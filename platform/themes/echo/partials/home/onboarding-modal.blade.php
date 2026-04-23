@@ -32,7 +32,7 @@
                     <div class="grimba-onboard-pillar">
                         <div class="grimba-onboard-pillar__bar" aria-hidden="true">
                             <span style="background:#3b82f6;"></span>
-                            <span style="background:#b39152;"></span>
+                            <span style="background:#a8a8a8;"></span>
                             <span style="background:#ef4444;"></span>
                         </div>
                         <strong>Biais classé</strong>

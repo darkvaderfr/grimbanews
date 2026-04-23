@@ -47,7 +47,7 @@
                                     <td class="text-end">{{ $c->total }}</td>
                                     <td style="min-width:170px;">
                                         <span style="color:#3b82f6;">● {{ $c->spread['left'] }}</span>
-                                        <span style="color:#b39152;" class="mx-2">● {{ $c->spread['center'] }}</span>
+                                        <span style="color:#a8a8a8;" class="mx-2">● {{ $c->spread['center'] }}</span>
                                         <span style="color:#ef4444;">● {{ $c->spread['right'] }}</span>
                                         @if($c->spread['unknown'] > 0)
                                             <span class="text-muted ms-2">(+{{ $c->spread['unknown'] }} ?)</span>

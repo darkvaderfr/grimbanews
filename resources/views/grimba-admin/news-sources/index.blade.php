@@ -47,7 +47,7 @@
                                     <td>
                                         @php
                                             $biasLabel = ['left'=>'Gauche','center'=>'Centre','right'=>'Droite','unknown'=>'—'][$src->bias_rating] ?? '—';
-                                            $biasColor = ['left'=>'#3b82f6','center'=>'#b39152','right'=>'#ef4444','unknown'=>'#9ca3af'][$src->bias_rating] ?? '#9ca3af';
+                                            $biasColor = ['left'=>'#3b82f6','center'=>'#a8a8a8','right'=>'#ef4444','unknown'=>'#9ca3af'][$src->bias_rating] ?? '#9ca3af';
                                         @endphp
                                         <span class="badge" style="background: {{ $biasColor }}22; color: {{ $biasColor }}; border: 1px solid {{ $biasColor }}44;">
                                             {{ $biasLabel }}

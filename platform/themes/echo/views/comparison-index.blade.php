@@ -6,7 +6,7 @@
 
     $biasColor = [
         'left'    => '#3b82f6',
-        'center'  => '#b39152',
+        'center'  => '#a8a8a8',
         'right'   => '#ef4444',
         'unknown' => '#9ca3af',
     ];

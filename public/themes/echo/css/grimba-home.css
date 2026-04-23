@@ -14,7 +14,7 @@
     --gn-tan-strong:   #c9ae76;
 
     --gn-left:   #3b82f6;
-    --gn-center: #b39152;
+    --gn-center: #a8a8a8;
     --gn-right:  #e84c3d;
     --gn-blind:  #8a2be2;
 
@@ -671,7 +671,7 @@ button.btn-grimba--solid,
 .grimba-topnews .grimba-coverage__chip--l,
 .grimba-latest .grimba-coverage__chip--l { color: var(--gn-left); }
 .grimba-topnews .grimba-coverage__chip--c,
-.grimba-latest .grimba-coverage__chip--c { color: #946e2c; }
+.grimba-latest .grimba-coverage__chip--c { color: #6b6b6b; }
 .grimba-topnews .grimba-coverage__chip--r,
 .grimba-latest .grimba-coverage__chip--r { color: var(--gn-right); }
 

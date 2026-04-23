@@ -7,7 +7,7 @@
 
     $biasMeta = [
         'left'    => ['label' => 'Gauche',      'color' => '#3b82f6'],
-        'center'  => ['label' => 'Centre',      'color' => '#b39152'],
+        'center'  => ['label' => 'Centre',      'color' => '#a8a8a8'],
         'right'   => ['label' => 'Droite',      'color' => '#ef4444'],
         'unknown' => ['label' => 'Non évalué',  'color' => '#9ca3af'],
     ];

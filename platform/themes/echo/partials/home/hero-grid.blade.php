@@ -192,13 +192,13 @@
                 </p>
                 <div style="display:flex;height:8px;border-radius:9999px;overflow:hidden;background:rgba(0,0,0,.08);">
                     <div style="width:{{ $pct['left'] }}%;background:#3b82f6;" title="Gauche {{ $pct['left'] }}%"></div>
-                    <div style="width:{{ $pct['center'] }}%;background:#b39152;" title="Centre {{ $pct['center'] }}%"></div>
+                    <div style="width:{{ $pct['center'] }}%;background:#a8a8a8;" title="Centre {{ $pct['center'] }}%"></div>
                     <div style="width:{{ $pct['right'] }}%;background:#ef4444;" title="Droite {{ $pct['right'] }}%"></div>
                 </div>
                 @if($readTotal > 0)
                     <div class="d-flex justify-content-between small mt-2">
                         <span style="color:#3b82f6;font-weight:600;">Gauche {{ $pct['left'] }}%</span>
-                        <span style="color:#b39152;font-weight:600;">Centre {{ $pct['center'] }}%</span>
+                        <span style="color:#a8a8a8;font-weight:600;">Centre {{ $pct['center'] }}%</span>
                         <span style="color:#ef4444;font-weight:600;">Droite {{ $pct['right'] }}%</span>
                     </div>
                 @else
