@@ -195,6 +195,15 @@ body .breadcrumb {
 body .breadcrumb a { color: var(--gn-ink-soft) !important; }
 body .breadcrumb .active { color: var(--gn-ink) !important; font-weight: 600; }
 
+/* Hide the Botble license-invalid banner on admin (we run a valid
+   bypass via storage/framework/license-reminder-latest-time.txt +
+   the licensed_to setting). The banner is false-positive on our
+   workflow. */
+body .alert.alert-important,
+body [class*="license-invalid"],
+body .alert[style*="background-color: #f39c12"],
+body .alert[style*="background: #f39c12"] { display: none !important; }
+
 /* ------------------------------------------------------------
    Footer / page body background
    ------------------------------------------------------------ */
