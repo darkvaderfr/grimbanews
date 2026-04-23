@@ -18,6 +18,27 @@ app()->booted(function (): void {
     }
 
     Post::saving(function (Post $post): void {
+        // Copy admin Post form values posted under the grimba_* prefix
+        // onto the model (our columns aren't in Post::$fillable, so
+        // mass-assignment would otherwise drop them).
+        $req = request();
+
+        if ($req) {
+            foreach (['source_id', 'story_cluster_id', 'bias_rating', 'is_blindspot'] as $key) {
+                $formKey = 'grimba_' . $key;
+                if ($req->has($formKey)) {
+                    $raw = $req->input($formKey);
+                    if ($key === 'is_blindspot') {
+                        $post->{$key} = in_array($raw, ['1', 1, 'on', true, 'true'], true);
+                    } elseif ($key === 'source_id' || $key === 'story_cluster_id') {
+                        $post->{$key} = $raw === '' || $raw === null ? null : (int) $raw;
+                    } else {
+                        $post->{$key} = $raw === '' || $raw === null ? null : $raw;
+                    }
+                }
+            }
+        }
+
         $sourceId = $post->source_id ?? null;
 
         if (! $sourceId) {
