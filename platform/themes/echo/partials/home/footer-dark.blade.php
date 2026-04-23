@@ -54,10 +54,10 @@
             <div class="col-lg-2 col-md-6 col-6">
                 <h4 class="grimba-footer__heading">GrimbaNews</h4>
                 <ul>
-                    <li><a href="{{ url('/about-us') }}">À propos</a></li>
+                    <li><a href="{{ url('/a-propos') }}">À propos</a></li>
                     <li><a href="{{ url('/contact') }}">Contact</a></li>
                     <li><a href="{{ url('/methodologie') }}">Méthodologie</a></li>
-                    <li><a href="#carrieres">Carrières</a></li>
+                    <li><a href="{{ url('/carrieres') }}">Carrières</a></li>
                 </ul>
             </div>
         </div>
@@ -69,8 +69,8 @@
             <span class="d-flex gap-3">
                 <a href="#fr">FR</a>
                 <a href="#en">EN</a>
-                <a href="#privacy">Confidentialité</a>
-                <a href="#terms">Conditions</a>
+                <a href="{{ url('/confidentialite') }}">Confidentialité</a>
+                <a href="{{ url('/conditions') }}">Conditions</a>
             </span>
         </div>
     </div>

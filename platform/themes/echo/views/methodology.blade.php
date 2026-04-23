@@ -16,7 +16,7 @@
             </p>
             <div class="d-flex gap-2 flex-wrap mt-3">
                 <a href="{{ url('/sources') }}" class="btn-grimba btn-grimba--solid btn-grimba--sm">Voir les sources classées</a>
-                <a href="#contestation" class="btn-grimba btn-grimba--ghost btn-grimba--sm">Contester un classement</a>
+                <a href="{{ url('/contact') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">Contester un classement</a>
             </div>
         </header>
 

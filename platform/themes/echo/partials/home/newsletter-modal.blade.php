@@ -32,7 +32,7 @@
             </div>
             <p class="small opacity-75 mt-2 mb-0">
                 Gratuit, désabonnement en un clic. Voir la
-                <a href="#privacy" class="text-decoration-underline">politique de confidentialité</a>.
+                <a href="{{ url('/confidentialite') }}" class="text-decoration-underline">politique de confidentialité</a>.
             </p>
         </form>
     </div>
