@@ -35,6 +35,32 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ])->render();
         })->name('public.comparison');
 
+        $feedHandler = function () {
+            $posts = Post::query()
+                ->where('status', 'published')
+                ->latest()
+                ->limit(30)
+                ->get();
+
+            $xml = view('theme.grimba-feed', [
+                'posts'     => $posts,
+                'siteTitle' => 'GrimbaNews',
+                'siteUrl'   => url('/'),
+                'siteDesc'  => 'Voyez chaque angle de chaque histoire — actualités francophones classées par biais éditorial.',
+                'feedUrl'   => url('/feed.xml'),
+                'builtAt'   => now()->toRssString(),
+            ])->render();
+
+            return response($xml, 200)
+                ->header('Content-Type', 'application/rss+xml; charset=UTF-8');
+        };
+
+        // Both paths exposed: /feed.xml is the canonical public URL
+        // (prod rewrites .xml through index.php); /feed works with
+        // PHP's built-in dev server which skips the router for .xml.
+        Route::get('feed.xml', $feedHandler)->name('public.feed');
+        Route::get('feed',     $feedHandler)->name('public.feed.alt');
+
         Route::post('topics/follow', function (Request $request) {
             $id = (int) $request->input('category_id');
             if (! $id) {

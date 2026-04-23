@@ -25,6 +25,7 @@
     {!! BaseHelper::googleFonts('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Public+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap') !!}
 
     {!! Theme::partial('css-variable-declare') !!}
+    <link rel="alternate" type="application/rss+xml" title="GrimbaNews — Flux RSS" href="{{ url('/feed.xml') }}">
     {!! Theme::header() !!}
 </head>
 <body class="grimba-home" {!! Theme::bodyAttributes() !!}>

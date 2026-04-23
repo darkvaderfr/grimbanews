@@ -47,6 +47,7 @@
                     <li><a href="{{ url('/comparatif/1') }}">Comparer les sources</a></li>
                     <li><a href="{{ url('/sources') }}">Biais des médias</a></li>
                     <li><a href="#newsletter" data-grimba-newsletter-open>Infolettre</a></li>
+                    <li><a href="{{ url('/feed.xml') }}">Flux RSS</a></li>
                     <li><a href="#extension">Extension navigateur</a></li>
                 </ul>
             </div>
