@@ -9,7 +9,12 @@
             <div class="small opacity-75 d-flex align-items-center gap-2">
                 <span>Extension navigateur</span>
                 <span class="opacity-50">·</span>
-                <span>Thème&nbsp;: Clair / Sombre / Auto</span>
+                <span>Thème&nbsp;:</span>
+                <div class="grimba-theme-switch" role="radiogroup" aria-label="Choix du thème">
+                    <button type="button" data-grimba-theme="light" aria-pressed="false" title="Clair">Clair</button>
+                    <button type="button" data-grimba-theme="dark"  aria-pressed="false" title="Sombre">Sombre</button>
+                    <button type="button" data-grimba-theme="auto"  aria-pressed="true"  title="Auto">Auto</button>
+                </div>
             </div>
             <div class="small opacity-75 d-flex align-items-center gap-3">
                 <span>{{ ucfirst($topDate) }}</span>
@@ -54,3 +59,31 @@
 </header>
 
 @include(Theme::getThemeNamespace('partials.home.newsletter-modal'))
+
+<script>
+    (function () {
+        const buttons = document.querySelectorAll('[data-grimba-theme]');
+        if (!buttons.length) return;
+
+        const active = document.documentElement.getAttribute('data-grimba-theme-pref') || 'auto';
+        buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.grimbaTheme === active)));
+
+        function apply(pref) {
+            const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+            const effective = pref === 'auto' ? (prefersDark ? 'dark' : 'light') : pref;
+            document.documentElement.setAttribute('data-bs-theme', effective);
+            document.documentElement.setAttribute('data-grimba-theme-pref', pref);
+            const oneYear = 60 * 60 * 24 * 365;
+            document.cookie = 'grimba_theme=' + pref + '; path=/; max-age=' + oneYear + '; SameSite=Lax';
+            buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.grimbaTheme === pref)));
+        }
+
+        buttons.forEach(b => b.addEventListener('click', () => apply(b.dataset.grimbaTheme)));
+
+        // Follow OS changes when in auto mode.
+        window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            const pref = document.documentElement.getAttribute('data-grimba-theme-pref');
+            if (pref === 'auto') apply('auto');
+        });
+    })();
+</script>

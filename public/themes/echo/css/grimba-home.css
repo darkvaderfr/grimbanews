@@ -27,6 +27,129 @@ html.grimba-home-html {
     background: linear-gradient(180deg, var(--gn-paper) 0%, #fbf7ee 55%, var(--gn-paper) 100%);
 }
 
+/* Dark-mode tokens override paper/ink for the whole site */
+html.grimba-home-html[data-bs-theme="dark"] {
+    --gn-paper:        #121007;
+    --gn-paper-warm:   #1c1811;
+    --gn-ink:          #f6f1e8;
+    --gn-ink-muted:    #e6ddc7;
+    --gn-ink-soft:     #c9bea5;
+    --gn-rule:         rgba(246, 241, 232, 0.14);
+    --gn-tan:          #a78a55;
+    --gn-tan-strong:   #c9ae76;
+    background: linear-gradient(180deg, #0c0a07 0%, #15120c 55%, #0c0a07 100%);
+}
+
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home {
+    color: var(--gn-ink);
+}
+
+/* Dark-mode header surfaces — brighter glass so text stays readable */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-header__main {
+    background: rgba(28, 24, 17, 0.88);
+    border-bottom-color: rgba(246, 241, 232, 0.12);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-header__meta,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-chips {
+    background: rgba(18, 16, 7, 0.7);
+    border-bottom-color: rgba(246, 241, 232, 0.08);
+    color: var(--gn-ink-muted);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-nav a { color: var(--gn-ink-muted); }
+html.grimba-home-html[data-bs-theme="dark"] .grimba-nav a:hover,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-nav a.active { color: var(--gn-ink); border-color: var(--gn-ink); }
+html.grimba-home-html[data-bs-theme="dark"] .grimba-wordmark { color: var(--gn-ink); }
+html.grimba-home-html[data-bs-theme="dark"] .grimba-wordmark__tag { color: var(--gn-ink-soft); }
+
+html.grimba-home-html[data-bs-theme="dark"] .grimba-search input {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--gn-ink);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-search input::placeholder { color: var(--gn-ink-soft); }
+
+/* Chip surfaces in dark mode */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-chip {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--gn-ink-muted);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-chip:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--gn-ink);
+    color: var(--gn-ink);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-chip__follow {
+    background: var(--gn-ink);
+    color: var(--gn-paper);
+}
+
+/* Briefing / topnews text */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-briefing__title,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-topnews__title,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-latest__title,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-section__title,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-methodology__title {
+    color: var(--gn-ink);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-briefing__headline,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-topnews__headline,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-latest__headline {
+    color: var(--gn-ink);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-briefing__sub,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-topnews__kicker,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-latest__kicker {
+    color: var(--gn-ink-soft);
+}
+
+/* Button overrides for dark mode */
+html.grimba-home-html[data-bs-theme="dark"] .btn-grimba--solid {
+    background: var(--gn-paper-warm);
+    color: var(--gn-ink) !important;
+    border-color: rgba(255,255,255,0.12);
+}
+html.grimba-home-html[data-bs-theme="dark"] .btn-grimba--ghost {
+    color: var(--gn-ink);
+    border-color: rgba(255,255,255,0.2);
+}
+html.grimba-home-html[data-bs-theme="dark"] .btn-grimba--ghost:hover {
+    border-color: var(--gn-ink);
+    background: rgba(255,255,255,0.08);
+}
+
+/* Urgency banner keeps its tan + black ink for brand consistency */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-urgency { color: #1a1713; }
+
+/* Theme switch buttons */
+.grimba-theme-switch {
+    display: inline-flex;
+    gap: 2px;
+    border: 1px solid var(--gn-rule);
+    border-radius: 9999px;
+    padding: 2px;
+    margin-left: 0.25rem;
+}
+.grimba-theme-switch button {
+    appearance: none;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.15rem 0.55rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    color: var(--gn-ink-soft);
+    line-height: 1.4;
+}
+.grimba-theme-switch button:hover { color: var(--gn-ink); }
+.grimba-theme-switch button[aria-pressed="true"] {
+    background: var(--gn-ink);
+    color: var(--gn-paper);
+}
+
 body.grimba-home {
     font-family: var(--gn-font-body);
     color: var(--gn-ink);

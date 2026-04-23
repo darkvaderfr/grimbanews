@@ -5,7 +5,17 @@
      */
 @endphp
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ theme_option('theme_style', 'auto') }}" class="grimba-home-html">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ request()->cookie('grimba_theme', 'auto') }}" class="grimba-home-html">
+<script>
+    // Apply dark mode early to avoid flash. Reads cookie + respects system preference.
+    (function () {
+        const pref = document.cookie.match(/(?:^|; )grimba_theme=([^;]+)/)?.[1] || 'auto';
+        const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+        const effective = pref === 'auto' ? (prefersDark ? 'dark' : 'light') : pref;
+        document.documentElement.setAttribute('data-bs-theme', effective);
+        document.documentElement.setAttribute('data-grimba-theme-pref', pref);
+    })();
+</script>
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1" name="viewport">
