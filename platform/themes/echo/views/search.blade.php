@@ -1,5 +1,5 @@
 @php
-    Theme::layout('full-width');
+    Theme::layout('grimba-chrome');
     $enableSidebar = theme_option('enable_sidebar', 'yes');
     $postStyle = request()->query('style') ?: theme_option('post_style', 'grid');
 

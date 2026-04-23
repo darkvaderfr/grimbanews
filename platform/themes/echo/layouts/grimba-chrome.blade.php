@@ -1,0 +1,41 @@
+@php
+    /**
+     * GrimbaNews — shared chrome (tan banner, glass header, chip strip,
+     * dark footer) wrapping any view via @yield('content').
+     *
+     * Used by post detail, listings, comparison, blindspot, sources.
+     * The homepage gets layouts/grimba-home.blade.php which renders
+     * its own full-bleed body instead of a @yield('content') trunk.
+     */
+@endphp
+<!doctype html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ theme_option('theme_style', 'auto') }}" class="grimba-home-html">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1" name="viewport">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    {!! BaseHelper::googleFonts('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Public+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap') !!}
+
+    {!! Theme::partial('css-variable-declare') !!}
+    {!! Theme::header() !!}
+</head>
+<body class="grimba-home grimba-subpage" {!! Theme::bodyAttributes() !!}>
+    {!! apply_filters(THEME_FRONT_BODY, null) !!}
+
+    @include(Theme::getThemeNamespace('partials.home.urgency-banner'))
+    @include(Theme::getThemeNamespace('partials.home.main-header'))
+    @include(Theme::getThemeNamespace('partials.home.topic-chips'))
+
+    <main class="grimba-sub-main">
+        <div class="container-xxl py-4">
+            {!! Theme::content() !!}
+        </div>
+    </main>
+
+    @include(Theme::getThemeNamespace('partials.home.footer-dark'))
+
+    <script>'use strict'; window.siteConfig = {};</script>
+    {!! Theme::footer() !!}
+</body>
+</html>

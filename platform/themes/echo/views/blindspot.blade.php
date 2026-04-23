@@ -1,4 +1,5 @@
 @php
+    Theme::layout('grimba-chrome');
     /**
      * Blindspot Feed — histoires couvertes par un seul camp.
      *

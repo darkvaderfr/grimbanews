@@ -1,4 +1,5 @@
 @php
+    Theme::layout('grimba-chrome');
     /**
      * @var int $clusterId
      * @var \Illuminate\Support\Collection $posts

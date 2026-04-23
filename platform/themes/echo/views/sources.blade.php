@@ -1,4 +1,5 @@
 @php
+    Theme::layout('grimba-chrome');
     /**
      * @var array<string,\Illuminate\Support\Collection> $grouped  Sources grouped by bias_rating
      * @var int $total

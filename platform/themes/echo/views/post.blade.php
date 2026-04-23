@@ -1,5 +1,5 @@
 @php
-    Theme::layout('full-width');
+    Theme::layout('grimba-chrome');
     Theme::set('isDetailPage', true);
 
     $descriptionStyle = theme_option('blog_description_style');

@@ -1,7 +1,7 @@
 @php
     $enableSidebar = theme_option('enable_sidebar', 'yes');
     $postStyle = request()->query('style') ?: theme_option('post_style', 'grid');
-    Theme::layout('full-width');
+    Theme::layout('grimba-chrome');
     $authorSocials = $author->getMetaData('social_links', true);
 
     if ($authorSocials !== null && $authorSocials !== '[]') {

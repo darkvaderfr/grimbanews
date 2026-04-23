@@ -1,4 +1,5 @@
 @php
+    Theme::layout('grimba-chrome');
     $enableSidebar = theme_option('blog_sidebar_enabled', true);
     $postStyle = request()->input('style', theme_option('post_style', 'card')) ;
 @endphp
