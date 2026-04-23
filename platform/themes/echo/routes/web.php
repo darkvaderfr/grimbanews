@@ -94,6 +94,13 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('feed.xml', $feedHandler)->name('public.feed');
         Route::get('feed',     $feedHandler)->name('public.feed.alt');
 
+        Route::post('lang/set', function (Request $request) {
+            $lang = $request->input('lang') === 'en' ? 'en' : 'fr';
+            return response()
+                ->json(['ok' => true, 'lang' => $lang])
+                ->cookie('grimba_lang', $lang, 60 * 24 * 365, '/', null, false, false);
+        })->name('public.lang.set');
+
         Route::post('region/set', function (Request $request) {
             $region = (string) $request->input('region', 'monde');
             $allowed = ['monde', 'afrique', 'europe', 'france', 'international'];

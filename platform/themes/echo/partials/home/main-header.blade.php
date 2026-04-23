@@ -7,20 +7,21 @@
     <div class="grimba-header__meta">
         <div class="container-xxl d-flex flex-wrap justify-content-between align-items-center py-1">
             <div class="small opacity-75 d-flex align-items-center gap-2">
-                <span>Extension navigateur</span>
+                <span>{{ __('Extension navigateur') }}</span>
                 <span class="opacity-50">·</span>
-                <span>Thème&nbsp;:</span>
-                <div class="grimba-theme-switch" role="radiogroup" aria-label="Choix du thème">
-                    <button type="button" data-grimba-theme="light" aria-pressed="false" title="Clair">Clair</button>
-                    <button type="button" data-grimba-theme="dark"  aria-pressed="false" title="Sombre">Sombre</button>
-                    <button type="button" data-grimba-theme="auto"  aria-pressed="true"  title="Auto">Auto</button>
+                <span>{{ __('Thème') }}&nbsp;:</span>
+                <div class="grimba-theme-switch" role="radiogroup" aria-label="{{ __('Choix du thème') }}">
+                    <button type="button" data-grimba-theme="light" aria-pressed="false" title="{{ __('Clair') }}">{{ __('Clair') }}</button>
+                    <button type="button" data-grimba-theme="dark"  aria-pressed="false" title="{{ __('Sombre') }}">{{ __('Sombre') }}</button>
+                    <button type="button" data-grimba-theme="auto"  aria-pressed="true"  title="{{ __('Auto') }}">{{ __('Auto') }}</button>
                 </div>
+                @include(Theme::getThemeNamespace('partials.home.lang-switch'))
             </div>
             <div class="small opacity-75 d-flex align-items-center gap-3">
                 <span>{{ ucfirst($topDate) }}</span>
                 <span class="opacity-50">·</span>
                 <a href="{{ url('/pour-vous') }}" class="text-decoration-none">
-                    Pour vous (<span id="grimba-follow-count">{{ $followCount }}</span>)
+                    {{ __('Pour vous') }} (<span id="grimba-follow-count">{{ $followCount }}</span>)
                 </a>
                 <span class="opacity-50">·</span>
                 @include(Theme::getThemeNamespace('partials.home.region-dropdown'))
@@ -36,23 +37,23 @@
             </a>
 
             <nav class="grimba-nav d-none d-lg-flex" aria-label="{{ __('Principal') }}">
-                <a href="{{ url('/') }}" class="active">Accueil</a>
-                <a href="{{ url('/pour-vous') }}">Pour vous</a>
-                <a href="#local">Local</a>
-                <a href="{{ url('/angles-morts') }}">Angles morts</a>
-                <a href="{{ url('/sources') }}">Sources</a>
+                <a href="{{ url('/') }}" class="active">{{ __('Accueil') }}</a>
+                <a href="{{ url('/pour-vous') }}">{{ __('Pour vous') }}</a>
+                <a href="#local">{{ __('Local') }}</a>
+                <a href="{{ url('/angles-morts') }}">{{ __('Angles morts') }}</a>
+                <a href="{{ url('/sources') }}">{{ __('Sources') }}</a>
             </nav>
 
             <form action="{{ url('/search') }}" method="get" class="grimba-search flex-grow-1" role="search">
-                <input type="search" name="q" placeholder="Rechercher une histoire, un sujet, une source…" aria-label="{{ __('Recherche') }}">
+                <input type="search" name="q" placeholder="{{ __('Rechercher une histoire, un sujet, une source…') }}" aria-label="{{ __('Recherche') }}">
                 <button type="submit" aria-label="{{ __('Lancer la recherche') }}">
                     <x-core::icon name="ti ti-search" />
                 </button>
             </form>
 
             <div class="d-flex align-items-center gap-2">
-                <button type="button" data-grimba-newsletter-open class="btn-grimba btn-grimba--solid">S'abonner</button>
-                <a href="{{ url('/login') }}" class="btn-grimba btn-grimba--ghost">Se connecter</a>
+                <button type="button" data-grimba-newsletter-open class="btn-grimba btn-grimba--solid">{{ __('S\'abonner') }}</button>
+                <a href="{{ url('/login') }}" class="btn-grimba btn-grimba--ghost">{{ __('Se connecter') }}</a>
             </div>
         </div>
     </div>

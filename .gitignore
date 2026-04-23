@@ -50,6 +50,7 @@ resources/docs
 /lang/*
 !/lang/en
 !/lang/fr.json
+!/lang/en.json
 
 /log
 

@@ -7,6 +7,12 @@
      * The homepage gets layouts/grimba-home.blade.php which renders
      * its own full-bleed body instead of a @yield('content') trunk.
      */
+
+    // Locale override from grimba_lang cookie (wins over Botble's Language plugin).
+    $__grimbaLang = (string) request()->cookie('grimba_lang', '');
+    if ($__grimbaLang === 'en' || $__grimbaLang === 'fr') {
+        app()->setLocale($__grimbaLang);
+    }
 @endphp
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ request()->cookie('grimba_theme', 'auto') }}" class="grimba-home-html">

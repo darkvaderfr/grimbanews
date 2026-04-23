@@ -17,6 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: [
             'grimba_read',
         ]);
+
+        // Apply our locale-from-cookie switch on every web request.
+        $middleware->web(append: [
+            \App\Http\Middleware\GrimbaLocale::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
