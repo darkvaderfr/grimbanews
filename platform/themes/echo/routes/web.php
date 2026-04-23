@@ -32,6 +32,27 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ])->render();
         })->name('public.comparison');
 
+        Route::get('sources', function () {
+            $rows = \Illuminate\Support\Facades\DB::table('news_sources')
+                ->orderBy('credibility_score', 'desc')
+                ->orderBy('name')
+                ->get();
+
+            $grouped = $rows->groupBy(fn ($r) => in_array($r->bias_rating, ['left','center','right']) ? $r->bias_rating : 'unknown');
+
+            SeoHelper::setTitle('Sources classées — GrimbaNews')
+                ->setDescription('Biais, propriété, crédibilité et origine des sources suivies.');
+
+            Theme::breadcrumb()
+                ->add('Accueil', url('/'))
+                ->add('Sources', url('/sources'));
+
+            return Theme::scope('sources', [
+                'grouped' => $grouped,
+                'total'   => $rows->count(),
+            ])->render();
+        })->name('public.sources');
+
         Route::get('angles-morts', function () {
             $posts = Post::query()
                 ->where('is_blindspot', true)
