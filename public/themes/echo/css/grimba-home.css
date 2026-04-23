@@ -295,7 +295,19 @@ a.grimba-urgency__cta,
     color: var(--gn-ink-soft);
     padding: 0.35rem;
     cursor: pointer;
+    /* Must constrain explicitly — generic button styles elsewhere in
+       the Botble/Echo base can stretch this to form width and eat
+       every click on the input. */
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
 }
+.grimba-search button svg { pointer-events: none; width: 18px; height: 18px; }
 
 .btn-grimba {
     display: inline-flex;
