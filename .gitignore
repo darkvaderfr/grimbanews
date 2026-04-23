@@ -37,6 +37,8 @@ public/themes/**
 !public/themes/echo/
 !public/themes/echo/css/
 !public/themes/echo/css/grimba*.css
+!public/themes/echo/js/
+!public/themes/echo/js/grimba-*.js
 public/docs
 resources/docs
 
