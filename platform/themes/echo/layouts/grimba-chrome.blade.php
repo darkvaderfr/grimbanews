@@ -35,6 +35,11 @@
 
     {!! Theme::partial('css-variable-declare') !!}
     <link rel="alternate" type="application/rss+xml" title="GrimbaNews — Flux RSS" href="{{ url('/feed.xml') }}">
+    <meta property="og:image" content="{{ url('/og/home.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ url('/og/home.png') }}">
     {!! Theme::header() !!}
 </head>
 <body class="grimba-home grimba-subpage" {!! Theme::bodyAttributes() !!}>

@@ -44,6 +44,77 @@ class GrimbaOgImageController
         ]);
     }
 
+    /**
+     * Default / homepage OG image: GrimbaNews wordmark + tagline on paper.
+     * Cached forever unless the file is deleted; re-rendered on miss.
+     */
+    public function home(): Response
+    {
+        $cachePath = storage_path('app/public/og/home.png');
+
+        if (! File::exists($cachePath)) {
+            File::ensureDirectoryExists(dirname($cachePath));
+            $this->renderHome($cachePath);
+        }
+
+        return response(File::get($cachePath), 200, [
+            'Content-Type'  => 'image/png',
+            'Cache-Control' => 'public, max-age=604800',
+        ]);
+    }
+
+    private function renderHome(string $outPath): void
+    {
+        $img = imagecreatetruecolor(self::W, self::H);
+
+        $paper   = imagecolorallocate($img, self::PAPER[0], self::PAPER[1], self::PAPER[2]);
+        $ink     = imagecolorallocate($img, self::INK[0], self::INK[1], self::INK[2]);
+        $inkSoft = imagecolorallocate($img, self::INK_SOFT[0], self::INK_SOFT[1], self::INK_SOFT[2]);
+        $tan     = imagecolorallocate($img, 220, 200, 160);
+        $left    = imagecolorallocate($img, self::LEFT[0], self::LEFT[1], self::LEFT[2]);
+        $center  = imagecolorallocate($img, self::CENTER[0], self::CENTER[1], self::CENTER[2]);
+        $right   = imagecolorallocate($img, self::RIGHT[0], self::RIGHT[1], self::RIGHT[2]);
+
+        imagefill($img, 0, 0, $paper);
+        imagefilledrectangle($img, 0, 0, self::W, 16, $tan);
+
+        $serifFont = $this->findFont(['Georgia Bold.ttf', 'Georgia.ttf', 'Times New Roman Bold.ttf']);
+        $sansFont  = $this->findFont(['Arial Bold.ttf', 'Arial.ttf', 'Helvetica.ttc']);
+
+        // Big centered wordmark — measure so "News" never collides with "GRIMBA"
+        $markFont = $sansFont;
+        $tagFont  = $serifFont ?? $sansFont;
+        $markText = 'GRIMBA';
+        $markX = 80;
+        $markY = 170;
+        $this->ttfText($img, $markFont, 68, $markX, $markY, $ink, $markText);
+        $markBbox  = imagettfbbox(68, 0, $markFont, $markText);
+        $markWidth = $markBbox[2] - $markBbox[0];
+        $this->ttfText($img, $tagFont, 56, $markX + $markWidth + 24, $markY, $inkSoft, 'News');
+
+        // Tagline
+        $this->ttfText($img, $serifFont ?? $sansFont, 48, 80, 310, $ink, 'Voyez chaque angle');
+        $this->ttfText($img, $serifFont ?? $sansFont, 48, 80, 374, $ink, 'de chaque histoire.');
+
+        // Subtext
+        $this->ttfText($img, $sansFont, 22, 80, 440, $inkSoft, 'Biais classés. Angles morts repérés. Sources comparées.');
+        $this->ttfText($img, $sansFont, 22, 80, 476, $inkSoft, 'En français — et désormais en anglais.');
+
+        // L/C/R bar strip at bottom
+        $barY = self::H - 90;
+        imagefilledrectangle($img, 80, $barY, 480, $barY + 10, $left);
+        imagefilledrectangle($img, 480, $barY, 800, $barY + 10, $center);
+        imagefilledrectangle($img, 800, $barY, self::W - 80, $barY + 10, $right);
+
+        $this->ttfText($img, $sansFont, 18, 80, $barY + 40, $inkSoft, 'GAUCHE   ·   CENTRE   ·   DROITE');
+
+        // Corner mark
+        $this->ttfText($img, $sansFont, 18, self::W - 220, self::H - 50, $inkSoft, 'grimbanews.com');
+
+        imagepng($img, $outPath, 6);
+        imagedestroy($img);
+    }
+
     private function render(Post $post, string $outPath): void
     {
         $img = imagecreatetruecolor(self::W, self::H);

@@ -103,6 +103,8 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('og/post/{id}', [\App\Http\Controllers\GrimbaOgImageController::class, 'show'])
             ->where('id', '[0-9]+')
             ->name('public.og.post.alt');
+        Route::get('og/home.png', [\App\Http\Controllers\GrimbaOgImageController::class, 'home'])->name('public.og.home');
+        Route::get('og/home',     [\App\Http\Controllers\GrimbaOgImageController::class, 'home'])->name('public.og.home.alt');
 
         Route::post('translate/set', function (Request $request) {
             $mode = $request->input('mode');
