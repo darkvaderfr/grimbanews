@@ -42,9 +42,11 @@
             </form>
 
             <div class="d-flex align-items-center gap-2">
-                <a href="#subscribe" class="btn-grimba btn-grimba--solid">S'abonner</a>
+                <button type="button" data-grimba-newsletter-open class="btn-grimba btn-grimba--solid">S'abonner</button>
                 <a href="{{ url('/login') }}" class="btn-grimba btn-grimba--ghost">Se connecter</a>
             </div>
         </div>
     </div>
 </header>
+
+@include(Theme::getThemeNamespace('partials.home.newsletter-modal'))

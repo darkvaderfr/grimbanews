@@ -4,7 +4,10 @@ use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
 use Botble\Blog\Models\Post;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 use Theme\Echo\Http\Controllers\EchoController;
 
 Route::group(['middleware' => ['web', 'core']], function (): void {
@@ -31,6 +34,40 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 'clusterId'  => $clusterId,
             ])->render();
         })->name('public.comparison');
+
+        Route::post('newsletter/subscribe', function (Request $request) {
+            $data = Validator::make($request->all(), [
+                'email'      => ['required', 'email:rfc', 'max:191'],
+                'source_key' => ['nullable', 'string', 'max:64'],
+            ])->validate();
+
+            $now    = now();
+            $locale = app()->getLocale();
+
+            $email = mb_strtolower($data['email']);
+            $table = DB::table('newsletter_subscriptions');
+            $existing = $table->where('email', $email)->first();
+
+            $payload = [
+                'email'      => $email,
+                'locale'     => $locale,
+                'source_key' => $data['source_key'] ?? 'unknown',
+                'ip_address' => $request->ip(),
+                'user_agent' => mb_substr((string) $request->userAgent(), 0, 255),
+                'updated_at' => $now,
+            ];
+
+            if ($existing) {
+                $table->where('email', $email)->update($payload);
+            } else {
+                $payload['created_at'] = $now;
+                $table->insert($payload);
+            }
+
+            return back()
+                ->with('newsletter_flash', 'Merci ! Votre inscription à l\'infolettre GrimbaNews est enregistrée.')
+                ->withFragment('newsletter');
+        })->name('public.newsletter.subscribe');
 
         Route::get('methodologie', function () {
             SeoHelper::setTitle('Méthodologie — GrimbaNews')

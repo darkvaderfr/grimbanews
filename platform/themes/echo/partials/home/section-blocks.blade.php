@@ -81,11 +81,13 @@
                     </a>
                 @endforeach
 
-                <form class="grimba-blind-subscribe" onsubmit="event.preventDefault();">
+                <form class="grimba-blind-subscribe" method="POST" action="{{ route('public.newsletter.subscribe') }}">
+                    @csrf
+                    <input type="hidden" name="source_key" value="section_blindspot_{{ \Illuminate\Support\Str::slug($cat->name) }}">
                     <span class="blindspot-badge blindspot-badge--on-dark">Newsletter angles morts</span>
                     <p class="small mb-2">Recevez chaque semaine les histoires ignorées par votre camp.</p>
                     <div class="d-flex gap-2">
-                        <input type="email" placeholder="Adresse e-mail" aria-label="Adresse e-mail">
+                        <input type="email" name="email" required placeholder="Adresse e-mail" aria-label="Adresse e-mail">
                         <button type="submit" class="btn-grimba btn-grimba--solid btn-grimba--sm">S'inscrire</button>
                     </div>
                 </form>
