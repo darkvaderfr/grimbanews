@@ -205,6 +205,97 @@ body .alert[style*="background-color: #f39c12"],
 body .alert[style*="background: #f39c12"] { display: none !important; }
 
 /* ------------------------------------------------------------
+   Dark-mode parity sweep (S62)
+   ------------------------------------------------------------ */
+html[data-bs-theme="dark"] body,
+html[data-bs-theme="dark"] body .page-body {
+    background: var(--gn-paper) !important;
+    color: var(--gn-ink);
+}
+html[data-bs-theme="dark"] body .card {
+    background: var(--gn-paper-warm) !important;
+    color: var(--gn-ink);
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html[data-bs-theme="dark"] body .card-header {
+    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+html[data-bs-theme="dark"] body .card-title,
+html[data-bs-theme="dark"] body strong,
+html[data-bs-theme="dark"] body b {
+    color: var(--gn-ink) !important;
+}
+html[data-bs-theme="dark"] body .text-muted {
+    color: var(--gn-ink-soft) !important;
+}
+html[data-bs-theme="dark"] body .table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.04) !important;
+}
+html[data-bs-theme="dark"] body .table tbody td,
+html[data-bs-theme="dark"] body .table thead th {
+    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+    color: var(--gn-ink);
+}
+html[data-bs-theme="dark"] body .form-control,
+html[data-bs-theme="dark"] body .form-select {
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: var(--gn-ink) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+html[data-bs-theme="dark"] body .form-control::placeholder {
+    color: var(--gn-ink-soft) !important;
+}
+html[data-bs-theme="dark"] body .btn-outline-primary {
+    color: var(--gn-ink) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+html[data-bs-theme="dark"] body .btn-outline-primary:hover {
+    background: var(--gn-ink) !important;
+    color: var(--gn-paper) !important;
+}
+html[data-bs-theme="dark"] body .btn-outline-secondary {
+    color: var(--gn-ink) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+}
+html[data-bs-theme="dark"] body .btn-outline-danger {
+    color: #ff9b91 !important;
+    border-color: rgba(232, 76, 61, 0.35) !important;
+}
+html[data-bs-theme="dark"] body .breadcrumb a,
+html[data-bs-theme="dark"] body .breadcrumb .active {
+    color: var(--gn-ink) !important;
+}
+html[data-bs-theme="dark"] body .navbar-vertical {
+    background: #1c1811 !important;
+    border-right-color: rgba(255, 255, 255, 0.08);
+}
+html[data-bs-theme="dark"] body .navbar-vertical .nav-link {
+    color: var(--gn-ink-muted) !important;
+}
+html[data-bs-theme="dark"] body .navbar-vertical .nav-link:hover {
+    color: var(--gn-ink) !important;
+    background: rgba(255, 255, 255, 0.06);
+}
+html[data-bs-theme="dark"] body .navbar-vertical .nav-link.active,
+html[data-bs-theme="dark"] body .navbar-vertical .nav-item.active > .nav-link {
+    background: var(--gn-paper) !important;
+    color: var(--gn-paper-warm) !important;
+}
+html[data-bs-theme="dark"] body .navbar.navbar-expand-md.d-print-none {
+    background: rgba(18, 16, 7, 0.92) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+html[data-bs-theme="dark"] body .alert-success {
+    background: rgba(34, 197, 94, 0.15) !important;
+    color: #86efac !important;
+    border-color: rgba(34, 197, 94, 0.3) !important;
+}
+html[data-bs-theme="dark"] body .badge.text-bg-success { background: rgba(34, 197, 94, 0.2) !important; color: #86efac !important; }
+html[data-bs-theme="dark"] body .badge.text-bg-warning { background: rgba(234, 179, 8, 0.22) !important; color: #fde68a !important; }
+html[data-bs-theme="dark"] body .badge.text-bg-danger  { background: rgba(232, 76, 61, 0.2)  !important; color: #ff9b91 !important; }
+html[data-bs-theme="dark"] body .badge.text-bg-secondary { background: rgba(255,255,255,0.08) !important; color: var(--gn-ink-soft) !important; }
+
+/* ------------------------------------------------------------
    Footer / page body background
    ------------------------------------------------------------ */
 body .page-body { background: var(--gn-paper) !important; }
