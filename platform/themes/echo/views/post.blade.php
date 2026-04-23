@@ -1,6 +1,14 @@
 @php
     Theme::layout('grimba-chrome');
     Theme::set('isDetailPage', true);
+
+    // Branded OG image per post.
+    $ogUrl = url('/og/post/' . $post->id . '.png');
+    SeoHelper::openGraph()->setImage($ogUrl);
+    SeoHelper::openGraph()->addProperty('image:width', '1200');
+    SeoHelper::openGraph()->addProperty('image:height', '630');
+    SeoHelper::twitter()->setType('summary_large_image');
+    SeoHelper::twitter()->addImage($ogUrl);
 @endphp
 
 {{-- S49: record post visit in grimba_read cookie (last 30, most-recent-first). --}}

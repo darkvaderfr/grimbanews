@@ -94,6 +94,16 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('feed.xml', $feedHandler)->name('public.feed');
         Route::get('feed',     $feedHandler)->name('public.feed.alt');
 
+        // Both variants because PHP's built-in dev server short-circuits
+        // .png paths before routing kicks in; /og/post/{id} works in dev,
+        // /og/post/{id}.png is the canonical URL in prod (Apache/Nginx rewrites).
+        Route::get('og/post/{id}.png', [\App\Http\Controllers\GrimbaOgImageController::class, 'show'])
+            ->where('id', '[0-9]+')
+            ->name('public.og.post');
+        Route::get('og/post/{id}', [\App\Http\Controllers\GrimbaOgImageController::class, 'show'])
+            ->where('id', '[0-9]+')
+            ->name('public.og.post.alt');
+
         Route::post('translate/set', function (Request $request) {
             $mode = $request->input('mode');
             $allowed = ['original', 'auto', 'both'];
