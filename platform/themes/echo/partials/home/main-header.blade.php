@@ -1,5 +1,7 @@
 @php
     $topDate = \Carbon\Carbon::now()->locale(app()->getLocale())->isoFormat('dddd D MMMM YYYY');
+    $rawFollow = (string) request()->cookie('grimba_follow', '');
+    $followCount = count(array_filter(array_map('intval', explode(',', $rawFollow))));
 @endphp
 <header class="grimba-header">
     <div class="grimba-header__meta">
@@ -12,7 +14,9 @@
             <div class="small opacity-75 d-flex align-items-center gap-3">
                 <span>{{ ucfirst($topDate) }}</span>
                 <span class="opacity-50">·</span>
-                <a href="#location" class="text-decoration-none">Localisation</a>
+                <a href="{{ url('/pour-vous') }}" class="text-decoration-none">
+                    Pour vous (<span id="grimba-follow-count">{{ $followCount }}</span>)
+                </a>
                 <span class="opacity-50">·</span>
                 <span>Édition FR</span>
             </div>
@@ -28,7 +32,7 @@
 
             <nav class="grimba-nav d-none d-lg-flex" aria-label="{{ __('Principal') }}">
                 <a href="{{ url('/') }}" class="active">Accueil</a>
-                <a href="{{ url('/blog') }}">Pour vous</a>
+                <a href="{{ url('/pour-vous') }}">Pour vous</a>
                 <a href="#local">Local</a>
                 <a href="{{ url('/angles-morts') }}">Angles morts</a>
                 <a href="{{ url('/sources') }}">Sources</a>

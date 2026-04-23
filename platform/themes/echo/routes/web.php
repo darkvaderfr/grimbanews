@@ -35,6 +35,57 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ])->render();
         })->name('public.comparison');
 
+        Route::post('topics/follow', function (Request $request) {
+            $id = (int) $request->input('category_id');
+            if (! $id) {
+                return response()->json(['ok' => false, 'message' => 'Missing category_id'], 422);
+            }
+
+            $raw = (string) $request->cookie('grimba_follow', '');
+            $ids = array_filter(array_map('intval', explode(',', $raw)));
+
+            $action = $request->input('action', 'toggle');
+            if ($action === 'follow' || ($action === 'toggle' && ! in_array($id, $ids, true))) {
+                $ids[] = $id;
+            } elseif ($action === 'unfollow' || ($action === 'toggle' && in_array($id, $ids, true))) {
+                $ids = array_values(array_filter($ids, fn ($i) => $i !== $id));
+            }
+
+            $ids = array_values(array_unique($ids));
+            $value = implode(',', $ids);
+
+            return response()
+                ->json(['ok' => true, 'followed' => $ids, 'count' => count($ids)])
+                ->cookie('grimba_follow', $value, 60 * 24 * 365, '/', null, false, false);
+        })->name('public.topics.follow');
+
+        Route::get('pour-vous', function (Request $request) {
+            $raw = (string) $request->cookie('grimba_follow', '');
+            $ids = array_filter(array_map('intval', explode(',', $raw)));
+
+            $postsQuery = Post::query()
+                ->where('status', 'published')
+                ->latest();
+
+            if (! empty($ids)) {
+                $postsQuery->whereHas('categories', fn ($q) => $q->whereIn('categories.id', $ids));
+            }
+
+            $posts = $postsQuery->paginate(12);
+
+            SeoHelper::setTitle('Pour vous — GrimbaNews')
+                ->setDescription("Votre fil personnalisé selon les sujets que vous suivez.");
+
+            Theme::breadcrumb()
+                ->add('Accueil', url('/'))
+                ->add('Pour vous', url('/pour-vous'));
+
+            return Theme::scope('for-you', [
+                'posts'         => $posts,
+                'followedIds'   => $ids,
+            ])->render();
+        })->name('public.for-you');
+
         Route::post('newsletter/subscribe', function (Request $request) {
             $data = Validator::make($request->all(), [
                 'email'      => ['required', 'email:rfc', 'max:191'],

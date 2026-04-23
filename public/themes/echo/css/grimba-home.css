@@ -247,6 +247,7 @@ button.btn-grimba--solid,
     border-color: var(--gn-ink);
     transform: translateY(-1px);
 }
+.grimba-chip__label { color: inherit; text-decoration: none; }
 .grimba-chip__follow {
     display: inline-flex;
     align-items: center;
@@ -257,6 +258,21 @@ button.btn-grimba--solid,
     border-radius: 50%;
     font-size: 0.75rem;
     font-weight: 700;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background .15s, transform .15s;
+}
+.grimba-chip__follow:hover { transform: scale(1.1); }
+.grimba-chip--followed {
+    background: var(--gn-ink);
+    border-color: var(--gn-ink);
+    color: var(--gn-paper);
+}
+.grimba-chip--followed .grimba-chip__label { color: var(--gn-paper); }
+.grimba-chip--followed .grimba-chip__follow {
+    background: var(--gn-paper);
+    color: var(--gn-ink);
 }
 
 /* ------------------------------------------------------------
