@@ -1,6 +1,21 @@
 @php
     Theme::layout('grimba-chrome');
     Theme::set('isDetailPage', true);
+@endphp
+
+{{-- S49: record post visit in grimba_read cookie (last 30, most-recent-first). --}}
+<script>
+    (function () {
+        try {
+            const id = '{{ (int) $post->id }}';
+            const current = (document.cookie.match(/(?:^|; )grimba_read=([^;]+)/)?.[1] || '').split(',').filter(Boolean);
+            const updated = [id, ...current.filter(x => x !== id)].slice(0, 30);
+            document.cookie = 'grimba_read=' + updated.join(',') + '; path=/; max-age=' + (60 * 60 * 24 * 30) + '; SameSite=Lax';
+        } catch (_) {}
+    })();
+</script>
+
+@php
 
     $descriptionStyle = theme_option('blog_description_style');
     $authorStyle = theme_option('blog_author_style');

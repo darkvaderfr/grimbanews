@@ -11,7 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // GrimbaNews reader-history cookie is set client-side via JS
+        // on every post view — can't be Laravel-encrypted. Exclude it
+        // so EncryptCookies doesn't null it out server-side.
+        $middleware->encryptCookies(except: [
+            'grimba_read',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

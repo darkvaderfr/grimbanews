@@ -150,15 +150,60 @@
                 Voir le fil des angles morts →
             </a>
 
+            @php
+                $readRaw = (string) request()->cookie('grimba_read', '');
+                $readIds = array_filter(array_map('intval', explode(',', $readRaw)));
+
+                $readPosts = collect();
+                $biasCounts = ['left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0];
+                $readSources = [];
+
+                if (! empty($readIds)) {
+                    $readPosts = Post::query()
+                        ->whereIn('id', $readIds)
+                        ->where('status', 'published')
+                        ->get();
+
+                    foreach ($readPosts as $rp) {
+                        $r = $rp->bias_rating ?? 'unknown';
+                        if (isset($biasCounts[$r])) $biasCounts[$r]++;
+                        if ($rp->source_name) $readSources[$rp->source_name] = true;
+                    }
+                }
+
+                $readTotal    = $readPosts->count();
+                $known        = $biasCounts['left'] + $biasCounts['center'] + $biasCounts['right'];
+                $pct = [
+                    'left'   => $known ? round($biasCounts['left']   * 100 / $known) : 33,
+                    'center' => $known ? round($biasCounts['center'] * 100 / $known) : 34,
+                    'right'  => $known ? round($biasCounts['right']  * 100 / $known) : 33,
+                ];
+                $sourcesCount = count($readSources);
+            @endphp
+
             <section class="grimba-bias-profile">
                 <h4 class="h6 mb-1">Votre biais de lecture</h4>
-                <p class="small opacity-75 mb-2">0 source · 0 article</p>
+                <p class="small opacity-75 mb-2">
+                    @if($readTotal === 0)
+                        0 source · 0 article · <em>lisez quelques articles pour voir votre profil</em>
+                    @else
+                        {{ $sourcesCount }} {{ $sourcesCount === 1 ? 'source' : 'sources' }} · {{ $readTotal }} {{ $readTotal === 1 ? 'article' : 'articles' }} lus
+                    @endif
+                </p>
                 <div style="display:flex;height:8px;border-radius:9999px;overflow:hidden;background:rgba(0,0,0,.08);">
-                    <div style="width:33%;background:#3b82f6;"></div>
-                    <div style="width:34%;background:#cfa24a;"></div>
-                    <div style="width:33%;background:#ef4444;"></div>
+                    <div style="width:{{ $pct['left'] }}%;background:#3b82f6;" title="Gauche {{ $pct['left'] }}%"></div>
+                    <div style="width:{{ $pct['center'] }}%;background:#b39152;" title="Centre {{ $pct['center'] }}%"></div>
+                    <div style="width:{{ $pct['right'] }}%;background:#ef4444;" title="Droite {{ $pct['right'] }}%"></div>
                 </div>
-                <a href="#demo" class="small text-decoration-underline mt-2 d-inline-block">Voir la démo</a>
+                @if($readTotal > 0)
+                    <div class="d-flex justify-content-between small mt-2">
+                        <span style="color:#3b82f6;font-weight:600;">Gauche {{ $pct['left'] }}%</span>
+                        <span style="color:#b39152;font-weight:600;">Centre {{ $pct['center'] }}%</span>
+                        <span style="color:#ef4444;font-weight:600;">Droite {{ $pct['right'] }}%</span>
+                    </div>
+                @else
+                    <a href="{{ url('/blog') }}" class="small text-decoration-underline mt-2 d-inline-block">Commencer à lire</a>
+                @endif
             </section>
         </aside>
 
