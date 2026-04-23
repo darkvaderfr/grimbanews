@@ -34,6 +34,7 @@ bun.lockb
 public/mix-manifest.json
 
 public/themes
+!public/themes/echo/css/grimba.css
 public/docs
 resources/docs
 

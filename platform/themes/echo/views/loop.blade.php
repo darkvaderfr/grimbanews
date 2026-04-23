@@ -17,6 +17,8 @@
                         'col-xl-8 col-lg-7 col-md-12' => $enableSidebar,
                         'col-12' => ! $enableSidebar,
                     ])>
+                        {!! Theme::partial('bias-legend') !!}
+                        {!! Theme::partial('feed-balance', ['posts' => $posts]) !!}
                         {!! Theme::partial('blog.posts', compact('posts', 'postStyle', 'enableSidebar')) !!}
                     </div>
 
