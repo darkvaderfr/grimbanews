@@ -59,6 +59,7 @@
 </header>
 
 @include(Theme::getThemeNamespace('partials.home.newsletter-modal'))
+@include(Theme::getThemeNamespace('partials.home.onboarding-modal'))
 
 <script>
     (function () {

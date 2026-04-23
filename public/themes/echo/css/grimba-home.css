@@ -1049,6 +1049,68 @@ button.btn-grimba--solid,
 }
 
 /* ------------------------------------------------------------
+   12d. Onboarding modal
+   ------------------------------------------------------------ */
+.grimba-onboard-panel {
+    max-width: 720px !important;
+    padding: 2rem 2rem 1.5rem !important;
+}
+.grimba-onboard-pillar {
+    background: rgba(255,255,255,0.55);
+    border: 1px solid var(--gn-rule);
+    border-radius: 12px;
+    padding: 1rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+.grimba-onboard-pillar strong { font-family: var(--gn-font-display); font-size: 1rem; }
+.grimba-onboard-pillar__bar {
+    display: flex;
+    height: 5px;
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-bottom: 0.35rem;
+}
+.grimba-onboard-pillar__bar span { flex: 1; height: 100%; display: block; }
+.grimba-onboard-pillar__dot {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+.grimba-onboard-pillar__score {
+    font-family: var(--gn-font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #22c55e;
+    line-height: 1;
+    margin-bottom: 0.2rem;
+}
+.grimba-onboard-pillar__score span {
+    font-size: 0.9rem;
+    opacity: 0.6;
+    font-weight: 500;
+}
+
+.grimba-onboard-topic[aria-pressed="true"] {
+    background: var(--gn-ink);
+    color: var(--gn-paper) !important;
+    border-color: var(--gn-ink);
+}
+
+[data-bs-theme="dark"] .grimba-onboard-pillar {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+}
+
+/* ------------------------------------------------------------
    13. Mobile
    ------------------------------------------------------------ */
 @media (max-width: 991px) {

@@ -94,6 +94,18 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('feed.xml', $feedHandler)->name('public.feed');
         Route::get('feed',     $feedHandler)->name('public.feed.alt');
 
+        Route::post('onboarding/complete', function (Request $request) {
+            $ids = array_filter(array_map('intval', (array) $request->input('category_ids', [])));
+            $ids = array_values(array_unique($ids));
+            $value = implode(',', $ids);
+
+            $resp = response()->json(['ok' => true, 'followed' => $ids, 'count' => count($ids)]);
+            $oneYear = 60 * 24 * 365;
+            $resp->cookie('grimba_follow', $value, $oneYear, '/', null, false, false);
+            $resp->cookie('grimba_onboarded', '1', $oneYear, '/', null, false, false);
+            return $resp;
+        })->name('public.onboarding.complete');
+
         Route::post('topics/follow', function (Request $request) {
             $id = (int) $request->input('category_id');
             if (! $id) {
