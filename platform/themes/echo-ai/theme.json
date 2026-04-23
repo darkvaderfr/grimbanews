@@ -1,0 +1,10 @@
+{
+    "id": "archielite/echo-ai",
+    "name": "Echo AI",
+    "namespace": "Theme\\EchoAI\\",
+    "author": "Archi Elite",
+    "url": "https://archielite.com",
+    "version": "1.0.0",
+    "description": "Echo - News & Magazine",
+    "required_plugins": []
+}

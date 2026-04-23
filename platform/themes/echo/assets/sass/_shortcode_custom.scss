@@ -1,0 +1,207 @@
+html {
+    &:not([data-theme='dark']) {
+        .echo-hero-section,
+        .echo-latest-news-area,
+        .echo-trending-area,
+        .echo-de-category-area,
+        .echo-feature-area,
+        .echo-home-2-feature-area,
+        .echo-fd-post-area,
+        .echo-hm2-video-area,
+        .echo-banner,
+        .echo-archive-area,
+        .echo-popular-area,
+        .echo-cl-blocks-content,
+        .echo-hero-section.home-three,
+        .echo-latest-news-area.home-three,
+        .echo-video-area.home-three,
+        .echo-catagories-area,
+        .hm5-feature-area,
+        .echo-video-area.home-six,
+        .echo-trending-news-area.home-seven,
+        .echo-video-area.home-seven,
+        .echo-business-area,
+        .echo-banner-area.home-seven,
+        .echo-trending-news-area.home-eight,
+        .echo-hero-section.inner.home-eight,
+        .echo-video-area.home-eight,
+        .echo-banner-area.home-ten,
+        .echo-photography-area,
+        .echo-banner-area.home-nine,
+        .echo-dishes-area,
+        .echo-new-dishes-area,
+        .echo-food-review-area,
+        .echo-popular-news-area {
+            background-color: var(--background-color);
+            background-image: var(--background-image);
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+
+            a.title-hover {
+                color: var(--text-color);
+            }
+        }
+
+        .echo-home-2-feature-area {
+            .echo-home-2-feature-area-content {
+                background-color: var(--background-color);
+                background-image: var(--background-image);
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;
+            }
+
+            .echo-home-2-main-title {
+                h2 {
+                    &:before, &:after {
+                        background-color: var(--line-color);
+                    }
+                }
+            }
+        }
+
+        .echo-fd-post-area {
+            .echo-fd-post-content {
+                background-color: var(--background-color);
+                background-image: var(--background-image);
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;
+
+                .echo-3-align-icons {
+                    a {
+                        color: var(--text-body-color) !important;
+                    }
+                }
+
+                i, p {
+                    color: var(--text-body-color) !important;
+                }
+            }
+
+            .echo-home-2-main-title {
+                h2 {
+                    &:before, &:after {
+                        background-color: var(--line-color);
+                    }
+                }
+            }
+        }
+
+        .echo-archive-area {
+            .echo-archive-area-content {
+                background-color: var(--background-color);
+                background-image: var(--background-image);
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;
+            }
+        }
+
+        .echo-cl-blocks-area {
+            .echo-cl-blocks-full-content {
+                background-color: var(--background-color) !important;
+                background-image: var(--background-image);
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;
+            }
+        }
+
+        .echo-video-area.home-seven {
+            .echo-home-1-hero-area-top-story {
+                .echo-top-story {
+                    .echo-story-text {
+                        .title-hover {
+                            color: var(--text-color);
+
+                            &:hover {
+                                background-image: linear-gradient(to right, var(--text-color) 50%, transparent 50%);
+                            }
+                        }
+                    }
+                }
+            }
+
+            .echo-hero-title {
+                a.title-hover {
+                    color: var(--text-color);
+
+                    &:hover {
+                        background-image: linear-gradient(to right, var(--text-color) 50%, transparent 50%);
+                    }
+                }
+            }
+        }
+        .home-eight {
+            .echo-banner-area {
+                .banner-inner {
+                    .left-side {
+                        .echo-hero-title {
+                            a.title-hover {
+                                color: var(--text-color) !important;
+
+                                &:hover {
+                                    background-image: linear-gradient(to right, var(--text-color) 50%, transparent 50%);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .echo-hero-section.inner.home-eight {
+            a.title-hover {
+                color: var(--text-color) !important;
+
+                &:hover {
+                    background-image: linear-gradient(to right, var(--text-color) 50%, transparent 50%);
+                }
+            }
+        }
+
+        .echo-banner-area.home-nine {
+            .right-side-banner {
+                .content {
+                    a.title-hover {
+                        color: var(--text-color) !important;
+
+                        &:hover {
+                            background-image: linear-gradient(to right, var(--text-color) 50%, transparent 50%);
+                        }
+                    }
+                }
+            }
+        }
+
+        .home-nine .echo-new-dishes-area, .echo-food-review-area {
+            .echo-hero-baner {
+                .content {
+                    .echo-hero-title {
+                        a.title-hover {
+                            color: var(--text-color) !important;
+
+                            &:hover {
+                                background-image: linear-gradient(to right, var(--text-color) 50%, transparent 50%);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .echo-feature-area.home-three {
+            .echo-feature-area-right-audio-text {
+                a.title-hover {
+                    color: var(--color-heading);
+
+                    &:hover {
+                        background-image: linear-gradient(to right, var(--color-heading) 50%, transparent 50%);
+                    }
+                }
+            }
+        }
+    }
+}

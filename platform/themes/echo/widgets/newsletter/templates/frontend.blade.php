@@ -1,0 +1,21 @@
+@if (is_plugin_active('newsletter'))
+    @switch($sidebar)
+        @case('footer_sidebar')
+            @include(Theme::getThemeNamespace('widgets.newsletter.templates.partials.sidebars.footer'))
+            @break
+        @case('blog_bottom_sidebar')
+            @include(Theme::getThemeNamespace('widgets.newsletter.templates.partials.sidebars.blog-bottom'))
+            @break
+        @case('menu_sidebar')
+            @include(Theme::getThemeNamespace('widgets.newsletter.templates.partials.sidebars.menu'))
+            @break
+        @case('primary_sidebar')
+            @include(Theme::getThemeNamespace('widgets.newsletter.templates.partials.sidebars.primary'))
+            @break
+        @case('above_footer_sidebar')
+            @include(Theme::getThemeNamespace('widgets.newsletter.templates.partials.sidebars.above-footer'))
+            @break
+        @default
+            @include(Theme::getThemeNamespace('widgets.newsletter.templates.partials.sidebars.primary'))
+    @endswitch
+@endif
