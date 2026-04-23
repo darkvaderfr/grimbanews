@@ -94,6 +94,18 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('feed.xml', $feedHandler)->name('public.feed');
         Route::get('feed',     $feedHandler)->name('public.feed.alt');
 
+        Route::post('region/set', function (Request $request) {
+            $region = (string) $request->input('region', 'monde');
+            $allowed = ['monde', 'afrique', 'europe', 'france', 'international'];
+            if (! in_array($region, $allowed, true)) {
+                $region = 'monde';
+            }
+
+            return response()
+                ->json(['ok' => true, 'region' => $region])
+                ->cookie('grimba_region', $region, 60 * 24 * 365, '/', null, false, false);
+        })->name('public.region.set');
+
         Route::post('onboarding/complete', function (Request $request) {
             $ids = array_filter(array_map('intval', (array) $request->input('category_ids', [])));
             $ids = array_values(array_unique($ids));

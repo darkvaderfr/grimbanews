@@ -23,7 +23,7 @@
                     Pour vous (<span id="grimba-follow-count">{{ $followCount }}</span>)
                 </a>
                 <span class="opacity-50">·</span>
-                <span>Édition FR</span>
+                @include(Theme::getThemeNamespace('partials.home.region-dropdown'))
             </div>
         </div>
     </div>

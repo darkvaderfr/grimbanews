@@ -128,6 +128,82 @@ html.grimba-home-html[data-bs-theme="dark"] .btn-grimba--ghost:hover {
 /* Urgency banner keeps its tan + black ink for brand consistency */
 html.grimba-home-html[data-bs-theme="dark"] .grimba-urgency { color: #1a1713; }
 
+/* Region dropdown (top-right) */
+.grimba-region { position: relative; display: inline-flex; }
+.grimba-region__trigger {
+    appearance: none;
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+}
+.grimba-region__trigger:hover {
+    background: rgba(26, 23, 19, 0.06);
+    border-color: var(--gn-rule);
+}
+.grimba-region__caret { font-size: 0.7rem; opacity: 0.6; }
+.grimba-region__menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.4rem);
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--gn-rule);
+    border-radius: 14px;
+    box-shadow: 0 14px 36px rgba(26, 23, 19, 0.14);
+    list-style: none;
+    padding: 0.4rem;
+    margin: 0;
+    min-width: 200px;
+    display: none;
+    z-index: 200;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+.grimba-region.is-open .grimba-region__menu { display: block; }
+.grimba-region__option {
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+    padding: 0.55rem 0.75rem;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font: inherit;
+    color: var(--gn-ink);
+    font-size: 0.92rem;
+}
+.grimba-region__option:hover { background: rgba(26, 23, 19, 0.06); }
+.grimba-region__option.is-active {
+    background: var(--gn-ink);
+    color: var(--gn-paper);
+    font-weight: 600;
+}
+[data-bs-theme="dark"] .grimba-region__trigger:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+[data-bs-theme="dark"] .grimba-region__menu {
+    background: rgba(28, 24, 17, 0.96);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
+}
+[data-bs-theme="dark"] .grimba-region__option { color: var(--gn-ink); }
+[data-bs-theme="dark"] .grimba-region__option:hover { background: rgba(255, 255, 255, 0.08); }
+[data-bs-theme="dark"] .grimba-region__option.is-active {
+    background: var(--gn-paper);
+    color: var(--gn-ink);
+}
+
 /* Theme switch buttons */
 .grimba-theme-switch {
     display: inline-flex;
