@@ -7,6 +7,12 @@
      */
     use Illuminate\Support\Facades\DB;
 
+    // Ensure locale is set from cookie before __() lookups + disclaimer logic.
+    $__grimbaLang = (string) request()->cookie('grimba_lang', '');
+    if ($__grimbaLang === 'en' || $__grimbaLang === 'fr') {
+        app()->setLocale($__grimbaLang);
+    }
+
     $source = null;
     if ($post->source_id) {
         $source = DB::table('news_sources')->where('id', $post->source_id)->first();
@@ -85,8 +91,27 @@
 
     @if($post->is_blindspot)
         <div class="grimba-post-attribution__blindspot-notice">
-            <strong>Angle mort.</strong> Cette histoire n'est couverte que par un seul côté du spectre politique.
-            <a href="{{ url('/angles-morts') }}">Voir d'autres angles morts →</a>
+            <strong>{{ __('Angle mort') }}.</strong>
+            {{ __('Cette histoire n\'est couverte que par un seul côté du spectre politique.') }}
+            <a href="{{ url('/angles-morts') }}">{{ __('Voir d\'autres angles morts') }} →</a>
+        </div>
+    @endif
+
+    @php
+        $translateMode = (string) (request()->cookie('grimba_translate') ?? 'original');
+        $uiLocale = app()->getLocale();
+        $postLocale = strtolower((string) ($post->original_language ?? ''));
+        $isForeign = $postLocale && $postLocale !== $uiLocale;
+    @endphp
+
+    @if($isForeign && $translateMode !== 'original')
+        <div class="grimba-translate-notice" role="note">
+            <strong>{{ __('Traduction automatique') }}.</strong>
+            {{ __('Cet article a été traduit par une machine depuis :lang. Il peut contenir des erreurs. Consultez la version originale pour la précision éditoriale.', ['lang' => strtoupper($postLocale)]) }}
+        </div>
+    @elseif($isForeign && $translateMode === 'original')
+        <div class="grimba-translate-notice" role="note" style="background:rgba(59,130,246,0.08); border-color:rgba(59,130,246,0.3); color:#1e3a8a;">
+            {{ __('Cet article est affiché dans sa langue d\'origine (:lang). Changez votre mode de lecture en haut à droite pour une traduction automatique.', ['lang' => strtoupper($postLocale)]) }}
         </div>
     @endif
 </section>

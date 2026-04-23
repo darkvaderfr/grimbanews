@@ -56,6 +56,7 @@ app()->booted(function (): void {
             'bias_rating'       => $source->bias_rating,
             'ownership_type'    => $source->ownership_type,
             'credibility_score' => $source->credibility_score,
+            'original_language' => $source->language,
         ];
 
         foreach ($copy as $field => $value) {

@@ -27,8 +27,8 @@
     </div>
 
     <div class="article-card__content">
-        {{-- Category + Source kicker --}}
-        <div class="d-flex align-items-center gap-2 mb-2">
+        {{-- Category + Source kicker + language badge --}}
+        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
             @if($post->firstCategory)
                 <a href="{{ $post->firstCategory->url }}" class="grimba-topnews__kicker text-decoration-none">
                     {{ $post->firstCategory->name }}
@@ -38,6 +38,7 @@
                 <span class="opacity-50">·</span>
                 <span class="grimba-topnews__kicker opacity-75">{{ $post->source_name }}</span>
             @endif
+            {!! Theme::partial('home.language-badge', ['post' => $post, 'compact' => true]) !!}
         </div>
 
         {{-- Title --}}

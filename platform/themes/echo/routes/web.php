@@ -94,6 +94,18 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('feed.xml', $feedHandler)->name('public.feed');
         Route::get('feed',     $feedHandler)->name('public.feed.alt');
 
+        Route::post('translate/set', function (Request $request) {
+            $mode = $request->input('mode');
+            $allowed = ['original', 'auto', 'both'];
+            if (! in_array($mode, $allowed, true)) {
+                $mode = 'original';
+            }
+
+            return response()
+                ->json(['ok' => true, 'mode' => $mode])
+                ->cookie('grimba_translate', $mode, 60 * 24 * 365, '/', null, false, false);
+        })->name('public.translate.set');
+
         Route::post('lang/set', function (Request $request) {
             $lang = $request->input('lang') === 'en' ? 'en' : 'fr';
             return response()

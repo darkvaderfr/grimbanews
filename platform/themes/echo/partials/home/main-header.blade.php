@@ -16,6 +16,8 @@
                     <button type="button" data-grimba-theme="auto"  aria-pressed="true"  title="{{ __('Auto') }}">{{ __('Auto') }}</button>
                 </div>
                 @include(Theme::getThemeNamespace('partials.home.lang-switch'))
+                <span class="opacity-50">·</span>
+                @include(Theme::getThemeNamespace('partials.home.translate-picker'))
             </div>
             <div class="small opacity-75 d-flex align-items-center gap-3">
                 <span>{{ ucfirst($topDate) }}</span>
