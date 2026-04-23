@@ -34,6 +34,9 @@
                                 @if($p->source_name)
                                     <span class="opacity-50">·</span> {{ $p->source_name }}
                                 @endif
+                                @if($p->created_at)
+                                    <span class="opacity-50">·</span> {{ $p->created_at->locale('fr')->diffForHumans(['short' => false]) }}
+                                @endif
                             </span>
                             <a href="{{ $p->url }}" class="grimba-latest__headline">{{ $p->name }}</a>
                             {!! Theme::partial('home.coverage-bar', ['post' => $p, 'compact' => true]) !!}

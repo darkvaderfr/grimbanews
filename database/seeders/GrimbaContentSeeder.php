@@ -161,18 +161,34 @@ class GrimbaContentSeeder extends Seeder
             ->delete();
 
         // ────────────────────────────────────────────────────────
-        // Create clusters.
+        // Create clusters — spread timestamps so feeds feel live.
+        // Cluster 1001 is "breaking" (posts 30m-3h old),
+        // 1002 is mid-day (6-12h), 1003 is yesterday (18-34h).
         // ────────────────────────────────────────────────────────
+        $ageBuckets = [
+            1001 => [30, 180],      // minutes
+            1002 => [360, 720],
+            1003 => [1080, 2040],
+        ];
+
         foreach ($clusters as $clusterId => $cluster) {
             $categoryId = Category::query()->where('name', $cluster['category'])->value('id') ?? 1;
+            [$minAge, $maxAge] = $ageBuckets[$clusterId] ?? [60, 600];
+            $postIndex = 0;
 
             foreach ($cluster['posts'] as $item) {
+                // Stagger posts in the cluster a few minutes apart so one
+                // is naturally freshest — the hero preference kicks in.
+                $minutesOld = rand($minAge, $maxAge) + ($postIndex * 15);
+                $postIndex++;
                 $imgPath = 'grimba-seeds/cluster-' . $clusterId . '-' . \Illuminate\Support\Str::slug($item['source']) . '.svg';
                 File::put(public_path('storage/' . $imgPath), $this->makeCoverSvg(
                     $cluster['topic'],
                     $item['source'],
                     $cluster['tint']
                 ));
+
+                $createdAt = now()->subMinutes($minutesOld);
 
                 $post = Post::query()->create([
                     'name'        => $item['name'],
@@ -184,6 +200,8 @@ class GrimbaContentSeeder extends Seeder
                     'author_id'   => $authorId,
                     'author_type' => \Botble\ACL\Models\User::class,
                     'views'       => rand(500, 5000),
+                    'created_at'  => $createdAt,
+                    'updated_at'  => $createdAt,
                 ]);
 
                 // Trigger the saving hook: setting source_id copies
@@ -200,7 +218,7 @@ class GrimbaContentSeeder extends Seeder
         // ────────────────────────────────────────────────────────
         // Create standalones.
         // ────────────────────────────────────────────────────────
-        foreach ($standalones as $item) {
+        foreach ($standalones as $i => $item) {
             $categoryId = Category::query()->where('name', $item['category'])->value('id') ?? 1;
             $imgPath = 'grimba-seeds/stand-' . \Illuminate\Support\Str::slug($item['source'] . '-' . mb_substr($item['name'], 0, 30)) . '.svg';
             File::put(public_path('storage/' . $imgPath), $this->makeCoverSvg(
@@ -208,6 +226,10 @@ class GrimbaContentSeeder extends Seeder
                 $item['source'],
                 $item['tint']
             ));
+
+            // Standalones spread across the last 30 hours so recency
+            // kickers show a mix of "Il y a X heures" and "Il y a 1 jour".
+            $createdAt = now()->subMinutes(rand(45, 1800));
 
             $post = Post::query()->create([
                 'name'        => $item['name'],
@@ -219,6 +241,8 @@ class GrimbaContentSeeder extends Seeder
                 'author_id'   => $authorId,
                 'author_type' => \Botble\ACL\Models\User::class,
                 'views'       => rand(200, 2500),
+                'created_at'  => $createdAt,
+                'updated_at'  => $createdAt,
             ]);
 
             $post->source_id   = $sources[$item['source']] ?? null;

@@ -79,6 +79,9 @@
                         @endif
                         <div class="grimba-briefing__body">
                             <a href="{{ $p->url }}" class="grimba-briefing__headline">{{ $p->name }}</a>
+                            @if($p->created_at)
+                                <span class="small opacity-75">{{ $p->created_at->locale('fr')->diffForHumans(['short' => false]) }}</span>
+                            @endif
                             {!! Theme::partial('home.coverage-bar', ['post' => $p, 'compact' => true]) !!}
                         </div>
                     </li>
