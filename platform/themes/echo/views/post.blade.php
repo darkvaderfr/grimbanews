@@ -28,20 +28,13 @@
                                 {!! Theme::partial('blog.post.partials.action-post', ['post' => $post, 'enableActionAudio' => false]) !!}
                             </div>
 
-                            {{-- Bias Indicator Row --}}
+                            {{-- Category row --}}
                             <div class="d-flex align-items-center gap-2 mb-2">
                                 @include(Theme::getThemeNamespace('partials.category-badge'), ['post' => $post])
-                                {!! Theme::partial('bias-badge', [
-                                    'bias' => $post->bias_rating ?? null,
-                                    'showLabel' => true,
-                                    'size' => 'md'
-                                ]) !!}
-                                @if($post->is_blindspot ?? false)
-                                    <span class="blindspot-badge" title="Story covered by only one side">
-                                        Blindspot
-                                    </span>
-                                @endif
                             </div>
+
+                            {{-- GrimbaNews source attribution --}}
+                            @include(Theme::getThemeNamespace('partials.blog.post.partials.source-attribution'), ['post' => $post])
 
                             <h2 class="echo-hero-title text-capitalize font-weight-bold mt-0">
                                 <a title="{{ $post->name }}" href="{{ $url }}" class="title-hover truncate-custom truncate-3-custom">{{ $post->name }}</a>
@@ -88,6 +81,9 @@
                                 {!! apply_filters('ads_render', null, 'post_after', ['class' => 'my-2 text-center']) !!}
                             </div>
                         @endif
+
+                        {{-- GrimbaNews other angles (sibling cluster posts) --}}
+                        @include(Theme::getThemeNamespace('partials.blog.post.partials.other-angles'), ['post' => $post])
 
                         @php
                             $socials = \Botble\Theme\Supports\ThemeSupport::getSocialSharingButtons($post->url, $post->name, RvMedia::getImageUrl($post->image));

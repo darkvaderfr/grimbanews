@@ -125,3 +125,172 @@
 
 /* Comparison cards hover */
 .comparison-card:hover { transform: translateY(-3px); }
+
+/* ============================================================
+   Post detail — GrimbaNews source attribution
+   ============================================================ */
+
+.grimba-post-attribution {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+    margin: 0.25rem 0 1.25rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.grimba-post-attribution__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.grimba-post-attribution__source {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-right: auto;
+}
+
+.grimba-post-attribution__kicker {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.6;
+    font-weight: 600;
+}
+
+.grimba-post-attribution__name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+.grimba-post-attribution__name a { color: inherit; text-decoration: none; border-bottom: 1px solid rgba(0,0,0,0.15); }
+.grimba-post-attribution__name a:hover { border-color: currentColor; }
+
+.grimba-post-attribution__ownership {
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.02);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.grimba-post-attribution__cred {
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.grimba-post-attribution__cred-bar {
+    height: 6px;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.06);
+}
+.grimba-post-attribution__cred-bar > div { height: 100%; }
+
+.grimba-post-attribution__blindspot-notice {
+    margin-top: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 10px;
+    background: rgba(138, 43, 226, 0.08);
+    border: 1px solid rgba(138, 43, 226, 0.25);
+    color: #6b2bb8;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+.grimba-post-attribution__blindspot-notice a {
+    color: #6b2bb8;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+/* Dark-mode tweaks */
+[data-bs-theme="dark"] .grimba-post-attribution {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.1);
+}
+[data-bs-theme="dark"] .grimba-post-attribution__ownership {
+    border-color: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04);
+}
+
+/* ============================================================
+   Autres angles
+   ============================================================ */
+
+.grimba-other-angles {
+    margin: 2rem 0 1rem;
+    padding: 1.5rem;
+    border-top: 2px solid rgba(0,0,0,0.08);
+    border-bottom: 2px solid rgba(0,0,0,0.08);
+}
+
+.grimba-other-angles__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.grimba-other-angles__title {
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.grimba-other-angles__all {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 1px;
+}
+
+.grimba-other-angles__card {
+    display: block;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .15s ease, border-color .15s ease, background .15s ease;
+}
+.grimba-other-angles__card:hover {
+    transform: translateY(-2px);
+    background: #fff;
+    border-color: rgba(0,0,0,0.2);
+    color: inherit;
+}
+
+.grimba-other-angles__source {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    opacity: 0.7;
+}
+
+.grimba-other-angles__headline {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0.25rem 0 0.5rem;
+}
+
+.grimba-other-angles__desc {
+    font-size: 0.85rem;
+    opacity: 0.75;
+    margin: 0;
+    line-height: 1.4;
+}
