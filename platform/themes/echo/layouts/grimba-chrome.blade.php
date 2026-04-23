@@ -29,7 +29,11 @@
 
     <main class="grimba-sub-main">
         <div class="container-xxl py-4">
-            {!! Theme::content() !!}
+            @hasSection('content')
+                @yield('content')
+            @else
+                {!! Theme::content() !!}
+            @endif
         </div>
     </main>
 

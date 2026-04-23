@@ -1,20 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8" />
-    <meta name="robots" content="noindex,nofollow,noarchive" />
-    <title>{{ __('Maintenance mode') }}</title>
-    <link rel="stylesheet" href="{{ asset('vendor/core/core/base/css/error-pages.css') }}">
-</head>
-<body>
-<div class="container">
-    <h1>{{ __('Maintenance mode') }}</h1>
-    <p>{{ __('Sorry, we are doing some maintenance. Please check back soon.') }}</p>
-    <small>{!! BaseHelper::clean(__("If you are the administrator and you can't access your site after enabling maintenance mode, just need to delete file <strong>storage/framework/down</strong> to turn-off maintenance mode.")) !!}</small>
-    @if ($adminEmail = get_admin_email()->first())
-        <p>{!! BaseHelper::clean(__('If you need help, contact us at :mail.', ['mail' => Html::mailto($adminEmail)])) !!}</p>
-    @endif
-</div>
-</body>
-</html>
+@php
+    SeoHelper::setTitle('503 — Service indisponible');
+    Theme::fireEventGlobalAssets();
+@endphp
+@extends(Theme::getThemeNamespace('layouts.grimba-chrome'))
 
+@section('content')
+    <section class="grimba-error grimba-error--503 py-5">
+        <div class="container">
+            <div class="glass-panel p-4 p-md-5 text-center" style="max-width: 720px; margin: 0 auto;">
+                <span class="grimba-methodology__kicker">Maintenance</span>
+                <h1 class="grimba-methodology__title mt-2 mb-3">
+                    GrimbaNews est en maintenance.
+                </h1>
+                <p class="mb-4 opacity-85" style="max-width: 52ch; margin-left: auto; margin-right: auto;">
+                    Nous améliorons la plateforme. Nous revenons très vite. Merci pour
+                    votre patience.
+                </p>
+            </div>
+        </div>
+    </section>
+@endsection

@@ -1,19 +1,27 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8" />
-    <meta name="robots" content="noindex,nofollow,noarchive" />
-    <title>{{ __('An Error Occurred: Internal Server Error') }}</title>
-    <link rel="stylesheet" href="{{ asset('vendor/core/core/base/css/error-pages.css') }}">
-</head>
-<body>
-<div class="container">
-    <h1>{{ __('Oops! An Error Occurred') }}</h1>
-    <h2>{{ __('The server returned a "500 Internal Server Error".') }}</h2>
+@php
+    SeoHelper::setTitle('500 — Erreur interne');
+    Theme::fireEventGlobalAssets();
+@endphp
+@extends(Theme::getThemeNamespace('layouts.grimba-chrome'))
 
-    <p>
-        {{ __('Something is broken. Please let us know what you were doing when this error occurred. We will fix it as soon as possible. Sorry for any inconvenience caused.') }}
-    </p>
-</div>
-</body>
-</html>
+@section('content')
+    <section class="grimba-error grimba-error--500 py-5">
+        <div class="container">
+            <div class="glass-panel p-4 p-md-5 text-center" style="max-width: 720px; margin: 0 auto;">
+                <span class="grimba-methodology__kicker">Erreur 500</span>
+                <h1 class="grimba-methodology__title mt-2 mb-3">
+                    Quelque chose s'est cassé côté serveur.
+                </h1>
+                <p class="mb-4 opacity-85" style="max-width: 52ch; margin-left: auto; margin-right: auto;">
+                    Une erreur interne nous empêche de servir cette page pour l'instant.
+                    L'équipe a été notifiée. Réessayez dans quelques minutes, ou revenez
+                    à la liste des dernières histoires.
+                </p>
+                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                    <a href="{{ url('/') }}" class="btn-grimba btn-grimba--solid">Retour à l'accueil</a>
+                    <a href="{{ url('/blog') }}" class="btn-grimba btn-grimba--ghost">Voir le fil</a>
+                </div>
+            </div>
+        </div>
+    </section>
+@endsection
