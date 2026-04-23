@@ -909,6 +909,59 @@ button.btn-grimba--solid,
 }
 
 /* ------------------------------------------------------------
+   Comparatif index cards
+   ------------------------------------------------------------ */
+.grimba-comparison-index__card {
+    display: block;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--gn-rule);
+    border-radius: 14px;
+    padding: 1.25rem 1.35rem 1.1rem;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.grimba-comparison-index__card:hover {
+    transform: translateY(-2px);
+    background: #fff;
+    border-color: var(--gn-ink);
+    box-shadow: 0 10px 26px rgba(26, 23, 19, 0.08);
+    color: inherit;
+}
+.grimba-comparison-index__dossier {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    opacity: 0.6;
+}
+.grimba-comparison-index__title {
+    font-family: var(--gn-font-display);
+    font-size: 1.35rem;
+    line-height: 1.25;
+    font-weight: 700;
+    margin: 0.25rem 0 1rem;
+    letter-spacing: -0.01em;
+}
+.grimba-comparison-index__bar {
+    display: flex;
+    height: 6px;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: rgba(26, 23, 19, 0.08);
+}
+
+[data-bs-theme="dark"] .grimba-comparison-index__card {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+[data-bs-theme="dark"] .grimba-comparison-index__card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--gn-ink);
+}
+
+/* ------------------------------------------------------------
    12b-bis. Botble Page body (legal / À propos / Contact etc.)
    ------------------------------------------------------------ */
 .grimba-page__body {

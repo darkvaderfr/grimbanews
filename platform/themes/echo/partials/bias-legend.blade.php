@@ -17,7 +17,7 @@
     <p class="small opacity-85 mb-2">
         Chaque article est classé selon l'orientation éditoriale de sa source. Voir la
         <a href="{{ url('/methodologie') }}" class="text-decoration-underline">méthodologie</a>,
-        la <a href="{{ url('/comparatif/1') }}" class="text-decoration-underline">comparaison des sources</a>
+        la <a href="{{ url('/comparatif') }}" class="text-decoration-underline">comparaison des sources</a>
         ou le flux des <a href="{{ url('/angles-morts') }}" class="text-decoration-underline">angles morts</a>.
     </p>
 </aside>

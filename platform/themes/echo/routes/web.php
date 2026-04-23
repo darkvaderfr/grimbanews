@@ -12,6 +12,39 @@ use Theme\Echo\Http\Controllers\EchoController;
 
 Route::group(['middleware' => ['web', 'core']], function (): void {
     Theme::registerRoutes(function (): void {
+        Route::get('comparatif', function () {
+            $clusters = DB::table('story_clusters')
+                ->orderByDesc('id')
+                ->get()
+                ->map(function ($c) {
+                    $rows = DB::table('posts')
+                        ->where('story_cluster_id', $c->id)
+                        ->where('status', 'published')
+                        ->get(['id', 'name', 'bias_rating', 'source_name', 'image', 'created_at']);
+
+                    $counts = ['left' => 0, 'center' => 0, 'right' => 0];
+                    foreach ($rows as $r) {
+                        if (isset($counts[$r->bias_rating])) $counts[$r->bias_rating]++;
+                    }
+                    $c->posts    = $rows;
+                    $c->total    = $rows->count();
+                    $c->counts   = $counts;
+                    $c->latestAt = $rows->max('created_at');
+                    return $c;
+                })
+                ->filter(fn ($c) => $c->total > 0)
+                ->values();
+
+            SeoHelper::setTitle('Comparer les sources — GrimbaNews')
+                ->setDescription("Tous les dossiers en cours — chaque histoire vue sous plusieurs angles.");
+
+            Theme::breadcrumb()
+                ->add('Accueil', url('/'))
+                ->add('Comparer les sources', url('/comparatif'));
+
+            return Theme::scope('comparison-index', compact('clusters'))->render();
+        })->name('public.comparison.index');
+
         Route::get('comparatif/{clusterId}', function (int $clusterId) {
             $posts = Post::query()
                 ->where('story_cluster_id', $clusterId)
