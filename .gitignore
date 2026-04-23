@@ -49,6 +49,7 @@ resources/docs
 
 /lang/*
 !/lang/en
+!/lang/fr.json
 
 /log
 

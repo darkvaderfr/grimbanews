@@ -909,6 +909,41 @@ button.btn-grimba--solid,
 }
 
 /* ------------------------------------------------------------
+   12b-bis. Botble Page body (legal / À propos / Contact etc.)
+   ------------------------------------------------------------ */
+.grimba-page__body {
+    max-width: 72ch;
+    margin: 0 auto;
+    font-family: var(--gn-font-body);
+    color: var(--gn-ink);
+}
+.grimba-page__body .ck-content p,
+.grimba-page__body .ck-content li {
+    font-size: 1rem;
+    line-height: 1.65;
+    margin-bottom: 0.9rem;
+}
+.grimba-page__body .ck-content h2 {
+    font-family: var(--gn-font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 2rem 0 0.75rem;
+    letter-spacing: -0.01em;
+}
+.grimba-page__body .ck-content a {
+    color: var(--gn-ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.grimba-page__body .ck-content code {
+    background: rgba(26, 23, 19, 0.06);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    font-family: var(--gn-font-mono);
+    font-size: 0.88em;
+}
+
+/* ------------------------------------------------------------
    12c. Newsletter modal
    ------------------------------------------------------------ */
 .grimba-newsletter-modal {
