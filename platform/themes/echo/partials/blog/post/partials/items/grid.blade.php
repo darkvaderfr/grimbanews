@@ -1,24 +1,60 @@
-<div class="echo-hero-baner post-item-grid">
-    <div class="echo-inner-img-ct-1  img-transition-scale position-relative">
+@php
+    /**
+     * Grid item — GrimbaNews refit.
+     * Bias badge + optional L/C/R coverage bar + source kicker.
+     */
+@endphp
+<article class="article-card">
+    <div class="article-card__image">
         <a href="{{ $post->url }}">
-            {{ RvMedia::image($post->image, $post->name, 'small', attributes: ['width' => '100%', 'height' => '100%']) }}
+            {{ RvMedia::image($post->image, $post->name, 'medium') }}
         </a>
 
-        @if ($category = $post->firstCategory)
-            <div class="echo-ct-style-3-shep">
-                <p>
-                    <a href="{{ $category->url }}" class="truncate-custom truncate-1-custom">{{ $category->name }}</a>
-                </p>
+        {{-- Bias Badge top-right --}}
+        <div class="position-absolute top-0 end-0 p-2">
+            {!! Theme::partial('bias-badge', [
+                'bias'      => $post->bias_rating ?? null,
+                'showLabel' => false,
+                'size'      => 'sm',
+            ]) !!}
+        </div>
+
+        @if($post->is_blindspot ?? false)
+            <div class="position-absolute top-0 start-0 p-2">
+                <span class="blindspot-badge">Angle mort</span>
             </div>
         @endif
     </div>
-    <div class="echo-banner-texting">
-        {!! Theme::partial('post-meta', ['post' => $post, 'wrapperClass' => 'echo-hero-area-titlepost-post-like-comment-share text-center justify-content-center']) !!}
-        <h4 class="echo-hero-title text-capitalize font-weight-bold text-center">
-            <a href="{{ $post->url }}" title="{{ $post->name }}" class="title-hover truncate-custom truncate-2-custom">{{ $post->name }}</a>
-        </h4>
+
+    <div class="article-card__content">
+        {{-- Category + Source kicker --}}
+        <div class="d-flex align-items-center gap-2 mb-2">
+            @if($post->firstCategory)
+                <a href="{{ $post->firstCategory->url }}" class="grimba-topnews__kicker text-decoration-none">
+                    {{ $post->firstCategory->name }}
+                </a>
+            @endif
+            @if($post->source_name)
+                <span class="opacity-50">·</span>
+                <span class="grimba-topnews__kicker opacity-75">{{ $post->source_name }}</span>
+            @endif
+        </div>
+
+        {{-- Title --}}
+        <h2 class="article-card__title">
+            <a href="{{ $post->url }}" title="{{ $post->name }}" class="title-hover text-decoration-none">
+                {{ $post->name }}
+            </a>
+        </h2>
+
+        {{-- Description --}}
         @if ($description = $post->description)
-            <p class="echo-hero-discription text-center truncate-custom truncate-2-custom">{!! BaseHelper::clean($description) !!}</p>
+            <p class="echo-hero-discription truncate-custom truncate-3-custom mb-2" title="{{ $description }}">
+                {!! BaseHelper::clean($description) !!}
+            </p>
         @endif
+
+        {{-- Coverage bar (only draws for balanced clusters, else Centre/Source label) --}}
+        {!! Theme::partial('home.coverage-bar', ['post' => $post, 'compact' => false]) !!}
     </div>
-</div>
+</article>

@@ -69,9 +69,11 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: 100%;
     transition: all 0.3s ease;
+    margin-bottom: 1.25rem;
 }
+/* When in a Bootstrap grid column, let the card fill the column height */
+.row > [class*="col-"] > .article-card { height: 100%; margin-bottom: 0; }
 .article-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
