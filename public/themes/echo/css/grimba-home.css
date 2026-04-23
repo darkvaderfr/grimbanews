@@ -690,6 +690,82 @@ button.btn-grimba--solid,
 .grimba-footer__rule { border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 2rem 0 1.25rem; }
 
 /* ------------------------------------------------------------
+   12b. Methodology page
+   ------------------------------------------------------------ */
+.grimba-methodology { font-family: var(--gn-font-body); color: var(--gn-ink); }
+
+.grimba-methodology__hero { }
+.grimba-methodology__kicker {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    opacity: 0.6;
+}
+.grimba-methodology__title {
+    font-family: var(--gn-font-display);
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0.5rem 0 1rem;
+    letter-spacing: -0.015em;
+}
+.grimba-methodology__lede {
+    font-size: 1.1rem;
+    line-height: 1.55;
+    max-width: 60ch;
+    color: var(--gn-ink-muted);
+    margin: 0;
+}
+
+.grimba-methodology__section {
+    max-width: 72ch;
+    margin: 0 auto 2.5rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--gn-rule);
+}
+.grimba-methodology__section:first-of-type { border-top: none; padding-top: 0; }
+.grimba-methodology__section h2 {
+    font-family: var(--gn-font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    letter-spacing: -0.01em;
+}
+.grimba-methodology__section p,
+.grimba-methodology__section li {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--gn-ink);
+}
+.grimba-methodology__section ul,
+.grimba-methodology__section ol {
+    padding-left: 1.25rem;
+    margin: 0 0 1rem;
+}
+.grimba-methodology__section li { margin-bottom: 0.5rem; }
+.grimba-methodology__section strong { font-weight: 600; }
+.grimba-methodology__section a {
+    color: var(--gn-ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.grimba-methodology__footer {
+    max-width: 72ch;
+    margin: 0 auto;
+}
+
+/* inline dots — reuse coverage dot colors */
+.grimba-methodology .grimba-coverage__dot {
+    width: 10px; height: 10px;
+    display: inline-block;
+    border-radius: 50%;
+    vertical-align: baseline;
+    margin: 0 0.15rem 0 0.35rem;
+}
+
+/* ------------------------------------------------------------
    13. Mobile
    ------------------------------------------------------------ */
 @media (max-width: 991px) {

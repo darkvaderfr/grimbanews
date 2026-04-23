@@ -32,6 +32,17 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ])->render();
         })->name('public.comparison');
 
+        Route::get('methodologie', function () {
+            SeoHelper::setTitle('Méthodologie — GrimbaNews')
+                ->setDescription("Comment GrimbaNews classe les biais, repère les angles morts et note la crédibilité des sources.");
+
+            Theme::breadcrumb()
+                ->add('Accueil', url('/'))
+                ->add('Méthodologie', url('/methodologie'));
+
+            return Theme::scope('methodology', [])->render();
+        })->name('public.methodology');
+
         Route::get('sources', function () {
             $rows = \Illuminate\Support\Facades\DB::table('news_sources')
                 ->orderBy('credibility_score', 'desc')

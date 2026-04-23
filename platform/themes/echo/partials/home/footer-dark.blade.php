@@ -56,7 +56,7 @@
                 <ul>
                     <li><a href="{{ url('/about-us') }}">À propos</a></li>
                     <li><a href="{{ url('/contact') }}">Contact</a></li>
-                    <li><a href="#methodo">Méthodologie</a></li>
+                    <li><a href="{{ url('/methodologie') }}">Méthodologie</a></li>
                     <li><a href="#carrieres">Carrières</a></li>
                 </ul>
             </div>
