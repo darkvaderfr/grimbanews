@@ -92,8 +92,9 @@ app()->booted(function (): void {
     ]);
 
     register_page_template([
-        'homepage' => __('Homepage'),
-        'full-width' => __('Full Width'),
+        'homepage'    => __('Homepage'),
+        'full-width'  => __('Full Width'),
+        'grimba-home' => __('GrimbaNews Homepage'),
     ]);
 
     if (is_plugin_active('member')) {

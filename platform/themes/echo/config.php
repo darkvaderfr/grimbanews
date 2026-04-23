@@ -66,6 +66,7 @@ return [
             $theme->asset()->usePath()->add('fontawesome-css', 'css/fontawesome-5.css');
             $theme->asset()->usePath()->add('style', 'css/style.css');
             $theme->asset()->usePath()->add('grimba', 'css/grimba.css');
+            $theme->asset()->usePath()->add('grimba-home', 'css/grimba-home.css');
 
             $theme->asset()->container('footer')->usePath()->add('jquery', 'plugins/jquery.min.js');
             $theme->asset()->container('footer')->usePath()->add('bootstrap-js', 'plugins/bootstrap/bootstrap.bundle.min.js');

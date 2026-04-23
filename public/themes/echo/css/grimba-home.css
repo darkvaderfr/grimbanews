@@ -1,0 +1,708 @@
+/* ============================================================
+   GrimbaNews — Homepage (Steve's cinematic glass over newsprint)
+   Reference: GroundNews, reinterpreted for francophone + glass.
+   ============================================================ */
+
+:root {
+    --gn-paper:        #f6f1e8;
+    --gn-paper-warm:   #ede4d2;
+    --gn-ink:          #1a1713;
+    --gn-ink-muted:    #4a4540;
+    --gn-ink-soft:     #6b6459;
+    --gn-rule:         rgba(26, 23, 19, 0.08);
+    --gn-tan:          #dcc8a0;
+    --gn-tan-strong:   #c9ae76;
+
+    --gn-left:   #3b82f6;
+    --gn-center: #b39152;
+    --gn-right:  #e84c3d;
+    --gn-blind:  #8a2be2;
+
+    --gn-font-display: 'Fraunces', 'Playfair Display', Georgia, serif;
+    --gn-font-body:    'Public Sans', 'Inter', system-ui, sans-serif;
+    --gn-font-mono:    'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+html.grimba-home-html {
+    background: linear-gradient(180deg, var(--gn-paper) 0%, #fbf7ee 55%, var(--gn-paper) 100%);
+}
+
+body.grimba-home {
+    font-family: var(--gn-font-body);
+    color: var(--gn-ink);
+    background: transparent;
+    font-feature-settings: "ss01", "cv11";
+}
+
+body.grimba-home h1,
+body.grimba-home h2,
+body.grimba-home h3,
+body.grimba-home h4,
+body.grimba-home .grimba-hero__title,
+body.grimba-home .grimba-section__title {
+    font-family: var(--gn-font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.01em;
+}
+
+body.grimba-home a:not([class*="btn-grimba"]):not([class*="grimba-urgency__cta"]) { color: inherit; }
+
+/* Kill stock newsletter popup + announcement on the new homepage */
+body.grimba-home .newsletter-popup-wrap,
+body.grimba-home [data-bb-toggle="announcement"],
+body.grimba-home .announcement-bar { display: none !important; }
+
+/* Soften RvMedia placeholders (no content yet) */
+body.grimba-home img[src*="placehold"],
+body.grimba-home img[alt=""] {
+    filter: blur(0.5px) brightness(0.96);
+}
+
+/* ------------------------------------------------------------
+   1. Urgency banner
+   ------------------------------------------------------------ */
+.grimba-urgency {
+    background: var(--gn-tan);
+    color: #1a1713;
+    border-bottom: 1px solid var(--gn-tan-strong);
+    font-family: var(--gn-font-body);
+    font-size: 0.9rem;
+}
+.grimba-urgency__text { font-weight: 500; }
+a.grimba-urgency__cta,
+.grimba-urgency__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--gn-ink);
+    color: var(--gn-paper) !important;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: transform .2s ease, background .2s ease;
+}
+.grimba-urgency__cta:hover { transform: translateY(-1px); background: #000; color: #fff; }
+
+/* ------------------------------------------------------------
+   2. Header
+   ------------------------------------------------------------ */
+.grimba-header { position: sticky; top: 0; z-index: 50; }
+.grimba-header__meta {
+    background: rgba(246, 241, 232, 0.7);
+    border-bottom: 1px solid var(--gn-rule);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-family: var(--gn-font-body);
+    font-size: 0.8rem;
+}
+.grimba-header__main {
+    background: rgba(246, 241, 232, 0.85);
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--gn-rule);
+    box-shadow: 0 6px 20px rgba(26, 23, 19, 0.06);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.grimba-wordmark {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    text-decoration: none;
+    color: var(--gn-ink);
+    font-family: var(--gn-font-mono);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+.grimba-wordmark__mark { font-size: 1.35rem; line-height: 1; }
+.grimba-wordmark__tag {
+    font-family: var(--gn-font-display);
+    font-weight: 500;
+    font-size: 1.05rem;
+    font-style: italic;
+    color: var(--gn-ink-soft);
+}
+.grimba-wordmark--light { color: var(--gn-paper); }
+.grimba-wordmark--light .grimba-wordmark__tag { color: rgba(246, 241, 232, 0.7); }
+
+.grimba-nav {
+    display: flex;
+    gap: 1.5rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+.grimba-nav a {
+    text-decoration: none;
+    color: var(--gn-ink-muted);
+    padding: 0.25rem 0;
+    border-bottom: 2px solid transparent;
+    transition: color .15s, border-color .15s;
+}
+.grimba-nav a:hover { color: var(--gn-ink); }
+.grimba-nav a.active { color: var(--gn-ink); border-color: var(--gn-ink); }
+
+.grimba-search {
+    position: relative;
+    max-width: 360px;
+    margin-left: auto;
+}
+.grimba-search input {
+    width: 100%;
+    padding: 0.55rem 2.25rem 0.55rem 1rem;
+    border-radius: 9999px;
+    border: 1px solid var(--gn-rule);
+    background: rgba(255, 255, 255, 0.7);
+    font-family: var(--gn-font-body);
+    font-size: 0.9rem;
+    color: var(--gn-ink);
+    transition: border-color .2s, background .2s;
+}
+.grimba-search input:focus {
+    outline: none;
+    border-color: var(--gn-ink);
+    background: #fff;
+}
+.grimba-search button {
+    position: absolute;
+    right: 0.35rem; top: 50%; transform: translateY(-50%);
+    background: transparent; border: none;
+    color: var(--gn-ink-soft);
+    padding: 0.35rem;
+    cursor: pointer;
+}
+
+.btn-grimba {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--gn-font-body);
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: transform .15s, background .15s, color .15s, border-color .15s;
+    border: 1px solid transparent;
+    cursor: pointer;
+    line-height: 1;
+}
+.btn-grimba--sm { font-size: 0.8rem; padding: 0.35rem 0.75rem; }
+a.btn-grimba--solid,
+button.btn-grimba--solid,
+.btn-grimba.btn-grimba--solid {
+    background: var(--gn-ink);
+    color: var(--gn-paper) !important;
+}
+.btn-grimba--solid:hover { background: #000; transform: translateY(-1px); }
+.btn-grimba--ghost {
+    background: transparent;
+    color: var(--gn-ink);
+    border-color: var(--gn-rule);
+}
+.btn-grimba--ghost:hover { border-color: var(--gn-ink); background: rgba(26, 23, 19, 0.04); }
+
+/* ------------------------------------------------------------
+   3. Topic chip strip
+   ------------------------------------------------------------ */
+.grimba-chips {
+    background: rgba(246, 241, 232, 0.6);
+    border-bottom: 1px solid var(--gn-rule);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.grimba-chips__row {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.6rem 0;
+    scrollbar-width: none;
+}
+.grimba-chips__row::-webkit-scrollbar { display: none; }
+
+.grimba-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.85rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid var(--gn-rule);
+    color: var(--gn-ink);
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background .15s, border-color .15s, transform .15s;
+    flex-shrink: 0;
+}
+.grimba-chip:hover {
+    background: #fff;
+    border-color: var(--gn-ink);
+    transform: translateY(-1px);
+}
+.grimba-chip__follow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    background: var(--gn-ink);
+    color: var(--gn-paper);
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* ------------------------------------------------------------
+   4. Main spacing
+   ------------------------------------------------------------ */
+.grimba-home-main { padding: 1.5rem 0 3rem; }
+
+/* ------------------------------------------------------------
+   5. Daily Briefing (left column)
+   ------------------------------------------------------------ */
+.grimba-briefing {
+    border-right: 1px solid var(--gn-rule);
+    padding-right: 1.5rem;
+}
+.grimba-briefing__head { margin-bottom: 0.75rem; }
+.grimba-briefing__title { font-size: 1.25rem; margin: 0 0 0.25rem; }
+.grimba-briefing__sub { font-size: 0.8rem; color: var(--gn-ink-soft); margin: 0; }
+.grimba-briefing__list { list-style: none; padding: 0; margin: 0; }
+.grimba-briefing__item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--gn-rule);
+}
+.grimba-briefing__item:last-child { border-bottom: none; }
+.grimba-briefing__thumb {
+    flex: 0 0 76px; width: 76px; height: 76px;
+    border-radius: 10px; overflow: hidden;
+    background: var(--gn-paper-warm);
+}
+.grimba-briefing__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.grimba-briefing__body { flex: 1; display: flex; flex-direction: column; gap: 0.35rem; }
+.grimba-briefing__headline {
+    font-family: var(--gn-font-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.25;
+    color: var(--gn-ink);
+    text-decoration: none;
+}
+.grimba-briefing__headline:hover { color: var(--gn-ink-muted); }
+.grimba-briefing__more {
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gn-ink);
+    text-decoration: none;
+    border-bottom: 1px solid var(--gn-ink);
+    padding-bottom: 2px;
+}
+
+/* ------------------------------------------------------------
+   6. Hero story (center column)
+   ------------------------------------------------------------ */
+.grimba-hero__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 16/10;
+    border-radius: 18px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    background: var(--gn-paper-warm);
+    box-shadow: 0 12px 40px rgba(26, 23, 19, 0.1);
+}
+.grimba-hero__media img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .6s ease;
+}
+.grimba-hero__media:hover img { transform: scale(1.03); }
+.grimba-hero__gradient {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 35%, rgba(0,0,0,0.72) 100%);
+}
+.grimba-hero__text {
+    position: absolute;
+    left: 1.5rem; right: 1.5rem; bottom: 4.25rem;
+    color: #fff;
+}
+.grimba-hero__title {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    line-height: 1.1;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: #fff;
+}
+.grimba-hero__desc {
+    font-size: 0.95rem;
+    opacity: 0.85;
+    max-width: 44ch;
+    margin: 0;
+}
+.grimba-hero__coverage {
+    position: absolute;
+    left: 1.5rem; right: 1.5rem; bottom: 1rem;
+}
+
+/* ------------------------------------------------------------
+   7. Coverage bar
+   ------------------------------------------------------------ */
+.grimba-coverage__bar {
+    display: flex;
+    height: 6px;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: rgba(26, 23, 19, 0.12);
+}
+.grimba-coverage--compact .grimba-coverage__bar { height: 4px; }
+.grimba-coverage--on-dark .grimba-coverage__bar { background: rgba(255,255,255,0.18); }
+
+.grimba-coverage__seg--l { background: var(--gn-left); }
+.grimba-coverage__seg--c { background: var(--gn-center); }
+.grimba-coverage__seg--r { background: var(--gn-right); }
+
+.grimba-coverage__legend {
+    display: flex; gap: 0.75rem; flex-wrap: wrap;
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.45);
+}
+.grimba-coverage__chip--l { color: #9ec4ff; }
+.grimba-coverage__chip--c { color: #e7c47b; }
+.grimba-coverage__chip--r { color: #ff9b91; }
+.grimba-coverage__sources { color: rgba(255,255,255,0.75); }
+
+.grimba-coverage--compact .grimba-coverage__legend { display: none; }
+
+.grimba-coverage--label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    color: var(--gn-ink-muted);
+}
+.grimba-coverage__dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gn-center);
+}
+.grimba-coverage__dot--left   { background: var(--gn-left); }
+.grimba-coverage__dot--center { background: var(--gn-center); }
+.grimba-coverage__dot--right  { background: var(--gn-right); }
+
+/* ------------------------------------------------------------
+   8. Blindspot rail + cards
+   ------------------------------------------------------------ */
+.grimba-blindspot-rail {
+    display: flex; flex-direction: column; gap: 1rem;
+}
+.grimba-blindspot-rail__kicker { margin-bottom: 0.35rem; }
+.grimba-blindspot-rail__desc {
+    font-size: 0.85rem;
+    color: var(--gn-ink-soft);
+    margin: 0 0 0.5rem;
+}
+.grimba-blindspot-rail__desc a {
+    color: var(--gn-ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.grimba-blindspot-rail__more {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--gn-ink);
+    margin-top: 0.25rem;
+}
+
+.blindspot-badge--ghost {
+    background: transparent;
+    border: 1px solid rgba(138, 43, 226, 0.5);
+    color: var(--gn-blind);
+    padding: 0.2rem 0.6rem;
+}
+.blindspot-badge--on-dark {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+.blindspot-badge--on-dark::before {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+}
+
+.grimba-blind-card {
+    display: block;
+    background: #17140f;
+    color: #f6f1e8;
+    border-radius: 16px;
+    overflow: hidden;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.grimba-blind-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.25);
+    color: #fff;
+}
+.grimba-blind-card__media { aspect-ratio: 16/9; overflow: hidden; }
+.grimba-blind-card__media img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+.grimba-blind-card__body { padding: 1rem 1rem 1.1rem; }
+.grimba-blind-card__tag { display: inline-block; margin-bottom: 0.5rem; }
+.grimba-blind-card__title {
+    font-family: var(--gn-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0.5rem 0 0.75rem;
+    line-height: 1.25;
+    color: #fff;
+}
+.grimba-blind-card--wide { display: flex; align-items: stretch; }
+.grimba-blind-card--wide .grimba-blind-card__media { flex: 0 0 120px; aspect-ratio: auto; }
+.grimba-blind-card--wide .grimba-blind-card__media img { height: 100%; }
+.grimba-blind-card--wide .grimba-blind-card__body { flex: 1; padding: 0.85rem 1rem; }
+
+/* Bias profile box in sidebar */
+.grimba-bias-profile {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--gn-rule);
+    border-radius: 16px;
+    padding: 1rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* ------------------------------------------------------------
+   9. Top News inline stack
+   ------------------------------------------------------------ */
+.grimba-topnews__title { font-size: 1.1rem; margin: 0 0 0.75rem; }
+.grimba-topnews__list { list-style: none; margin: 0; padding: 0; }
+.grimba-topnews__item {
+    display: flex; gap: 1rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--gn-rule);
+}
+.grimba-topnews__item:first-child { border-top: 0; }
+.grimba-topnews__body { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
+.grimba-topnews__kicker {
+    font-size: 0.75rem;
+    color: var(--gn-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+.grimba-topnews__headline {
+    font-family: var(--gn-font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    text-decoration: none;
+    color: var(--gn-ink);
+}
+.grimba-topnews__headline:hover { color: var(--gn-ink-muted); }
+.grimba-topnews__thumb {
+    flex: 0 0 110px; width: 110px; aspect-ratio: 4/3;
+    border-radius: 10px; overflow: hidden;
+    background: var(--gn-paper-warm);
+}
+.grimba-topnews__thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Override legend colors when NOT on a dark hero */
+.grimba-topnews .grimba-coverage__legend,
+.grimba-briefing .grimba-coverage__legend,
+.grimba-latest .grimba-coverage__legend {
+    color: var(--gn-ink-soft);
+    text-shadow: none;
+}
+.grimba-topnews .grimba-coverage__chip--l,
+.grimba-latest .grimba-coverage__chip--l { color: var(--gn-left); }
+.grimba-topnews .grimba-coverage__chip--c,
+.grimba-latest .grimba-coverage__chip--c { color: #946e2c; }
+.grimba-topnews .grimba-coverage__chip--r,
+.grimba-latest .grimba-coverage__chip--r { color: var(--gn-right); }
+
+/* ------------------------------------------------------------
+   10. Section blocks (Israel-Gaza / US Politics equivalents)
+   ------------------------------------------------------------ */
+.grimba-section__title {
+    font-size: 1.75rem;
+    margin: 0;
+    letter-spacing: -0.015em;
+}
+.grimba-section__hero {
+    display: block;
+    position: relative;
+    aspect-ratio: 4/3;
+    border-radius: 16px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    background: var(--gn-paper-warm);
+}
+.grimba-section__hero img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+}
+.grimba-section__hero::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.7) 100%);
+}
+.grimba-section__hero-body {
+    position: absolute;
+    left: 1.25rem; right: 1.25rem; bottom: 1.25rem;
+    color: #fff; z-index: 1;
+}
+.grimba-section__kicker {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 0.35rem;
+    opacity: 0.85;
+}
+.grimba-section__kicker--rail {
+    color: var(--gn-blind);
+    opacity: 1;
+}
+.grimba-section__hero-title {
+    font-family: var(--gn-font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.15;
+    margin: 0 0 0.75rem;
+    color: #fff;
+}
+
+.grimba-blind-subscribe {
+    background: #17140f;
+    color: #f6f1e8;
+    border-radius: 14px;
+    padding: 1rem;
+}
+.grimba-blind-subscribe input {
+    flex: 1;
+    padding: 0.5rem 0.85rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-size: 0.85rem;
+}
+.grimba-blind-subscribe input::placeholder { color: rgba(255,255,255,0.5); }
+.grimba-blind-subscribe .btn-grimba--solid {
+    background: var(--gn-paper);
+    color: var(--gn-ink);
+}
+
+/* ------------------------------------------------------------
+   11. Latest stories + Similar topics
+   ------------------------------------------------------------ */
+.grimba-latest__title { font-size: 1.5rem; margin: 0; }
+.grimba-latest__list { list-style: none; margin: 0; padding: 0; }
+.grimba-latest__item {
+    display: flex; gap: 1rem;
+    padding: 0.9rem 0;
+    border-top: 1px solid var(--gn-rule);
+}
+.grimba-latest__item:first-child { border-top: 0; }
+.grimba-latest__body { flex: 1; display: flex; flex-direction: column; gap: 0.35rem; }
+.grimba-latest__kicker {
+    font-size: 0.75rem;
+    color: var(--gn-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+.grimba-latest__headline {
+    font-family: var(--gn-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-decoration: none;
+    color: var(--gn-ink);
+}
+.grimba-latest__thumb {
+    flex: 0 0 92px; width: 92px; aspect-ratio: 1/1;
+    border-radius: 10px; overflow: hidden;
+    background: var(--gn-paper-warm);
+}
+.grimba-latest__thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.grimba-similar__list {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 0.5rem;
+}
+.grimba-similar__chip {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--gn-rule);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.6);
+    text-decoration: none;
+    color: var(--gn-ink);
+    font-weight: 500;
+    transition: background .15s, border-color .15s;
+}
+.grimba-similar__chip:hover { background: #fff; border-color: var(--gn-ink); }
+.grimba-similar__plus {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--gn-ink);
+    color: var(--gn-paper);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+/* ------------------------------------------------------------
+   12. Dark footer
+   ------------------------------------------------------------ */
+.grimba-footer {
+    background: #0f0d0a;
+    color: var(--gn-paper);
+    margin-top: 3rem;
+}
+.grimba-footer a { color: rgba(246, 241, 232, 0.75); text-decoration: none; }
+.grimba-footer a:hover { color: #fff; }
+.grimba-footer__heading {
+    font-family: var(--gn-font-body);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: rgba(246, 241, 232, 0.6);
+    margin: 0 0 0.75rem;
+}
+.grimba-footer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem; }
+.grimba-footer__rule { border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 2rem 0 1.25rem; }
+
+/* ------------------------------------------------------------
+   13. Mobile
+   ------------------------------------------------------------ */
+@media (max-width: 991px) {
+    .grimba-briefing { border-right: 0; padding-right: 0; border-bottom: 1px solid var(--gn-rule); padding-bottom: 1.5rem; }
+    .grimba-nav { display: none !important; }
+    .grimba-header__meta { display: none; }
+    .grimba-search { max-width: none; margin: 0; }
+    .grimba-hero__title { font-size: 1.5rem; }
+    .grimba-section__title { font-size: 1.4rem; }
+}
+@media (max-width: 575px) {
+    .grimba-header__main .btn-grimba { padding: 0.4rem 0.7rem; font-size: 0.8rem; }
+    .grimba-hero__text { left: 1rem; right: 1rem; bottom: 3.5rem; }
+    .grimba-hero__coverage { left: 1rem; right: 1rem; }
+    .grimba-latest__thumb, .grimba-topnews__thumb { display: none; }
+}
