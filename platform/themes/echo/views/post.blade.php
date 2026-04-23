@@ -28,6 +28,21 @@
                                 {!! Theme::partial('blog.post.partials.action-post', ['post' => $post, 'enableActionAudio' => false]) !!}
                             </div>
 
+                            {{-- Bias Indicator Row --}}
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                @include(Theme::getThemeNamespace('partials.category-badge'), ['post' => $post])
+                                {!! Theme::partial('bias-badge', [
+                                    'bias' => $post->bias_rating ?? null,
+                                    'showLabel' => true,
+                                    'size' => 'md'
+                                ]) !!}
+                                @if($post->is_blindspot ?? false)
+                                    <span class="blindspot-badge" title="Story covered by only one side">
+                                        Blindspot
+                                    </span>
+                                @endif
+                            </div>
+
                             <h2 class="echo-hero-title text-capitalize font-weight-bold mt-0">
                                 <a title="{{ $post->name }}" href="{{ $url }}" class="title-hover truncate-custom truncate-3-custom">{{ $post->name }}</a>
                             </h2>

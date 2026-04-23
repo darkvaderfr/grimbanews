@@ -3565,3 +3565,189 @@ p.h5  {
         max-width: 24px;
     }
 }
+
+/* ============================================
+   GRIMBANEWS — GroundNews-inspired Features
+   ============================================ */
+
+/* Bias Badge Component */
+.bias-badge {
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &--sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+
+        .ti {
+            width: 12px;
+            height: 12px;
+        }
+    }
+
+    &--md {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    &--lg {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+
+        .ti {
+            width: 18px;
+            height: 18px;
+        }
+    }
+}
+
+/* Glass/Translucency Design — Steve's Cinematic Language */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+}
+
+.glass-overlay {
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.02) 100%
+        );
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: inherit;
+        pointer-events: none;
+    }
+}
+
+/* Dark mode glass adjustments */
+[data-bs-theme="dark"] {
+    .glass-panel {
+        background: rgba(30, 30, 30, 0.4);
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+        background: rgba(30, 30, 30, 0.3);
+        border-color: rgba(255, 255, 255, 0.06);
+
+        &:hover {
+            background: rgba(30, 30, 30, 0.45);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+    }
+}
+
+/* Article Card with Glass Effect */
+.article-card {
+    @extend .glass-card;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    &__image {
+        position: relative;
+        overflow: hidden;
+        aspect-ratio: 16/9;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        &:hover img {
+            transform: scale(1.05);
+        }
+    }
+
+    &__content {
+        padding: 1.25rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+    }
+
+    &__meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: auto;
+        padding-top: 0.75rem;
+        font-size: 0.875rem;
+        opacity: 0.8;
+    }
+}
+
+/* Blindspot Indicator */
+.blindspot-badge {
+    background: rgba(138, 43, 226, 0.15);
+    color: #8a2be2;
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    &::before {
+        content: '!';
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        background: #8a2be2;
+        color: white;
+        border-radius: 50%;
+        font-size: 10px;
+    }
+}
