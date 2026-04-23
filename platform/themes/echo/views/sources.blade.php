@@ -7,7 +7,7 @@
 
     $biasMeta = [
         'left'    => ['label' => 'Gauche',      'color' => '#3b82f6'],
-        'center'  => ['label' => 'Centre',      'color' => '#22c55e'],
+        'center'  => ['label' => 'Centre',      'color' => '#b39152'],
         'right'   => ['label' => 'Droite',      'color' => '#ef4444'],
         'unknown' => ['label' => 'Non évalué',  'color' => '#9ca3af'],
     ];
@@ -18,88 +18,219 @@
         'independent' => 'Indépendant',
         'nonprofit'   => 'Associatif',
     ];
+
+    // Build the list of unique countries represented for the country filter.
+    $allCountries = collect($grouped)
+        ->flatten(1)
+        ->pluck('country')
+        ->filter()
+        ->unique()
+        ->sort()
+        ->values();
 @endphp
 
-{!! Theme::partial('breadcrumbs', ['title' => 'Sources']) !!}
-
-<section class="sources-page py-5">
+<section class="grimba-sources py-5">
     <div class="container">
+
         <header class="glass-panel p-4 mb-4">
-            <h1 class="h2 mb-2">Sources classées</h1>
+            <span class="grimba-methodology__kicker">Sources classées</span>
+            <h1 class="grimba-methodology__title mt-2 mb-2">
+                {{ $total }} médias sous notre grille d'analyse
+            </h1>
             <p class="mb-0 opacity-85">
-                {{ $total }} médias suivis par GrimbaNews — biais éditorial, type de propriété,
-                score de crédibilité et pays d'origine. Les classements sont ouverts et
-                révisables.
+                Biais éditorial, type de propriété, score de crédibilité, pays
+                d'origine et langue. Classements ouverts et révisables — voir la
+                <a href="{{ url('/methodologie') }}" class="text-decoration-underline">méthodologie</a>.
             </p>
         </header>
 
-        @foreach(['left','center','right','unknown'] as $biasKey)
-            @php $bucket = $grouped[$biasKey] ?? collect(); @endphp
-            @continue($bucket->isEmpty())
-
-            <section class="mb-5">
-                <h2 class="h4 d-flex align-items-center gap-2 mb-3">
-                    <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:{{ $biasMeta[$biasKey]['color'] }};"></span>
-                    {{ $biasMeta[$biasKey]['label'] }}
-                    <span class="small opacity-75">({{ $bucket->count() }})</span>
-                </h2>
-
-                <div class="row g-3">
-                    @foreach($bucket as $src)
-                        <div class="col-lg-4 col-md-6 col-12">
-                            <article class="glass-card p-3 h-100">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h3 class="h6 mb-0">
-                                        @if($src->website)
-                                            <a href="https://{{ $src->website }}" target="_blank" rel="noopener" class="text-decoration-none">
-                                                {{ $src->name }}
-                                            </a>
-                                        @else
-                                            {{ $src->name }}
-                                        @endif
-                                    </h3>
-                                    <span class="bias-badge bias-badge--sm"
-                                          style="background: {{ $biasMeta[$biasKey]['color'] }}22;
-                                                 color: {{ $biasMeta[$biasKey]['color'] }};
-                                                 border: 1px solid {{ $biasMeta[$biasKey]['color'] }}44;">
-                                        {{ $biasMeta[$biasKey]['label'] }}
-                                    </span>
-                                </div>
-
-                                <div class="small opacity-85 d-flex flex-wrap gap-2">
-                                    @if($src->ownership_type)
-                                        <span>{{ $ownershipLabel[$src->ownership_type] ?? ucfirst($src->ownership_type) }}</span>
-                                    @endif
-                                    @if($src->country)
-                                        <span class="opacity-70">·</span>
-                                        <span>{{ $src->country }}</span>
-                                    @endif
-                                    @if($src->language)
-                                        <span class="opacity-70">·</span>
-                                        <span class="text-uppercase">{{ $src->language }}</span>
-                                    @endif
-                                </div>
-
-                                @if($src->credibility_score)
-                                    @php
-                                        $score = (int) $src->credibility_score;
-                                        $barColor = $score >= 85 ? '#22c55e' : ($score >= 70 ? '#eab308' : '#ef4444');
-                                    @endphp
-                                    <div class="mt-3">
-                                        <div class="d-flex justify-content-between small mb-1">
-                                            <span class="opacity-75">Crédibilité</span>
-                                            <strong>{{ $score }}/100</strong>
-                                        </div>
-                                        <div style="height:6px;border-radius:9999px;background:rgba(0,0,0,0.08);overflow:hidden;">
-                                            <div style="width:{{ $score }}%;height:100%;background:{{ $barColor }};"></div>
-                                        </div>
-                                    </div>
-                                @endif
-                            </article>
-                        </div>
-                    @endforeach
+        <div class="grimba-sources__controls glass-panel p-3 mb-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-lg-4 col-md-5 col-12">
+                    <label class="small text-uppercase opacity-75 fw-semibold mb-1 d-block">Rechercher</label>
+                    <input
+                        type="search"
+                        id="grimba-sources-search"
+                        class="form-control"
+                        placeholder="Nom du média, site, pays…"
+                        aria-label="Rechercher une source"
+                    >
                 </div>
-            </section>
-        @endforeach
+                <div class="col-lg-5 col-md-7 col-12">
+                    <label class="small text-uppercase opacity-75 fw-semibold mb-1 d-block">Biais</label>
+                    <div class="grimba-sources__bias-filter d-flex gap-2 flex-wrap" role="tablist">
+                        <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--solid" data-bias="all">Tous</button>
+                        <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--ghost" data-bias="left"
+                                style="color:{{ $biasMeta['left']['color'] }};border-color:{{ $biasMeta['left']['color'] }}44;">● Gauche</button>
+                        <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--ghost" data-bias="center"
+                                style="color:{{ $biasMeta['center']['color'] }};border-color:{{ $biasMeta['center']['color'] }}44;">● Centre</button>
+                        <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--ghost" data-bias="right"
+                                style="color:{{ $biasMeta['right']['color'] }};border-color:{{ $biasMeta['right']['color'] }}44;">● Droite</button>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-12">
+                    <label class="small text-uppercase opacity-75 fw-semibold mb-1 d-block">Pays</label>
+                    <select id="grimba-sources-country" class="form-select">
+                        <option value="all">Tous les pays</option>
+                        @foreach($allCountries as $cc)
+                            <option value="{{ $cc }}">{{ $cc }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3 small opacity-75">
+                <span id="grimba-sources-count">{{ $total }} sources affichées</span>
+                <button type="button" id="grimba-sources-reset" class="btn-grimba btn-grimba--ghost btn-grimba--sm">
+                    Réinitialiser
+                </button>
+            </div>
+        </div>
+
+        <div id="grimba-sources-list">
+            @foreach(['left','center','right','unknown'] as $biasKey)
+                @php $bucket = $grouped[$biasKey] ?? collect(); @endphp
+                @continue($bucket->isEmpty())
+
+                <section class="grimba-sources__group mb-5" data-bias-group="{{ $biasKey }}">
+                    <h2 class="h4 d-flex align-items-center gap-2 mb-3">
+                        <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:{{ $biasMeta[$biasKey]['color'] }};"></span>
+                        {{ $biasMeta[$biasKey]['label'] }}
+                        <span class="small opacity-75" data-bucket-count>({{ $bucket->count() }})</span>
+                    </h2>
+
+                    <div class="row g-3">
+                        @foreach($bucket as $src)
+                            <div class="col-lg-4 col-md-6 col-12 grimba-sources__item"
+                                 data-name="{{ strtolower($src->name) }}"
+                                 data-website="{{ strtolower($src->website ?? '') }}"
+                                 data-country="{{ $src->country ?? '' }}"
+                                 data-bias="{{ $biasKey }}">
+                                <article class="glass-card p-3 h-100">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h3 class="h6 mb-0">
+                                            @if($src->website)
+                                                <a href="https://{{ $src->website }}" target="_blank" rel="noopener" class="text-decoration-none">
+                                                    {{ $src->name }}
+                                                </a>
+                                            @else
+                                                {{ $src->name }}
+                                            @endif
+                                        </h3>
+                                        <span class="bias-badge bias-badge--sm"
+                                              style="background: {{ $biasMeta[$biasKey]['color'] }}22;
+                                                     color: {{ $biasMeta[$biasKey]['color'] }};
+                                                     border: 1px solid {{ $biasMeta[$biasKey]['color'] }}44;">
+                                            {{ $biasMeta[$biasKey]['label'] }}
+                                        </span>
+                                    </div>
+
+                                    <div class="small opacity-85 d-flex flex-wrap gap-2">
+                                        @if($src->ownership_type)
+                                            <span>{{ $ownershipLabel[$src->ownership_type] ?? ucfirst($src->ownership_type) }}</span>
+                                        @endif
+                                        @if($src->country)
+                                            <span class="opacity-70">·</span>
+                                            <span>{{ $src->country }}</span>
+                                        @endif
+                                        @if($src->language)
+                                            <span class="opacity-70">·</span>
+                                            <span class="text-uppercase">{{ $src->language }}</span>
+                                        @endif
+                                    </div>
+
+                                    @if($src->credibility_score)
+                                        @php
+                                            $score = (int) $src->credibility_score;
+                                            $barColor = $score >= 85 ? '#22c55e' : ($score >= 70 ? '#eab308' : '#ef4444');
+                                        @endphp
+                                        <div class="mt-3">
+                                            <div class="d-flex justify-content-between small mb-1">
+                                                <span class="opacity-75">Crédibilité</span>
+                                                <strong>{{ $score }}/100</strong>
+                                            </div>
+                                            <div style="height:6px;border-radius:9999px;background:rgba(0,0,0,0.08);overflow:hidden;">
+                                                <div style="width:{{ $score }}%;height:100%;background:{{ $barColor }};"></div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </article>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @endforeach
+        </div>
+
+        <div id="grimba-sources-empty" class="glass-panel p-4 text-center d-none">
+            <p class="mb-0">Aucune source ne correspond à ces filtres.</p>
+        </div>
     </div>
 </section>
+
+<script>
+    (function () {
+        const search  = document.getElementById('grimba-sources-search');
+        const country = document.getElementById('grimba-sources-country');
+        const reset   = document.getElementById('grimba-sources-reset');
+        const count   = document.getElementById('grimba-sources-count');
+        const empty   = document.getElementById('grimba-sources-empty');
+        const list    = document.getElementById('grimba-sources-list');
+        const biasBtns = document.querySelectorAll('.grimba-sources__bias-filter [data-bias]');
+        let   activeBias = 'all';
+
+        function apply() {
+            const q = (search.value || '').trim().toLowerCase();
+            const c = country.value;
+
+            let shown = 0;
+            document.querySelectorAll('.grimba-sources__item').forEach(item => {
+                const matchBias    = activeBias === 'all' || item.dataset.bias === activeBias;
+                const matchCountry = c === 'all' || item.dataset.country === c;
+                const matchText    = !q
+                    || item.dataset.name.includes(q)
+                    || item.dataset.website.includes(q)
+                    || item.dataset.country.toLowerCase().includes(q);
+
+                const visible = matchBias && matchCountry && matchText;
+                item.classList.toggle('d-none', !visible);
+                if (visible) shown++;
+            });
+
+            // Group headers fade out when empty so the page stays clean.
+            document.querySelectorAll('.grimba-sources__group').forEach(g => {
+                const remaining = g.querySelectorAll('.grimba-sources__item:not(.d-none)').length;
+                g.classList.toggle('d-none', remaining === 0);
+                const countEl = g.querySelector('[data-bucket-count]');
+                if (countEl) countEl.textContent = '(' + remaining + ')';
+            });
+
+            count.textContent = shown + ' source' + (shown === 1 ? '' : 's') + ' affichée' + (shown === 1 ? '' : 's');
+            empty.classList.toggle('d-none', shown !== 0);
+            list.classList.toggle('d-none', shown === 0);
+        }
+
+        biasBtns.forEach(btn => btn.addEventListener('click', () => {
+            activeBias = btn.dataset.bias;
+            biasBtns.forEach(b => {
+                b.classList.toggle('btn-grimba--solid', b === btn);
+                b.classList.toggle('btn-grimba--ghost', b !== btn);
+            });
+            apply();
+        }));
+
+        search.addEventListener('input', apply);
+        country.addEventListener('change', apply);
+        reset.addEventListener('click', () => {
+            search.value = '';
+            country.value = 'all';
+            activeBias = 'all';
+            biasBtns.forEach(b => {
+                const isAll = b.dataset.bias === 'all';
+                b.classList.toggle('btn-grimba--solid', isAll);
+                b.classList.toggle('btn-grimba--ghost', !isAll);
+            });
+            apply();
+        });
+    })();
+</script>
