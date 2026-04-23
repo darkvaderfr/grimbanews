@@ -1,17 +1,47 @@
 @php
     use Botble\Blog\Models\Post;
+    use Illuminate\Support\Facades\DB;
 
-    $briefing = Post::query()
+    // Clusters that actually have ≥2 bias sides — only those unlock the L/C/R bar.
+    $balancedClusters = DB::table('posts')
+        ->select('story_cluster_id')
         ->where('status', 'published')
+        ->whereNotNull('story_cluster_id')
+        ->whereIn('bias_rating', ['left', 'center', 'right'])
+        ->groupBy('story_cluster_id')
+        ->havingRaw('COUNT(DISTINCT bias_rating) >= 2')
+        ->pluck('story_cluster_id');
+
+    // Hero = most recent featured post that's part of a balanced cluster.
+    // Fallbacks: latest featured / latest published.
+    $hero = Post::query()
+            ->where('status', 'published')
+            ->where('is_featured', true)
+            ->whereIn('story_cluster_id', $balancedClusters)
+            ->latest()->first()
+        ?? Post::query()->where('status', 'published')->where('is_featured', true)->latest()->first()
+        ?? Post::query()->where('status', 'published')->latest()->first();
+
+    // Briefing prefers clustered posts (bar draws under each), then fills
+    // with non-clustered recents so the column is always 5 items.
+    $clusteredRecent = Post::query()
+        ->where('status', 'published')
+        ->whereIn('story_cluster_id', $balancedClusters)
+        ->when($hero, fn ($q) => $q->where('id', '!=', $hero->id))
         ->latest()
-        ->limit(9)
+        ->limit(5)
         ->get();
 
-    $hero = Post::query()
-        ->where('status', 'published')
-        ->where('is_featured', true)
-        ->latest()
-        ->first() ?? $briefing->first();
+    $briefing = $clusteredRecent;
+    if ($briefing->count() < 5) {
+        $fill = Post::query()
+            ->where('status', 'published')
+            ->whereNotIn('id', $briefing->pluck('id')->push($hero?->id)->filter())
+            ->latest()
+            ->limit(5 - $briefing->count())
+            ->get();
+        $briefing = $briefing->concat($fill);
+    }
 
     $blindspots = Post::query()
         ->where('status', 'published')
@@ -20,8 +50,11 @@
         ->limit(2)
         ->get();
 
-    $totalArticles = $briefing->sum(fn ($p) => max(1, $p->views ?? 1));
-    $readMinutes   = max(1, (int) round($briefing->count() * 1.2));
+    // Counter values — full published recent set, not just what we render.
+    $briefingStats = Post::query()->where('status', 'published')->latest()->limit(9)->get();
+
+    $totalArticles = $briefingStats->sum(fn ($p) => max(1, $p->views ?? 1));
+    $readMinutes   = max(1, (int) round($briefingStats->count() * 1.2));
 @endphp
 
 <section class="grimba-hero-grid">
@@ -32,7 +65,7 @@
             <header class="grimba-briefing__head">
                 <h2 class="grimba-briefing__title">Briefing du jour</h2>
                 <p class="grimba-briefing__sub">
-                    {{ $briefing->count() }} histoires · {{ $totalArticles }} articles · {{ $readMinutes }} min de lecture
+                    {{ $briefingStats->count() }} histoires · {{ $totalArticles }} articles · {{ $readMinutes }} min de lecture
                 </p>
             </header>
 
