@@ -124,11 +124,32 @@
                             @endif
                         </div>
 
-                        @if ($content = $post->content)
+                        @php
+                            // S91: swap body content when reader asked for
+                            // auto translation AND we have a translated_content
+                            // row in the right locale. 'both' mode stacks:
+                            // translation first (primary reading), original
+                            // beneath in a collapsed <details> so a curious
+                            // reader can compare.
+                            $__gnBody       = ($__gnMode !== 'original' && $__gnHasTr && $post->translated_content)
+                                ? $post->translated_content
+                                : $post->content;
+                            $__gnShowOrig   = ($__gnMode === 'both' && $__gnHasTr && $post->translated_content);
+                        @endphp
+                        @if ($content = $__gnBody)
                             <div class="ck-content">
                                 {!! apply_filters('ads_render', null, 'post_before', ['class' => 'my-2 text-center']) !!}
 
                                 {!! BaseHelper::clean($content) !!}
+
+                                @if ($__gnShowOrig)
+                                    <details class="mt-4 mb-2 small">
+                                        <summary class="text-muted" style="cursor: pointer;">Afficher le texte original ({{ strtoupper($post->original_language) }})</summary>
+                                        <div class="mt-2 opacity-75" lang="{{ $post->original_language }}">
+                                            {!! BaseHelper::clean($post->content) !!}
+                                        </div>
+                                    </details>
+                                @endif
 
                                 {!! apply_filters('ads_render', null, 'post_after', ['class' => 'my-2 text-center']) !!}
                             </div>

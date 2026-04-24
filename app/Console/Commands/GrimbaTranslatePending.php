@@ -46,7 +46,7 @@ class GrimbaTranslatePending extends Command
             });
         }
 
-        $posts = $query->get(['id', 'name', 'description', 'original_language', 'translated_to']);
+        $posts = $query->get(['id', 'name', 'description', 'content', 'original_language', 'translated_to']);
 
         if ($posts->isEmpty()) {
             $this->info('Nothing to translate.');
@@ -65,6 +65,16 @@ class GrimbaTranslatePending extends Command
             $tDesc = $p->description
                 ? $translator->translate((string) $p->description, (string) $p->original_language, $to)
                 : null;
+            // Content can be much longer; skip translation when it's
+            // effectively a duplicate of description (RSS poller case —
+            // content is just a link + the same summary) to keep
+            // provider tokens down.
+            $contentPlain = trim(strip_tags((string) $p->content));
+            $descPlain    = trim(strip_tags((string) ($p->description ?? '')));
+            $tContent = null;
+            if ($contentPlain !== '' && mb_strlen($contentPlain) > mb_strlen($descPlain) + 40) {
+                $tContent = $translator->translate((string) $p->content, (string) $p->original_language, $to);
+            }
 
             if ($tName === null) {
                 $this->line('    (skipped — all providers failed)');
@@ -75,6 +85,7 @@ class GrimbaTranslatePending extends Command
             DB::table('posts')->where('id', $p->id)->update([
                 'translated_name'        => $tName['text'],
                 'translated_description' => $tDesc['text'] ?? null,
+                'translated_content'     => $tContent['text'] ?? null,
                 'translated_to'          => $to,
                 'translated_at'          => now(),
                 'translation_driver'     => $tName['driver'],
