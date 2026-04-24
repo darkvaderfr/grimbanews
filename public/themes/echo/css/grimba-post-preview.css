@@ -1,0 +1,155 @@
+/* GrimbaNews — post editor live source/cluster preview card.
+   Paired with grimba-post-preview.php + grimba-post-preview.js.
+   Styled against the admin paper/ink tokens already pulled in by
+   grimba-admin.css (see grimba-admin-chrome.php). */
+
+#grimba-post-preview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 6px 0 18px;
+}
+
+@media (max-width: 900px) {
+    #grimba-post-preview { grid-template-columns: 1fr; }
+}
+
+#grimba-post-preview .gp-pane {
+    border: 1px solid rgba(26, 23, 19, .12);
+    border-radius: 10px;
+    background: #faf6ec;
+    padding: 12px 14px 14px;
+    font-family: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: #1a1713;
+    min-height: 96px;
+}
+
+[data-bs-theme="dark"] #grimba-post-preview .gp-pane {
+    background: #1f1d1a;
+    border-color: rgba(246, 241, 232, .12);
+    color: #f1ede3;
+}
+
+#grimba-post-preview .gp-pane-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #6b6459;
+    margin-bottom: 8px;
+}
+
+[data-bs-theme="dark"] #grimba-post-preview .gp-pane-label {
+    color: #a39d92;
+}
+
+#grimba-post-preview .gp-pane-body {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+#grimba-post-preview .gp-pane-body.is-empty {
+    color: #8a8578;
+    font-style: italic;
+}
+
+#grimba-post-preview .gp-name {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    margin: 0 0 6px;
+    line-height: 1.2;
+}
+
+#grimba-post-preview .gp-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    font-size: 12px;
+    color: #6b6459;
+    margin-bottom: 8px;
+}
+[data-bs-theme="dark"] #grimba-post-preview .gp-meta { color: #a39d92; }
+
+#grimba-post-preview .gp-meta strong {
+    color: #1a1713;
+    font-weight: 600;
+}
+[data-bs-theme="dark"] #grimba-post-preview .gp-meta strong { color: #f1ede3; }
+
+#grimba-post-preview .gp-chip {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    padding: 2px 10px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+}
+
+#grimba-post-preview .gp-chip--left    { color: #3b82f6; background: rgba(59,130,246,.10); }
+#grimba-post-preview .gp-chip--center  { color: #6b6459; background: rgba(168,168,168,.14); }
+#grimba-post-preview .gp-chip--right   { color: #e84c3d; background: rgba(232,76,61,.10); }
+#grimba-post-preview .gp-chip--unknown { color: #8a8578; background: rgba(138,133,120,.12); }
+
+#grimba-post-preview .gp-credbar {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(26,23,19,.08);
+    overflow: hidden;
+    margin-top: 6px;
+}
+#grimba-post-preview .gp-credbar > span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #e84c3d 0%, #dcc890 60%, #3b82f6 100%);
+}
+
+#grimba-post-preview .gp-credlabel {
+    font-size: 11px;
+    color: #6b6459;
+    margin-top: 4px;
+}
+
+#grimba-post-preview .gp-bardist {
+    display: flex;
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 8px 0 6px;
+    background: rgba(26,23,19,.06);
+}
+#grimba-post-preview .gp-bardist > span {
+    display: block;
+    height: 100%;
+}
+#grimba-post-preview .gp-bardist .gp-bar--left    { background: #3b82f6; }
+#grimba-post-preview .gp-bardist .gp-bar--center  { background: #a8a8a8; }
+#grimba-post-preview .gp-bardist .gp-bar--right   { background: #e84c3d; }
+#grimba-post-preview .gp-bardist .gp-bar--unknown { background: #8a2be2; }
+
+#grimba-post-preview .gp-distlegend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    font-size: 12px;
+    color: #6b6459;
+}
+
+#grimba-post-preview .gp-latest {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(26,23,19,.12);
+    font-size: 12px;
+    color: #6b6459;
+}
+#grimba-post-preview .gp-latest em { color: #1a1713; font-style: normal; font-weight: 500; }
+[data-bs-theme="dark"] #grimba-post-preview .gp-latest em { color: #f1ede3; }
+
+#grimba-post-preview .gp-error {
+    color: #e84c3d;
+    font-size: 12px;
+}

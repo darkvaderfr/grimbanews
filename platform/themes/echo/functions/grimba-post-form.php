@@ -12,6 +12,7 @@
 
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Blog\Forms\PostForm;
@@ -93,6 +94,23 @@ app()->booted(function (): void {
                     ->helperText('Histoire couverte presque exclusivement par un seul camp.')
                     ->defaultValue((bool) (optional($form->getModel())->is_blindspot ?? false))
                     ->toArray()
+            )
+            ->addAfter(
+                'grimba_is_blindspot',
+                'grimba_preview_card',
+                HtmlField::class,
+                [
+                    'html' => '<div id="grimba-post-preview" data-grimba-preview>'
+                        . '<div class="gp-pane gp-source" data-pane="source">'
+                        .   '<div class="gp-pane-label">Aperçu source</div>'
+                        .   '<div class="gp-pane-body" data-slot="source">Sélectionnez une source pour voir ses détails.</div>'
+                        . '</div>'
+                        . '<div class="gp-pane gp-cluster" data-pane="cluster">'
+                        .   '<div class="gp-pane-label">Aperçu dossier</div>'
+                        .   '<div class="gp-pane-body" data-slot="cluster">Sélectionnez un dossier pour voir sa composition.</div>'
+                        . '</div>'
+                        . '</div>',
+                ]
             );
     });
 });
