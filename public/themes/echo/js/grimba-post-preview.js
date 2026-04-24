@@ -157,10 +157,79 @@
         });
     }
 
+    function renderSuggestion(slotEl, data, clusterSel) {
+        clear(slotEl);
+        slotEl.classList.remove('is-empty');
+
+        var banner = el('div', { cls: 'gp-meta' });
+        banner.appendChild(el('span', { cls: 'gp-chip gp-chip--suggest', text: 'Suggestion auto' }));
+        banner.appendChild(document.createTextNode(
+            ' — ce titre ressemble à un dossier existant.'
+        ));
+        slotEl.appendChild(banner);
+
+        slotEl.appendChild(el('div', {
+            cls: 'gp-name',
+            text: '#' + data.id + ' — ' + (data.topic || ''),
+        }));
+
+        var total = Number(data.total || 0);
+        var countRow = el('div', { cls: 'gp-meta' });
+        countRow.appendChild(el('strong', { text: String(total) }));
+        countRow.appendChild(document.createTextNode(
+            ' article' + (total === 1 ? '' : 's') + ' déjà attaché' + (total === 1 ? '' : 's')
+        ));
+        slotEl.appendChild(countRow);
+
+        if (Array.isArray(data.sources) && data.sources.length > 0) {
+            var srcs = el('div', { cls: 'gp-meta' });
+            srcs.appendChild(el('strong', { text: 'Sources: ' }));
+            srcs.appendChild(document.createTextNode(data.sources.slice(0, 4).join(' · ')));
+            slotEl.appendChild(srcs);
+        }
+
+        var btnRow = el('div', { style: 'margin-top: 10px; display:flex; gap:8px;' });
+        var attach = el('button', {
+            cls: 'btn btn-sm btn-outline-primary',
+            text: 'Attacher ce dossier',
+        });
+        attach.type = 'button';
+        attach.addEventListener('click', function () {
+            if (!clusterSel) return;
+            var opt = Array.from(clusterSel.options).find(function (o) {
+                return String(o.value) === String(data.id);
+            });
+            if (!opt) return;
+            clusterSel.value = String(data.id);
+            // Notify any listeners (select2, native). select2 wraps <select>
+            // with a custom dropdown; dispatch 'change' so both its data
+            // binding and our own preview-fetch listener fire.
+            clusterSel.dispatchEvent(new Event('change', { bubbles: true }));
+            if (window.jQuery) { window.jQuery(clusterSel).trigger('change'); }
+        });
+        btnRow.appendChild(attach);
+
+        var dismiss = el('button', {
+            cls: 'btn btn-sm btn-link text-muted',
+            text: 'Ignorer',
+        });
+        dismiss.type = 'button';
+        dismiss.addEventListener('click', function () {
+            setEmpty(slotEl, 'Sélectionnez un dossier pour voir sa composition.');
+            // Remember dismissal for the remainder of the page session so the
+            // nudge doesn't keep coming back on every title keystroke.
+            slotEl.dataset.dismissedSuggestion = String(data.id);
+        });
+        btnRow.appendChild(dismiss);
+
+        slotEl.appendChild(btnRow);
+    }
+
     ready(function () {
         var card = document.getElementById('grimba-post-preview');
         if (!card) return;
 
+        var titleInput = document.querySelector('input[name="name"]');
         var sourceSel = document.querySelector('[name="grimba_source_id"]');
         var clusterSel = document.querySelector('[name="grimba_story_cluster_id"]');
         var sourceSlot = card.querySelector('[data-slot="source"]');
@@ -201,6 +270,45 @@
                 .catch(function (err) { setError(clusterSlot, 'Impossible de charger le dossier (' + err.message + ').'); });
         }
 
+        function maybeSuggestCluster() {
+            if (! clusterSel || ! titleInput) return;
+            // Only nudge when the editor hasn't picked a cluster themselves.
+            if (clusterSel.value) return;
+            var title = String(titleInput.value || '').trim();
+            if (title.length < 10) {
+                if (clusterSlot.dataset.suggestionShown === '1') {
+                    setEmpty(clusterSlot, 'Sélectionnez un dossier pour voir sa composition.');
+                    delete clusterSlot.dataset.suggestionShown;
+                }
+                return;
+            }
+            fetchJson(base + '/grimba/api/preview/cluster-suggest?title=' + encodeURIComponent(title), token)
+                .then(function (data) {
+                    if (! data || ! data.suggested) {
+                        // No suggestion — only reset if we had one showing.
+                        if (clusterSlot.dataset.suggestionShown === '1') {
+                            setEmpty(clusterSlot, 'Sélectionnez un dossier pour voir sa composition.');
+                            delete clusterSlot.dataset.suggestionShown;
+                        }
+                        return;
+                    }
+                    // Respect "Ignorer" for this cluster within this page load.
+                    if (String(clusterSlot.dataset.dismissedSuggestion || '') === String(data.id)) return;
+                    // Don't clobber an already-loaded cluster card — only render
+                    // the suggestion when no real cluster selection is active.
+                    if (clusterSel.value) return;
+                    renderSuggestion(clusterSlot, data, clusterSel);
+                    clusterSlot.dataset.suggestionShown = '1';
+                })
+                .catch(function () { /* silent — nudge is optional polish */ });
+        }
+
+        var suggestTimer = null;
+        function scheduleSuggest() {
+            if (suggestTimer) clearTimeout(suggestTimer);
+            suggestTimer = setTimeout(maybeSuggestCluster, 700);
+        }
+
         if (sourceSel) {
             sourceSel.addEventListener('change', updateSource);
             sourceSel.addEventListener('select2:select', updateSource);
@@ -211,5 +319,12 @@
             clusterSel.addEventListener('select2:select', updateCluster);
             updateCluster();
         }
+        if (titleInput) {
+            titleInput.addEventListener('input', scheduleSuggest);
+            titleInput.addEventListener('blur',  maybeSuggestCluster);
+        }
+        // First-load pass — covers the edit-existing-draft case where the
+        // editor hasn't touched the title but still has no cluster yet.
+        scheduleSuggest();
     });
 })();

@@ -12,9 +12,11 @@
  * and the rest of the form; this file owns the behavior and styling.
  */
 
+use App\Services\GrimbaRssPoller;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -84,6 +86,54 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba/api/preview')
                 ] : null,
             ]);
         })->name('cluster');
+
+        // Cluster suggestion — S86. Given the editor's current title,
+        // returns the cluster an auto-cluster pass would attach this
+        // post to (Jaccard on tokenised titles, lookback 30 days,
+        // threshold 0.35 — same knobs as GrimbaRssPoller::findLikelyCluster
+        // so ingest-time and editor-time behave identically).
+        Route::get('cluster-suggest', function (Request $request): JsonResponse {
+            $title = trim((string) $request->query('title', ''));
+            if (mb_strlen($title) < 10) {
+                return response()->json(['suggested' => false]);
+            }
+
+            // Looser threshold (0.20) than the auto-ingest path (0.35):
+            // a human will accept or dismiss the nudge, so false positives
+            // are cheap. Sanity test: "Manchester United beat Everton" still
+            // returns null, "Réforme des retraites : cortège parisien"
+            // correctly lands on cluster 1001.
+            $clusterId = GrimbaRssPoller::findLikelyCluster($title, 30, 0.20);
+            if ($clusterId === null) {
+                return response()->json(['suggested' => false]);
+            }
+
+            $cluster = DB::table('story_clusters')->where('id', $clusterId)->first();
+            if (! $cluster) {
+                return response()->json(['suggested' => false]);
+            }
+
+            $rows = DB::table('posts')
+                ->where('story_cluster_id', $clusterId)
+                ->whereIn('status', ['published', 'draft'])
+                ->get(['bias_rating', 'source_name']);
+
+            $counts = ['left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0];
+            foreach ($rows as $r) {
+                $k = $r->bias_rating ?: 'unknown';
+                if (! isset($counts[$k])) $k = 'unknown';
+                $counts[$k]++;
+            }
+
+            return response()->json([
+                'suggested' => true,
+                'id'        => (int) $cluster->id,
+                'topic'     => $cluster->topic,
+                'total'     => $rows->count(),
+                'counts'    => $counts,
+                'sources'   => $rows->pluck('source_name')->filter()->unique()->values(),
+            ]);
+        })->name('cluster-suggest');
     });
 
 // ---------- Asset injection (post create + edit pages only) ----------
