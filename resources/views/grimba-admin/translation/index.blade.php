@@ -76,6 +76,25 @@
                         <div class="form-text">Défaut : <code>mistralai/mistral-small-3-24b-instruct</code>. Voir <a href="https://openrouter.ai/models" target="_blank" rel="noopener">openrouter.ai/models</a>.</div>
                     </div>
 
+                    <hr class="my-4">
+
+                    <h5>Flux RSS — publication automatique</h5>
+                    <div class="form-check form-switch mb-2">
+                        <input type="hidden" name="ingest_auto_publish" value="0">
+                        <input class="form-check-input" type="checkbox" role="switch"
+                               id="ingest_auto_publish" name="ingest_auto_publish" value="1"
+                               @checked($autoPublish)>
+                        <label class="form-check-label" for="ingest_auto_publish">
+                            <strong>Publier automatiquement les articles RSS ingérés</strong>
+                        </label>
+                    </div>
+                    <div class="form-text mb-3">
+                        Par défaut, chaque article ingéré par le polleur RSS arrive en <code>brouillon</code> et un éditeur
+                        le valide depuis <a href="{{ route('grimba.rss-drafts.index') }}">la file d'attente</a>. Activé,
+                        les articles sont publiés immédiatement — utile en phase de démo / lancement, à désactiver dès
+                        qu'une équipe éditoriale est en place.
+                    </div>
+
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">Enregistrer</button>
                     </div>

@@ -43,12 +43,13 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             foreach ($drivers as $d) {
                 $settings[$d] = (string) setting('grimba_translator_' . $d . '_key', '');
             }
-            $pinned   = (string) setting('grimba_translator_driver', 'auto');
-            $orModel  = (string) setting('grimba_translator_openrouter_model', '');
-            $translator = app(GrimbaTranslator::class);
+            $pinned       = (string) setting('grimba_translator_driver', 'auto');
+            $orModel      = (string) setting('grimba_translator_openrouter_model', '');
+            $autoPublish  = (bool) setting('grimba_ingest_auto_publish', false);
+            $translator   = app(GrimbaTranslator::class);
 
             return view('grimba-admin.translation.index', compact(
-                'drivers', 'settings', 'pinned', 'orModel', 'translator'
+                'drivers', 'settings', 'pinned', 'orModel', 'translator', 'autoPublish'
             ));
         })->name('translation.index');
 
@@ -79,6 +80,10 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
             $orModel = trim((string) $request->input('openrouter_model', ''));
             $store->set('grimba_translator_openrouter_model', $orModel);
+
+            // S92: RSS auto-publish toggle. Checkbox semantics — absent
+            // input means "off", so honour the submit explicitly.
+            $store->set('grimba_ingest_auto_publish', $request->boolean('ingest_auto_publish') ? '1' : '');
 
             $store->save();
 

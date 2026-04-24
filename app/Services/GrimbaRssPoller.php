@@ -365,7 +365,20 @@ class GrimbaRssPoller
                 ? '<p><a href="' . e($item['link']) . '" target="_blank" rel="noopener">Lire l’article original</a></p>'
                 . '<p>' . e($item['summary'] ?? '') . '</p>'
                 : '<p>' . e($item['summary'] ?? '') . '</p>';
-            $post->status      = 'draft';
+            // S92: status defaults to 'draft' so editors review before
+            // the public reader sees new items. Flip
+            // GRIMBA_INGEST_AUTO_PUBLISH=true (or the equivalent Botble
+            // setting) to short-circuit review and publish immediately —
+            // useful during launch / demo phases when we want the site
+            // to feel alive without an editor babysitting the queue.
+            $autoPublish = false;
+            if (is_callable('setting')) {
+                $autoPublish = (bool) setting('grimba_ingest_auto_publish', false);
+            }
+            if (! $autoPublish && env('GRIMBA_INGEST_AUTO_PUBLISH')) {
+                $autoPublish = filter_var(env('GRIMBA_INGEST_AUTO_PUBLISH'), FILTER_VALIDATE_BOOLEAN);
+            }
+            $post->status      = $autoPublish ? 'published' : 'draft';
             $post->author_id   = 1;
             $post->author_type = \Botble\ACL\Models\User::class;
             $post->is_featured = false;
