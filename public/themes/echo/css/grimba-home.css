@@ -384,19 +384,31 @@ body.grimba-home .echo-author-area {
     position: absolute;
     right: 0;
     top: calc(100% + 0.4rem);
-    background: rgba(255, 255, 255, 0.96);
+    background: rgba(255, 255, 255, 0.98);
     border: 1px solid var(--gn-rule);
     border-radius: 14px;
     box-shadow: 0 14px 36px rgba(26, 23, 19, 0.14);
     list-style: none;
     padding: 0.4rem;
     margin: 0;
-    min-width: 200px;
+    min-width: 240px;
     display: none;
-    z-index: 200;
+    /* Escape the sticky header (.grimba-header z-index: 50) and any
+       other stacking context so the picker never lands under the
+       category chip strip. */
+    z-index: 10000;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
+/* Dropdown triggers need their own stacking context too, otherwise
+   the z-index on their menu is scoped away by whatever contains them. */
+.grimba-translate,
+.grimba-region {
+    position: relative;
+    isolation: isolate;
+}
+.grimba-translate.is-open,
+.grimba-region.is-open { z-index: 10001; }
 .grimba-region.is-open .grimba-region__menu { display: block; }
 .grimba-region__option {
     width: 100%;

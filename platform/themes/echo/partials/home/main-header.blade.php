@@ -5,27 +5,32 @@
 @endphp
 <header class="grimba-header">
     <div class="grimba-header__meta">
-        <div class="container-xxl d-flex flex-wrap justify-content-between align-items-center py-1">
+        <div class="container-xxl d-flex flex-wrap justify-content-between align-items-center py-1 grimba-utility-bar">
             <div class="small opacity-75 d-flex align-items-center gap-2">
-                <span>{{ __('Extension navigateur') }}</span>
-                <span class="opacity-50">·</span>
-                <span>{{ __('Thème') }}&nbsp;:</span>
+                {{-- Theme as icon-only toggle — label moved to tooltip --}}
                 <div class="grimba-theme-switch" role="radiogroup" aria-label="{{ __('Choix du thème') }}">
-                    <button type="button" data-grimba-theme="light" aria-pressed="false" title="{{ __('Clair') }}">{{ __('Clair') }}</button>
-                    <button type="button" data-grimba-theme="dark"  aria-pressed="false" title="{{ __('Sombre') }}">{{ __('Sombre') }}</button>
-                    <button type="button" data-grimba-theme="auto"  aria-pressed="true"  title="{{ __('Auto') }}">{{ __('Auto') }}</button>
+                    <button type="button" data-grimba-theme="light" aria-pressed="false" title="{{ __('Thème clair') }}">
+                        <span aria-hidden="true">☀</span>
+                    </button>
+                    <button type="button" data-grimba-theme="dark"  aria-pressed="false" title="{{ __('Thème sombre') }}">
+                        <span aria-hidden="true">☾</span>
+                    </button>
+                    <button type="button" data-grimba-theme="auto"  aria-pressed="true"  title="{{ __('Thème auto (suit le système)') }}">
+                        <span aria-hidden="true">◐</span>
+                    </button>
                 </div>
+                <span class="opacity-25">·</span>
                 @include(Theme::getThemeNamespace('partials.home.lang-switch'))
-                <span class="opacity-50">·</span>
+                <span class="opacity-25">·</span>
                 @include(Theme::getThemeNamespace('partials.home.translate-picker'))
             </div>
-            <div class="small opacity-75 d-flex align-items-center gap-3">
-                <span>{{ ucfirst($topDate) }}</span>
-                <span class="opacity-50">·</span>
-                <a href="{{ url('/pour-vous') }}" class="text-decoration-none">
+            <div class="small opacity-75 d-flex align-items-center gap-2">
+                <span class="d-none d-md-inline">{{ ucfirst($topDate) }}</span>
+                <span class="opacity-25 d-none d-md-inline">·</span>
+                <a href="{{ url('/pour-vous') }}" class="text-decoration-none" title="{{ __('Pour vous') }}">
                     {{ __('Pour vous') }} (<span id="grimba-follow-count">{{ $followCount }}</span>)
                 </a>
-                <span class="opacity-50">·</span>
+                <span class="opacity-25">·</span>
                 @include(Theme::getThemeNamespace('partials.home.region-dropdown'))
             </div>
         </div>

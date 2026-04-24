@@ -12,14 +12,24 @@
         ->havingRaw('COUNT(DISTINCT bias_rating) >= 2')
         ->pluck('story_cluster_id');
 
-    // Hero = most recent featured post that's part of a balanced cluster.
-    // Fallbacks: latest featured / latest published.
-    $hero = Post::query()
-            ->where('status', 'published')
-            ->where('is_featured', true)
+    // Hero = most recent featured post that's part of a balanced cluster
+    // AND has a real hero image (RSS-sourced external URL beats the dark
+    // gradient placeholder SVGs the seeds use). Falls back to:
+    //   featured + real-image (any cluster) → featured (any image) →
+    //   published + real-image → latest published.
+    $realImageFilter = fn ($q) => $q->where('image', 'like', 'http%');
+
+    $hero = Post::query()->where('status', 'published')->where('is_featured', true)
+            ->whereIn('story_cluster_id', $balancedClusters)
+            ->tap($realImageFilter)
+            ->latest()->first()
+        ?? Post::query()->where('status', 'published')->where('is_featured', true)
+            ->tap($realImageFilter)->latest()->first()
+        ?? Post::query()->where('status', 'published')->where('is_featured', true)
             ->whereIn('story_cluster_id', $balancedClusters)
             ->latest()->first()
         ?? Post::query()->where('status', 'published')->where('is_featured', true)->latest()->first()
+        ?? Post::query()->where('status', 'published')->tap($realImageFilter)->latest()->first()
         ?? Post::query()->where('status', 'published')->latest()->first();
 
     // Briefing prefers clustered posts (bar draws under each), then fills
