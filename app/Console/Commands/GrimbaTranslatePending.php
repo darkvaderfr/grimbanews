@@ -25,7 +25,7 @@ class GrimbaTranslatePending extends Command
         $dry      = (bool) $this->option('dry-run');
 
         if (! $translator->enabled()) {
-            $this->warn('No translation providers configured (set any of DEEPL_API_KEY, MISTRAL_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, GROQ_API_KEY, LIBRETRANSLATE_URL). Skipping.');
+            $this->warn('No translation providers configured (set any of DEEPL_API_KEY, MISTRAL_API_KEY, OPENROUTER_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, GROQ_API_KEY, LIBRETRANSLATE_URL). Skipping.');
             return self::SUCCESS;
         }
 

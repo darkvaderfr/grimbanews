@@ -16,16 +16,24 @@ use Throwable;
  *                                            pronoun + idiom accuracy.
  *   2. mistral     — MISTRAL_API_KEY       — FR-native, strong on
  *                                            European news vocabulary.
- *   3. openai      — OPENAI_API_KEY (or
+ *   3. openrouter  — OPENROUTER_API_KEY    — unified gateway to 100+
+ *                                            models; one key, routes
+ *                                            to the cheapest/fastest
+ *                                            model you pick via
+ *                                            OPENROUTER_MODEL env
+ *                                            (default:
+ *                                            mistralai/mistral-small-3-
+ *                                            24b-instruct).
+ *   4. openai      — OPENAI_API_KEY (or
  *                    Botble setting
  *                    ai_writer_openai_key) — gpt-4o-mini, cheap baseline.
- *   4. anthropic   — ANTHROPIC_API_KEY     — claude-3-5-haiku, good
+ *   5. anthropic   — ANTHROPIC_API_KEY     — claude-3-5-haiku, good
  *                                            prose, slightly pricier.
- *   5. google      — GOOGLE_API_KEY        — Gemini 2.0 Flash via the
+ *   6. google      — GOOGLE_API_KEY        — Gemini 2.0 Flash via the
  *                                            generativelanguage API.
- *   6. groq        — GROQ_API_KEY          — Llama 3.3 70B, fast and
+ *   7. groq        — GROQ_API_KEY          — Llama 3.3 70B, fast and
  *                                            free-tier generous.
- *   7. libre       — LIBRETRANSLATE_URL    — self-hosted fallback,
+ *   8. libre       — LIBRETRANSLATE_URL    — self-hosted fallback,
  *                                            no auth needed.
  *
  * Failover: if the primary driver 5xx's or times out, the next configured
@@ -41,7 +49,7 @@ class GrimbaTranslator
     private const TIMEOUT = 10;
 
     /** @var array<int, string> Provider preference order when driver=auto */
-    private const CHAIN = ['deepl', 'mistral', 'openai', 'anthropic', 'google', 'groq', 'libre'];
+    private const CHAIN = ['deepl', 'mistral', 'openrouter', 'openai', 'anthropic', 'google', 'groq', 'libre'];
 
     public function enabled(): bool
     {
@@ -104,44 +112,57 @@ class GrimbaTranslator
     private function credentialFor(string $driver): ?string
     {
         return match ($driver) {
-            'deepl'     => env('DEEPL_API_KEY') ?: null,
-            'mistral'   => env('MISTRAL_API_KEY') ?: null,
-            'openai'    => env('OPENAI_API_KEY')
+            'deepl'      => env('DEEPL_API_KEY') ?: null,
+            'mistral'    => env('MISTRAL_API_KEY') ?: null,
+            'openrouter' => env('OPENROUTER_API_KEY') ?: null,
+            'openai'     => env('OPENAI_API_KEY')
                             ?: (is_callable('setting') ? (setting('ai_writer_openai_key') ?: null) : null),
-            'anthropic' => env('ANTHROPIC_API_KEY') ?: null,
-            'google'    => env('GOOGLE_API_KEY') ?: null,
-            'groq'      => env('GROQ_API_KEY') ?: null,
-            'libre'     => env('LIBRETRANSLATE_URL') ?: null,
-            default     => null,
+            'anthropic'  => env('ANTHROPIC_API_KEY') ?: null,
+            'google'     => env('GOOGLE_API_KEY') ?: null,
+            'groq'       => env('GROQ_API_KEY') ?: null,
+            'libre'      => env('LIBRETRANSLATE_URL') ?: null,
+            default      => null,
         };
     }
 
     private function dispatch(string $driver, string $text, string $from, string $to): ?string
     {
         return match ($driver) {
-            'deepl'     => $this->viaDeepL($text, $from, $to),
-            'mistral'   => $this->viaOpenAiCompatible(
+            'deepl'      => $this->viaDeepL($text, $from, $to),
+            'mistral'    => $this->viaOpenAiCompatible(
                 $text, $from, $to,
                 'https://api.mistral.ai/v1/chat/completions',
                 $this->credentialFor('mistral') ?? '',
                 'mistral-small-latest',
             ),
-            'openai'    => $this->viaOpenAiCompatible(
+            'openrouter' => $this->viaOpenAiCompatible(
+                $text, $from, $to,
+                'https://openrouter.ai/api/v1/chat/completions',
+                $this->credentialFor('openrouter') ?? '',
+                env('OPENROUTER_MODEL', 'mistralai/mistral-small-3-24b-instruct'),
+                [
+                    // OpenRouter's attribution + analytics headers —
+                    // recommended per https://openrouter.ai/docs/api-reference/overview
+                    'HTTP-Referer' => (string) (config('app.url') ?: 'https://grimbanews.com'),
+                    'X-Title'      => 'GrimbaNews',
+                ],
+            ),
+            'openai'     => $this->viaOpenAiCompatible(
                 $text, $from, $to,
                 'https://api.openai.com/v1/chat/completions',
                 $this->credentialFor('openai') ?? '',
                 'gpt-4o-mini',
             ),
-            'anthropic' => $this->viaAnthropic($text, $from, $to),
-            'google'    => $this->viaGoogleGemini($text, $from, $to),
-            'groq'      => $this->viaOpenAiCompatible(
+            'anthropic'  => $this->viaAnthropic($text, $from, $to),
+            'google'     => $this->viaGoogleGemini($text, $from, $to),
+            'groq'       => $this->viaOpenAiCompatible(
                 $text, $from, $to,
                 'https://api.groq.com/openai/v1/chat/completions',
                 $this->credentialFor('groq') ?? '',
                 'llama-3.3-70b-versatile',
             ),
-            'libre'     => $this->viaLibreTranslate($text, $from, $to),
-            default     => null,
+            'libre'      => $this->viaLibreTranslate($text, $from, $to),
+            default      => null,
         };
     }
 
@@ -172,22 +193,27 @@ class GrimbaTranslator
         return (string) ($response->json('translations.0.text') ?? '') ?: null;
     }
 
-    private function viaOpenAiCompatible(string $text, string $from, string $to, string $endpoint, string $key, string $model): ?string
+    private function viaOpenAiCompatible(string $text, string $from, string $to, string $endpoint, string $key, string $model, array $extraHeaders = []): ?string
     {
         if (! $key) return null;
 
-        $response = Http::withToken($key)
+        $http = Http::withToken($key)
             ->timeout(self::TIMEOUT)
-            ->acceptJson()
-            ->post($endpoint, [
-                'model'       => $model,
-                'temperature' => 0.2,
-                'max_tokens'  => 1200,
-                'messages'    => [
-                    ['role' => 'system', 'content' => $this->translatorSystemPrompt($from, $to)],
-                    ['role' => 'user',   'content' => $text],
-                ],
-            ]);
+            ->acceptJson();
+
+        if (! empty($extraHeaders)) {
+            $http = $http->withHeaders($extraHeaders);
+        }
+
+        $response = $http->post($endpoint, [
+            'model'       => $model,
+            'temperature' => 0.2,
+            'max_tokens'  => 1200,
+            'messages'    => [
+                ['role' => 'system', 'content' => $this->translatorSystemPrompt($from, $to)],
+                ['role' => 'user',   'content' => $text],
+            ],
+        ]);
 
         if (! $response->successful()) return null;
         return trim((string) $response->json('choices.0.message.content', '')) ?: null;
