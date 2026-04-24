@@ -297,6 +297,18 @@ class GrimbaRssPoller
                 $post->created_at = $item['published_at'];
             }
 
+            // Near-duplicate detection (S78) — if this title matches an
+            // article already attached to a cluster, inherit the cluster
+            // so the L/C/R coverage bar lights up on first ingest.
+            // Editors can override via the post editor dropdown if the
+            // auto-guess is wrong.
+            if (empty($post->story_cluster_id)) {
+                $candidate = self::findLikelyCluster($post->name);
+                if ($candidate !== null) {
+                    $post->story_cluster_id = $candidate;
+                }
+            }
+
             $post->save();
 
             $slugValue = $this->uniqueSlug($post->name);
@@ -316,6 +328,98 @@ class GrimbaRssPoller
             ]);
             return null;
         }
+    }
+
+    /**
+     * Near-duplicate cluster detection via Jaccard similarity on
+     * tokenised, diacritic-stripped, stopword-filtered titles.
+     *
+     * Public + static so the retroactive artisan command
+     * (grimba:recluster) can reuse it without instantiating the
+     * full poller.
+     *
+     * Returns a story_cluster_id when at least one existing post
+     * (≤30 days old, attached to a cluster) crosses the 0.35
+     * Jaccard threshold. Null when nothing sticks.
+     */
+    public static function findLikelyCluster(string $title, int $lookbackDays = 30, float $threshold = 0.35): ?int
+    {
+        $target = self::tokeniseForMatch($title);
+        if (count($target) < 3) {
+            return null;
+        }
+
+        $candidates = DB::table('posts')
+            ->whereNotNull('story_cluster_id')
+            ->whereIn('status', ['published', 'draft'])
+            ->where('created_at', '>=', now()->subDays($lookbackDays))
+            ->get(['name', 'story_cluster_id']);
+
+        $byCluster = [];
+        foreach ($candidates as $c) {
+            $other = self::tokeniseForMatch((string) $c->name);
+            if (count($other) < 3) continue;
+
+            $score = self::jaccard($target, $other);
+            if ($score >= $threshold) {
+                $cid = (int) $c->story_cluster_id;
+                $byCluster[$cid] = max($byCluster[$cid] ?? 0.0, $score);
+            }
+        }
+
+        if (empty($byCluster)) {
+            return null;
+        }
+
+        arsort($byCluster);
+        return (int) array_key_first($byCluster);
+    }
+
+    /**
+     * Lowercase, strip diacritics, drop digits/punctuation, drop
+     * stopwords + anything shorter than 3 chars. Unique set semantics.
+     */
+    private static function tokeniseForMatch(string $s): array
+    {
+        $s = mb_strtolower($s);
+        // Diacritic fold: "Réforme" → "Reforme", "grève" → "greve"
+        $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
+        if ($ascii === false || $ascii === '') {
+            $ascii = $s;
+        }
+        // Replace any apostrophe/punct/digit/space block with a single space
+        $spaced = preg_replace('/[\p{P}\d\s]+/u', ' ', $ascii) ?? $ascii;
+        $tokens = array_filter(preg_split('/\s+/', trim($spaced)) ?: []);
+
+        static $stop = [
+            // French
+            'les','des','une','dans','pour','avec','sans','plus','mais','sont','est','ont','pas',
+            'que','qui','ces','son','ses','leur','leurs','nos','vos','etre','avoir','cette','cet',
+            'tous','tout','toute','toutes','entre','apres','avant','sous','sur','par','aux','aux',
+            'ceci','cela','cet','faire','deja','encore','fois','donc','alors','ainsi','meme',
+            // English
+            'the','and','but','for','with','without','this','that','these','those','from','into',
+            'about','over','after','before','under','above','between','against','during','while',
+            'where','when','what','which','who','whom','how','why','they','them','their','theirs',
+            'there','here','been','being','have','has','had','does','did','doing','will','would',
+            'could','should','can','may','might','must','shall','into','onto',
+        ];
+
+        $out = [];
+        foreach ($tokens as $t) {
+            if (strlen($t) < 3) continue;
+            if (in_array($t, $stop, true)) continue;
+            $out[$t] = true;
+        }
+        return array_keys($out);
+    }
+
+    private static function jaccard(array $a, array $b): float
+    {
+        if (empty($a) || empty($b)) return 0.0;
+        $intersection = count(array_intersect($a, $b));
+        $union = count(array_unique(array_merge($a, $b)));
+        return $union > 0 ? $intersection / $union : 0.0;
     }
 
     private function uniqueSlug(string $title): string
