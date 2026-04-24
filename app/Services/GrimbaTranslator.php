@@ -1,0 +1,297 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Throwable;
+
+/*
+ * GrimbaTranslator — multi-provider text translation with failover.
+ *
+ * Providers (first configured wins unless GRIMBA_TRANSLATOR_DRIVER pins
+ * a specific one; the chain below is the auto-select order):
+ *
+ *   1. deepl       — DEEPL_API_KEY         — best-in-class FR/EN,
+ *                                            pronoun + idiom accuracy.
+ *   2. mistral     — MISTRAL_API_KEY       — FR-native, strong on
+ *                                            European news vocabulary.
+ *   3. openai      — OPENAI_API_KEY (or
+ *                    Botble setting
+ *                    ai_writer_openai_key) — gpt-4o-mini, cheap baseline.
+ *   4. anthropic   — ANTHROPIC_API_KEY     — claude-3-5-haiku, good
+ *                                            prose, slightly pricier.
+ *   5. google      — GOOGLE_API_KEY        — Gemini 2.0 Flash via the
+ *                                            generativelanguage API.
+ *   6. groq        — GROQ_API_KEY          — Llama 3.3 70B, fast and
+ *                                            free-tier generous.
+ *   7. libre       — LIBRETRANSLATE_URL    — self-hosted fallback,
+ *                                            no auth needed.
+ *
+ * Failover: if the primary driver 5xx's or times out, the next configured
+ * provider in the chain is tried. Successful translation returns
+ * ['text' => string, 'driver' => provider-name]. Total failure returns
+ * null and the batch command logs the post id for retry next tick.
+ *
+ * Per-call timeout aggressive (10s) so a slow upstream never chokes
+ * `grimba:translate-pending` which iterates dozens of posts per run.
+ */
+class GrimbaTranslator
+{
+    private const TIMEOUT = 10;
+
+    /** @var array<int, string> Provider preference order when driver=auto */
+    private const CHAIN = ['deepl', 'mistral', 'openai', 'anthropic', 'google', 'groq', 'libre'];
+
+    public function enabled(): bool
+    {
+        return $this->configuredDrivers() !== [];
+    }
+
+    /** @return array<int, string> drivers that have a credential configured */
+    public function configuredDrivers(): array
+    {
+        $out = [];
+        foreach (self::CHAIN as $name) {
+            if ($this->credentialFor($name) !== null) $out[] = $name;
+        }
+        return $out;
+    }
+
+    /**
+     * Translate a text chunk. Tries the pinned driver first (if any),
+     * then falls through the auto chain on failure. Returns null when
+     * nothing succeeded or source == target.
+     *
+     * @return array{text:string, driver:string}|null
+     */
+    public function translate(string $text, string $from, string $to = 'fr'): ?array
+    {
+        $text = trim($text);
+        if ($text === '' || strtolower(substr($from, 0, 2)) === strtolower(substr($to, 0, 2))) {
+            return null;
+        }
+
+        $order = $this->failoverOrder();
+
+        foreach ($order as $driver) {
+            try {
+                $out = $this->dispatch($driver, $text, $from, $to);
+                if ($out !== null && $out !== '') {
+                    return ['text' => $out, 'driver' => $driver];
+                }
+            } catch (Throwable $e) {
+                Log::warning('[GrimbaTranslator] driver failed, trying next', [
+                    'driver' => $driver, 'from' => $from, 'to' => $to, 'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return null;
+    }
+
+    /** @return array<int, string> */
+    private function failoverOrder(): array
+    {
+        $pinned = env('GRIMBA_TRANSLATOR_DRIVER');
+        if (is_string($pinned) && $pinned !== '' && $pinned !== 'auto') {
+            // Pinned first, then chain for failover (skip dupes / unconfigured)
+            return array_values(array_unique(array_merge([$pinned], $this->configuredDrivers())));
+        }
+        return $this->configuredDrivers();
+    }
+
+    private function credentialFor(string $driver): ?string
+    {
+        return match ($driver) {
+            'deepl'     => env('DEEPL_API_KEY') ?: null,
+            'mistral'   => env('MISTRAL_API_KEY') ?: null,
+            'openai'    => env('OPENAI_API_KEY')
+                            ?: (is_callable('setting') ? (setting('ai_writer_openai_key') ?: null) : null),
+            'anthropic' => env('ANTHROPIC_API_KEY') ?: null,
+            'google'    => env('GOOGLE_API_KEY') ?: null,
+            'groq'      => env('GROQ_API_KEY') ?: null,
+            'libre'     => env('LIBRETRANSLATE_URL') ?: null,
+            default     => null,
+        };
+    }
+
+    private function dispatch(string $driver, string $text, string $from, string $to): ?string
+    {
+        return match ($driver) {
+            'deepl'     => $this->viaDeepL($text, $from, $to),
+            'mistral'   => $this->viaOpenAiCompatible(
+                $text, $from, $to,
+                'https://api.mistral.ai/v1/chat/completions',
+                $this->credentialFor('mistral') ?? '',
+                'mistral-small-latest',
+            ),
+            'openai'    => $this->viaOpenAiCompatible(
+                $text, $from, $to,
+                'https://api.openai.com/v1/chat/completions',
+                $this->credentialFor('openai') ?? '',
+                'gpt-4o-mini',
+            ),
+            'anthropic' => $this->viaAnthropic($text, $from, $to),
+            'google'    => $this->viaGoogleGemini($text, $from, $to),
+            'groq'      => $this->viaOpenAiCompatible(
+                $text, $from, $to,
+                'https://api.groq.com/openai/v1/chat/completions',
+                $this->credentialFor('groq') ?? '',
+                'llama-3.3-70b-versatile',
+            ),
+            'libre'     => $this->viaLibreTranslate($text, $from, $to),
+            default     => null,
+        };
+    }
+
+    // ---- Drivers ----
+
+    private function viaDeepL(string $text, string $from, string $to): ?string
+    {
+        $key = $this->credentialFor('deepl');
+        if (! $key) return null;
+
+        // DeepL Free endpoints use -free.com; paid use api.deepl.com.
+        // Both accept the same request; detect from key suffix (free keys end in ':fx').
+        $endpoint = str_ends_with((string) $key, ':fx')
+            ? 'https://api-free.deepl.com/v2/translate'
+            : 'https://api.deepl.com/v2/translate';
+
+        $response = Http::timeout(self::TIMEOUT)
+            ->withHeaders(['Authorization' => 'DeepL-Auth-Key ' . $key])
+            ->asForm()
+            ->post($endpoint, [
+                'text'         => $text,
+                'source_lang'  => strtoupper(substr($from, 0, 2)),
+                'target_lang'  => strtoupper(substr($to, 0, 2)),
+                'preserve_formatting' => '1',
+            ]);
+
+        if (! $response->successful()) return null;
+        return (string) ($response->json('translations.0.text') ?? '') ?: null;
+    }
+
+    private function viaOpenAiCompatible(string $text, string $from, string $to, string $endpoint, string $key, string $model): ?string
+    {
+        if (! $key) return null;
+
+        $response = Http::withToken($key)
+            ->timeout(self::TIMEOUT)
+            ->acceptJson()
+            ->post($endpoint, [
+                'model'       => $model,
+                'temperature' => 0.2,
+                'max_tokens'  => 1200,
+                'messages'    => [
+                    ['role' => 'system', 'content' => $this->translatorSystemPrompt($from, $to)],
+                    ['role' => 'user',   'content' => $text],
+                ],
+            ]);
+
+        if (! $response->successful()) return null;
+        return trim((string) $response->json('choices.0.message.content', '')) ?: null;
+    }
+
+    private function viaAnthropic(string $text, string $from, string $to): ?string
+    {
+        $key = $this->credentialFor('anthropic');
+        if (! $key) return null;
+
+        $response = Http::timeout(self::TIMEOUT)
+            ->withHeaders([
+                'x-api-key' => $key,
+                'anthropic-version' => '2023-06-01',
+                'content-type' => 'application/json',
+            ])
+            ->post('https://api.anthropic.com/v1/messages', [
+                'model'      => 'claude-3-5-haiku-latest',
+                'max_tokens' => 1200,
+                'system'     => $this->translatorSystemPrompt($from, $to),
+                'messages'   => [['role' => 'user', 'content' => $text]],
+            ]);
+
+        if (! $response->successful()) return null;
+        // Anthropic returns content as array of blocks
+        $blocks = $response->json('content', []);
+        $out = '';
+        foreach ((array) $blocks as $b) {
+            if (($b['type'] ?? '') === 'text') $out .= (string) ($b['text'] ?? '');
+        }
+        return trim($out) ?: null;
+    }
+
+    private function viaGoogleGemini(string $text, string $from, string $to): ?string
+    {
+        $key = $this->credentialFor('google');
+        if (! $key) return null;
+
+        $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . urlencode($key);
+
+        $response = Http::timeout(self::TIMEOUT)
+            ->acceptJson()
+            ->post($endpoint, [
+                'contents' => [[
+                    'role'  => 'user',
+                    'parts' => [['text' => $text]],
+                ]],
+                'systemInstruction' => [
+                    'parts' => [['text' => $this->translatorSystemPrompt($from, $to)]],
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.2,
+                    'maxOutputTokens' => 1200,
+                ],
+            ]);
+
+        if (! $response->successful()) return null;
+        $parts = (array) $response->json('candidates.0.content.parts', []);
+        $out = '';
+        foreach ($parts as $p) { $out .= (string) ($p['text'] ?? ''); }
+        return trim($out) ?: null;
+    }
+
+    private function viaLibreTranslate(string $text, string $from, string $to): ?string
+    {
+        $base = $this->credentialFor('libre');
+        if (! $base) return null;
+
+        $response = Http::timeout(self::TIMEOUT)
+            ->acceptJson()
+            ->post(rtrim($base, '/') . '/translate', [
+                'q'      => $text,
+                'source' => strtolower(substr($from, 0, 2)),
+                'target' => strtolower(substr($to, 0, 2)),
+                'format' => 'text',
+            ]);
+
+        if (! $response->successful()) return null;
+        return trim((string) $response->json('translatedText', '')) ?: null;
+    }
+
+    private function translatorSystemPrompt(string $from, string $to): string
+    {
+        $fromLabel = $this->localeLabel($from);
+        $toLabel   = $this->localeLabel($to);
+        return "You are a translation engine. Translate the user's text from {$fromLabel} into {$toLabel}. "
+             . 'Preserve tone, proper nouns, and any dates or numbers. '
+             . 'Do not add commentary, do not quote, do not explain. Output only the translated text.';
+    }
+
+    private function localeLabel(string $code): string
+    {
+        return match (strtolower(substr($code, 0, 2))) {
+            'fr' => 'French',
+            'en' => 'English',
+            'es' => 'Spanish',
+            'pt' => 'Portuguese',
+            'de' => 'German',
+            'it' => 'Italian',
+            'ar' => 'Arabic',
+            'zh' => 'Chinese',
+            'ja' => 'Japanese',
+            'ru' => 'Russian',
+            default => $code,
+        };
+    }
+}

@@ -111,10 +111,25 @@
                         {{ RvMedia::image($hero->image, $hero->name, 'extra-large') }}
                     @endif
                     <div class="grimba-hero__gradient"></div>
+                    @php
+                        $__mode = (string) (request()->cookie('grimba_translate') ?? 'original');
+                        if (! in_array($__mode, ['original', 'auto', 'both'], true)) $__mode = 'original';
+                        $__target = (string) (request()->cookie('grimba_lang') ?? 'fr');
+                        $__hasTr = ! empty($hero->translated_name)
+                            && ($hero->translated_to ?? null) === $__target
+                            && ($hero->original_language ?? null) !== $__target;
+                        $__heroTitle = ($__mode !== 'original' && $__hasTr) ? $hero->translated_name : $hero->name;
+                        $__heroDesc  = ($__mode !== 'original' && $__hasTr && $hero->translated_description)
+                            ? $hero->translated_description
+                            : $hero->description;
+                    @endphp
                     <div class="grimba-hero__text">
-                        <h1 class="grimba-hero__title">{{ $hero->name }}</h1>
-                        @if($hero->description)
-                            <p class="grimba-hero__desc">{{ \Illuminate\Support\Str::limit(strip_tags($hero->description), 140) }}</p>
+                        <h1 class="grimba-hero__title">{{ $__heroTitle }}</h1>
+                        @if($__mode === 'both' && $__hasTr)
+                            <p class="grimba-hero__title-original small opacity-75 mt-1 mb-2" lang="{{ $hero->original_language }}">{{ $hero->name }}</p>
+                        @endif
+                        @if($__heroDesc)
+                            <p class="grimba-hero__desc">{{ \Illuminate\Support\Str::limit(strip_tags($__heroDesc), 140) }}</p>
                         @endif
                     </div>
                     <div class="grimba-hero__coverage">
