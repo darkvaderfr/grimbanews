@@ -2,21 +2,23 @@
 
 /*
  * GrimbaNews — on admin root hit, redirect to GrimbaNews cockpit.
+ *
+ * The redirect logic lives in App\Http\Middleware\GrimbaAdminRootRedirect
+ * so Laravel's MiddlewareNameResolver can resolve it by class name.
+ * Here we just attach it to the 'web' group during boot — attaching
+ * after 'web' means StartSession has already run, so auth()->check()
+ * reflects the real session state (the original RouteMatched listener
+ * ran before StartSession and therefore always saw an anonymous
+ * request).
+ *
  * Keeps the stock Botble dashboard reachable at /admin?stock=1.
  */
 
-use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Facades\Event;
+use App\Http\Middleware\GrimbaAdminRootRedirect;
+use Illuminate\Routing\Router;
 
-Event::listen(RouteMatched::class, function (RouteMatched $event) {
-    $request = $event->request;
-    $adminPrefix = trim((string) config('core.base.general.admin_dir', 'admin'), '/');
-
-    if ($request->path() !== $adminPrefix) return;
-    if ($request->query('stock') === '1') return;
-    if (! auth()->check()) return;
-
-    $target = url('/' . $adminPrefix . '/grimba/cockpit');
-    redirect($target)->send();
-    exit;
+app()->booted(function (): void {
+    /** @var Router $router */
+    $router = app('router');
+    $router->pushMiddlewareToGroup('web', GrimbaAdminRootRedirect::class);
 });
