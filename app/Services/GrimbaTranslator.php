@@ -101,16 +101,37 @@ class GrimbaTranslator
     /** @return array<int, string> */
     private function failoverOrder(): array
     {
-        $pinned = env('GRIMBA_TRANSLATOR_DRIVER');
+        // Setting wins over env so admin UI changes are immediate.
+        $pinned = is_callable('setting')
+            ? (setting('grimba_translator_driver') ?: null)
+            : null;
+        if (! $pinned) {
+            $pinned = env('GRIMBA_TRANSLATOR_DRIVER');
+        }
         if (is_string($pinned) && $pinned !== '' && $pinned !== 'auto') {
-            // Pinned first, then chain for failover (skip dupes / unconfigured)
             return array_values(array_unique(array_merge([$pinned], $this->configuredDrivers())));
         }
         return $this->configuredDrivers();
     }
 
+    /**
+     * Credential resolution order per driver:
+     *   1. Botble setting `grimba_translator_<driver>_key` — writable
+     *      from /admin/grimba/translation so Vader can rotate without
+     *      SSH-editing .env.
+     *   2. Driver-specific env var (DEEPL_API_KEY, OPENROUTER_API_KEY,
+     *      etc). Keeps 12-factor workflows working.
+     *   3. (openai only) Botble's existing ai_writer_openai_key setting
+     *      so the AI Writer plugin and our translator share one key.
+     */
     private function credentialFor(string $driver): ?string
     {
+        $fromSetting = null;
+        if (is_callable('setting')) {
+            $fromSetting = setting('grimba_translator_' . $driver . '_key') ?: null;
+        }
+        if ($fromSetting) return $fromSetting;
+
         return match ($driver) {
             'deepl'      => env('DEEPL_API_KEY') ?: null,
             'mistral'    => env('MISTRAL_API_KEY') ?: null,
