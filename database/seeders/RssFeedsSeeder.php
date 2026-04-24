@@ -22,25 +22,29 @@ class RssFeedsSeeder extends Seeder
 {
     public function run(): void
     {
+        // feedsByName: source_name => [url, is_active, notes]
+        // Broken feeds are retained with is_active=false so the admin UI
+        // shows why (audit trail), not silently dropped.
         $feedsByName = [
-            'Le Monde'          => 'https://www.lemonde.fr/rss/une.xml',
-            'Libération'        => 'https://www.liberation.fr/arc/outboundfeeds/rss/?outputType=xml',
-            'Mediapart'         => 'https://www.mediapart.fr/articles/feed',
-            'Le Figaro'         => 'https://www.lefigaro.fr/rss/figaro_actualites.xml',
-            'France 24'         => 'https://www.france24.com/fr/france/rss',
-            'L\'Opinion'        => 'https://www.lopinion.fr/feed.xml',
-            'Valeurs Actuelles' => 'https://www.valeursactuelles.com/feed',
-            'Jeune Afrique'     => 'https://www.jeuneafrique.com/feed/',
-            'RFI Afrique'       => 'https://www.rfi.fr/fr/afrique/rss',
-            'Cameroon Tribune'  => 'https://www.cameroon-tribune.cm/rss',
-            'BBC'               => 'https://feeds.bbci.co.uk/news/rss.xml',
-            'The Guardian'      => 'https://www.theguardian.com/world/rss',
-            'Reuters'           => 'https://feeds.reuters.com/reuters/topNews',
+            'Le Monde'          => ['url' => 'https://www.lemonde.fr/rss/une.xml',                               'active' => true,  'notes' => null],
+            'Libération'        => ['url' => 'https://www.liberation.fr/arc/outboundfeeds/rss/?outputType=xml', 'active' => true,  'notes' => null],
+            'Mediapart'         => ['url' => 'https://www.mediapart.fr/articles/feed',                           'active' => true,  'notes' => null],
+            'Le Figaro'         => ['url' => 'https://www.lefigaro.fr/rss/figaro_actualites.xml',                'active' => true,  'notes' => null],
+            'France 24'         => ['url' => 'https://www.france24.com/fr/france/rss',                           'active' => true,  'notes' => null],
+            'L\'Opinion'        => ['url' => 'https://www.lopinion.fr/feed.xml',                                 'active' => false, 'notes' => '2026-04-24: returns 404 behind CF. Needs replacement URL from editor.'],
+            'Valeurs Actuelles' => ['url' => 'https://www.valeursactuelles.com/feed',                            'active' => true,  'notes' => null],
+            'Jeune Afrique'     => ['url' => 'https://www.jeuneafrique.com/feed/',                               'active' => true,  'notes' => null],
+            'RFI Afrique'       => ['url' => 'https://www.rfi.fr/fr/afrique/rss',                                'active' => true,  'notes' => null],
+            'Cameroon Tribune'  => ['url' => 'https://www.cameroon-tribune.cm/rss',                              'active' => false, 'notes' => '2026-04-24: returns 403. Host serves iso-8859-1 404 body — likely UA-filtered or feed removed.'],
+            'BBC'               => ['url' => 'https://feeds.bbci.co.uk/news/rss.xml',                            'active' => true,  'notes' => null],
+            'The Guardian'      => ['url' => 'https://www.theguardian.com/world/rss',                            'active' => true,  'notes' => null],
+            'Reuters'           => ['url' => 'https://feeds.reuters.com/reuters/topNews',                        'active' => false, 'notes' => '2026-04-24: feeds.reuters.com DNS gone after their paywall migration. No replacement without API access.'],
+            'All Africa'        => ['url' => 'https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf',   'active' => true,  'notes' => 'Pan-African wire service — compensates for Cameroon Tribune outage.'],
         ];
 
         $now = now();
 
-        foreach ($feedsByName as $sourceName => $url) {
+        foreach ($feedsByName as $sourceName => $cfg) {
             $source = DB::table('news_sources')
                 ->where('name', $sourceName)
                 ->first(['id']);
@@ -51,18 +55,21 @@ class RssFeedsSeeder extends Seeder
             }
 
             DB::table('rss_feeds')->updateOrInsert(
-                ['source_id' => $source->id, 'url' => $url],
+                ['source_id' => $source->id, 'url' => $cfg['url']],
                 [
-                    'feed_format' => str_contains($url, '/atom') || str_ends_with($url, '.atom')
+                    'feed_format' => str_contains($cfg['url'], '/atom') || str_ends_with($cfg['url'], '.atom')
                         ? 'atom'
                         : 'rss',
-                    'is_active'   => true,
+                    'is_active'   => $cfg['active'],
+                    'notes'       => $cfg['notes'],
                     'updated_at'  => $now,
                     'created_at'  => $now,
                 ]
             );
         }
 
-        $this->command?->info('Seeded ' . DB::table('rss_feeds')->count() . ' RSS feeds.');
+        $active = DB::table('rss_feeds')->where('is_active', true)->count();
+        $total  = DB::table('rss_feeds')->count();
+        $this->command?->info("Seeded {$total} RSS feeds ({$active} active).");
     }
 }
