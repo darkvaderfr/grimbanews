@@ -227,13 +227,35 @@ class GrimbaOgImageController
 
     private function findFont(array $candidates): ?string
     {
+        // Bundled fonts win — same render on macOS dev and Linux prod.
+        $bundled = public_path('themes/echo/fonts');
+        $bundledMap = [
+            // serif candidates → Fraunces-Bold
+            'Fraunces-Bold.ttf'       => 'Fraunces-Bold.ttf',
+            'Georgia Bold.ttf'        => 'Fraunces-Bold.ttf',
+            'Georgia.ttf'             => 'Fraunces-Bold.ttf',
+            'Times New Roman Bold.ttf' => 'Fraunces-Bold.ttf',
+            // sans candidates → PublicSans-Bold
+            'PublicSans-Bold.ttf'     => 'PublicSans-Bold.ttf',
+            'Arial Bold.ttf'          => 'PublicSans-Bold.ttf',
+            'Arial.ttf'               => 'PublicSans-Bold.ttf',
+            'Helvetica.ttc'           => 'PublicSans-Bold.ttf',
+        ];
+        foreach ($candidates as $name) {
+            if (isset($bundledMap[$name])) {
+                $p = $bundled . '/' . $bundledMap[$name];
+                if (File::exists($p)) return $p;
+            }
+        }
+
+        // Fall back to system fonts (dev convenience on macOS).
         $roots = [
             '/System/Library/Fonts/Supplemental',
             '/System/Library/Fonts',
             '/Library/Fonts',
             '/usr/share/fonts/truetype/dejavu',
             '/usr/share/fonts/truetype/liberation',
-            public_path('themes/echo/fonts'),
+            $bundled,
         ];
         foreach ($roots as $root) {
             foreach ($candidates as $name) {
@@ -241,7 +263,6 @@ class GrimbaOgImageController
                 if (File::exists($p)) return $p;
             }
         }
-        // DejaVu is almost always on Linux servers.
         $fallback = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
         return File::exists($fallback) ? $fallback : null;
     }
