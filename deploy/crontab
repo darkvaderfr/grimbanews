@@ -1,0 +1,11 @@
+# GrimbaNews Crontab Configuration
+# Installed by deploy/bootstrap.sh. Also safe to install manually:
+#   crontab -e
+# or:
+#   cp deploy/crontab /etc/cron.d/grimbanews   # requires root header line
+
+# Laravel Scheduler — runs every minute, delegates to the real jobs
+# registered in routes/console.php:
+#   - grimba:poll-feeds   every 30 min (RSS ingest)
+#   - grimba:cleanup-slugs 03:15 daily (orphan-slug sweep)
+* * * * * cd /var/www/grimbanews/current && sudo -u www-data php artisan schedule:run >> /var/log/grimbanews-cron.log 2>&1
