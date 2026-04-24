@@ -12,8 +12,8 @@
     <div class="container-xxl py-5">
         <div class="row g-4">
             <div class="col-lg-3 col-md-6 col-12">
-                <a href="{{ url('/') }}" class="grimba-wordmark grimba-wordmark--light" aria-label="GrimbaNews — accueil">
-                    <span class="grimba-wordmark__mark">GRIMBA</span>
+                <a href="{{ url('/') }}" class="grimba-wordmark grimba-wordmark--light" aria-label="Grimba News — accueil">
+                    <span class="grimba-wordmark__mark">Grimba</span>
                     <span class="grimba-wordmark__tag">News</span>
                 </a>
                 <p class="small opacity-75 mt-3 mb-0">

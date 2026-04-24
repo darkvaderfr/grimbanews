@@ -38,8 +38,8 @@
 
     <div class="grimba-header__main glass-panel">
         <div class="container-xxl d-flex align-items-center gap-4 py-3">
-            <a href="{{ url('/') }}" class="grimba-wordmark" aria-label="GrimbaNews — accueil">
-                <span class="grimba-wordmark__mark">GRIMBA</span>
+            <a href="{{ url('/') }}" class="grimba-wordmark" aria-label="Grimba News — accueil">
+                <span class="grimba-wordmark__mark">Grimba</span>
                 <span class="grimba-wordmark__tag">News</span>
             </a>
 

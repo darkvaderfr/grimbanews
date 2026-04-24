@@ -18,6 +18,11 @@
     --gn-right:  #e84c3d;
     --gn-blind:  #8a2be2;
 
+    /* Editorial accent — the masthead red from the S83 landing.
+       Warmer than --gn-right (which reads as political-right colour);
+       sits closer to a newspaper / magazine ink red. */
+    --gn-accent: #c0392b;
+
     --gn-font-display: 'Fraunces', 'Playfair Display', Georgia, serif;
     --gn-font-body:    'Public Sans', 'Inter', system-ui, sans-serif;
     --gn-font-mono:    'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
@@ -555,26 +560,40 @@ a.grimba-urgency__cta,
     -webkit-backdrop-filter: blur(18px);
 }
 
+/* S83 masthead — editorial serif, mixed case, accent-red "News".
+   Paired with the ^opsz display axis so the wordmark gains density
+   at large sizes without looking like a logotype. */
 .grimba-wordmark {
     display: inline-flex;
     align-items: baseline;
-    gap: 0.35rem;
+    gap: 0.3rem;
     text-decoration: none;
     color: var(--gn-ink);
-    font-family: var(--gn-font-mono);
+    font-family: var(--gn-font-display);
     font-weight: 700;
-    letter-spacing: 0.02em;
+    letter-spacing: -0.015em;
+    line-height: 1;
 }
-.grimba-wordmark__mark { font-size: 1.55rem; line-height: 1; }
+.grimba-wordmark__mark {
+    font-size: 1.75rem;
+    line-height: 1;
+    font-variation-settings: 'opsz' 72;
+}
 .grimba-wordmark__tag {
     font-family: var(--gn-font-display);
-    font-weight: 500;
-    font-size: 1.2rem;
-    font-style: italic;
-    color: var(--gn-ink-soft);
+    font-weight: 700;
+    font-size: 1.5rem;
+    font-style: normal;
+    color: var(--gn-accent);
+    letter-spacing: -0.015em;
 }
 .grimba-wordmark--light { color: var(--gn-paper); }
-.grimba-wordmark--light .grimba-wordmark__tag { color: rgba(246, 241, 232, 0.7); }
+.grimba-wordmark--light .grimba-wordmark__tag { color: var(--gn-accent); }
+
+/* Dark-mode accent — desaturated so OLED red doesn't bloom */
+html.grimba-home-html[data-bs-theme="dark"] {
+    --gn-accent: #e07a70;
+}
 
 .grimba-nav {
     display: flex;
