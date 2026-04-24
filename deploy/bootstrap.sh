@@ -66,8 +66,18 @@ fi
 cd "$APP_PATH"
 
 # 3. Composer install
+# - COMPOSER_ALLOW_SUPERUSER=1: we're root; the warning is fine here.
+# - --ignore-platform-req=ext-redis: the shared VPS has php-redis 5.3.7
+#   but symfony/cache v7.4.1 wants >=6.1. We don't use redis at runtime
+#   (CACHE_STORE=file, SESSION_DRIVER=file, QUEUE_CONNECTION=sync in .env)
+#   so ignoring the requirement is safe. If/when the VPS admin bumps
+#   php-redis, drop this flag.
 echo "=== Composer install ==="
-composer install --no-dev --optimize-autoloader --no-interaction
+COMPOSER_ALLOW_SUPERUSER=1 composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction \
+    --ignore-platform-req=ext-redis
 
 # 4. .env + APP_KEY
 echo "=== Writing .env ==="
@@ -106,10 +116,38 @@ ENV
     php artisan key:generate --force
 fi
 
-# 5. SQLite DB + migrations + seeders
-echo "=== SQLite DB + migrations ==="
+# 5. SQLite DB: seed from prod-snapshot.sql, then apply any newer migrations.
+#
+# WHY the snapshot: Botble's plugin migrations only register when the
+# plugin is "installed" (a plugins table row). On a virgin DB, that
+# flag isn't there, so `php artisan migrate` silently skips 80% of the
+# schema (no posts, no news_sources, etc.) and the app can't boot.
+# database/prod-snapshot.sql is a filtered dump of a working install
+# (schema + seed data: 20 news_sources, 14 rss_feeds, 4 clusters,
+# 21 published posts + their slugs, 1 admin user, license bypass
+# settings). Ship with every deploy tarball, rebuild via
+# `make db-snapshot` when schema changes.
+echo "=== SQLite DB: applying prod-snapshot.sql ==="
 touch database/grimbanews.sqlite
-php artisan migrate --force
+# Fresh install path — zero tables means apply the snapshot
+TABLE_COUNT=$(sqlite3 database/grimbanews.sqlite "SELECT COUNT(*) FROM sqlite_master WHERE type='table';")
+if [ "$TABLE_COUNT" -lt 5 ]; then
+    if [ -f database/prod-snapshot.sql ]; then
+        echo "  Fresh DB detected ($TABLE_COUNT tables) — loading snapshot"
+        sqlite3 database/grimbanews.sqlite < database/prod-snapshot.sql
+        echo "  Tables now: $(sqlite3 database/grimbanews.sqlite "SELECT COUNT(*) FROM sqlite_master WHERE type='table';")"
+    else
+        echo "  ERROR: prod-snapshot.sql missing — can't bootstrap DB"
+        exit 1
+    fi
+else
+    echo "  DB has $TABLE_COUNT tables — skipping snapshot (incremental path)"
+fi
+
+echo "=== Running migrations (picks up any added after snapshot) ==="
+php artisan migrate --force 2>&1 | tail -10
+
+echo "=== Re-seeding RSS feeds (idempotent) ==="
 php artisan db:seed --class='Database\Seeders\RssFeedsSeeder' --force
 
 # 6. First poll to warm the queue

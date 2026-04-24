@@ -92,9 +92,18 @@ chown -R www-data:www-data storage bootstrap/cache database 2>/dev/null || true
 chmod -R ug+rwX storage bootstrap/cache 2>/dev/null || true
 
 echo "=== Composer install (no-dev, optimized) ==="
-sudo -u www-data composer install --no-dev --optimize-autoloader --no-interaction 2>&1 | tail -5 || true
+# --ignore-platform-req=ext-redis: VPS ships php-redis 5.3.7 but
+# symfony/cache v7.4.1 wants >=6.1; we don't use redis at runtime
+# (cache/session/queue are all file-based in .env). Safe to ignore.
+sudo -u www-data composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction \
+    --ignore-platform-req=ext-redis 2>&1 | tail -5 || true
 
-echo "=== Running migrations ==="
+echo "=== Running migrations (idempotent) ==="
+# Incremental deploys: snapshot application is bootstrap-only. Only
+# net-new migrations should run here.
 sudo -u www-data php artisan migrate --force 2>&1 | tail -10 || true
 
 echo "=== Seeding RSS feeds (idempotent) ==="
