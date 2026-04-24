@@ -188,12 +188,15 @@ class GrimbaRssPoller
         $pub = (string) ($node->pubDate ?? '');
         $published = $pub !== '' ? $this->toIso($pub) : null;
 
+        $image = $this->extractImageUrl($node, $summary);
+
         return [
             'guid'         => $guid,
             'title'        => $title,
             'link'         => $link ?: null,
             'summary'      => $this->cleanSummary($summary),
             'published_at' => $published,
+            'image'        => $image,
         ];
     }
 
@@ -202,11 +205,15 @@ class GrimbaRssPoller
         $title = trim((string) $node->title);
 
         $link = '';
+        $enclosure = '';
         foreach ($node->link as $l) {
             $rel = (string) $l['rel'];
-            if ($rel === '' || $rel === 'alternate') {
+            $type = (string) $l['type'];
+            if (($rel === '' || $rel === 'alternate') && $link === '') {
                 $link = (string) $l['href'];
-                break;
+            }
+            if ($rel === 'enclosure' && str_starts_with($type, 'image/')) {
+                $enclosure = (string) $l['href'];
             }
         }
 
@@ -217,13 +224,90 @@ class GrimbaRssPoller
         $pub = (string) ($node->published ?? $node->updated ?? '');
         $published = $pub !== '' ? $this->toIso($pub) : null;
 
+        $image = $enclosure ?: $this->extractImageUrl($node, $summary);
+
         return [
             'guid'         => $guid,
             'title'        => $title,
             'link'         => $link ?: null,
             'summary'      => $this->cleanSummary($summary),
             'published_at' => $published,
+            'image'        => $image,
         ];
+    }
+
+    /**
+     * Lift a hero image URL out of an RSS/Atom item.
+     *
+     * Checks in order:
+     *   1. <enclosure url="…" type="image/…"/>      (RSS 2.0 attachments)
+     *   2. <media:thumbnail url="…"/>                 (MRSS namespace)
+     *   3. <media:content url="…" medium="image"/>    (MRSS namespace)
+     *   4. First <img src="…"> in description /
+     *      content:encoded                            (universal fallback)
+     *
+     * Returns null when nothing plausible is found. Filters obviously
+     * broken entries (no http/https scheme) so we never persist a
+     * tracking-pixel data: URI as the hero image.
+     */
+    private function extractImageUrl(SimpleXMLElement $node, string $summaryHtml): ?string
+    {
+        // 1. RSS 2.0 <enclosure>
+        foreach ($node->enclosure as $enc) {
+            $type = (string) $enc['type'];
+            $url  = (string) $enc['url'];
+            if ($url !== '' && str_starts_with($type, 'image/') && $this->looksLikeHttpUrl($url)) {
+                return $url;
+            }
+        }
+
+        // 2 + 3. Media RSS namespace. Property access (`$media->content`)
+        // on a namespace-filtered SimpleXMLElement returns children with
+        // attributes stripped — burned an hour on that SimpleXML quirk.
+        // Iterating with `foreach ($media as $tag => $c)` preserves
+        // attributes via $c->attributes().
+        $media = $node->children('http://search.yahoo.com/mrss/');
+        if ($media) {
+            $thumb = null;
+            $contentHit = null;
+            foreach ($media as $tag => $c) {
+                $attrs = $c->attributes();
+                $url   = (string) ($attrs['url'] ?? '');
+                if ($url === '' || ! $this->looksLikeHttpUrl($url)) continue;
+
+                if ($tag === 'thumbnail' && $thumb === null) {
+                    $thumb = $url;
+                    continue;
+                }
+                if ($tag === 'content' && $contentHit === null) {
+                    $medium  = (string) ($attrs['medium'] ?? '');
+                    $type    = (string) ($attrs['type'] ?? '');
+                    $hasSize = isset($attrs['width']) || isset($attrs['height']);
+                    $looksImg = (bool) preg_match('/\.(jpe?g|png|gif|webp|avif)(\?|$)/i', $url);
+                    if ($medium === 'image'
+                        || str_starts_with($type, 'image/')
+                        || $hasSize
+                        || $looksImg) {
+                        $contentHit = $url;
+                    }
+                }
+            }
+            if ($thumb !== null) return $thumb;
+            if ($contentHit !== null) return $contentHit;
+        }
+
+        // 4. First <img src="…"> in body HTML
+        if ($summaryHtml !== '' && preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $summaryHtml, $m)) {
+            $url = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if ($this->looksLikeHttpUrl($url)) return $url;
+        }
+
+        return null;
+    }
+
+    private function looksLikeHttpUrl(string $url): bool
+    {
+        return (bool) preg_match('#^https?://[^\s<>"\']+$#i', $url);
     }
 
     private function toIso(string $raw): ?string
@@ -295,6 +379,13 @@ class GrimbaRssPoller
 
             if (! empty($item['published_at'])) {
                 $post->created_at = $item['published_at'];
+            }
+
+            // Hero image lift (S79). Botble's Post.image accepts both
+            // storage-relative paths and absolute URLs; we keep the
+            // upstream URL so we don't re-host copyrighted images.
+            if (! empty($item['image'])) {
+                $post->image = $item['image'];
             }
 
             // Near-duplicate detection (S78) — if this title matches an
