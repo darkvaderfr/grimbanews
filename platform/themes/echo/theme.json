@@ -1,10 +1,10 @@
 {
     "id": "archielite/echo",
-    "name": "Echo",
+    "name": "GrimbaNews",
     "namespace": "Theme\\Echo\\",
-    "author": "Archi Elite",
-    "url": "https://archielite.com",
+    "author": "Iboga Ventures — Nobu Kaizen",
+    "url": "https://grimbanews.com",
     "version": "1.0.0",
-    "description": "Echo - News & Magazine",
+    "description": "GrimbaNews — francophone news with bias classification and cross-source comparison.",
     "required_plugins": []
 }

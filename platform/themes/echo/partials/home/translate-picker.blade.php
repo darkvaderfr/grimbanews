@@ -42,13 +42,37 @@
         const menu    = root.querySelector('.grimba-region__menu');
         const csrf    = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
+        function positionMenu() {
+            const r = trigger.getBoundingClientRect();
+            // Right-align: menu's right edge follows trigger's right edge.
+            // Flip upward if the menu would clip below the viewport.
+            menu.style.visibility = 'hidden';
+            menu.style.display = 'block';
+            const mw = menu.offsetWidth;
+            const mh = menu.offsetHeight;
+            menu.style.visibility = '';
+            menu.style.display = '';
+
+            let top  = r.bottom + 6;
+            if (top + mh > window.innerHeight - 8) {
+                top = Math.max(8, r.top - mh - 6);
+            }
+            const left = Math.max(8, r.right - mw);
+
+            menu.style.top  = top + 'px';
+            menu.style.left = left + 'px';
+            menu.style.right = 'auto';
+        }
         function setOpen(open) {
+            if (open) positionMenu();
             root.classList.toggle('is-open', open);
             trigger.setAttribute('aria-expanded', String(open));
         }
         trigger.addEventListener('click', (e) => { e.stopPropagation(); setOpen(! root.classList.contains('is-open')); });
-        document.addEventListener('click', (e) => { if (! root.contains(e.target)) setOpen(false); });
+        document.addEventListener('click', (e) => { if (! root.contains(e.target) && ! menu.contains(e.target)) setOpen(false); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+        window.addEventListener('resize', () => { if (root.classList.contains('is-open')) positionMenu(); });
+        window.addEventListener('scroll', () => { if (root.classList.contains('is-open')) positionMenu(); }, { passive: true });
 
         menu.querySelectorAll('[data-grimba-translate]').forEach(btn => btn.addEventListener('click', async () => {
             const mode = btn.dataset.grimbaTranslate;
