@@ -106,12 +106,12 @@
 
     @if($isForeign && $translateMode !== 'original')
         <div class="grimba-translate-notice" role="note">
-            <strong>{{ __('Traduction automatique') }}.</strong>
-            {{ __('Cet article a été traduit par une machine depuis :lang. Il peut contenir des erreurs. Consultez la version originale pour la précision éditoriale.', ['lang' => strtoupper($postLocale)]) }}
+            <strong>{{ __('Traduit par NobuAI') }}.</strong>
+            {{ __('Cet article a été traduit automatiquement depuis :lang par NobuAI. Il peut contenir des erreurs. Consultez la version originale pour la précision éditoriale.', ['lang' => strtoupper($postLocale)]) }}
         </div>
     @elseif($isForeign && $translateMode === 'original')
         <div class="grimba-translate-notice" role="note" style="background:rgba(59,130,246,0.08); border-color:rgba(59,130,246,0.3); color:#1e3a8a;">
-            {{ __('Cet article est affiché dans sa langue d\'origine (:lang). Changez votre mode de lecture en haut à droite pour une traduction automatique.', ['lang' => strtoupper($postLocale)]) }}
+            {{ __('Cet article est affiché dans sa langue d\'origine (:lang). Changez votre mode de lecture en haut à droite pour une traduction NobuAI.', ['lang' => strtoupper($postLocale)]) }}
         </div>
     @endif
 </section>

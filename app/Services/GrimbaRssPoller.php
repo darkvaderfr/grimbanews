@@ -397,8 +397,18 @@ class GrimbaRssPoller
             // Hero image lift (S79). Botble's Post.image accepts both
             // storage-relative paths and absolute URLs; we keep the
             // upstream URL so we don't re-host copyrighted images.
+            //
+            // S93: when the RSS item carried no image, fall back to
+            // scraping the article page for og:image / twitter:image.
+            // Costs +1 HTTP req per image-less new item — bounded by
+            // the per-tick dedup so it's ≤ MAX_ITEMS_PER_FEED.
             if (! empty($item['image'])) {
                 $post->image = $item['image'];
+            } elseif (! empty($item['link'])) {
+                [$scraped] = app(GrimbaArticleImageScraper::class)->extractFromUrl($item['link']);
+                if ($scraped) {
+                    $post->image = $scraped;
+                }
             }
 
             // Near-duplicate detection (S78) — if this title matches an

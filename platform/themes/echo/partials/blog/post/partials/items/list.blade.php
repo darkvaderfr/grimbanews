@@ -1,7 +1,7 @@
 <div class="echo-hero-baner post-item-list">
     <div class="echo-inner-img-ct-1  img-transition-scale position-relative">
         <a href="{{ $post->url }}">
-            {{ RvMedia::image($post->image, $post->name, 'medium-square') }}
+            {!! Theme::partial('post-hero-img', ['post' => $post, 'size' => 'medium-square']) !!}
         </a>
         @include(Theme::getThemeNamespace('partials.blog.post.partials.action-post'))
     </div>

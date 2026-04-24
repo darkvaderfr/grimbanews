@@ -7,14 +7,14 @@
     <button type="button" class="grimba-translate__trigger" data-grimba-translate-toggle
             aria-haspopup="listbox" aria-expanded="false" title="{{ __('Mode de lecture') }}">
         <span aria-hidden="true">Aa</span>
-        <span>{{ ['original' => __('VO'), 'auto' => __('Auto'), 'both' => __('VO + Auto')][$mode] }}</span>
+        <span>{{ ['original' => __('VO'), 'auto' => __('NobuAI'), 'both' => __('VO + NobuAI')][$mode] }}</span>
         <span aria-hidden="true" class="grimba-region__caret">▾</span>
     </button>
     <ul class="grimba-region__menu" role="listbox" aria-label="{{ __('Mode de lecture') }}">
         @foreach([
-            'original' => ['label' => __('Version originale'),     'desc' => __('Articles affichés dans leur langue d\'origine.')],
-            'auto'     => ['label' => __('Traduction automatique'), 'desc' => __('Tout traduit dans votre langue (machine).')],
-            'both'     => ['label' => __('Original + traduction'),  'desc' => __('Affiche les deux, côte à côte.')],
+            'original' => ['label' => __('Version originale'),        'desc' => __('Articles affichés dans leur langue d\'origine.')],
+            'auto'     => ['label' => __('NobuAI traduit pour moi'),   'desc' => __('Tout traduit dans votre langue par NobuAI.')],
+            'both'     => ['label' => __('Original + NobuAI'),         'desc' => __('Affiche les deux, côte à côte.')],
         ] as $key => $r)
             <li>
                 <button type="button"

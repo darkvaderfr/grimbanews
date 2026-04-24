@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\GrimbaRssPoller;
+use Botble\Blog\Models\Post;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -51,9 +52,53 @@ class GrimbaPollFeeds extends Command
         $this->table(['Feed', 'Source', 'Status', 'New drafts', 'Error'], $rows);
         $this->info(sprintf('Done. %d feed(s), %d new draft post(s).', count($summary), $totalIngested));
 
+        if ($totalIngested > 0) {
+            $this->retroCluster();
+        }
+
         $this->flagUnhealthyFeeds();
 
         return self::SUCCESS;
+    }
+
+    /**
+     * S95 — after each poll tick, retroactively attach any still
+     * un-clustered drafts (from THIS tick or prior ticks) to an
+     * existing story_cluster when title similarity crosses the
+     * 0.35 Jaccard threshold. Zero HTTP cost; just DB + tokenising.
+     *
+     * This catches the "first match" lag: post A arrives, no
+     * cluster yet. Post B arrives 30 min later on the same story,
+     * gets clustered and creates the cluster. Without this step,
+     * A stays orphaned until the nightly recluster.
+     */
+    private function retroCluster(): void
+    {
+        $orphans = Post::query()
+            ->whereNull('story_cluster_id')
+            ->whereIn('status', ['draft', 'published'])
+            ->where('created_at', '>=', now()->subDays(3))
+            ->orderByDesc('id')
+            ->limit(100)
+            ->get(['id', 'name']);
+
+        if ($orphans->isEmpty()) {
+            return;
+        }
+
+        $attached = 0;
+        foreach ($orphans as $p) {
+            $cluster = GrimbaRssPoller::findLikelyCluster((string) $p->name);
+            if ($cluster === null) continue;
+            DB::table('posts')
+                ->where('id', $p->id)
+                ->update(['story_cluster_id' => $cluster, 'updated_at' => now()]);
+            $attached++;
+        }
+
+        if ($attached > 0) {
+            $this->line(sprintf('  ↳ retro-clustered %d draft(s) to existing story_clusters.', $attached));
+        }
     }
 
     /**

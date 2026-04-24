@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\GrimbaArticleImageScraper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -38,7 +39,7 @@ class GrimbaEnrichDrafts extends Command
     private const USER_AGENT = 'GrimbaNewsBot/1.0 (+https://grimbanews.com/bot)';
     private const FETCH_TIMEOUT = 15;
 
-    public function handle(): int
+    public function handle(GrimbaArticleImageScraper $scraper): int
     {
         $limit = (int) $this->option('limit');
         $feedId = $this->option('feed');
@@ -100,7 +101,7 @@ class GrimbaEnrichDrafts extends Command
             }
 
             if ($url === null && ! empty($t->link)) {
-                [$url, $how] = $this->extractFromArticlePage($t->link);
+                [$url, $how] = $scraper->extractFromUrl($t->link);
             }
 
             if ($url !== null) {
@@ -280,99 +281,6 @@ class GrimbaEnrichDrafts extends Command
             }
         }
         return '';
-    }
-
-    /**
-     * Fetch an article page and try to lift og:image, twitter:image,
-     * or the first `.jpg/.png/.webp/.avif` `<img>` in the HTML.
-     *
-     * @return array{0: ?string, 1: ?string} [url, method]
-     */
-    private function extractFromArticlePage(string $url): array
-    {
-        try {
-            $res = Http::withUserAgent(self::USER_AGENT)
-                ->withHeaders([
-                    'Accept'          => 'text/html,application/xhtml+xml',
-                    'Accept-Language' => 'fr,en;q=0.6',
-                ])
-                ->timeout(self::FETCH_TIMEOUT)
-                ->connectTimeout(10)
-                ->withOptions(['allow_redirects' => ['max' => 5]])
-                ->get($url);
-
-            if (! $res->successful()) {
-                return [null, null];
-            }
-
-            $html = (string) $res->body();
-            if ($html === '') {
-                return [null, null];
-            }
-
-            // og:image (property-then-content OR content-then-property)
-            if (preg_match('/<meta[^>]+property=["\']og:image(?::url)?["\'][^>]*content=["\']([^"\']+)["\']/i', $html, $m)
-                || preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]*property=["\']og:image(?::url)?["\']/i', $html, $m)) {
-                $img = $this->resolveUrl(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'), $url);
-                if ($img && $this->looksHttp($img)) {
-                    return [$img, 'og'];
-                }
-            }
-
-            // twitter:image
-            if (preg_match('/<meta[^>]+name=["\']twitter:image(?::src)?["\'][^>]*content=["\']([^"\']+)["\']/i', $html, $m)
-                || preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]*name=["\']twitter:image(?::src)?["\']/i', $html, $m)) {
-                $img = $this->resolveUrl(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'), $url);
-                if ($img && $this->looksHttp($img)) {
-                    return [$img, 'twitter'];
-                }
-            }
-
-            // First meaningful <img> with a real image extension —
-            // skip tracking pixels and sprite sheets.
-            if (preg_match('/<img[^>]+src=["\']([^"\']+\.(?:jpe?g|png|webp|avif)(?:\?[^"\']*)?)["\']/i', $html, $m)) {
-                $img = $this->resolveUrl(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'), $url);
-                if ($img && $this->looksHttp($img)) {
-                    return [$img, 'img'];
-                }
-            }
-        } catch (Throwable $e) {
-            Log::debug('[grimba:enrich-drafts] article fetch failed', [
-                'url'   => $url,
-                'error' => $e->getMessage(),
-            ]);
-        }
-
-        return [null, null];
-    }
-
-    /**
-     * Upgrade relative/protocol-relative URLs to absolute, using the
-     * article URL as the base. Some publishers ship og:image as
-     * /wp-content/... or //cdn.example/...
-     */
-    private function resolveUrl(string $candidate, string $base): ?string
-    {
-        if ($candidate === '') {
-            return null;
-        }
-        if (str_starts_with($candidate, 'http://') || str_starts_with($candidate, 'https://')) {
-            return $candidate;
-        }
-        $parts = parse_url($base);
-        if (! $parts || empty($parts['scheme']) || empty($parts['host'])) {
-            return null;
-        }
-        $origin = $parts['scheme'] . '://' . $parts['host'];
-        if (str_starts_with($candidate, '//')) {
-            return $parts['scheme'] . ':' . $candidate;
-        }
-        if (str_starts_with($candidate, '/')) {
-            return $origin . $candidate;
-        }
-        // rare: plain relative — resolve against directory of base path
-        $dir = isset($parts['path']) ? rtrim(dirname($parts['path']), '/') : '';
-        return $origin . $dir . '/' . $candidate;
     }
 
     private function looksHttp(string $url): bool

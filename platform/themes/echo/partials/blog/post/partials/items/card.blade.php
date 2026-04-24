@@ -19,7 +19,7 @@
 <article class="article-card {{ $classWrapper ?? null }}">
     <div class="article-card__image">
         <a href="{{ $post->url }}">
-            {{ RvMedia::image($post->image, $post->name, 'large') }}
+            {!! Theme::partial('post-hero-img', ['post' => $post, 'size' => 'large']) !!}
         </a>
 
         {{-- Bias Badge --}}
@@ -59,6 +59,11 @@
                 {{ $__title }}
             </a>
         </h2>
+        @if ($__mode !== 'original' && $__hasTr)
+            <div class="article-card__nobuai mb-1">
+                {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+            </div>
+        @endif
         @if ($__subTitle)
             <div class="article-card__subtitle small opacity-75 mb-1" lang="{{ $post->original_language }}" title="{{ $__subTitle }}">
                 {{ $__subTitle }}

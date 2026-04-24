@@ -106,6 +106,17 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('og/home.png', [\App\Http\Controllers\GrimbaOgImageController::class, 'home'])->name('public.og.home');
         Route::get('og/home',     [\App\Http\Controllers\GrimbaOgImageController::class, 'home'])->name('public.og.home.alt');
 
+        // S96 — editorial SVG placeholder for posts with no image.
+        // Served cheap (no GD, no file cache — one string build per
+        // request, HTTP cached for 24h). Reader cards + hero fall back
+        // to this when posts.image is null.
+        Route::get('og/placeholder/{id}.svg', [\App\Http\Controllers\GrimbaPlaceholderController::class, 'show'])
+            ->where('id', '[0-9]+')
+            ->name('public.og.placeholder');
+        Route::get('og/placeholder/{id}', [\App\Http\Controllers\GrimbaPlaceholderController::class, 'show'])
+            ->where('id', '[0-9]+')
+            ->name('public.og.placeholder.alt');
+
         // GrimbaNews /search — SQLite FTS5 with source + bias facets.
         // Registered before Botble's default /search (Botble\Blog\Http\
         // Controllers\PublicController) so our handler wins. Keeps the

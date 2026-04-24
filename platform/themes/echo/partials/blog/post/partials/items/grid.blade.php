@@ -7,7 +7,7 @@
 <article class="article-card">
     <div class="article-card__image">
         <a href="{{ $post->url }}">
-            {{ RvMedia::image($post->image, $post->name, 'medium') }}
+            {!! Theme::partial('post-hero-img', ['post' => $post, 'size' => 'medium']) !!}
         </a>
 
         {{-- Bias Badge top-right --}}

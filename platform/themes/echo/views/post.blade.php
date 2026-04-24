@@ -82,6 +82,11 @@
                             <h2 class="echo-hero-title text-capitalize font-weight-bold mt-0">
                                 <a title="{{ $__gnTitle }}" href="{{ $url }}" class="title-hover truncate-custom truncate-3-custom">{{ $__gnTitle }}</a>
                             </h2>
+                            @if ($__gnMode !== 'original' && $__gnHasTr)
+                                <div class="mt-2 mb-2">
+                                    {!! Theme::partial('nobuai-chip', ['size' => 'md']) !!}
+                                </div>
+                            @endif
                             @if ($__gnOriginalTitle)
                                 <p class="small opacity-75 mb-3" lang="{{ $post->original_language }}" title="{{ $__gnOriginalTitle }}">
                                     {{ $__gnOriginalTitle }}
