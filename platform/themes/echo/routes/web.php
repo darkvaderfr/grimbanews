@@ -106,6 +106,83 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('og/home.png', [\App\Http\Controllers\GrimbaOgImageController::class, 'home'])->name('public.og.home');
         Route::get('og/home',     [\App\Http\Controllers\GrimbaOgImageController::class, 'home'])->name('public.og.home.alt');
 
+        // GrimbaNews /search — SQLite FTS5 with source + bias facets.
+        // Registered before Botble's default /search (Botble\Blog\Http\
+        // Controllers\PublicController) so our handler wins. Keeps the
+        // existing search.blade.php view (expects $posts) and layers on
+        // the optional $availableSources / $availableBiases / $selected
+        // view vars for the facet UI.
+        $searchHandler = function (Request $request) {
+            $q        = trim((string) $request->query('q', ''));
+            $sourceId = (int) $request->query('source', 0) ?: null;
+            $bias     = in_array($request->query('bias'), ['left', 'center', 'right', 'unknown'], true)
+                ? $request->query('bias')
+                : null;
+
+            $posts = collect();
+
+            if ($q !== '') {
+                // Quote every term so FTS5's syntax characters in user
+                // input ("OR", "NOT", "*", "-") never throw fts5: syntax
+                // error. Terms are ANDed implicitly.
+                $ftsQuery = collect(preg_split('/\s+/u', $q))
+                    ->filter(fn ($t) => mb_strlen($t) > 0)
+                    ->map(fn ($t) => '"' . str_replace('"', '""', $t) . '"')
+                    ->implode(' ');
+
+                $ids = DB::table('posts_fts')
+                    ->whereRaw('posts_fts MATCH ?', [$ftsQuery])
+                    ->orderByRaw('bm25(posts_fts)')
+                    ->limit(500)
+                    ->pluck('rowid')
+                    ->all();
+
+                if (! empty($ids)) {
+                    $query = \Botble\Blog\Models\Post::query()
+                        ->whereIn('posts.id', $ids)
+                        ->where('posts.status', 'published');
+
+                    if ($sourceId) {
+                        $query->where('posts.source_id', $sourceId);
+                    }
+                    if ($bias) {
+                        $query->where('posts.bias_rating', $bias);
+                    }
+
+                    // Preserve the BM25 ordering from the FTS result.
+                    $idOrder = implode(',', array_map('intval', $ids));
+                    $query->orderByRaw("CASE posts.id " .
+                        collect($ids)
+                            ->values()
+                            ->map(fn ($id, $i) => 'WHEN ' . (int) $id . ' THEN ' . $i)
+                            ->implode(' ') .
+                        " END");
+
+                    $posts = $query->paginate(12)->withQueryString();
+                } else {
+                    $posts = \Botble\Blog\Models\Post::query()->whereRaw('1 = 0')->paginate(12);
+                }
+            }
+
+            $availableSources = DB::table('news_sources')->orderBy('name')->get(['id', 'name']);
+
+            SeoHelper::setTitle(($q !== '' ? "Recherche : {$q}" : 'Recherche') . ' — GrimbaNews')
+                ->setDescription('Explorez les articles, sources et dossiers de GrimbaNews.');
+
+            Theme::breadcrumb()
+                ->add('Accueil', url('/'))
+                ->add('Recherche', url('/search'));
+
+            return Theme::scope('search', [
+                'posts'            => $posts,
+                'availableSources' => $availableSources,
+                'selectedSource'   => $sourceId,
+                'selectedBias'     => $bias,
+            ])->render();
+        };
+
+        Route::get('search', $searchHandler)->name('public.grimba-search');
+
         Route::post('translate/set', function (Request $request) {
             $mode = $request->input('mode');
             $allowed = ['original', 'auto', 'both'];

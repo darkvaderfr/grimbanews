@@ -5,6 +5,16 @@
     $total = $posts instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator
         ? $posts->total()
         : $posts->count();
+    $availableSources = $availableSources ?? collect();
+    $selectedSource   = $selectedSource   ?? null;
+    $selectedBias     = $selectedBias     ?? null;
+    $biasChoices      = [
+        ''        => 'Tous biais',
+        'left'    => 'Gauche',
+        'center'  => 'Centre',
+        'right'   => 'Droite',
+        'unknown' => 'Non classé',
+    ];
 @endphp
 
 <section class="grimba-search-page container py-5">
@@ -19,12 +29,35 @@
             @endif
         </h1>
         <form method="GET" action="{{ url('/search') }}" class="mt-3" role="search">
-            <div class="d-flex gap-2 flex-wrap">
+            <div class="d-flex gap-2 flex-wrap align-items-center">
                 <input type="search" name="q" value="{{ $query }}"
                        placeholder="Rechercher une histoire, un sujet, une source…"
                        class="flex-grow-1"
                        style="min-width: 280px; padding: 0.6rem 1rem; border-radius: 9999px; border: 1px solid var(--gn-rule); background: rgba(255,255,255,0.8);">
+
+                <select name="source" aria-label="Filtrer par source"
+                        style="padding: 0.6rem 1rem; border-radius: 9999px; border: 1px solid var(--gn-rule); background: rgba(255,255,255,0.8);">
+                    <option value="">Toutes sources</option>
+                    @foreach($availableSources as $src)
+                        <option value="{{ $src->id }}" @selected((int) $selectedSource === (int) $src->id)>
+                            {{ $src->name }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <select name="bias" aria-label="Filtrer par biais"
+                        style="padding: 0.6rem 1rem; border-radius: 9999px; border: 1px solid var(--gn-rule); background: rgba(255,255,255,0.8);">
+                    @foreach($biasChoices as $key => $label)
+                        <option value="{{ $key }}" @selected((string) $selectedBias === (string) $key)>{{ $label }}</option>
+                    @endforeach
+                </select>
+
                 <button type="submit" class="btn-grimba btn-grimba--solid">Chercher</button>
+
+                @if($selectedSource || $selectedBias)
+                    <a href="{{ url('/search?q=' . urlencode($query)) }}"
+                       class="small" style="color: var(--gn-ink); opacity: .6;">Réinitialiser les filtres</a>
+                @endif
             </div>
         </form>
     </header>
