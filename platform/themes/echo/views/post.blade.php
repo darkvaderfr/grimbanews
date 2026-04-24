@@ -29,6 +29,26 @@
     $authorStyle = theme_option('blog_author_style');
     $url = $post->url;
 
+    // S89: single-post translation respects the grimba_translate reader
+    // cookie the same way the grid card + hero do. When auto/both is set
+    // and we have a translated row that targets the reader's locale,
+    // swap title + description + content (content stays untranslated in
+    // this sprint — only name + description are translated at ingest
+    // time; the full body is S91 follow-up when Vader wires DeepL doc-
+    // translate or an equivalent).
+    $__gnMode   = (string) (request()->cookie('grimba_translate') ?? 'original');
+    if (! in_array($__gnMode, ['original', 'auto', 'both'], true)) $__gnMode = 'original';
+    $__gnTarget = (string) (request()->cookie('grimba_lang') ?? 'fr');
+    $__gnHasTr  = ! empty($post->translated_name)
+        && ($post->translated_to ?? null) === $__gnTarget
+        && ($post->original_language ?? null) !== $__gnTarget;
+
+    $__gnTitle   = ($__gnMode !== 'original' && $__gnHasTr) ? $post->translated_name : $post->name;
+    $__gnOriginalTitle = ($__gnMode === 'both' && $__gnHasTr) ? $post->name : null;
+    $__gnDesc    = ($__gnMode !== 'original' && $__gnHasTr && $post->translated_description)
+        ? $post->translated_description
+        : $post->description;
+
     Theme::set('breadcrumb_background_image', $post->getMetaData('breadcrumb_background_image', true));
     Theme::set('breadcrumb_background_color', $post->getMetaData('breadcrumb_background_color', true));
     Theme::set('breadcrumb_text_color', $post->getMetaData('breadcrumb_text_color', true));
@@ -60,8 +80,17 @@
                             @include(Theme::getThemeNamespace('partials.blog.post.partials.source-attribution'), ['post' => $post])
 
                             <h2 class="echo-hero-title text-capitalize font-weight-bold mt-0">
-                                <a title="{{ $post->name }}" href="{{ $url }}" class="title-hover truncate-custom truncate-3-custom">{{ $post->name }}</a>
+                                <a title="{{ $__gnTitle }}" href="{{ $url }}" class="title-hover truncate-custom truncate-3-custom">{{ $__gnTitle }}</a>
                             </h2>
+                            @if ($__gnOriginalTitle)
+                                <p class="small opacity-75 mb-3" lang="{{ $post->original_language }}" title="{{ $__gnOriginalTitle }}">
+                                    {{ $__gnOriginalTitle }}
+                                </p>
+                            @elseif ($__gnMode !== 'original' && ! $__gnHasTr && ($post->original_language ?? null) && $post->original_language !== $__gnTarget)
+                                <p class="small opacity-50 mb-2" lang="{{ $post->original_language }}">
+                                    <em>— traduction en attente ({{ strtoupper($post->original_language) }})</em>
+                                </p>
+                            @endif
 
                             {!! Theme::partial('post-meta', [
                                 'post' => $post,
@@ -77,7 +106,7 @@
                                 </div>
                             @endif
 
-                            @if ($description = $post->description)
+                            @if ($description = $__gnDesc)
                                 @if ($descriptionStyle == 'drop_cap')
                                     <p class="echo-hero-discription">
                                         @if ($firstChar = substr($description, 0, 1))
