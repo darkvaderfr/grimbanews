@@ -14,3 +14,13 @@ Schedule::command('grimba:cleanup-slugs')
     ->dailyAt('03:15')
     ->onOneServer()
     ->withoutOverlapping();
+
+// GrimbaNews — RSS ingest. 30-minute cadence strikes the usual
+// francophone publishing rhythm without hammering upstream feeds.
+// withoutOverlapping protects against a slow run overlapping the
+// next tick; runInBackground keeps artisan schedule:run itself snappy.
+Schedule::command('grimba:poll-feeds')
+    ->everyThirtyMinutes()
+    ->onOneServer()
+    ->withoutOverlapping(20)
+    ->runInBackground();
