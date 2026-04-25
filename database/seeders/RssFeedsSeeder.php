@@ -40,6 +40,21 @@ class RssFeedsSeeder extends Seeder
             'The Guardian'      => ['url' => 'https://www.theguardian.com/world/rss',                            'active' => true,  'notes' => null],
             'Reuters'           => ['url' => 'https://feeds.reuters.com/reuters/topNews',                        'active' => false, 'notes' => '2026-04-24: feeds.reuters.com DNS gone after their paywall migration. No replacement without API access.'],
             'All Africa'        => ['url' => 'https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf',   'active' => true,  'notes' => 'Pan-African wire service — compensates for Cameroon Tribune outage.'],
+
+            // S152 — right-leaning feeds added 2026-04-26 to balance the
+            // FR/center-heavy default mix. Seven of these poll cleanly;
+            // Le Point + L'Opinion default URLs 404 and are kept inactive
+            // until an editor supplies a working replacement.
+            'Daily Mail'             => ['url' => 'https://www.dailymail.co.uk/news/index.rss',          'active' => true,  'notes' => 'S152 — right-leaning UK tabloid coverage.'],
+            'The Telegraph'          => ['url' => 'https://www.telegraph.co.uk/rss.xml',                 'active' => true,  'notes' => 'S152 — right-leaning UK broadsheet.'],
+            'The Wall Street Journal'=> ['url' => 'https://feeds.a.dj.com/rss/RSSWorldNews.xml',         'active' => true,  'notes' => 'S152 — right-of-center US business daily, world news section.'],
+            'National Review'        => ['url' => 'https://www.nationalreview.com/feed/',                'active' => true,  'notes' => 'S152 — US conservative magazine.'],
+            'Fox News'               => ['url' => 'https://moxie.foxnews.com/google-publisher/latest.xml','active' => true, 'notes' => 'S152 — right-leaning US cable + web news.'],
+            'The Washington Times'   => ['url' => 'https://www.washingtontimes.com/rss/headlines/news/world/','active' => true,'notes' => 'S152 — US right-leaning daily, world section.'],
+            'Breitbart News'         => ['url' => 'https://feeds.feedburner.com/breitbart',              'active' => true,  'notes' => 'S152 — US right-wing news site.'],
+            // Le Point + L'Opinion attempted at S152 — both 404 from
+            // their advertised RSS endpoints. Skipped here until an
+            // editor supplies a working URL.
         ];
 
         $now = now();
