@@ -11,14 +11,22 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // GrimbaNews reader-history cookie is set client-side via JS
-        // on every post view — can't be Laravel-encrypted. Exclude it
-        // so EncryptCookies doesn't null it out server-side.
-        // grimba_cookie_consent (S145) is also set client-side from
-        // the consent banner so it stays plain.
+        // GrimbaNews reader-preference cookies live unencrypted so:
+        //   1. JS on the client can read them (already true for
+        //      grimba_read which is set in JS)
+        //   2. The server-side region scope (S147) reads the same
+        //      plain value JS would write
+        //   3. End users / tests can inspect them in devtools without
+        //      having to round-trip through a Laravel decrypt
+        // None of these store anything sensitive — they're UI prefs.
         $middleware->encryptCookies(except: [
             'grimba_read',
             'grimba_cookie_consent',
+            'grimba_region',
+            'grimba_lang',
+            'grimba_translate',
+            'grimba_follow',
+            'grimba_onboarded',
         ]);
 
         // Apply our locale-from-cookie switch on every web request.
