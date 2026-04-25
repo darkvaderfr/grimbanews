@@ -420,7 +420,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->whereNotNull('owner_name')
                 ->where('owner_name', '!=', '')
                 ->orderBy('name')
-                ->get(['name','slug','owner_name','bias_rating','country','credibility_score']);
+                ->get(['name','slug','owner_name','bias_rating','country','credibility_score','website']);
 
             $owners = $sources
                 ->groupBy('owner_name')

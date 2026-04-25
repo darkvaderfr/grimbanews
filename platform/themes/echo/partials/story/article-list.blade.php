@@ -3,11 +3,35 @@
      * S148 — Cluster article list. Renders all posts in the same
      * story_cluster, grouped by bias, with filter tabs.
      *
+     * S161 — honor the grimba_translate cookie. Previous version
+     * always rendered post.name (original) — flipping the picker to
+     * NobuAI did nothing visible to the article list. Now we resolve
+     * each post's display title + description through the same
+     * mode/locale gate the post hero uses.
+     *
      * @var \Illuminate\Database\Eloquent\Collection $clusterPosts
      * @var \Botble\Blog\Models\Post                 $currentPost  the post the reader landed on
      */
 
     use Illuminate\Support\Str;
+
+    $__listMode   = (string) (request()->cookie('grimba_translate') ?? 'original');
+    if ($__listMode === 'both') $__listMode = 'auto';
+    if (! in_array($__listMode, ['original', 'auto'], true)) $__listMode = 'original';
+    $__listTarget = (string) (request()->cookie('grimba_lang') ?? app()->getLocale() ?? 'fr');
+
+    $resolveTitle = function ($cp) use ($__listMode, $__listTarget) {
+        $hasTr = ! empty($cp->translated_name)
+            && ($cp->translated_to ?? null) === $__listTarget
+            && ($cp->original_language ?? null) !== $__listTarget;
+        return ($__listMode === 'auto' && $hasTr) ? $cp->translated_name : $cp->name;
+    };
+    $resolveDesc = function ($cp) use ($__listMode, $__listTarget) {
+        $hasTr = ! empty($cp->translated_description)
+            && ($cp->translated_to ?? null) === $__listTarget
+            && ($cp->original_language ?? null) !== $__listTarget;
+        return ($__listMode === 'auto' && $hasTr) ? $cp->translated_description : $cp->description;
+    };
 
     $byBias = ['left' => [], 'center' => [], 'right' => [], 'unknown' => []];
     foreach ($clusterPosts as $cp) {
@@ -105,19 +129,33 @@
                         @endif
                     </div>
 
+                    @php
+                        $__title = $resolveTitle($cp);
+                        $__desc  = $resolveDesc($cp);
+                        $__showNobuChip = ($__listMode === 'auto')
+                            && ! empty($cp->translated_name)
+                            && ($cp->translated_to ?? null) === $__listTarget
+                            && ($cp->original_language ?? null) !== $__listTarget;
+                    @endphp
                     <h3 style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; line-height:1.3; letter-spacing:-0.2px; margin:0 0 8px;">
                         @if($isCurrent)
-                            {{ $cp->name }}
+                            {{ $__title }}
                         @else
                             <a href="{{ $cp->url ?? '#' }}" style="color:var(--gn-ink,#1a1713); text-decoration:none;">
-                                {{ $cp->name }}
+                                {{ $__title }}
                             </a>
                         @endif
                     </h3>
 
-                    @if($cp->description)
+                    @if($__showNobuChip)
+                        <div class="mb-2">
+                            {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+                        </div>
+                    @endif
+
+                    @if($__desc)
                         <p class="small opacity-85 mb-2" style="line-height:1.5;">
-                            {{ Str::limit(strip_tags($cp->description), 220) }}
+                            {{ Str::limit(strip_tags($__desc), 220) }}
                         </p>
                     @endif
 

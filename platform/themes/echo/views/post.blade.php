@@ -70,6 +70,13 @@
                 'id', 'name', 'description', 'source_id', 'source_name',
                 'bias_rating', 'story_cluster_id', 'created_at', 'updated_at',
                 'image',
+                // S161 — translation fields so the cluster article list
+                // can honor the NobuAI toggle. Without these the
+                // SELECT'd object had only `name`, leaving the list
+                // stuck on original-language headlines regardless of
+                // cookie state.
+                'translated_name', 'translated_description',
+                'translated_to', 'original_language',
             ]);
         $__gnIsStoryPage = $__gnClusterPosts->count() >= 2;
     }
@@ -101,23 +108,28 @@
 
                 {{-- Hero block: title, current article meta, bias chips --}}
                 <header class="glass-panel p-3 p-md-4 mb-3">
-                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2 small">
-                        <span class="grimba-methodology__kicker">Histoire</span>
-                        @if($post->source_name)
+                    <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap mb-2">
+                        <div class="d-flex align-items-center gap-2 flex-wrap small">
+                            <span class="grimba-methodology__kicker">Histoire</span>
+                            @if($post->source_name)
+                                <span class="opacity-50">·</span>
+                                <span class="opacity-75">Lu d'abord chez {{ $post->source_name }}</span>
+                            @endif
                             <span class="opacity-50">·</span>
-                            <span class="opacity-75">Lu d'abord chez {{ $post->source_name }}</span>
-                        @endif
-                        <span class="opacity-50">·</span>
-                        <span class="opacity-75">
-                            {{ $__gnClusterPosts->count() }} {{ $__gnClusterPosts->count() === 1 ? 'couverture' : 'couvertures' }}
-                        </span>
-                        @php
-                            $__gnLatest = $__gnClusterPosts->max('updated_at');
-                        @endphp
-                        @if($__gnLatest)
-                            <span class="opacity-50">·</span>
-                            <span class="opacity-75">Mis à jour {{ $__gnLatest->locale('fr')->diffForHumans() }}</span>
-                        @endif
+                            <span class="opacity-75">
+                                {{ $__gnClusterPosts->count() }} {{ $__gnClusterPosts->count() === 1 ? 'couverture' : 'couvertures' }}
+                            </span>
+                            @php
+                                $__gnLatest = $__gnClusterPosts->max('updated_at');
+                            @endphp
+                            @if($__gnLatest)
+                                <span class="opacity-50">·</span>
+                                <span class="opacity-75">Mis à jour {{ $__gnLatest->locale('fr')->diffForHumans() }}</span>
+                            @endif
+                        </div>
+                        {{-- S162 — translate toggle moved here from header.
+                             Reader meets it in context. --}}
+                        @include(Theme::getThemeNamespace('partials.home.translate-picker'))
                     </div>
 
                     <h1 class="grimba-methodology__title m-0 mb-2"
@@ -207,6 +219,12 @@
 <section class="echo-hero-section inner inner-post echo-feature-area bg-white blog-post-details-content">
     <div class="echo-hero">
         <div class="container">
+            {{-- S162 — translate toggle on the legacy single-post hero,
+                 mirroring the story-page placement. Out-of-cluster
+                 articles still need a translation control. --}}
+            <div class="d-flex justify-content-end mb-3">
+                @include(Theme::getThemeNamespace('partials.home.translate-picker'))
+            </div>
             <div class="echo-full-hero-content">
                 <div class="row gx-5 sticky-coloum-wrap">
                     <div class="col-xl-8 col-lg-8">

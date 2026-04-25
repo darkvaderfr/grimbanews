@@ -89,15 +89,12 @@
                                        color:var(--gn-ink,#1a1713);
                                        text-decoration:none;
                                    ">
-                                    <span style="
-                                        flex-shrink:0;
-                                        width:34px; height:34px; border-radius:50%;
-                                        background:{{ $meta['color'] }}1a;
-                                        color:{{ $meta['color'] }};
-                                        display:inline-flex; align-items:center; justify-content:center;
-                                        font-family:'Public Sans',system-ui,sans-serif;
-                                        font-weight:700; font-size:11px; letter-spacing:0.5px;
-                                    ">{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($s->name, 0, 2)) }}</span>
+                                    {!! Theme::partial('source-logo', [
+                                        'name'    => $s->name,
+                                        'website' => $s->website ?? null,
+                                        'size'    => 34,
+                                        'color'   => $meta['color'],
+                                    ]) !!}
                                     <span style="flex:1; min-width:0;">
                                         <span style="display:block; font-weight:600; line-height:1.2; word-break:break-word;">
                                             {{ $s->name }}

@@ -21,8 +21,12 @@
                 </div>
                 <span class="opacity-25">·</span>
                 @include(Theme::getThemeNamespace('partials.home.lang-switch'))
-                <span class="opacity-25">·</span>
-                @include(Theme::getThemeNamespace('partials.home.translate-picker'))
+                {{-- S162 — translate-picker moved out of header into the
+                     story page itself. Header had two language-related
+                     pills (FR/EN + VO/NobuAI) which read as duplicate
+                     intent. The reader meets the toggle where it
+                     matters — on an article. Cookie is global, so a
+                     flip on one article applies sitewide. --}}
             </div>
             <div class="small opacity-75 d-flex align-items-center gap-2">
                 <span class="d-none d-md-inline">{{ ucfirst($topDate) }}</span>

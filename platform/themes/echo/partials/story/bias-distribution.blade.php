@@ -6,6 +6,19 @@
      *
      * @var \Illuminate\Database\Eloquent\Collection $clusterPosts
      */
+    // S161 — fetch website for each unique source so the logo
+    // partial can lift Clearbit + favicon. Map name → website via
+    // a single news_sources lookup keyed on the source_id list.
+    $sourceIds = $clusterPosts->pluck('source_id')->filter()->unique()->all();
+    $sourceMeta = [];
+    if (! empty($sourceIds)) {
+        $sourceMeta = \Illuminate\Support\Facades\DB::table('news_sources')
+            ->whereIn('id', $sourceIds)
+            ->get(['id', 'name', 'website'])
+            ->keyBy('id')
+            ->all();
+    }
+
     $sourcesByBias = ['left' => [], 'center' => [], 'right' => [], 'unknown' => []];
     $seen = [];
     foreach ($clusterPosts as $cp) {
@@ -16,7 +29,10 @@
         $seen[$key] = true;
         $b = $cp->bias_rating ?? 'unknown';
         if (! isset($sourcesByBias[$b])) $b = 'unknown';
-        $sourcesByBias[$b][] = $name;
+        $website = $cp->source_id && isset($sourceMeta[$cp->source_id])
+            ? $sourceMeta[$cp->source_id]->website
+            : null;
+        $sourcesByBias[$b][] = ['name' => $name, 'website' => $website];
     }
 
     $counts = [
@@ -30,13 +46,6 @@
         'center' => $known ? round($counts['center'] * 100 / $known) : 0,
         'right'  => $known ? round($counts['right']  * 100 / $known) : 0,
     ];
-
-    /** @return string Two-letter source initials. "Le Monde" → "LM" */
-    $initials = function (string $name): string {
-        $words = preg_split('/\s+/u', preg_replace('/[\(\)\\.\,]/u', '', $name)) ?: [];
-        if (count($words) === 1) return mb_strtoupper(mb_substr($words[0], 0, 2));
-        return mb_strtoupper(mb_substr($words[0], 0, 1) . mb_substr($words[1], 0, 1));
-    };
 
     $biasMeta = [
         'left'   => ['label' => 'Gauche', 'color' => '#3b82f6'],
@@ -78,20 +87,14 @@
 
         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
             @foreach(['left', 'center', 'right'] as $b)
-                <div style="display:flex; flex-direction:column; align-items:center; gap:4px; min-height:1px;">
-                    @foreach(array_slice($sourcesByBias[$b], 0, 6) as $sname)
-                        <span title="{{ $sname }}"
-                              style="
-                                  display:inline-flex; align-items:center; justify-content:center;
-                                  width:36px; height:36px; border-radius:50%;
-                                  background:{{ $biasMeta[$b]['color'] }}1a;
-                                  color:{{ $biasMeta[$b]['color'] }};
-                                  border:1.5px solid {{ $biasMeta[$b]['color'] }}55;
-                                  font-family:'Public Sans',system-ui,sans-serif;
-                                  font-weight:700; font-size:12px; letter-spacing:0.5px;
-                              ">
-                            {{ $initials($sname) }}
-                        </span>
+                <div style="display:flex; flex-direction:column; align-items:center; gap:6px; min-height:1px;">
+                    @foreach(array_slice($sourcesByBias[$b], 0, 6) as $entry)
+                        {!! Theme::partial('source-logo', [
+                            'name'    => $entry['name'],
+                            'website' => $entry['website'] ?? null,
+                            'size'    => 36,
+                            'color'   => $biasMeta[$b]['color'],
+                        ]) !!}
                     @endforeach
                     @if(count($sourcesByBias[$b]) > 6)
                         <span style="font-size:11px; opacity:0.6; font-weight:600;">
