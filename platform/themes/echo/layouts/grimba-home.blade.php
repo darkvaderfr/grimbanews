@@ -57,6 +57,9 @@
 
     <main class="grimba-home-main">
         <div class="container-xxl">
+            {{-- S154 — multi-bias hero rail. Shows only when ≥1 cluster
+                 has cross-spectrum coverage; hides itself otherwise. --}}
+            @include(Theme::getThemeNamespace('partials.home.all-sides-rail'))
             @include(Theme::getThemeNamespace('partials.home.hero-grid'))
             @include(Theme::getThemeNamespace('partials.home.top-news'))
             @include(Theme::getThemeNamespace('partials.home.section-blocks'))
