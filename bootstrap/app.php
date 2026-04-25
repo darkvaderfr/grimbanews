@@ -14,8 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // GrimbaNews reader-history cookie is set client-side via JS
         // on every post view — can't be Laravel-encrypted. Exclude it
         // so EncryptCookies doesn't null it out server-side.
+        // grimba_cookie_consent (S145) is also set client-side from
+        // the consent banner so it stays plain.
         $middleware->encryptCookies(except: [
             'grimba_read',
+            'grimba_cookie_consent',
         ]);
 
         // Apply our locale-from-cookie switch on every web request.

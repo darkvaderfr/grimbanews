@@ -66,6 +66,9 @@
 
     @include(Theme::getThemeNamespace('partials.home.footer-dark'))
 
+    {{-- S145 — cookie consent overlay (mirrors grimba-chrome). --}}
+    @include(Theme::getThemeNamespace('partials.cookie-consent'))
+
     <script>'use strict'; window.siteConfig = {};</script>
     {!! Theme::footer() !!}
 </body>

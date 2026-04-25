@@ -29,7 +29,11 @@
 
     $emailOptional   = CommentHelper::isEmailOptional();
     $showWebsite     = CommentHelper::isShowWebsiteField();
-    $showCookieConsent = CommentHelper::isShowCommentCookieConsent();
+    // S145 — comment-form cookie consent is now handled by the
+    // site-wide cookie banner (partials/cookie-consent.blade.php).
+    // The plugin's per-form checkbox positioned outside the form
+    // panel due to CSS conflicts and was non-functional regardless.
+    $showCookieConsent = false;
     $reCaptchaOn     = CommentHelper::isEnableReCaptcha();
 
     $titleText = trans('plugins/fob-comment::comment.front.form.title');

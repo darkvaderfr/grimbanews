@@ -71,6 +71,10 @@
 
     @include(Theme::getThemeNamespace('partials.home.footer-dark'))
 
+    {{-- S145 — site-wide cookie consent overlay (sticky bottom-right
+         until accept/reject; gated on admin setting). --}}
+    @include(Theme::getThemeNamespace('partials.cookie-consent'))
+
     <script>'use strict'; window.siteConfig = {};</script>
     {!! Theme::footer() !!}
 </body>

@@ -103,6 +103,27 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('og/post/{id}', [\App\Http\Controllers\GrimbaOgImageController::class, 'show'])
             ->where('id', '[0-9]+')
             ->name('public.og.post.alt');
+        // S145 — cookie-consent endpoint. Records the visitor's
+        // accept/reject choice as an unencrypted cookie + writes a
+        // fire-and-forget log line for audit. Returns 204; the
+        // banner JS already hides itself client-side.
+        Route::post('cookie-consent/{action}', function (Request $request, string $action) {
+            if (! in_array($action, ['accept', 'reject'], true)) {
+                return response()->noContent(400);
+            }
+            $value = $action === 'accept' ? 'accepted' : 'rejected';
+
+            \Illuminate\Support\Facades\Log::info('[grimba.cookie-consent] choice', [
+                'choice'  => $value,
+                'ip_hash' => substr(sha1((string) $request->ip()), 0, 12),
+                'ua_hash' => substr(sha1((string) $request->userAgent()), 0, 12),
+            ]);
+
+            return response()
+                ->noContent()
+                ->cookie('grimba_cookie_consent', $value, 60 * 24 * 365, '/', null, false, false);
+        })->name('public.cookie-consent');
+
         Route::get('og/home.png', [\App\Http\Controllers\GrimbaOgImageController::class, 'home'])->name('public.og.home');
         Route::get('og/home',     [\App\Http\Controllers\GrimbaOgImageController::class, 'home'])->name('public.og.home.alt');
 
