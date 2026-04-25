@@ -432,13 +432,19 @@ class GrimbaRssPoller
                 }
             }
 
-            // Near-duplicate detection (S78 + S132) — match against
-            // existing clusters first; if none, attempt to form a new
-            // cluster from recent orphan articles on the same event.
-            // Editors can override via the post editor dropdown if
-            // the auto-guess is wrong.
+            // Near-duplicate detection (S78 + S132 + S159) — match
+            // against existing clusters first; if none, attempt to form
+            // a new cluster from recent orphan articles on the same
+            // event. Folds translated_name tokens in when available so
+            // cross-language coverage clusters too.
             if (empty($post->story_cluster_id)) {
-                $candidate = self::findOrFormCluster($post->name);
+                $candidate = self::findOrFormCluster(
+                    (string) $post->name,
+                    30,
+                    0.30,
+                    false,
+                    $post->translated_name ?? null,
+                );
                 if ($candidate !== null) {
                     $post->story_cluster_id = $candidate;
                 }
@@ -477,7 +483,7 @@ class GrimbaRssPoller
      * (≤30 days old, attached to a cluster) crosses the 0.35
      * Jaccard threshold. Null when nothing sticks.
      */
-    public static function findLikelyCluster(string $title, int $lookbackDays = 30, float $threshold = 0.30): ?int
+    public static function findLikelyCluster(string $title, int $lookbackDays = 30, float $threshold = 0.30, ?string $translatedTitle = null): ?int
     {
         // S151 — threshold tuned 0.35 → 0.30. The previous setting
         // missed too many same-event francophone clusters: news
@@ -485,10 +491,17 @@ class GrimbaRssPoller
         // tokeniser drops stopwords aggressively, so even close
         // matches scored just below 0.35.
         //
+        // S159 — caller can pass the post's translated_name. Tokens
+        // from both the original AND the translation are unioned, so
+        // an EN headline ("Trump cancels Pakistan trip") and a FR
+        // headline ("Trump annule le voyage au Pakistan") share
+        // enough proper-noun tokens to cluster across the language
+        // boundary. The diacritic-folder already normalises both.
+        //
         // The lookback window cap (still 30 days here) is the safety
         // net: a 2025 "retraites" story won't pull a 2026 "retraites"
         // story even at the looser threshold.
-        $target = self::tokeniseForMatch($title);
+        $target = self::tokensForPost($title, $translatedTitle);
         if (count($target) < 3) {
             return null;
         }
@@ -497,11 +510,11 @@ class GrimbaRssPoller
             ->whereNotNull('story_cluster_id')
             ->whereIn('status', ['published', 'draft'])
             ->where('created_at', '>=', now()->subDays($lookbackDays))
-            ->get(['name', 'story_cluster_id']);
+            ->get(['name', 'translated_name', 'story_cluster_id']);
 
         $byCluster = [];
         foreach ($candidates as $c) {
-            $other = self::tokeniseForMatch((string) $c->name);
+            $other = self::tokensForPost((string) $c->name, $c->translated_name);
             if (count($other) < 3) continue;
 
             $score = self::jaccard($target, $other);
@@ -549,15 +562,16 @@ class GrimbaRssPoller
         int $lookbackDays = 30,
         float $threshold = 0.30,
         bool $dryRun = false,
+        ?string $translatedTitle = null,
     ): ?int {
         // Stage 1 — existing-cluster match (cheap, indexed lookup).
-        $existing = self::findLikelyCluster($title, $lookbackDays, $threshold);
+        $existing = self::findLikelyCluster($title, $lookbackDays, $threshold, $translatedTitle);
         if ($existing !== null) {
             return $existing;
         }
 
         // Stage 2 — orphan scan. Only fires when stage 1 returned null.
-        $target = self::tokeniseForMatch($title);
+        $target = self::tokensForPost($title, $translatedTitle);
         if (count($target) < 3) {
             return null;
         }
@@ -586,11 +600,13 @@ class GrimbaRssPoller
             // Recency wins; older orphans get a chance via the next
             // article that arrives within their window.
             ->limit(500)
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'translated_name']);
 
         $matches = [];
         foreach ($orphans as $o) {
-            $other = self::tokeniseForMatch((string) $o->name);
+            // S159 — same as findLikelyCluster, fold translation
+            // tokens in so EN + FR variants of the same event match.
+            $other = self::tokensForPost((string) $o->name, $o->translated_name);
             if (count($other) < 3) continue;
             $score = self::jaccard($target, $other);
             if ($score >= $threshold) {
@@ -635,6 +651,28 @@ class GrimbaRssPoller
         ]);
 
         return $clusterId;
+    }
+
+    /**
+     * S159 — token set for a post, unioning original title + an
+     * optional translated title. When both are present, an EN
+     * headline like "Trump cancels Pakistan trip" and its FR
+     * translation "Trump annule le voyage au Pakistan" share the
+     * proper-noun tokens (trump, pakistan), letting cross-language
+     * coverage cluster together.
+     *
+     * @return array<int, string>
+     */
+    public static function tokensForPost(string $name, ?string $translatedName = null): array
+    {
+        $tokens = self::tokeniseForMatch($name);
+        if ($translatedName !== null && trim($translatedName) !== '') {
+            $tokens = array_values(array_unique(array_merge(
+                $tokens,
+                self::tokeniseForMatch($translatedName)
+            )));
+        }
+        return $tokens;
     }
 
     /**

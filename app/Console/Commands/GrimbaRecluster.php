@@ -25,7 +25,7 @@ class GrimbaRecluster extends Command
             ->whereNull('story_cluster_id')
             ->whereIn('status', ['draft', 'published'])
             ->orderBy('id')
-            ->get(['id', 'name', 'status', 'source_name']);
+            ->get(['id', 'name', 'status', 'source_name', 'translated_name']);
 
         $this->info(sprintf(
             'Scanning %d un-clustered post(s), threshold=%.2f, lookback=%d days%s.',
@@ -42,7 +42,13 @@ class GrimbaRecluster extends Command
             // S132 — try existing-cluster match AND orphan-orphan
             // formation. dryRun honors --dry-run on the command so
             // we don't write story_clusters during a preview.
-            $cluster = GrimbaRssPoller::findOrFormCluster($p->name, $lookback, $threshold, $dry);
+            $cluster = GrimbaRssPoller::findOrFormCluster(
+                (string) $p->name,
+                $lookback,
+                $threshold,
+                $dry,
+                $p->translated_name ?? null,
+            );
             if ($cluster === null) continue;
             if ($cluster < 0) {
                 // Dry preview sentinel — note "would form/attach"

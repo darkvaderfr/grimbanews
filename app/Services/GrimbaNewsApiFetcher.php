@@ -375,12 +375,18 @@ class GrimbaNewsApiFetcher
                 $post->image = $a['image'];
             }
 
-            // Reuse the static cluster helper (S132) — match against
-            // existing clusters AND form new clusters from orphans.
-            // A NewsAPI article and an RSS article on the same event
-            // now cluster even when neither was clustered before.
+            // Reuse the static cluster helper (S132 + S159) — match
+            // against existing clusters AND form new clusters from
+            // orphans, folding in translated_name tokens for cross-
+            // language matching when a translation exists already.
             if (empty($post->story_cluster_id)) {
-                $candidate = GrimbaRssPoller::findOrFormCluster($post->name);
+                $candidate = GrimbaRssPoller::findOrFormCluster(
+                    (string) $post->name,
+                    30,
+                    0.30,
+                    false,
+                    $post->translated_name ?? null,
+                );
                 if ($candidate !== null) {
                     $post->story_cluster_id = $candidate;
                 }
