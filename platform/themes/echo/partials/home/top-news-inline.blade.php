@@ -58,11 +58,9 @@
                     <a href="{{ $p->url }}" class="grimba-topnews__headline">{{ $p->name }}</a>
                     {!! Theme::partial('home.coverage-bar', ['post' => $p, 'compact' => false]) !!}
                 </div>
-                @if($p->image)
-                    <a href="{{ $p->url }}" class="grimba-topnews__thumb">
-                        {{ RvMedia::image($p->image, $p->name, 'thumb-medium') }}
-                    </a>
-                @endif
+                <a href="{{ $p->url }}" class="grimba-topnews__thumb">
+                    {!! Theme::partial('post-hero-img', ['post' => $p, 'size' => 'thumb-medium']) !!}
+                </a>
             </li>
         @endforeach
     </ul>

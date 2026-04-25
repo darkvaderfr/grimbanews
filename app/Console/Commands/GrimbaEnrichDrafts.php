@@ -32,7 +32,8 @@ class GrimbaEnrichDrafts extends Command
     protected $signature = 'grimba:enrich-drafts
         {--limit=0 : Cap number of posts processed (0 = no cap)}
         {--feed= : Restrict to one rss_feeds.id}
-        {--dry-run : Report what would change without writing}';
+        {--dry-run : Report what would change without writing}
+        {--force : Re-attempt scrape on ALL RSS-backed posts (not just image-less). Captures upstream upgrades — e.g. a publisher fixing their og:image tag.}';
 
     protected $description = 'Backfill hero images on RSS-ingested posts that have no `posts.image` yet (S84).';
 
@@ -41,15 +42,20 @@ class GrimbaEnrichDrafts extends Command
 
     public function handle(GrimbaArticleImageScraper $scraper): int
     {
-        $limit = (int) $this->option('limit');
+        $limit  = (int) $this->option('limit');
         $feedId = $this->option('feed');
-        $dry = (bool) $this->option('dry-run');
+        $dry    = (bool) $this->option('dry-run');
+        $force  = (bool) $this->option('force');
+        $startedAt = microtime(true);
 
         $query = DB::table('posts')
             ->join('rss_feed_items', 'rss_feed_items.post_id', '=', 'posts.id')
             ->leftJoin('rss_feeds', 'rss_feeds.id', '=', 'rss_feed_items.feed_id')
-            ->where(fn ($q) => $q->whereNull('posts.image')->orWhere('posts.image', ''))
             ->orderBy('posts.id');
+
+        if (! $force) {
+            $query->where(fn ($q) => $q->whereNull('posts.image')->orWhere('posts.image', ''));
+        }
 
         if ($feedId !== null) {
             $query->where('rss_feed_items.feed_id', (int) $feedId);
@@ -68,12 +74,18 @@ class GrimbaEnrichDrafts extends Command
 
         if ($targets->isEmpty()) {
             $this->info('No candidates — nothing to backfill.');
+            $this->logCoverage([
+                'candidates' => 0, 'enriched' => 0, 'via' => ['feed' => 0, 'og' => 0, 'twitter' => 0, 'img' => 0],
+                'missing' => 0, 'force' => $force, 'dry' => $dry, 'feed_id' => $feedId,
+                'duration_s' => round(microtime(true) - $startedAt, 2),
+            ]);
             return self::SUCCESS;
         }
 
-        $this->info(sprintf('Candidates: %d%s%s',
+        $this->info(sprintf('Candidates: %d%s%s%s',
             $targets->count(),
             $feedId !== null ? " (feed #{$feedId})" : '',
+            $force ? ' [FORCE — all posts, not just image-less]' : '',
             $dry ? ' [DRY RUN]' : ''
         ));
 
@@ -138,7 +150,49 @@ class GrimbaEnrichDrafts extends Command
             $this->warn('DRY RUN — no posts.image values were written. Re-run without --dry-run to persist.');
         }
 
+        $this->logCoverage([
+            'candidates' => $targets->count(),
+            'enriched'   => $got,
+            'via'        => $via,
+            'missing'    => $missing,
+            'force'      => $force,
+            'dry'        => $dry,
+            'feed_id'    => $feedId,
+            'duration_s' => round(microtime(true) - $startedAt, 2),
+        ]);
+
         return self::SUCCESS;
+    }
+
+    /**
+     * S105 — append a one-line structured record to
+     * storage/logs/grimba-image-coverage.log so Vader can grep weekly
+     * trends without parsing artisan stdout. Also writes to Laravel's
+     * default log channel for centralised view.
+     *
+     * Format: ISO timestamp · candidates=N · enriched=M (feed=A og=B twitter=C img=D) · missing=K · force=bool · dry=bool · duration=s
+     */
+    private function logCoverage(array $stats): void
+    {
+        $line = sprintf(
+            "[%s] grimba:enrich-drafts candidates=%d enriched=%d (feed=%d og=%d twitter=%d img=%d) missing=%d force=%s dry=%s feed=%s duration=%ss\n",
+            now()->toIso8601String(),
+            (int) $stats['candidates'],
+            (int) $stats['enriched'],
+            (int) ($stats['via']['feed'] ?? 0),
+            (int) ($stats['via']['og'] ?? 0),
+            (int) ($stats['via']['twitter'] ?? 0),
+            (int) ($stats['via']['img'] ?? 0),
+            (int) $stats['missing'],
+            $stats['force'] ? 'true' : 'false',
+            $stats['dry']   ? 'true' : 'false',
+            $stats['feed_id'] !== null ? (string) $stats['feed_id'] : '-',
+            $stats['duration_s']
+        );
+
+        $path = storage_path('logs/grimba-image-coverage.log');
+        @file_put_contents($path, $line, FILE_APPEND | LOCK_EX);
+        Log::info('[grimba:enrich-drafts] run complete', $stats);
     }
 
     /**

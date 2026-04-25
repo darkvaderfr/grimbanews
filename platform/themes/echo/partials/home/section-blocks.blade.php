@@ -51,9 +51,7 @@
             <div class="col-lg-7 col-12">
                 @if($latest)
                     <a href="{{ $latest->url }}" class="grimba-section__hero">
-                        @if($latest->image)
-                            {{ RvMedia::image($latest->image, $latest->name, 'extra-large') }}
-                        @endif
+                        {!! Theme::partial('post-hero-img', ['post' => $latest, 'size' => 'extra-large']) !!}
                         <div class="grimba-section__hero-body">
                             <span class="grimba-section__kicker">Dernières {{ strtolower($cat->name) }}</span>
                             <h3 class="grimba-section__hero-title">{{ $latest->name }}</h3>
@@ -68,11 +66,9 @@
 
                 @foreach($categoryBlindspots as $b)
                     <a href="{{ $b->url }}" class="grimba-blind-card grimba-blind-card--wide">
-                        @if($b->image)
-                            <div class="grimba-blind-card__media">
-                                {{ RvMedia::image($b->image, $b->name, 'medium') }}
-                            </div>
-                        @endif
+                        <div class="grimba-blind-card__media">
+                            {!! Theme::partial('post-hero-img', ['post' => $b, 'size' => 'medium']) !!}
+                        </div>
                         <div class="grimba-blind-card__body">
                             <span class="blindspot-badge blindspot-badge--on-dark">Angle mort</span>
                             <h4 class="grimba-blind-card__title">{{ $b->name }}</h4>

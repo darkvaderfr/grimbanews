@@ -82,11 +82,9 @@
             <ol class="grimba-briefing__list">
                 @foreach($briefing->take(5) as $p)
                     <li class="grimba-briefing__item">
-                        @if($p->image)
-                            <a href="{{ $p->url }}" class="grimba-briefing__thumb">
-                                {{ RvMedia::image($p->image, $p->name, 'small') }}
-                            </a>
-                        @endif
+                        <a href="{{ $p->url }}" class="grimba-briefing__thumb">
+                            {!! Theme::partial('post-hero-img', ['post' => $p, 'size' => 'small']) !!}
+                        </a>
                         <div class="grimba-briefing__body">
                             <a href="{{ $p->url }}" class="grimba-briefing__headline">{{ $p->name }}</a>
                             @if($p->created_at)
@@ -107,9 +105,7 @@
         <section class="col-xl-6 col-lg-8 col-12 grimba-hero">
             @if($hero)
                 <a href="{{ $hero->url }}" class="grimba-hero__media">
-                    @if($hero->image)
-                        {{ RvMedia::image($hero->image, $hero->name, 'extra-large') }}
-                    @endif
+                    {!! Theme::partial('post-hero-img', ['post' => $hero, 'size' => 'extra-large']) !!}
                     <div class="grimba-hero__gradient"></div>
                     @php
                         $__mode = (string) (request()->cookie('grimba_translate') ?? 'original');
@@ -125,6 +121,11 @@
                     @endphp
                     <div class="grimba-hero__text">
                         <h1 class="grimba-hero__title">{{ $__heroTitle }}</h1>
+                        @if($__mode !== 'original' && $__hasTr)
+                            <div class="mt-2 mb-1">
+                                {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+                            </div>
+                        @endif
                         @if($__mode === 'both' && $__hasTr)
                             <p class="grimba-hero__title-original small opacity-75 mt-1 mb-2" lang="{{ $hero->original_language }}">{{ $hero->name }}</p>
                         @endif
@@ -156,11 +157,9 @@
 
             @foreach($blindspots as $b)
                 <a href="{{ $b->url }}" class="grimba-blind-card">
-                    @if($b->image)
-                        <div class="grimba-blind-card__media">
-                            {{ RvMedia::image($b->image, $b->name, 'medium') }}
-                        </div>
-                    @endif
+                    <div class="grimba-blind-card__media">
+                        {!! Theme::partial('post-hero-img', ['post' => $b, 'size' => 'medium']) !!}
+                    </div>
                     <div class="grimba-blind-card__body">
                         <span class="grimba-blind-card__tag">
                             <span class="blindspot-badge blindspot-badge--on-dark">Angle mort</span>
@@ -175,61 +174,7 @@
                 Voir le fil des angles morts →
             </a>
 
-            @php
-                $readRaw = (string) request()->cookie('grimba_read', '');
-                $readIds = array_filter(array_map('intval', explode(',', $readRaw)));
-
-                $readPosts = collect();
-                $biasCounts = ['left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0];
-                $readSources = [];
-
-                if (! empty($readIds)) {
-                    $readPosts = Post::query()
-                        ->whereIn('id', $readIds)
-                        ->where('status', 'published')
-                        ->get();
-
-                    foreach ($readPosts as $rp) {
-                        $r = $rp->bias_rating ?? 'unknown';
-                        if (isset($biasCounts[$r])) $biasCounts[$r]++;
-                        if ($rp->source_name) $readSources[$rp->source_name] = true;
-                    }
-                }
-
-                $readTotal    = $readPosts->count();
-                $known        = $biasCounts['left'] + $biasCounts['center'] + $biasCounts['right'];
-                $pct = [
-                    'left'   => $known ? round($biasCounts['left']   * 100 / $known) : 33,
-                    'center' => $known ? round($biasCounts['center'] * 100 / $known) : 34,
-                    'right'  => $known ? round($biasCounts['right']  * 100 / $known) : 33,
-                ];
-                $sourcesCount = count($readSources);
-            @endphp
-
-            <section class="grimba-bias-profile">
-                <h4 class="h6 mb-1">Votre biais de lecture</h4>
-                <p class="small opacity-75 mb-2">
-                    @if($readTotal === 0)
-                        0 source · 0 article · <em>lisez quelques articles pour voir votre profil</em>
-                    @else
-                        {{ $sourcesCount }} {{ $sourcesCount === 1 ? 'source' : 'sources' }} · {{ $readTotal }} {{ $readTotal === 1 ? 'article' : 'articles' }} lus
-                    @endif
-                </p>
-                <div style="display:flex;height:8px;border-radius:9999px;overflow:hidden;background:rgba(0,0,0,.08);">
-                    <div style="width:{{ $pct['left'] }}%;background:#3b82f6;" title="Gauche {{ $pct['left'] }}%"></div>
-                    <div style="width:{{ $pct['center'] }}%;background:#a8a8a8;" title="Centre {{ $pct['center'] }}%"></div>
-                    <div style="width:{{ $pct['right'] }}%;background:#ef4444;" title="Droite {{ $pct['right'] }}%"></div>
-                </div>
-                @if($readTotal > 0)
-                    <div class="d-flex justify-content-between small mt-2">
-                        <span style="color:#3b82f6;font-weight:600;">Gauche {{ $pct['left'] }}%</span>
-                        <span style="color:#a8a8a8;font-weight:600;">Centre {{ $pct['center'] }}%</span>
-                        <span style="color:#ef4444;font-weight:600;">Droite {{ $pct['right'] }}%</span>
-                    </div>
-                @else
-                    <a href="{{ url('/blog') }}" class="small text-decoration-underline mt-2 d-inline-block">Commencer à lire</a>
-                @endif
-            </section>
+            {!! Theme::partial('bias-mix', ['variant' => 'compact']) !!}
         </aside>
 
     </div>

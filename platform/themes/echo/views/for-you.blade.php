@@ -50,6 +50,11 @@
             @endif
         </header>
 
+        {{-- S100 — bias-mix widget. Reads grimba_read cookie, no server state. --}}
+        <div class="glass-panel p-3 p-md-4 mb-4">
+            {!! Theme::partial('bias-mix', ['variant' => 'full']) !!}
+        </div>
+
         @if($posts->isEmpty())
             <div class="glass-panel p-4 text-center">
                 <p class="mb-0">Aucune histoire correspondant à vos sujets pour l'instant.</p>

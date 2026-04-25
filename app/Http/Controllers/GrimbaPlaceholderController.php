@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Botble\Blog\Models\Post;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 /*
  * S96 — editorial SVG placeholder for posts that have no image after
@@ -30,14 +31,23 @@ class GrimbaPlaceholderController
     {
         $post = Post::query()->where('id', $postId)->first([
             'id', 'name', 'translated_name', 'translated_to',
-            'source_name', 'bias_rating',
+            'source_name', 'source_id', 'bias_rating',
         ]);
 
         $source = $post->source_name ?? 'GrimbaNews';
         $title  = trim((string) ($post->translated_name ?: $post->name ?? 'Article'));
         $bias   = $post->bias_rating ?? 'unknown';
 
-        $svg = $this->render($source, $title, $bias);
+        // S102 — pull country tag for the kicker line if the post is
+        // backed by a registered news_source row.
+        $country = null;
+        if ($post && $post->source_id) {
+            $country = DB::table('news_sources')
+                ->where('id', $post->source_id)
+                ->value('country');
+        }
+
+        $svg = $this->render($source, $title, $bias, $country);
 
         return response($svg, 200, [
             'Content-Type'  => 'image/svg+xml; charset=UTF-8',
@@ -46,7 +56,7 @@ class GrimbaPlaceholderController
         ]);
     }
 
-    private function render(string $source, string $title, string $bias): string
+    private function render(string $source, string $title, string $bias, ?string $country = null): string
     {
         $w = self::W;
         $h = self::H;
@@ -58,44 +68,78 @@ class GrimbaPlaceholderController
             default  => '#6b6459',
         };
 
+        $biasLabel = match ($bias) {
+            'left'   => 'GAUCHE',
+            'right'  => 'DROITE',
+            'center' => 'CENTRE',
+            default  => '—',
+        };
+
+        // S102 — deterministic source-derived hue accent so each
+        // outlet's placeholder is visually distinct without needing
+        // an admin-set brand_color column. Saturated 18%, lightness
+        // 92% keeps the wash subtle — newsprint, not neon.
+        $hue = $this->sourceHue($source);
+        $sourceWash = "hsl({$hue}, 25%, 90%)";
+
         // Soft editorial palette (matches --gn-paper / --gn-ink tokens).
         $paper = '#f6f1e8';
         $ink   = '#1a1713';
         $rule  = '#1a171366';
 
         $sourceEsc = htmlspecialchars(mb_strtoupper($source), ENT_QUOTES | ENT_XML1, 'UTF-8');
+        $kickerCountry = $country
+            ? htmlspecialchars(mb_strtoupper($country), ENT_QUOTES | ENT_XML1, 'UTF-8')
+            : 'GRIMBANEWS';
 
-        // Title: wrap to 3 lines of ~34 chars. Truncate with em-dash if
+        // Title: wrap to 3 lines of ~32 chars. Truncate with em-dash if
         // it overflows. Serif headline rendered via generic font-family
         // so the client picks up whatever "Fraunces"-alike it has.
-        $lines = $this->wrapTitle($title, 34, 3);
-        $titleY = 310;
-        $titleLineHeight = 72;
+        $lines = $this->wrapTitle($title, 32, 3);
+        $titleY = 320;
+        $titleLineHeight = 74;
 
         $titleSvg = '';
         foreach ($lines as $i => $line) {
             $y = $titleY + ($i * $titleLineHeight);
             $esc = htmlspecialchars($line, ENT_QUOTES | ENT_XML1, 'UTF-8');
-            $titleSvg .= "\n    <text x=\"120\" y=\"{$y}\" fill=\"{$ink}\" font-size=\"60\" font-family=\"'Fraunces','Playfair Display',Georgia,serif\" font-weight=\"600\" letter-spacing=\"-0.5\">{$esc}</text>";
+            $titleSvg .= "\n    <text x=\"120\" y=\"{$y}\" fill=\"{$ink}\" font-size=\"62\" font-family=\"'Fraunces','Playfair Display',Georgia,serif\" font-weight=\"600\" letter-spacing=\"-0.5\">{$esc}</text>";
         }
 
         return <<<SVG
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {$w} {$h}" width="{$w}" height="{$h}" role="img" aria-label="GrimbaNews">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {$w} {$h}" width="{$w}" height="{$h}" role="img" aria-label="GrimbaNews · {$sourceEsc}">
     <defs>
         <pattern id="grain" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
             <rect width="4" height="4" fill="{$paper}"/>
             <circle cx="1" cy="1" r="0.3" fill="{$ink}" opacity="0.05"/>
         </pattern>
+        <linearGradient id="sourceWash" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="{$sourceWash}" stop-opacity="0.85"/>
+            <stop offset="60%" stop-color="{$paper}" stop-opacity="1"/>
+        </linearGradient>
     </defs>
     <rect width="{$w}" height="{$h}" fill="url(#grain)"/>
+    <rect width="{$w}" height="240" fill="url(#sourceWash)"/>
     <rect x="0" y="0" width="32" height="{$h}" fill="{$stripeColor}"/>
     <line x1="120" y1="160" x2="1080" y2="160" stroke="{$rule}" stroke-width="1"/>
-    <text x="120" y="128" fill="{$ink}" font-size="28" font-family="'Public Sans',system-ui,sans-serif" font-weight="700" letter-spacing="3">{$sourceEsc}</text>
-    <text x="120" y="200" fill="{$ink}" opacity="0.55" font-size="20" font-family="'Public Sans',system-ui,sans-serif" letter-spacing="1">ARTICLE · GRIMBANEWS</text>{$titleSvg}
-    <text x="120" y="{$h}" dy="-48" fill="{$ink}" opacity="0.5" font-size="22" font-family="'Public Sans',system-ui,sans-serif">grimbanews.com</text>
+    <text x="120" y="128" fill="{$ink}" font-size="32" font-family="'Public Sans',system-ui,sans-serif" font-weight="700" letter-spacing="3">{$sourceEsc}</text>
+    <text x="120" y="200" fill="{$ink}" opacity="0.55" font-size="18" font-family="'Public Sans',system-ui,sans-serif" letter-spacing="1.5">{$kickerCountry} · BIAIS {$biasLabel}</text>{$titleSvg}
+    <line x1="120" y1="{$h}" y2="{$h}" x2="280" stroke="{$stripeColor}" stroke-width="3" transform="translate(0,-72)"/>
+    <text x="120" y="{$h}" dy="-30" fill="{$ink}" opacity="0.5" font-size="22" font-family="'Public Sans',system-ui,sans-serif">grimbanews.com</text>
 </svg>
 SVG;
+    }
+
+    /**
+     * Map a source name to a stable hue (0-360). Pure hash; no LUT
+     * to maintain. Different sources land in different parts of the
+     * spectrum so the page doesn't feel monochrome.
+     */
+    private function sourceHue(string $source): int
+    {
+        $hash = crc32($source);
+        return (int) ($hash % 360);
     }
 
     /** @return array<int, string> */
