@@ -82,6 +82,11 @@
             </p>
         @endif
 
+        {{-- S136 — coverage bar (only renders when story_cluster has
+             ≥2 bias sides; otherwise falls back to source · bias chip
+             OR nothing if neither is set). --}}
+        {!! Theme::partial('home.coverage-bar', ['post' => $post, 'compact' => true]) !!}
+
         {{-- Meta --}}
         <div class="article-card__meta">
             {!! Theme::partial('post-meta', [

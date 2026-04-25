@@ -49,7 +49,12 @@
                         color: {{ $biasColor }};
                         font-size:12px; font-weight:700; letter-spacing:0.4px; text-transform:uppercase;
                     ">{{ $biasLabel }}</span>
-                <span class="small opacity-75">Crédibilité {{ $source->credibility_score ?? '—' }} · {{ $ownershipLabel }}</span>
+                <span class="small opacity-75">
+                    Crédibilité {{ $source->credibility_score ?? '—' }} · {{ $ownershipLabel }}
+                    @if($source->owner_name)
+                        · propriété de <strong>{{ $source->owner_name }}</strong>
+                    @endif
+                </span>
             </div>
 
             <h1 class="grimba-methodology__title mt-1 mb-3" style="font-size: clamp(32px, 4vw, 52px);">

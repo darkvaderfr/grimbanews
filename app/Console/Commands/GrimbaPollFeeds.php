@@ -88,11 +88,23 @@ class GrimbaPollFeeds extends Command
 
         $attached = 0;
         foreach ($orphans as $p) {
-            $cluster = GrimbaRssPoller::findLikelyCluster((string) $p->name);
+            // S132 — findOrFormCluster handles both existing-cluster
+            // match AND orphan-orphan formation. Note: the latter
+            // already updates DB rows itself (atomically inside the
+            // helper's transaction), so we only need to update THIS
+            // post's row when the helper returned a non-null id and
+            // we haven't been moved already.
+            $cluster = GrimbaRssPoller::findOrFormCluster((string) $p->name);
             if ($cluster === null) continue;
-            DB::table('posts')
-                ->where('id', $p->id)
-                ->update(['story_cluster_id' => $cluster, 'updated_at' => now()]);
+
+            // Re-read story_cluster_id — findOrFormCluster may have
+            // already attached this post via the orphan sweep.
+            $current = DB::table('posts')->where('id', $p->id)->value('story_cluster_id');
+            if ($current === null) {
+                DB::table('posts')
+                    ->where('id', $p->id)
+                    ->update(['story_cluster_id' => $cluster, 'updated_at' => now()]);
+            }
             $attached++;
         }
 

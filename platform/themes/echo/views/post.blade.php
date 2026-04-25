@@ -103,6 +103,12 @@
                                 'isSingle' => true,
                             ]) !!}
 
+                            {{-- S141 — "see other coverages" chip when the
+                                 post belongs to a multi-source cluster --}}
+                            <div class="text-center text-md-start mt-3">
+                                {!! Theme::partial('comparatif-cta', ['post' => $post]) !!}
+                            </div>
+
                             @if (echo_is_audio_post($post))
                                 <div class="wrapper-audio-control">
                                     <audio controls>

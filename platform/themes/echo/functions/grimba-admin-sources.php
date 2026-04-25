@@ -39,6 +39,60 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             return view('grimba-admin.news-sources.index', compact('sources', 'q'));
         })->name('news-sources.index');
 
+        // S133 — unknown-bias triage queue. NewsAPI auto-creates
+        // source rows for outlets not in its catalog (BFMTV,
+        // Lalibre.be, etc.); they land here marked unknown for
+        // editor classification.
+        Route::get('news-sources/triage', function () {
+            $rows = DB::table('news_sources')
+                ->where('bias_rating', 'unknown')
+                ->orderByDesc('updated_at')
+                ->get();
+
+            // Hydrate per-row article counts + a sample headline.
+            $ids = $rows->pluck('id')->all();
+            $counts = collect();
+            $samples = collect();
+            if (! empty($ids)) {
+                $counts = DB::table('posts')
+                    ->whereIn('source_id', $ids)
+                    ->select('source_id', DB::raw('COUNT(*) as c'))
+                    ->groupBy('source_id')
+                    ->pluck('c', 'source_id');
+
+                $samples = DB::table('posts')
+                    ->whereIn('source_id', $ids)
+                    ->orderByDesc('id')
+                    ->get(['id', 'name', 'source_id'])
+                    ->groupBy('source_id')
+                    ->map(fn ($g) => $g->take(2)->pluck('name')->all());
+            }
+
+            return view('grimba-admin.news-sources.triage', [
+                'rows'    => $rows,
+                'counts'  => $counts,
+                'samples' => $samples,
+            ]);
+        })->name('news-sources.triage');
+
+        Route::post('news-sources/{id}/quick-classify', function (Request $request, int $id) {
+            $exists = DB::table('news_sources')->where('id', $id)->exists();
+            abort_if(! $exists, 404);
+
+            $data = Validator::make($request->all(), [
+                'bias_rating'       => 'required|in:left,center,right,unknown',
+                'ownership_type'    => 'nullable|string|max:64',
+                'credibility_score' => 'nullable|integer|min:0|max:100',
+                'country'           => 'nullable|string|max:8',
+                'language'          => 'nullable|string|max:8',
+            ])->validate();
+
+            $data['updated_at'] = now();
+            DB::table('news_sources')->where('id', $id)->update($data);
+
+            return response()->json(['ok' => true]);
+        })->name('news-sources.quick-classify');
+
         Route::get('news-sources/create', function () {
             return view('grimba-admin.news-sources.form', [
                 'source' => null,

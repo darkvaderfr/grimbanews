@@ -5,6 +5,31 @@
     $rawFollow = (string) request()->cookie('grimba_follow', '');
     $followedIds = array_filter(array_map('intval', explode(',', $rawFollow)));
     $isFollowed = in_array($category->id, $followedIds, true);
+
+    // S138 — category-level bias distribution. Computed from the
+    // last 200 published posts in this category. Reveals how the
+    // topic is being covered overall — when one side dominates, the
+    // bar surfaces it before the reader even scrolls.
+    use Botble\Blog\Models\Post;
+    $catBias = Post::query()
+        ->whereHas('categories', fn ($q) => $q->where('categories.id', $category->id))
+        ->where('status', 'published')
+        ->latest()
+        ->limit(200)
+        ->get(['bias_rating'])
+        ->reduce(function (array $a, $p) {
+            $r = $p->bias_rating ?? 'unknown';
+            if (! isset($a[$r])) $a[$r] = 0;
+            $a[$r]++;
+            return $a;
+        }, ['left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0]);
+    $catKnown = $catBias['left'] + $catBias['center'] + $catBias['right'];
+    $catTotal = $catKnown + $catBias['unknown'];
+    $catPct = [
+        'left'   => $catKnown ? round($catBias['left']   * 100 / $catKnown) : 0,
+        'center' => $catKnown ? round($catBias['center'] * 100 / $catKnown) : 0,
+        'right'  => $catKnown ? round($catBias['right']  * 100 / $catKnown) : 0,
+    ];
 @endphp
 
 <section class="grimba-category-hero container">
@@ -32,6 +57,29 @@
                 <span>{{ $isFollowed ? 'Suivi' : 'Suivre ce sujet' }}</span>
             </button>
         </div>
+
+        @if($catKnown > 0)
+            <div class="mt-4">
+                <p class="small opacity-75 mb-2">
+                    <strong>Couverture sur {{ $category->name }}</strong> ·
+                    {{ $catTotal }} {{ $catTotal === 1 ? 'article archivé' : 'articles archivés' }}{{ $catBias['unknown'] > 0 ? ' (' . $catBias['unknown'] . ' non classé' . ($catBias['unknown'] === 1 ? '' : 's') . ')' : '' }}
+                </p>
+                <div style="display:flex;height:14px;border-radius:9999px;overflow:hidden;background:rgba(0,0,0,.08);">
+                    <div style="width:{{ $catPct['left'] }}%;background:#3b82f6;" title="Gauche {{ $catPct['left'] }}%"></div>
+                    <div style="width:{{ $catPct['center'] }}%;background:#a8a8a8;" title="Centre {{ $catPct['center'] }}%"></div>
+                    <div style="width:{{ $catPct['right'] }}%;background:#e84c3d;" title="Droite {{ $catPct['right'] }}%"></div>
+                </div>
+                <div class="d-flex justify-content-between small mt-2">
+                    <span style="color:#3b82f6;font-weight:600;">Gauche {{ $catPct['left'] }}%</span>
+                    <span style="color:#a8a8a8;font-weight:600;">Centre {{ $catPct['center'] }}%</span>
+                    <span style="color:#e84c3d;font-weight:600;">Droite {{ $catPct['right'] }}%</span>
+                </div>
+                <p class="small opacity-60 mt-2 mb-0">
+                    Distribution réelle des biais sur les 200 derniers articles de ce sujet.
+                    Quand un côté domine, vous voyez immédiatement où la couverture s'écarte.
+                </p>
+            </div>
+        @endif
     </header>
 </section>
 

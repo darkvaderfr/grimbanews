@@ -12,5 +12,9 @@
         @if ($description = $post->description)
             <p class="echo-hero-discription truncate-custom truncate-3-custom" title="{{ $description }}">{!! BaseHelper::clean($description) !!}</p>
         @endif
+
+        {{-- S136 — coverage bar (compact). Only fires when the
+             cluster has ≥2 bias sides, else falls back to Centre/Source. --}}
+        {!! Theme::partial('home.coverage-bar', ['post' => $post, 'compact' => true]) !!}
     </div>
 </div>

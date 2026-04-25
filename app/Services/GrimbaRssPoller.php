@@ -411,13 +411,13 @@ class GrimbaRssPoller
                 }
             }
 
-            // Near-duplicate detection (S78) — if this title matches an
-            // article already attached to a cluster, inherit the cluster
-            // so the L/C/R coverage bar lights up on first ingest.
-            // Editors can override via the post editor dropdown if the
-            // auto-guess is wrong.
+            // Near-duplicate detection (S78 + S132) — match against
+            // existing clusters first; if none, attempt to form a new
+            // cluster from recent orphan articles on the same event.
+            // Editors can override via the post editor dropdown if
+            // the auto-guess is wrong.
             if (empty($post->story_cluster_id)) {
-                $candidate = self::findLikelyCluster($post->name);
+                $candidate = self::findOrFormCluster($post->name);
                 if ($candidate !== null) {
                     $post->story_cluster_id = $candidate;
                 }
@@ -487,6 +487,109 @@ class GrimbaRssPoller
 
         arsort($byCluster);
         return (int) array_key_first($byCluster);
+    }
+
+    /**
+     * S132 — full cluster resolution: existing match OR new cluster
+     * formation from orphans. THE GroundNews-grade unlock.
+     *
+     * Without this method, two un-clustered articles on the same
+     * event NEVER cluster — findLikelyCluster only matches against
+     * posts that already have a story_cluster_id. At scale (NewsAPI
+     * ingest, 100s of articles/day), 95% of stories stayed orphan.
+     *
+     * Two-stage resolution:
+     *   1. findLikelyCluster — if any existing cluster matches, use it
+     *   2. otherwise, scan recent ORPHAN posts (story_cluster_id IS NULL)
+     *      and find ones that match the new title above threshold.
+     *      If ≥1 orphan matches, MINT a new story_cluster row, attach
+     *      the orphan(s) plus the calling article's id (caller fills
+     *      the new article's row separately because it isn't saved
+     *      yet at call time).
+     *
+     * Returns the resolved story_cluster_id, or null when nothing
+     * matches (= a genuine new story; first article in its cluster).
+     *
+     * Pure: doesn't touch the calling article's row. The caller
+     * applies the returned id to its own draft. Existing orphans are
+     * mutated in-place (atomic update inside a transaction).
+     */
+    public static function findOrFormCluster(
+        string $title,
+        int $lookbackDays = 30,
+        float $threshold = 0.35,
+        bool $dryRun = false,
+    ): ?int {
+        // Stage 1 — existing-cluster match (cheap, indexed lookup).
+        $existing = self::findLikelyCluster($title, $lookbackDays, $threshold);
+        if ($existing !== null) {
+            return $existing;
+        }
+
+        // Stage 2 — orphan scan. Only fires when stage 1 returned null.
+        $target = self::tokeniseForMatch($title);
+        if (count($target) < 3) {
+            return null;
+        }
+
+        $orphans = DB::table('posts')
+            ->whereNull('story_cluster_id')
+            ->whereIn('status', ['published', 'draft'])
+            ->where('created_at', '>=', now()->subDays($lookbackDays))
+            ->orderByDesc('id')
+            // 500 cap: at scale we don't want to scan all-time orphans.
+            // Recency wins; older orphans get a chance via the next
+            // article that arrives within their window.
+            ->limit(500)
+            ->get(['id', 'name']);
+
+        $matches = [];
+        foreach ($orphans as $o) {
+            $other = self::tokeniseForMatch((string) $o->name);
+            if (count($other) < 3) continue;
+            $score = self::jaccard($target, $other);
+            if ($score >= $threshold) {
+                $matches[] = (int) $o->id;
+            }
+        }
+
+        if (empty($matches)) {
+            return null;
+        }
+
+        // Dry-run probe: signal "would form" by returning -1. Caller
+        // can render this in a preview without writing.
+        if ($dryRun) {
+            return -1;
+        }
+
+        // Mint a new cluster + attach the matching orphans atomically.
+        // Topic = the calling title trimmed; editor can edit later.
+        $clusterId = DB::transaction(function () use ($title, $matches): int {
+            $cid = DB::table('story_clusters')->insertGetId([
+                'topic'      => Str::limit(trim($title), 200, '…'),
+                'description'=> null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('posts')
+                ->whereIn('id', $matches)
+                ->update([
+                    'story_cluster_id' => $cid,
+                    'updated_at'       => now(),
+                ]);
+
+            return (int) $cid;
+        });
+
+        Log::info('[GrimbaRssPoller] orphan cluster formed', [
+            'cluster_id' => $clusterId,
+            'seed_title' => Str::limit($title, 80, '…'),
+            'attached_orphans' => count($matches),
+        ]);
+
+        return $clusterId;
     }
 
     /**

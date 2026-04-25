@@ -375,11 +375,12 @@ class GrimbaNewsApiFetcher
                 $post->image = $a['image'];
             }
 
-            // Reuse the static near-dup helper from the RSS poller —
-            // a NewsAPI article and an RSS article on the same event
-            // get the same story_cluster_id automatically.
+            // Reuse the static cluster helper (S132) — match against
+            // existing clusters AND form new clusters from orphans.
+            // A NewsAPI article and an RSS article on the same event
+            // now cluster even when neither was clustered before.
             if (empty($post->story_cluster_id)) {
-                $candidate = GrimbaRssPoller::findLikelyCluster($post->name);
+                $candidate = GrimbaRssPoller::findOrFormCluster($post->name);
                 if ($candidate !== null) {
                     $post->story_cluster_id = $candidate;
                 }

@@ -39,8 +39,16 @@ class GrimbaRecluster extends Command
         $rows = [];
 
         foreach ($candidates as $p) {
-            $cluster = GrimbaRssPoller::findLikelyCluster($p->name, $lookback, $threshold);
+            // S132 — try existing-cluster match AND orphan-orphan
+            // formation. dryRun honors --dry-run on the command so
+            // we don't write story_clusters during a preview.
+            $cluster = GrimbaRssPoller::findOrFormCluster($p->name, $lookback, $threshold, $dry);
             if ($cluster === null) continue;
+            if ($cluster < 0) {
+                // Dry preview sentinel — note "would form/attach"
+                // without resolving to a real cluster id.
+                $cluster = 0;
+            }
 
             $rows[] = [
                 $p->id,
