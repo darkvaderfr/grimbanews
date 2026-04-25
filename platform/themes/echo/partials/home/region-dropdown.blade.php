@@ -1,15 +1,30 @@
 @php
-    $currentRegion = (string) (request()->cookie('grimba_region') ?? 'monde');
+    /**
+     * S146 — region map aligned with audience countries Vader actually
+     * publishes for: France, UK, US, Canada, Africa, International.
+     * Drops the previous Monde/Europe placeholders that didn't map
+     * cleanly to news-source country codes (FR/GB/US/CA/Africa/—).
+     *
+     * The cookie value is the routing key the rest of the site reads
+     * (filtering RSS feeds, NewsAPI top-headlines, blog facets), so
+     * the keys are stable lowercase ISO-style strings.
+     */
+    $currentRegion = (string) (request()->cookie('grimba_region') ?? 'international');
 
     $regions = [
-        'monde'         => ['label' => 'Monde',          'flag' => '🌍'],
-        'afrique'       => ['label' => 'Afrique',        'flag' => '🌍'],
-        'europe'        => ['label' => 'Europe',         'flag' => '🇪🇺'],
-        'france'        => ['label' => 'France',         'flag' => '🇫🇷'],
-        'international' => ['label' => 'International',  'flag' => '🌐'],
+        'france'        => ['label' => 'France',        'flag' => '🇫🇷'],
+        'uk'            => ['label' => 'UK',            'flag' => '🇬🇧'],
+        'us'            => ['label' => 'US',            'flag' => '🇺🇸'],
+        'canada'        => ['label' => 'Canada',        'flag' => '🇨🇦'],
+        'africa'        => ['label' => 'Afrique',       'flag' => '🌍'],
+        'international' => ['label' => 'International', 'flag' => '🌐'],
     ];
 
-    $current = $regions[$currentRegion] ?? $regions['monde'];
+    // Migrate legacy values: monde/europe → international, afrique → africa.
+    $migrationMap = ['monde' => 'international', 'europe' => 'international', 'afrique' => 'africa'];
+    if (isset($migrationMap[$currentRegion])) $currentRegion = $migrationMap[$currentRegion];
+
+    $current = $regions[$currentRegion] ?? $regions['international'];
 @endphp
 
 <div class="grimba-region" data-grimba-region-root>

@@ -692,6 +692,13 @@ button.btn-grimba--solid,
     border-bottom: 1px solid var(--gn-rule);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    /* S146 — backdrop-filter creates a new stacking context. Without
+       an explicit z-index, this strip paints later in DOM order than
+       the sticky header (z:50) and ends up COVERING the region/translate
+       dropdown items rendered from the header. Force the strip below
+       the header so the dropdown wins. */
+    position: relative;
+    z-index: 1;
 }
 .grimba-chips__row {
     display: flex;

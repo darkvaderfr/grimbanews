@@ -235,10 +235,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         })->name('public.lang.set');
 
         Route::post('region/set', function (Request $request) {
-            $region = (string) $request->input('region', 'monde');
-            $allowed = ['monde', 'afrique', 'europe', 'france', 'international'];
+            // S146 — six audience regions aligned with the picker
+            // (france / uk / us / canada / africa / international).
+            $region = (string) $request->input('region', 'international');
+            $allowed = ['france', 'uk', 'us', 'canada', 'africa', 'international'];
             if (! in_array($region, $allowed, true)) {
-                $region = 'monde';
+                $region = 'international';
             }
 
             return response()
