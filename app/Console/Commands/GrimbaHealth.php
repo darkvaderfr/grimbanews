@@ -1,0 +1,157 @@
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+
+/*
+ * S153 — one-page health summary for the GrimbaNews ingest +
+ * editorial pipeline. Designed to be `tail`-able from a cron
+ * weekly + manually runnable when checking on the system.
+ *
+ * Reports:
+ *   1. Posts by status (published / draft / total)
+ *   2. Bias mix on published posts
+ *   3. Region (country) coverage
+ *   4. Cluster diversity (singletons vs multi-bias)
+ *   5. Source classification gaps (% unknown by ingest volume)
+ *   6. Feed health (active / sick / failed)
+ *   7. Dedup state (count of duplicate-name groups remaining)
+ *   8. Recent ingest rate (last 24h, RSS + NewsAPI separately)
+ */
+class GrimbaHealth extends Command
+{
+    protected $signature = 'grimba:health';
+    protected $description = 'One-page health summary of the GrimbaNews ingest + editorial pipeline (S153).';
+
+    public function handle(): int
+    {
+        $this->newLine();
+        $this->line(str_repeat('═', 70));
+        $this->line(sprintf('  GrimbaNews — health check · %s', now()->toIso8601String()));
+        $this->line(str_repeat('═', 70));
+
+        // 1. Posts by status
+        $byStatus = DB::table('posts')->select('status', DB::raw('COUNT(*) as c'))->groupBy('status')->pluck('c', 'status');
+        $this->newLine();
+        $this->line('1. Posts');
+        foreach (['published' => '🟢', 'draft' => '🟡', 'pending' => '⚪'] as $st => $glyph) {
+            $this->line(sprintf('   %s %-12s %d', $glyph, $st, $byStatus[$st] ?? 0));
+        }
+        $this->line(sprintf('     %-14s %d', 'TOTAL', $byStatus->sum()));
+
+        // 2. Bias mix on published
+        $bias = DB::table('posts')->where('status', 'published')->select('bias_rating', DB::raw('COUNT(*) as c'))->groupBy('bias_rating')->pluck('c', 'bias_rating');
+        $pubTotal = $bias->sum() ?: 1;
+        $this->newLine();
+        $this->line('2. Bias mix (published)');
+        foreach (['left' => 'Gauche  ', 'center' => 'Centre  ', 'right' => 'Droite  ', 'unknown' => 'Inconnu '] as $k => $label) {
+            $count = $bias[$k] ?? 0;
+            $pct = round($count * 100 / $pubTotal);
+            $this->line(sprintf('   %s %4d (%2d%%) %s', $label, $count, $pct, str_repeat('▓', max(1, (int) round($pct / 3)))));
+        }
+
+        // 3. Region coverage
+        $byCountry = DB::table('posts')
+            ->join('news_sources', 'news_sources.id', '=', 'posts.source_id')
+            ->where('posts.status', 'published')
+            ->select('news_sources.country', DB::raw('COUNT(*) as c'))
+            ->groupBy('news_sources.country')
+            ->orderByDesc('c')
+            ->limit(10)
+            ->get();
+        $this->newLine();
+        $this->line('3. Region coverage (published, top 10 countries)');
+        foreach ($byCountry as $r) {
+            $this->line(sprintf('   %-8s %d', $r->country ?: '(none)', $r->c));
+        }
+
+        // 4. Cluster diversity
+        $clusters = DB::table('posts')->whereNotNull('story_cluster_id')->where('status', 'published')
+            ->select('story_cluster_id', DB::raw('COUNT(*) as c'))
+            ->groupBy('story_cluster_id')->get();
+        $multi = 0;
+        $allThree = 0;
+        foreach ($clusters as $c) {
+            $sides = DB::table('posts')
+                ->where('story_cluster_id', $c->story_cluster_id)
+                ->where('status', 'published')
+                ->whereIn('bias_rating', ['left', 'center', 'right'])
+                ->distinct('bias_rating')
+                ->count('bias_rating');
+            if ($sides >= 2) $multi++;
+            if ($sides >= 3) $allThree++;
+        }
+        $totalClusters = $clusters->count();
+        $this->newLine();
+        $this->line('4. Cluster diversity');
+        $this->line(sprintf('   total clusters w/ ≥1 published post: %d', $totalClusters));
+        $this->line(sprintf('   ≥2 bias sides:                       %d (%d%%)', $multi, $totalClusters ? round($multi * 100 / $totalClusters) : 0));
+        $this->line(sprintf('   all 3 bias sides:                    %d (%d%%)', $allThree, $totalClusters ? round($allThree * 100 / $totalClusters) : 0));
+
+        // 5. Source classification gaps
+        $unknown = DB::table('news_sources')
+            ->leftJoin('posts', 'posts.source_id', '=', 'news_sources.id')
+            ->where('news_sources.bias_rating', 'unknown')
+            ->select('news_sources.name', DB::raw('COUNT(posts.id) as c'))
+            ->groupBy('news_sources.id', 'news_sources.name')
+            ->having('c', '>', 0)
+            ->orderByDesc('c')
+            ->limit(8)
+            ->get();
+        $this->newLine();
+        $this->line('5. Top unclassified sources (need editor triage)');
+        if ($unknown->isEmpty()) {
+            $this->line('   ✓ no unclassified sources with ingested articles');
+        } else {
+            foreach ($unknown as $s) {
+                $this->line(sprintf('   %-30s %d articles', \Illuminate\Support\Str::limit($s->name, 30), $s->c));
+            }
+        }
+
+        // 6. Feed health
+        $feeds = DB::table('rss_feeds')
+            ->select(
+                DB::raw('SUM(CASE WHEN is_active = 1 AND consecutive_failures = 0 THEN 1 ELSE 0 END) as ok'),
+                DB::raw('SUM(CASE WHEN is_active = 1 AND consecutive_failures BETWEEN 1 AND 4 THEN 1 ELSE 0 END) as wobbly'),
+                DB::raw('SUM(CASE WHEN is_active = 1 AND consecutive_failures >= 5 THEN 1 ELSE 0 END) as sick'),
+                DB::raw('SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive'),
+            )->first();
+        $this->newLine();
+        $this->line('6. RSS feed health');
+        $this->line(sprintf('   🟢 healthy    %d', $feeds->ok));
+        $this->line(sprintf('   🟡 wobbly     %d  (1-4 consecutive failures)', $feeds->wobbly));
+        $this->line(sprintf('   🔴 sick       %d  (≥5 consecutive failures)', $feeds->sick));
+        $this->line(sprintf('   ⚫ inactive   %d', $feeds->inactive));
+
+        // 7. Dedup state
+        $duppedNames = DB::table('posts')
+            ->select('name', 'source_id', DB::raw('COUNT(*) as c'))
+            ->groupBy('name', 'source_id')
+            ->having('c', '>', 1)
+            ->count();
+        $this->newLine();
+        $this->line('7. Dedup state');
+        if ($duppedNames === 0) {
+            $this->line('   ✓ no duplicate-name groups remaining');
+        } else {
+            $this->line(sprintf('   ⚠ %d duplicate-name groups — run grimba:dedupe-posts --apply', $duppedNames));
+        }
+
+        // 8. Last 24h ingest
+        $rss24 = DB::table('rss_feed_items')->where('seen_at', '>=', now()->subDay())->count();
+        $api24 = DB::table('newsapi_items')->where('fetched_at', '>=', now()->subDay())->count();
+        $this->newLine();
+        $this->line('8. Ingest last 24h');
+        $this->line(sprintf('   RSS poller    : %d items', $rss24));
+        $this->line(sprintf('   NewsAPI fetch : %d items', $api24));
+        $this->line(sprintf('   Combined      : %d items', $rss24 + $api24));
+
+        $this->newLine();
+        $this->line(str_repeat('═', 70));
+        $this->newLine();
+
+        return self::SUCCESS;
+    }
+}
