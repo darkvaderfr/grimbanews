@@ -329,6 +329,11 @@ class GrimbaRssPoller
      */
     private function ingestItem(stdClass $feed, array $item): bool
     {
+        // S151b — two-layer dedup. Per-feed (feed_id, guid) catches
+        // most cases; canonical-URL-hash across ALL feeds catches the
+        // ones where a single article is broadcast under different
+        // GUIDs (BBC RSS appends #0, #2 fragments) or appears in two
+        // feeds we both poll.
         $existing = DB::table('rss_feed_items')
             ->where('feed_id', $feed->id)
             ->where('guid', $item['guid'])
@@ -338,12 +343,28 @@ class GrimbaRssPoller
             return false;
         }
 
+        $canonicalHash = null;
+        if (! empty($item['link'])) {
+            $canonicalHash = app(\App\Services\GrimbaUrlCanonicalizer::class)
+                ->hash((string) $item['link']);
+
+            if ($canonicalHash) {
+                $byCanonical = DB::table('rss_feed_items')
+                    ->where('canonical_url_hash', $canonicalHash)
+                    ->first(['id']);
+                if ($byCanonical) {
+                    return false;
+                }
+            }
+        }
+
         $postId = $this->createDraftPost($feed, $item);
 
         DB::table('rss_feed_items')->insert([
             'feed_id'        => $feed->id,
             'guid'           => $item['guid'],
             'link'           => $item['link'] ?? null,
+            'canonical_url_hash' => $canonicalHash,
             'title_snapshot' => Str::limit($item['title'], 450, ''),
             'post_id'        => $postId,
             'seen_at'        => now(),
@@ -456,8 +477,17 @@ class GrimbaRssPoller
      * (≤30 days old, attached to a cluster) crosses the 0.35
      * Jaccard threshold. Null when nothing sticks.
      */
-    public static function findLikelyCluster(string $title, int $lookbackDays = 30, float $threshold = 0.35): ?int
+    public static function findLikelyCluster(string $title, int $lookbackDays = 30, float $threshold = 0.30): ?int
     {
+        // S151 — threshold tuned 0.35 → 0.30. The previous setting
+        // missed too many same-event francophone clusters: news
+        // headlines vary a lot in phrasing across outlets, and the
+        // tokeniser drops stopwords aggressively, so even close
+        // matches scored just below 0.35.
+        //
+        // The lookback window cap (still 30 days here) is the safety
+        // net: a 2025 "retraites" story won't pull a 2026 "retraites"
+        // story even at the looser threshold.
         $target = self::tokeniseForMatch($title);
         if (count($target) < 3) {
             return null;
@@ -517,7 +547,7 @@ class GrimbaRssPoller
     public static function findOrFormCluster(
         string $title,
         int $lookbackDays = 30,
-        float $threshold = 0.35,
+        float $threshold = 0.30,
         bool $dryRun = false,
     ): ?int {
         // Stage 1 — existing-cluster match (cheap, indexed lookup).
@@ -532,10 +562,25 @@ class GrimbaRssPoller
             return null;
         }
 
+        // S151 — orphan-orphan formation uses a TIGHTER recency window
+        // (default 2 days). Orphans only cluster with each other when
+        // they're plausibly covering the same breaking event — across
+        // multi-week windows, false-positive matches dominated.
+        $orphanWindowHours = max(6, $lookbackDays * 2); // 60h default for 30-day caller
+        $orphanCutoff = now()->subHours($orphanWindowHours);
+        // Cap at 7 days even when the caller passed a long lookback —
+        // events covered concurrently across outlets happen in days,
+        // not weeks. The existing-cluster path (stage 1) handles the
+        // long-tail "is this an old story?" case.
+        $sevenDaysAgo = now()->subDays(7);
+        if ($orphanCutoff->lt($sevenDaysAgo)) {
+            $orphanCutoff = $sevenDaysAgo;
+        }
+
         $orphans = DB::table('posts')
             ->whereNull('story_cluster_id')
             ->whereIn('status', ['published', 'draft'])
-            ->where('created_at', '>=', now()->subDays($lookbackDays))
+            ->where('created_at', '>=', $orphanCutoff)
             ->orderByDesc('id')
             // 500 cap: at scale we don't want to scan all-time orphans.
             // Recency wins; older orphans get a chance via the next
