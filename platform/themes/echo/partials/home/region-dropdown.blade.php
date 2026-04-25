@@ -8,6 +8,11 @@
      * The cookie value is the routing key the rest of the site reads
      * (filtering RSS feeds, NewsAPI top-headlines, blog facets), so
      * the keys are stable lowercase ISO-style strings.
+     *
+     * S155 — picker now shows (N) beside each region label, computed
+     * from the same country mapping as GrimbaRegionScope so what the
+     * reader sees in the dropdown matches what they get after the
+     * cookie flips. International always shows the unfiltered total.
      */
     $currentRegion = (string) (request()->cookie('grimba_region') ?? 'international');
 
@@ -25,6 +30,39 @@
     if (isset($migrationMap[$currentRegion])) $currentRegion = $migrationMap[$currentRegion];
 
     $current = $regions[$currentRegion] ?? $regions['international'];
+
+    // S155 — per-region published-post counts. Mirror the country-code
+    // map from GrimbaRegionScope (kept inline rather than coupling
+    // partials to Scope internals).
+    $regionCountryMap = [
+        'france' => ['FR'],
+        'uk'     => ['GB', 'UK'],
+        'us'     => ['US'],
+        'canada' => ['CA'],
+        'africa' => ['DZ','AO','BJ','BW','BF','BI','CV','CM','CF','TD','KM','CG','CD','DJ','EG','GQ','ER','SZ','ET','GA','GM','GH','GN','GW','CI','KE','LS','LR','LY','MG','MW','ML','MR','MU','MA','MZ','NA','NE','NG','RW','ST','SN','SC','SL','SO','ZA','SS','SD','TZ','TG','TN','UG','ZM','ZW'],
+    ];
+
+    // Cache the counts for a minute — every page load shouldn't re-aggregate.
+    $regionCounts = \Illuminate\Support\Facades\Cache::remember(
+        'grimba_region_counts_v1',
+        60,
+        function () use ($regionCountryMap) {
+            $counts = [];
+            // Total (international) = all published, scope-bypassed via withoutGlobalScope.
+            $counts['international'] = \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
+                ->where('status', 'published')
+                ->count();
+            foreach ($regionCountryMap as $key => $codes) {
+                $counts[$key] = \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
+                    ->where('status', 'published')
+                    ->whereIn('source_id', function ($q) use ($codes): void {
+                        $q->select('id')->from('news_sources')->whereIn('country', $codes);
+                    })
+                    ->count();
+            }
+            return $counts;
+        }
+    );
 @endphp
 
 <div class="grimba-region" data-grimba-region-root>
@@ -36,14 +74,23 @@
     </button>
     <ul class="grimba-region__menu" role="listbox" aria-label="Édition régionale">
         @foreach($regions as $key => $r)
+            @php
+                $count = (int) ($regionCounts[$key] ?? 0);
+                $disabled = $count === 0 && $key !== 'international';
+            @endphp
             <li>
                 <button type="button"
                         role="option"
                         aria-selected="{{ $key === $currentRegion ? 'true' : 'false' }}"
+                        @if($disabled) aria-disabled="true" @endif
                         data-grimba-region="{{ $key }}"
-                        class="grimba-region__option @if($key === $currentRegion) is-active @endif">
+                        class="grimba-region__option @if($key === $currentRegion) is-active @endif"
+                        @if($disabled) style="opacity:0.4; cursor:not-allowed;" disabled @endif>
                     <span aria-hidden="true">{{ $r['flag'] }}</span>
                     <span>{{ $r['label'] }}</span>
+                    <span class="ms-auto small opacity-65" style="font-variant-numeric: tabular-nums;">
+                        {{ number_format($count) }}
+                    </span>
                 </button>
             </li>
         @endforeach
