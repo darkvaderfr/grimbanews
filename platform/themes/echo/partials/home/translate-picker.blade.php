@@ -23,19 +23,28 @@
     $mode = in_array($raw, ['original', 'auto'], true) ? $raw : 'original';
 @endphp
 
-<div class="grimba-theme-switch grimba-nobuai-switch" role="radiogroup" aria-label="Traduction NobuAI">
-    <button type="button"
-            data-grimba-translate="original"
-            aria-pressed="{{ $mode === 'original' ? 'true' : 'false' }}"
-            title="{{ __('Articles dans leur langue d\'origine') }}">
-        VO
-    </button>
-    <button type="button"
-            data-grimba-translate="auto"
-            aria-pressed="{{ $mode === 'auto' ? 'true' : 'false' }}"
-            title="{{ __('Traduction NobuAI dans la langue du site') }}">
-        NobuAI
-    </button>
+{{-- S164 — visible label + globe icon. Vader: "Maintenant aucun
+     utilisateur ne saura a quoi ca sert sauf apres click." Add an
+     in-context label so the toggle's purpose is read at a glance. --}}
+<div class="grimba-translate-toggle" style="display:inline-flex; align-items:center; gap:8px;">
+    <span aria-hidden="true" style="font-size:14px; opacity:0.65;" title="{{ __('Traduction NobuAI') }}">🌐</span>
+    <span class="small fw-semibold" style="opacity:0.75; letter-spacing:0.2px;">
+        {{ __('Traduction') }}&nbsp;:
+    </span>
+    <div class="grimba-theme-switch grimba-nobuai-switch" role="radiogroup" aria-label="{{ __('Traduction NobuAI') }}">
+        <button type="button"
+                data-grimba-translate="original"
+                aria-pressed="{{ $mode === 'original' ? 'true' : 'false' }}"
+                title="{{ __('Lire dans la langue d\'origine') }}">
+            VO
+        </button>
+        <button type="button"
+                data-grimba-translate="auto"
+                aria-pressed="{{ $mode === 'auto' ? 'true' : 'false' }}"
+                title="{{ __('Traduit par NobuAI dans la langue du site') }}">
+            NobuAI
+        </button>
+    </div>
 </div>
 
 <script>

@@ -166,6 +166,22 @@
                         }
                     @endphp
 
+                    @php
+                        // S163 — full-article reading. Setting gates
+                        // the feature (paid-tier flag); rendering
+                        // gates on the post actually having extracted
+                        // full_content. Translated full body is
+                        // post.translated_content (S91) when the
+                        // reader is in NobuAI mode.
+                        $__gnFullActive  = (bool) setting('grimba_full_article_active', false);
+                        $__gnFullBody = null;
+                        if ($__gnFullActive && ! empty($post->full_content)) {
+                            $__gnFullBody = (
+                                $__gnMode === 'auto' && ! empty($post->translated_content) && ($post->translated_to ?? null) === $__gnTarget
+                            ) ? $post->translated_content : $post->full_content;
+                        }
+                    @endphp
+
                     @if(! empty($__gnSummaryItems))
                         @if(count($__gnSummaryItems) === 1)
                             {{-- Single fallback line (no real NobuAI summary
@@ -190,6 +206,34 @@
                         @endif
                     @endif
                 </header>
+
+                @if($__gnFullBody)
+                    <details class="grimba-full-article glass-panel p-3 p-md-4 mb-3" style="cursor:pointer;">
+                        <summary style="cursor:pointer; font-family:'Public Sans',system-ui,sans-serif; font-weight:700; font-size:14px; letter-spacing:0.4px; text-transform:uppercase; color:var(--gn-ink,#1a1713);">
+                            Lire l'article complet ↓
+                            <span class="small opacity-65 ms-2" style="font-weight:500; text-transform:none; letter-spacing:0;">
+                                · {{ \Illuminate\Support\Str::words(strip_tags($__gnFullBody), 1, '') === '' ? '' : (\Illuminate\Support\Str::wordCount(strip_tags($__gnFullBody)) . ' mots') }}
+                            </span>
+                        </summary>
+                        <div class="grimba-full-article__body mt-3" style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-size:17px; line-height:1.65; color:var(--gn-ink,#1a1713);">
+                            {!! BaseHelper::clean($__gnFullBody) !!}
+                        </div>
+                        @php
+                            $__gnUpstream = \Illuminate\Support\Facades\DB::table('rss_feed_items')
+                                ->where('post_id', $post->id)->value('link')
+                                ?? \Illuminate\Support\Facades\DB::table('newsapi_items')
+                                    ->where('post_id', $post->id)->value('article_url');
+                        @endphp
+                        @if($__gnUpstream)
+                            <p class="small opacity-60 mt-3 mb-0" style="font-family:'Public Sans',system-ui,sans-serif;">
+                                Source originale :
+                                <a href="{{ $__gnUpstream }}" target="_blank" rel="noopener" style="color:#c0392b;">
+                                    {{ $post->source_name ?? 'lire chez l\'éditeur' }} ↗
+                                </a>
+                            </p>
+                        @endif
+                    </details>
+                @endif
 
                 @include(Theme::getThemeNamespace('partials.story.article-list'), [
                     'clusterPosts' => $__gnClusterPosts,
