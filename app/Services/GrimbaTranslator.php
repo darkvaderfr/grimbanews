@@ -48,8 +48,12 @@ class GrimbaTranslator
 {
     private const TIMEOUT = 10;
 
-    /** @var array<int, string> Provider preference order when driver=auto */
-    private const CHAIN = ['deepl', 'mistral', 'openrouter', 'openai', 'anthropic', 'google', 'groq', 'libre'];
+    /** @var array<int, string> Provider preference order when driver=auto.
+     *  `googletx` (S158) is the always-on fallback — Google Translate's
+     *  unofficial gtx endpoint, no API key required. Quality is "good
+     *  enough for a glance"; rate-limited per IP, so it's last in the
+     *  chain — paid drivers run first when configured. */
+    private const CHAIN = ['deepl', 'mistral', 'openrouter', 'openai', 'anthropic', 'google', 'groq', 'libre', 'googletx'];
 
     public function enabled(): bool
     {
@@ -142,6 +146,7 @@ class GrimbaTranslator
             'google'     => env('GOOGLE_API_KEY') ?: null,
             'groq'       => env('GROQ_API_KEY') ?: null,
             'libre'      => env('LIBRETRANSLATE_URL') ?: null,
+            'googletx'   => 'free', // sentinel — always available
             default      => null,
         };
     }
@@ -183,6 +188,7 @@ class GrimbaTranslator
                 'llama-3.3-70b-versatile',
             ),
             'libre'      => $this->viaLibreTranslate($text, $from, $to),
+            'googletx'   => $this->viaGoogleUnofficial($text, $from, $to),
             default      => null,
         };
     }
@@ -296,6 +302,78 @@ class GrimbaTranslator
         $out = '';
         foreach ($parts as $p) { $out .= (string) ($p['text'] ?? ''); }
         return trim($out) ?: null;
+    }
+
+    /**
+     * Google Translate unofficial "gtx" endpoint — no API key, no
+     * billing, rate-limited per IP. Quality is good for headlines +
+     * short prose; bumps to slower drivers when blocked.
+     *
+     * Returns JSON shaped like:
+     *   [ [ ["translated", "original", null, null, 1], ... ], null, "en", ... ]
+     * Concatenate the first column of each pair to get the full
+     * translation back.
+     */
+    private function viaGoogleUnofficial(string $text, string $from, string $to): ?string
+    {
+        $sl = mb_substr($from, 0, 2) ?: 'auto';
+        $tl = mb_substr($to,   0, 2) ?: 'fr';
+
+        // gtx endpoint caps at ~5000 chars. We chunk longer payloads.
+        $chunks = $this->chunkForGoogleTx($text, 4500);
+        $out = '';
+
+        foreach ($chunks as $chunk) {
+            $res = \Illuminate\Support\Facades\Http::withUserAgent('Mozilla/5.0 (compatible; GrimbaNewsBot/1.0)')
+                ->timeout(15)
+                ->connectTimeout(8)
+                ->get('https://translate.googleapis.com/translate_a/single', [
+                    'client' => 'gtx',
+                    'sl'     => $sl,
+                    'tl'     => $tl,
+                    'dt'     => 't',
+                    'q'      => $chunk,
+                ]);
+
+            if (! $res->successful()) {
+                throw new \RuntimeException('googletx HTTP ' . $res->status());
+            }
+
+            $body = $res->json();
+            if (! is_array($body) || empty($body[0])) {
+                throw new \RuntimeException('googletx unexpected payload');
+            }
+
+            foreach ($body[0] as $segment) {
+                if (is_array($segment) && isset($segment[0]) && is_string($segment[0])) {
+                    $out .= $segment[0];
+                }
+            }
+        }
+
+        return trim($out) ?: null;
+    }
+
+    /**
+     * Split long text on sentence boundaries so each chunk is ≤ $max.
+     * @return array<int, string>
+     */
+    private function chunkForGoogleTx(string $text, int $max): array
+    {
+        if (mb_strlen($text) <= $max) return [$text];
+
+        $sentences = preg_split('/([.!?…]\s+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE) ?: [$text];
+        $chunks = [];
+        $buf = '';
+        foreach ($sentences as $piece) {
+            if (mb_strlen($buf . $piece) > $max && $buf !== '') {
+                $chunks[] = $buf;
+                $buf = '';
+            }
+            $buf .= $piece;
+        }
+        if ($buf !== '') $chunks[] = $buf;
+        return $chunks;
     }
 
     private function viaLibreTranslate(string $text, string $from, string $to): ?string

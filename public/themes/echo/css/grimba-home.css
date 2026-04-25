@@ -392,18 +392,20 @@ body.grimba-home .echo-author-area {
        come later in DOM order. top/left are set inline by JS from the
        trigger's getBoundingClientRect() on open. */
     position: fixed;
-    background: rgba(255, 255, 255, 0.98);
-    border: 1px solid var(--gn-rule);
+    /* S158 — opaque background. The previous 0.98 + blur(12px) let
+       the article hero behind the dropdown bleed through, making
+       option labels hard to read. Solid paper bg + heavier shadow
+       gives the menu a real edge. */
+    background: var(--gn-paper, #f6f1e8);
+    border: 1px solid rgba(26, 23, 19, 0.16);
     border-radius: 14px;
-    box-shadow: 0 14px 36px rgba(26, 23, 19, 0.14);
+    box-shadow: 0 18px 42px rgba(26, 23, 19, 0.22);
     list-style: none;
     padding: 0.4rem;
     margin: 0;
     min-width: 240px;
     display: none;
     z-index: 2147483000;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
 }
 .grimba-translate,
 .grimba-region {
@@ -438,9 +440,12 @@ body.grimba-home .echo-author-area {
     border-color: rgba(255, 255, 255, 0.12);
 }
 [data-bs-theme="dark"] .grimba-region__menu {
-    background: rgba(28, 24, 17, 0.96);
-    border-color: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
+    /* S158 — fully opaque dark menu (was 0.96 + blur). Same fix as
+       light variant: see-through dropdowns over hero images were
+       unreadable. */
+    background: #1c1811;
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.5);
 }
 [data-bs-theme="dark"] .grimba-region__option { color: var(--gn-ink); }
 [data-bs-theme="dark"] .grimba-region__option:hover { background: rgba(255, 255, 255, 0.08); }
