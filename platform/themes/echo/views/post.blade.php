@@ -80,6 +80,25 @@
         <div class="row gx-4 gx-lg-5">
             <div class="col-lg-8 col-12 mb-4">
 
+                @php
+                    // Best hero image for the story: current post's image
+                    // first, else any cluster post that has one. The
+                    // cards below each carry their own image too — this
+                    // is the "above the fold" anchor.
+                    $__gnHero = $post->image ?: $__gnClusterPosts->pluck('image')->filter()->first();
+                @endphp
+
+                @if($__gnHero)
+                    <div class="grimba-story-hero glass-panel p-0 mb-3" style="overflow:hidden;">
+                        <div class="ratio ratio-21x9" style="background:rgba(0,0,0,0.04);">
+                            <img src="{{ \Botble\Media\Facades\RvMedia::getImageUrl($__gnHero) }}"
+                                 alt="{{ $__gnTitle }}"
+                                 loading="eager"
+                                 style="object-fit:cover; width:100%; height:100%;">
+                        </div>
+                    </div>
+                @endif
+
                 {{-- Hero block: title, current article meta, bias chips --}}
                 <header class="glass-panel p-3 p-md-4 mb-3">
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-2 small">
@@ -136,23 +155,28 @@
                     @endphp
 
                     @if(! empty($__gnSummaryItems))
-                        <ul class="m-0 mt-3 ps-3" style="font-size:15px; line-height:1.55;">
-                            @foreach(array_slice($__gnSummaryItems, 0, 6) as $line)
-                                <li class="mb-2">{{ $line }}</li>
-                            @endforeach
-                        </ul>
-                        <div class="mt-3 d-flex align-items-center gap-2 small opacity-65">
-                            {!! Theme::partial('nobuai-chip', ['size' => 'sm', 'label' => 'Résumé NobuAI']) !!}
-                            <span>· Résumé éditorial à partir des couvertures collectées.</span>
-                        </div>
+                        @if(count($__gnSummaryItems) === 1)
+                            {{-- Single fallback line (no real NobuAI summary
+                                 yet) — render as paragraph so the page
+                                 doesn't read "lone bullet point". --}}
+                            <p class="mt-3 mb-0" style="font-size:15px; line-height:1.55;">
+                                {{ $__gnSummaryItems[0] }}
+                            </p>
+                            <div class="mt-2 d-flex align-items-center gap-2 small opacity-55">
+                                <span>Lu d'abord — résumé étendu à venir quand NobuAI couvre cette histoire.</span>
+                            </div>
+                        @else
+                            <ul class="m-0 mt-3 ps-3" style="font-size:15px; line-height:1.55;">
+                                @foreach(array_slice($__gnSummaryItems, 0, 6) as $line)
+                                    <li class="mb-2">{{ $line }}</li>
+                                @endforeach
+                            </ul>
+                            <div class="mt-3 d-flex align-items-center gap-2 small opacity-65">
+                                {!! Theme::partial('nobuai-chip', ['size' => 'sm', 'label' => 'Résumé NobuAI']) !!}
+                                <span>· Résumé éditorial à partir des couvertures collectées.</span>
+                            </div>
+                        @endif
                     @endif
-
-                    <div class="mt-3 d-flex flex-wrap gap-2">
-                        <a href="{{ url('/comparatif/' . $post->story_cluster_id) }}"
-                           class="btn-grimba btn-grimba--ghost btn-grimba--sm">
-                            Vue comparatif détaillée →
-                        </a>
-                    </div>
                 </header>
 
                 @include(Theme::getThemeNamespace('partials.story.article-list'), [
