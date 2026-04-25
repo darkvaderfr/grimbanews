@@ -39,10 +39,14 @@
 
     $readTotal    = $readPosts->count();
     $known        = $biasCounts['left'] + $biasCounts['center'] + $biasCounts['right'];
+    // S148 — when there's no read history, render an empty bar
+    // (zeroed segments) instead of the 33/34/33 placeholder Vader
+    // flagged. A pseudo-balanced default looked like real article
+    // distribution and lied about coverage.
     $pct = [
-        'left'   => $known ? round($biasCounts['left']   * 100 / $known) : 33,
-        'center' => $known ? round($biasCounts['center'] * 100 / $known) : 34,
-        'right'  => $known ? round($biasCounts['right']  * 100 / $known) : 33,
+        'left'   => $known ? round($biasCounts['left']   * 100 / $known) : 0,
+        'center' => $known ? round($biasCounts['center'] * 100 / $known) : 0,
+        'right'  => $known ? round($biasCounts['right']  * 100 / $known) : 0,
     ];
     $sourcesCount = count($readSources);
 

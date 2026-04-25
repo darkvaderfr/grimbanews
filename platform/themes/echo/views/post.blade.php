@@ -52,8 +52,134 @@
     Theme::set('breadcrumb_background_image', $post->getMetaData('breadcrumb_background_image', true));
     Theme::set('breadcrumb_background_color', $post->getMetaData('breadcrumb_background_color', true));
     Theme::set('breadcrumb_text_color', $post->getMetaData('breadcrumb_text_color', true));
+
+    // S148 — story-page mode. When this post belongs to a story
+    // cluster with at least 2 published articles total, render the
+    // GroundNews-style cluster view instead of the legacy single-post
+    // layout. The legacy layout is kept as fallback for orphan posts
+    // (no cluster) and clusters of 1 (no comparison value).
+    $__gnClusterPosts = collect();
+    $__gnIsStoryPage = false;
+    if ($post->story_cluster_id) {
+        $__gnClusterPosts = \Botble\Blog\Models\Post::query()
+            ->where('story_cluster_id', $post->story_cluster_id)
+            ->where('status', 'published')
+            ->with('categories')
+            ->orderBy('created_at', 'desc')
+            ->get([
+                'id', 'name', 'description', 'source_id', 'source_name',
+                'bias_rating', 'story_cluster_id', 'created_at', 'updated_at',
+                'image',
+            ]);
+        $__gnIsStoryPage = $__gnClusterPosts->count() >= 2;
+    }
 @endphp
 
+@if($__gnIsStoryPage)
+    <section class="grimba-story container py-4 py-md-5">
+        <div class="row gx-4 gx-lg-5">
+            <div class="col-lg-8 col-12 mb-4">
+
+                {{-- Hero block: title, current article meta, bias chips --}}
+                <header class="glass-panel p-3 p-md-4 mb-3">
+                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2 small">
+                        <span class="grimba-methodology__kicker">Histoire</span>
+                        @if($post->source_name)
+                            <span class="opacity-50">·</span>
+                            <span class="opacity-75">Lu d'abord chez {{ $post->source_name }}</span>
+                        @endif
+                        <span class="opacity-50">·</span>
+                        <span class="opacity-75">
+                            {{ $__gnClusterPosts->count() }} {{ $__gnClusterPosts->count() === 1 ? 'couverture' : 'couvertures' }}
+                        </span>
+                        @php
+                            $__gnLatest = $__gnClusterPosts->max('updated_at');
+                        @endphp
+                        @if($__gnLatest)
+                            <span class="opacity-50">·</span>
+                            <span class="opacity-75">Mis à jour {{ $__gnLatest->locale('fr')->diffForHumans() }}</span>
+                        @endif
+                    </div>
+
+                    <h1 class="grimba-methodology__title m-0 mb-2"
+                        style="font-size:clamp(28px, 3.6vw, 44px); line-height:1.1; letter-spacing:-0.5px;">
+                        {{ $__gnTitle }}
+                    </h1>
+
+                    @if ($__gnMode !== 'original' && $__gnHasTr)
+                        <div class="mb-2">
+                            {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+                        </div>
+                    @endif
+
+                    @if ($__gnOriginalTitle)
+                        <p class="small opacity-75 mb-2" lang="{{ $post->original_language }}">
+                            {{ $__gnOriginalTitle }}
+                        </p>
+                    @endif
+
+                    {{-- AI summary section. NobuAI summaries (S110) are
+                         not generated yet — when they ship, $post->summary_nobuai
+                         will populate this. Until then we render the post's
+                         description as a single bullet so the section
+                         doesn't look broken. --}}
+                    @php
+                        $__gnSummaryItems = [];
+                        if (! empty($post->summary_nobuai ?? null)) {
+                            $__gnSummaryItems = array_filter(array_map(
+                                'trim',
+                                preg_split("/\r\n|\n|\r/", (string) $post->summary_nobuai)
+                            ));
+                        } elseif ($__gnDesc) {
+                            $__gnSummaryItems = [strip_tags($__gnDesc)];
+                        }
+                    @endphp
+
+                    @if(! empty($__gnSummaryItems))
+                        <ul class="m-0 mt-3 ps-3" style="font-size:15px; line-height:1.55;">
+                            @foreach(array_slice($__gnSummaryItems, 0, 6) as $line)
+                                <li class="mb-2">{{ $line }}</li>
+                            @endforeach
+                        </ul>
+                        <div class="mt-3 d-flex align-items-center gap-2 small opacity-65">
+                            {!! Theme::partial('nobuai-chip', ['size' => 'sm', 'label' => 'Résumé NobuAI']) !!}
+                            <span>· Résumé éditorial à partir des couvertures collectées.</span>
+                        </div>
+                    @endif
+
+                    <div class="mt-3 d-flex flex-wrap gap-2">
+                        <a href="{{ url('/comparatif/' . $post->story_cluster_id) }}"
+                           class="btn-grimba btn-grimba--ghost btn-grimba--sm">
+                            Vue comparatif détaillée →
+                        </a>
+                    </div>
+                </header>
+
+                @include(Theme::getThemeNamespace('partials.story.article-list'), [
+                    'clusterPosts' => $__gnClusterPosts,
+                    'currentPost'  => $post,
+                ])
+            </div>
+
+            <aside class="col-lg-4 col-12">
+                <div class="position-sticky" style="top: 90px;">
+                    @include(Theme::getThemeNamespace('partials.story.coverage-details'), [
+                        'clusterPosts' => $__gnClusterPosts,
+                        'clusterId'    => $post->story_cluster_id,
+                    ])
+                    @include(Theme::getThemeNamespace('partials.story.bias-distribution'), [
+                        'clusterPosts' => $__gnClusterPosts,
+                    ])
+                    @include(Theme::getThemeNamespace('partials.story.similar-topics'), [
+                        'post' => $post,
+                    ])
+                </div>
+            </aside>
+        </div>
+    </section>
+@endif
+
+@if(! $__gnIsStoryPage)
 <section class="echo-hero-section inner inner-post echo-feature-area bg-white blog-post-details-content">
     <div class="echo-hero">
         <div class="container">
@@ -315,3 +441,4 @@
         </div>
     </div>
 </section>
+@endif{{-- close S148 story-page fallback wrapper --}}
