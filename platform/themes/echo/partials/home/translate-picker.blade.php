@@ -1,80 +1,50 @@
 @php
-    $mode = (string) (request()->cookie('grimba_translate') ?? 'original');
-    if (! in_array($mode, ['original', 'auto', 'both'], true)) $mode = 'original';
+    /**
+     * S160 — binary NobuAI translation toggle.
+     *
+     * Replaces the previous 3-mode dropdown ("VO / Auto / VO + Auto").
+     * Vader's call: keep it as simple as the FR/EN language toggle —
+     * one pill, two states. When NobuAI is on, every article renders
+     * in the site's currently-selected locale (set by the lang-switch
+     * just to its left). When off, articles render in their original
+     * language.
+     *
+     * Cookie values:
+     *   grimba_translate=original  → show post.name (default)
+     *   grimba_translate=auto      → show post.translated_name when
+     *                                 translated_to matches the
+     *                                 reader's grimba_lang cookie
+     *
+     * The legacy 'both' value is migrated to 'auto' on read — readers
+     * who had it set get the cleaner experience automatically.
+     */
+    $raw = (string) (request()->cookie('grimba_translate') ?? 'original');
+    if ($raw === 'both') $raw = 'auto';
+    $mode = in_array($raw, ['original', 'auto'], true) ? $raw : 'original';
 @endphp
 
-<div class="grimba-translate" data-grimba-translate-root>
-    <button type="button" class="grimba-translate__trigger" data-grimba-translate-toggle
-            aria-haspopup="listbox" aria-expanded="false" title="{{ __('Mode de lecture') }}">
-        <span aria-hidden="true">Aa</span>
-        <span>{{ ['original' => __('VO'), 'auto' => __('NobuAI'), 'both' => __('VO + NobuAI')][$mode] }}</span>
-        <span aria-hidden="true" class="grimba-region__caret">▾</span>
+<div class="grimba-theme-switch grimba-nobuai-switch" role="radiogroup" aria-label="Traduction NobuAI">
+    <button type="button"
+            data-grimba-translate="original"
+            aria-pressed="{{ $mode === 'original' ? 'true' : 'false' }}"
+            title="{{ __('Articles dans leur langue d\'origine') }}">
+        VO
     </button>
-    <ul class="grimba-region__menu" role="listbox" aria-label="{{ __('Mode de lecture') }}">
-        @foreach([
-            'original' => ['label' => __('Version originale'),        'desc' => __('Articles affichés dans leur langue d\'origine.')],
-            'auto'     => ['label' => __('NobuAI traduit pour moi'),   'desc' => __('Tout traduit dans votre langue par NobuAI.')],
-            'both'     => ['label' => __('Original + NobuAI'),         'desc' => __('Affiche les deux, côte à côte.')],
-        ] as $key => $r)
-            <li>
-                <button type="button"
-                        role="option"
-                        aria-selected="{{ $key === $mode ? 'true' : 'false' }}"
-                        data-grimba-translate="{{ $key }}"
-                        class="grimba-region__option @if($key === $mode) is-active @endif"
-                        style="align-items: flex-start;">
-                    <span aria-hidden="true">●</span>
-                    <span>
-                        <strong>{{ $r['label'] }}</strong>
-                        <span class="d-block small opacity-75 mt-1">{{ $r['desc'] }}</span>
-                    </span>
-                </button>
-            </li>
-        @endforeach
-    </ul>
+    <button type="button"
+            data-grimba-translate="auto"
+            aria-pressed="{{ $mode === 'auto' ? 'true' : 'false' }}"
+            title="{{ __('Traduction NobuAI dans la langue du site') }}">
+        NobuAI
+    </button>
 </div>
 
 <script>
     (function () {
-        const root = document.querySelector('[data-grimba-translate-root]');
-        if (!root) return;
-        const trigger = root.querySelector('[data-grimba-translate-toggle]');
-        const menu    = root.querySelector('.grimba-region__menu');
-        const csrf    = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        const buttons = document.querySelectorAll('[data-grimba-translate]');
+        if (! buttons.length) return;
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-        function positionMenu() {
-            const r = trigger.getBoundingClientRect();
-            // Right-align: menu's right edge follows trigger's right edge.
-            // Flip upward if the menu would clip below the viewport.
-            menu.style.visibility = 'hidden';
-            menu.style.display = 'block';
-            const mw = menu.offsetWidth;
-            const mh = menu.offsetHeight;
-            menu.style.visibility = '';
-            menu.style.display = '';
-
-            let top  = r.bottom + 6;
-            if (top + mh > window.innerHeight - 8) {
-                top = Math.max(8, r.top - mh - 6);
-            }
-            const left = Math.max(8, r.right - mw);
-
-            menu.style.top  = top + 'px';
-            menu.style.left = left + 'px';
-            menu.style.right = 'auto';
-        }
-        function setOpen(open) {
-            if (open) positionMenu();
-            root.classList.toggle('is-open', open);
-            trigger.setAttribute('aria-expanded', String(open));
-        }
-        trigger.addEventListener('click', (e) => { e.stopPropagation(); setOpen(! root.classList.contains('is-open')); });
-        document.addEventListener('click', (e) => { if (! root.contains(e.target) && ! menu.contains(e.target)) setOpen(false); });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
-        window.addEventListener('resize', () => { if (root.classList.contains('is-open')) positionMenu(); });
-        window.addEventListener('scroll', () => { if (root.classList.contains('is-open')) positionMenu(); }, { passive: true });
-
-        menu.querySelectorAll('[data-grimba-translate]').forEach(btn => btn.addEventListener('click', async () => {
+        buttons.forEach(btn => btn.addEventListener('click', async () => {
             const mode = btn.dataset.grimbaTranslate;
             const res = await fetch(@json(route('public.translate.set')), {
                 method: 'POST',

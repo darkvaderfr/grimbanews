@@ -216,9 +216,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('search', $searchHandler)->name('public.grimba-search');
 
         Route::post('translate/set', function (Request $request) {
-            $mode = $request->input('mode');
-            $allowed = ['original', 'auto', 'both'];
-            if (! in_array($mode, $allowed, true)) {
+            // S160 — toggle is now binary (original | auto). Legacy
+            // 'both' values get coerced to auto on the server too,
+            // matching the picker's read-side migration.
+            $mode = (string) $request->input('mode');
+            if ($mode === 'both') $mode = 'auto';
+            if (! in_array($mode, ['original', 'auto'], true)) {
                 $mode = 'original';
             }
 
