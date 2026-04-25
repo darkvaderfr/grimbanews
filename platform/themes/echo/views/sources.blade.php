@@ -37,11 +37,14 @@
             <h1 class="grimba-methodology__title mt-2 mb-2">
                 {{ $total }} médias sous notre grille d'analyse
             </h1>
-            <p class="mb-0 opacity-85">
+            <p class="mb-3 opacity-85">
                 Biais éditorial, type de propriété, score de crédibilité, pays
                 d'origine et langue. Classements ouverts et révisables — voir la
                 <a href="{{ url('/methodologie') }}" class="text-decoration-underline">méthodologie</a>.
             </p>
+            <a href="{{ url('/proprietaires') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">
+                Carte des propriétaires →
+            </a>
         </header>
 
         <div class="grimba-sources__controls glass-panel p-3 mb-4">

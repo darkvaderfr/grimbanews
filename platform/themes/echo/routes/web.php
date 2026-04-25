@@ -408,6 +408,41 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             return Theme::scope('methodology', [])->render();
         })->name('public.methodology');
 
+        // S156 — ownership map page. Aggregates news_sources by
+        // owner_name, ranks by # of outlets controlled, surfaces
+        // multi-bias owners (single owner controlling outlets across
+        // the spectrum) with a chip.
+        Route::get('proprietaires', function () {
+            $sources = \Illuminate\Support\Facades\DB::table('news_sources')
+                ->whereNotNull('owner_name')
+                ->where('owner_name', '!=', '')
+                ->orderBy('name')
+                ->get(['name','slug','owner_name','bias_rating','country','credibility_score']);
+
+            $owners = $sources
+                ->groupBy('owner_name')
+                ->map(fn ($group, $name) => [
+                    'name'    => $name,
+                    'sources' => $group,
+                ])
+                ->sortByDesc(fn ($o) => count($o['sources']))
+                ->values();
+
+            SeoHelper::setTitle('Qui possède quoi — GrimbaNews')
+                ->setDescription("Carte de la concentration des médias suivis par GrimbaNews.");
+
+            Theme::breadcrumb()
+                ->add('Accueil', url('/'))
+                ->add('Sources', url('/sources'))
+                ->add('Propriétaires', url('/proprietaires'));
+
+            return Theme::scope('owners', [
+                'owners'       => $owners,
+                'totalOwners'  => $owners->count(),
+                'totalSources' => $sources->count(),
+            ])->render();
+        })->name('public.owners');
+
         Route::get('sources', function () {
             $rows = \Illuminate\Support\Facades\DB::table('news_sources')
                 ->orderBy('credibility_score', 'desc')
