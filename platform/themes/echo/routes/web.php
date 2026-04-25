@@ -406,6 +406,55 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ])->render();
         })->name('public.sources');
 
+        // S111 — per-source page. Editorial outlet card + actual
+        // bias distribution from the source's published-article
+        // archive + recent articles grid. Slug column added by the
+        // 2026_04_25 migration.
+        Route::get('sources/{slug}', function (string $slug) {
+            $source = \Illuminate\Support\Facades\DB::table('news_sources')
+                ->where('slug', $slug)
+                ->first();
+
+            abort_if(! $source, 404);
+
+            $stats = ['left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0, 'total' => 0];
+            \Illuminate\Support\Facades\DB::table('posts')
+                ->where('source_id', $source->id)
+                ->where('status', 'published')
+                ->select('bias_rating', \Illuminate\Support\Facades\DB::raw('count(*) as c'))
+                ->groupBy('bias_rating')
+                ->get()
+                ->each(function ($row) use (&$stats): void {
+                    $b = in_array($row->bias_rating, ['left','center','right'], true) ? $row->bias_rating : 'unknown';
+                    $stats[$b] += (int) $row->c;
+                    $stats['total'] += (int) $row->c;
+                });
+
+            $posts = Post::query()
+                ->where('source_id', $source->id)
+                ->where('status', 'published')
+                ->latest()
+                ->paginate(12);
+
+            SeoHelper::setTitle($source->name . ' — GrimbaNews')
+                ->setDescription(sprintf(
+                    '%s — biais déclaré : %s. Couverture archivée par GrimbaNews.',
+                    $source->name,
+                    $source->bias_rating ?? 'non classé'
+                ));
+
+            Theme::breadcrumb()
+                ->add('Accueil', url('/'))
+                ->add('Sources', url('/sources'))
+                ->add($source->name, url('/sources/' . $source->slug));
+
+            return Theme::scope('source', [
+                'source' => $source,
+                'posts'  => $posts,
+                'stats'  => $stats,
+            ])->render();
+        })->where('slug', '[a-z0-9\-]+')->name('public.source');
+
         Route::get('angles-morts', function () {
             $posts = Post::query()
                 ->where('is_blindspot', true)

@@ -37,35 +37,43 @@ function render_mark(int $size, string $fontPath)
     imagealphablending($im, true);
     imagesavealpha($im, true);
 
-    // Editorial palette.
+    // Editorial palette — paper bg, dark "G" mirroring "Grimba" in
+    // the wordmark, red accent dot mirroring "News".
     $paper = imagecolorallocate($im, 246, 241, 232);
     $ink   = imagecolorallocate($im, 26, 23, 19);
     $red   = imagecolorallocate($im, 192, 57, 43);
 
-    // Rounded square via filled rectangle. Real corner-rounding via
-    // GD requires per-pixel work; for sub-32px the radius vanishes
-    // visually, so we fill flat. The browser pads favicons anyway.
     imagefilledrectangle($im, 0, 0, $size - 1, $size - 1, $paper);
 
-    // Serif "G" centered. Tune font-size for visual weight at each
-    // resolution. 16px favicon needs the G slightly smaller because
-    // anti-aliasing eats the bowl.
-    $fontSize = (int) round($size * 0.62);
-    if ($size <= 16) $fontSize = (int) round($size * 0.7);
+    // Serif "G" left-anchored so the red dot has room to read as
+    // the "News" accent on its baseline (matches the wordmark's
+    // two-tone rhythm). At 16px the dot would clip — render the G
+    // centered + skip the dot at that size.
+    $tinyMode = $size < 24;
+    $fontSize = $tinyMode ? (int) round($size * 0.72) : (int) round($size * 0.7);
 
     $bbox = imagettfbbox($fontSize, 0, $fontPath, 'G');
     $textW = abs($bbox[2] - $bbox[0]);
     $textH = abs($bbox[7] - $bbox[1]);
-    $x = (int) (($size - $textW) / 2 - $bbox[0]);
+
+    if ($tinyMode) {
+        $x = (int) (($size - $textW) / 2 - $bbox[0]);
+    } else {
+        // Left-anchored: G occupies left ~60%, leaves ~40% for the dot.
+        $x = (int) ($size * 0.20) - $bbox[0];
+    }
     $y = (int) (($size + $textH) / 2 - 2);
 
     imagettftext($im, $fontSize, 0, $x, $y, $ink, $fontPath, 'G');
 
-    // Red accent dot, top-right. Skip below 24px — too small to read.
-    if ($size >= 24) {
-        $r = max(2, (int) round($size * 0.07));
+    // Red accent dot ON BASELINE next to the G, sized to feel like
+    // a punctuation mark in a wordmark — bigger than the previous
+    // top-right speck. Only on ≥24px (clipping at 16px).
+    if (! $tinyMode) {
+        $r = max(3, (int) round($size * 0.10));
         $cx = (int) ($size * 0.78);
-        $cy = (int) ($size * 0.30);
+        // Baseline-aligned vertical: matches the bottom of the G.
+        $cy = (int) ($size * 0.72);
         imagefilledellipse($im, $cx, $cy, $r * 2, $r * 2, $red);
     }
 

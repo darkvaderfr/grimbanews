@@ -109,7 +109,11 @@
                                 <article class="glass-card p-3 h-100">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <h3 class="h6 mb-0">
-                                            @if($src->website)
+                                            @if($src->slug ?? null)
+                                                <a href="{{ url('/sources/' . $src->slug) }}" class="text-decoration-none" style="color:var(--gn-ink,#1a1713);">
+                                                    {{ $src->name }} →
+                                                </a>
+                                            @elseif($src->website)
                                                 <a href="https://{{ $src->website }}" target="_blank" rel="noopener" class="text-decoration-none">
                                                     {{ $src->name }}
                                                 </a>
