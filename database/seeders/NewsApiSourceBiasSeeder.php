@@ -36,9 +36,17 @@ class NewsApiSourceBiasSeeder extends Seeder
         $skipped = 0;
 
         foreach ($catalog as $row) {
+            // S149 — only consider api_id when set. `where('api_id', null)`
+            // expands to `WHERE api_id IS NULL` and would match any
+            // unclassified row, so an entry with api_id=null was hijacking
+            // a different source by accident.
             $existing = DB::table('news_sources')
-                ->where('api_id', $row['api_id'])
-                ->orWhere('name', $row['name'])
+                ->where(function ($q) use ($row): void {
+                    if (! empty($row['api_id'])) {
+                        $q->where('api_id', $row['api_id']);
+                    }
+                    $q->orWhere('name', $row['name']);
+                })
                 ->first();
 
             $slug = Str::slug($row['name']);
@@ -179,6 +187,56 @@ class NewsApiSourceBiasSeeder extends Seeder
 
             // Misc
             ['api_id' => 'national-geographic','name' => 'National Geographic','website' => 'nationalgeographic.com','bias' => 'center','ownership' => 'corporate','credibility' => 88,'country' => 'US','language' => 'en','description' => 'Geography + science magazine, Disney.'],
+
+            // S149 — francophone outlets that auto-created themselves at
+            // ingest time (NewsAPI returns them in /everything but they
+            // aren't in NewsAPI's /sources catalog so they had no api_id).
+            // Lookup falls back to name-match in resolveSourceId, so the
+            // seeder uses null for api_id and matches by name instead.
+            // Bias / ownership references: AllSides + Ad Fontes (where
+            // available), MBFC, Wikipedia editorial summaries.
+
+            // FR — generalist
+            ['api_id' => null, 'name' => 'BFMTV',                'website' => 'bfmtv.com',           'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 65, 'country' => 'FR', 'language' => 'fr', 'description' => 'Chaîne d\'info en continu française, propriété de Patrick Drahi (Altice).'],
+            ['api_id' => null, 'name' => 'Franceinfo.fr',        'website' => 'francetvinfo.fr',     'bias' => 'center', 'ownership' => 'public',     'credibility' => 80, 'country' => 'FR', 'language' => 'fr', 'description' => 'Service public d\'information de France Télévisions et Radio France.'],
+            ['api_id' => null, 'name' => 'Le HuffPost',          'website' => 'huffingtonpost.fr',   'bias' => 'left',   'ownership' => 'corporate',  'credibility' => 62, 'country' => 'FR', 'language' => 'fr', 'description' => 'Édition française du HuffPost, propriété BuzzFeed Inc.'],
+            ['api_id' => null, 'name' => 'L\'Obs',               'website' => 'nouvelobs.com',       'bias' => 'left',   'ownership' => 'corporate',  'credibility' => 75, 'country' => 'FR', 'language' => 'fr', 'description' => 'Hebdomadaire français, groupe Le Monde (Niel/Křetínský).'],
+            ['api_id' => null, 'name' => 'Le Parisien',          'website' => 'leparisien.fr',       'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 72, 'country' => 'FR', 'language' => 'fr', 'description' => 'Quotidien régional français, propriété de LVMH (Bernard Arnault).'],
+            ['api_id' => null, 'name' => 'L\'Express',           'website' => 'lexpress.fr',         'bias' => 'right',  'ownership' => 'corporate',  'credibility' => 72, 'country' => 'FR', 'language' => 'fr', 'description' => 'Hebdomadaire français centre-droit, propriété de Patrick Drahi (Altice).'],
+            ['api_id' => null, 'name' => 'Le Point',             'website' => 'lepoint.fr',          'bias' => 'right',  'ownership' => 'corporate',  'credibility' => 70, 'country' => 'FR', 'language' => 'fr', 'description' => 'Hebdomadaire français de droite, propriété de François Pinault (Artémis).'],
+            ['api_id' => null, 'name' => 'Atlantico.fr',         'website' => 'atlantico.fr',        'bias' => 'right',  'ownership' => 'corporate',  'credibility' => 55, 'country' => 'FR', 'language' => 'fr', 'description' => 'Site d\'opinion français de droite.'],
+            ['api_id' => null, 'name' => '20 Minutes',           'website' => '20minutes.fr',        'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 70, 'country' => 'FR', 'language' => 'fr', 'description' => 'Quotidien gratuit français, propriété de Sipa Group + Schibsted.'],
+            ['api_id' => null, 'name' => 'Challenges',           'website' => 'challenges.fr',       'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 72, 'country' => 'FR', 'language' => 'fr', 'description' => 'Hebdomadaire économique français, fondé par Claude Perdriel.'],
+            ['api_id' => null, 'name' => 'Courrier International','website' => 'courrierinternational.com','bias' => 'left','ownership' => 'corporate','credibility' => 80, 'country' => 'FR', 'language' => 'fr', 'description' => 'Hebdomadaire français de revue de presse internationale, groupe Le Monde.'],
+            ['api_id' => null, 'name' => 'Le Dauphiné Libéré','website' => 'ledauphine.com',      'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 70, 'country' => 'FR', 'language' => 'fr', 'description' => 'Quotidien régional français (Sud-Est), groupe Ebra.'],
+            ['api_id' => null, 'name' => 'Le Journal des Entreprises','website' => 'lejournaldesentreprises.com','bias' => 'center','ownership' => 'corporate','credibility' => 68,'country' => 'FR','language' => 'fr','description' => 'Mensuel B2B régional français.'],
+
+            // BE — francophone
+            ['api_id' => null, 'name' => 'Lalibre.be',           'website' => 'lalibre.be',          'bias' => 'right',  'ownership' => 'corporate',  'credibility' => 75, 'country' => 'BE', 'language' => 'fr', 'description' => 'Quotidien belge centre-droit (héritage chrétien-démocrate), groupe IPM.'],
+            ['api_id' => null, 'name' => 'dh.be',                'website' => 'dhnet.be',            'bias' => 'right',  'ownership' => 'corporate',  'credibility' => 62, 'country' => 'BE', 'language' => 'fr', 'description' => 'La Dernière Heure — quotidien populaire belge centre-droit, groupe IPM.'],
+            ['api_id' => null, 'name' => 'Lavenir.net',          'website' => 'lavenir.net',         'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 70, 'country' => 'BE', 'language' => 'fr', 'description' => 'Quotidien régional belge (héritage catholique), groupe Nethys.'],
+
+            // FR — tech / specialty
+            ['api_id' => null, 'name' => 'Les Numériques',      'website' => 'lesnumeriques.com',   'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 72, 'country' => 'FR', 'language' => 'fr', 'description' => 'Site français de tests high-tech, groupe M6 Web.'],
+            ['api_id' => null, 'name' => 'Futura',               'website' => 'futura-sciences.com', 'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 72, 'country' => 'FR', 'language' => 'fr', 'description' => 'Magazine français de vulgarisation scientifique.'],
+            ['api_id' => null, 'name' => 'Daily Geek Show',     'website' => 'dailygeekshow.com',   'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 62, 'country' => 'FR', 'language' => 'fr', 'description' => 'Site web français lifestyle / découverte.'],
+            ['api_id' => null, 'name' => 'Génération NT',       'website' => 'generation-nt.com',   'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 65, 'country' => 'FR', 'language' => 'fr', 'description' => 'Site français d\'actualité high-tech.'],
+            ['api_id' => null, 'name' => 'iPhoneAddict.fr',     'website' => 'iphoneaddict.fr',     'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 65, 'country' => 'FR', 'language' => 'fr', 'description' => 'Site français spécialisé Apple / iPhone.'],
+            ['api_id' => null, 'name' => 'Journal du geek',     'website' => 'journaldugeek.com',   'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 65, 'country' => 'FR', 'language' => 'fr', 'description' => 'Site français de culture geek / tech / gaming.'],
+
+            // US — generalist + entertainment + business additions
+            ['api_id' => null, 'name' => 'NPR',                  'website' => 'npr.org',             'bias' => 'left',   'ownership' => 'public',     'credibility' => 85, 'country' => 'US', 'language' => 'en', 'description' => 'US public radio network. AllSides rates as lean-left.'],
+            ['api_id' => null, 'name' => 'CNBC',                 'website' => 'cnbc.com',            'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 75, 'country' => 'US', 'language' => 'en', 'description' => 'US business news cable channel, NBCUniversal (Comcast).'],
+            ['api_id' => null, 'name' => 'MarketWatch',          'website' => 'marketwatch.com',     'bias' => 'right',  'ownership' => 'corporate',  'credibility' => 72, 'country' => 'US', 'language' => 'en', 'description' => 'US financial news site, News Corp / Dow Jones.'],
+            ['api_id' => null, 'name' => 'Fortune',              'website' => 'fortune.com',         'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 78, 'country' => 'US', 'language' => 'en', 'description' => 'US business magazine, Fortune Media (Chatchaval Jiaravanon).'],
+            ['api_id' => null, 'name' => 'Slate Magazine',       'website' => 'slate.com',           'bias' => 'left',   'ownership' => 'corporate',  'credibility' => 70, 'country' => 'US', 'language' => 'en', 'description' => 'US online magazine, Graham Holdings Company.'],
+            ['api_id' => null, 'name' => 'Deadline',             'website' => 'deadline.com',        'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 70, 'country' => 'US', 'language' => 'en', 'description' => 'US entertainment trade, Penske Media Corporation.'],
+            ['api_id' => null, 'name' => 'Hollywood Reporter',   'website' => 'hollywoodreporter.com','bias' => 'center','ownership' => 'corporate', 'credibility' => 70, 'country' => 'US', 'language' => 'en', 'description' => 'US entertainment trade, Penske Media Corporation.'],
+            ['api_id' => null, 'name' => 'PEOPLE',               'website' => 'people.com',          'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 65, 'country' => 'US', 'language' => 'en', 'description' => 'US celebrity weekly, Dotdash Meredith.'],
+            ['api_id' => null, 'name' => 'Gizmodo.com',          'website' => 'gizmodo.com',         'bias' => 'left',   'ownership' => 'corporate',  'credibility' => 70, 'country' => 'US', 'language' => 'en', 'description' => 'US tech/culture site, G/O Media.'],
+            ['api_id' => null, 'name' => 'GamesIndustry.biz',    'website' => 'gamesindustry.biz',   'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 72, 'country' => 'GB', 'language' => 'en', 'description' => 'UK gaming-industry trade, Gamer Network.'],
+            ['api_id' => null, 'name' => 'GlobeNewswire',        'website' => 'globenewswire.com',   'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 50, 'country' => 'US', 'language' => 'en', 'description' => 'PR newswire (Notified by Intrado) — primary-source distribution, low independent reporting.'],
+            ['api_id' => null, 'name' => 'nj.com',               'website' => 'nj.com',              'bias' => 'center', 'ownership' => 'corporate',  'credibility' => 70, 'country' => 'US', 'language' => 'en', 'description' => 'New Jersey local news, NJ Advance Media (Newhouse).'],
         ];
     }
 }
