@@ -35,6 +35,16 @@ Schedule::command('grimba:translate-pending --limit=50')
     ->withoutOverlapping(20)
     ->runInBackground();
 
+// GrimbaNews — auto-publish drafts from trusted classified sources
+// (S150). Runs every 15 min, 1h after each :15/:45 ingest cadence so
+// any new draft has settled before promotion. Editor still has the
+// 1h age window (+ the cron's :00/:30 offset) to manually demote.
+Schedule::command('grimba:publish-trusted')
+    ->cron('5,35 * * * *')
+    ->onOneServer()
+    ->withoutOverlapping(15)
+    ->runInBackground();
+
 // GrimbaNews — NewsAPI ingest (S128). Runs at :15 and :45 past the
 // hour so it doesn't collide with the RSS poller (which fires on the
 // :00 / :30 boundary). Skips silently when the key isn't set; gated
