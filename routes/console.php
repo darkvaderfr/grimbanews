@@ -35,6 +35,17 @@ Schedule::command('grimba:translate-pending --limit=50')
     ->withoutOverlapping(20)
     ->runInBackground();
 
+// GrimbaNews — NewsAPI ingest (S128). Runs at :15 and :45 past the
+// hour so it doesn't collide with the RSS poller (which fires on the
+// :00 / :30 boundary). Skips silently when the key isn't set; gated
+// on the active toggle in /admin/grimba/newsapi.
+Schedule::command('grimba:fetch-newsapi')
+    ->cron('15,45 * * * *')
+    ->onOneServer()
+    ->withoutOverlapping(20)
+    ->runInBackground()
+    ->when(fn () => (bool) setting('grimba_newsapi_active', true));
+
 // GrimbaNews — weekly image-backfill sweep (S94). Catches two cases
 // the live poller misses:
 //   1. Older drafts (aged out of the feed window at the time of their
