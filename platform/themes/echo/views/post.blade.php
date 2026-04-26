@@ -375,6 +375,9 @@
                     @include(Theme::getThemeNamespace('partials.story.bias-distribution'), [
                         'clusterPosts' => $__gnClusterPosts,
                     ])
+                    @include(Theme::getThemeNamespace('partials.story.timeline'), [
+                        'clusterPosts' => $__gnClusterPosts,
+                    ])
                     @include(Theme::getThemeNamespace('partials.story.similar-topics'), [
                         'post' => $post,
                     ])
