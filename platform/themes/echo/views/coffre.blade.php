@@ -7,6 +7,7 @@
      *
      * @var \Illuminate\Support\Collection $posts  ordered most-recent-first
      * @var int $count
+     * @var int $staleCount
      */
     Theme::layout('grimba-chrome');
 
@@ -39,6 +40,11 @@
                     Vos articles sauvegardés, du plus récent au plus ancien. Cliquez sur l'étoile <span aria-hidden="true">★</span> pour retirer.
                 @endif
             </p>
+            @if(($staleCount ?? 0) > 0)
+                <div class="mt-3 small" style="padding:10px 12px; border-radius:12px; background:rgba(192,57,43,0.08); border:1px solid rgba(192,57,43,0.16); color:#8d3025;">
+                    {{ $staleCount }} {{ $staleCount === 1 ? 'article n’était plus disponible' : 'articles n’étaient plus disponibles' }} et {{ $staleCount === 1 ? 'a été retiré' : 'ont été retirés' }} automatiquement de votre coffre.
+                </div>
+            @endif
         </header>
 
         @if($count === 0)
@@ -55,7 +61,7 @@
             {{-- S184 — bias filter tabs (client-side filter, no reload).
                  Only renders L/C/R buckets that have at least one post. --}}
             @if($count >= 2)
-                <div class="d-flex align-items-center justify-content-center gap-1 mb-4" data-grimba-coffre-tabs role="tablist"
+                <div class="d-flex align-items-center justify-content-center gap-1 mb-4" data-grimba-coffre-tabs role="tablist" aria-label="Filtrer le coffre par biais"
                      style="display:flex; border-radius:9999px; background:rgba(0,0,0,0.04); padding:4px; width:fit-content; margin-left:auto; margin-right:auto;">
                     @php
                         $tabs = [
@@ -68,6 +74,7 @@
                     @foreach($tabs as $key => $meta)
                         @if($key === 'all' || ($vaultCounts[$key] ?? 0) > 0)
                             <button type="button" data-bias-tab="{{ $key }}" role="tab"
+                                    aria-controls="grimba-coffre-panel"
                                     aria-selected="{{ $key === 'all' ? 'true' : 'false' }}"
                                     style="
                                         padding:6px 14px; border-radius:9999px; border:none;
@@ -86,10 +93,20 @@
                 </div>
             @endif
 
-            <div class="row g-4" data-grimba-coffre-list>
+            <div class="row g-4" data-grimba-coffre-list id="grimba-coffre-panel" role="tabpanel">
                 @foreach($posts as $post)
-                    <div class="col-lg-4 col-md-6 col-12" data-bias="{{ $post->bias_rating ?? 'unknown' }}">
-                        @include(Theme::getThemeNamespace('partials.blog.post.partials.items.grid'), ['post' => $post])
+                    <div class="col-lg-4 col-md-6 col-12" data-bias="{{ $post->bias_rating ?? 'unknown' }}" data-post-id="{{ (int) $post->id }}">
+                        <div class="grimba-coffre-card">
+                            @include(Theme::getThemeNamespace('partials.blog.post.partials.items.grid'), ['post' => $post])
+                            <div class="d-flex justify-content-between align-items-center gap-2 mt-2 px-1">
+                                <span class="small opacity-60">Retirer rapidement</span>
+                                <button type="button"
+                                        class="btn-grimba btn-grimba--ghost btn-grimba--sm"
+                                        data-grimba-vault-remove="{{ (int) $post->id }}">
+                                    ✓ Marquer comme lu
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 @endforeach
             </div>
@@ -100,6 +117,11 @@
                    class="btn-grimba btn-grimba--ghost btn-grimba--sm"
                    style="padding:8px 18px; border-radius:9999px; border:1px solid rgba(26,23,19,0.2); background:transparent; color:var(--gn-ink,#1a1713); font-weight:600; font-size:13px; text-decoration:none;">
                     ⬇ Exporter (.csv)
+                </a>
+                <a href="{{ url('/coffre/partager') }}"
+                   class="btn-grimba btn-grimba--ghost btn-grimba--sm"
+                   style="padding:8px 18px; border-radius:9999px; border:1px solid rgba(26,23,19,0.2); background:transparent; color:var(--gn-ink,#1a1713); font-weight:600; font-size:13px; text-decoration:none;">
+                    Partager un lien
                 </a>
                 <button type="button" id="grimba-coffre-clear"
                         class="btn-grimba btn-grimba--ghost btn-grimba--sm"
@@ -114,6 +136,7 @@
 <script>
     (function () {
         const btn = document.getElementById('grimba-coffre-clear');
+        const list = document.querySelector('[data-grimba-coffre-list]');
         if (btn) {
             btn.addEventListener('click', () => {
                 if (! confirm('Vider votre coffre ? Cette action est irréversible.')) return;
@@ -140,5 +163,26 @@
             }
             tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.biasTab)));
         }
+
+        document.addEventListener('click', (event) => {
+            const remove = event.target.closest('[data-grimba-vault-remove]');
+            if (! remove) return;
+            event.preventDefault();
+            const id = String(remove.dataset.grimbaVaultRemove || '');
+            const trigger = document.querySelector('[data-grimba-save="' + id + '"]');
+            if (trigger && trigger.getAttribute('aria-pressed') === 'true') {
+                trigger.click();
+            }
+        });
+
+        document.addEventListener('grimba:vault-changed', (event) => {
+            if (! list) return;
+            const ids = Array.isArray(event.detail?.ids) ? event.detail.ids.map(String) : [];
+            list.querySelectorAll('[data-post-id]').forEach(node => {
+                node.style.display = ids.includes(node.dataset.postId) ? '' : 'none';
+            });
+            const visible = Array.from(list.querySelectorAll('[data-post-id]')).filter(node => node.style.display !== 'none');
+            if (! visible.length) window.location.reload();
+        });
     })();
 </script>

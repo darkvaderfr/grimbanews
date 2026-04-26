@@ -109,12 +109,12 @@ are the orphan-post layout, Highlights/Voices panels, and sort options.
 | ✅ S183 | Bias-colored synthesis bullets | `b57cedd` |
 | ✅ S175 | Multi-source extractive synthesis | `223e593` |
 | **B1** | **Orphan-post layout polish** — single-source posts (`$__gnIsStoryPage === false`) still render the legacy 250+ line Bootstrap layout. Apply grimba-chrome hero treatment: glass-panel hero, kicker row matching cluster pages, source/bias chip stack, NobuAI summary block (single bullet from description), reading-time, save pill | Visual parity with cluster hero on a known orphan post |
-| **B2** | **Highlights panel** (right sidebar) — extractive top 3 facts: most-frequent named entities (people/places) across the cluster, ordered by mention count. Use a regex-based name detector (Capitalized 2-word sequences) until LLM lands | New `partials/story/highlights.blade.php`, only renders when ≥ 3 entities |
-| **B3** | **Voices panel** — quoted-text scanner: regex-extract `«…»` and `"…"` strings ≥ 12 chars from cluster post descriptions, attribute to source, render as a stacked quote list. Skip when < 2 quotes found | New `partials/story/voices.blade.php` |
-| **B4** | **Article-list sort toggle** — "Plus récent" vs "Par camp" toggle above the cluster article list. Persists in `grimba_cluster_sort` cookie. Default = bias bucket order | Toggle works without page reload |
-| **B5** | **Coverage gap detail link** — make the S181 callout's "/angles-morts" anchor a deep-link with `?cluster={id}` so the angles-morts page can highlight the specific story | `/angles-morts?cluster=1005` scrolls to the matching card |
-| **B6** | **Story share kit** — three-button row (Twitter / Bluesky / copy-link) above the synthesis. Twitter intent uses the cluster URL + truncated title | Sharing works on at least one mobile + desktop browser |
-| **B7** | **"Lu chez X" jump-list** — when current source has a sibling cluster member, surface a chip like "Aussi chez Le Monde, Libération, La Croix" that anchor-links into the article list | Only renders when cluster ≥ 3 sources |
+| ✅ S185 | Highlights panel | Uncommitted worktree |
+| ✅ S186 | Voices panel | Uncommitted worktree |
+| ✅ S187 | Article-list sort toggle | Uncommitted worktree |
+| ✅ S188 | Coverage gap detail link | Uncommitted worktree |
+| ✅ S189 | Story share kit | Uncommitted worktree |
+| ✅ S190 | "Lu chez X" jump-list | Uncommitted worktree |
 | **B8** | **Reading-progress bar** — slim sticky bar at the top of the story page that tracks scroll progress through the article body | < 200ms scroll-to-paint, no jank |
 | **B9** | **Bias confidence indicator** — when a source's `credibility_score` is < 50 OR `bias_rating` was system-classified vs editorially-set, show a "biais auto-détecté" subscript next to the lean badge | Indicator surfaces on at least one demo post |
 | **B10** | **Story-page Open Graph upgrade** — current OG uses post image + title; for cluster pages, generate a composite OG with bias bar + outlet count | New OG handler in `GrimbaOgImageController::story()` |
@@ -132,12 +132,12 @@ missing the polish that makes saved-articles habitual.
 | ✅ S178 | Header vault count badge | `3be887c` |
 | ✅ S182 | Vault CSV export | `92fd5e9` |
 | ✅ S184 | /coffre bias filter tabs | `1e64da5` |
-| **C1** | **Onboarding modal mention** — add a "Sauvegardez pour plus tard" line to the existing `partials/home/onboarding-modal.blade.php` so first-time visitors discover the vault | New visitors see the hint; existing visitors don't (gated on `grimba_onboarded` cookie) |
-| **C2** | **Mobile floating action button** — when the vault has ≥ 1 saved item, surface a sticky bottom-right pill on mobile that links to `/coffre`. Hide on /coffre itself | Renders only at `< md` breakpoint |
-| **C3** | **Keyboard shortcut "S"** — pressing `S` on a story page toggles the save state for the current post. Skip if focused element is an input | Manual key-press test passes |
-| **C4** | **Vault-share link** — `/coffre/partager` route that takes the cookie ids, encodes them in a URL fragment (so the data stays client-side), and outputs a shareable URL. Recipient lands on `/coffre/depuis-lien#ids=...` and the cookie is rewritten with the offered ids (with confirmation) | A shared URL works incognito |
-| **C5** | **Stale-id pruning** — when `/coffre` route notices that ≥ 1 cookie id no longer maps to a published post, write a cleaned cookie back via `Cookie::queue` so the count badge stops over-reporting | Cookie self-heals after a deleted-post navigation |
-| **C6** | **"Marquer comme lu"** — small ✓ button next to each /coffre card that removes it from the vault. Faster than the star toggle on tiny cards | Click removes card without reload |
+| ✅ S191 | Onboarding modal mention | Uncommitted worktree |
+| ✅ S192 | Mobile floating action button | Uncommitted worktree |
+| ✅ S193 | Keyboard shortcut "S" | Uncommitted worktree |
+| ✅ S194 | Vault-share link | Uncommitted worktree |
+| ✅ S195 | Stale-id pruning | Uncommitted worktree |
+| ✅ S196 | "Marquer comme lu" | Uncommitted worktree |
 | **C7** | **Save → email alert (member-only)** — `auth('member')` users get an option to email themselves the saved article digest weekly. Stores opt-in on `members.weekly_vault_digest` boolean column | New migration + scheduled command + opt-in toggle on /account |
 | **C8** | **Vault analytics** — log save toggles to a `vault_events` SQLite table (event, post_id, ts, ip_hash) so editorial can see "what readers actually save" without per-user identification | Cron-archived weekly to `storage/exports/vault_events_YYYY-MM.csv` |
 
@@ -151,10 +151,10 @@ need to feel as cinematic as the story pages.
 | ID | Sprint | Acceptance |
 |----|--------|------------|
 | ✅ S176 | Region picker subtle translucency | `223e593` |
-| **D1** | **/sources index polish** — current page is mostly a flat sortable table. Restructure into a Steve-styled grid: bias buckets header → outlet cards (logo + name + ownership chip + credibility chip + recent-cluster count). Search box at top | Visual parity with the rest of the site |
+| ✅ S197 | /sources index polish | Uncommitted worktree |
 | **D2** | **/pour-vous polish** — bias-mix block already there; add a "Sujets que vous évitez" section showing categories with 0 reads in the last 14 days, link to `/blog?categorie=X` | Renders when read history > 10 articles |
 | **D3** | **Trending kicker on homepage** — utility-bar message "X nouveaux ce matin · Y angles morts · Z dossiers en cours". Cached for 5 min via `Cache::remember` | First paint includes the kicker |
-| **D4** | **Mobile floating bottom nav** — replace the current header chip strip on mobile with a 5-item bottom nav (Accueil · Pour vous · Local · Coffre · Compte). Sticky, glass-panel | < md viewport only |
+| ✅ S199 | Mobile floating bottom nav | Uncommitted worktree |
 | **D5** | **Search facets** — `/search?q=...` already supports `source` and `bias` filters; add `from_date`, `to_date`, `owner` (drop the `news_sources.owner_name` enum). Update `search.blade.php` facet UI | Date range filter narrows results correctly |
 | **D6** | **Topic-chip strip persistence** — current topic chips reset selection on every navigation; persist last-selected chip in `grimba_chip` cookie and pre-select on return | Returning to homepage retains chip selection |
 | **D7** | **Saved-search alerts (member-only)** — let logged-in readers save a search query + facet combo. New `saved_searches` table; weekly cron emails new matches | One member can save & receive a digest |
@@ -206,7 +206,7 @@ users; the cinematic design must not exclude them.
 | ID | Sprint | Acceptance |
 |----|--------|------------|
 | **G1** | **Focus-visible audit** — every interactive element shows a 2px paper-on-ink outline on `:focus-visible`. Currently only some buttons have it | axe-core a11y report has zero focus-related violations |
-| **G2** | **ARIA pass on bias filter tabs** — `role="tablist"` + `role="tab"` + `aria-controls` + `aria-selected` on every tab strip (cluster, /coffre). Add proper `tabpanel` IDs | Screen reader announces "Tab 1 of 4 selected" correctly |
+| ✅ S198 | ARIA pass on bias filter tabs | Uncommitted worktree |
 | **G3** | **Color contrast check** — verify `--gn-ink` on `--gn-paper` and dark variants meet WCAG AA. The 0.45-alpha muted text needs auditing | Contrast checker reports AA across the palette |
 | **G4** | **EN locale completeness** — all `__()` strings have an `en.php` translation. Currently most are FR-only with FR fallback | `app()->setLocale('en')` renders /coffre, /pour-vous, /local fully |
 | **G5** | **Keyboard navigation** — tab-order audit on every page; trap focus correctly in modals (newsletter, onboarding) | Manual keyboard-only walkthrough passes |

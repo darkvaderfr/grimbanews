@@ -146,6 +146,15 @@
                                         @endif
                                     </div>
 
+                                    <div class="d-flex flex-wrap gap-2 mt-3 small">
+                                        <span style="padding:4px 9px;border-radius:9999px;background:rgba(26,23,19,0.05);">
+                                            {{ (int) ($src->recent_cluster_count ?? 0) }} dossiers / 30 j
+                                        </span>
+                                        <span style="padding:4px 9px;border-radius:9999px;background:rgba(26,23,19,0.05);">
+                                            {{ (int) ($src->article_count ?? 0) }} articles
+                                        </span>
+                                    </div>
+
                                     @if($src->credibility_score)
                                         @php
                                             $score = (int) $src->credibility_score;

@@ -1,10 +1,12 @@
 <?php
 
+use App\Support\GrimbaVault;
 use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
 use Botble\Blog\Models\Post;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
@@ -531,10 +533,27 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         })->name('public.owners');
 
         Route::get('sources', function () {
-            $rows = \Illuminate\Support\Facades\DB::table('news_sources')
+            $activity = DB::table('posts')
+                ->selectRaw('source_id, COUNT(*) as article_count, COUNT(DISTINCT story_cluster_id) as cluster_count, MAX(created_at) as last_published_at')
+                ->selectRaw("COUNT(DISTINCT CASE WHEN created_at >= ? THEN story_cluster_id END) as recent_cluster_count", [now()->subDays(30)])
+                ->where('status', 'published')
+                ->whereNotNull('source_id')
+                ->groupBy('source_id');
+
+            $rows = DB::table('news_sources')
+                ->leftJoinSub($activity, 'activity', function ($join): void {
+                    $join->on('activity.source_id', '=', 'news_sources.id');
+                })
                 ->orderBy('credibility_score', 'desc')
+                ->orderByDesc('recent_cluster_count')
                 ->orderBy('name')
-                ->get();
+                ->get([
+                    'news_sources.*',
+                    DB::raw('COALESCE(activity.article_count, 0) as article_count'),
+                    DB::raw('COALESCE(activity.cluster_count, 0) as cluster_count'),
+                    DB::raw('COALESCE(activity.recent_cluster_count, 0) as recent_cluster_count'),
+                    'activity.last_published_at',
+                ]);
 
             $grouped = $rows->groupBy(fn ($r) => in_array($r->bias_rating, ['left','center','right']) ? $r->bias_rating : 'unknown');
 
@@ -604,23 +623,18 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         // Reads grimba_vault CSV (CSV of post ids, last-saved-first,
         // capped at 50 by client JS) and renders the saved articles.
         Route::get('coffre', function (Request $request) {
-            $raw = (string) $request->cookie('grimba_vault', '');
-            $ids = array_values(array_filter(array_map('intval', explode(',', $raw))));
+            $ids = GrimbaVault::parseIds((string) $request->cookie(GrimbaVault::COOKIE, ''));
+            $posts = GrimbaVault::resolvePosts($ids);
+            $staleIds = GrimbaVault::staleIds($ids, $posts);
 
-            $posts = collect();
-            if (! empty($ids)) {
-                $byId = Post::query()
-                    ->whereIn('id', $ids)
-                    ->where('status', 'published')
-                    ->with('categories')
-                    ->get()
-                    ->keyBy('id');
+            if ($staleIds !== []) {
+                $clean = $posts->pluck('id')->map(static fn ($id): int => (int) $id)->all();
 
-                // Preserve cookie order (most-recent first).
-                $posts = collect($ids)
-                    ->map(fn ($id) => $byId->get($id))
-                    ->filter()
-                    ->values();
+                if ($clean === []) {
+                    Cookie::queue(Cookie::forget(GrimbaVault::COOKIE, '/'));
+                } else {
+                    Cookie::queue(GrimbaVault::COOKIE, GrimbaVault::serializeIds($clean), 60 * 24 * 365, '/', null, false, false, false, 'Lax');
+                }
             }
 
             SeoHelper::setTitle('Mon coffre — GrimbaNews')
@@ -633,16 +647,51 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             return Theme::scope('coffre', [
                 'posts' => $posts,
                 'count' => $posts->count(),
+                'staleCount' => count($staleIds),
             ])->render();
         })->name('public.coffre');
+
+        Route::get('coffre/partager', function (Request $request) {
+            $ids = GrimbaVault::parseIds((string) $request->cookie(GrimbaVault::COOKIE, ''));
+            $shareUrl = url('/coffre/depuis-lien') . '#ids=' . GrimbaVault::serializeIds($ids);
+
+            SeoHelper::setTitle('Partager mon coffre — GrimbaNews')
+                ->setDescription('Créer un lien local pour partager votre sélection sauvegardée.');
+
+            Theme::breadcrumb()
+                ->add('Accueil', url('/'))
+                ->add('Mon coffre', url('/coffre'))
+                ->add('Partager', url('/coffre/partager'));
+
+            return Theme::scope('coffre-share', [
+                'mode' => 'share',
+                'count' => count($ids),
+                'shareUrl' => $shareUrl,
+            ])->render();
+        })->name('public.coffre.share');
+
+        Route::get('coffre/depuis-lien', function () {
+            SeoHelper::setTitle('Importer un coffre — GrimbaNews')
+                ->setDescription('Importer une sélection GrimbaNews partagée.');
+
+            Theme::breadcrumb()
+                ->add('Accueil', url('/'))
+                ->add('Mon coffre', url('/coffre'))
+                ->add('Depuis un lien', url('/coffre/depuis-lien'));
+
+            return Theme::scope('coffre-share', [
+                'mode' => 'import',
+                'count' => 0,
+                'shareUrl' => '',
+            ])->render();
+        })->name('public.coffre.import');
 
         // S182 — vault CSV export. Cookie-only data; mirror of
         // /pour-vous/export.csv. Hydrates titles/sources/bias from the
         // grimba_vault id list and streams a CSV. Empty cookie → CSV
         // with header only.
         Route::get('coffre/export.csv', function (Request $request) {
-            $raw = (string) $request->cookie('grimba_vault', '');
-            $ids = array_values(array_filter(array_map('intval', explode(',', $raw))));
+            $ids = GrimbaVault::parseIds((string) $request->cookie(GrimbaVault::COOKIE, ''));
 
             $rows = collect();
             if (! empty($ids)) {
@@ -686,10 +735,15 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ]);
         })->name('public.coffre.export');
 
-        Route::get('angles-morts', function () {
+        Route::get('angles-morts', function (Request $request) {
+            $clusterId = (int) $request->query('cluster', 0);
+
             $posts = Post::query()
                 ->where('is_blindspot', true)
                 ->where('status', 'published')
+                ->when($clusterId > 0, static function ($query) use ($clusterId): void {
+                    $query->orderByRaw('CASE WHEN story_cluster_id = ? THEN 0 ELSE 1 END', [$clusterId]);
+                })
                 ->latest()
                 ->paginate(12);
 
@@ -700,7 +754,10 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add('Accueil', url('/'))
                 ->add('Angles morts', url('/angles-morts'));
 
-            return Theme::scope('blindspot', compact('posts'))->render();
+            return Theme::scope('blindspot', [
+                'posts' => $posts,
+                'focusClusterId' => $clusterId,
+            ])->render();
         })->name('public.blindspot');
 
         Route::group([

@@ -41,7 +41,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="grimba-onboard-pillar">
-                        <div class="grimba-onboard-pillar__dot" style="background:#8a2be2;" aria-hidden="true">!</div>
+                        <div class="grimba-onboard-pillar__dot" style="background:#c0392b;" aria-hidden="true">!</div>
                         <strong>Angles morts</strong>
                         <p class="small opacity-85 mb-0">Les histoires qu'un seul camp couvre — on les signale.</p>
                     </div>
@@ -56,6 +56,9 @@
             </div>
 
             <div class="mb-2"><strong>Choisissez 3 sujets</strong> pour démarrer votre fil (optionnel) :</div>
+            <p class="small opacity-75 mb-3">
+                Astuce : l'étoile <span aria-hidden="true">★</span> sauvegarde n'importe quel article dans votre coffre pour plus tard, sans créer de compte.
+            </p>
             <div class="d-flex flex-wrap gap-2 mb-3 grimba-onboard-topics">
                 @foreach($topics as $topic)
                     <button type="button"

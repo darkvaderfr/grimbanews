@@ -69,80 +69,11 @@
         </div>
     </main>
 
-    {{-- S173 — vault toggle handler. Single delegate at body level
-         so freshly-injected save-button instances also work. Cookie
-         is in EncryptCookies::except so JS read/write round-trips. --}}
-    <script>
-        (function () {
-            const COOKIE = 'grimba_vault';
-            const MAX = 50;
+    @include(Theme::getThemeNamespace('partials.home.vault-fab'))
+    @include(Theme::getThemeNamespace('partials.home.mobile-bottom-nav'))
 
-            function ids() {
-                const m = document.cookie.match(/(?:^|; )grimba_vault=([^;]+)/);
-                if (! m) return [];
-                return decodeURIComponent(m[1]).split(',').filter(Boolean).map(s => parseInt(s, 10)).filter(Number.isFinite);
-            }
-            function write(arr) {
-                const v = arr.slice(0, MAX).join(',');
-                document.cookie = COOKIE + '=' + encodeURIComponent(v) + '; path=/; max-age=' + (60 * 60 * 24 * 365) + '; SameSite=Lax';
-            }
-
-            function paint(btn, saved) {
-                btn.setAttribute('aria-pressed', String(saved));
-                const icon = btn.querySelector('.grimba-save-btn__icon, span[aria-hidden]');
-                if (icon) icon.textContent = saved ? '★' : '☆';
-                if (btn.classList.contains('grimba-save-btn--pill')) {
-                    const label = btn.querySelector('.grimba-save-btn__label');
-                    if (label) label.textContent = saved ? 'Sauvegardé' : 'Sauvegarder';
-                    btn.style.background = saved ? 'var(--gn-ink, #1a1713)' : 'rgba(255,255,255,0.6)';
-                    btn.style.color = saved ? 'var(--gn-paper, #f6f1e8)' : 'var(--gn-ink, #1a1713)';
-                } else {
-                    btn.style.background = saved ? 'var(--gn-ink, #1a1713)' : 'rgba(255,255,255,0.6)';
-                    btn.style.color = saved ? 'var(--gn-paper, #f6f1e8)' : 'var(--gn-ink, #1a1713)';
-                }
-            }
-
-            // S178 — keep the header vault badge in sync with current count.
-            function paintCount() {
-                const n = ids().length;
-                document.querySelectorAll('[data-grimba-vault-count]').forEach(el => {
-                    el.textContent = String(n);
-                });
-            }
-
-            // Initial paint
-            function syncAll() {
-                const saved = new Set(ids());
-                document.querySelectorAll('[data-grimba-save]').forEach(btn => {
-                    const id = parseInt(btn.dataset.grimbaSave, 10);
-                    if (! Number.isFinite(id)) return;
-                    paint(btn, saved.has(id));
-                });
-                paintCount();
-            }
-
-            document.addEventListener('click', (e) => {
-                const btn = e.target.closest('[data-grimba-save]');
-                if (! btn) return;
-                e.preventDefault();
-                const id = parseInt(btn.dataset.grimbaSave, 10);
-                if (! Number.isFinite(id)) return;
-                const list = ids();
-                const i = list.indexOf(id);
-                if (i >= 0) list.splice(i, 1);
-                else list.unshift(id);
-                write(list);
-                paint(btn, list.includes(id));
-                paintCount();
-            });
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', syncAll);
-            } else {
-                syncAll();
-            }
-        })();
-    </script>
+    {{-- S173/S185 — shared vault toggle handler for all layouts. --}}
+    @include(Theme::getThemeNamespace('partials.home.vault-script'))
 
     @include(Theme::getThemeNamespace('partials.home.footer-dark'))
 

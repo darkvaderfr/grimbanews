@@ -166,7 +166,7 @@
                             <span>
                                 <strong>Couverture déséquilibrée</strong> — cette histoire n'est pour l'instant
                                 couverte que par {{ $__sideMeta[$__sole]['label'] }}.
-                                <a href="{{ url('/angles-morts') }}" style="color:inherit; text-decoration:underline;">Voir tous les angles morts</a>.
+                                <a href="{{ url('/angles-morts') }}?cluster={{ (int) $post->story_cluster_id }}#cluster-{{ (int) $post->story_cluster_id }}" style="color:inherit; text-decoration:underline;">Voir cet angle mort</a>.
                             </span>
                         </div>
                     @endif
@@ -384,6 +384,10 @@
                     @endif
                 </header>
 
+                @include(Theme::getThemeNamespace('partials.story.share-kit'), [
+                    'title' => $__gnTitle,
+                ])
+
                 @if($__gnFullBody)
                     <details class="grimba-full-article glass-panel p-3 p-md-4 mb-3" style="cursor:pointer;">
                         <summary style="cursor:pointer; font-family:'Public Sans',system-ui,sans-serif; font-weight:700; font-size:14px; letter-spacing:0.4px; text-transform:uppercase; color:var(--gn-ink,#1a1713);">
@@ -428,6 +432,12 @@
                         'clusterPosts' => $__gnClusterPosts,
                     ])
                     @include(Theme::getThemeNamespace('partials.story.timeline'), [
+                        'clusterPosts' => $__gnClusterPosts,
+                    ])
+                    @include(Theme::getThemeNamespace('partials.story.highlights'), [
+                        'clusterPosts' => $__gnClusterPosts,
+                    ])
+                    @include(Theme::getThemeNamespace('partials.story.voices'), [
                         'clusterPosts' => $__gnClusterPosts,
                     ])
                     @include(Theme::getThemeNamespace('partials.story.similar-topics'), [

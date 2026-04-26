@@ -67,10 +67,14 @@
         </div>
     </main>
 
+    @include(Theme::getThemeNamespace('partials.home.vault-fab'))
+    @include(Theme::getThemeNamespace('partials.home.mobile-bottom-nav'))
+
     @include(Theme::getThemeNamespace('partials.home.footer-dark'))
 
     {{-- S145 — cookie consent overlay (mirrors grimba-chrome). --}}
     @include(Theme::getThemeNamespace('partials.cookie-consent'))
+    @include(Theme::getThemeNamespace('partials.home.vault-script'))
 
     <script>'use strict'; window.siteConfig = {};</script>
     {!! Theme::footer() !!}

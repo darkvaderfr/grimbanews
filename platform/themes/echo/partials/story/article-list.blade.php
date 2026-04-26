@@ -11,6 +11,7 @@
      * @var \Botble\Blog\Models\Post                 $currentPost  the post the reader landed on
      */
 
+    use App\Support\GrimbaStoryInsights;
     use Illuminate\Support\Str;
 
     $byBias = ['left' => [], 'center' => [], 'right' => [], 'unknown' => []];
@@ -33,6 +34,15 @@
         'right'   => ['label' => 'Droite',     'color' => '#e84c3d', 'short' => 'D'],
         'unknown' => ['label' => 'Non classé', 'color' => '#6b6459', 'short' => '·'],
     ];
+
+    $sortMode = request()->cookie('grimba_cluster_sort', 'bias') === 'recent' ? 'recent' : 'bias';
+    $jumpList = GrimbaStoryInsights::buildJumpList($clusterPosts, (int) $currentPost->id);
+
+    $clusterList = $sortMode === 'recent'
+        ? $clusterPosts->sortByDesc('created_at')->values()
+        : collect(['left', 'center', 'right', 'unknown'])
+            ->flatMap(static fn (string $bucket) => $byBias[$bucket])
+            ->values();
 @endphp
 
 <section class="grimba-story-articles">
@@ -41,21 +51,54 @@
             <span style="opacity:0.55;">{{ $totalCount }}</span>
             {{ $totalCount === 1 ? 'article' : 'articles' }}
         </h2>
-        <div class="grimba-story-articles__tabs" role="tablist" data-grimba-cluster-tabs
+        <div class="grimba-story-articles__tabs" role="tablist" aria-label="Filtrer les articles du dossier" data-grimba-cluster-tabs
              style="display:flex; gap:4px; border-radius:9999px; background:rgba(0,0,0,0.04); padding:4px;">
-            <button type="button" data-bias-tab="all" role="tab" aria-selected="true"
+            <button type="button" data-bias-tab="all" role="tab" aria-controls="grimba-cluster-panel" aria-selected="true"
                     style="padding:6px 12px; border-radius:9999px; border:none; background:var(--gn-ink,#1a1713); color:var(--gn-paper,#f6f1e8); font-weight:700; font-size:13px;">
                 Tous · {{ $totalCount }}
             </button>
             @foreach(['left', 'center', 'right'] as $b)
                 @if($countLabels[$b] > 0)
-                    <button type="button" data-bias-tab="{{ $b }}" role="tab" aria-selected="false"
+                    <button type="button" data-bias-tab="{{ $b }}" role="tab" aria-controls="grimba-cluster-panel" aria-selected="false"
                             style="padding:6px 12px; border-radius:9999px; border:none; background:transparent; color:var(--gn-ink,#1a1713); font-weight:600; font-size:13px;">
                         <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:{{ $biasMeta[$b]['color'] }}; margin-right:4px;"></span>
                         {{ $biasMeta[$b]['label'] }} · {{ $countLabels[$b] }}
                     </button>
                 @endif
             @endforeach
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mb-3">
+        @if(count($jumpList) >= 2)
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="small opacity-60">Lu chez</span>
+                @foreach($jumpList as $jump)
+                    @php $color = $biasMeta[$jump['bias']]['color'] ?? 'rgba(26,23,19,0.45)'; @endphp
+                    <a href="#story-article-{{ $jump['id'] }}"
+                       class="btn-grimba btn-grimba--ghost btn-grimba--sm"
+                       style="border-color:{{ $color }}33; color:var(--gn-ink,#1a1713);">
+                        <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:{{ $color }}; margin-right:6px;"></span>
+                        {{ $jump['label'] }}
+                    </a>
+                @endforeach
+            </div>
+        @endif
+
+        <div class="d-flex align-items-center gap-2 ms-auto" data-grimba-cluster-sort>
+            <span class="small opacity-60">Trier</span>
+            <button type="button"
+                    class="btn-grimba btn-grimba--sm {{ $sortMode === 'bias' ? 'btn-grimba--solid' : 'btn-grimba--ghost' }}"
+                    data-sort-mode="bias"
+                    aria-pressed="{{ $sortMode === 'bias' ? 'true' : 'false' }}">
+                Par camp
+            </button>
+            <button type="button"
+                    class="btn-grimba btn-grimba--sm {{ $sortMode === 'recent' ? 'btn-grimba--solid' : 'btn-grimba--ghost' }}"
+                    data-sort-mode="recent"
+                    aria-pressed="{{ $sortMode === 'recent' ? 'true' : 'false' }}">
+                Plus récent
+            </button>
         </div>
     </div>
 
@@ -70,15 +113,25 @@
                 ->keyBy('id');
     @endphp
 
-    <ul class="list-unstyled m-0" data-grimba-cluster-list>
-        @foreach(['left', 'center', 'right', 'unknown'] as $bucket)
-            @foreach($byBias[$bucket] as $cp)
+    <ul class="list-unstyled m-0" data-grimba-cluster-list id="grimba-cluster-panel" role="tabpanel">
+        @foreach($clusterList as $cp)
                 @php
+                    $bucket = isset($biasMeta[$cp->bias_rating ?? '']) ? ($cp->bias_rating ?? 'unknown') : 'unknown';
                     $isCurrent = (int) $cp->id === (int) $currentPost->id;
                     $meta = $biasMeta[$bucket];
                     $src = $cp->source_id && isset($__sources[$cp->source_id]) ? $__sources[$cp->source_id] : null;
+                    $sortTs = optional($cp->created_at)->timestamp ?? 0;
+                    $sortBias = match ($bucket) {
+                        'left' => 1,
+                        'center' => 2,
+                        'right' => 3,
+                        default => 4,
+                    };
                 @endphp
                 <li data-bias="{{ $bucket }}"
+                    id="story-article-{{ (int) $cp->id }}"
+                    data-sort-ts="{{ $sortTs }}"
+                    data-sort-bias="{{ $sortBias }}"
                     class="grimba-story-article {{ $isCurrent ? 'grimba-story-article--current' : '' }}"
                     style="
                         padding: 16px 18px;
@@ -173,7 +226,6 @@
                         @endif
                     </div>
                 </li>
-            @endforeach
         @endforeach
     </ul>
 </section>
@@ -182,6 +234,7 @@
     (function () {
         const tabs = document.querySelectorAll('[data-grimba-cluster-tabs] [data-bias-tab]');
         const items = document.querySelectorAll('[data-grimba-cluster-list] [data-bias]');
+        const sortWrap = document.querySelector('[data-grimba-cluster-sort]');
         if (! tabs.length || ! items.length) return;
 
         function activate(filter) {
@@ -197,6 +250,34 @@
             });
         }
 
+        function sortItems(mode) {
+            const list = document.querySelector('[data-grimba-cluster-list]');
+            if (! list) return;
+            const nodes = Array.from(items);
+            nodes.sort((a, b) => {
+                if (mode === 'recent') {
+                    return Number(b.dataset.sortTs || 0) - Number(a.dataset.sortTs || 0);
+                }
+                const biasDelta = Number(a.dataset.sortBias || 99) - Number(b.dataset.sortBias || 99);
+                if (biasDelta !== 0) return biasDelta;
+                return Number(b.dataset.sortTs || 0) - Number(a.dataset.sortTs || 0);
+            });
+            nodes.forEach(node => list.appendChild(node));
+            document.cookie = 'grimba_cluster_sort=' + mode + '; path=/; max-age=' + (60 * 60 * 24 * 365) + '; SameSite=Lax';
+
+            if (sortWrap) {
+                sortWrap.querySelectorAll('[data-sort-mode]').forEach(btn => {
+                    const active = btn.dataset.sortMode === mode;
+                    btn.setAttribute('aria-pressed', String(active));
+                    btn.classList.toggle('btn-grimba--solid', active);
+                    btn.classList.toggle('btn-grimba--ghost', !active);
+                });
+            }
+        }
+
         tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.biasTab)));
+        sortWrap?.querySelectorAll('[data-sort-mode]').forEach(btn => {
+            btn.addEventListener('click', () => sortItems(btn.dataset.sortMode || 'bias'));
+        });
     })();
 </script>

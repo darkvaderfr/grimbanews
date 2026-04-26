@@ -4,6 +4,7 @@
      * Blindspot Feed — histoires couvertes par un seul camp.
      *
      * @var \Illuminate\Contracts\Pagination\LengthAwarePaginator $posts
+     * @var int $focusClusterId
      */
 @endphp
 
@@ -28,8 +29,16 @@
         @else
             <div class="row g-4">
                 @foreach($posts as $post)
-                    <div class="col-lg-4 col-md-6 col-12">
-                        @include(Theme::getThemeNamespace('partials.blog.post.partials.items.card'), ['post' => $post])
+                    @php $isFocus = ($focusClusterId ?? 0) > 0 && (int) $post->story_cluster_id === (int) $focusClusterId; @endphp
+                    <div class="col-lg-4 col-md-6 col-12" id="cluster-{{ (int) $post->story_cluster_id }}">
+                        <div @if($isFocus) class="glass-panel p-2" style="box-shadow:0 16px 50px rgba(192,57,43,0.18); border-color:rgba(192,57,43,0.26);" @endif>
+                            @if($isFocus)
+                                <div class="small fw-semibold text-uppercase mb-2" style="letter-spacing:0.08em; color:#c0392b;">
+                                    Histoire liée
+                                </div>
+                            @endif
+                            @include(Theme::getThemeNamespace('partials.blog.post.partials.items.card'), ['post' => $post])
+                        </div>
                     </div>
                 @endforeach
             </div>
