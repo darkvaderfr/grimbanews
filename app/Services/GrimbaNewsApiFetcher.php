@@ -402,6 +402,22 @@ class GrimbaNewsApiFetcher
                 'prefix'         => SlugHelper::getPrefix(Post::class) ?? '',
             ]);
 
+            // S165 — auto-classify into news categories at ingest.
+            try {
+                $catIds = app(\App\Services\GrimbaCategoryClassifier::class)
+                    ->classify((string) $post->name, $post->description, $post->source_name);
+                foreach ($catIds as $cid) {
+                    DB::table('post_categories')->insertOrIgnore([
+                        'category_id' => $cid,
+                        'post_id'     => $post->id,
+                    ]);
+                }
+            } catch (Throwable $e) {
+                Log::warning('[GrimbaNewsApiFetcher] category classification failed', [
+                    'post_id' => $post->id, 'error' => $e->getMessage(),
+                ]);
+            }
+
             return (int) $post->id;
         } catch (Throwable $e) {
             Log::warning('[GrimbaNewsApiFetcher] createDraftPost failed', [
