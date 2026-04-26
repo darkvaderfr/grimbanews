@@ -4,6 +4,10 @@
             {!! Theme::partial('post-hero-img', ['post' => $post, 'size' => 'medium-square']) !!}
         </a>
         @include(Theme::getThemeNamespace('partials.blog.post.partials.action-post'))
+        {{-- S173 — save toggle on list cards too --}}
+        <div class="position-absolute top-0 end-0 p-2">
+            {!! Theme::partial('save-button', ['post' => $post, 'variant' => 'icon']) !!}
+        </div>
     </div>
     <div class="echo-banner-texting">
         <h3 class="echo-hero-title text-capitalize font-weight-bold"><a href="{{ $post->url }}" title="{{ $post->name }}" class="title-hover truncate-custom truncate-2-custom">{{ $post->name }}</a></h3>

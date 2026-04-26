@@ -392,11 +392,13 @@ body.grimba-home .echo-author-area {
        come later in DOM order. top/left are set inline by JS from the
        trigger's getBoundingClientRect() on open. */
     position: fixed;
-    /* S158 — opaque background. The previous 0.98 + blur(12px) let
-       the article hero behind the dropdown bleed through, making
-       option labels hard to read. Solid paper bg + heavier shadow
-       gives the menu a real edge. */
-    background: var(--gn-paper, #f6f1e8);
+    /* S176 — very subtle translucency (Vader's call). Was fully opaque
+       since S158; now ~96% paper bg with a soft blur lets the surface
+       behind hint through without compromising option-label legibility.
+       Keep the heavy shadow so the menu still has a real edge. */
+    background: rgba(246, 241, 232, 0.94);
+    -webkit-backdrop-filter: blur(10px) saturate(118%);
+    backdrop-filter: blur(10px) saturate(118%);
     border: 1px solid rgba(26, 23, 19, 0.16);
     border-radius: 14px;
     box-shadow: 0 18px 42px rgba(26, 23, 19, 0.22);
@@ -440,10 +442,12 @@ body.grimba-home .echo-author-area {
     border-color: rgba(255, 255, 255, 0.12);
 }
 [data-bs-theme="dark"] .grimba-region__menu {
-    /* S158 — fully opaque dark menu (was 0.96 + blur). Same fix as
-       light variant: see-through dropdowns over hero images were
-       unreadable. */
-    background: #1c1811;
+    /* S176 — match light-mode subtle translucency. Dark paper at 94%
+       opacity + same blur. Heavy shadow keeps the edge crisp against
+       light hero images bleeding behind. */
+    background: rgba(28, 24, 17, 0.94);
+    -webkit-backdrop-filter: blur(10px) saturate(118%);
+    backdrop-filter: blur(10px) saturate(118%);
     border-color: rgba(255, 255, 255, 0.18);
     box-shadow: 0 18px 42px rgba(0, 0, 0, 0.5);
 }

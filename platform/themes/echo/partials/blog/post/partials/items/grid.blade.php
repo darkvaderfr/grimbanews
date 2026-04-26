@@ -10,13 +10,14 @@
             {!! Theme::partial('post-hero-img', ['post' => $post, 'size' => 'medium']) !!}
         </a>
 
-        {{-- Bias Badge top-right --}}
-        <div class="position-absolute top-0 end-0 p-2">
+        {{-- Bias Badge + S173 save toggle, top-right stack --}}
+        <div class="position-absolute top-0 end-0 p-2 d-flex flex-column align-items-end gap-1">
             {!! Theme::partial('bias-badge', [
                 'bias'      => $post->bias_rating ?? null,
                 'showLabel' => false,
                 'size'      => 'sm',
             ]) !!}
+            {!! Theme::partial('save-button', ['post' => $post, 'variant' => 'icon']) !!}
         </div>
 
         @if($post->is_blindspot ?? false)

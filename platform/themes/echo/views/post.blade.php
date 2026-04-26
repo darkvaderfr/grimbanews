@@ -172,20 +172,63 @@
                         {!! Theme::partial('save-button', ['post' => $post, 'variant' => 'pill']) !!}
                     </div>
 
-                    {{-- AI summary section. NobuAI summaries (S110) are
-                         not generated yet — when they ship, $post->summary_nobuai
-                         will populate this. Until then we render the post's
-                         description as a single bullet so the section
-                         doesn't look broken. --}}
+                    {{-- S175 — Multi-source summary. When the post has a
+                         pre-generated summary_nobuai, use it (LLM-driven,
+                         once that ships). Otherwise build an extractive
+                         baseline by lifting the lead sentence from each
+                         cluster post's description, then dedupe near-
+                         duplicates. The badge label flips to "Synthèse
+                         multi-sources" so we don't pretend extractive is
+                         AI. Single-bullet description-only fallback is
+                         preserved as a last resort. --}}
                     @php
                         $__gnSummaryItems = [];
+                        $__gnSummaryMode = 'fallback';
+
                         if (! empty($post->summary_nobuai ?? null)) {
                             $__gnSummaryItems = array_filter(array_map(
                                 'trim',
                                 preg_split("/\r\n|\n|\r/", (string) $post->summary_nobuai)
                             ));
-                        } elseif ($__gnDesc) {
+                            $__gnSummaryMode = 'nobuai';
+                        } elseif ($__gnClusterPosts->count() >= 2) {
+                            // Extractive: one bullet per source's lead sentence.
+                            // Sort: current post first, then by published recency.
+                            $__gnExtract = [];
+                            $__gnSeen = [];
+                            $__ordered = $__gnClusterPosts
+                                ->sortByDesc(fn ($cp) => (int) $cp->id === (int) $post->id ? 1 : 0)
+                                ->values();
+                            foreach ($__ordered as $cp) {
+                                $desc = trim(strip_tags((string) ($cp->description ?? '')));
+                                if ($desc === '') continue;
+                                // Lead sentence: split on . ! ? followed by space/EOL.
+                                $parts = preg_split('/(?<=[\.\!\?])\s+/u', $desc, 2);
+                                $lead = trim($parts[0] ?? $desc);
+                                if (mb_strlen($lead) < 30) {
+                                    // Too short to be a useful sentence — take more.
+                                    $lead = $desc;
+                                }
+                                $lead = \Illuminate\Support\Str::limit($lead, 220);
+                                // Dedupe by first 40 lowercased chars.
+                                $sig = mb_strtolower(mb_substr(preg_replace('/\s+/u', ' ', $lead), 0, 40));
+                                if (isset($__gnSeen[$sig])) continue;
+                                $__gnSeen[$sig] = true;
+                                $__gnExtract[] = [
+                                    'text'   => $lead,
+                                    'source' => $cp->source_name ?? null,
+                                ];
+                                if (count($__gnExtract) >= 5) break;
+                            }
+                            if (! empty($__gnExtract)) {
+                                $__gnSummaryItems = $__gnExtract;
+                                $__gnSummaryMode = 'extractive';
+                            }
+                        }
+
+                        if (empty($__gnSummaryItems) && $__gnDesc) {
                             $__gnSummaryItems = [strip_tags($__gnDesc)];
+                            $__gnSummaryMode = 'fallback';
                         }
                     @endphp
 
@@ -201,12 +244,23 @@
                     @endphp
 
                     @if(! empty($__gnSummaryItems))
-                        {{-- S171 — Insights par NobuAI block. GroundNews-
-                             fidelity: dotted top border, NobuAI badge with
-                             gradient pill, list-style:none on summary so
-                             the disclosure triangle is hidden, custom chevron
-                             via ::after CSS, plus a "Ce résumé semble
-                             incorrect ?" feedback link on the right. --}}
+                        {{-- S171 → S175 — Insights block. Badge label flips
+                             based on $__gnSummaryMode: NobuAI when LLM-
+                             generated, "Synthèse multi-sources" when
+                             extractive (lead sentence per cluster source),
+                             default copy on single-bullet fallback. --}}
+                        @php
+                            $__badgeLabel = match ($__gnSummaryMode) {
+                                'nobuai'     => 'Insights par NobuAI',
+                                'extractive' => 'Synthèse multi-sources',
+                                default      => 'Aperçu',
+                            };
+                            $__badgeFootnote = match ($__gnSummaryMode) {
+                                'nobuai'     => null,
+                                'extractive' => 'Première phrase de chaque source · résumé NobuAI à venir.',
+                                default      => "Résumé multi-sources à venir dès qu'une autre couverture rejoint cette histoire.",
+                            };
+                        @endphp
                         <div style="border-top:1px dashed rgba(26,23,19,0.15); padding-top:14px; margin-top:18px;">
                             <details open class="grimba-insights" style="cursor:default;">
                                 <summary class="grimba-insights__summary"
@@ -220,24 +274,42 @@
                                         font-size:11.5px; font-weight:700; letter-spacing:0.5px;
                                     ">
                                         <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#f6f1e8;"></span>
-                                        Insights par NobuAI
+                                        {{ $__badgeLabel }}
                                     </span>
                                     <span class="ms-auto small opacity-55" style="font-size:12px;">
                                         ▾ <span style="margin-left:4px;">cliquer pour masquer</span>
                                     </span>
                                 </summary>
 
-                                @if(count($__gnSummaryItems) === 1)
+                                @if($__gnSummaryMode === 'extractive')
+                                    {{-- Bulleted list with per-source attribution. --}}
+                                    <ul class="m-0" style="list-style:none; padding:0; font-size:15.5px; line-height:1.55; color:var(--gn-ink,#1a1713);">
+                                        @foreach($__gnSummaryItems as $item)
+                                            <li style="display:flex; gap:10px; margin-bottom:12px; align-items:flex-start;">
+                                                <span style="flex:0 0 6px; width:6px; height:6px; margin-top:8px; border-radius:50%; background:rgba(26,23,19,0.45);"></span>
+                                                <span style="flex:1;">
+                                                    {{ $item['text'] }}
+                                                    @if($item['source'])
+                                                        <span class="opacity-60" style="font-size:12.5px; margin-left:4px;">— {{ $item['source'] }}</span>
+                                                    @endif
+                                                </span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @elseif(count($__gnSummaryItems) === 1)
                                     <p class="m-0" style="font-size:15.5px; line-height:1.6; color:var(--gn-ink,#1a1713);">
-                                        {{ $__gnSummaryItems[0] }}
+                                        {{ is_array($__gnSummaryItems[0]) ? $__gnSummaryItems[0]['text'] : $__gnSummaryItems[0] }}
                                     </p>
-                                    <p class="small opacity-55 mt-2 mb-0">Résumé multi-source à venir dès qu'une autre couverture rejoint cette histoire.</p>
                                 @else
                                     <ul class="m-0 ps-3" style="font-size:15.5px; line-height:1.6; color:var(--gn-ink,#1a1713);">
                                         @foreach(array_slice($__gnSummaryItems, 0, 6) as $line)
-                                            <li style="margin-bottom:10px;">{{ $line }}</li>
+                                            <li style="margin-bottom:10px;">{{ is_array($line) ? $line['text'] : $line }}</li>
                                         @endforeach
                                     </ul>
+                                @endif
+
+                                @if($__badgeFootnote)
+                                    <p class="small opacity-55 mt-2 mb-0">{{ $__badgeFootnote }}</p>
                                 @endif
 
                                 <div class="d-flex justify-content-end mt-3">
