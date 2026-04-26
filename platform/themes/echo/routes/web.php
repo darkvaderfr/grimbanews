@@ -411,6 +411,24 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             return Theme::scope('methodology', [])->render();
         })->name('public.methodology');
 
+        // S168 — member dashboard hijack. Botble Member plugin's
+        // dashboard ships an admin-style sidebar layout (built for
+        // sites where members write blog posts). GrimbaNews members
+        // are READERS, so the published-posts/draft/pending widgets
+        // are noise. Our route returns a Steve-styled "Mon compte"
+        // landing — bias-mix widget + 4 action cards + logout.
+        Route::get('account', function () {
+            $user = auth('member')->user();
+            if (! $user) {
+                return redirect(route('public.member.login'));
+            }
+            SeoHelper::setTitle('Mon compte — GrimbaNews');
+            Theme::breadcrumb()
+                ->add('Accueil', url('/'))
+                ->add('Mon compte', url('/account'));
+            return Theme::scope('account', compact('user'))->render();
+        })->name('public.account');
+
         // S167 — Local news. Reads grimba_local_city + _country
         // cookies, falls back to IP geolocation via GrimbaGeoLocator
         // (no key required — ip-api.com / ipapi.co cascade), then
