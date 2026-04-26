@@ -600,6 +600,42 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ])->render();
         })->where('slug', '[a-z0-9\-]+')->name('public.source');
 
+        // S173 — saved-for-later vault. Cookie-only (no auth required).
+        // Reads grimba_vault CSV (CSV of post ids, last-saved-first,
+        // capped at 50 by client JS) and renders the saved articles.
+        Route::get('coffre', function (Request $request) {
+            $raw = (string) $request->cookie('grimba_vault', '');
+            $ids = array_values(array_filter(array_map('intval', explode(',', $raw))));
+
+            $posts = collect();
+            if (! empty($ids)) {
+                $byId = Post::query()
+                    ->whereIn('id', $ids)
+                    ->where('status', 'published')
+                    ->with('categories')
+                    ->get()
+                    ->keyBy('id');
+
+                // Preserve cookie order (most-recent first).
+                $posts = collect($ids)
+                    ->map(fn ($id) => $byId->get($id))
+                    ->filter()
+                    ->values();
+            }
+
+            SeoHelper::setTitle('Mon coffre — GrimbaNews')
+                ->setDescription("Articles sauvegardés pour plus tard.");
+
+            Theme::breadcrumb()
+                ->add('Accueil', url('/'))
+                ->add('Mon coffre', url('/coffre'));
+
+            return Theme::scope('coffre', [
+                'posts' => $posts,
+                'count' => $posts->count(),
+            ])->render();
+        })->name('public.coffre');
+
         Route::get('angles-morts', function () {
             $posts = Post::query()
                 ->where('is_blindspot', true)

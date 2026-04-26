@@ -37,6 +37,8 @@ return Application::configure(basePath: dirname(__DIR__))
             // dark explicitly. Now the cookie value the JS writes is
             // the same string the SSR sees.
             'grimba_theme',
+            // S173 — saved-for-later vault (post id list, JS-managed).
+            'grimba_vault',
         ]);
 
         // Apply our locale-from-cookie switch on every web request.

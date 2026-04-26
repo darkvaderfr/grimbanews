@@ -28,6 +28,7 @@
                     <li><a href="{{ url('/') }}">Accueil</a></li>
                     <li><a href="{{ url('/pour-vous') }}">Pour vous</a></li>
                     <li><a href="{{ url('/local') }}">Local</a></li>
+                    <li><a href="{{ url('/coffre') }}">Mon coffre</a></li>
                     <li><a href="{{ url('/angles-morts') }}">Angles morts</a></li>
                     <li><a href="{{ url('/comparatif') }}">Comparatif</a></li>
                 </ul>

@@ -141,6 +141,9 @@
                                 font-size:11px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;
                             ">Vous lisez</span>
                         @endif
+
+                        {{-- S173 — save-for-later icon. Cookie-only, no auth. --}}
+                        {!! Theme::partial('save-button', ['post' => $cp, 'variant' => 'icon']) !!}
                     </div>
 
                     <h3 style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; line-height:1.3; letter-spacing:-0.2px; margin:0 0 6px;">

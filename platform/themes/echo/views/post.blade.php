@@ -166,6 +166,10 @@
                                 title="Voir la distribution des biais">
                             ⚖️ Comparaison des biais
                         </button>
+
+                        {{-- S173 — save-for-later pill. Cookie-only (no auth).
+                             Toggles post id in grimba_vault, surfaces in /coffre. --}}
+                        {!! Theme::partial('save-button', ['post' => $post, 'variant' => 'pill']) !!}
                     </div>
 
                     {{-- AI summary section. NobuAI summaries (S110) are
@@ -362,8 +366,10 @@
 
                             {{-- S141 — "see other coverages" chip when the
                                  post belongs to a multi-source cluster --}}
-                            <div class="text-center text-md-start mt-3">
+                            <div class="d-flex flex-wrap align-items-center gap-2 text-center text-md-start mt-3">
                                 {!! Theme::partial('comparatif-cta', ['post' => $post]) !!}
+                                {{-- S173 — save-for-later pill on legacy layout too --}}
+                                {!! Theme::partial('save-button', ['post' => $post, 'variant' => 'pill']) !!}
                             </div>
 
                             @if (echo_is_audio_post($post))

@@ -73,6 +73,16 @@
                 </h3>
                 <p class="small opacity-75 m-0">{{ __('Exporter mes lectures en CSV.') }}</p>
             </a>
+
+            {{-- S173 — saved articles vault --}}
+            <a href="{{ url('/coffre') }}" class="glass-panel p-4" style="display:block; text-decoration:none; color:var(--gn-ink,#1a1713);"
+               onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+                <div style="font-size:24px; margin-bottom:8px;">★</div>
+                <h3 style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; margin:0 0 4px;">
+                    {{ __('Mon coffre') }}
+                </h3>
+                <p class="small opacity-75 m-0">{{ __('Articles sauvegardés pour plus tard.') }}</p>
+            </a>
         </div>
 
         {{-- Account meta + logout --}}
