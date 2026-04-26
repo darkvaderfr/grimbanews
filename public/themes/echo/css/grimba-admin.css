@@ -134,8 +134,51 @@ body .app-sidebar .dropdown-menu .dropdown-item.show {
 body .navbar.navbar-expand-md.d-print-none {
     background: rgba(246, 241, 232, 0.9) !important;
     border-bottom: 1px solid var(--gn-rule) !important;
+    color: var(--gn-ink) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
+body header.navbar.navbar-expand-md.d-print-none .navbar-toggler,
+body header.navbar.navbar-expand-md.d-print-none .nav-link,
+body header.navbar.navbar-expand-md.d-print-none .nav-link.text-reset,
+body header.navbar.navbar-expand-md.d-print-none .dropdown-toggle:not(.btn),
+body header.navbar.navbar-expand-md.d-print-none .btn-icon {
+    color: var(--gn-ink-muted) !important;
+}
+body header.navbar.navbar-expand-md.d-print-none .navbar-toggler:hover,
+body header.navbar.navbar-expand-md.d-print-none .navbar-toggler:focus,
+body header.navbar.navbar-expand-md.d-print-none .nav-link:hover,
+body header.navbar.navbar-expand-md.d-print-none .nav-link:focus,
+body header.navbar.navbar-expand-md.d-print-none .dropdown-toggle:not(.btn):hover,
+body header.navbar.navbar-expand-md.d-print-none .dropdown-toggle:not(.btn):focus,
+body header.navbar.navbar-expand-md.d-print-none .btn-icon:hover,
+body header.navbar.navbar-expand-md.d-print-none .btn-icon:focus {
+    color: var(--gn-ink) !important;
+    background: rgba(26, 23, 19, 0.06) !important;
+}
+body header.navbar.navbar-expand-md.d-print-none .navbar-toggler svg,
+body header.navbar.navbar-expand-md.d-print-none .nav-link svg,
+body header.navbar.navbar-expand-md.d-print-none .dropdown-toggle:not(.btn) svg,
+body header.navbar.navbar-expand-md.d-print-none .btn-icon svg {
+    color: currentColor !important;
+}
+body header.navbar.navbar-expand-md.d-print-none .navbar-toggler svg [stroke],
+body header.navbar.navbar-expand-md.d-print-none .nav-link svg [stroke],
+body header.navbar.navbar-expand-md.d-print-none .dropdown-toggle:not(.btn) svg [stroke],
+body header.navbar.navbar-expand-md.d-print-none .btn-icon svg [stroke] {
+    stroke: currentColor !important;
+}
+body header.navbar.navbar-expand-md.d-print-none .navbar-toggler svg [fill]:not([fill="none"]),
+body header.navbar.navbar-expand-md.d-print-none .nav-link svg [fill]:not([fill="none"]),
+body header.navbar.navbar-expand-md.d-print-none .dropdown-toggle:not(.btn) svg [fill]:not([fill="none"]),
+body header.navbar.navbar-expand-md.d-print-none .btn-icon svg [fill]:not([fill="none"]) {
+    fill: currentColor !important;
+}
+body header.navbar.navbar-expand-md.d-print-none .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%231a1713' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+body header.navbar.navbar-expand-md.d-print-none .text-muted {
+    color: var(--gn-ink-soft) !important;
 }
 
 /* ------------------------------------------------------------
@@ -352,7 +395,32 @@ html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item.show 
 }
 html[data-bs-theme="dark"] body .navbar.navbar-expand-md.d-print-none {
     background: rgba(18, 16, 7, 0.92) !important;
+    color: var(--gn-ink) !important;
     border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .navbar-toggler,
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .nav-link,
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .nav-link.text-reset,
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .dropdown-toggle:not(.btn),
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .btn-icon {
+    color: var(--gn-ink-muted) !important;
+}
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .navbar-toggler:hover,
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .navbar-toggler:focus,
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .nav-link:hover,
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .nav-link:focus,
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .dropdown-toggle:not(.btn):hover,
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .dropdown-toggle:not(.btn):focus,
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .btn-icon:hover,
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .btn-icon:focus {
+    color: var(--gn-ink) !important;
+    background: rgba(246, 241, 232, 0.08) !important;
+}
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23f6f1e8' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .text-muted {
+    color: var(--gn-ink-soft) !important;
 }
 html[data-bs-theme="dark"] body .alert-success {
     background: rgba(34, 197, 94, 0.15) !important;
