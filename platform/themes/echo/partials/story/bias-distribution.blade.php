@@ -9,14 +9,14 @@
     // S161 — fetch website for each unique source so the logo
     // partial can lift Clearbit + favicon. Map name → website via
     // a single news_sources lookup keyed on the source_id list.
-    $sourceIds = $clusterPosts->pluck('source_id')->filter()->unique()->all();
-    $sourceMeta = [];
-    if (! empty($sourceIds)) {
-        $sourceMeta = \Illuminate\Support\Facades\DB::table('news_sources')
-            ->whereIn('id', $sourceIds)
-            ->get(['id', 'name', 'website'])
-            ->keyBy('id')
-            ->all();
+    $sourceMeta = $sourceMeta ?? null;
+    if (! $sourceMeta) {
+        $sourceIds = $clusterPosts->pluck('source_id')->filter()->unique()->all();
+        $sourceMeta = empty($sourceIds) ? collect() :
+            \Illuminate\Support\Facades\DB::table('news_sources')
+                ->whereIn('id', $sourceIds)
+                ->get(['id', 'name', 'website'])
+                ->keyBy('id');
     }
 
     $sourcesByBias = ['left' => [], 'center' => [], 'right' => [], 'unknown' => []];

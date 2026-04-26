@@ -69,6 +69,9 @@
         <img src="{{ $clearbit }}"
              alt="{{ $name }}"
              loading="lazy"
+             decoding="async"
+             width="{{ $size }}"
+             height="{{ $size }}"
              style="width:100%; height:100%; object-fit:contain; background:#fff;"
              data-grimba-logo-fallback="{{ $googleS2 }}"
              onerror="(function(el){

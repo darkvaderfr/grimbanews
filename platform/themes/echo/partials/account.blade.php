@@ -17,6 +17,10 @@
                         class="avatar"
                         src="{{ $user->avatar_url }}"
                         alt="{{ $name = $user->name }}"
+                        loading="lazy"
+                        decoding="async"
+                        width="40"
+                        height="40"
                     >
                 </div>
                 <span class="user-name d-none d-sm-inline text-truncate">{{ $name }}</span>

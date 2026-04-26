@@ -5,15 +5,21 @@
     $__size = $size ?? 'medium';
     $__alt  = \App\Support\GrimbaTranslationPresenter::title($post);
     $__hasImg = ! empty($post->image);
+    $__eager = (bool) ($eager ?? false);
 @endphp
 @if($__hasImg)
-    {!! RvMedia::image($post->image, $__alt, $__size) !!}
+    {!! RvMedia::image($post->image, $__alt, $__size, attributes: [
+        'loading' => $__eager ? 'eager' : 'lazy',
+        'decoding' => $__eager ? 'sync' : 'async',
+        'width' => 1200,
+        'height' => 630,
+    ]) !!}
 @else
     <img
         src="{{ route('public.og.placeholder', ['id' => $post->id]) }}"
         alt="{{ $__alt }}"
-        loading="lazy"
-        decoding="async"
+        loading="{{ $__eager ? 'eager' : 'lazy' }}"
+        decoding="{{ $__eager ? 'sync' : 'async' }}"
         width="1200" height="630"
         class="gn-placeholder"
     />

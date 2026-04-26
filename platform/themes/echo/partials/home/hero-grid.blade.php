@@ -118,7 +118,7 @@
                     $heroTranslated = GnTr::isTranslated($hero);
                 @endphp
                 <a href="{{ $hero->url }}" class="grimba-hero__media">
-                    {!! Theme::partial('post-hero-img', ['post' => $hero, 'size' => 'extra-large']) !!}
+                    {!! Theme::partial('post-hero-img', ['post' => $hero, 'size' => 'extra-large', 'eager' => true]) !!}
                     <div class="grimba-hero__gradient"></div>
                     <div class="grimba-hero__text">
                         <h1 class="grimba-hero__title">{{ $heroTitle }}</h1>

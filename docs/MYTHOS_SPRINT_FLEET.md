@@ -41,7 +41,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **C** | Vault Maturity | C1–C8 | 4/8 done |
 | **D** | Discovery & Navigation | D1–D8 | 5/8 done |
 | **E** | NobuAI Integration | E1–E7 | 0/7 (gated on API key) |
-| **F** | Performance & SEO | F1–F8 | 6/8 done |
+| **F** | Performance & SEO | F1–F8 | 8/8 done |
 | **G** | A11y & I18n | G1–G6 | 0/6 |
 | **H** | Testing & QA | H1–H7 | 0/7 |
 | **I** | Marketing & Growth | I1–I8 | 0/8 |
@@ -189,8 +189,8 @@ data + sitemap are non-negotiable.
 
 | ID | Sprint | Acceptance |
 |----|--------|------------|
-| **F1** | **Image lazy-load audit** — every `<img>` outside the first viewport gets `loading="lazy" decoding="async"`. Hero images stay eager. Use a Blade directive or `post-hero-img` partial guard | Lighthouse "image elements have explicit width and height" passes |
-| **F2** | **Cluster-page query optimization** — the post.blade.php story branch issues 6+ subqueries; consolidate via eager-load on `$post->load('cluster.posts.source')` (or the existing source-meta preload pattern from S171 extended to all sidebar partials) | < 4 SQL queries on a cluster-page render |
+| ✅ S214 | Image lazy-load audit — Grimba-facing images now carry loading/decoding hints and dimensions; main homepage/story heroes stay eager | Uncommitted worktree |
+| ✅ S215 | Cluster-page query optimization — story source metadata is resolved once in `post.blade.php` and reused by sidebar/article-list partials | Uncommitted worktree |
 | ✅ S208 | Sitemap.xml generation — Botble sitemap index extended with Grimba static, sources, story-clusters | Uncommitted worktree |
 | ✅ S209 | schema.org JSON-LD — Grimba NewsArticle block uses NobuAI-rendered copy and cluster `mainEntityOfPage` | Uncommitted worktree |
 | ✅ S210 | Open Graph polish for /coffre and /local — tailored Grimba OG cards + layout-level image override | Uncommitted worktree |

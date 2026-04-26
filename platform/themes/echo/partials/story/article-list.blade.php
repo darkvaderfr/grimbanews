@@ -102,12 +102,15 @@
     {{-- S171 — pre-load source meta for every cluster post in one
          query so each card render is a hash lookup, not a roundtrip. --}}
     @php
-        $__sourceIds = $clusterPosts->pluck('source_id')->filter()->unique()->all();
-        $__sources = empty($__sourceIds) ? collect() :
-            \Illuminate\Support\Facades\DB::table('news_sources')
-                ->whereIn('id', $__sourceIds)
-                ->get(['id','name','website','ownership_type','credibility_score','owner_name'])
-                ->keyBy('id');
+        $__sources = $sourceMeta ?? null;
+        if (! $__sources) {
+            $__sourceIds = $clusterPosts->pluck('source_id')->filter()->unique()->all();
+            $__sources = empty($__sourceIds) ? collect() :
+                \Illuminate\Support\Facades\DB::table('news_sources')
+                    ->whereIn('id', $__sourceIds)
+                    ->get(['id','name','website','ownership_type','credibility_score','owner_name'])
+                    ->keyBy('id');
+        }
     @endphp
 
     <ul class="list-unstyled m-0" data-grimba-cluster-list id="grimba-cluster-panel" role="tabpanel">

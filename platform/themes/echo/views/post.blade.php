@@ -147,6 +147,7 @@
     // layout. The legacy layout is kept as fallback for orphan posts
     // (no cluster) and clusters of 1 (no comparison value).
     $__gnClusterPosts = collect();
+    $__gnSourceMeta = collect();
     $__gnIsStoryPage = false;
     if ($post->story_cluster_id) {
         $__gnClusterPosts = \Botble\Blog\Models\Post::query()
@@ -167,6 +168,15 @@
                 'translated_to', 'original_language',
             ]);
         $__gnIsStoryPage = $__gnClusterPosts->count() >= 2;
+
+        if ($__gnIsStoryPage) {
+            $__gnSourceIds = $__gnClusterPosts->pluck('source_id')->filter()->unique()->all();
+            $__gnSourceMeta = empty($__gnSourceIds) ? collect() :
+                \Illuminate\Support\Facades\DB::table('news_sources')
+                    ->whereIn('id', $__gnSourceIds)
+                    ->get(['id','name','website','ownership_type','credibility_score','owner_name'])
+                    ->keyBy('id');
+        }
     }
 @endphp
 
@@ -189,6 +199,9 @@
                             <img src="{{ \Botble\Media\Facades\RvMedia::getImageUrl($__gnHero) }}"
                                  alt="{{ $__gnTitle }}"
                                  loading="eager"
+                                 decoding="sync"
+                                 width="1200"
+                                 height="630"
                                  style="object-fit:cover; width:100%; height:100%;">
                         </div>
                     </div>
@@ -523,6 +536,7 @@
                 @include(Theme::getThemeNamespace('partials.story.article-list'), [
                     'clusterPosts' => $__gnClusterPosts,
                     'currentPost'  => $post,
+                    'sourceMeta'   => $__gnSourceMeta,
                 ])
             </div>
 
@@ -534,6 +548,7 @@
                     ])
                     @include(Theme::getThemeNamespace('partials.story.bias-distribution'), [
                         'clusterPosts' => $__gnClusterPosts,
+                        'sourceMeta'   => $__gnSourceMeta,
                     ])
                     @include(Theme::getThemeNamespace('partials.story.timeline'), [
                         'clusterPosts' => $__gnClusterPosts,
@@ -574,7 +589,13 @@
                                 </div>
                             @elseif ($image = $post->image)
                                 <div class="ratio ratio-21x9" style="background:rgba(0,0,0,0.04);">
-                                    {{ RvMedia::image($image, $post->name, attributes: ['style' => 'object-fit:cover;width:100%;height:100%;']) }}
+                                    {{ RvMedia::image($image, $post->name, attributes: [
+                                        'style' => 'object-fit:cover;width:100%;height:100%;',
+                                        'loading' => 'eager',
+                                        'decoding' => 'sync',
+                                        'width' => 1200,
+                                        'height' => 630,
+                                    ]) }}
                                 </div>
                             @endif
 

@@ -19,7 +19,7 @@
         <header class="text-center mb-4">
             <a href="{{ url('/') }}" aria-label="GrimbaNews">
                 <img src="{{ asset('storage/main/general/grimba-logo.svg') }}"
-                     alt="GrimbaNews" style="height:38px; width:auto;">
+                     alt="GrimbaNews" loading="eager" decoding="async" width="190" height="38" style="height:38px; width:auto;">
             </a>
         </header>
 

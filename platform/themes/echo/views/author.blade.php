@@ -17,7 +17,7 @@
                 <div class="echo-author-content">
                     @if ($avatar = $author->avatar->url)
                         <div class="echo-author-picture">
-                            <img src="{{ RvMedia::getImageUrl($avatar) }}" alt="{{ $author->name }}">
+                            <img src="{{ RvMedia::getImageUrl($avatar) }}" alt="{{ $author->name }}" loading="lazy" decoding="async" width="96" height="96">
                         </div>
                     @endif
                     <div class="echo-author-info">
