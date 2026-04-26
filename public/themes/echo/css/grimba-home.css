@@ -1682,6 +1682,25 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
     outline: 2px solid var(--gn-ink);
     outline-offset: 3px;
 }
+.grimba-reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1060;
+    height: 3px;
+    background: transparent;
+    pointer-events: none;
+}
+.grimba-reading-progress span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform: scaleX(0);
+    transform-origin: left center;
+    background: linear-gradient(90deg, #3b82f6, #a8a8a8, #e84c3d);
+    box-shadow: 0 0 14px rgba(26, 23, 19, 0.18);
+}
 
 @media (max-width: 767.98px) {
     body.grimba-home {

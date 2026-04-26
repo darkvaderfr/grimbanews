@@ -115,7 +115,7 @@ are the orphan-post layout, Highlights/Voices panels, and sort options.
 | ✅ S188 | Coverage gap detail link | Uncommitted worktree |
 | ✅ S189 | Story share kit | Uncommitted worktree |
 | ✅ S190 | "Lu chez X" jump-list | Uncommitted worktree |
-| **B8** | **Reading-progress bar** — slim sticky bar at the top of the story page that tracks scroll progress through the article body | < 200ms scroll-to-paint, no jank |
+| ✅ S201 | Reading-progress bar | Uncommitted worktree |
 | **B9** | **Bias confidence indicator** — when a source's `credibility_score` is < 50 OR `bias_rating` was system-classified vs editorially-set, show a "biais auto-détecté" subscript next to the lean badge | Indicator surfaces on at least one demo post |
 | **B10** | **Story-page Open Graph upgrade** — current OG uses post image + title; for cluster pages, generate a composite OG with bias bar + outlet count | New OG handler in `GrimbaOgImageController::story()` |
 

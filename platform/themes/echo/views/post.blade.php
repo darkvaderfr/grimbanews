@@ -23,6 +23,38 @@
     })();
 </script>
 
+{{-- S201 — story reading progress. Tiny fixed bar, updated with
+     requestAnimationFrame so scroll work stays cheap. --}}
+<div class="grimba-reading-progress" aria-hidden="true">
+    <span data-grimba-reading-progress></span>
+</div>
+<script>
+    (function () {
+        const bar = document.querySelector('[data-grimba-reading-progress]');
+        if (! bar) return;
+
+        let ticking = false;
+        function paint() {
+            const target = document.querySelector('.grimba-story, .blog-post-details-content') || document.body;
+            const rect = target.getBoundingClientRect();
+            const viewport = window.innerHeight || document.documentElement.clientHeight || 1;
+            const total = Math.max(1, rect.height - viewport);
+            const read = Math.min(total, Math.max(0, -rect.top));
+            bar.style.transform = 'scaleX(' + (read / total).toFixed(4) + ')';
+            ticking = false;
+        }
+        function requestPaint() {
+            if (ticking) return;
+            ticking = true;
+            window.requestAnimationFrame(paint);
+        }
+
+        window.addEventListener('scroll', requestPaint, { passive: true });
+        window.addEventListener('resize', requestPaint);
+        requestPaint();
+    })();
+</script>
+
 @php
 
     $descriptionStyle = theme_option('blog_description_style');
