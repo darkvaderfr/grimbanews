@@ -42,7 +42,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **D** | Discovery & Navigation | D1–D8 | 5/8 done |
 | **E** | NobuAI Integration | E1–E7 | 0/7 (gated on API key) |
 | **F** | Performance & SEO | F1–F8 | 8/8 done |
-| **G** | A11y & I18n | G1–G6 | 0/6 |
+| **G** | A11y & I18n | G1–G6 | 3/6 done |
 | **H** | Testing & QA | H1–H7 | 0/7 |
 | **I** | Marketing & Growth | I1–I8 | 0/8 |
 | **J** | Admin & Editorial Tooling | J1–J6 | 0/6 |
@@ -207,12 +207,12 @@ users; the cinematic design must not exclude them.
 
 | ID | Sprint | Acceptance |
 |----|--------|------------|
-| **G1** | **Focus-visible audit** — every interactive element shows a 2px paper-on-ink outline on `:focus-visible`. Currently only some buttons have it | axe-core a11y report has zero focus-related violations |
+| ✅ S216 | Focus-visible audit — global Grimba link/button/form/tab outline coverage with dark-mode color override | Uncommitted worktree |
 | ✅ S198 | ARIA pass on bias filter tabs | Uncommitted worktree |
 | **G3** | **Color contrast check** — verify `--gn-ink` on `--gn-paper` and dark variants meet WCAG AA. The 0.45-alpha muted text needs auditing | Contrast checker reports AA across the palette |
 | **G4** | **EN locale completeness** — all `__()` strings have an `en.php` translation. Currently most are FR-only with FR fallback | `app()->setLocale('en')` renders /coffre, /pour-vous, /local fully |
 | **G5** | **Keyboard navigation** — tab-order audit on every page; trap focus correctly in modals (newsletter, onboarding) | Manual keyboard-only walkthrough passes |
-| **G6** | **Skip-to-content link** — paper-on-ink link as the first focusable element on every page; jumps to `<main>` | Tab-once on home focuses the link |
+| ✅ S217 | Skip-to-content link — first focusable link on both Grimba layouts jumps to `<main id="grimba-main-content">` | Uncommitted worktree |
 
 ---
 

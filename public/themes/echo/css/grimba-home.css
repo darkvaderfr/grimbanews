@@ -1673,9 +1673,42 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
 .grimba-mobile-nav__item:focus-visible,
 .grimba-vault-fab:focus-visible,
 [data-bias-tab]:focus-visible,
-[data-sort-mode]:focus-visible {
+[data-sort-mode]:focus-visible,
+.grimba-home a:focus-visible,
+.grimba-home button:focus-visible,
+.grimba-home input:focus-visible,
+.grimba-home select:focus-visible,
+.grimba-home textarea:focus-visible,
+.grimba-home [role="button"]:focus-visible,
+.grimba-home [role="tab"]:focus-visible {
     outline: 2px solid var(--gn-ink);
     outline-offset: 3px;
+}
+.grimba-skip-link {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 9999;
+    transform: translateY(-180%);
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: var(--gn-ink);
+    color: var(--gn-paper) !important;
+    font-family: var(--gn-font-body);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    box-shadow: 0 14px 40px rgba(26, 23, 19, 0.22);
+    transition: transform 0.16s ease;
+}
+.grimba-skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 2px solid var(--gn-paper);
+    outline-offset: 3px;
+}
+.grimba-home main:focus {
+    outline: none;
 }
 .grimba-reading-progress {
     position: fixed;
@@ -1782,6 +1815,13 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn:focus-visible,
 html.grimba-home-html[data-bs-theme="dark"] .grimba-mobile-nav__item:focus-visible,
 html.grimba-home-html[data-bs-theme="dark"] .grimba-vault-fab:focus-visible,
 html.grimba-home-html[data-bs-theme="dark"] [data-bias-tab]:focus-visible,
-html.grimba-home-html[data-bs-theme="dark"] [data-sort-mode]:focus-visible {
+html.grimba-home-html[data-bs-theme="dark"] [data-sort-mode]:focus-visible,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-home a:focus-visible,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-home button:focus-visible,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-home input:focus-visible,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-home select:focus-visible,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-home textarea:focus-visible,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-home [role="button"]:focus-visible,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-home [role="tab"]:focus-visible {
     outline-color: var(--gn-paper);
 }

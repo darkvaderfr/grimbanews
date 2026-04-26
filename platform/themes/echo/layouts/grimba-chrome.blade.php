@@ -56,13 +56,14 @@
 </head>
 <body class="grimba-home grimba-subpage" {!! Theme::bodyAttributes() !!}>
     {!! apply_filters(THEME_FRONT_BODY, null) !!}
+    <a class="grimba-skip-link" href="#grimba-main-content">Aller au contenu principal</a>
 
     @include(Theme::getThemeNamespace('partials.home.urgency-banner'))
     @include(Theme::getThemeNamespace('partials.home.main-header'))
     @include(Theme::getThemeNamespace('partials.home.topic-chips'))
     @include(Theme::getThemeNamespace('partials.home.translation-note'))
 
-    <main class="grimba-sub-main">
+    <main class="grimba-sub-main" id="grimba-main-content" tabindex="-1">
         <div class="container-xxl py-4">
             @hasSection('content')
                 @yield('content')
