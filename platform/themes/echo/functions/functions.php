@@ -21,16 +21,82 @@ use Botble\Newsletter\Facades\Newsletter;
 use Botble\Page\Models\Page;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Support\Http\Requests\Request as BaseRequest;
+use Botble\Theme\Events\RenderingSiteMapEvent;
+use Botble\Theme\Facades\SiteMapManager;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Supports\ThemeSupport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 
 if (is_plugin_active('member')) {
     SlugHelper::registerModule(Member::class, 'Member');
 }
 
 app()->booted(function (): void {
+    Event::listen(RenderingSiteMapEvent::class, function (RenderingSiteMapEvent $event): void {
+        switch ($event->key) {
+            case 'grimba-static':
+                SiteMapManager::add(url('/'), now()->toDateTimeString(), '1.0');
+                foreach (['comparatif', 'sources', 'angles-morts', 'pour-vous', 'local', 'methodologie'] as $path) {
+                    SiteMapManager::add(url('/' . $path), now()->toDateTimeString(), $path === 'comparatif' ? '0.9' : '0.7');
+                }
+
+                return;
+
+            case 'grimba-sources':
+                DB::table('news_sources')
+                    ->whereNotNull('slug')
+                    ->where('slug', '!=', '')
+                    ->orderBy('name')
+                    ->get(['slug', 'updated_at'])
+                    ->each(fn ($source) => SiteMapManager::add(
+                        url('/sources/' . $source->slug),
+                        $source->updated_at ?? now()->toDateTimeString(),
+                        '0.7',
+                        'weekly'
+                    ));
+
+                return;
+
+            case 'grimba-story-clusters':
+                DB::table('posts')
+                    ->selectRaw('story_cluster_id, MAX(updated_at) as latest_at, COUNT(*) as post_count')
+                    ->where('status', 'published')
+                    ->whereNotNull('story_cluster_id')
+                    ->groupBy('story_cluster_id')
+                    ->havingRaw('COUNT(*) > 0')
+                    ->orderByDesc('latest_at')
+                    ->get()
+                    ->each(fn ($cluster) => SiteMapManager::add(
+                        url('/comparatif/' . $cluster->story_cluster_id),
+                        $cluster->latest_at ?? now()->toDateTimeString(),
+                        '0.8',
+                        'hourly'
+                    ));
+
+                return;
+
+            case null:
+                $latestSource = DB::table('news_sources')->whereNotNull('slug')->max('updated_at');
+                $latestCluster = DB::table('posts')
+                    ->where('status', 'published')
+                    ->whereNotNull('story_cluster_id')
+                    ->max('updated_at');
+
+                SiteMapManager::addSitemap(SiteMapManager::route('grimba-static'), now()->toDateTimeString());
+                if ($latestSource) {
+                    SiteMapManager::addSitemap(SiteMapManager::route('grimba-sources'), $latestSource);
+                }
+                if ($latestCluster) {
+                    SiteMapManager::addSitemap(SiteMapManager::route('grimba-story-clusters'), $latestCluster);
+                }
+
+                return;
+        }
+    });
+
     ThemeSupport::registerToastNotification();
     ThemeSupport::registerPreloader();
     ThemeSupport::registerSocialLinks();

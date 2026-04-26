@@ -8,6 +8,26 @@
     // landing page on first paint. Live JS updates handled below.
     $rawVault = (string) request()->cookie('grimba_vault', '');
     $vaultCount = count(array_filter(array_map('intval', explode(',', $rawVault))));
+
+    // S206/D3 — cached editorial pulse for first paint.
+    $pulse = \Illuminate\Support\Facades\Cache::remember('grimba_header_pulse_v1', 300, function (): array {
+        $morning = now()->setTime(6, 0);
+        return [
+            'new' => \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
+                ->where('status', 'published')
+                ->where('created_at', '>=', $morning)
+                ->count(),
+            'blindspots' => \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
+                ->where('status', 'published')
+                ->where('is_blindspot', true)
+                ->count(),
+            'clusters' => \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
+                ->where('status', 'published')
+                ->whereNotNull('story_cluster_id')
+                ->distinct('story_cluster_id')
+                ->count('story_cluster_id'),
+        ];
+    });
 @endphp
 <header class="grimba-header">
     <div class="grimba-header__meta">
@@ -27,7 +47,12 @@
                 </div>
                 <span class="opacity-25">·</span>
                 @include(Theme::getThemeNamespace('partials.home.lang-switch'))
-                {{-- S170 — translation feature dropped entirely. --}}
+                <span class="opacity-25 d-none d-lg-inline">·</span>
+                <span class="grimba-header-pulse d-none d-lg-inline">
+                    {{ $pulse['new'] }} nouveau{{ $pulse['new'] === 1 ? '' : 'x' }} ce matin ·
+                    {{ $pulse['blindspots'] }} angle{{ $pulse['blindspots'] === 1 ? '' : 's' }} mort{{ $pulse['blindspots'] === 1 ? '' : 's' }} ·
+                    {{ $pulse['clusters'] }} dossiers actifs
+                </span>
             </div>
             <div class="small opacity-75 d-flex align-items-center gap-2">
                 <span class="d-none d-md-inline">{{ ucfirst($topDate) }}</span>

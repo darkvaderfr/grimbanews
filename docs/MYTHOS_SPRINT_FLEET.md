@@ -37,11 +37,11 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | Fleet | Theme | Sprints | Status |
 |-------|-------|---------|--------|
 | **A** | Push & Deploy Gate | A1–A5 | OPEN — pushing blocked |
-| **B** | Story Page Completion | B1–B10 | 6/10 done |
+| **B** | Story Page Completion | B1–B10 | 10/10 done |
 | **C** | Vault Maturity | C1–C8 | 4/8 done |
-| **D** | Discovery & Navigation | D1–D8 | 1/8 done |
+| **D** | Discovery & Navigation | D1–D8 | 5/8 done |
 | **E** | NobuAI Integration | E1–E7 | 0/7 (gated on API key) |
-| **F** | Performance & SEO | F1–F8 | 0/8 |
+| **F** | Performance & SEO | F1–F8 | 4/8 done |
 | **G** | A11y & I18n | G1–G6 | 0/6 |
 | **H** | Testing & QA | H1–H7 | 0/7 |
 | **I** | Marketing & Growth | I1–I8 | 0/8 |
@@ -119,7 +119,7 @@ are the orphan-post layout, Highlights/Voices panels, and sort options.
 | ✅ S202 | Bias confidence indicator | Uncommitted worktree |
 | ✅ S203 | Opaque region picker | Uncommitted worktree |
 | ✅ S204 | FR-mode page translation + expanded NobuAI providers | Uncommitted worktree |
-| **B10** | **Story-page Open Graph upgrade** — current OG uses post image + title; for cluster pages, generate a composite OG with bias bar + outlet count | New OG handler in `GrimbaOgImageController::story()` |
+| ✅ S205 | Story-page Open Graph upgrade | Uncommitted worktree |
 
 ---
 
@@ -155,10 +155,10 @@ need to feel as cinematic as the story pages.
 | ✅ S176 | Region picker subtle translucency | `223e593` |
 | ✅ S197 | /sources index polish | Uncommitted worktree |
 | **D2** | **/pour-vous polish** — bias-mix block already there; add a "Sujets que vous évitez" section showing categories with 0 reads in the last 14 days, link to `/blog?categorie=X` | Renders when read history > 10 articles |
-| **D3** | **Trending kicker on homepage** — utility-bar message "X nouveaux ce matin · Y angles morts · Z dossiers en cours". Cached for 5 min via `Cache::remember` | First paint includes the kicker |
+| ✅ S206 | Trending kicker on homepage | Uncommitted worktree |
 | ✅ S199 | Mobile floating bottom nav | Uncommitted worktree |
 | **D5** | **Search facets** — `/search?q=...` already supports `source` and `bias` filters; add `from_date`, `to_date`, `owner` (drop the `news_sources.owner_name` enum). Update `search.blade.php` facet UI | Date range filter narrows results correctly |
-| **D6** | **Topic-chip strip persistence** — current topic chips reset selection on every navigation; persist last-selected chip in `grimba_chip` cookie and pre-select on return | Returning to homepage retains chip selection |
+| ✅ S207 | Topic-chip strip persistence | Uncommitted worktree |
 | **D7** | **Saved-search alerts (member-only)** — let logged-in readers save a search query + facet combo. New `saved_searches` table; weekly cron emails new matches | One member can save & receive a digest |
 | **D8** | **Site-wide command palette (⌘K)** — fuzzy search across categories, sources, recent stories. Lazy-loaded JS, cookie-cached search index | ⌘K opens; typing 2 chars surfaces matches |
 
@@ -191,10 +191,10 @@ data + sitemap are non-negotiable.
 |----|--------|------------|
 | **F1** | **Image lazy-load audit** — every `<img>` outside the first viewport gets `loading="lazy" decoding="async"`. Hero images stay eager. Use a Blade directive or `post-hero-img` partial guard | Lighthouse "image elements have explicit width and height" passes |
 | **F2** | **Cluster-page query optimization** — the post.blade.php story branch issues 6+ subqueries; consolidate via eager-load on `$post->load('cluster.posts.source')` (or the existing source-meta preload pattern from S171 extended to all sidebar partials) | < 4 SQL queries on a cluster-page render |
-| **F3** | **Sitemap.xml generation** — `Botble\\Sitemap` or hand-rolled controller. Includes posts, categories, sources, story-clusters | `https://grimbanews.com/sitemap.xml` returns valid XML |
-| **F4** | **schema.org JSON-LD** — NewsArticle on every post, with author/publisher/datePublished. Cluster pages add `mainEntityOfPage` referencing the cluster | Google rich-results test passes |
-| **F5** | **Open Graph polish for /coffre and /local** — currently those use the home OG image; give each surface a tailored OG | Custom OG renders for those routes |
-| **F6** | **Preload hint sweep** — add `<link rel="preload">` for the Fraunces + Public Sans WOFF2 files (currently relies on `googleFonts()` which is async) | Fonts paint < 200ms after HTML |
+| ✅ S208 | Sitemap.xml generation — Botble sitemap index extended with Grimba static, sources, story-clusters | Uncommitted worktree |
+| ✅ S209 | schema.org JSON-LD — Grimba NewsArticle block uses NobuAI-rendered copy and cluster `mainEntityOfPage` | Uncommitted worktree |
+| ✅ S210 | Open Graph polish for /coffre and /local — tailored Grimba OG cards + layout-level image override | Uncommitted worktree |
+| ✅ S211 | Preload hint sweep — shared partial preloads generated Fraunces/Public Sans WOFF2 slices when present | Uncommitted worktree |
 | **F7** | **HTTP-cache audit** — set `Cache-Control: public, max-age=300, s-maxage=900` on read-only routes (homepage, /sources, /comparatif). Skip on personalized routes (/pour-vous, /coffre) | curl -I shows correct headers per route class |
 | **F8** | **Image CDN proxy** — proxy outlet logos through `/img-proxy?u=...` to (a) avoid CORS quirks, (b) cache long-tail logos, (c) avoid blank flicker | Proxy serves a cached PNG within 50ms |
 

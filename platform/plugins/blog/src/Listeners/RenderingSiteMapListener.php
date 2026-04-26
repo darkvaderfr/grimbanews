@@ -8,6 +8,7 @@ use Botble\Blog\Models\Tag;
 use Botble\Theme\Events\RenderingSiteMapEvent;
 use Botble\Theme\Facades\SiteMapManager;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class RenderingSiteMapListener
 {
@@ -75,8 +76,12 @@ class RenderingSiteMapListener
         }
 
         // Generate sitemap indexes using the new SiteMapManager pagination functionality
+        $archiveSelect = DB::connection()->getDriverName() === 'sqlite'
+            ? "CAST(strftime('%Y', created_at) AS INTEGER) as created_year, CAST(strftime('%m', created_at) AS INTEGER) as created_month, MAX(created_at) as created_at, COUNT(*) as post_count"
+            : 'YEAR(created_at) as created_year, MONTH(created_at) as created_month, MAX(created_at) as created_at, COUNT(*) as post_count';
+
         $posts = Post::query()
-            ->selectRaw('YEAR(created_at) as created_year, MONTH(created_at) as created_month, MAX(created_at) as created_at, COUNT(*) as post_count')
+            ->selectRaw($archiveSelect)
             ->wherePublished()
             ->groupBy('created_year', 'created_month')
             ->orderByDesc('created_year')

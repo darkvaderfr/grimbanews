@@ -6,19 +6,77 @@
 
     $__gnSeoTitle = GnTr::title($post);
     $__gnSeoDesc = GnTr::description($post);
+    $__gnTarget = GnTr::targetLocale();
+    $__gnHasTr = GnTr::isTranslated($post, $__gnTarget);
     SeoHelper::setTitle($__gnSeoTitle);
     if ($__gnSeoDesc) {
         SeoHelper::setDescription(strip_tags((string) $__gnSeoDesc));
     }
 
-    // Branded OG image per post.
-    $ogUrl = url('/og/post/' . $post->id . '.png');
+    // Branded OG image per post. Cluster pages get a composite story
+    // card with source count + bias distribution.
+    $__gnOgClusterCount = $post->story_cluster_id
+        ? \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
+            ->where('story_cluster_id', $post->story_cluster_id)
+            ->where('status', 'published')
+            ->count()
+        : 0;
+    $ogUrl = ($post->story_cluster_id && $__gnOgClusterCount >= 2)
+        ? url('/og/story/' . $post->story_cluster_id . '.png')
+        : url('/og/post/' . $post->id . '.png');
+    Theme::set('grimba_og_image', $ogUrl);
     SeoHelper::openGraph()->setImage($ogUrl);
     SeoHelper::openGraph()->addProperty('image:width', '1200');
     SeoHelper::openGraph()->addProperty('image:height', '630');
     SeoHelper::twitter()->setType('summary_large_image');
     SeoHelper::twitter()->addImage($ogUrl);
+
+    $__gnClean = static fn ($value) => trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags((string) $value), ENT_QUOTES, 'UTF-8')));
+    $__gnArticleUrl = $post->url;
+    $__gnClusterUrl = ($post->story_cluster_id && $__gnOgClusterCount >= 2)
+        ? url('/comparatif/' . $post->story_cluster_id)
+        : $__gnArticleUrl;
+    $__gnJsonLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'NewsArticle',
+        'headline' => $__gnClean($__gnSeoTitle),
+        'description' => $__gnClean($__gnSeoDesc ?: $post->description),
+        'image' => [$ogUrl],
+        'url' => $__gnArticleUrl,
+        'mainEntityOfPage' => [
+            '@type' => 'WebPage',
+            '@id' => $__gnClusterUrl,
+        ],
+        'datePublished' => optional($post->created_at)->toAtomString(),
+        'dateModified' => optional($post->updated_at ?: $post->created_at)->toAtomString(),
+        'author' => [
+            '@type' => 'Organization',
+            'name' => $post->source_name ?: 'GrimbaNews',
+        ],
+        'publisher' => [
+            '@type' => 'Organization',
+            'name' => 'GrimbaNews',
+            'url' => url('/'),
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => url('/og/home.png'),
+                'width' => 1200,
+                'height' => 630,
+            ],
+        ],
+        'isAccessibleForFree' => true,
+        'inLanguage' => $__gnHasTr ? 'fr' : ($post->original_language ?: 'fr'),
+    ];
+
+    if ($post->relationLoaded('categories') || method_exists($post, 'categories')) {
+        $section = optional($post->categories->first())->name;
+        if ($section) {
+            $__gnJsonLd['articleSection'] = $section;
+        }
+    }
 @endphp
+
+<script type="application/ld+json">{!! json_encode($__gnJsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 
 {{-- S49: record post visit in grimba_read cookie (last 30, most-recent-first). --}}
 <script>

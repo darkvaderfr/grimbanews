@@ -13,6 +13,8 @@
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\DashboardMenuItem;
+use App\Services\GrimbaNobuAi;
+use App\Services\GrimbaTranslator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -101,9 +103,42 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->where('is_blindspot', true)
                 ->count();
 
-            // Stats headers.
+            // Stats headers + operational pressure.
             $publishedToday = $todayPosts->count();
             $draftCount = DB::table('posts')->where('status', '!=', 'published')->count();
+            $publishedTotal = DB::table('posts')->where('status', 'published')->count();
+            $clusterCount = DB::table('story_clusters')->count();
+            $activeClusterCount = DB::table('posts')
+                ->where('status', 'published')
+                ->whereNotNull('story_cluster_id')
+                ->distinct('story_cluster_id')
+                ->count('story_cluster_id');
+            $translationReady = DB::table('posts')
+                ->where('status', 'published')
+                ->where('original_language', '!=', 'fr')
+                ->where('translated_to', 'fr')
+                ->whereNotNull('translated_name')
+                ->count();
+            $translationPending = DB::table('posts')
+                ->where('status', 'published')
+                ->where('original_language', '!=', 'fr')
+                ->where(function ($q): void {
+                    $q->whereNull('translated_to')
+                        ->orWhere('translated_to', '!=', 'fr')
+                        ->orWhereNull('translated_name');
+                })
+                ->count();
+
+            $latestDrafts = DB::table('posts')
+                ->where('status', '!=', 'published')
+                ->orderByDesc('updated_at')
+                ->limit(5)
+                ->get(['id', 'name', 'source_name', 'updated_at', 'bias_rating']);
+
+            $nobuAi = app(GrimbaNobuAi::class);
+            $translator = app(GrimbaTranslator::class);
+            $nobuDrivers = $nobuAi->configuredDrivers();
+            $translationDrivers = $translator->configuredDrivers();
 
             return view('grimba-admin.cockpit', compact(
                 'coverage', 'coverageTotal',
@@ -111,7 +146,10 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'topSources',
                 'sparkline', 'signupsTotal',
                 'blindspotCount',
-                'publishedToday', 'draftCount'
+                'publishedToday', 'draftCount',
+                'publishedTotal', 'clusterCount', 'activeClusterCount',
+                'translationReady', 'translationPending',
+                'latestDrafts', 'nobuDrivers', 'translationDrivers'
             ));
         })->name('cockpit');
     });

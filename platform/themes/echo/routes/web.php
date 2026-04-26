@@ -105,6 +105,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('og/post/{id}', [\App\Http\Controllers\GrimbaOgImageController::class, 'show'])
             ->where('id', '[0-9]+')
             ->name('public.og.post.alt');
+        Route::get('og/story/{id}.png', [\App\Http\Controllers\GrimbaOgImageController::class, 'story'])
+            ->where('id', '[0-9]+')
+            ->name('public.og.story');
+        Route::get('og/story/{id}', [\App\Http\Controllers\GrimbaOgImageController::class, 'story'])
+            ->where('id', '[0-9]+')
+            ->name('public.og.story.alt');
         // S145 — cookie-consent endpoint. Records the visitor's
         // accept/reject choice as an unencrypted cookie + writes a
         // fire-and-forget log line for audit. Returns 204; the
@@ -128,6 +134,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
         Route::get('og/home.png', [\App\Http\Controllers\GrimbaOgImageController::class, 'home'])->name('public.og.home');
         Route::get('og/home',     [\App\Http\Controllers\GrimbaOgImageController::class, 'home'])->name('public.og.home.alt');
+        Route::get('og/{surface}.png', [\App\Http\Controllers\GrimbaOgImageController::class, 'surface'])
+            ->where('surface', 'local|coffre')
+            ->name('public.og.surface');
+        Route::get('og/{surface}', [\App\Http\Controllers\GrimbaOgImageController::class, 'surface'])
+            ->where('surface', 'local|coffre')
+            ->name('public.og.surface.alt');
 
         // S96 — editorial SVG placeholder for posts with no image.
         // Served cheap (no GD, no file cache — one string build per
@@ -469,6 +481,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             SeoHelper::setTitle(($city ?: $country ?: 'Local') . ' — GrimbaNews')
                 ->setDescription("Actualité locale, sourcée et croisée.");
+            Theme::set('grimba_og_image', url('/og/local.png'));
 
             Theme::breadcrumb()
                 ->add('Accueil', url('/'))
@@ -639,6 +652,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             SeoHelper::setTitle('Mon coffre — GrimbaNews')
                 ->setDescription("Articles sauvegardés pour plus tard.");
+            Theme::set('grimba_og_image', url('/og/coffre.png'));
 
             Theme::breadcrumb()
                 ->add('Accueil', url('/'))

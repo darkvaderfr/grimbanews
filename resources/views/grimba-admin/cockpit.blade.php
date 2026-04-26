@@ -25,9 +25,45 @@
         <span>{{ $draftCount }} en brouillon</span>
     </div>
 
+    <section class="grimba-cockpit__hero mb-3">
+        <div>
+            <span class="grimba-cockpit__kicker">Command center</span>
+            <h1>Tableau de bord éditorial</h1>
+            <p>Surveillez la pression brouillons, la couverture, les traductions NobuAI et les dossiers actifs avant publication.</p>
+        </div>
+        <div class="grimba-cockpit__hero-actions">
+            <a href="{{ route('posts.create') }}" class="btn btn-primary">+ Nouvel article</a>
+            <a href="{{ route('grimba.translation.index') }}" class="btn btn-outline-primary">Clés NobuAI</a>
+            <a href="{{ url('/') }}" target="_blank" class="btn btn-outline-secondary">Voir le site →</a>
+        </div>
+    </section>
+
+    <section class="grimba-kpi-grid mb-3">
+        <article class="grimba-kpi">
+            <span>Publiés</span>
+            <strong>{{ number_format($publishedTotal) }}</strong>
+            <small>{{ $publishedToday }} aujourd'hui</small>
+        </article>
+        <article class="grimba-kpi grimba-kpi--warn">
+            <span>Brouillons</span>
+            <strong>{{ number_format($draftCount) }}</strong>
+            <small>à trier avant mise en ligne</small>
+        </article>
+        <article class="grimba-kpi">
+            <span>Dossiers actifs</span>
+            <strong>{{ number_format($activeClusterCount) }}</strong>
+            <small>{{ number_format($clusterCount) }} dossiers au total</small>
+        </article>
+        <article class="grimba-kpi {{ $translationPending > 0 ? 'grimba-kpi--warn' : '' }}">
+            <span>FR NobuAI</span>
+            <strong>{{ number_format($translationReady) }}</strong>
+            <small>{{ $translationPending }} traduction{{ $translationPending === 1 ? '' : 's' }} en attente</small>
+        </article>
+    </section>
+
     <div class="row g-3 mb-3">
         {{-- Coverage balance --}}
-        <div class="col-lg-8 col-12">
+        <div class="col-xl-7 col-12">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Équilibre de couverture — aujourd'hui</h3>
@@ -55,14 +91,29 @@
         </div>
 
         {{-- Angles morts counter --}}
-        <div class="col-lg-4 col-12">
-            <div class="card" style="border:1px solid rgba(138,43,226,0.3);">
-                <div class="card-body text-center">
-                    <div style="font-family: var(--gn-font-display); font-size: 2.8rem; font-weight: 700; color: #8a2be2; line-height: 1;">
-                        {{ $blindspotCount }}
+        <div class="col-xl-5 col-12">
+            <div class="card grimba-status-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+                        <div>
+                            <span class="grimba-cockpit__kicker">NobuAI</span>
+                            <h3 class="card-title mt-2 mb-1">Statut opérationnel</h3>
+                            <p class="text-muted mb-0">Le public ne voit que NobuAI; les fournisseurs restent côté admin.</p>
+                        </div>
+                        <div class="grimba-status-card__count">{{ $blindspotCount }}</div>
                     </div>
-                    <div class="text-uppercase small text-muted mt-1" style="letter-spacing:0.08em; font-weight:600;">Angles morts</div>
-                    <a href="{{ route('grimba.story-clusters.index') }}" class="btn btn-sm btn-outline-primary mt-3">Gérer les dossiers</a>
+                    <div class="grimba-provider-row">
+                        <span>LLM</span>
+                        <strong>{{ count($nobuDrivers) ? implode(' → ', $nobuDrivers) : 'aucune clé configurée' }}</strong>
+                    </div>
+                    <div class="grimba-provider-row">
+                        <span>Traduction</span>
+                        <strong>{{ count($translationDrivers) ? implode(' → ', $translationDrivers) : 'aucun fournisseur' }}</strong>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{{ route('grimba.translation.index') }}" class="btn btn-sm btn-primary">Configurer les clés</a>
+                        <a href="{{ route('grimba.story-clusters.index') }}" class="btn btn-sm btn-outline-primary">Gérer les dossiers</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -70,7 +121,7 @@
 
     <div class="row g-3 mb-3">
         {{-- Active dossiers --}}
-        <div class="col-lg-6 col-12">
+        <div class="col-lg-7 col-12">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Dossiers actifs</h3>
@@ -110,7 +161,7 @@
         </div>
 
         {{-- Top sources --}}
-        <div class="col-lg-6 col-12">
+        <div class="col-lg-5 col-12">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Sources les plus citées (7 j)</h3>
@@ -146,7 +197,7 @@
 
     <div class="row g-3">
         {{-- Newsletter signups 7-day sparkline --}}
-        <div class="col-lg-8 col-12">
+        <div class="col-lg-7 col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title">Inscriptions newsletter — 7 j</h3>
@@ -169,18 +220,30 @@
             </div>
         </div>
 
-        {{-- Quick nav --}}
-        <div class="col-lg-4 col-12">
+        {{-- Draft queue + quick nav --}}
+        <div class="col-lg-5 col-12">
             <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Actions rapides</h3>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">Brouillons récents</h3>
+                    <a href="{{ route('grimba.rss-drafts.index') }}" class="small">Voir la file</a>
                 </div>
                 <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{{ route('posts.create') }}" class="btn btn-primary">+ Nouvel article</a>
-                        <a href="{{ route('grimba.news-sources.create') }}" class="btn btn-outline-primary">+ Nouvelle source</a>
-                        <a href="{{ route('grimba.story-clusters.create') }}" class="btn btn-outline-primary">+ Nouveau dossier</a>
-                        <a href="{{ url('/') }}" target="_blank" class="btn btn-outline-secondary">Voir le site public →</a>
+                    @if($latestDrafts->isEmpty())
+                        <p class="text-muted mb-0">Aucun brouillon en attente.</p>
+                    @else
+                        <ul class="list-unstyled mb-3 grimba-draft-list">
+                            @foreach($latestDrafts as $draft)
+                                <li>
+                                    <a href="{{ route('posts.edit', $draft->id) }}">{{ \Illuminate\Support\Str::limit($draft->name, 68) }}</a>
+                                    <span>{{ $draft->source_name ?: 'Source inconnue' }} · {{ optional(\Carbon\Carbon::parse($draft->updated_at))->locale('fr')->diffForHumans() }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                    <div class="grimba-quick-actions">
+                        <a href="{{ route('posts.create') }}" class="btn btn-primary">+ Article</a>
+                        <a href="{{ route('grimba.news-sources.create') }}" class="btn btn-outline-primary">+ Source</a>
+                        <a href="{{ route('grimba.story-clusters.create') }}" class="btn btn-outline-primary">+ Dossier</a>
                     </div>
                 </div>
             </div>
@@ -208,6 +271,144 @@
         padding: 0.2rem 0.6rem;
         border-radius: 9999px;
         letter-spacing: 0.08em;
+    }
+    .grimba-cockpit__hero {
+        display: flex;
+        justify-content: space-between;
+        gap: 1.5rem;
+        padding: 1.4rem;
+        border: 1px solid var(--gn-rule);
+        border-radius: 20px;
+        background:
+            radial-gradient(circle at 12% 10%, rgba(220, 200, 160, 0.42), transparent 28%),
+            linear-gradient(135deg, rgba(255,255,255,0.86), rgba(246,241,232,0.72));
+        box-shadow: 0 18px 45px rgba(26, 23, 19, 0.07);
+    }
+    .grimba-cockpit__hero h1 {
+        margin: 0.8rem 0 0.4rem;
+        font-family: var(--gn-font-display);
+        font-size: clamp(1.9rem, 3vw, 3rem);
+        letter-spacing: -0.04em;
+    }
+    .grimba-cockpit__hero p {
+        max-width: 680px;
+        margin: 0;
+        color: var(--gn-ink-soft);
+    }
+    .grimba-cockpit__hero-actions,
+    .grimba-quick-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .grimba-cockpit__hero-actions {
+        justify-content: flex-end;
+        min-width: 330px;
+    }
+    .grimba-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+    .grimba-kpi {
+        padding: 1rem;
+        border: 1px solid var(--gn-rule);
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(26, 23, 19, 0.045);
+    }
+    .grimba-kpi span,
+    .grimba-provider-row span {
+        display: block;
+        font-family: var(--gn-font-mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--gn-ink-soft);
+    }
+    .grimba-kpi strong {
+        display: block;
+        margin-top: 0.25rem;
+        font-family: var(--gn-font-display);
+        font-size: 2rem;
+        line-height: 1;
+        color: var(--gn-ink);
+    }
+    .grimba-kpi small {
+        color: var(--gn-ink-soft);
+    }
+    .grimba-kpi--warn {
+        border-color: rgba(232, 76, 61, 0.26);
+        background: linear-gradient(135deg, #fff, rgba(232, 76, 61, 0.05));
+    }
+    .grimba-status-card {
+        min-height: 100%;
+    }
+    .grimba-status-card__count {
+        min-width: 82px;
+        text-align: center;
+        font-family: var(--gn-font-display);
+        font-size: 3rem;
+        line-height: 1;
+        color: var(--gn-blind);
+    }
+    .grimba-status-card__count::after {
+        content: 'angles morts';
+        display: block;
+        margin-top: 0.35rem;
+        font-family: var(--gn-font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--gn-ink-soft);
+    }
+    .grimba-provider-row {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 0.75rem;
+        padding: 0.65rem 0;
+        border-top: 1px solid var(--gn-rule);
+    }
+    .grimba-provider-row strong {
+        font-size: 0.85rem;
+        color: var(--gn-ink);
+        word-break: break-word;
+    }
+    .grimba-draft-list li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--gn-rule);
+    }
+    .grimba-draft-list a {
+        display: block;
+        color: var(--gn-ink);
+        font-family: var(--gn-font-display);
+        font-weight: 650;
+        text-decoration: none;
+        line-height: 1.2;
+    }
+    .grimba-draft-list span {
+        display: block;
+        margin-top: 0.25rem;
+        color: var(--gn-ink-soft);
+        font-size: 0.78rem;
+    }
+    @media (max-width: 991px) {
+        .grimba-cockpit__hero {
+            flex-direction: column;
+        }
+        .grimba-cockpit__hero-actions {
+            min-width: 0;
+            justify-content: flex-start;
+        }
+        .grimba-kpi-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    @media (max-width: 575px) {
+        .grimba-kpi-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 @endsection

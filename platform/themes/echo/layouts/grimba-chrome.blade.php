@@ -31,6 +31,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    @include(Theme::getThemeNamespace('partials.font-preloads'))
     {!! BaseHelper::googleFonts('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Public+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap') !!}
 
     {!! Theme::partial('css-variable-declare') !!}
@@ -44,12 +45,13 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     <meta name="theme-color" content="#f6f1e8">
 
+    @php($__grimbaOgImage = Theme::get('grimba_og_image') ?: url('/og/home.png'))
     <link rel="alternate" type="application/rss+xml" title="GrimbaNews — Flux RSS" href="{{ url('/feed.xml') }}">
-    <meta property="og:image" content="{{ url('/og/home.png') }}">
+    <meta property="og:image" content="{{ $__grimbaOgImage }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="{{ url('/og/home.png') }}">
+    <meta name="twitter:image" content="{{ $__grimbaOgImage }}">
     {!! Theme::header() !!}
 </head>
 <body class="grimba-home grimba-subpage" {!! Theme::bodyAttributes() !!}>

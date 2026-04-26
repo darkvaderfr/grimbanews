@@ -9,6 +9,7 @@
 
     $rawFollow = (string) request()->cookie('grimba_follow', '');
     $followedIds = array_filter(array_map('intval', explode(',', $rawFollow)));
+    $selectedChip = (int) request()->cookie('grimba_chip', 0);
 @endphp
 
 @if($chips->isNotEmpty())
@@ -16,9 +17,12 @@
         <div class="container-xxl">
             <div class="grimba-chips__row">
                 @foreach($chips as $chip)
-                    @php $isFollowed = in_array($chip->id, $followedIds, true); @endphp
-                    <span class="grimba-chip @if($isFollowed) grimba-chip--followed @endif" data-category-id="{{ $chip->id }}">
-                        <a class="grimba-chip__label" href="{{ $chip->url }}">{{ $chip->name }}</a>
+                    @php
+                        $isFollowed = in_array($chip->id, $followedIds, true);
+                        $isSelected = (int) $chip->id === $selectedChip;
+                    @endphp
+                    <span class="grimba-chip @if($isFollowed) grimba-chip--followed @endif @if($isSelected) grimba-chip--selected @endif" data-category-id="{{ $chip->id }}">
+                        <a class="grimba-chip__label" href="{{ $chip->url }}" data-grimba-chip-select="{{ $chip->id }}">{{ $chip->name }}</a>
                         <button type="button"
                                 class="grimba-chip__follow"
                                 data-grimba-follow="{{ $chip->id }}"
@@ -52,6 +56,12 @@
                     // Update counter in header meta strip if present.
                     const counter = document.getElementById('grimba-follow-count');
                     if (counter) counter.textContent = String(res.count);
+                });
+            });
+            document.querySelectorAll('[data-grimba-chip-select]').forEach(link => {
+                link.addEventListener('click', () => {
+                    document.cookie = 'grimba_chip=' + encodeURIComponent(link.dataset.grimbaChipSelect)
+                        + '; path=/; max-age=' + (60 * 60 * 24 * 365) + '; SameSite=Lax';
                 });
             });
         })();

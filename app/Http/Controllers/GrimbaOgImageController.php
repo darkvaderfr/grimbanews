@@ -63,6 +63,48 @@ class GrimbaOgImageController
         ]);
     }
 
+    public function surface(string $surface): Response
+    {
+        abort_unless(in_array($surface, ['local', 'coffre'], true), 404);
+
+        $cachePath = storage_path('app/public/og/' . $surface . '.png');
+
+        if (! File::exists($cachePath)) {
+            File::ensureDirectoryExists(dirname($cachePath));
+            $this->renderSurface($surface, $cachePath);
+        }
+
+        return response(File::get($cachePath), 200, [
+            'Content-Type'  => 'image/png',
+            'Cache-Control' => 'public, max-age=604800',
+        ]);
+    }
+
+    public function story(Request $request, int $clusterId): Response
+    {
+        $posts = Post::query()
+            ->where('story_cluster_id', $clusterId)
+            ->where('status', 'published')
+            ->orderByDesc('created_at')
+            ->get(['id', 'name', 'translated_name', 'description', 'translated_description', 'source_name', 'bias_rating', 'updated_at']);
+
+        abort_if($posts->count() < 2, 404);
+
+        $latest = optional($posts->max('updated_at'))->timestamp ?? time();
+        $cacheKey = 'og/story-' . $clusterId . '-' . $posts->count() . '-' . $latest . '.png';
+        $cachePath = storage_path('app/public/' . $cacheKey);
+
+        if (! File::exists($cachePath)) {
+            File::ensureDirectoryExists(dirname($cachePath));
+            $this->renderStory($posts, $cachePath);
+        }
+
+        return response(File::get($cachePath), 200, [
+            'Content-Type'  => 'image/png',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
     private function renderHome(string $outPath): void
     {
         $img = imagecreatetruecolor(self::W, self::H);
@@ -110,6 +152,68 @@ class GrimbaOgImageController
 
         // Corner mark
         $this->ttfText($img, $sansFont, 18, self::W - 220, self::H - 50, $inkSoft, 'grimbanews.com');
+
+        imagepng($img, $outPath, 6);
+        imagedestroy($img);
+    }
+
+    private function renderSurface(string $surface, string $outPath): void
+    {
+        $copy = [
+            'local' => [
+                'kicker' => 'LOCAL',
+                'title' => 'Votre actualité locale',
+                'lines' => ['Sources proches. Angles comparés.', 'Votre ville replacée dans le contexte national.'],
+                'accent' => [34, 197, 94],
+            ],
+            'coffre' => [
+                'kicker' => 'COFFRE',
+                'title' => "Votre veille, prête à reprendre",
+                'lines' => ['Articles sauvegardés. Biais filtrables.', 'Export CSV pour garder vos lectures utiles.'],
+                'accent' => [59, 130, 246],
+            ],
+        ][$surface];
+
+        $img = imagecreatetruecolor(self::W, self::H);
+
+        $paper   = imagecolorallocate($img, self::PAPER[0], self::PAPER[1], self::PAPER[2]);
+        $ink     = imagecolorallocate($img, self::INK[0], self::INK[1], self::INK[2]);
+        $inkSoft = imagecolorallocate($img, self::INK_SOFT[0], self::INK_SOFT[1], self::INK_SOFT[2]);
+        $tan     = imagecolorallocate($img, 220, 200, 160);
+        $accent  = imagecolorallocate($img, $copy['accent'][0], $copy['accent'][1], $copy['accent'][2]);
+        $left    = imagecolorallocate($img, self::LEFT[0], self::LEFT[1], self::LEFT[2]);
+        $center  = imagecolorallocate($img, self::CENTER[0], self::CENTER[1], self::CENTER[2]);
+        $right   = imagecolorallocate($img, self::RIGHT[0], self::RIGHT[1], self::RIGHT[2]);
+
+        imagefill($img, 0, 0, $paper);
+        imagefilledrectangle($img, 0, 0, self::W, 16, $tan);
+        imagefilledrectangle($img, 72, 514, self::W - 72, 532, imagecolorallocatealpha($img, 26, 23, 19, 112));
+        imagefilledrectangle($img, 72, 514, 460, 532, $left);
+        imagefilledrectangle($img, 460, 514, 770, 532, $center);
+        imagefilledrectangle($img, 770, 514, self::W - 72, 532, $right);
+
+        $serifFont = $this->findFont(['Georgia Bold.ttf', 'Georgia.ttf', 'Times New Roman Bold.ttf']);
+        $sansFont  = $this->findFont(['Arial Bold.ttf', 'Arial.ttf', 'Helvetica.ttc']);
+        $monoFont  = $this->findFont(['Menlo.ttc', 'Courier New Bold.ttf', 'Courier.ttc']) ?? $sansFont;
+
+        $this->ttfText($img, $monoFont ?? $sansFont, 30, 72, 90, $ink, 'GRIMBA');
+        $this->ttfText($img, $serifFont ?? $sansFont, 28, 218, 90, $inkSoft, 'News');
+        $this->ttfText($img, $monoFont ?? $sansFont, 18, 72, 146, $accent, $copy['kicker']);
+
+        $y = 250;
+        foreach (array_slice($this->wrapText($serifFont ?? $sansFont, 60, $copy['title'], self::W - 144), 0, 3) as $line) {
+            $this->ttfText($img, $serifFont ?? $sansFont, 60, 72, $y, $ink, $line);
+            $y += 78;
+        }
+
+        $y += 12;
+        foreach ($copy['lines'] as $line) {
+            $this->ttfText($img, $sansFont, 26, 72, $y, $inkSoft, $line);
+            $y += 38;
+        }
+
+        $this->ttfText($img, $sansFont, 18, 72, self::H - 42, $inkSoft, 'GAUCHE · CENTRE · DROITE');
+        $this->ttfText($img, $sansFont, 18, self::W - 250, self::H - 42, $inkSoft, 'grimbanews.com');
 
         imagepng($img, $outPath, 6);
         imagedestroy($img);
@@ -220,6 +324,76 @@ class GrimbaOgImageController
                 }
             }
         }
+
+        imagepng($img, $outPath, 6);
+        imagedestroy($img);
+    }
+
+    private function renderStory($posts, string $outPath): void
+    {
+        $img = imagecreatetruecolor(self::W, self::H);
+
+        $paper   = imagecolorallocate($img, self::PAPER[0], self::PAPER[1], self::PAPER[2]);
+        $ink     = imagecolorallocate($img, self::INK[0], self::INK[1], self::INK[2]);
+        $inkSoft = imagecolorallocate($img, self::INK_SOFT[0], self::INK_SOFT[1], self::INK_SOFT[2]);
+        $rule    = imagecolorallocatealpha($img, 26, 23, 19, 95);
+        $tan     = imagecolorallocate($img, 220, 200, 160);
+        $left    = imagecolorallocate($img, self::LEFT[0], self::LEFT[1], self::LEFT[2]);
+        $center  = imagecolorallocate($img, self::CENTER[0], self::CENTER[1], self::CENTER[2]);
+        $right   = imagecolorallocate($img, self::RIGHT[0], self::RIGHT[1], self::RIGHT[2]);
+
+        imagefill($img, 0, 0, $paper);
+        imagefilledrectangle($img, 0, 0, self::W, 16, $tan);
+
+        $serifFont = $this->findFont(['Georgia Bold.ttf', 'Georgia.ttf', 'Times New Roman Bold.ttf']);
+        $sansFont  = $this->findFont(['Arial Bold.ttf', 'Arial.ttf', 'Helvetica.ttc']);
+        $monoFont  = $this->findFont(['Menlo.ttc', 'Courier New Bold.ttf', 'Courier.ttc']) ?? $sansFont;
+
+        $head = $posts->first();
+        $title = trim((string) ($head->translated_name ?: $head->name));
+        $sources = $posts->pluck('source_name')->filter()->unique()->values();
+        $sourceCount = $sources->count();
+        $counts = ['left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0];
+        foreach ($posts as $post) {
+            $bias = $post->bias_rating ?? 'unknown';
+            $counts[$bias] = ($counts[$bias] ?? 0) + 1;
+        }
+        $total = max(1, $counts['left'] + $counts['center'] + $counts['right']);
+
+        $this->ttfText($img, $monoFont ?? $sansFont, 30, 60, 88, $ink, 'GRIMBA');
+        $this->ttfText($img, $serifFont ?? $sansFont, 28, 206, 88, $inkSoft, 'News');
+        $this->ttfText($img, $monoFont ?? $sansFont, 18, 60, 132, $inkSoft, 'DOSSIER MULTI-SOURCES');
+        imagefilledrectangle($img, 60, 152, self::W - 60, 153, $rule);
+
+        $y = 230;
+        foreach (array_slice($this->wrapText($serifFont ?? $sansFont, 54, $title, self::W - 120), 0, 4) as $line) {
+            $this->ttfText($img, $serifFont ?? $sansFont, 54, 60, $y, $ink, $line);
+            $y += 70;
+        }
+
+        $summaryY = min($y + 20, 500);
+        $this->ttfText($img, $sansFont, 24, 60, $summaryY, $inkSoft, $posts->count() . ' articles · ' . $sourceCount . ' sources · couverture comparée');
+
+        $barX = 60;
+        $barY = self::H - 92;
+        $barW = self::W - 120;
+        $barH = 18;
+        imagefilledrectangle($img, $barX, $barY, $barX + $barW, $barY + $barH, imagecolorallocatealpha($img, 26, 23, 19, 110));
+
+        $colors = ['left' => $left, 'center' => $center, 'right' => $right];
+        $x = $barX;
+        foreach (['left', 'center', 'right'] as $side) {
+            $segW = (int) round($counts[$side] * $barW / $total);
+            if ($segW > 0) {
+                imagefilledrectangle($img, $x, $barY, $x + $segW, $barY + $barH, $colors[$side]);
+            }
+            $x += $segW;
+        }
+
+        $this->ttfText($img, $sansFont, 19, 60, self::H - 42, $left, 'GAUCHE ' . $counts['left']);
+        $this->ttfText($img, $sansFont, 19, 240, self::H - 42, $center, 'CENTRE ' . $counts['center']);
+        $this->ttfText($img, $sansFont, 19, 430, self::H - 42, $right, 'DROITE ' . $counts['right']);
+        $this->ttfText($img, $sansFont, 18, self::W - 250, self::H - 42, $inkSoft, 'grimbanews.com');
 
         imagepng($img, $outPath, 6);
         imagedestroy($img);
