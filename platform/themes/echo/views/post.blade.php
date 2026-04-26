@@ -254,6 +254,10 @@
                                 $__gnExtract[] = [
                                     'text'   => $lead,
                                     'source' => $cp->source_name ?? null,
+                                    // S183 — bias dot on each bullet so a
+                                    // reader can scan which side is saying
+                                    // what without reading every line.
+                                    'bias'   => $cp->bias_rating ?? 'unknown',
                                 ];
                                 if (count($__gnExtract) >= 5) break;
                             }
@@ -319,11 +323,24 @@
                                 </summary>
 
                                 @if($__gnSummaryMode === 'extractive')
-                                    {{-- Bulleted list with per-source attribution. --}}
+                                    {{-- S175/S183 — bulleted list with bias-colored
+                                         dot + per-source attribution. --}}
+                                    @php
+                                        $__bulletColor = [
+                                            'left'    => '#3b82f6',
+                                            'center'  => '#a8a8a8',
+                                            'right'   => '#e84c3d',
+                                            'unknown' => 'rgba(26,23,19,0.45)',
+                                        ];
+                                    @endphp
                                     <ul class="m-0" style="list-style:none; padding:0; font-size:15.5px; line-height:1.55; color:var(--gn-ink,#1a1713);">
                                         @foreach($__gnSummaryItems as $item)
+                                            @php
+                                                $__bColor = $__bulletColor[$item['bias'] ?? 'unknown'] ?? $__bulletColor['unknown'];
+                                            @endphp
                                             <li style="display:flex; gap:10px; margin-bottom:12px; align-items:flex-start;">
-                                                <span style="flex:0 0 6px; width:6px; height:6px; margin-top:8px; border-radius:50%; background:rgba(26,23,19,0.45);"></span>
+                                                <span aria-hidden="true" title="{{ $item['bias'] ?? 'non classé' }}"
+                                                      style="flex:0 0 8px; width:8px; height:8px; margin-top:8px; border-radius:50%; background:{{ $__bColor }};"></span>
                                                 <span style="flex:1;">
                                                     {{ $item['text'] }}
                                                     @if($item['source'])
