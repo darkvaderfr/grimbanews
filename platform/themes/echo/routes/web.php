@@ -355,12 +355,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             $posts = $postsQuery->paginate(12);
 
-            SeoHelper::setTitle('Pour vous — GrimbaNews')
-                ->setDescription("Votre fil personnalisé selon les sujets que vous suivez.");
+            SeoHelper::setTitle(__('Pour vous') . ' — GrimbaNews')
+                ->setDescription(__('Votre fil personnalisé selon les sujets que vous suivez.'));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Pour vous', url('/pour-vous'));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Pour vous'), url('/pour-vous'));
 
             return Theme::scope('for-you', [
                 'posts'         => $posts,
@@ -450,7 +450,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             }
 
             return back()
-                ->with('newsletter_flash', 'Merci ! Votre inscription à l\'infolettre GrimbaNews est enregistrée.')
+                ->with('newsletter_flash', __("Merci ! Votre inscription à l'infolettre GrimbaNews est enregistrée."))
                 ->withFragment('newsletter');
         })->name('public.newsletter.subscribe');
 
@@ -528,13 +528,13 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 $posts = $q->limit(36)->get();
             }
 
-            SeoHelper::setTitle(($city ?: $country ?: 'Local') . ' — GrimbaNews')
-                ->setDescription("Actualité locale, sourcée et croisée.");
+            SeoHelper::setTitle(($city ?: $country ?: __('Local')) . ' — GrimbaNews')
+                ->setDescription(__('Actualité locale, sourcée et croisée.'));
             Theme::set('grimba_og_image', url('/og/local.png'));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Local', url('/local'));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Local'), url('/local'));
 
             return Theme::scope('local', [
                 'city'     => $city,
@@ -699,13 +699,13 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 }
             }
 
-            SeoHelper::setTitle('Mon coffre — GrimbaNews')
-                ->setDescription("Articles sauvegardés pour plus tard.");
+            SeoHelper::setTitle(__('Mon coffre') . ' — GrimbaNews')
+                ->setDescription(__('Articles sauvegardés pour plus tard.'));
             Theme::set('grimba_og_image', url('/og/coffre.png'));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Mon coffre', url('/coffre'));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Mon coffre'), url('/coffre'));
 
             return Theme::scope('coffre', [
                 'posts' => $posts,
@@ -718,13 +718,13 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $ids = GrimbaVault::parseIds((string) $request->cookie(GrimbaVault::COOKIE, ''));
             $shareUrl = url('/coffre/depuis-lien') . '#ids=' . GrimbaVault::serializeIds($ids);
 
-            SeoHelper::setTitle('Partager mon coffre — GrimbaNews')
-                ->setDescription('Créer un lien local pour partager votre sélection sauvegardée.');
+            SeoHelper::setTitle(__('Partager mon coffre') . ' — GrimbaNews')
+                ->setDescription(__('Créer un lien local pour partager votre sélection sauvegardée.'));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Mon coffre', url('/coffre'))
-                ->add('Partager', url('/coffre/partager'));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Mon coffre'), url('/coffre'))
+                ->add(__('Partager'), url('/coffre/partager'));
 
             return Theme::scope('coffre-share', [
                 'mode' => 'share',
@@ -734,13 +734,13 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         })->name('public.coffre.share');
 
         Route::get('coffre/depuis-lien', function () {
-            SeoHelper::setTitle('Importer un coffre — GrimbaNews')
-                ->setDescription('Importer une sélection GrimbaNews partagée.');
+            SeoHelper::setTitle(__('Importer un coffre') . ' — GrimbaNews')
+                ->setDescription(__('Importer une sélection GrimbaNews partagée.'));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Mon coffre', url('/coffre'))
-                ->add('Depuis un lien', url('/coffre/depuis-lien'));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Mon coffre'), url('/coffre'))
+                ->add(__('Depuis un lien'), url('/coffre/depuis-lien'));
 
             return Theme::scope('coffre-share', [
                 'mode' => 'import',

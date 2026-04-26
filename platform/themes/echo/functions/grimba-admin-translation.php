@@ -25,6 +25,7 @@
  *   grimba_translator_<driver>_model  (optional model override for LLM providers)
  */
 
+use App\Services\GrimbaNobuAi;
 use App\Services\GrimbaTranslator;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\DashboardMenu;
@@ -53,9 +54,11 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $pinned       = (string) setting('grimba_translator_driver', 'auto');
             $autoPublish  = (bool) setting('grimba_ingest_auto_publish', false);
             $translator   = app(GrimbaTranslator::class);
+            $nobuAi       = app(GrimbaNobuAi::class);
+            $nobuConfigured = $nobuAi->configuredDrivers();
 
             return view('grimba-admin.translation.index', compact(
-                'drivers', 'settings', 'pinned', 'models', 'modelDrivers', 'translator', 'autoPublish'
+                'drivers', 'settings', 'pinned', 'models', 'modelDrivers', 'translator', 'nobuConfigured', 'autoPublish'
             ));
         })->name('translation.index');
 
@@ -135,6 +138,32 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             }
             return back()->with('success_msg', 'Test auto : aucun fournisseur configuré ou tous en échec.');
         })->name('translation.test');
+
+        Route::post('translation/nobuai-test', function (Request $request) {
+            $prompt = trim((string) $request->input('prompt', 'Return exactly OK.'));
+            if ($prompt === '') {
+                $prompt = 'Return exactly OK.';
+            }
+
+            /** @var GrimbaNobuAi $nobuAi */
+            $nobuAi = app(GrimbaNobuAi::class);
+            if ($nobuAi->configuredDrivers() === []) {
+                return back()->with('success_msg', 'NobuAI : aucune clé LLM configurée. Ajoutez OpenAI, OpenRouter, Anthropic, xAI, Mistral, Gemini, Perplexity ou Groq.');
+            }
+
+            $start = microtime(true);
+            $res = $nobuAi->complete($prompt);
+            $ms = (int) round((microtime(true) - $start) * 1000);
+
+            if ($res) {
+                return back()->with('success_msg', sprintf(
+                    'NobuAI OK (%dms) via %s : %s',
+                    $ms, $res['driver'], \Illuminate\Support\Str::limit($res['text'], 120)
+                ));
+            }
+
+            return back()->with('success_msg', sprintf('NobuAI : échec de tous les fournisseurs configurés (%dms).', $ms));
+        })->name('translation.nobuai-test');
     });
 
 app()->booted(function (): void {

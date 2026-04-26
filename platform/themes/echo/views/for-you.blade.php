@@ -13,24 +13,24 @@
     <div class="container">
 
         <header class="glass-panel p-4 p-md-5 mb-4">
-            <span class="grimba-methodology__kicker">Pour vous</span>
+            <span class="grimba-methodology__kicker">{{ __('Pour vous') }}</span>
             <h1 class="grimba-methodology__title mt-2 mb-2">
                 @if($followed->isEmpty())
-                    Suivez des sujets pour construire votre fil
+                    {{ __('Suivez des sujets pour construire votre fil') }}
                 @else
-                    Votre fil — {{ $followed->count() }} {{ $followed->count() === 1 ? 'sujet suivi' : 'sujets suivis' }}
+                    {{ __('Votre fil') }} — {{ $followed->count() }} {{ $followed->count() === 1 ? __('sujet suivi') : __('sujets suivis') }}
                 @endif
             </h1>
             <p class="mb-3 opacity-85">
                 @if($followed->isEmpty())
-                    Cliquez sur le <strong>+</strong> à côté d'un sujet pour l'ajouter à votre fil.
-                    Votre sélection reste locale à votre navigateur — aucun compte requis.
+                    {!! __('Cliquez sur le <strong>+</strong> à côté d\'un sujet pour l\'ajouter à votre fil.') !!}
+                    {{ __('Votre sélection reste locale à votre navigateur — aucun compte requis.') }}
                 @else
-                    Les histoires récentes de
+                    {{ __('Les histoires récentes de') }}
                     @foreach($followed as $i => $c)
                         <strong>{{ $c->name }}</strong>@if($i < $followed->count() - 1), @endif
                     @endforeach.
-                    Ajustez votre sélection depuis la barre de sujets ou en cliquant sur les chips ci-dessous.
+                    {{ __('Ajustez votre sélection depuis la barre de sujets ou en cliquant sur les chips ci-dessous.') }}
                 @endif
             </p>
             @if($followed->isNotEmpty())
@@ -43,10 +43,10 @@
                             <span aria-hidden="true">×</span>
                         </button>
                     @endforeach
-                    <a href="{{ url('/') }}" class="btn-grimba btn-grimba--solid btn-grimba--sm">+ Ajouter des sujets</a>
+                    <a href="{{ url('/') }}" class="btn-grimba btn-grimba--solid btn-grimba--sm">+ {{ __('Ajouter des sujets') }}</a>
                 </div>
             @else
-                <a href="{{ url('/') }}" class="btn-grimba btn-grimba--solid">Choisir des sujets</a>
+                <a href="{{ url('/') }}" class="btn-grimba btn-grimba--solid">{{ __('Choisir des sujets') }}</a>
             @endif
         </header>
 
@@ -57,7 +57,7 @@
 
         @if($posts->isEmpty())
             <div class="glass-panel p-4 text-center">
-                <p class="mb-0">Aucune histoire correspondant à vos sujets pour l'instant.</p>
+                <p class="mb-0">{{ __("Aucune histoire correspondant à vos sujets pour l'instant.") }}</p>
             </div>
         @else
             <div class="row g-4">

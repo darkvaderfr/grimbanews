@@ -141,6 +141,22 @@
                            placeholder="The quick brown fox jumps over the lazy dog.">
                     <button type="submit" class="btn btn-outline-primary btn-sm">Tester</button>
                 </form>
+
+                <hr class="my-4">
+
+                <h5>NobuAI — wrapper LLM public</h5>
+                <p class="text-muted small mb-2">
+                    Le public voit seulement <strong>NobuAI</strong>. Ce test vérifie le wrapper serveur avec les fournisseurs LLM configurés
+                    ({{ $nobuConfigured === [] ? 'aucune clé LLM configurée' : implode(' → ', $nobuConfigured) }}).
+                    Le fournisseur préféré ci-dessus pilote aussi NobuAI quand il est compatible LLM.
+                </p>
+                <form method="POST" action="{{ route('grimba.translation.nobuai-test') }}" class="d-flex gap-2 flex-wrap align-items-start">
+                    @csrf
+                    <input type="text" name="prompt" class="form-control form-control-sm" style="max-width: 420px;"
+                           value="Return exactly OK."
+                           placeholder="Return exactly OK.">
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Tester NobuAI</button>
+                </form>
             </x-core::card.body>
         </x-core::card>
     </div>

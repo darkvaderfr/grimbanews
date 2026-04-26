@@ -17,7 +17,7 @@
     <div class="container">
 
         <header class="glass-panel p-4 p-md-5 mb-4">
-            <span class="grimba-methodology__kicker">Local</span>
+            <span class="grimba-methodology__kicker">{{ __('Local') }}</span>
 
             @if($hasLocation)
                 <h1 class="grimba-methodology__title mt-2 mb-2" style="font-size: clamp(28px, 3.6vw, 42px); letter-spacing:-0.4px;">
@@ -28,18 +28,18 @@
                     @endif
                 </h1>
                 <p class="opacity-85 mb-3" style="font-size:16px; line-height:1.5;">
-                    {{ $posts->count() }} {{ $posts->count() === 1 ? 'histoire récente' : 'histoires récentes' }}
+                    {{ $posts->count() }} {{ $posts->count() === 1 ? __('histoire récente') : __('histoires récentes') }}
                     @if($city)
-                        couvrant {{ $city }}
+                        {{ __('couvrant') }} {{ $city }}
                     @elseif($country)
-                        provenant de {{ $country }}
+                        {{ __('provenant de') }} {{ $country }}
                     @endif
-                    — sources croisées.
+                    — {{ __('sources croisées') }}.
                 </p>
                 @if($detected)
                     <p class="small opacity-65 mb-3">
-                        🌍 Localisation détectée automatiquement à partir de votre IP.
-                        Pas la bonne ? Changez-la ci-dessous.
+                        🌍 {{ __('Localisation détectée automatiquement à partir de votre IP.') }}
+                        {{ __('Pas la bonne ? Changez-la ci-dessous.') }}
                     </p>
                 @endif
             @else

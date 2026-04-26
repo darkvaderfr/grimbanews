@@ -24,25 +24,25 @@
     <div class="container">
 
         <header class="glass-panel p-4 p-md-5 mb-4">
-            <span class="grimba-methodology__kicker">Mon coffre</span>
+            <span class="grimba-methodology__kicker">{{ __('Mon coffre') }}</span>
             <h1 class="grimba-methodology__title mt-2 mb-2">
                 @if($count === 0)
-                    Aucun article sauvegardé pour l'instant
+                    {{ __("Aucun article sauvegardé pour l'instant") }}
                 @else
-                    {{ $count }} {{ $count === 1 ? 'article sauvegardé' : 'articles sauvegardés' }}
+                    {{ $count === 1 ? __(':count article sauvegardé', ['count' => $count]) : __(':count articles sauvegardés', ['count' => $count]) }}
                 @endif
             </h1>
             <p class="mb-0 opacity-85">
                 @if($count === 0)
-                    Cliquez sur l'étoile <span aria-hidden="true">☆</span> dans n'importe quel article pour l'ajouter ici.
-                    Votre coffre reste local à votre navigateur — aucun compte requis, capacité 50 articles.
+                    {{ __("Cliquez sur l'étoile") }} <span aria-hidden="true">☆</span> {{ __("dans n'importe quel article pour l'ajouter ici.") }}
+                    {{ __('Votre coffre reste local à votre navigateur — aucun compte requis, capacité 50 articles.') }}
                 @else
-                    Vos articles sauvegardés, du plus récent au plus ancien. Cliquez sur l'étoile <span aria-hidden="true">★</span> pour retirer.
+                    {{ __("Vos articles sauvegardés, du plus récent au plus ancien. Cliquez sur l'étoile") }} <span aria-hidden="true">★</span> {{ __('pour retirer.') }}
                 @endif
             </p>
             @if(($staleCount ?? 0) > 0)
                 <div class="mt-3 small" style="padding:10px 12px; border-radius:12px; background:rgba(192,57,43,0.08); border:1px solid rgba(192,57,43,0.16); color:#8d3025;">
-                    {{ $staleCount }} {{ $staleCount === 1 ? 'article n’était plus disponible' : 'articles n’étaient plus disponibles' }} et {{ $staleCount === 1 ? 'a été retiré' : 'ont été retirés' }} automatiquement de votre coffre.
+                    {{ $staleCount === 1 ? __(':count article indisponible retiré', ['count' => $staleCount]) : __(':count articles indisponibles retirés', ['count' => $staleCount]) }}
                 </div>
             @endif
         </header>
@@ -51,24 +51,24 @@
             <div class="glass-panel p-4 p-md-5 text-center">
                 <div style="font-size:48px; line-height:1; margin-bottom:14px; opacity:0.4;">☆</div>
                 <p class="mb-3 opacity-85" style="font-size:16px;">
-                    Trouvez d'abord quelque chose à lire plus tard.
+                    {{ __("Trouvez d'abord quelque chose à lire plus tard.") }}
                 </p>
                 <a href="{{ url('/') }}" class="btn-grimba btn-grimba--solid">
-                    Parcourir l'actualité
+                    {{ __("Parcourir l'actualité") }}
                 </a>
             </div>
         @else
             {{-- S184 — bias filter tabs (client-side filter, no reload).
                  Only renders L/C/R buckets that have at least one post. --}}
             @if($count >= 2)
-                <div class="d-flex align-items-center justify-content-center gap-1 mb-4" data-grimba-coffre-tabs role="tablist" aria-label="Filtrer le coffre par biais"
+                <div class="d-flex align-items-center justify-content-center gap-1 mb-4" data-grimba-coffre-tabs role="tablist" aria-label="{{ __('Filtrer le coffre par biais') }}"
                      style="display:flex; border-radius:9999px; background:rgba(0,0,0,0.04); padding:4px; width:fit-content; margin-left:auto; margin-right:auto;">
                     @php
                         $tabs = [
-                            'all'    => ['label' => 'Tous',   'color' => 'var(--gn-ink,#1a1713)'],
-                            'left'   => ['label' => 'Gauche', 'color' => '#3b82f6'],
-                            'center' => ['label' => 'Centre', 'color' => '#a8a8a8'],
-                            'right'  => ['label' => 'Droite', 'color' => '#e84c3d'],
+                            'all'    => ['label' => __('Tous'),   'color' => 'var(--gn-ink,#1a1713)'],
+                            'left'   => ['label' => __('Gauche'), 'color' => '#3b82f6'],
+                            'center' => ['label' => __('Centre'), 'color' => '#a8a8a8'],
+                            'right'  => ['label' => __('Droite'), 'color' => '#e84c3d'],
                         ];
                     @endphp
                     @foreach($tabs as $key => $meta)
@@ -99,11 +99,11 @@
                         <div class="grimba-coffre-card">
                             @include(Theme::getThemeNamespace('partials.blog.post.partials.items.grid'), ['post' => $post])
                             <div class="d-flex justify-content-between align-items-center gap-2 mt-2 px-1">
-                                <span class="small opacity-60">Retirer rapidement</span>
+                                <span class="small opacity-60">{{ __('Retirer rapidement') }}</span>
                                 <button type="button"
                                         class="btn-grimba btn-grimba--ghost btn-grimba--sm"
                                         data-grimba-vault-remove="{{ (int) $post->id }}">
-                                    ✓ Marquer comme lu
+                                    ✓ {{ __('Marquer comme lu') }}
                                 </button>
                             </div>
                         </div>
@@ -116,17 +116,17 @@
                 <a href="{{ url('/coffre/export.csv') }}"
                    class="btn-grimba btn-grimba--ghost btn-grimba--sm"
                    style="padding:8px 18px; border-radius:9999px; border:1px solid rgba(26,23,19,0.2); background:transparent; color:var(--gn-ink,#1a1713); font-weight:600; font-size:13px; text-decoration:none;">
-                    ⬇ Exporter (.csv)
+                    ⬇ {{ __('Exporter (.csv)') }}
                 </a>
                 <a href="{{ url('/coffre/partager') }}"
                    class="btn-grimba btn-grimba--ghost btn-grimba--sm"
                    style="padding:8px 18px; border-radius:9999px; border:1px solid rgba(26,23,19,0.2); background:transparent; color:var(--gn-ink,#1a1713); font-weight:600; font-size:13px; text-decoration:none;">
-                    Partager un lien
+                    {{ __('Partager un lien') }}
                 </a>
                 <button type="button" id="grimba-coffre-clear"
                         class="btn-grimba btn-grimba--ghost btn-grimba--sm"
                         style="padding:8px 18px; border-radius:9999px; border:1px solid rgba(26,23,19,0.2); background:transparent; color:var(--gn-ink,#1a1713); font-weight:600; font-size:13px; cursor:pointer;">
-                    Vider le coffre
+                    {{ __('Vider le coffre') }}
                 </button>
             </div>
         @endif
@@ -139,7 +139,7 @@
         const list = document.querySelector('[data-grimba-coffre-list]');
         if (btn) {
             btn.addEventListener('click', () => {
-                if (! confirm('Vider votre coffre ? Cette action est irréversible.')) return;
+                if (! confirm(@json(__('Vider votre coffre ? Cette action est irréversible.')))) return;
                 document.cookie = 'grimba_vault=; path=/; max-age=0; SameSite=Lax';
                 window.location.reload();
             });

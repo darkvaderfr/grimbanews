@@ -70,7 +70,9 @@ class GrimbaNobuAi
      */
     private function failoverOrder(): array
     {
-        $pinned = is_callable('setting') ? (setting('grimba_nobuai_driver') ?: null) : null;
+        $pinned = is_callable('setting')
+            ? (setting('grimba_nobuai_driver') ?: setting('grimba_translator_driver') ?: null)
+            : null;
         if (! $pinned) {
             $pinned = env('GRIMBA_NOBUAI_DRIVER');
         }
