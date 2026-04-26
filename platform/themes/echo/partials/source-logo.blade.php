@@ -2,12 +2,10 @@
     /**
      * S161 — real publisher logo.
      *
-     * Renders an <img> from Clearbit's free logo API
-     * (https://logo.clearbit.com/<host>), with two cascading
-     * fallbacks via JS onerror:
-     *   1. Clearbit  → preferred (returns clean PNG with alpha)
-     *   2. Google s2 → favicon at requested size (always works for
-     *                   any reachable domain)
+     * Renders an <img> through /img-proxy, backed by Clearbit's free
+     * logo API, with two cascading fallbacks via JS onerror:
+     *   1. Proxied Clearbit → preferred (clean PNG with alpha)
+     *   2. Proxied Google s2 → favicon at requested size
      *   3. Initials  → 2-letter monogram in a colored circle (the
      *                   previous S148 design, kept as last resort)
      *
@@ -48,8 +46,8 @@
         ? mb_strtoupper(mb_substr($words[0], 0, 2))
         : mb_strtoupper(mb_substr($words[0], 0, 1) . mb_substr($words[1] ?? '', 0, 1));
 
-    $clearbit = $host ? "https://logo.clearbit.com/{$host}?size={$size}" : null;
-    $googleS2 = $host ? "https://www.google.com/s2/favicons?domain={$host}&sz=64" : null;
+    $clearbit = $host ? url('/img-proxy?u=' . rawurlencode("https://logo.clearbit.com/{$host}?size={$size}")) : null;
+    $googleS2 = $host ? url('/img-proxy?u=' . rawurlencode("https://www.google.com/s2/favicons?domain={$host}&sz=64")) : null;
 
     $uid = 'sl-' . bin2hex(random_bytes(4));
 @endphp

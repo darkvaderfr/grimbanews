@@ -41,7 +41,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **C** | Vault Maturity | C1–C8 | 4/8 done |
 | **D** | Discovery & Navigation | D1–D8 | 5/8 done |
 | **E** | NobuAI Integration | E1–E7 | 0/7 (gated on API key) |
-| **F** | Performance & SEO | F1–F8 | 4/8 done |
+| **F** | Performance & SEO | F1–F8 | 6/8 done |
 | **G** | A11y & I18n | G1–G6 | 0/6 |
 | **H** | Testing & QA | H1–H7 | 0/7 |
 | **I** | Marketing & Growth | I1–I8 | 0/8 |
@@ -195,8 +195,8 @@ data + sitemap are non-negotiable.
 | ✅ S209 | schema.org JSON-LD — Grimba NewsArticle block uses NobuAI-rendered copy and cluster `mainEntityOfPage` | Uncommitted worktree |
 | ✅ S210 | Open Graph polish for /coffre and /local — tailored Grimba OG cards + layout-level image override | Uncommitted worktree |
 | ✅ S211 | Preload hint sweep — shared partial preloads generated Fraunces/Public Sans WOFF2 slices when present | Uncommitted worktree |
-| **F7** | **HTTP-cache audit** — set `Cache-Control: public, max-age=300, s-maxage=900` on read-only routes (homepage, /sources, /comparatif). Skip on personalized routes (/pour-vous, /coffre) | curl -I shows correct headers per route class |
-| **F8** | **Image CDN proxy** — proxy outlet logos through `/img-proxy?u=...` to (a) avoid CORS quirks, (b) cache long-tail logos, (c) avoid blank flicker | Proxy serves a cached PNG within 50ms |
+| ✅ S212 | HTTP-cache audit — public cache headers on homepage, /sources*, /comparatif* with cookie-aware Vary | Uncommitted worktree |
+| ✅ S213 | Image CDN proxy — source logos flow through constrained `/img-proxy?u=...` cache for Clearbit/Google favicon assets | Uncommitted worktree |
 
 ---
 

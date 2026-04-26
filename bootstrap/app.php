@@ -44,6 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Apply our locale-from-cookie switch on every web request.
         $middleware->web(append: [
             \App\Http\Middleware\GrimbaLocale::class,
+            \App\Http\Middleware\GrimbaPublicCache::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

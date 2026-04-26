@@ -141,6 +141,55 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ->where('surface', 'local|coffre')
             ->name('public.og.surface.alt');
 
+        // S213 — constrained image proxy for outlet logos. Keeps
+        // reader cards off third-party logo hosts and lets Laravel/CDN
+        // cache long-tail source icons. Deliberately limited to the two
+        // logo providers used by the source-logo partial, so it cannot
+        // become a general-purpose open proxy.
+        Route::get('img-proxy', function (Request $request) {
+            $url = (string) $request->query('u', '');
+            $parts = parse_url($url);
+            $host = strtolower((string) ($parts['host'] ?? ''));
+
+            abort_unless(
+                in_array($parts['scheme'] ?? '', ['http', 'https'], true)
+                && in_array($host, ['logo.clearbit.com', 'www.google.com'], true),
+                404
+            );
+
+            $cachePath = storage_path('app/public/img-proxy/' . sha1($url) . '.bin');
+            $metaPath = $cachePath . '.type';
+
+            if (! \Illuminate\Support\Facades\File::exists($cachePath)) {
+                try {
+                    $res = \Illuminate\Support\Facades\Http::timeout(6)
+                        ->connectTimeout(3)
+                        ->withHeaders(['Accept' => 'image/avif,image/webp,image/png,image/jpeg,image/*'])
+                        ->get($url);
+
+                    abort_unless($res->successful(), 404);
+
+                    $type = strtolower((string) $res->header('Content-Type', 'image/png'));
+                    abort_unless(str_starts_with($type, 'image/'), 404);
+
+                    \Illuminate\Support\Facades\File::ensureDirectoryExists(dirname($cachePath));
+                    \Illuminate\Support\Facades\File::put($cachePath, $res->body());
+                    \Illuminate\Support\Facades\File::put($metaPath, strtok($type, ';') ?: 'image/png');
+                } catch (\Throwable) {
+                    abort(404);
+                }
+            }
+
+            $type = \Illuminate\Support\Facades\File::exists($metaPath)
+                ? trim((string) \Illuminate\Support\Facades\File::get($metaPath))
+                : 'image/png';
+
+            return response(\Illuminate\Support\Facades\File::get($cachePath), 200, [
+                'Content-Type' => $type ?: 'image/png',
+                'Cache-Control' => 'public, max-age=604800, s-maxage=604800',
+            ]);
+        })->name('public.img-proxy');
+
         // S96 — editorial SVG placeholder for posts with no image.
         // Served cheap (no GD, no file cache — one string build per
         // request, HTTP cached for 24h). Reader cards + hero fall back
