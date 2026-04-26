@@ -23,8 +23,8 @@
         ],
         'center' => [
             'label' => 'Centre',
-            'color' => '#22c55e',      // Green
-            'bg' => 'rgba(34, 197, 94, 0.15)',
+            'color' => '#a8a8a8',      // Neutral grey
+            'bg' => 'rgba(168, 168, 168, 0.15)',
             'icon' => 'ti ti-minus'
         ],
         'right' => [

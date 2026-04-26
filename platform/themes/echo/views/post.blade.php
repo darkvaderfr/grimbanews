@@ -460,82 +460,84 @@
             <div class="echo-full-hero-content">
                 <div class="row gx-5 sticky-coloum-wrap">
                     <div class="col-xl-8 col-lg-8">
-                        <div class="echo-hero-baner">
-                            <div class="echo-inner-img-ct-1 img-transition-scale mb-3 position-relative">
-                                @if (defined('GALLERY_MODULE_SCREEN_NAME') && ! empty($galleries = gallery_meta_data($post)))
+                        {{-- S200 — orphan-post parity. Single-source posts now
+                             use the same glass-language hero as clustered
+                             stories instead of the stock Echo Bootstrap block. --}}
+                        <header class="grimba-orphan-hero glass-panel p-0 mb-4" style="overflow:hidden;">
+                            @if (defined('GALLERY_MODULE_SCREEN_NAME') && ! empty($galleries = gallery_meta_data($post)))
+                                <div class="grimba-orphan-hero__media">
                                     {!! render_object_gallery($galleries) !!}
-                                @elseif ($image = $post->image)
-                                    {{ RvMedia::image($image, $post->name, attributes: ['class' => 'post-style-1-frist-hero-img']) }}
-                                @endif
-
-                                {!! Theme::partial('blog.post.partials.action-post', ['post' => $post, 'enableActionAudio' => false]) !!}
-                            </div>
-
-                            {{-- Category row --}}
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                @include(Theme::getThemeNamespace('partials.category-badge'), ['post' => $post])
-                            </div>
-
-                            {{-- GrimbaNews source attribution --}}
-                            @include(Theme::getThemeNamespace('partials.blog.post.partials.source-attribution'), ['post' => $post])
-
-                            <h2 class="echo-hero-title text-capitalize font-weight-bold mt-0">
-                                <a title="{{ $__gnTitle }}" href="{{ $url }}" class="title-hover truncate-custom truncate-3-custom">{{ $__gnTitle }}</a>
-                            </h2>
-                            @if ($__gnMode !== 'original' && $__gnHasTr)
-                                <div class="mt-2 mb-2">
-                                    {!! Theme::partial('nobuai-chip', ['size' => 'md']) !!}
                                 </div>
-                            @endif
-                            @if ($__gnOriginalTitle)
-                                <p class="small opacity-75 mb-3" lang="{{ $post->original_language }}" title="{{ $__gnOriginalTitle }}">
-                                    {{ $__gnOriginalTitle }}
-                                </p>
-                            @elseif ($__gnMode !== 'original' && ! $__gnHasTr && ($post->original_language ?? null) && $post->original_language !== $__gnTarget)
-                                <p class="small opacity-50 mb-2" lang="{{ $post->original_language }}">
-                                    <em>— traduction en attente ({{ strtoupper($post->original_language) }})</em>
-                                </p>
-                            @endif
-
-                            {!! Theme::partial('post-meta', [
-                                'post' => $post,
-                                'wrapperClass' => 'echo-hero-area-titlepost-post-like-comment-share post-meta',
-                                'isSingle' => true,
-                            ]) !!}
-
-                            {{-- S141 — "see other coverages" chip when the
-                                 post belongs to a multi-source cluster --}}
-                            <div class="d-flex flex-wrap align-items-center gap-2 text-center text-md-start mt-3">
-                                {!! Theme::partial('comparatif-cta', ['post' => $post]) !!}
-                                {{-- S173 — save-for-later pill on legacy layout too --}}
-                                {!! Theme::partial('save-button', ['post' => $post, 'variant' => 'pill']) !!}
-                            </div>
-
-                            @if (echo_is_audio_post($post))
-                                <div class="wrapper-audio-control">
-                                    <audio controls>
-                                        <source src="{{ RvMedia::url(echo_get_post_audio_url($post)) }}" type="audio/ogg">
-                                    </audio>
+                            @elseif ($image = $post->image)
+                                <div class="ratio ratio-21x9" style="background:rgba(0,0,0,0.04);">
+                                    {{ RvMedia::image($image, $post->name, attributes: ['style' => 'object-fit:cover;width:100%;height:100%;']) }}
                                 </div>
                             @endif
 
-                            @if ($description = $__gnDesc)
-                                @if ($descriptionStyle == 'drop_cap')
-                                    <p class="echo-hero-discription">
-                                        @if ($firstChar = substr($description, 0, 1))
-                                            <span class="text-dropped-cap">{!! BaseHelper::clean($firstChar) !!}</span>
-                                        @endif
+                            <div class="p-3 p-md-4">
+                                <div class="d-flex align-items-center gap-2 flex-wrap mb-2 small">
+                                    <span class="grimba-methodology__kicker">Article</span>
+                                    @if($post->source_name)
+                                        <span class="opacity-50">·</span>
+                                        <span class="opacity-75">Lu chez {{ $post->source_name }}</span>
+                                    @endif
+                                    <span class="opacity-50">·</span>
+                                    <span class="opacity-75">{{ optional($post->created_at)->locale('fr')->diffForHumans() }}</span>
+                                    {!! Theme::partial('reading-time', ['post' => $post]) !!}
+                                </div>
 
-                                        @if ($descriptionRemaining = substr($description, 1))
-                                            {!! BaseHelper::clean($descriptionRemaining) !!}
-                                        @endif
-                                    </p>
-                                    <div class="clearfix"></div>
-                                @else
-                                    <p class="echo-hero-discription">{!! BaseHelper::clean($description) !!}</p>
+                                <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                                    @include(Theme::getThemeNamespace('partials.category-badge'), ['post' => $post])
+                                    @include(Theme::getThemeNamespace('partials.bias-badge'), ['bias' => $post->bias_rating ?? 'unknown', 'size' => 'sm'])
+                                </div>
+
+                                <h1 class="grimba-methodology__title m-0 mb-3"
+                                    style="font-size:clamp(30px, 4vw, 52px); line-height:1.04; letter-spacing:-0.7px;">
+                                    {{ $__gnTitle }}
+                                </h1>
+
+                                @include(Theme::getThemeNamespace('partials.blog.post.partials.source-attribution'), ['post' => $post])
+
+                                @if ($description = trim(strip_tags((string) $__gnDesc)))
+                                    <div style="border-top:1px dashed rgba(26,23,19,0.15); padding-top:14px; margin-top:18px;">
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <span style="
+                                                display:inline-flex; align-items:center; gap:6px;
+                                                padding:4px 10px; border-radius:9999px;
+                                                background:linear-gradient(135deg,#1a1713,#3a342c);
+                                                color:#f6f1e8;
+                                                font-family:'Public Sans',system-ui,sans-serif;
+                                                font-size:11.5px; font-weight:700; letter-spacing:0.5px;
+                                            ">
+                                                <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#f6f1e8;"></span>
+                                                Aperçu
+                                            </span>
+                                            <span class="small opacity-55">Résumé multi-sources à venir si d'autres couvertures rejoignent cette histoire.</span>
+                                        </div>
+                                        <p class="m-0" style="font-size:15.5px; line-height:1.6; color:var(--gn-ink,#1a1713);">
+                                            {{ \Illuminate\Support\Str::limit($description, 260) }}
+                                        </p>
+                                    </div>
                                 @endif
-                            @endif
-                        </div>
+
+                                <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+                                    {!! Theme::partial('comparatif-cta', ['post' => $post]) !!}
+                                    {!! Theme::partial('save-button', ['post' => $post, 'variant' => 'pill']) !!}
+                                </div>
+                            </div>
+                        </header>
+
+                        @include(Theme::getThemeNamespace('partials.story.share-kit'), [
+                            'title' => $__gnTitle,
+                        ])
+
+                        @if (echo_is_audio_post($post))
+                            <div class="wrapper-audio-control">
+                                <audio controls>
+                                    <source src="{{ RvMedia::url(echo_get_post_audio_url($post)) }}" type="audio/ogg">
+                                </audio>
+                            </div>
+                        @endif
 
                         @php
                             // S91: swap body content when reader asked for

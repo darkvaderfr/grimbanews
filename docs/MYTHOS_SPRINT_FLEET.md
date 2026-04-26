@@ -108,7 +108,7 @@ are the orphan-post layout, Highlights/Voices panels, and sort options.
 | ✅ S181 | One-sided coverage callout | `7a64b78` |
 | ✅ S183 | Bias-colored synthesis bullets | `b57cedd` |
 | ✅ S175 | Multi-source extractive synthesis | `223e593` |
-| **B1** | **Orphan-post layout polish** — single-source posts (`$__gnIsStoryPage === false`) still render the legacy 250+ line Bootstrap layout. Apply grimba-chrome hero treatment: glass-panel hero, kicker row matching cluster pages, source/bias chip stack, NobuAI summary block (single bullet from description), reading-time, save pill | Visual parity with cluster hero on a known orphan post |
+| ✅ S200 | Orphan-post layout polish | Uncommitted worktree |
 | ✅ S185 | Highlights panel | Uncommitted worktree |
 | ✅ S186 | Voices panel | Uncommitted worktree |
 | ✅ S187 | Article-list sort toggle | Uncommitted worktree |
