@@ -27,6 +27,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'grimba_translate',
             'grimba_follow',
             'grimba_onboarded',
+            // S167 — local-news preferences (city / country / ISO code)
+            'grimba_local_city',
+            'grimba_local_country',
+            'grimba_local_cc',
         ]);
 
         // Apply our locale-from-cookie switch on every web request.

@@ -411,6 +411,81 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             return Theme::scope('methodology', [])->render();
         })->name('public.methodology');
 
+        // S167 — Local news. Reads grimba_local_city + _country
+        // cookies, falls back to IP geolocation via GrimbaGeoLocator
+        // (no key required — ip-api.com / ipapi.co cascade), then
+        // filters posts: source country match + city keyword scan.
+        // Cookies-only flow respects the consent banner: we only fire
+        // the IP lookup when the visitor has no manually-set location.
+        Route::get('local', function (Request $request) {
+            $city    = trim((string) $request->cookie('grimba_local_city', ''));
+            $country = trim((string) $request->cookie('grimba_local_country', ''));
+            $cc      = trim((string) $request->cookie('grimba_local_cc', ''));
+            $detected = false;
+
+            if ($city === '' && $country === '') {
+                $geo = app(\App\Services\GrimbaGeoLocator::class)->locate((string) $request->ip());
+                if ($geo) {
+                    $city    = $geo['city'];
+                    $country = $geo['country'];
+                    $cc      = $geo['country_code'];
+                    $detected = true;
+                }
+            }
+
+            $posts = collect();
+            if ($cc !== '' || $city !== '') {
+                $q = Post::query()
+                    ->where('status', 'published')
+                    ->latest();
+
+                if ($cc !== '') {
+                    $q->whereIn('source_id', function ($sub) use ($cc): void {
+                        $sub->select('id')->from('news_sources')
+                            ->where('country', mb_strtoupper($cc));
+                    });
+                }
+                if ($city !== '') {
+                    $needle = '%' . $city . '%';
+                    $q->where(function ($w) use ($needle): void {
+                        $w->where('name', 'like', $needle)
+                          ->orWhere('description', 'like', $needle);
+                    });
+                }
+
+                $posts = $q->limit(36)->get();
+            }
+
+            SeoHelper::setTitle(($city ?: $country ?: 'Local') . ' — GrimbaNews')
+                ->setDescription("Actualité locale, sourcée et croisée.");
+
+            Theme::breadcrumb()
+                ->add('Accueil', url('/'))
+                ->add('Local', url('/local'));
+
+            return Theme::scope('local', [
+                'city'     => $city,
+                'country'  => $country,
+                'cc'       => $cc,
+                'detected' => $detected,
+                'posts'    => $posts,
+            ])->render();
+        })->name('public.local');
+
+        // S167 — POST endpoint to persist a manually-entered location.
+        Route::post('local/set', function (Request $request) {
+            $city    = trim((string) $request->input('city',    ''));
+            $country = trim((string) $request->input('country', ''));
+            $cc      = trim((string) $request->input('cc',      ''));
+
+            $resp = response()->json(['ok' => true, 'city' => $city, 'country' => $country, 'cc' => $cc]);
+            $oneYear = 60 * 24 * 365;
+            $resp->cookie('grimba_local_city',    $city,    $oneYear, '/', null, false, false);
+            $resp->cookie('grimba_local_country', $country, $oneYear, '/', null, false, false);
+            $resp->cookie('grimba_local_cc',      mb_strtoupper($cc), $oneYear, '/', null, false, false);
+            return $resp;
+        })->name('public.local.set');
+
         // S156 — ownership map page. Aggregates news_sources by
         // owner_name, ranks by # of outlets controlled, surfaces
         // multi-bias owners (single owner controlling outlets across

@@ -50,7 +50,7 @@
             <nav class="grimba-nav d-none d-lg-flex" aria-label="{{ __('Principal') }}">
                 <a href="{{ url('/') }}" class="active">{{ __('Accueil') }}</a>
                 <a href="{{ url('/pour-vous') }}">{{ __('Pour vous') }}</a>
-                <a href="#local">{{ __('Local') }}</a>
+                <a href="{{ url('/local') }}">{{ __('Local') }}</a>
                 <a href="{{ url('/angles-morts') }}">{{ __('Angles morts') }}</a>
                 <a href="{{ url('/sources') }}">{{ __('Sources') }}</a>
             </nav>
