@@ -31,6 +31,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'grimba_local_city',
             'grimba_local_country',
             'grimba_local_cc',
+            // S172 — theme preference (light / dark / auto). Was
+            // encrypted: server reads landed on null → "auto" default →
+            // wrong CSS variables on first paint for users who chose
+            // dark explicitly. Now the cookie value the JS writes is
+            // the same string the SSR sees.
+            'grimba_theme',
         ]);
 
         // Apply our locale-from-cookie switch on every web request.

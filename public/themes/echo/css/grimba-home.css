@@ -1492,3 +1492,102 @@ button.btn-grimba--solid,
     .grimba-hero__coverage { left: 1rem; right: 1rem; }
     .grimba-latest__thumb, .grimba-topnews__thumb { display: none; }
 }
+
+/* ------------------------------------------------------------
+   14. Dark-mode coverage (S172)
+   ------------------------------------------------------------
+   Pages that escaped the original dark-mode pass: legacy single-
+   post layout (echo-hero-section), category pages, /sources, /pour-
+   vous, /local, /proprietaires, /account, member auth, story page
+   article cards. The grimba paper / ink token swap (line 42-52)
+   already handles MOST surfaces — these rules tighten the rest. */
+
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-subpage,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home {
+    background: linear-gradient(180deg, #0c0a07 0%, #15120c 55%, #0c0a07 100%);
+    color: var(--gn-ink);
+}
+
+/* Glass panels — re-tint for dark */
+html.grimba-home-html[data-bs-theme="dark"] .glass-panel {
+    background: rgba(28, 24, 17, 0.55);
+    border: 1px solid rgba(246, 241, 232, 0.10);
+    color: var(--gn-ink);
+}
+
+/* Botble / Echo legacy hardcoded bg-white surfaces */
+html.grimba-home-html[data-bs-theme="dark"] .echo-hero-section,
+html.grimba-home-html[data-bs-theme="dark"] .echo-feature-area,
+html.grimba-home-html[data-bs-theme="dark"] .blog-post-details-content,
+html.grimba-home-html[data-bs-theme="dark"] .bg-white,
+html.grimba-home-html[data-bs-theme="dark"] .bg-body-tertiary,
+html.grimba-home-html[data-bs-theme="dark"] .bg-light {
+    background-color: transparent !important;
+    color: var(--gn-ink);
+}
+
+/* Article card surface (story-page cluster list) */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-story-article {
+    background: rgba(28, 24, 17, 0.55) !important;
+    border-color: rgba(246, 241, 232, 0.10) !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-story-article--current {
+    background: rgba(28, 24, 17, 0.78) !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-story-article a {
+    color: var(--gn-ink) !important;
+}
+
+/* Inputs (search, forms, picker) */
+html.grimba-home-html[data-bs-theme="dark"] input[type="text"],
+html.grimba-home-html[data-bs-theme="dark"] input[type="email"],
+html.grimba-home-html[data-bs-theme="dark"] input[type="password"],
+html.grimba-home-html[data-bs-theme="dark"] input[type="search"],
+html.grimba-home-html[data-bs-theme="dark"] input[type="url"],
+html.grimba-home-html[data-bs-theme="dark"] textarea,
+html.grimba-home-html[data-bs-theme="dark"] select {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: var(--gn-ink) !important;
+    border-color: rgba(246, 241, 232, 0.18) !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] input::placeholder,
+html.grimba-home-html[data-bs-theme="dark"] textarea::placeholder {
+    color: var(--gn-ink-soft) !important;
+}
+
+/* Buttons + links inside content */
+html.grimba-home-html[data-bs-theme="dark"] .article-card,
+html.grimba-home-html[data-bs-theme="dark"] .article-card__title a {
+    color: var(--gn-ink);
+}
+html.grimba-home-html[data-bs-theme="dark"] .echo-hero-discription,
+html.grimba-home-html[data-bs-theme="dark"] .blog-post-details-content p,
+html.grimba-home-html[data-bs-theme="dark"] .blog-post-details-content h2,
+html.grimba-home-html[data-bs-theme="dark"] .blog-post-details-content h3,
+html.grimba-home-html[data-bs-theme="dark"] .blog-post-details-content h4 {
+    color: var(--gn-ink) !important;
+}
+
+/* Insights / NobuAI block — dark variant of the gradient pill */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-insights .grimba-insights__summary span:first-child {
+    background: linear-gradient(135deg, #f6f1e8, #c9bea5) !important;
+    color: #1a1713 !important;
+}
+
+/* Footer (already dark by design — make sure overlap with body OK) */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-footer {
+    background: #060503;
+}
+
+/* Newsletter modal + cookie banner — dark surface */
+html.grimba-home-html[data-bs-theme="dark"] .gn-newsletter-modal,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-cookie-consent {
+    background: #1c1811 !important;
+    color: var(--gn-ink) !important;
+    border-color: rgba(246, 241, 232, 0.12) !important;
+}
+
+/* Bias-mix bars — keep colour vivid; just ensure label text reads */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
+    color: var(--gn-ink);
+}

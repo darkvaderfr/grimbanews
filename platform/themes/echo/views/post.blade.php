@@ -197,26 +197,60 @@
                     @endphp
 
                     @if(! empty($__gnSummaryItems))
-                        {{-- S170 — Insights par NobuAI block, GroundNews-style.
-                             Toggle-collapsible via <details>. Reader can hide
-                             the AI summary if they don't want it. --}}
-                        <details open class="mt-3" style="cursor:default;">
-                            <summary style="cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px; font-family:'Public Sans',system-ui,sans-serif; font-size:13px; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; color:var(--gn-ink,#1a1713); opacity:0.75; margin-bottom:10px;">
-                                <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:linear-gradient(135deg,#6b7280,#1a1713);"></span>
-                                Insights par NobuAI
-                                <span style="margin-left:auto; font-size:11px; opacity:0.6; font-weight:500; text-transform:none;">cliquer pour masquer</span>
-                            </summary>
-                            @if(count($__gnSummaryItems) === 1)
-                                <p class="m-0" style="font-size:15px; line-height:1.55;">{{ $__gnSummaryItems[0] }}</p>
-                                <p class="small opacity-55 mt-2 mb-0">Résumé éditorial à venir — couverture en cours.</p>
-                            @else
-                                <ul class="m-0 ps-3" style="font-size:15px; line-height:1.55;">
-                                    @foreach(array_slice($__gnSummaryItems, 0, 6) as $line)
-                                        <li class="mb-2">{{ $line }}</li>
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </details>
+                        {{-- S171 — Insights par NobuAI block. GroundNews-
+                             fidelity: dotted top border, NobuAI badge with
+                             gradient pill, list-style:none on summary so
+                             the disclosure triangle is hidden, custom chevron
+                             via ::after CSS, plus a "Ce résumé semble
+                             incorrect ?" feedback link on the right. --}}
+                        <div style="border-top:1px dashed rgba(26,23,19,0.15); padding-top:14px; margin-top:18px;">
+                            <details open class="grimba-insights" style="cursor:default;">
+                                <summary class="grimba-insights__summary"
+                                    style="cursor:pointer; list-style:none; display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                                    <span style="
+                                        display:inline-flex; align-items:center; gap:6px;
+                                        padding:4px 10px; border-radius:9999px;
+                                        background:linear-gradient(135deg,#1a1713,#3a342c);
+                                        color:#f6f1e8;
+                                        font-family:'Public Sans',system-ui,sans-serif;
+                                        font-size:11.5px; font-weight:700; letter-spacing:0.5px;
+                                    ">
+                                        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#f6f1e8;"></span>
+                                        Insights par NobuAI
+                                    </span>
+                                    <span class="ms-auto small opacity-55" style="font-size:12px;">
+                                        ▾ <span style="margin-left:4px;">cliquer pour masquer</span>
+                                    </span>
+                                </summary>
+
+                                @if(count($__gnSummaryItems) === 1)
+                                    <p class="m-0" style="font-size:15.5px; line-height:1.6; color:var(--gn-ink,#1a1713);">
+                                        {{ $__gnSummaryItems[0] }}
+                                    </p>
+                                    <p class="small opacity-55 mt-2 mb-0">Résumé multi-source à venir dès qu'une autre couverture rejoint cette histoire.</p>
+                                @else
+                                    <ul class="m-0 ps-3" style="font-size:15.5px; line-height:1.6; color:var(--gn-ink,#1a1713);">
+                                        @foreach(array_slice($__gnSummaryItems, 0, 6) as $line)
+                                            <li style="margin-bottom:10px;">{{ $line }}</li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+
+                                <div class="d-flex justify-content-end mt-3">
+                                    <a href="{{ url('/contact') }}?topic=insight&post={{ $post->id }}"
+                                       style="font-size:12px; color:var(--gn-ink,#1a1713); opacity:0.55; text-decoration:underline;">
+                                        Ce résumé vous semble incorrect ?
+                                    </a>
+                                </div>
+                            </details>
+                        </div>
+
+                        <style>
+                            .grimba-insights__summary::-webkit-details-marker { display: none; }
+                            .grimba-insights[open] .grimba-insights__summary span:last-child::before {
+                                content: '▴ ';
+                            }
+                        </style>
                     @endif
                 </header>
 
@@ -273,7 +307,9 @@
 @endif
 
 @if(! $__gnIsStoryPage)
-<section class="echo-hero-section inner inner-post echo-feature-area bg-white blog-post-details-content">
+{{-- S172 — dropped Bootstrap bg-white that forced light bg in dark
+     mode. body chrome's grimba paper bg now shines through correctly. --}}
+<section class="echo-hero-section inner inner-post echo-feature-area blog-post-details-content">
     <div class="echo-hero">
         <div class="container">
             {{-- S170 — translation feature dropped. The legacy single-

@@ -59,12 +59,24 @@
         </div>
     </div>
 
+    {{-- S171 — pre-load source meta for every cluster post in one
+         query so each card render is a hash lookup, not a roundtrip. --}}
+    @php
+        $__sourceIds = $clusterPosts->pluck('source_id')->filter()->unique()->all();
+        $__sources = empty($__sourceIds) ? collect() :
+            \Illuminate\Support\Facades\DB::table('news_sources')
+                ->whereIn('id', $__sourceIds)
+                ->get(['id','name','website','ownership_type','credibility_score','owner_name'])
+                ->keyBy('id');
+    @endphp
+
     <ul class="list-unstyled m-0" data-grimba-cluster-list>
         @foreach(['left', 'center', 'right', 'unknown'] as $bucket)
             @foreach($byBias[$bucket] as $cp)
                 @php
                     $isCurrent = (int) $cp->id === (int) $currentPost->id;
                     $meta = $biasMeta[$bucket];
+                    $src = $cp->source_id && isset($__sources[$cp->source_id]) ? $__sources[$cp->source_id] : null;
                 @endphp
                 <li data-bias="{{ $bucket }}"
                     class="grimba-story-article {{ $isCurrent ? 'grimba-story-article--current' : '' }}"
@@ -77,21 +89,42 @@
                         background: {{ $isCurrent ? $meta['color'] . '0d' : 'rgba(255,255,255,0.55)' }};
                     ">
 
-                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2 small">
-                        <strong style="font-family:'Public Sans',system-ui,sans-serif;">{{ $cp->source_name ?? '—' }}</strong>
-                        @if(! empty($cp->source_id))
-                            @php
-                                $src = \Illuminate\Support\Facades\DB::table('news_sources')->where('id', $cp->source_id)->first();
-                            @endphp
-                            @if($src && $src->ownership_type)
-                                <span class="opacity-60">·</span>
-                                <span class="opacity-75">{{ ucfirst((string) $src->ownership_type) }}</span>
-                            @endif
-                            @if($src && $src->credibility_score)
-                                <span class="opacity-60">·</span>
-                                <span class="opacity-75">Crédibilité {{ $src->credibility_score }}</span>
-                            @endif
+                    {{-- Source row: logo + name + ownership/credibility chips + lean badge --}}
+                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                        {!! Theme::partial('source-logo', [
+                            'name'    => $cp->source_name ?? '—',
+                            'website' => $src->website ?? null,
+                            'size'    => 28,
+                            'color'   => $meta['color'],
+                        ]) !!}
+                        <strong style="font-family:'Public Sans',system-ui,sans-serif; font-size:14px;">
+                            {{ $cp->source_name ?? '—' }}
+                        </strong>
+
+                        @if($src?->ownership_type)
+                            <span style="
+                                padding:2px 8px; border-radius:9999px;
+                                background:rgba(26,23,19,0.06); color:var(--gn-ink,#1a1713);
+                                font-size:11px; font-weight:600; letter-spacing:0.3px;
+                            " title="{{ $src->owner_name ? 'Propriété de ' . $src->owner_name : '' }}">
+                                {{ ucfirst((string) $src->ownership_type) }}
+                            </span>
                         @endif
+
+                        @if($src?->credibility_score)
+                            @php
+                                $credColor = $src->credibility_score >= 75 ? '#16a34a'
+                                          : ($src->credibility_score >= 60 ? '#a16207' : '#dc2626');
+                            @endphp
+                            <span style="
+                                padding:2px 8px; border-radius:9999px;
+                                background:{{ $credColor }}15; color:{{ $credColor }};
+                                font-size:11px; font-weight:700; letter-spacing:0.3px;
+                            " title="Crédibilité éditoriale (0-100)">
+                                ⓘ {{ $src->credibility_score }}
+                            </span>
+                        @endif
+
                         <span class="ms-auto" style="
                             display:inline-flex; align-items:center; gap:4px;
                             padding:3px 10px; border-radius:9999px;
@@ -100,6 +133,7 @@
                         ">
                             {{ $meta['label'] }}
                         </span>
+
                         @if($isCurrent)
                             <span style="
                                 padding:3px 10px; border-radius:9999px;
@@ -109,7 +143,7 @@
                         @endif
                     </div>
 
-                    <h3 style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; line-height:1.3; letter-spacing:-0.2px; margin:0 0 8px;">
+                    <h3 style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; line-height:1.3; letter-spacing:-0.2px; margin:0 0 6px;">
                         @if($isCurrent)
                             {{ $cp->name }}
                         @else
@@ -120,8 +154,8 @@
                     </h3>
 
                     @if($cp->description)
-                        <p class="small opacity-85 mb-2" style="line-height:1.5;">
-                            {{ Str::limit(strip_tags($cp->description), 220) }}
+                        <p class="small mb-2" style="line-height:1.5; color:var(--gn-ink,#1a1713); opacity:0.85;">
+                            {{ Str::limit(strip_tags($cp->description), 200) }}
                         </p>
                     @endif
 
@@ -130,8 +164,8 @@
                             {{ $cp->created_at ? $cp->created_at->locale('fr')->diffForHumans() : '' }}
                         </span>
                         @if(! $isCurrent)
-                            <a href="{{ $cp->url ?? '#' }}" style="color:#c0392b; text-decoration:underline; font-weight:600;">
-                                Lire l'article →
+                            <a href="{{ $cp->url ?? '#' }}" target="_blank" rel="noopener" style="color:#c0392b; text-decoration:none; font-weight:700; font-size:13px;">
+                                Lire l'article complet ↗
                             </a>
                         @endif
                     </div>
