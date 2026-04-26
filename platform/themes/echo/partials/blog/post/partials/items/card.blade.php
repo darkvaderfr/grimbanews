@@ -1,20 +1,8 @@
 @php
-    // Reader mode: original | auto | both (cookie grimba_translate, S56).
-    // If the reader chose translation AND we have one, swap into the
-    // article card. `both` layers a small subtitle under the main title
-    // so the original language doesn't vanish.
-    $__mode = (string) (request()->cookie('grimba_translate') ?? 'original');
-    if (! in_array($__mode, ['original', 'auto', 'both'], true)) $__mode = 'original';
-    $__target = (string) (request()->cookie('grimba_lang') ?? 'fr');
-    $__hasTr = ! empty($post->translated_name)
-        && ($post->translated_to ?? null) === $__target
-        && ($post->original_language ?? null) !== $__target;
-
-    $__title = ($__mode !== 'original' && $__hasTr) ? $post->translated_name : $post->name;
-    $__subTitle = ($__mode === 'both' && $__hasTr) ? $post->name : null;
-    $__desc  = ($__mode !== 'original' && $__hasTr && $post->translated_description)
-        ? $post->translated_description
-        : $post->description;
+    // S170 — translation feature dropped. Cards always render the
+    // original-language title + description.
+    $__title = $post->name;
+    $__desc  = $post->description;
 @endphp
 <article class="article-card {{ $classWrapper ?? null }}">
     <div class="article-card__image">
@@ -53,27 +41,11 @@
             ]) !!}
         </div>
 
-        {{-- Title (respects reader-mode cookie: original | auto | both) --}}
         <h2 class="article-card__title">
             <a href="{{ $post->url }}" title="{{ $__title }}" class="title-hover text-decoration-none">
                 {{ $__title }}
             </a>
         </h2>
-        @if ($__mode !== 'original' && $__hasTr)
-            <div class="article-card__nobuai mb-1">
-                {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
-            </div>
-        @endif
-        @if ($__subTitle)
-            <div class="article-card__subtitle small opacity-75 mb-1" lang="{{ $post->original_language }}" title="{{ $__subTitle }}">
-                {{ $__subTitle }}
-            </div>
-        @endif
-        @if ($__mode !== 'original' && ! $__hasTr && ($post->original_language ?? null) && $post->original_language !== $__target)
-            <div class="article-card__translation-pending small opacity-50 mb-1" lang="{{ $post->original_language }}">
-                <em>— traduction en attente ({{ strtoupper($post->original_language) }})</em>
-            </div>
-        @endif
 
         {{-- Description --}}
         @if ($description = $__desc)

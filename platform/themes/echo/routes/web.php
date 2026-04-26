@@ -215,20 +215,11 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
         Route::get('search', $searchHandler)->name('public.grimba-search');
 
-        Route::post('translate/set', function (Request $request) {
-            // S160 — toggle is now binary (original | auto). Legacy
-            // 'both' values get coerced to auto on the server too,
-            // matching the picker's read-side migration.
-            $mode = (string) $request->input('mode');
-            if ($mode === 'both') $mode = 'auto';
-            if (! in_array($mode, ['original', 'auto'], true)) {
-                $mode = 'original';
-            }
-
-            return response()
-                ->json(['ok' => true, 'mode' => $mode])
-                ->cookie('grimba_translate', $mode, 60 * 24 * 365, '/', null, false, false);
-        })->name('public.translate.set');
+        // S170 — POST /translate/set removed with the translation
+        // feature. Legacy clients that hit it just get a no-op JSON;
+        // the cookie is no longer read anywhere.
+        Route::post('translate/set', fn () => response()->json(['ok' => true, 'note' => 'translation feature removed']))
+            ->name('public.translate.set');
 
         Route::post('lang/set', function (Request $request) {
             $lang = $request->input('lang') === 'en' ? 'en' : 'fr';

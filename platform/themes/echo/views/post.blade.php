@@ -29,25 +29,19 @@
     $authorStyle = theme_option('blog_author_style');
     $url = $post->url;
 
-    // S89: single-post translation respects the grimba_translate reader
-    // cookie the same way the grid card + hero do. When auto/both is set
-    // and we have a translated row that targets the reader's locale,
-    // swap title + description + content (content stays untranslated in
-    // this sprint — only name + description are translated at ingest
-    // time; the full body is S91 follow-up when Vader wires DeepL doc-
-    // translate or an equivalent).
-    $__gnMode   = (string) (request()->cookie('grimba_translate') ?? 'original');
-    if (! in_array($__gnMode, ['original', 'auto', 'both'], true)) $__gnMode = 'original';
-    $__gnTarget = (string) (request()->cookie('grimba_lang') ?? 'fr');
-    $__gnHasTr  = ! empty($post->translated_name)
-        && ($post->translated_to ?? null) === $__gnTarget
-        && ($post->original_language ?? null) !== $__gnTarget;
-
-    $__gnTitle   = ($__gnMode !== 'original' && $__gnHasTr) ? $post->translated_name : $post->name;
-    $__gnOriginalTitle = ($__gnMode === 'both' && $__gnHasTr) ? $post->name : null;
-    $__gnDesc    = ($__gnMode !== 'original' && $__gnHasTr && $post->translated_description)
-        ? $post->translated_description
-        : $post->description;
+    // S170 — translation feature dropped. Posts now always render in
+    // their stored language. translated_* columns remain in the DB
+    // (still populated by the cron) but are not consulted on read.
+    // Vader's call: "let's get rid of the translation feature and
+    // fully replicate ground news article display."
+    $__gnTitle   = $post->name;
+    $__gnDesc    = $post->description;
+    // Compatibility shims so legacy branches that still reference
+    // these vars don't throw — render-time they're now fixed.
+    $__gnMode    = 'original';
+    $__gnHasTr   = false;
+    $__gnOriginalTitle = null;
+    $__gnTarget  = 'fr';
 
     Theme::set('breadcrumb_background_image', $post->getMetaData('breadcrumb_background_image', true));
     Theme::set('breadcrumb_background_color', $post->getMetaData('breadcrumb_background_color', true));
@@ -106,48 +100,73 @@
                     </div>
                 @endif
 
-                {{-- Hero block: title, current article meta, bias chips --}}
+                {{-- S170 — Hero block matches GroundNews article display:
+                     kicker → title → bias filter tabs + Bias Comparison
+                     button → bullet summary with NobuAI insights toggle. --}}
+                @php
+                    $__gnLatest = $__gnClusterPosts->max('updated_at');
+                    $__gnByBias = ['left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0];
+                    foreach ($__gnClusterPosts as $cp) {
+                        $b = $cp->bias_rating ?? 'unknown';
+                        if (! isset($__gnByBias[$b])) $b = 'unknown';
+                        $__gnByBias[$b]++;
+                    }
+                @endphp
                 <header class="glass-panel p-3 p-md-4 mb-3">
-                    <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap mb-2">
-                        <div class="d-flex align-items-center gap-2 flex-wrap small">
-                            <span class="grimba-methodology__kicker">Histoire</span>
-                            @if($post->source_name)
-                                <span class="opacity-50">·</span>
-                                <span class="opacity-75">Lu d'abord chez {{ $post->source_name }}</span>
-                            @endif
+                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2 small">
+                        <span class="grimba-methodology__kicker">Histoire</span>
+                        @if($post->source_name)
                             <span class="opacity-50">·</span>
-                            <span class="opacity-75">
-                                {{ $__gnClusterPosts->count() }} {{ $__gnClusterPosts->count() === 1 ? 'couverture' : 'couvertures' }}
-                            </span>
-                            @php
-                                $__gnLatest = $__gnClusterPosts->max('updated_at');
-                            @endphp
-                            @if($__gnLatest)
-                                <span class="opacity-50">·</span>
-                                <span class="opacity-75">Mis à jour {{ $__gnLatest->locale('fr')->diffForHumans() }}</span>
-                            @endif
-                        </div>
-                        {{-- S162 — translate toggle moved here from header.
-                             Reader meets it in context. --}}
-                        @include(Theme::getThemeNamespace('partials.home.translate-picker'))
+                            <span class="opacity-75">Lu d'abord chez {{ $post->source_name }}</span>
+                        @endif
+                        <span class="opacity-50">·</span>
+                        <span class="opacity-75">
+                            {{ $__gnClusterPosts->count() }} {{ $__gnClusterPosts->count() === 1 ? 'couverture' : 'couvertures' }}
+                        </span>
+                        @if($__gnLatest)
+                            <span class="opacity-50">·</span>
+                            <span class="opacity-75">Mis à jour {{ $__gnLatest->locale('fr')->diffForHumans() }}</span>
+                        @endif
                     </div>
 
-                    <h1 class="grimba-methodology__title m-0 mb-2"
+                    <h1 class="grimba-methodology__title m-0 mb-3"
                         style="font-size:clamp(28px, 3.6vw, 44px); line-height:1.1; letter-spacing:-0.5px;">
                         {{ $__gnTitle }}
                     </h1>
 
-                    @if ($__gnMode !== 'original' && $__gnHasTr)
-                        <div class="mb-2">
-                            {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+                    {{-- S170 — bias filter tabs sit right under the title,
+                         GroundNews-style. Tabs use the same data attribute
+                         as the article-list section below; clicking filters
+                         in place via the existing JS handler. --}}
+                    <div class="d-flex align-items-center gap-2 flex-wrap mb-3" data-grimba-cluster-tabs>
+                        @php
+                            $__pillBg = 'background:rgba(0,0,0,0.05); padding:4px;';
+                            $__activeBtn = 'background:var(--gn-ink,#1a1713); color:var(--gn-paper,#f6f1e8);';
+                            $__inactiveBtn = 'background:transparent; color:var(--gn-ink,#1a1713);';
+                        @endphp
+                        <div role="tablist" style="display:flex; gap:4px; border-radius:9999px; {{ $__pillBg }}">
+                            <button type="button" data-bias-tab="all" role="tab" aria-selected="true"
+                                    style="padding:6px 14px; border-radius:9999px; border:none; font-weight:700; font-size:13px; {{ $__activeBtn }}">
+                                Tous
+                            </button>
+                            @foreach(['left' => ['Gauche','#3b82f6'], 'center' => ['Centre','#a8a8a8'], 'right' => ['Droite','#e84c3d']] as $b => [$lbl,$col])
+                                @if($__gnByBias[$b] > 0)
+                                    <button type="button" data-bias-tab="{{ $b }}" role="tab" aria-selected="false"
+                                            style="padding:6px 14px; border-radius:9999px; border:none; font-weight:600; font-size:13px; {{ $__inactiveBtn }}">
+                                        <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:{{ $col }}; margin-right:5px; vertical-align:1px;"></span>
+                                        {{ $lbl }}
+                                    </button>
+                                @endif
+                            @endforeach
                         </div>
-                    @endif
 
-                    @if ($__gnOriginalTitle)
-                        <p class="small opacity-75 mb-2" lang="{{ $post->original_language }}">
-                            {{ $__gnOriginalTitle }}
-                        </p>
-                    @endif
+                        <button type="button"
+                                onclick="document.querySelector('.grimba-story-distribution')?.scrollIntoView({behavior:'smooth', block:'start'});"
+                                style="margin-left:auto; padding:6px 14px; border-radius:9999px; border:1px solid rgba(26,23,19,0.18); background:rgba(255,255,255,0.6); color:var(--gn-ink,#1a1713); font-weight:600; font-size:13px; cursor:pointer;"
+                                title="Voir la distribution des biais">
+                            ⚖️ Comparaison des biais
+                        </button>
+                    </div>
 
                     {{-- AI summary section. NobuAI summaries (S110) are
                          not generated yet — when they ship, $post->summary_nobuai
@@ -174,36 +193,30 @@
                         // post.translated_content (S91) when the
                         // reader is in NobuAI mode.
                         $__gnFullActive  = (bool) setting('grimba_full_article_active', false);
-                        $__gnFullBody = null;
-                        if ($__gnFullActive && ! empty($post->full_content)) {
-                            $__gnFullBody = (
-                                $__gnMode === 'auto' && ! empty($post->translated_content) && ($post->translated_to ?? null) === $__gnTarget
-                            ) ? $post->translated_content : $post->full_content;
-                        }
+                        $__gnFullBody = $__gnFullActive ? ($post->full_content ?? null) : null;
                     @endphp
 
                     @if(! empty($__gnSummaryItems))
-                        @if(count($__gnSummaryItems) === 1)
-                            {{-- Single fallback line (no real NobuAI summary
-                                 yet) — render as paragraph so the page
-                                 doesn't read "lone bullet point". --}}
-                            <p class="mt-3 mb-0" style="font-size:15px; line-height:1.55;">
-                                {{ $__gnSummaryItems[0] }}
-                            </p>
-                            <div class="mt-2 d-flex align-items-center gap-2 small opacity-55">
-                                <span>Lu d'abord — résumé étendu à venir quand NobuAI couvre cette histoire.</span>
-                            </div>
-                        @else
-                            <ul class="m-0 mt-3 ps-3" style="font-size:15px; line-height:1.55;">
-                                @foreach(array_slice($__gnSummaryItems, 0, 6) as $line)
-                                    <li class="mb-2">{{ $line }}</li>
-                                @endforeach
-                            </ul>
-                            <div class="mt-3 d-flex align-items-center gap-2 small opacity-65">
-                                {!! Theme::partial('nobuai-chip', ['size' => 'sm', 'label' => 'Résumé NobuAI']) !!}
-                                <span>· Résumé éditorial à partir des couvertures collectées.</span>
-                            </div>
-                        @endif
+                        {{-- S170 — Insights par NobuAI block, GroundNews-style.
+                             Toggle-collapsible via <details>. Reader can hide
+                             the AI summary if they don't want it. --}}
+                        <details open class="mt-3" style="cursor:default;">
+                            <summary style="cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px; font-family:'Public Sans',system-ui,sans-serif; font-size:13px; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; color:var(--gn-ink,#1a1713); opacity:0.75; margin-bottom:10px;">
+                                <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:linear-gradient(135deg,#6b7280,#1a1713);"></span>
+                                Insights par NobuAI
+                                <span style="margin-left:auto; font-size:11px; opacity:0.6; font-weight:500; text-transform:none;">cliquer pour masquer</span>
+                            </summary>
+                            @if(count($__gnSummaryItems) === 1)
+                                <p class="m-0" style="font-size:15px; line-height:1.55;">{{ $__gnSummaryItems[0] }}</p>
+                                <p class="small opacity-55 mt-2 mb-0">Résumé éditorial à venir — couverture en cours.</p>
+                            @else
+                                <ul class="m-0 ps-3" style="font-size:15px; line-height:1.55;">
+                                    @foreach(array_slice($__gnSummaryItems, 0, 6) as $line)
+                                        <li class="mb-2">{{ $line }}</li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </details>
                     @endif
                 </header>
 
@@ -263,12 +276,8 @@
 <section class="echo-hero-section inner inner-post echo-feature-area bg-white blog-post-details-content">
     <div class="echo-hero">
         <div class="container">
-            {{-- S162 — translate toggle on the legacy single-post hero,
-                 mirroring the story-page placement. Out-of-cluster
-                 articles still need a translation control. --}}
-            <div class="d-flex justify-content-end mb-3">
-                @include(Theme::getThemeNamespace('partials.home.translate-picker'))
-            </div>
+            {{-- S170 — translation feature dropped. The legacy single-
+                 post layout had a translate-picker here; gone. --}}
             <div class="echo-full-hero-content">
                 <div class="row gx-5 sticky-coloum-wrap">
                     <div class="col-xl-8 col-lg-8">
