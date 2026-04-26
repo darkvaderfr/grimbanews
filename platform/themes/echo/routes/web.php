@@ -636,6 +636,56 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ])->render();
         })->name('public.coffre');
 
+        // S182 — vault CSV export. Cookie-only data; mirror of
+        // /pour-vous/export.csv. Hydrates titles/sources/bias from the
+        // grimba_vault id list and streams a CSV. Empty cookie → CSV
+        // with header only.
+        Route::get('coffre/export.csv', function (Request $request) {
+            $raw = (string) $request->cookie('grimba_vault', '');
+            $ids = array_values(array_filter(array_map('intval', explode(',', $raw))));
+
+            $rows = collect();
+            if (! empty($ids)) {
+                $byId = Post::query()
+                    ->whereIn('id', $ids)
+                    ->where('status', 'published')
+                    ->get(['id', 'name', 'bias_rating', 'source_name', 'created_at'])
+                    ->keyBy('id');
+
+                foreach ($ids as $i => $id) {
+                    if (! isset($byId[$id])) continue;
+                    $p = $byId[$id];
+                    $rows->push([
+                        'rank'        => $i + 1,
+                        'post_id'     => (int) $p->id,
+                        'title'       => (string) $p->name,
+                        'source'      => (string) ($p->source_name ?? ''),
+                        'bias'        => (string) ($p->bias_rating ?? 'unknown'),
+                        'published_at'=> optional($p->created_at)->toDateString() ?? '',
+                    ]);
+                }
+            }
+
+            $filename = 'grimbanews-coffre-' . now()->format('Y-m-d') . '.csv';
+
+            return response()->streamDownload(function () use ($rows) {
+                $h = fopen('php://output', 'w');
+                fwrite($h, "\xEF\xBB\xBF");
+                fputcsv($h, ['rang', 'post_id', 'titre', 'source', 'biais', 'publie_le']);
+                foreach ($rows as $r) {
+                    fputcsv($h, [
+                        $r['rank'], $r['post_id'], $r['title'],
+                        $r['source'], $r['bias'], $r['published_at'],
+                    ]);
+                }
+                fclose($h);
+            }, $filename, [
+                'Content-Type'  => 'text/csv; charset=UTF-8',
+                'Cache-Control' => 'no-store, max-age=0',
+                'X-GN-Privacy'  => 'cookie-only-no-server-record',
+            ]);
+        })->name('public.coffre.export');
+
         Route::get('angles-morts', function () {
             $posts = Post::query()
                 ->where('is_blindspot', true)

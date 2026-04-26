@@ -52,7 +52,13 @@
                 @endforeach
             </div>
 
-            <div class="text-center mt-5">
+            <div class="d-flex flex-wrap justify-content-center gap-2 mt-5">
+                {{-- S182 — vault CSV export --}}
+                <a href="{{ url('/coffre/export.csv') }}"
+                   class="btn-grimba btn-grimba--ghost btn-grimba--sm"
+                   style="padding:8px 18px; border-radius:9999px; border:1px solid rgba(26,23,19,0.2); background:transparent; color:var(--gn-ink,#1a1713); font-weight:600; font-size:13px; text-decoration:none;">
+                    ⬇ Exporter (.csv)
+                </a>
                 <button type="button" id="grimba-coffre-clear"
                         class="btn-grimba btn-grimba--ghost btn-grimba--sm"
                         style="padding:8px 18px; border-radius:9999px; border:1px solid rgba(26,23,19,0.2); background:transparent; color:var(--gn-ink,#1a1713); font-weight:600; font-size:13px; cursor:pointer;">
