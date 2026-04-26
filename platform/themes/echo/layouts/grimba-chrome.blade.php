@@ -102,6 +102,14 @@
                 }
             }
 
+            // S178 — keep the header vault badge in sync with current count.
+            function paintCount() {
+                const n = ids().length;
+                document.querySelectorAll('[data-grimba-vault-count]').forEach(el => {
+                    el.textContent = String(n);
+                });
+            }
+
             // Initial paint
             function syncAll() {
                 const saved = new Set(ids());
@@ -110,6 +118,7 @@
                     if (! Number.isFinite(id)) return;
                     paint(btn, saved.has(id));
                 });
+                paintCount();
             }
 
             document.addEventListener('click', (e) => {
@@ -124,6 +133,7 @@
                 else list.unshift(id);
                 write(list);
                 paint(btn, list.includes(id));
+                paintCount();
             });
 
             if (document.readyState === 'loading') {

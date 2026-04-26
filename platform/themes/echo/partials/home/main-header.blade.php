@@ -2,6 +2,12 @@
     $topDate = \Carbon\Carbon::now()->locale(app()->getLocale())->isoFormat('dddd D MMMM YYYY');
     $rawFollow = (string) request()->cookie('grimba_follow', '');
     $followCount = count(array_filter(array_map('intval', explode(',', $rawFollow))));
+
+    // S178 — vault count for the header link. Derived from the same
+    // grimba_vault cookie /coffre reads, so the SSR badge matches the
+    // landing page on first paint. Live JS updates handled below.
+    $rawVault = (string) request()->cookie('grimba_vault', '');
+    $vaultCount = count(array_filter(array_map('intval', explode(',', $rawVault))));
 @endphp
 <header class="grimba-header">
     <div class="grimba-header__meta">
@@ -28,6 +34,11 @@
                 <span class="opacity-25 d-none d-md-inline">·</span>
                 <a href="{{ url('/pour-vous') }}" class="text-decoration-none" title="{{ __('Pour vous') }}">
                     {{ __('Pour vous') }} (<span id="grimba-follow-count">{{ $followCount }}</span>)
+                </a>
+                <span class="opacity-25">·</span>
+                {{-- S178 — vault link in utility bar so readers find their saves. --}}
+                <a href="{{ url('/coffre') }}" class="text-decoration-none" title="{{ __('Mes articles sauvegardés') }}">
+                    <span aria-hidden="true">★</span>&nbsp;<span id="grimba-vault-count" data-grimba-vault-count>{{ $vaultCount }}</span>
                 </a>
                 <span class="opacity-25">·</span>
                 @include(Theme::getThemeNamespace('partials.home.region-dropdown'))
