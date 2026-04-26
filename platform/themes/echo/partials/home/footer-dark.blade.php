@@ -23,12 +23,13 @@
             </div>
 
             <div class="col-lg-2 col-md-6 col-6">
-                <h4 class="grimba-footer__heading">Actualités</h4>
+                <h4 class="grimba-footer__heading">Lecteur</h4>
                 <ul>
                     <li><a href="{{ url('/') }}">Accueil</a></li>
-                    <li><a href="{{ url('/blog') }}">Pour vous</a></li>
+                    <li><a href="{{ url('/pour-vous') }}">Pour vous</a></li>
+                    <li><a href="{{ url('/local') }}">Local</a></li>
                     <li><a href="{{ url('/angles-morts') }}">Angles morts</a></li>
-                    <li><a href="{{ url('/sources') }}">Sources</a></li>
+                    <li><a href="{{ url('/comparatif') }}">Comparatif</a></li>
                 </ul>
             </div>
 
@@ -42,13 +43,13 @@
             </div>
 
             <div class="col-lg-2 col-md-6 col-6">
-                <h4 class="grimba-footer__heading">Outils</h4>
+                <h4 class="grimba-footer__heading">Sources</h4>
                 <ul>
-                    <li><a href="{{ url('/comparatif') }}">Comparer les sources</a></li>
-                    <li><a href="{{ url('/sources') }}">Biais des médias</a></li>
-                    <li><a href="#newsletter" data-grimba-newsletter-open>Infolettre</a></li>
+                    <li><a href="{{ url('/sources') }}">Tous les médias</a></li>
+                    <li><a href="{{ url('/proprietaires') }}">Carte des propriétaires</a></li>
+                    <li><a href="{{ url('/methodologie') }}">Méthodologie</a></li>
                     <li><a href="{{ url('/feed.xml') }}">Flux RSS</a></li>
-                    <li><a href="#extension">Extension navigateur</a></li>
+                    <li><a href="#newsletter" data-grimba-newsletter-open>Infolettre</a></li>
                 </ul>
             </div>
 
@@ -57,8 +58,13 @@
                 <ul>
                     <li><a href="{{ url('/a-propos') }}">À propos</a></li>
                     <li><a href="{{ url('/contact') }}">Contact</a></li>
-                    <li><a href="{{ url('/methodologie') }}">Méthodologie</a></li>
                     <li><a href="{{ url('/carrieres') }}">Carrières</a></li>
+                    @auth('member')
+                        <li><a href="{{ url('/account') }}">Mon compte</a></li>
+                    @else
+                        <li><a href="{{ route('public.member.login') }}">Connexion</a></li>
+                        <li><a href="{{ route('public.member.register') }}">Inscription</a></li>
+                    @endauth
                 </ul>
             </div>
         </div>
@@ -68,8 +74,6 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center small opacity-75">
             <span>© {{ date('Y') }} GrimbaNews · Iboga Ventures</span>
             <span class="d-flex gap-3">
-                <a href="#fr">FR</a>
-                <a href="#en">EN</a>
                 <a href="{{ url('/confidentialite') }}">Confidentialité</a>
                 <a href="{{ url('/conditions') }}">Conditions</a>
             </span>
