@@ -9,6 +9,7 @@
     --gn-ink:          #1a1713;
     --gn-ink-muted:    #4a4540;
     --gn-ink-soft:     #6b6459;
+    --gn-muted:        #4a4540;
     --gn-rule:         rgba(26, 23, 19, 0.08);
     --gn-tan:          #dcc8a0;
     --gn-tan-strong:   #c9ae76;
@@ -45,6 +46,7 @@ html.grimba-home-html[data-bs-theme="dark"] {
     --gn-ink:          #f6f1e8;
     --gn-ink-muted:    #e6ddc7;
     --gn-ink-soft:     #c9bea5;
+    --gn-muted:        #e6ddc7;
     --gn-rule:         rgba(246, 241, 232, 0.14);
     --gn-tan:          #a78a55;
     --gn-tan-strong:   #c9ae76;
@@ -53,6 +55,12 @@ html.grimba-home-html[data-bs-theme="dark"] {
 
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home {
     color: var(--gn-ink);
+}
+
+.grimba-home .opacity-60,
+.grimba-home .opacity-65 {
+    opacity: 1 !important;
+    color: var(--gn-ink-soft);
 }
 
 /* Dark-mode header surfaces — brighter glass so text stays readable */
