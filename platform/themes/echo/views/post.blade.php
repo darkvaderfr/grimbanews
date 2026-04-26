@@ -136,6 +136,41 @@
                         {{ $__gnTitle }}
                     </h1>
 
+                    {{-- S181 — derived coverage-gap callout. When a cluster
+                         has 2+ sources but only one of L/C/R is represented,
+                         surface that explicitly so the reader knows they're
+                         getting a one-sided take. Cheaper than the manually-
+                         set is_blindspot flag (auto from cluster contents). --}}
+                    @php
+                        $__sidesPresent = collect(['left','center','right'])
+                            ->filter(fn ($b) => ($__gnByBias[$b] ?? 0) > 0)
+                            ->values();
+                        $__oneSidedCoverage = $__gnClusterPosts->count() >= 2 && $__sidesPresent->count() === 1;
+                        $__sideMeta = [
+                            'left'   => ['label' => 'la gauche', 'color' => '#3b82f6'],
+                            'center' => ['label' => 'le centre', 'color' => '#a8a8a8'],
+                            'right'  => ['label' => 'la droite', 'color' => '#e84c3d'],
+                        ];
+                    @endphp
+                    @if($__oneSidedCoverage)
+                        @php $__sole = $__sidesPresent->first(); @endphp
+                        <div class="d-flex align-items-center gap-2 mb-3" role="note"
+                             style="
+                                padding:10px 14px; border-radius:12px;
+                                background:{{ $__sideMeta[$__sole]['color'] }}14;
+                                border:1px solid {{ $__sideMeta[$__sole]['color'] }}40;
+                                color:var(--gn-ink,#1a1713);
+                                font-size:13.5px; line-height:1.4;
+                             ">
+                            <span aria-hidden="true" style="font-size:16px;">⚠</span>
+                            <span>
+                                <strong>Couverture déséquilibrée</strong> — cette histoire n'est pour l'instant
+                                couverte que par {{ $__sideMeta[$__sole]['label'] }}.
+                                <a href="{{ url('/angles-morts') }}" style="color:inherit; text-decoration:underline;">Voir tous les angles morts</a>.
+                            </span>
+                        </div>
+                    @endif
+
                     {{-- S170 — bias filter tabs sit right under the title,
                          GroundNews-style. Tabs use the same data attribute
                          as the article-list section below; clicking filters
