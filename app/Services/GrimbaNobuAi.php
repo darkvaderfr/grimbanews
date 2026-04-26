@@ -17,7 +17,7 @@ class GrimbaNobuAi
 {
     private const TIMEOUT = 12;
 
-    private const CHAIN = ['mistral', 'openrouter', 'openai', 'anthropic', 'google', 'groq'];
+    private const CHAIN = ['mistral', 'openrouter', 'openai', 'anthropic', 'google', 'xai', 'perplexity', 'groq'];
 
     public function enabled(): bool
     {
@@ -98,6 +98,8 @@ class GrimbaNobuAi
             'openai' => env('OPENAI_API_KEY') ?: (is_callable('setting') ? (setting('ai_writer_openai_key') ?: null) : null),
             'anthropic' => env('ANTHROPIC_API_KEY') ?: null,
             'google' => env('GOOGLE_API_KEY') ?: null,
+            'xai' => env('XAI_API_KEY') ?: null,
+            'perplexity' => env('PERPLEXITY_API_KEY') ?: null,
             'groq' => env('GROQ_API_KEY') ?: null,
             default => null,
         };
@@ -109,14 +111,14 @@ class GrimbaNobuAi
             'mistral' => $this->viaOpenAiCompatible(
                 'https://api.mistral.ai/v1/chat/completions',
                 $this->credentialFor('mistral') ?? '',
-                'mistral-small-latest',
+                $this->modelFor('mistral', 'mistral-small-latest'),
                 $prompt,
                 $system,
             ),
             'openrouter' => $this->viaOpenAiCompatible(
                 'https://openrouter.ai/api/v1/chat/completions',
                 $this->credentialFor('openrouter') ?? '',
-                env('OPENROUTER_MODEL', 'mistralai/mistral-small-3-24b-instruct'),
+                $this->modelFor('openrouter', 'mistralai/mistral-small-3-24b-instruct'),
                 $prompt,
                 $system,
                 [
@@ -127,16 +129,30 @@ class GrimbaNobuAi
             'openai' => $this->viaOpenAiCompatible(
                 'https://api.openai.com/v1/chat/completions',
                 $this->credentialFor('openai') ?? '',
-                env('OPENAI_MODEL', 'gpt-4o-mini'),
+                $this->modelFor('openai', 'gpt-4o-mini'),
                 $prompt,
                 $system,
             ),
             'anthropic' => $this->viaAnthropic($prompt, $system),
             'google' => $this->viaGoogleGemini($prompt, $system),
+            'xai' => $this->viaOpenAiCompatible(
+                'https://api.x.ai/v1/chat/completions',
+                $this->credentialFor('xai') ?? '',
+                $this->modelFor('xai', 'grok-4.20'),
+                $prompt,
+                $system,
+            ),
+            'perplexity' => $this->viaOpenAiCompatible(
+                'https://api.perplexity.ai/chat/completions',
+                $this->credentialFor('perplexity') ?? '',
+                $this->modelFor('perplexity', 'sonar-pro'),
+                $prompt,
+                $system,
+            ),
             'groq' => $this->viaOpenAiCompatible(
                 'https://api.groq.com/openai/v1/chat/completions',
                 $this->credentialFor('groq') ?? '',
-                'llama-3.3-70b-versatile',
+                $this->modelFor('groq', 'llama-3.3-70b-versatile'),
                 $prompt,
                 $system,
             ),
@@ -186,7 +202,7 @@ class GrimbaNobuAi
                 'content-type' => 'application/json',
             ])
             ->post('https://api.anthropic.com/v1/messages', [
-                'model' => env('ANTHROPIC_MODEL', 'claude-3-5-haiku-latest'),
+                'model' => $this->modelFor('anthropic', 'claude-3-5-haiku-latest'),
                 'max_tokens' => 900,
                 'system' => $system,
                 'messages' => [['role' => 'user', 'content' => $prompt]],
@@ -213,7 +229,8 @@ class GrimbaNobuAi
             return null;
         }
 
-        $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . urlencode($key);
+        $model = $this->modelFor('google', 'gemini-2.0-flash');
+        $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' . rawurlencode($model) . ':generateContent?key=' . urlencode($key);
         $response = Http::timeout(self::TIMEOUT)
             ->acceptJson()
             ->post($endpoint, [
@@ -246,5 +263,30 @@ class GrimbaNobuAi
     {
         return 'You are NobuAI for GrimbaNews. Produce concise, neutral newsroom assistance. '
             . 'Do not mention model providers. Do not invent facts. If evidence is insufficient, say so.';
+    }
+
+    private function modelFor(string $driver, string $default): string
+    {
+        $fromNobuSetting = is_callable('setting') ? trim((string) setting('grimba_nobuai_' . $driver . '_model', '')) : '';
+        if ($fromNobuSetting !== '') {
+            return $fromNobuSetting;
+        }
+
+        $fromTranslatorSetting = is_callable('setting') ? trim((string) setting('grimba_translator_' . $driver . '_model', '')) : '';
+        if ($fromTranslatorSetting !== '') {
+            return $fromTranslatorSetting;
+        }
+
+        return match ($driver) {
+            'openrouter' => env('OPENROUTER_MODEL', $default),
+            'openai' => env('OPENAI_MODEL', $default),
+            'anthropic' => env('ANTHROPIC_MODEL', $default),
+            'google' => env('GOOGLE_MODEL', $default),
+            'mistral' => env('MISTRAL_MODEL', $default),
+            'groq' => env('GROQ_MODEL', $default),
+            'xai' => env('XAI_MODEL', $default),
+            'perplexity' => env('PERPLEXITY_MODEL', $default),
+            default => $default,
+        };
     }
 }

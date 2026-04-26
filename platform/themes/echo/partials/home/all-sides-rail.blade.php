@@ -13,6 +13,7 @@
      * the rail hides itself entirely.
      */
 
+    use App\Support\GrimbaTranslationPresenter as GnTr;
     use Botble\Blog\Models\Post;
 
     // Cluster ids with ≥2 bias sides + post-counts (recency-weighted).
@@ -41,7 +42,7 @@
         ->whereIn('story_cluster_id', $clusterIds)
         ->where('status', 'published')
         ->orderByDesc('created_at')
-        ->get(['id', 'name', 'story_cluster_id', 'bias_rating', 'image', 'source_name'])
+        ->get(['id', 'name', 'translated_name', 'translated_description', 'translated_to', 'original_language', 'story_cluster_id', 'bias_rating', 'image', 'source_name'])
         ->groupBy('story_cluster_id');
 
     $cards = [];
@@ -99,6 +100,8 @@
             @php
                 $head = $card['head'];
                 $url = $head->url ?? url('/blog');
+                $title = GnTr::title($head);
+                $isTranslated = GnTr::isTranslated($head);
             @endphp
             <a href="{{ $url }}"
                class="grimba-all-sides__card"
@@ -119,13 +122,13 @@
                 @if($card['image'])
                     <div class="ratio ratio-16x9" style="background:rgba(0,0,0,0.04);">
                         <img src="{{ \Botble\Media\Facades\RvMedia::getImageUrl($card['image']) }}"
-                             alt="{{ $head->name }}"
+                             alt="{{ $title }}"
                              loading="lazy"
                              style="object-fit:cover; width:100%; height:100%;">
                     </div>
                 @else
                     <img src="{{ url('/og/placeholder/' . $head->id . '.svg') }}"
-                         alt="{{ $head->name }}"
+                         alt="{{ $title }}"
                          loading="lazy"
                          style="width:100%; aspect-ratio:16/9; object-fit:cover; background:rgba(0,0,0,0.04);">
                 @endif
@@ -158,8 +161,11 @@
                         margin:0;
                         flex:1;
                     ">
-                        {{ \Illuminate\Support\Str::limit($head->name, 110) }}
+                        {{ \Illuminate\Support\Str::limit($title, 110) }}
                     </h3>
+                    @if($isTranslated)
+                        <div class="mt-2">{!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}</div>
+                    @endif
                 </div>
             </a>
         @endforeach

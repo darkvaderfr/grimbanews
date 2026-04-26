@@ -1,4 +1,5 @@
 @php
+    use App\Support\GrimbaTranslationPresenter as GnTr;
     use Botble\Blog\Models\Category;
     use Botble\Blog\Models\Post;
 
@@ -50,11 +51,18 @@
         <div class="row g-4">
             <div class="col-lg-7 col-12">
                 @if($latest)
+                    @php
+                        $latestTitle = GnTr::title($latest);
+                        $latestTranslated = GnTr::isTranslated($latest);
+                    @endphp
                     <a href="{{ $latest->url }}" class="grimba-section__hero">
                         {!! Theme::partial('post-hero-img', ['post' => $latest, 'size' => 'extra-large']) !!}
                         <div class="grimba-section__hero-body">
                             <span class="grimba-section__kicker">Dernières {{ strtolower($cat->name) }}</span>
-                            <h3 class="grimba-section__hero-title">{{ $latest->name }}</h3>
+                            <h3 class="grimba-section__hero-title">{{ $latestTitle }}</h3>
+                            @if($latestTranslated)
+                                {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+                            @endif
                             {!! Theme::partial('home.coverage-bar', ['post' => $latest, 'compact' => false]) !!}
                         </div>
                     </a>
@@ -65,13 +73,20 @@
                 <span class="grimba-section__kicker grimba-section__kicker--rail">Angles morts · {{ $cat->name }}</span>
 
                 @foreach($categoryBlindspots as $b)
+                    @php
+                        $blindTitle = GnTr::title($b);
+                        $blindTranslated = GnTr::isTranslated($b);
+                    @endphp
                     <a href="{{ $b->url }}" class="grimba-blind-card grimba-blind-card--wide">
                         <div class="grimba-blind-card__media">
                             {!! Theme::partial('post-hero-img', ['post' => $b, 'size' => 'medium']) !!}
                         </div>
                         <div class="grimba-blind-card__body">
                             <span class="blindspot-badge blindspot-badge--on-dark">Angle mort</span>
-                            <h4 class="grimba-blind-card__title">{{ $b->name }}</h4>
+                            <h4 class="grimba-blind-card__title">{{ $blindTitle }}</h4>
+                            @if($blindTranslated)
+                                {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+                            @endif
                             {!! Theme::partial('home.coverage-bar', ['post' => $b, 'compact' => true, 'onDark' => true]) !!}
                         </div>
                     </a>

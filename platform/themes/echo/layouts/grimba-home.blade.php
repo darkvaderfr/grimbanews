@@ -54,6 +54,7 @@
     @include(Theme::getThemeNamespace('partials.home.urgency-banner'))
     @include(Theme::getThemeNamespace('partials.home.main-header'))
     @include(Theme::getThemeNamespace('partials.home.topic-chips'))
+    @include(Theme::getThemeNamespace('partials.home.translation-note'))
 
     <main class="grimba-home-main">
         <div class="container-xxl">

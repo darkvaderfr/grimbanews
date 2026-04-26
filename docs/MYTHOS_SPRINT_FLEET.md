@@ -118,6 +118,7 @@ are the orphan-post layout, Highlights/Voices panels, and sort options.
 | ✅ S201 | Reading-progress bar | Uncommitted worktree |
 | ✅ S202 | Bias confidence indicator | Uncommitted worktree |
 | ✅ S203 | Opaque region picker | Uncommitted worktree |
+| ✅ S204 | FR-mode page translation + expanded NobuAI providers | Uncommitted worktree |
 | **B10** | **Story-page Open Graph upgrade** — current OG uses post image + title; for cluster pages, generate a composite OG with bias bar + outlet count | New OG handler in `GrimbaOgImageController::story()` |
 
 ---

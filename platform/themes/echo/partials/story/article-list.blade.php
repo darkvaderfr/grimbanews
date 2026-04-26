@@ -3,14 +3,11 @@
      * S148 — Cluster article list. Renders all posts in the same
      * story_cluster, grouped by bias, with filter tabs.
      *
-     * S170 — translation feature dropped. Title + description always
-     * render in their original-source language. translated_* columns
-     * left in place but no longer consulted on read.
-     *
      * @var \Illuminate\Database\Eloquent\Collection $clusterPosts
      * @var \Botble\Blog\Models\Post                 $currentPost  the post the reader landed on
      */
 
+    use App\Support\GrimbaTranslationPresenter as GnTr;
     use App\Support\GrimbaStoryInsights;
     use Illuminate\Support\Str;
 
@@ -127,6 +124,9 @@
                         'right' => 3,
                         default => 4,
                     };
+                    $title = GnTr::title($cp);
+                    $description = GnTr::description($cp);
+                    $isTranslated = GnTr::isTranslated($cp);
                 @endphp
                 <li data-bias="{{ $bucket }}"
                     id="story-article-{{ (int) $cp->id }}"
@@ -205,17 +205,23 @@
 
                     <h3 style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; line-height:1.3; letter-spacing:-0.2px; margin:0 0 6px;">
                         @if($isCurrent)
-                            {{ $cp->name }}
+                            {{ $title }}
                         @else
                             <a href="{{ $cp->url ?? '#' }}" style="color:var(--gn-ink,#1a1713); text-decoration:none;">
-                                {{ $cp->name }}
+                                {{ $title }}
                             </a>
                         @endif
                     </h3>
 
-                    @if($cp->description)
+                    @if($isTranslated)
+                        <div class="mb-2">
+                            {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+                        </div>
+                    @endif
+
+                    @if($description)
                         <p class="small mb-2" style="line-height:1.5; color:var(--gn-ink,#1a1713); opacity:0.85;">
-                            {{ Str::limit(strip_tags($cp->description), 200) }}
+                            {{ Str::limit(strip_tags($description), 200) }}
                         </p>
                     @endif
 

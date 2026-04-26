@@ -3,6 +3,9 @@
      * Grid item — GrimbaNews refit.
      * Bias badge + optional L/C/R coverage bar + source kicker.
      */
+    $__title = \App\Support\GrimbaTranslationPresenter::title($post);
+    $__desc = \App\Support\GrimbaTranslationPresenter::description($post);
+    $__isTr = \App\Support\GrimbaTranslationPresenter::isTranslated($post);
 @endphp
 <article class="article-card">
     <div class="article-card__image">
@@ -46,13 +49,16 @@
 
         {{-- Title --}}
         <h2 class="article-card__title">
-            <a href="{{ $post->url }}" title="{{ $post->name }}" class="title-hover text-decoration-none">
-                {{ $post->name }}
+            <a href="{{ $post->url }}" title="{{ $__title }}" class="title-hover text-decoration-none">
+                {{ $__title }}
             </a>
         </h2>
+        @if($__isTr)
+            <div class="mb-2">{!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}</div>
+        @endif
 
         {{-- Description --}}
-        @if ($description = $post->description)
+        @if ($description = $__desc)
             <p class="echo-hero-discription truncate-custom truncate-3-custom mb-2" title="{{ $description }}">
                 {!! BaseHelper::clean($description) !!}
             </p>

@@ -17,10 +17,12 @@
  *   grimba_translator_openai_key      (falls back to ai_writer_openai_key)
  *   grimba_translator_anthropic_key
  *   grimba_translator_google_key
+ *   grimba_translator_xai_key
+ *   grimba_translator_perplexity_key
  *   grimba_translator_groq_key
  *   grimba_translator_libre_key
  *   grimba_translator_driver          (auto | <driver-name>)
- *   grimba_translator_openrouter_model (optional model override)
+ *   grimba_translator_<driver>_model  (optional model override for LLM providers)
  */
 
 use App\Services\GrimbaTranslator;
@@ -38,23 +40,28 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
     ->group(function (): void {
 
         Route::get('translation', function () {
-            $drivers  = ['deepl', 'mistral', 'openrouter', 'openai', 'anthropic', 'google', 'groq', 'libre'];
+            $drivers  = ['deepl', 'mistral', 'openrouter', 'openai', 'anthropic', 'google', 'xai', 'perplexity', 'groq', 'libre'];
+            $modelDrivers = ['mistral', 'openrouter', 'openai', 'anthropic', 'google', 'xai', 'perplexity', 'groq'];
             $settings = [];
             foreach ($drivers as $d) {
                 $settings[$d] = (string) setting('grimba_translator_' . $d . '_key', '');
             }
+            $models = [];
+            foreach ($modelDrivers as $d) {
+                $models[$d] = (string) setting('grimba_translator_' . $d . '_model', '');
+            }
             $pinned       = (string) setting('grimba_translator_driver', 'auto');
-            $orModel      = (string) setting('grimba_translator_openrouter_model', '');
             $autoPublish  = (bool) setting('grimba_ingest_auto_publish', false);
             $translator   = app(GrimbaTranslator::class);
 
             return view('grimba-admin.translation.index', compact(
-                'drivers', 'settings', 'pinned', 'orModel', 'translator', 'autoPublish'
+                'drivers', 'settings', 'pinned', 'models', 'modelDrivers', 'translator', 'autoPublish'
             ));
         })->name('translation.index');
 
         Route::post('translation', function (Request $request) {
-            $drivers = ['deepl', 'mistral', 'openrouter', 'openai', 'anthropic', 'google', 'groq', 'libre'];
+            $drivers = ['deepl', 'mistral', 'openrouter', 'openai', 'anthropic', 'google', 'xai', 'perplexity', 'groq', 'libre'];
+            $modelDrivers = ['mistral', 'openrouter', 'openai', 'anthropic', 'google', 'xai', 'perplexity', 'groq'];
 
             /** @var SettingStore $store */
             $store = app('core.setting');
@@ -78,8 +85,9 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             }
             $store->set('grimba_translator_driver', $pinned);
 
-            $orModel = trim((string) $request->input('openrouter_model', ''));
-            $store->set('grimba_translator_openrouter_model', $orModel);
+            foreach ($modelDrivers as $d) {
+                $store->set('grimba_translator_' . $d . '_model', trim((string) $request->input($d . '_model', '')));
+            }
 
             // S92: RSS auto-publish toggle. Checkbox semantics — absent
             // input means "off", so honour the submit explicitly.

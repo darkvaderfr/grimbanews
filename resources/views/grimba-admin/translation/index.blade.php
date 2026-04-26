@@ -8,8 +8,20 @@
         'openai'     => ['name' => 'OpenAI',          'field' => 'OPENAI_API_KEY',     'hint' => 'gpt-4o-mini. Also shared with AI Writer plugin.'],
         'anthropic'  => ['name' => 'Anthropic',       'field' => 'ANTHROPIC_API_KEY',  'hint' => 'claude-3-5-haiku. Good prose.'],
         'google'     => ['name' => 'Google Gemini',   'field' => 'GOOGLE_API_KEY',     'hint' => 'Gemini 2.0 Flash.'],
+        'xai'        => ['name' => 'xAI / Grok',      'field' => 'XAI_API_KEY',        'hint' => 'Grok via the OpenAI-compatible xAI API.'],
+        'perplexity' => ['name' => 'Perplexity Sonar', 'field' => 'PERPLEXITY_API_KEY', 'hint' => 'Sonar via OpenAI-compatible chat completions.'],
         'groq'       => ['name' => 'Groq',            'field' => 'GROQ_API_KEY',       'hint' => 'Llama 3.3 70B, very fast, generous free tier.'],
         'libre'      => ['name' => 'LibreTranslate',  'field' => 'LIBRETRANSLATE_URL', 'hint' => 'Self-hosted. Paste the full URL here (e.g. https://translate.example.com).'],
+    ];
+    $modelDefaults = [
+        'mistral' => 'mistral-small-latest',
+        'openrouter' => 'mistralai/mistral-small-3-24b-instruct',
+        'openai' => 'gpt-4o-mini',
+        'anthropic' => 'claude-3-5-haiku-latest',
+        'google' => 'gemini-2.0-flash',
+        'xai' => 'grok-4.20',
+        'perplexity' => 'sonar-pro',
+        'groq' => 'llama-3.3-70b-versatile',
     ];
     $configured = $translator->configuredDrivers();
 @endphp
@@ -49,7 +61,7 @@
                                 <option value="{{ $d }}" @selected($pinned === $d)>{{ $meta['name'] }} uniquement</option>
                             @endforeach
                         </select>
-                        <div class="form-text">En <em>Auto</em>, la chaîne DeepL → Mistral → OpenRouter → OpenAI → Anthropic → Gemini → Groq → LibreTranslate est essayée dans l'ordre, avec basculement automatique en cas d'échec.</div>
+                        <div class="form-text">En <em>Auto</em>, la chaîne DeepL → Mistral → OpenRouter → OpenAI → Anthropic → Gemini → xAI → Perplexity → Groq → LibreTranslate est essayée dans l'ordre, avec basculement automatique en cas d'échec.</div>
                     </div>
 
                     @foreach($driverLabels as $d => $meta)
@@ -70,10 +82,23 @@
                     @endforeach
 
                     <div class="mb-4">
-                        <label class="form-label"><strong>Modèle OpenRouter (optionnel)</strong></label>
-                        <input type="text" name="openrouter_model" value="{{ $orModel }}" class="form-control" style="max-width: 500px;"
-                               placeholder="mistralai/mistral-small-3-24b-instruct">
-                        <div class="form-text">Défaut : <code>mistralai/mistral-small-3-24b-instruct</code>. Voir <a href="https://openrouter.ai/models" target="_blank" rel="noopener">openrouter.ai/models</a>.</div>
+                        <label class="form-label"><strong>Modèles LLM (optionnel)</strong></label>
+                        <div class="row g-3">
+                            @foreach($modelDefaults as $d => $default)
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted mb-1">{{ $driverLabels[$d]['name'] }}</label>
+                                    <input type="text"
+                                           name="{{ $d }}_model"
+                                           value="{{ $models[$d] ?? '' }}"
+                                           class="form-control"
+                                           placeholder="{{ $default }}">
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="form-text">
+                            Laissez vide pour utiliser le modèle par défaut. Ces valeurs alimentent la traduction et le wrapper NobuAI.
+                            Pour OpenRouter, voir <a href="https://openrouter.ai/models" target="_blank" rel="noopener">openrouter.ai/models</a>.
+                        </div>
                     </div>
 
                     <hr class="my-4">

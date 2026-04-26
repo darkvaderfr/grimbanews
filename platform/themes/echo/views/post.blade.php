@@ -1,6 +1,15 @@
 @php
+    use App\Support\GrimbaTranslationPresenter as GnTr;
+
     Theme::layout('grimba-chrome');
     Theme::set('isDetailPage', true);
+
+    $__gnSeoTitle = GnTr::title($post);
+    $__gnSeoDesc = GnTr::description($post);
+    SeoHelper::setTitle($__gnSeoTitle);
+    if ($__gnSeoDesc) {
+        SeoHelper::setDescription(strip_tags((string) $__gnSeoDesc));
+    }
 
     // Branded OG image per post.
     $ogUrl = url('/og/post/' . $post->id . '.png');
@@ -61,19 +70,14 @@
     $authorStyle = theme_option('blog_author_style');
     $url = $post->url;
 
-    // S170 — translation feature dropped. Posts now always render in
-    // their stored language. translated_* columns remain in the DB
-    // (still populated by the cron) but are not consulted on read.
-    // Vader's call: "let's get rid of the translation feature and
-    // fully replicate ground news article display."
-    $__gnTitle   = $post->name;
-    $__gnDesc    = $post->description;
-    // Compatibility shims so legacy branches that still reference
-    // these vars don't throw — render-time they're now fixed.
-    $__gnMode    = 'original';
-    $__gnHasTr   = false;
-    $__gnOriginalTitle = null;
-    $__gnTarget  = 'fr';
+    // FR mode is the reading mode: English-source posts render from
+    // translated_* columns, with NobuAI attribution beside the title.
+    $__gnTarget  = GnTr::targetLocale();
+    $__gnHasTr   = GnTr::isTranslated($post, $__gnTarget);
+    $__gnMode    = $__gnHasTr ? 'translated' : 'original';
+    $__gnTitle   = GnTr::title($post);
+    $__gnDesc    = GnTr::description($post);
+    $__gnOriginalTitle = $__gnHasTr ? $post->name : null;
 
     Theme::set('breadcrumb_background_image', $post->getMetaData('breadcrumb_background_image', true));
     Theme::set('breadcrumb_background_color', $post->getMetaData('breadcrumb_background_color', true));
@@ -167,6 +171,14 @@
                         style="font-size:clamp(28px, 3.6vw, 44px); line-height:1.1; letter-spacing:-0.5px;">
                         {{ $__gnTitle }}
                     </h1>
+                    @if($__gnHasTr)
+                        <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+                            {!! Theme::partial('nobuai-chip', ['size' => 'md']) !!}
+                            <span class="small opacity-65">
+                                Article original en {{ strtoupper((string) $post->original_language) }} affiché en français.
+                            </span>
+                        </div>
+                    @endif
 
                     {{-- S181 — derived coverage-gap callout. When a cluster
                          has 2+ sources but only one of L/C/R is represented,
@@ -269,7 +281,7 @@
                                 ->sortByDesc(fn ($cp) => (int) $cp->id === (int) $post->id ? 1 : 0)
                                 ->values();
                             foreach ($__ordered as $cp) {
-                                $desc = trim(strip_tags((string) ($cp->description ?? '')));
+                                $desc = trim(strip_tags((string) GnTr::description($cp)));
                                 if ($desc === '') continue;
                                 // Lead sentence: split on . ! ? followed by space/EOL.
                                 $parts = preg_split('/(?<=[\.\!\?])\s+/u', $desc, 2);
@@ -313,7 +325,9 @@
                         // post.translated_content (S91) when the
                         // reader is in NobuAI mode.
                         $__gnFullActive  = (bool) setting('grimba_full_article_active', false);
-                        $__gnFullBody = $__gnFullActive ? ($post->full_content ?? null) : null;
+                        $__gnFullBody = $__gnFullActive
+                            ? ($__gnHasTr && $post->translated_content ? $post->translated_content : ($post->full_content ?? null))
+                            : null;
                     @endphp
 
                     @if(! empty($__gnSummaryItems))
@@ -527,6 +541,14 @@
                                     style="font-size:clamp(30px, 4vw, 52px); line-height:1.04; letter-spacing:-0.7px;">
                                     {{ $__gnTitle }}
                                 </h1>
+                                @if($__gnHasTr)
+                                    <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+                                        {!! Theme::partial('nobuai-chip', ['size' => 'md']) !!}
+                                        <span class="small opacity-65">
+                                            Article original en {{ strtoupper((string) $post->original_language) }} affiché en français.
+                                        </span>
+                                    </div>
+                                @endif
 
                                 @include(Theme::getThemeNamespace('partials.blog.post.partials.source-attribution'), ['post' => $post])
 
@@ -572,16 +594,8 @@
                         @endif
 
                         @php
-                            // S91: swap body content when reader asked for
-                            // auto translation AND we have a translated_content
-                            // row in the right locale. 'both' mode stacks:
-                            // translation first (primary reading), original
-                            // beneath in a collapsed <details> so a curious
-                            // reader can compare.
-                            $__gnBody       = ($__gnMode !== 'original' && $__gnHasTr && $post->translated_content)
-                                ? $post->translated_content
-                                : $post->content;
-                            $__gnShowOrig   = ($__gnMode === 'both' && $__gnHasTr && $post->translated_content);
+                            $__gnBody = GnTr::body($post);
+                            $__gnShowOrig = $__gnHasTr && $post->translated_content;
                         @endphp
                         @if ($content = $__gnBody)
                             <div class="ck-content">
@@ -606,7 +620,7 @@
                         @include(Theme::getThemeNamespace('partials.blog.post.partials.other-angles'), ['post' => $post])
 
                         @php
-                            $socials = \Botble\Theme\Supports\ThemeSupport::getSocialSharingButtons($post->url, $post->name, RvMedia::getImageUrl($post->image));
+                            $socials = \Botble\Theme\Supports\ThemeSupport::getSocialSharingButtons($post->url, $__gnTitle, RvMedia::getImageUrl($post->image));
                             $tags = $post->tags;
                         @endphp
 

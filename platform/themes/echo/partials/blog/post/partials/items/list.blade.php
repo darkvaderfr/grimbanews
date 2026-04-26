@@ -1,3 +1,8 @@
+@php
+    $__title = \App\Support\GrimbaTranslationPresenter::title($post);
+    $__desc = \App\Support\GrimbaTranslationPresenter::description($post);
+    $__isTr = \App\Support\GrimbaTranslationPresenter::isTranslated($post);
+@endphp
 <div class="echo-hero-baner post-item-list">
     <div class="echo-inner-img-ct-1  img-transition-scale position-relative">
         <a href="{{ $post->url }}">
@@ -10,10 +15,13 @@
         </div>
     </div>
     <div class="echo-banner-texting">
-        <h3 class="echo-hero-title text-capitalize font-weight-bold"><a href="{{ $post->url }}" title="{{ $post->name }}" class="title-hover truncate-custom truncate-2-custom">{{ $post->name }}</a></h3>
+        <h3 class="echo-hero-title text-capitalize font-weight-bold"><a href="{{ $post->url }}" title="{{ $__title }}" class="title-hover truncate-custom truncate-2-custom">{{ $__title }}</a></h3>
+        @if($__isTr)
+            <div class="mb-2">{!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}</div>
+        @endif
 
         {!! Theme::partial('post-meta', ['post' => $post, 'wrapperClass' => 'echo-hero-area-titlepost-post-like-comment-share']) !!}
-        @if ($description = $post->description)
+        @if ($description = $__desc)
             <p class="echo-hero-discription truncate-custom truncate-3-custom" title="{{ $description }}">{!! BaseHelper::clean($description) !!}</p>
         @endif
 

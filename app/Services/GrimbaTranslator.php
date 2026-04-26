@@ -31,9 +31,13 @@ use Throwable;
  *                                            prose, slightly pricier.
  *   6. google      — GOOGLE_API_KEY        — Gemini 2.0 Flash via the
  *                                            generativelanguage API.
- *   7. groq        — GROQ_API_KEY          — Llama 3.3 70B, fast and
+ *   7. xai         — XAI_API_KEY           — Grok via OpenAI-compatible
+ *                                            chat completions.
+ *   8. perplexity  — PERPLEXITY_API_KEY    — Sonar via OpenAI-compatible
+ *                                            chat completions.
+ *   9. groq        — GROQ_API_KEY          — Llama 3.3 70B, fast and
  *                                            free-tier generous.
- *   8. libre       — LIBRETRANSLATE_URL    — self-hosted fallback,
+ *  10. libre       — LIBRETRANSLATE_URL    — self-hosted fallback,
  *                                            no auth needed.
  *
  * Failover: if the primary driver 5xx's or times out, the next configured
@@ -53,7 +57,7 @@ class GrimbaTranslator
      *  unofficial gtx endpoint, no API key required. Quality is "good
      *  enough for a glance"; rate-limited per IP, so it's last in the
      *  chain — paid drivers run first when configured. */
-    private const CHAIN = ['deepl', 'mistral', 'openrouter', 'openai', 'anthropic', 'google', 'groq', 'libre', 'googletx'];
+    private const CHAIN = ['deepl', 'mistral', 'openrouter', 'openai', 'anthropic', 'google', 'xai', 'perplexity', 'groq', 'libre', 'googletx'];
 
     public function enabled(): bool
     {
@@ -144,6 +148,8 @@ class GrimbaTranslator
                             ?: (is_callable('setting') ? (setting('ai_writer_openai_key') ?: null) : null),
             'anthropic'  => env('ANTHROPIC_API_KEY') ?: null,
             'google'     => env('GOOGLE_API_KEY') ?: null,
+            'xai'        => env('XAI_API_KEY') ?: null,
+            'perplexity' => env('PERPLEXITY_API_KEY') ?: null,
             'groq'       => env('GROQ_API_KEY') ?: null,
             'libre'      => env('LIBRETRANSLATE_URL') ?: null,
             'googletx'   => 'free', // sentinel — always available
@@ -159,13 +165,13 @@ class GrimbaTranslator
                 $text, $from, $to,
                 'https://api.mistral.ai/v1/chat/completions',
                 $this->credentialFor('mistral') ?? '',
-                'mistral-small-latest',
+                $this->modelFor('mistral', 'mistral-small-latest'),
             ),
             'openrouter' => $this->viaOpenAiCompatible(
                 $text, $from, $to,
                 'https://openrouter.ai/api/v1/chat/completions',
                 $this->credentialFor('openrouter') ?? '',
-                env('OPENROUTER_MODEL', 'mistralai/mistral-small-3-24b-instruct'),
+                $this->modelFor('openrouter', 'mistralai/mistral-small-3-24b-instruct'),
                 [
                     // OpenRouter's attribution + analytics headers —
                     // recommended per https://openrouter.ai/docs/api-reference/overview
@@ -177,15 +183,27 @@ class GrimbaTranslator
                 $text, $from, $to,
                 'https://api.openai.com/v1/chat/completions',
                 $this->credentialFor('openai') ?? '',
-                'gpt-4o-mini',
+                $this->modelFor('openai', 'gpt-4o-mini'),
             ),
             'anthropic'  => $this->viaAnthropic($text, $from, $to),
             'google'     => $this->viaGoogleGemini($text, $from, $to),
+            'xai'        => $this->viaOpenAiCompatible(
+                $text, $from, $to,
+                'https://api.x.ai/v1/chat/completions',
+                $this->credentialFor('xai') ?? '',
+                $this->modelFor('xai', 'grok-4.20'),
+            ),
+            'perplexity' => $this->viaOpenAiCompatible(
+                $text, $from, $to,
+                'https://api.perplexity.ai/chat/completions',
+                $this->credentialFor('perplexity') ?? '',
+                $this->modelFor('perplexity', 'sonar-pro'),
+            ),
             'groq'       => $this->viaOpenAiCompatible(
                 $text, $from, $to,
                 'https://api.groq.com/openai/v1/chat/completions',
                 $this->credentialFor('groq') ?? '',
-                'llama-3.3-70b-versatile',
+                $this->modelFor('groq', 'llama-3.3-70b-versatile'),
             ),
             'libre'      => $this->viaLibreTranslate($text, $from, $to),
             'googletx'   => $this->viaGoogleUnofficial($text, $from, $to),
@@ -258,7 +276,7 @@ class GrimbaTranslator
                 'content-type' => 'application/json',
             ])
             ->post('https://api.anthropic.com/v1/messages', [
-                'model'      => 'claude-3-5-haiku-latest',
+                'model'      => $this->modelFor('anthropic', 'claude-3-5-haiku-latest'),
                 'max_tokens' => 1200,
                 'system'     => $this->translatorSystemPrompt($from, $to),
                 'messages'   => [['role' => 'user', 'content' => $text]],
@@ -279,7 +297,8 @@ class GrimbaTranslator
         $key = $this->credentialFor('google');
         if (! $key) return null;
 
-        $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . urlencode($key);
+        $model = $this->modelFor('google', 'gemini-2.0-flash');
+        $endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' . rawurlencode($model) . ':generateContent?key=' . urlencode($key);
 
         $response = Http::timeout(self::TIMEOUT)
             ->acceptJson()
@@ -401,6 +420,27 @@ class GrimbaTranslator
         return "You are a translation engine. Translate the user's text from {$fromLabel} into {$toLabel}. "
              . 'Preserve tone, proper nouns, and any dates or numbers. '
              . 'Do not add commentary, do not quote, do not explain. Output only the translated text.';
+    }
+
+    private function modelFor(string $driver, string $default): string
+    {
+        $settingKey = 'grimba_translator_' . $driver . '_model';
+        $fromSetting = is_callable('setting') ? trim((string) setting($settingKey, '')) : '';
+        if ($fromSetting !== '') {
+            return $fromSetting;
+        }
+
+        return match ($driver) {
+            'openrouter' => env('OPENROUTER_MODEL', $default),
+            'openai' => env('OPENAI_MODEL', $default),
+            'anthropic' => env('ANTHROPIC_MODEL', $default),
+            'google' => env('GOOGLE_MODEL', $default),
+            'mistral' => env('MISTRAL_MODEL', $default),
+            'groq' => env('GROQ_MODEL', $default),
+            'xai' => env('XAI_MODEL', $default),
+            'perplexity' => env('PERPLEXITY_MODEL', $default),
+            default => $default,
+        };
     }
 
     private function localeLabel(string $code): string

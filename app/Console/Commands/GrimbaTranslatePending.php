@@ -15,7 +15,7 @@ class GrimbaTranslatePending extends Command
         {--force : Retranslate even if already has a translation in the target locale}
         {--dry-run : Report what would be translated without calling providers}';
 
-    protected $description = 'Translate pending un-translated posts via the configured provider chain (OpenAI / Anthropic / Mistral / DeepL / Gemini / Groq / LibreTranslate).';
+    protected $description = 'Translate pending un-translated posts via the configured provider chain (OpenAI / OpenRouter / Anthropic / xAI / Perplexity / Mistral / DeepL / Gemini / Groq / LibreTranslate).';
 
     public function handle(GrimbaTranslator $translator): int
     {

@@ -1713,6 +1713,18 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
     line-height: 1.2;
     text-transform: uppercase;
 }
+.grimba-translation-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: rgba(26, 23, 19, 0.045);
+    border: 1px solid rgba(26, 23, 19, 0.08);
+    color: var(--gn-muted);
+    font-family: var(--gn-font-body);
+    font-size: 12px;
+}
 
 @media (max-width: 767.98px) {
     body.grimba-home {

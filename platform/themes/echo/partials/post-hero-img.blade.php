@@ -3,7 +3,7 @@
     // editorial SVG placeholder when posts.image is null, instead of
     // RvMedia's generic broken-image glyph.
     $__size = $size ?? 'medium';
-    $__alt  = $post->name ?? '';
+    $__alt  = \App\Support\GrimbaTranslationPresenter::title($post);
     $__hasImg = ! empty($post->image);
 @endphp
 @if($__hasImg)

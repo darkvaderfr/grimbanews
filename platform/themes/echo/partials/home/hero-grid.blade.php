@@ -1,4 +1,5 @@
 @php
+    use App\Support\GrimbaTranslationPresenter as GnTr;
     use Botble\Blog\Models\Post;
     use Illuminate\Support\Facades\DB;
 
@@ -81,12 +82,19 @@
 
             <ol class="grimba-briefing__list">
                 @foreach($briefing->take(5) as $p)
+                    @php
+                        $title = GnTr::title($p);
+                        $isTranslated = GnTr::isTranslated($p);
+                    @endphp
                     <li class="grimba-briefing__item">
                         <a href="{{ $p->url }}" class="grimba-briefing__thumb">
                             {!! Theme::partial('post-hero-img', ['post' => $p, 'size' => 'small']) !!}
                         </a>
                         <div class="grimba-briefing__body">
-                            <a href="{{ $p->url }}" class="grimba-briefing__headline">{{ $p->name }}</a>
+                            <a href="{{ $p->url }}" class="grimba-briefing__headline">{{ $title }}</a>
+                            @if($isTranslated)
+                                {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+                            @endif
                             @if($p->created_at)
                                 <span class="small opacity-75">{{ $p->created_at->locale('fr')->diffForHumans(['short' => false]) }}</span>
                             @endif
@@ -104,15 +112,21 @@
         {{-- Center: Hero Story --}}
         <section class="col-xl-6 col-lg-8 col-12 grimba-hero">
             @if($hero)
+                @php
+                    $heroTitle = GnTr::title($hero);
+                    $heroDesc = GnTr::description($hero);
+                    $heroTranslated = GnTr::isTranslated($hero);
+                @endphp
                 <a href="{{ $hero->url }}" class="grimba-hero__media">
                     {!! Theme::partial('post-hero-img', ['post' => $hero, 'size' => 'extra-large']) !!}
                     <div class="grimba-hero__gradient"></div>
-                    {{-- S170 — translation feature dropped. Hero always
-                         renders the original-language title + desc. --}}
                     <div class="grimba-hero__text">
-                        <h1 class="grimba-hero__title">{{ $hero->name }}</h1>
-                        @if($hero->description)
-                            <p class="grimba-hero__desc">{{ \Illuminate\Support\Str::limit(strip_tags($hero->description), 140) }}</p>
+                        <h1 class="grimba-hero__title">{{ $heroTitle }}</h1>
+                        @if($heroTranslated)
+                            {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+                        @endif
+                        @if($heroDesc)
+                            <p class="grimba-hero__desc">{{ \Illuminate\Support\Str::limit(strip_tags($heroDesc), 140) }}</p>
                         @endif
                     </div>
                     <div class="grimba-hero__coverage">
@@ -138,6 +152,10 @@
             </header>
 
             @foreach($blindspots as $b)
+                @php
+                    $blindTitle = GnTr::title($b);
+                    $blindTranslated = GnTr::isTranslated($b);
+                @endphp
                 <a href="{{ $b->url }}" class="grimba-blind-card">
                     <div class="grimba-blind-card__media">
                         {!! Theme::partial('post-hero-img', ['post' => $b, 'size' => 'medium']) !!}
@@ -146,7 +164,10 @@
                         <span class="grimba-blind-card__tag">
                             <span class="blindspot-badge blindspot-badge--on-dark">Angle mort</span>
                         </span>
-                        <h3 class="grimba-blind-card__title">{{ $b->name }}</h3>
+                        <h3 class="grimba-blind-card__title">{{ $blindTitle }}</h3>
+                        @if($blindTranslated)
+                            {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+                        @endif
                         {!! Theme::partial('home.coverage-bar', ['post' => $b, 'compact' => true, 'onDark' => true]) !!}
                     </div>
                 </a>

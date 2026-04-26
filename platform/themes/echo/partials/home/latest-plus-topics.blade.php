@@ -1,4 +1,5 @@
 @php
+    use App\Support\GrimbaTranslationPresenter as GnTr;
     use Botble\Blog\Models\Category;
     use Botble\Blog\Models\Post;
 
@@ -25,6 +26,10 @@
 
             <ul class="grimba-latest__list">
                 @foreach($latest as $p)
+                    @php
+                        $title = GnTr::title($p);
+                        $isTranslated = GnTr::isTranslated($p);
+                    @endphp
                     <li class="grimba-latest__item">
                         <div class="grimba-latest__body">
                             <span class="grimba-latest__kicker">
@@ -38,7 +43,10 @@
                                     <span class="opacity-50">·</span> {{ $p->created_at->locale('fr')->diffForHumans(['short' => false]) }}
                                 @endif
                             </span>
-                            <a href="{{ $p->url }}" class="grimba-latest__headline">{{ $p->name }}</a>
+                            <a href="{{ $p->url }}" class="grimba-latest__headline">{{ $title }}</a>
+                            @if($isTranslated)
+                                <div class="mt-1">{!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}</div>
+                            @endif
                             {!! Theme::partial('home.coverage-bar', ['post' => $p, 'compact' => true]) !!}
                         </div>
                         <a href="{{ $p->url }}" class="grimba-latest__thumb">

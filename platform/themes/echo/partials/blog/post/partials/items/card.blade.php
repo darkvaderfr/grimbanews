@@ -1,8 +1,7 @@
 @php
-    // S170 — translation feature dropped. Cards always render the
-    // original-language title + description.
-    $__title = $post->name;
-    $__desc  = $post->description;
+    $__title = \App\Support\GrimbaTranslationPresenter::title($post);
+    $__desc  = \App\Support\GrimbaTranslationPresenter::description($post);
+    $__isTr = \App\Support\GrimbaTranslationPresenter::isTranslated($post);
 @endphp
 <article class="article-card {{ $classWrapper ?? null }}">
     <div class="article-card__image">
@@ -46,6 +45,9 @@
                 {{ $__title }}
             </a>
         </h2>
+        @if($__isTr)
+            <div class="mb-2">{!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}</div>
+        @endif
 
         {{-- Description --}}
         @if ($description = $__desc)
