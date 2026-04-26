@@ -392,13 +392,11 @@ body.grimba-home .echo-author-area {
        come later in DOM order. top/left are set inline by JS from the
        trigger's getBoundingClientRect() on open. */
     position: fixed;
-    /* S176 — very subtle translucency (Vader's call). Was fully opaque
-       since S158; now ~96% paper bg with a soft blur lets the surface
-       behind hint through without compromising option-label legibility.
-       Keep the heavy shadow so the menu still has a real edge. */
-    background: rgba(246, 241, 232, 0.94);
-    -webkit-backdrop-filter: blur(10px) saturate(118%);
-    backdrop-filter: blur(10px) saturate(118%);
+    /* S203 — opaque paper. The translucent version made hero cards
+       bleed through the region picker and hurt menu legibility. */
+    background: var(--gn-paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     border: 1px solid rgba(26, 23, 19, 0.16);
     border-radius: 14px;
     box-shadow: 0 18px 42px rgba(26, 23, 19, 0.22);
@@ -442,12 +440,9 @@ body.grimba-home .echo-author-area {
     border-color: rgba(255, 255, 255, 0.12);
 }
 [data-bs-theme="dark"] .grimba-region__menu {
-    /* S176 — match light-mode subtle translucency. Dark paper at 94%
-       opacity + same blur. Heavy shadow keeps the edge crisp against
-       light hero images bleeding behind. */
-    background: rgba(28, 24, 17, 0.94);
-    -webkit-backdrop-filter: blur(10px) saturate(118%);
-    backdrop-filter: blur(10px) saturate(118%);
+    background: #1c1811;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     border-color: rgba(255, 255, 255, 0.18);
     box-shadow: 0 18px 42px rgba(0, 0, 0, 0.5);
 }
@@ -1700,6 +1695,23 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
     transform-origin: left center;
     background: linear-gradient(90deg, #3b82f6, #a8a8a8, #e84c3d);
     box-shadow: 0 0 14px rgba(26, 23, 19, 0.18);
+}
+.grimba-bias-confidence {
+    display: inline-flex;
+    align-items: center;
+    width: max-content;
+    max-width: 160px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(192, 57, 43, 0.08);
+    border: 1px solid rgba(192, 57, 43, 0.18);
+    color: #8d3025;
+    font-family: var(--gn-font-body);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-transform: uppercase;
 }
 
 @media (max-width: 767.98px) {

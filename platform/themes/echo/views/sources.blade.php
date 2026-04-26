@@ -124,11 +124,16 @@
                                                 {{ $src->name }}
                                             @endif
                                         </h3>
-                                        <span class="bias-badge bias-badge--sm"
-                                              style="background: {{ $biasMeta[$biasKey]['color'] }}22;
-                                                     color: {{ $biasMeta[$biasKey]['color'] }};
-                                                     border: 1px solid {{ $biasMeta[$biasKey]['color'] }}44;">
-                                            {{ $biasMeta[$biasKey]['label'] }}
+                                        <span class="d-inline-flex flex-column align-items-end gap-1">
+                                            <span class="bias-badge bias-badge--sm"
+                                                  style="background: {{ $biasMeta[$biasKey]['color'] }}22;
+                                                         color: {{ $biasMeta[$biasKey]['color'] }};
+                                                         border: 1px solid {{ $biasMeta[$biasKey]['color'] }}44;">
+                                                {{ $biasMeta[$biasKey]['label'] }}
+                                            </span>
+                                            @include(Theme::getThemeNamespace('partials.bias-confidence'), [
+                                                'source' => $src,
+                                            ])
                                         </span>
                                     </div>
 

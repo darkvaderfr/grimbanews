@@ -186,6 +186,10 @@
                         ">
                             {{ $meta['label'] }}
                         </span>
+                        @include(Theme::getThemeNamespace('partials.bias-confidence'), [
+                            'source' => $src,
+                            'post' => $cp,
+                        ])
 
                         @if($isCurrent)
                             <span style="

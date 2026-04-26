@@ -59,11 +59,17 @@
         </div>
 
         @if($biasLabel)
-            {!! Theme::partial('bias-badge', [
-                'bias'      => $post->bias_rating,
-                'showLabel' => true,
-                'size'      => 'md',
-            ]) !!}
+            <span class="d-inline-flex flex-column align-items-start gap-1">
+                {!! Theme::partial('bias-badge', [
+                    'bias'      => $post->bias_rating,
+                    'showLabel' => true,
+                    'size'      => 'md',
+                ]) !!}
+                @include(Theme::getThemeNamespace('partials.bias-confidence'), [
+                    'source' => $source,
+                    'post' => $post,
+                ])
+            </span>
         @endif
 
         @if($post->is_blindspot)
