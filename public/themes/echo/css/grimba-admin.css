@@ -81,6 +81,52 @@ body .navbar-vertical .nav-item.active > .nav-link {
 body .navbar-vertical .nav-link-icon {
     color: currentColor;
 }
+body .navbar-vertical .dropdown-menu,
+body .app-sidebar .dropdown-menu {
+    background: rgba(246, 241, 232, 0.55) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+body .navbar-vertical .dropdown-menu .dropdown-item,
+body .app-sidebar .dropdown-menu .dropdown-item {
+    color: var(--gn-ink-muted) !important;
+    background: transparent !important;
+    border-radius: 10px;
+    font-family: var(--gn-font-body);
+}
+body .navbar-vertical .dropdown-menu .dropdown-item .nav-link-title,
+body .navbar-vertical .dropdown-menu .dropdown-item .nav-link-icon,
+body .app-sidebar .dropdown-menu .dropdown-item .nav-link-title,
+body .app-sidebar .dropdown-menu .dropdown-item .nav-link-icon {
+    color: currentColor !important;
+}
+body .navbar-vertical .dropdown-menu .dropdown-item svg,
+body .app-sidebar .dropdown-menu .dropdown-item svg {
+    color: currentColor !important;
+}
+body .navbar-vertical .dropdown-menu .dropdown-item svg [stroke],
+body .app-sidebar .dropdown-menu .dropdown-item svg [stroke] {
+    stroke: currentColor !important;
+}
+body .navbar-vertical .dropdown-menu .dropdown-item svg [fill]:not([fill="none"]),
+body .app-sidebar .dropdown-menu .dropdown-item svg [fill]:not([fill="none"]) {
+    fill: currentColor !important;
+}
+body .navbar-vertical .dropdown-menu .dropdown-item:hover,
+body .navbar-vertical .dropdown-menu .dropdown-item:focus,
+body .app-sidebar .dropdown-menu .dropdown-item:hover,
+body .app-sidebar .dropdown-menu .dropdown-item:focus {
+    color: var(--gn-ink) !important;
+    background: rgba(26, 23, 19, 0.07) !important;
+}
+body .navbar-vertical .dropdown-menu .dropdown-item.active,
+body .navbar-vertical .dropdown-menu .dropdown-item.show,
+body .app-sidebar .dropdown-menu .dropdown-item.active,
+body .app-sidebar .dropdown-menu .dropdown-item.show {
+    color: var(--gn-ink) !important;
+    background: rgba(26, 23, 19, 0.11) !important;
+    font-weight: 700;
+}
 
 /* ------------------------------------------------------------
    Top navbar
@@ -280,6 +326,29 @@ html[data-bs-theme="dark"] body .navbar-vertical .nav-link.active,
 html[data-bs-theme="dark"] body .navbar-vertical .nav-item.active > .nav-link {
     background: var(--gn-paper) !important;
     color: var(--gn-paper-warm) !important;
+}
+html[data-bs-theme="dark"] body .navbar-vertical .dropdown-menu,
+html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu {
+    background: rgba(18, 16, 7, 0.52) !important;
+}
+html[data-bs-theme="dark"] body .navbar-vertical .dropdown-menu .dropdown-item,
+html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item {
+    color: var(--gn-ink-muted) !important;
+    background: transparent !important;
+}
+html[data-bs-theme="dark"] body .navbar-vertical .dropdown-menu .dropdown-item:hover,
+html[data-bs-theme="dark"] body .navbar-vertical .dropdown-menu .dropdown-item:focus,
+html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item:hover,
+html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item:focus {
+    color: var(--gn-ink) !important;
+    background: rgba(246, 241, 232, 0.08) !important;
+}
+html[data-bs-theme="dark"] body .navbar-vertical .dropdown-menu .dropdown-item.active,
+html[data-bs-theme="dark"] body .navbar-vertical .dropdown-menu .dropdown-item.show,
+html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item.active,
+html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item.show {
+    color: var(--gn-ink) !important;
+    background: rgba(246, 241, 232, 0.13) !important;
 }
 html[data-bs-theme="dark"] body .navbar.navbar-expand-md.d-print-none {
     background: rgba(18, 16, 7, 0.92) !important;
