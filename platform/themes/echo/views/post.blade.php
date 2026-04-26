@@ -127,6 +127,8 @@
                             <span class="opacity-50">·</span>
                             <span class="opacity-75">Mis à jour {{ $__gnLatest->locale('fr')->diffForHumans() }}</span>
                         @endif
+                        {{-- S179 — reading time chip on the story hero meta line --}}
+                        {!! Theme::partial('reading-time', ['post' => $post]) !!}
                     </div>
 
                     <h1 class="grimba-methodology__title m-0 mb-3"

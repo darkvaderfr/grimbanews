@@ -40,6 +40,8 @@
                 <span class="grimba-topnews__kicker opacity-75">{{ $post->source_name }}</span>
             @endif
             {!! Theme::partial('home.language-badge', ['post' => $post, 'compact' => true]) !!}
+            {{-- S179 — reading time --}}
+            {!! Theme::partial('reading-time', ['post' => $post]) !!}
         </div>
 
         {{-- Title --}}
