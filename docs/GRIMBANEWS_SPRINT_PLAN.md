@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `51a218c` Document admin visual regression routes
 - `fe230c3` Document admin deployment checklist
 - `8353243` Record admin production readiness smoke
 - `1de435f` Complete admin cinematic SOK
 - `fbf0a03` Polish admin inline actions
-- `19820da` Add admin wayfinder navigation
 
 Latest verification:
 
-- `php artisan test` passed with `52` tests and `766` assertions.
+- `php artisan test` passed with `53` tests and `799` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 - `php artisan grimba:health` passed and `php artisan route:list --path=admin/grimba` lists 52 Grimba admin routes.
 
@@ -48,7 +48,7 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S247 — Maturity, Accessibility, Admin, And Tests
+### S185-S248 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
@@ -80,6 +80,7 @@ Latest verification:
 - S245 recorded a local production-readiness smoke without deploying: app health, NobuAI health, 52 admin routes, and the full test suite are green.
 - S246 documented the later production deployment cache order, post-deploy smoke, and rollback path for the admin redesign without deploying production.
 - S247 documented the required admin visual-regression screenshot routes and pass criteria so future changes preserve the redesigned backend contract.
+- S248 extracted an isolated focused admin route smoke test covering cockpit, provider vault, RSS, NewsAPI, sources, triage, clusters, coverage map, subscribers, and cookies.
 
 ## Active Systems
 
@@ -114,14 +115,14 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S248 — Admin Route Smoke Test Extraction
+### S249 — Admin Editorial Copy Final Pass
 
-Goal: Extract representative admin route rendering into a smaller focused test so backend UI smoke is faster to run during future sprints.
+Goal: Normalize remaining admin hero/page copy so the backend reads as one editorial product.
 
 Acceptance:
 
-- Add a focused feature test for key `/admin/grimba/*` GET pages that asserts shell markers and 200 responses.
-- Keep the broader admin settings integration test intact.
+- Custom admin hero text avoids mixed English/French where the surrounding page is French.
+- NobuAI/provider language remains admin-only where providers are named.
 - Keep tests green and do not deploy production.
 
 ## Operating Rules
