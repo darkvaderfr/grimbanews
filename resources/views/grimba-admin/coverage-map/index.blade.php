@@ -36,7 +36,7 @@
         <section class="grimba-admin-hero">
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                 <div>
-                    <span class="grimba-admin-kicker">Coverage map</span>
+                    <span class="grimba-admin-kicker">Carte couverture</span>
                     <h1 class="grimba-admin-title">Carte de couverture</h1>
                     <p class="grimba-admin-copy">
                         Repérez les dossiers qui n'ont qu'un angle politique ou qui manquent une source gauche, centre ou droite avant publication.

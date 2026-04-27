@@ -9,10 +9,10 @@
 
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
-                <span class="grimba-admin-kicker">Source intelligence</span>
+                <span class="grimba-admin-kicker">Renseignement sources</span>
                 <h1 class="grimba-admin-title">Sources suivies</h1>
                 <p class="grimba-admin-copy">
-                    Review every outlet GrimbaNews knows about, classify unknown sources, and keep bias/ownership signals reliable.
+                    Vérifiez chaque média connu de GrimbaNews, classez les sources inconnues et gardez les signaux biais/propriété fiables.
                 </p>
             </div>
             <span class="grimba-admin-status">{{ $unknownCount }} à classer</span>

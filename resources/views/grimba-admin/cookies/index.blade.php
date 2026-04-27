@@ -10,7 +10,7 @@
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
                 <span class="grimba-admin-kicker">Consent layer</span>
-                <h1 class="grimba-admin-title">Cookie banner</h1>
+                <h1 class="grimba-admin-title">Bandeau cookies</h1>
                 <p class="grimba-admin-copy">
                     Edit the public consent copy and keep the privacy banner readable across the GrimbaNews front-end.
                 </p>

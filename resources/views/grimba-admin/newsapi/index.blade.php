@@ -9,10 +9,10 @@
 
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
-                <span class="grimba-admin-kicker">Ingest engine</span>
+                <span class="grimba-admin-kicker">Moteur d'ingest</span>
                 <h1 class="grimba-admin-title">NewsAPI pipeline</h1>
                 <p class="grimba-admin-copy">
-                    Control the secondary ingest stream, test provider access, and launch a fetch without leaving the editorial backend.
+                    Pilotez le flux secondaire, testez l'accès fournisseur et lancez une récupération sans quitter le backend éditorial.
                 </p>
             </div>
             <span class="grimba-admin-status">

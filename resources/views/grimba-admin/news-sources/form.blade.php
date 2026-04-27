@@ -17,10 +17,10 @@
 
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
-                <span class="grimba-admin-kicker">Source registry</span>
-                <h1 class="grimba-admin-title">{{ $isEdit ? 'Edit source' : 'New source' }}</h1>
+                <span class="grimba-admin-kicker">Registre sources</span>
+                <h1 class="grimba-admin-title">{{ $isEdit ? 'Modifier la source' : 'Nouvelle source' }}</h1>
                 <p class="grimba-admin-copy">
-                    Maintain source bias, ownership, language, and credibility signals used across story comparisons.
+                    Maintenez les signaux de biais, propriété, langue et crédibilité utilisés dans les comparatifs.
                 </p>
             </div>
             <span class="grimba-admin-status">{{ $isEdit ? 'Editing #' . $source->id : 'Create mode' }}</span>

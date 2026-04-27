@@ -17,10 +17,10 @@
 
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
-                <span class="grimba-admin-kicker">RSS intake</span>
-                <h1 class="grimba-admin-title">{{ $isEdit ? 'Edit feed' : 'New RSS feed' }}</h1>
+                <span class="grimba-admin-kicker">Entrée RSS</span>
+                <h1 class="grimba-admin-title">{{ $isEdit ? 'Modifier le flux' : 'Nouveau flux RSS' }}</h1>
                 <p class="grimba-admin-copy">
-                    Connect a publisher feed to a classified source. Ingested drafts inherit source bias, ownership, and credibility metadata.
+                    Reliez un flux éditeur à une source classée. Les brouillons ingérés héritent des métadonnées de biais, propriété et crédibilité.
                 </p>
             </div>
             <span class="grimba-admin-status">{{ $isEdit ? 'Feed #' . $feed->id : 'Create mode' }}</span>

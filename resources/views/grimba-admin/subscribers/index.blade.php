@@ -9,7 +9,7 @@
 
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
-                <span class="grimba-admin-kicker">Audience command</span>
+                <span class="grimba-admin-kicker">Commande audience</span>
                 <h1 class="grimba-admin-title">Abonnés infolettre</h1>
                 <p class="grimba-admin-copy">
                     Suivez les inscriptions, exportez les segments, et gardez le signal biais du lectorat visible pour l'équipe éditoriale.

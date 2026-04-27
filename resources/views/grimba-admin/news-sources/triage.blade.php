@@ -10,10 +10,10 @@
 
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
-                <span class="grimba-admin-kicker">Classification queue</span>
+                <span class="grimba-admin-kicker">File de classification</span>
                 <h1 class="grimba-admin-title">Sources à classer</h1>
                 <p class="grimba-admin-copy">
-                    Classify automatically-created sources before their stories shape public bias distribution and NobuAI summaries.
+                    Classez les sources créées automatiquement avant qu'elles influencent la distribution des biais publics et les synthèses NobuAI.
                 </p>
             </div>
             <span class="grimba-admin-status">{{ $rows->count() }} en attente</span>

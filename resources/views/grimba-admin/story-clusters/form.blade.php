@@ -30,10 +30,10 @@
 
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
-                <span class="grimba-admin-kicker">Story desk</span>
-                <h1 class="grimba-admin-title">{{ $isEdit ? 'Edit story cluster' : 'New story cluster' }}</h1>
+                <span class="grimba-admin-kicker">Bureau histoire</span>
+                <h1 class="grimba-admin-title">{{ $isEdit ? 'Modifier le dossier' : 'Nouveau dossier' }}</h1>
                 <p class="grimba-admin-copy">
-                    Curate story groupings, attach or detach articles, and keep the public comparison page coherent.
+                    Organisez les regroupements, attachez ou détachez les articles et gardez la page de comparaison publique cohérente.
                 </p>
             </div>
             <span class="grimba-admin-status">{{ $isEdit ? 'Cluster #' . $cluster->id : 'Create mode' }}</span>

@@ -27,7 +27,7 @@
 
     <section class="grimba-cockpit__hero mb-3">
         <div>
-            <span class="grimba-cockpit__kicker">Command center</span>
+            <span class="grimba-cockpit__kicker">Centre de commande</span>
             <h1>Tableau de bord éditorial</h1>
             <p>Surveillez la pression brouillons, la couverture, les traductions NobuAI et les dossiers actifs avant publication.</p>
         </div>

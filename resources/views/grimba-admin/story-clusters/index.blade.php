@@ -10,7 +10,7 @@
         <section class="grimba-admin-hero">
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                 <div>
-                    <span class="grimba-admin-kicker">Cluster desk</span>
+                    <span class="grimba-admin-kicker">Bureau dossiers</span>
                     <h1 class="grimba-admin-title">Dossiers actifs</h1>
                     <p class="grimba-admin-copy">
                         Regroupez les articles par histoire, vérifiez la balance gauche-centre-droite, puis ouvrez la carte de couverture pour traiter les angles manquants.

@@ -199,4 +199,56 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('Dropdowns are solid and above page content', $doc);
         $this->assertStringContainsString('Dense table rows become labeled cards on mobile', $doc);
     }
+
+    public function test_grimba_admin_hero_copy_avoids_obvious_mixed_english(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $views = [
+            '/resources/views/grimba-admin/newsapi/index.blade.php',
+            '/resources/views/grimba-admin/coverage-map/index.blade.php',
+            '/resources/views/grimba-admin/cookies/index.blade.php',
+            '/resources/views/grimba-admin/cockpit.blade.php',
+            '/resources/views/grimba-admin/rss-feeds/index.blade.php',
+            '/resources/views/grimba-admin/rss-drafts/index.blade.php',
+            '/resources/views/grimba-admin/story-clusters/index.blade.php',
+            '/resources/views/grimba-admin/subscribers/index.blade.php',
+            '/resources/views/grimba-admin/news-sources/triage.blade.php',
+            '/resources/views/grimba-admin/news-sources/index.blade.php',
+            '/resources/views/grimba-admin/story-clusters/form.blade.php',
+            '/resources/views/grimba-admin/rss-feeds/form.blade.php',
+            '/resources/views/grimba-admin/news-sources/form.blade.php',
+            '/resources/views/grimba-admin/translation/index.blade.php',
+        ];
+        $forbidden = [
+            'Command center',
+            'RSS command lane',
+            'RSS control tower',
+            'Ingest engine',
+            'Audience command',
+            'Source intelligence',
+            'Classification queue',
+            'Cluster desk',
+            'Story desk',
+            'Source registry',
+            'RSS intake',
+            'Cookie banner',
+            'Coverage map',
+            'Edit source',
+            'New source',
+            'Edit feed',
+            'New RSS feed',
+            'Edit story cluster',
+            'New story cluster',
+            'NobuAI Provider Vault',
+            'LLM keys and translation controls',
+        ];
+
+        foreach ($views as $view) {
+            $contents = file_get_contents($root . $view);
+
+            foreach ($forbidden as $phrase) {
+                $this->assertStringNotContainsString($phrase, $contents, $view);
+            }
+        }
+    }
 }

@@ -45,7 +45,7 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin/grimba/translation')
             ->assertOk()
-            ->assertSee('NobuAI Provider Vault')
+            ->assertSee('Coffre fournisseurs NobuAI')
             ->assertSee('grimba-admin-wayfinder', false)
             ->assertSee('grimba-admin-form-section', false)
             ->assertSee('Provider diagnostics')
@@ -64,7 +64,7 @@ class AdminSettingsTest extends TestCase
             ->assertOk()
             ->assertSee('grimba-admin-wayfinder', false)
             ->assertSee('grimba-admin-table-responsive', false)
-            ->assertSee('Classification queue')
+            ->assertSee('File de classification')
             ->assertSee('Sources à classer')
             ->assertSee('Score');
 
@@ -159,7 +159,7 @@ class AdminSettingsTest extends TestCase
             ->assertSee('grimba-admin-actions', false)
             ->assertSee('grimba-admin-table-responsive', false)
             ->assertSee('grimba-admin-inline-actions', false)
-            ->assertSee('RSS control tower')
+            ->assertSee('Tour de contrôle RSS')
             ->assertSee('Flux RSS');
 
         $this->actingAs($this->admin())
@@ -174,7 +174,7 @@ class AdminSettingsTest extends TestCase
             ->assertOk()
             ->assertSee('grimba-admin-actions', false)
             ->assertSee('grimba-admin-table-responsive', false)
-            ->assertSee('Audience command')
+            ->assertSee('Commande audience')
             ->assertSee('Abonnés infolettre');
 
         $this->actingAs($this->admin())
@@ -236,7 +236,7 @@ class AdminSettingsTest extends TestCase
             ->assertOk()
             ->assertSee('grimba-admin-wayfinder', false)
             ->assertSee('grimba-admin-table-responsive', false)
-            ->assertSee('Coverage map')
+            ->assertSee('Carte couverture')
             ->assertSee('Carte de couverture');
 
         $this->actingAs($this->admin())
@@ -244,7 +244,7 @@ class AdminSettingsTest extends TestCase
             ->assertOk()
             ->assertSee('grimba-admin-wayfinder', false)
             ->assertSee('grimba-admin-form-section', false)
-            ->assertSee('Cookie banner');
+            ->assertSee('Bandeau cookies');
 
         $this->actingAs($this->admin())
             ->get('/admin/grimba/cockpit')

@@ -225,8 +225,8 @@
         </nav>
 
         <section class="grimba-llm-hero">
-            <span class="grimba-llm-kicker">NobuAI Provider Vault</span>
-            <h1 class="grimba-llm-title">LLM keys and translation controls</h1>
+            <span class="grimba-llm-kicker">Coffre fournisseurs NobuAI</span>
+            <h1 class="grimba-llm-title">Clés LLM et contrôles de traduction</h1>
             <p class="grimba-llm-copy mb-0" style="max-width: 760px;">
                 Add provider keys here. Readers only see <strong>NobuAI</strong>; this backend can route through OpenAI,
                 OpenRouter, Anthropic, xAI, Mistral, Gemini, Perplexity, Groq, DeepL, or LibreTranslate.

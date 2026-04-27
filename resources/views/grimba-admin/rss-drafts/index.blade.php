@@ -9,7 +9,7 @@
 
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
-                <span class="grimba-admin-kicker">RSS command lane</span>
+                <span class="grimba-admin-kicker">File de commande RSS</span>
                 <h1 class="grimba-admin-title">File RSS à réviser</h1>
                 <p class="grimba-admin-copy">
                     Corrigez les garde-fous, publiez uniquement les brouillons prêts, et gardez le flux reader sous contrôle.

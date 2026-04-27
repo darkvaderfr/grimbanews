@@ -9,7 +9,7 @@
 
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
-                <span class="grimba-admin-kicker">RSS control tower</span>
+                <span class="grimba-admin-kicker">Tour de contrôle RSS</span>
                 <h1 class="grimba-admin-title">Flux RSS</h1>
                 <p class="grimba-admin-copy">
                     Pilotez les sources syndiquées, repérez les flux malades, et déclenchez les polls sans quitter le cockpit éditorial.
