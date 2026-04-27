@@ -375,6 +375,12 @@ body .table tbody tr:hover {
 body .table tbody td {
     border-bottom-color: var(--gn-rule) !important;
 }
+body .grimba-admin-table-responsive {
+    width: 100%;
+}
+body .grimba-admin-table td[data-label]::before {
+    display: none;
+}
 
 /* ------------------------------------------------------------
    Forms
@@ -890,6 +896,98 @@ body pre.bg-light {
     color: var(--gn-ink) !important;
 }
 
+@media (max-width: 767.98px) {
+    body .grimba-admin-screen {
+        padding-inline: 0.25rem;
+    }
+    body .grimba-admin-hero {
+        padding: 1.1rem;
+        border-radius: 18px;
+    }
+    body .grimba-admin-title {
+        font-size: clamp(2rem, 12vw, 2.75rem);
+    }
+    body .grimba-admin-copy {
+        font-size: 0.94rem;
+    }
+    body .grimba-admin-status {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+    body .grimba-admin-actions,
+    body .grimba-admin-actions form {
+        width: 100%;
+        align-items: stretch;
+    }
+    body .grimba-admin-actions > *,
+    body .grimba-admin-actions .btn,
+    body .grimba-admin-actions .form-control,
+    body .grimba-admin-actions .form-select {
+        flex: 1 1 100%;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+    body .grimba-admin-empty {
+        min-height: 0;
+        padding: 1rem;
+    }
+    body .grimba-admin-table-responsive {
+        overflow: visible;
+    }
+    body .grimba-admin-table-responsive > .grimba-admin-table {
+        border-collapse: separate;
+        border-spacing: 0 0.75rem;
+    }
+    body .grimba-admin-table-responsive .grimba-admin-table thead {
+        display: none;
+    }
+    body .grimba-admin-table-responsive .grimba-admin-table tbody,
+    body .grimba-admin-table-responsive .grimba-admin-table tr,
+    body .grimba-admin-table-responsive .grimba-admin-table td {
+        display: block;
+        width: 100%;
+    }
+    body .grimba-admin-table-responsive .grimba-admin-table tbody tr {
+        padding: 0.9rem;
+        border: 1px solid var(--gn-rule);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: 0 14px 34px rgba(26, 23, 19, 0.07);
+    }
+    body .grimba-admin-table-responsive .grimba-admin-table td[data-label] {
+        display: grid;
+        grid-template-columns: minmax(7rem, 42%) 1fr;
+        gap: 0.75rem;
+        align-items: start;
+        padding: 0.42rem 0 !important;
+        border: 0 !important;
+        text-align: left !important;
+    }
+    body .grimba-admin-table-responsive .grimba-admin-table td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        color: var(--gn-ink-soft);
+        font-family: var(--gn-font-mono);
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+    body .grimba-admin-table-responsive .grimba-admin-table td[data-label="Actions"] {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start !important;
+        gap: 0.4rem;
+    }
+    body .grimba-admin-table-responsive .grimba-admin-table td[data-label="Actions"]::before {
+        flex: 1 0 100%;
+    }
+    body .grimba-admin-table-responsive .grimba-admin-table td form.d-inline {
+        display: inline-flex !important;
+    }
+}
+
 html[data-bs-theme="dark"] body .grimba-cockpit__hero,
 body[data-bs-theme="dark"] .grimba-cockpit__hero,
 html[data-bs-theme="dark"] body .grimba-admin-hero,
@@ -980,6 +1078,14 @@ html[data-bs-theme="dark"] body .table > :not(caption) > * > *,
 body[data-bs-theme="dark"] .table > :not(caption) > * > * {
     color: var(--gn-ink);
     border-color: rgba(246, 241, 232, 0.1);
+}
+@media (max-width: 767.98px) {
+    html[data-bs-theme="dark"] body .grimba-admin-table-responsive .grimba-admin-table tbody tr,
+    body[data-bs-theme="dark"] .grimba-admin-table-responsive .grimba-admin-table tbody tr {
+        background: rgba(36, 32, 22, 0.84);
+        border-color: rgba(246, 241, 232, 0.14);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+    }
 }
 html[data-bs-theme="dark"] body .table a,
 body[data-bs-theme="dark"] .table a,

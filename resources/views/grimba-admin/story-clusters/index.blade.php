@@ -31,8 +31,8 @@
             @endif
 
             <x-core::card.body>
-                <div class="table-responsive">
-                    <table class="table table-striped align-middle">
+                <div class="table-responsive grimba-admin-table-responsive">
+                    <table class="table table-striped align-middle grimba-admin-table">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -58,10 +58,10 @@
                                     };
                                 @endphp
                                 <tr>
-                                    <td class="text-muted">{{ $c->id }}</td>
-                                    <td><strong>{{ $c->topic }}</strong></td>
-                                    <td class="text-end">{{ $c->total }}</td>
-                                    <td style="min-width:170px;">
+                                    <td data-label="#" class="text-muted">{{ $c->id }}</td>
+                                    <td data-label="Dossier"><strong>{{ $c->topic }}</strong></td>
+                                    <td data-label="Articles" class="text-end">{{ $c->total }}</td>
+                                    <td data-label="Spread" style="min-width:170px;">
                                         <span style="color:#3b82f6;">● {{ $c->spread['left'] }}</span>
                                         <span style="color:#a8a8a8;" class="mx-2">● {{ $c->spread['center'] }}</span>
                                         <span style="color:#ef4444;">● {{ $c->spread['right'] }}</span>
@@ -69,10 +69,10 @@
                                             <span class="text-muted ms-2">(+{{ $c->spread['unknown'] }} ?)</span>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td data-label="Statut">
                                         <span class="badge text-bg-{{ $barStatus[1] }}">{{ $barStatus[0] }}</span>
                                     </td>
-                                    <td class="text-end">
+                                    <td data-label="Actions" class="text-end">
                                         <a href="{{ route('grimba.story-clusters.edit', $c->id) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
                                         @if($c->total > 0)
                                             <a href="{{ url('/comparatif/' . $c->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary">Voir</a>

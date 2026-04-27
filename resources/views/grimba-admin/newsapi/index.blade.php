@@ -86,8 +86,8 @@
                     @else
                         <form method="POST" action="{{ route('grimba.newsapi.publish-drafts') }}">
                             @csrf
-                            <div class="table-responsive">
-                                <table class="table table-sm align-middle">
+                            <div class="table-responsive grimba-admin-table-responsive">
+                                <table class="table table-sm align-middle grimba-admin-table">
                                     <thead>
                                         <tr>
                                             <th style="width: 34px;"></th>
@@ -105,10 +105,10 @@
                                                 $biasLabel = ['left'=>'Gauche','center'=>'Centre','right'=>'Droite','unknown'=>'—'][$draft->bias_rating] ?? '—';
                                             @endphp
                                             <tr @class(['table-warning' => ! $isReady])>
-                                                <td>
+                                                <td data-label="Sélection">
                                                     <input type="checkbox" name="ids[]" value="{{ $draft->id }}" class="form-check-input" @disabled(! $isReady)>
                                                 </td>
-                                                <td>
+                                                <td data-label="Article">
                                                     <a href="{{ route('posts.edit', $draft->id) }}" target="_blank">
                                                         <strong>{{ \Illuminate\Support\Str::limit($draft->name, 86) }}</strong>
                                                     </a>
@@ -130,9 +130,9 @@
                                                         <div class="small text-success mt-1">Prêt à publier</div>
                                                     @endif
                                                 </td>
-                                                <td class="small">{{ $draft->source_name ?: '—' }}</td>
-                                                <td class="small">{{ $biasLabel }}</td>
-                                                <td class="text-end">
+                                                <td data-label="Source" class="small">{{ $draft->source_name ?: '—' }}</td>
+                                                <td data-label="Biais" class="small">{{ $biasLabel }}</td>
+                                                <td data-label="Actions" class="text-end">
                                                     <a href="{{ route('posts.edit', $draft->id) }}" target="_blank" class="btn btn-sm btn-outline-primary">Éditer</a>
                                                 </td>
                                             </tr>

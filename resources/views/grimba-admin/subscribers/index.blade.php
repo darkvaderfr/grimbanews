@@ -64,8 +64,8 @@
             @endif
 
             <x-core::card.body>
-                <div class="table-responsive">
-                    <table class="table table-striped align-middle">
+                <div class="table-responsive grimba-admin-table-responsive">
+                    <table class="table table-striped align-middle grimba-admin-table">
                         <thead>
                             <tr>
                                 <th>Email</th>
@@ -80,24 +80,24 @@
                         <tbody>
                             @forelse($subs as $s)
                                 <tr>
-                                    <td><strong>{{ $s->email }}</strong></td>
-                                    <td class="text-uppercase">{{ $s->locale }}</td>
-                                    <td><span class="text-muted small font-monospace">{{ $s->source_key ?? '—' }}</span></td>
-                                    <td>
+                                    <td data-label="Email"><strong>{{ $s->email }}</strong></td>
+                                    <td data-label="Locale" class="text-uppercase">{{ $s->locale }}</td>
+                                    <td data-label="Source"><span class="text-muted small font-monospace">{{ $s->source_key ?? '—' }}</span></td>
+                                    <td data-label="Signal biais">
                                         <span class="badge text-bg-light border">{{ $s->digest_variant ?? '—' }}</span>
                                         <div class="small text-muted">
                                             L {{ $s->reader_bias_left ?? 0 }} · C {{ $s->reader_bias_center ?? 0 }} · R {{ $s->reader_bias_right ?? 0 }}
                                         </div>
                                     </td>
-                                    <td><span class="text-muted">{{ \Carbon\Carbon::parse($s->created_at)->locale('fr')->isoFormat('D MMM YYYY') }}</span></td>
-                                    <td>
+                                    <td data-label="Inscrit le"><span class="text-muted">{{ \Carbon\Carbon::parse($s->created_at)->locale('fr')->isoFormat('D MMM YYYY') }}</span></td>
+                                    <td data-label="Statut">
                                         @if($s->unsubscribed_at)
                                             <span class="badge text-bg-secondary">Désabonné</span>
                                         @else
                                             <span class="badge text-bg-success">Actif</span>
                                         @endif
                                     </td>
-                                    <td class="text-end">
+                                    <td data-label="Actions" class="text-end">
                                         <form method="POST" action="{{ route('grimba.subscribers.toggle', $s->id) }}" class="d-inline">
                                             @csrf
                                             <button class="btn btn-sm btn-outline-primary">

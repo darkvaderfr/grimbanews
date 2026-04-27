@@ -38,8 +38,8 @@
             @endif
 
             <x-core::card.body>
-                <div class="table-responsive">
-                    <table class="table table-striped align-middle">
+                <div class="table-responsive grimba-admin-table-responsive">
+                    <table class="table table-striped align-middle grimba-admin-table">
                         <thead>
                             <tr>
                                 <th>Nom</th>
@@ -56,13 +56,13 @@
                         <tbody>
                             @forelse($sources as $src)
                                 <tr>
-                                    <td><strong>{{ $src->name }}</strong></td>
-                                    <td>
+                                    <td data-label="Nom"><strong>{{ $src->name }}</strong></td>
+                                    <td data-label="Site">
                                         @if($src->website)
                                             <a href="https://{{ $src->website }}" target="_blank" rel="noopener">{{ $src->website }}</a>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td data-label="Biais">
                                         @php
                                             $biasLabel = ['left'=>'Gauche','center'=>'Centre','right'=>'Droite','unknown'=>'—'][$src->bias_rating] ?? '—';
                                             $biasColor = ['left'=>'#3b82f6','center'=>'#a8a8a8','right'=>'#ef4444','unknown'=>'#9ca3af'][$src->bias_rating] ?? '#9ca3af';
@@ -71,12 +71,12 @@
                                             {{ $biasLabel }}
                                         </span>
                                     </td>
-                                    <td class="text-end">{{ isset($src->bias_score) ? number_format((float) $src->bias_score, 1) : '—' }}</td>
-                                    <td class="text-muted">{{ ['state'=>'État','corporate'=>'Privé','independent'=>'Indépendant','nonprofit'=>'Associatif'][$src->ownership_type] ?? '—' }}</td>
-                                    <td class="text-end">{{ $src->credibility_score ?? '—' }}</td>
-                                    <td>{{ $src->country ?? '—' }}</td>
-                                    <td class="text-uppercase">{{ $src->language ?? '—' }}</td>
-                                    <td class="text-end">
+                                    <td data-label="Score" class="text-end">{{ isset($src->bias_score) ? number_format((float) $src->bias_score, 1) : '—' }}</td>
+                                    <td data-label="Propriété" class="text-muted">{{ ['state'=>'État','corporate'=>'Privé','independent'=>'Indépendant','nonprofit'=>'Associatif'][$src->ownership_type] ?? '—' }}</td>
+                                    <td data-label="Crédibilité" class="text-end">{{ $src->credibility_score ?? '—' }}</td>
+                                    <td data-label="Pays">{{ $src->country ?? '—' }}</td>
+                                    <td data-label="Langue" class="text-uppercase">{{ $src->language ?? '—' }}</td>
+                                    <td data-label="Actions" class="text-end">
                                         <a href="{{ route('grimba.news-sources.edit', $src->id) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
                                         <form method="POST" action="{{ route('grimba.news-sources.destroy', $src->id) }}"
                                               class="d-inline"

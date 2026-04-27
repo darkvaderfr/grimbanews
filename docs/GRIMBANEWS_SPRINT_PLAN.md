@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `89e36e3` Add admin empty-state cards
 - `ba8f803` Polish admin action center
 - `bf3bc60` Finish futuristic admin shell audit
 - `e9f4a2e` Add guardrail quick-fix links
 - `efd8ea2` Add ingest guardrail metrics
-- `ef2a4cd` Extract shared ingest guardrails
 
 Latest verification:
 
-- `php artisan test` passed with `46` tests and `650` assertions.
+- `php artisan test` passed with `47` tests and `676` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
 ## Completed Sprint Bands
@@ -47,7 +47,7 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S238 — Maturity, Accessibility, Admin, And Tests
+### S185-S239 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
@@ -70,6 +70,7 @@ Latest verification:
 - S236 finished the shared futuristic admin shell audit: RSS drafts, RSS feeds, and subscribers now use the Grimba hero shell, shared metric cards, dark/light tokens, and enforced Blade-shell tests.
 - S237 added a shared admin action system for cockpit, RSS, NewsAPI, subscribers, source, and cluster pages with distinct primary, warning, and destructive button states.
 - S238 replaced plain admin empty rows with shared Grimba empty-state cards across RSS drafts, NewsAPI drafts, subscribers, sources, and clusters, each with a direct next action.
+- S239 added responsive admin table cards and full-width mobile action rows so RSS, NewsAPI, subscriber, source, and cluster queues remain readable on narrow screens.
 
 ## Active Systems
 
@@ -104,15 +105,15 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S239 — Admin Density And Mobile Polish
+### S240 — Admin Form Density Polish
 
-Goal: Tighten responsive admin tables/cards for dense newsroom workflows on narrow screens.
+Goal: Bring admin edit/settings forms up to the same futuristic density and readability standard as the list screens.
 
 Acceptance:
 
-- Grimba admin tables keep readable labels/actions on tablet and mobile widths.
-- Action rows wrap predictably without overlapping dropdowns or cards.
-- Tests cover responsive CSS markers and representative admin render.
+- Source, RSS feed, cluster, and provider settings forms use consistent form sections, helper copy, and mobile spacing.
+- Dense fields avoid low-contrast muted copy in both light and dark mode.
+- Tests cover shared form CSS markers and representative admin render.
 
 ## Operating Rules
 

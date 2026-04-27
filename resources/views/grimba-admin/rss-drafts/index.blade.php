@@ -104,8 +104,8 @@
                             </span>
                         </div>
 
-                        <div class="table-responsive">
-                            <table class="table table-striped align-middle">
+                        <div class="table-responsive grimba-admin-table-responsive">
+                            <table class="table table-striped align-middle grimba-admin-table">
                                 <thead>
                                     <tr>
                                         <th style="width: 30px;">
@@ -127,10 +127,10 @@
                                             $isReady = empty($guardrails);
                                         @endphp
                                         <tr @class(['table-warning' => ! $isReady])>
-                                            <td>
+                                            <td data-label="Sélection">
                                                 <input type="checkbox" name="ids[]" value="{{ $d->id }}" class="form-check-input gn-draft-check" @disabled(! $isReady)>
                                             </td>
-                                            <td>
+                                            <td data-label="Titre">
                                                 <a href="{{ route('posts.edit', $d->id) }}" target="_blank">
                                                     <strong>{{ \Illuminate\Support\Str::limit($d->name, 95) }}</strong>
                                                 </a>
@@ -154,16 +154,16 @@
                                                     <div class="small text-success mt-1">Prêt à publier</div>
                                                 @endif
                                             </td>
-                                            <td class="small">{{ $d->source_name ?? '—' }}</td>
-                                            <td>
+                                            <td data-label="Source" class="small">{{ $d->source_name ?? '—' }}</td>
+                                            <td data-label="Biais">
                                                 <span class="badge" style="background: {{ $biasColor }}22; color: {{ $biasColor }}; border: 1px solid {{ $biasColor }}44;">
                                                     {{ $biasLabel }}
                                                 </span>
                                             </td>
-                                            <td class="small text-muted">
+                                            <td data-label="Reçu" class="small text-muted">
                                                 {{ \Carbon\Carbon::parse($d->created_at)->diffForHumans() }}
                                             </td>
-                                            <td class="text-end">
+                                            <td data-label="Actions" class="text-end">
                                                 <button type="submit"
                                                         formaction="{{ route('grimba.rss-drafts.publish-one', $d->id) }}"
                                                         class="btn btn-sm btn-outline-success"

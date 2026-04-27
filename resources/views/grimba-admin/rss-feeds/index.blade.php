@@ -67,8 +67,8 @@
                     </div>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="table table-striped align-middle">
+                <div class="table-responsive grimba-admin-table-responsive">
+                    <table class="table table-striped align-middle grimba-admin-table">
                         <thead>
                             <tr>
                                 <th>Source</th>
@@ -89,19 +89,19 @@
                                     $badgeText  = !$f->is_active ? 'Inactif' : ($sick ? 'Malade' : ($warn ? 'Instable' : 'OK'));
                                 @endphp
                                 <tr>
-                                    <td>
+                                    <td data-label="Source">
                                         <strong>{{ $f->source_name ?? '—' }}</strong>
                                         @if($f->notes)
                                             <div class="small text-muted">{{ \Illuminate\Support\Str::limit($f->notes, 80) }}</div>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td data-label="URL">
                                         <a href="{{ $f->url }}" target="_blank" rel="noopener" class="small text-break" style="max-width: 280px; display:inline-block;">
                                             {{ \Illuminate\Support\Str::limit($f->url, 60) }}
                                         </a>
                                     </td>
-                                    <td class="text-uppercase small">{{ $f->feed_format }}</td>
-                                    <td>
+                                    <td data-label="Format" class="text-uppercase small">{{ $f->feed_format }}</td>
+                                    <td data-label="État">
                                         <span class="badge"
                                               style="background: {{ $badgeColor }}22; color: {{ $badgeColor }}; border:1px solid {{ $badgeColor }}44;">
                                             {{ $badgeText }}
@@ -115,15 +115,15 @@
                                             </div>
                                         @endif
                                     </td>
-                                    <td class="text-end">{{ $f->items_ingested }}</td>
-                                    <td class="small text-muted">
+                                    <td data-label="Ingestés" class="text-end">{{ $f->items_ingested }}</td>
+                                    <td data-label="Dernier poll" class="small text-muted">
                                         @if($f->last_polled_at)
                                             {{ \Carbon\Carbon::parse($f->last_polled_at)->diffForHumans() }}
                                         @else
                                             —
                                         @endif
                                     </td>
-                                    <td class="text-end">
+                                    <td data-label="Actions" class="text-end">
                                         <form method="POST" action="{{ route('grimba.rss-feeds.poll-now', $f->id) }}" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-outline-primary">Poll</button>

@@ -130,6 +130,7 @@ class AdminSettingsTest extends TestCase
             ->get('/admin/grimba/rss-drafts?bias=unknown')
             ->assertOk()
             ->assertSee('grimba-admin-actions', false)
+            ->assertSee('grimba-admin-table-responsive', false)
             ->assertSee('Blockers RSS')
             ->assertSee('source manquante')
             ->assertSee('biais inconnu')
@@ -150,6 +151,7 @@ class AdminSettingsTest extends TestCase
             ->get('/admin/grimba/rss-feeds')
             ->assertOk()
             ->assertSee('grimba-admin-actions', false)
+            ->assertSee('grimba-admin-table-responsive', false)
             ->assertSee('RSS control tower')
             ->assertSee('Flux RSS');
 
@@ -157,6 +159,7 @@ class AdminSettingsTest extends TestCase
             ->get('/admin/grimba/subscribers')
             ->assertOk()
             ->assertSee('grimba-admin-actions', false)
+            ->assertSee('grimba-admin-table-responsive', false)
             ->assertSee('Audience command')
             ->assertSee('Abonnés infolettre');
 
@@ -504,6 +507,7 @@ class AdminSettingsTest extends TestCase
             ->get('/admin/grimba/newsapi')
             ->assertOk()
             ->assertSee('grimba-admin-actions', false)
+            ->assertSee('grimba-admin-table-responsive', false)
             ->assertSee('NewsAPI draft readiness')
             ->assertSee('Blockers NewsAPI')
             ->assertSee('source manquante')

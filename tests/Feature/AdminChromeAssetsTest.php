@@ -28,6 +28,10 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('body .grimba-admin-empty', $css);
         $this->assertStringContainsString('body .grimba-admin-empty__copy', $css);
         $this->assertStringContainsString('body .grimba-admin-empty__actions', $css);
+        $this->assertStringContainsString('body .grimba-admin-table-responsive', $css);
+        $this->assertStringContainsString('body .grimba-admin-table td[data-label]::before', $css);
+        $this->assertStringContainsString('@media (max-width: 767.98px)', $css);
+        $this->assertStringContainsString('grid-template-columns: minmax(7rem, 42%) 1fr;', $css);
         $this->assertStringContainsString('body .grimba-admin-screen .btn-outline-danger', $css);
         $this->assertStringContainsString('body .grimba-admin-screen .btn-outline-warning', $css);
         $this->assertStringContainsString('background-size: 42px 42px, 42px 42px, auto, auto;', $css);
@@ -81,6 +85,27 @@ class AdminChromeAssetsTest extends TestCase
 
             $this->assertStringContainsString('grimba-admin-empty', $contents, $view);
             $this->assertStringContainsString('grimba-admin-empty__actions', $contents, $view);
+        }
+    }
+
+    public function test_key_admin_tables_use_mobile_labels(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $views = [
+            '/resources/views/grimba-admin/rss-drafts/index.blade.php',
+            '/resources/views/grimba-admin/rss-feeds/index.blade.php',
+            '/resources/views/grimba-admin/newsapi/index.blade.php',
+            '/resources/views/grimba-admin/subscribers/index.blade.php',
+            '/resources/views/grimba-admin/news-sources/index.blade.php',
+            '/resources/views/grimba-admin/story-clusters/index.blade.php',
+        ];
+
+        foreach ($views as $view) {
+            $contents = file_get_contents($root . $view);
+
+            $this->assertStringContainsString('grimba-admin-table-responsive', $contents, $view);
+            $this->assertStringContainsString('grimba-admin-table', $contents, $view);
+            $this->assertStringContainsString('data-label="Actions"', $contents, $view);
         }
     }
 }
