@@ -571,7 +571,10 @@ class GrimbaRssPoller
      *
      * Pure: doesn't touch the calling article's row. The caller
      * applies the returned id to its own draft. Existing orphans are
-     * mutated in-place (atomic update inside a transaction).
+     * mutated in-place (atomic update inside a transaction). When
+     * resolving an already-saved orphan, pass $excludePostId so the
+     * orphan scan cannot match the article against itself and mint a
+     * one-post cluster.
      */
     public static function findOrFormCluster(
         string $title,
@@ -579,6 +582,7 @@ class GrimbaRssPoller
         float $threshold = 0.30,
         bool $dryRun = false,
         ?string $translatedTitle = null,
+        ?int $excludePostId = null,
     ): ?int {
         // Stage 1 — existing-cluster match (cheap, indexed lookup).
         $existing = self::findLikelyCluster($title, $lookbackDays, $threshold, $translatedTitle);
@@ -611,6 +615,7 @@ class GrimbaRssPoller
             ->whereNull('story_cluster_id')
             ->whereIn('status', ['published', 'draft'])
             ->where('created_at', '>=', $orphanCutoff)
+            ->when($excludePostId !== null, fn ($query) => $query->where('id', '!=', $excludePostId))
             ->orderByDesc('id')
             // 500 cap: at scale we don't want to scan all-time orphans.
             // Recency wins; older orphans get a chance via the next

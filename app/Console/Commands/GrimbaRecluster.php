@@ -48,6 +48,7 @@ class GrimbaRecluster extends Command
                 $threshold,
                 $dry,
                 $p->translated_name ?? null,
+                (int) $p->id,
             );
             if ($cluster === null) continue;
             if ($cluster < 0) {

@@ -94,7 +94,14 @@ class GrimbaPollFeeds extends Command
             // helper's transaction), so we only need to update THIS
             // post's row when the helper returned a non-null id and
             // we haven't been moved already.
-            $cluster = GrimbaRssPoller::findOrFormCluster((string) $p->name);
+            $cluster = GrimbaRssPoller::findOrFormCluster(
+                (string) $p->name,
+                30,
+                0.30,
+                false,
+                null,
+                (int) $p->id,
+            );
             if ($cluster === null) continue;
 
             // Re-read story_cluster_id — findOrFormCluster may have
