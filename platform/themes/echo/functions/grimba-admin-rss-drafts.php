@@ -20,6 +20,7 @@
  * already rejected.
  */
 
+use App\Support\GrimbaIngestGuardrails;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\DashboardMenuItem;
@@ -116,28 +117,7 @@ if (! function_exists('grimba_rss_draft_guardrails')) {
      */
     function grimba_rss_draft_guardrails(Post $post): array
     {
-        $flags = [];
-        $bias = (string) ($post->bias_rating ?? 'unknown');
-        $excerpt = trim(strip_tags((string) ($post->description ?? '')));
-        $originalLanguage = strtolower(substr((string) ($post->original_language ?? ''), 0, 2));
-
-        if (! $post->source_id || ! trim((string) ($post->source_name ?? ''))) {
-            $flags[] = 'source manquante';
-        }
-
-        if (! in_array($bias, ['left', 'center', 'right'], true)) {
-            $flags[] = 'biais inconnu';
-        }
-
-        if ($originalLanguage !== '' && $originalLanguage !== 'fr' && ! trim((string) ($post->translated_name ?? ''))) {
-            $flags[] = 'traduction manquante';
-        }
-
-        if (mb_strlen($excerpt) < 80) {
-            $flags[] = 'extrait trop court';
-        }
-
-        return $flags;
+        return GrimbaIngestGuardrails::flags($post);
     }
 }
 
@@ -147,31 +127,13 @@ if (! function_exists('grimba_publish_posts')) {
      */
     function grimba_publish_posts(array $ids): array
     {
-        $published = 0;
-        $blocked = 0;
-        $reasons = [];
-
-        foreach ($ids as $id) {
-            $post = Post::query()->where('id', $id)->where('status', 'draft')->first();
-            if (! $post) continue;
-
-            $flags = grimba_rss_draft_guardrails($post);
-            if ($flags !== []) {
-                $blocked++;
-                $reasons = array_merge($reasons, $flags);
-                continue;
-            }
-
-            $post->status = 'published';
-            $post->save();
-            $published++;
-        }
-
-        return [
-            'published' => $published,
-            'blocked' => $blocked,
-            'reasons' => array_values(array_unique($reasons)),
-        ];
+        return GrimbaIngestGuardrails::publishDrafts($ids, function ($query) {
+            return $query->whereIn('id', function ($sub): void {
+                $sub->select('post_id')
+                    ->from('rss_feed_items')
+                    ->whereNotNull('post_id');
+            });
+        });
     }
 }
 
