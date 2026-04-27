@@ -61,6 +61,50 @@
         </article>
     </section>
 
+    <section class="card grimba-ops-board mb-3">
+        <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <span class="grimba-cockpit__kicker">Operations board</span>
+                <h3 class="card-title mt-2 mb-0">Ingest et files à surveiller</h3>
+            </div>
+            <a href="{{ route('grimba.rss-feeds.index') }}" class="btn btn-sm btn-outline-primary">Ouvrir RSS</a>
+        </div>
+        <div class="card-body">
+            <div class="grimba-ops-grid">
+                <a href="{{ route('grimba.rss-feeds.index') }}" class="grimba-ops-tile">
+                    <span>RSS 24h</span>
+                    <strong>{{ number_format($rssItems24) }}</strong>
+                    <small>{{ $rssActive }} actifs · {{ $rssSick }} sick · dernier {{ $rssLastPoll ? \Carbon\Carbon::parse($rssLastPoll)->locale('fr')->diffForHumans() : 'jamais' }}</small>
+                </a>
+                <a href="{{ route('grimba.newsapi.index') }}" class="grimba-ops-tile {{ ! $newsApiActive || ! $newsApiConfigured ? 'is-warn' : '' }}">
+                    <span>NewsAPI 24h</span>
+                    <strong>{{ number_format($newsApiItems24) }}</strong>
+                    <small>{{ $newsApiConfigured ? 'clé présente' : 'clé absente' }} · {{ $newsApiActive ? 'actif' : 'désactivé' }} · {{ $newsApiLastFetch ? \Carbon\Carbon::parse($newsApiLastFetch)->locale('fr')->diffForHumans() : 'jamais fetché' }}</small>
+                </a>
+                <a href="{{ route('grimba.rss-drafts.index') }}" class="grimba-ops-tile {{ $draftCount > 0 ? 'is-warn' : '' }}">
+                    <span>Brouillons</span>
+                    <strong>{{ number_format($draftCount) }}</strong>
+                    <small>à relire avant publication</small>
+                </a>
+                <a href="{{ route('grimba.translation.index') }}" class="grimba-ops-tile {{ ($translationPending + $englishTranslationPending) > 0 ? 'is-warn' : '' }}">
+                    <span>Pending translations</span>
+                    <strong>{{ number_format($translationPending + $englishTranslationPending) }}</strong>
+                    <small>{{ $translationPending }} vers FR · {{ $englishTranslationPending }} vers EN</small>
+                </a>
+                <a href="{{ route('grimba.story-clusters.index') }}" class="grimba-ops-tile {{ $nobuInsightPending > 0 ? 'is-warn' : '' }}">
+                    <span>Pending insights</span>
+                    <strong>{{ number_format($nobuInsightPending) }}</strong>
+                    <small>{{ $nobuInsightReady }} dossiers prêts</small>
+                </a>
+                <div class="grimba-ops-tile {{ $duplicateGroups > 0 ? 'is-warn' : '' }}">
+                    <span>Duplicate groups</span>
+                    <strong>{{ number_format($duplicateGroups) }}</strong>
+                    <small>{{ $duplicateGroups > 0 ? 'lancer grimba:dedupe-posts --apply' : 'aucun groupe détecté' }}</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <div class="row g-3 mb-3">
         {{-- Coverage balance --}}
         <div class="col-xl-7 col-12">
@@ -359,6 +403,74 @@
         border-color: rgba(232, 76, 61, 0.26);
         background: linear-gradient(135deg, #fff, rgba(232, 76, 61, 0.05));
     }
+    .grimba-ops-board {
+        overflow: hidden;
+    }
+    .grimba-ops-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+    .grimba-ops-tile {
+        display: block;
+        min-height: 132px;
+        padding: 0.9rem;
+        border: 1px solid var(--gn-rule);
+        border-radius: 16px;
+        background:
+            radial-gradient(circle at 18% 0%, rgba(220, 200, 160, 0.24), transparent 38%),
+            rgba(255, 255, 255, 0.72);
+        color: var(--gn-ink);
+        text-decoration: none;
+        box-shadow: 0 8px 24px rgba(26, 23, 19, 0.045);
+    }
+    .grimba-ops-tile:hover,
+    .grimba-ops-tile:focus {
+        color: var(--gn-ink);
+        border-color: rgba(26, 23, 19, 0.24);
+        transform: translateY(-1px);
+    }
+    .grimba-ops-tile.is-warn {
+        border-color: rgba(232, 76, 61, 0.28);
+        background:
+            radial-gradient(circle at 18% 0%, rgba(232, 76, 61, 0.12), transparent 38%),
+            rgba(255, 255, 255, 0.78);
+    }
+    .grimba-ops-tile span {
+        display: block;
+        font-family: var(--gn-font-mono);
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--gn-ink-soft);
+    }
+    .grimba-ops-tile strong {
+        display: block;
+        margin: 0.45rem 0;
+        font-family: var(--gn-font-display);
+        font-size: 2rem;
+        line-height: 1;
+        color: var(--gn-ink);
+    }
+    .grimba-ops-tile small {
+        color: var(--gn-ink-soft);
+        line-height: 1.35;
+    }
+    html[data-bs-theme="dark"] body .grimba-ops-tile,
+    body[data-bs-theme="dark"] .grimba-ops-tile {
+        background:
+            radial-gradient(circle at 18% 0%, rgba(201, 174, 118, 0.16), transparent 38%),
+            rgba(36, 32, 22, 0.86);
+        border-color: rgba(246, 241, 232, 0.14);
+    }
+    html[data-bs-theme="dark"] body .grimba-ops-tile.is-warn,
+    body[data-bs-theme="dark"] .grimba-ops-tile.is-warn {
+        background:
+            radial-gradient(circle at 18% 0%, rgba(232, 76, 61, 0.16), transparent 38%),
+            rgba(36, 32, 22, 0.9);
+        border-color: rgba(232, 76, 61, 0.3);
+    }
     .grimba-status-card {
         min-height: 100%;
     }
@@ -421,9 +533,15 @@
         .grimba-kpi-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+        .grimba-ops-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
     }
     @media (max-width: 575px) {
         .grimba-kpi-grid {
+            grid-template-columns: 1fr;
+        }
+        .grimba-ops-grid {
             grid-template-columns: 1fr;
         }
     }

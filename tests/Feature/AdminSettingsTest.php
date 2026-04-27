@@ -89,7 +89,12 @@ class AdminSettingsTest extends TestCase
             ->get('/admin/grimba/cockpit')
             ->assertOk()
             ->assertSee('Insights dossiers')
-            ->assertSee('Dernier insight');
+            ->assertSee('Dernier insight')
+            ->assertSee('Operations board')
+            ->assertSee('RSS 24h')
+            ->assertSee('NewsAPI 24h')
+            ->assertSee('Pending translations')
+            ->assertSee('Duplicate groups');
 
         $clusterId = DB::table('story_clusters')->orderBy('id')->value('id');
         $this->assertNotNull($clusterId, 'Fixture database must contain at least one story cluster.');

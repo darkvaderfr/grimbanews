@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `81754cd` Polish admin chrome and provider vault
 - `12a2125` Audit static UI translation catalogs
 - `f9bea23` Harden public NobuAI insight branding
 - `df7b14d` Add cockpit NobuAI insight batch action
 - `8fd4bc7` Keep admin dropdowns above content
-- `b1dae35` Clarify NobuAI live health prompt
 
 Latest verification:
 
-- `php artisan test` passed with `36` tests and `426` assertions.
+- `php artisan test` passed with `36` tests and `431` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
 ## Completed Sprint Bands
@@ -47,13 +47,14 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S222 — Maturity, Accessibility, Admin, And Tests
+### S185-S223 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
 - S220 hardened public NobuAI insight rendering so reader pages dedupe lines and scrub provider names from saved insight copy.
 - S221 moved remaining core public chrome, metadata, blindspot, comparison, and error-page copy behind saved EN/FR catalogs, with regression tests for catalog coverage.
 - S222 raised admin dropdown/header stacking above page actions, made dropdown panels effectively solid in both themes, fixed dark-mode switch sync against stale local storage, and reorganized the NobuAI provider vault into readable provider groups.
+- S223 added a cockpit operations board for RSS/NewsAPI 24h ingest, sick feeds, draft pressure, duplicate groups, pending translations, and pending NobuAI insights with direct admin links.
 
 ## Active Systems
 
@@ -88,14 +89,24 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S223 — Ingest Operations Board
+### S224 — Cockpit Runbook Actions
 
-Goal: Add a compact admin operations panel for RSS/NewsAPI/dedupe/translation queue health.
+Goal: Convert the new operations board from passive status into safe bounded actions for the common editor runbook.
 
 Acceptance:
 
-- Cockpit exposes last run, last 24h ingest count, sick feeds, duplicate groups, pending translations, and pending insights.
-- Admin links jump to the relevant queue.
+- Admin can trigger bounded RSS poll, NewsAPI fetch, translation queue, and health checks from the cockpit.
+- Each action has clear limits, admin flash output, and does not perform destructive dedupe without explicit confirmation.
+- Tests cover route authorization, limit clamping, and summarized output.
+
+### S225 — Public Story Insight QA Pack
+
+Goal: Add fixtures that verify NobuAI insight copy remains GroundNews-style after provider changes.
+
+Acceptance:
+
+- Tests cover short labeled lines, coverage-gap wording, no provider leakage, and no duplicate insight lines.
+- Story page handles missing, stale, and freshly generated insights cleanly.
 
 ## Operating Rules
 

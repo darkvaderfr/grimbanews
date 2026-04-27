@@ -132,6 +132,51 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 })
                 ->count();
 
+            $rssActive = Schema::hasTable('rss_feeds')
+                ? DB::table('rss_feeds')->where('is_active', true)->count()
+                : 0;
+            $rssSick = Schema::hasTable('rss_feeds')
+                ? DB::table('rss_feeds')->where('is_active', true)->where('consecutive_failures', '>=', 5)->count()
+                : 0;
+            $rssLastPoll = Schema::hasTable('rss_feeds')
+                ? DB::table('rss_feeds')->whereNotNull('last_polled_at')->max('last_polled_at')
+                : null;
+            $rssItems24 = Schema::hasTable('rss_feed_items')
+                ? DB::table('rss_feed_items')->where('seen_at', '>=', now()->subDay())->count()
+                : 0;
+
+            $newsApiActive = (bool) setting('grimba_newsapi_active', true);
+            $newsApiConfigured = trim((string) setting('grimba_newsapi_key', env('NEWSAPI_KEY', ''))) !== '';
+            $newsApiItems24 = Schema::hasTable('newsapi_items')
+                ? DB::table('newsapi_items')->where('fetched_at', '>=', now()->subDay())->count()
+                : 0;
+            $newsApiLastFetch = Schema::hasTable('newsapi_items')
+                ? DB::table('newsapi_items')->whereNotNull('fetched_at')->max('fetched_at')
+                : null;
+
+            $duplicateGroups = DB::table('posts')
+                ->whereNotNull('name')
+                ->select('name', 'source_id', DB::raw('COUNT(*) as c'))
+                ->groupBy('name', 'source_id')
+                ->having('c', '>', 1)
+                ->count();
+
+            $englishTranslationPending = 0;
+            if (Schema::hasTable('grimba_post_translations')) {
+                $englishTranslationPending = DB::table('posts')
+                    ->where('status', 'published')
+                    ->whereNotNull('original_language')
+                    ->where('original_language', '!=', 'en')
+                    ->whereNotExists(function ($q): void {
+                        $q->selectRaw('1')
+                            ->from('grimba_post_translations')
+                            ->whereColumn('grimba_post_translations.post_id', 'posts.id')
+                            ->where('grimba_post_translations.locale', 'en')
+                            ->whereNotNull('grimba_post_translations.translated_name');
+                    })
+                    ->count();
+            }
+
             $latestDrafts = DB::table('posts')
                 ->where('status', '!=', 'published')
                 ->orderByDesc('updated_at')
@@ -175,6 +220,9 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'publishedToday', 'draftCount',
                 'publishedTotal', 'clusterCount', 'activeClusterCount',
                 'translationReady', 'translationPending',
+                'rssActive', 'rssSick', 'rssLastPoll', 'rssItems24',
+                'newsApiActive', 'newsApiConfigured', 'newsApiItems24', 'newsApiLastFetch',
+                'duplicateGroups', 'englishTranslationPending',
                 'latestDrafts', 'nobuDrivers', 'translationDrivers',
                 'nobuInsightReady', 'nobuInsightPending', 'nobuInsightLatest'
             ));
