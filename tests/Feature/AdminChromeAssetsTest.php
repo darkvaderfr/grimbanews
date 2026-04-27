@@ -178,4 +178,25 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('/admin/grimba/cockpit', $doc);
         $this->assertStringContainsString('no destructive migration is required for rollback', $doc);
     }
+
+    public function test_admin_visual_regression_routes_are_recorded(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $doc = file_get_contents($root . '/docs/GRIMBANEWS_ADMIN_VISUAL_REGRESSION_ROUTES.md');
+        $routes = [
+            '/admin/grimba/cockpit',
+            '/admin/grimba/translation',
+            '/admin/grimba/rss-drafts',
+            '/admin/grimba/news-sources/triage',
+            '/admin/grimba/coverage-map',
+            '/admin/grimba/cookies',
+        ];
+
+        foreach ($routes as $route) {
+            $this->assertStringContainsString($route, $doc);
+        }
+
+        $this->assertStringContainsString('Dropdowns are solid and above page content', $doc);
+        $this->assertStringContainsString('Dense table rows become labeled cards on mobile', $doc);
+    }
 }
