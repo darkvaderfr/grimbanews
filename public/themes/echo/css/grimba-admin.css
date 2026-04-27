@@ -21,6 +21,10 @@ body {
     --gn-font-display: 'Fraunces', 'Playfair Display', Georgia, serif;
     --gn-font-body:    'Public Sans', 'Inter', system-ui, sans-serif;
     --gn-font-mono:    'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+    --gn-dropdown-bg:  rgba(255, 255, 255, 0.96);
+    --gn-dropdown-line: rgba(26, 23, 19, 0.18);
+    --gn-dropdown-hover: rgba(26, 23, 19, 0.075);
+    --gn-dropdown-active: rgba(26, 23, 19, 0.12);
 
     font-family: var(--gn-font-body);
     color: var(--gn-ink);
@@ -34,6 +38,10 @@ html[data-bs-theme="dark"] body {
     --gn-ink-muted:    #e6ddc7;
     --gn-ink-soft:     #c9bea5;
     --gn-rule:         rgba(246, 241, 232, 0.12);
+    --gn-dropdown-bg:  rgba(28, 24, 17, 0.97);
+    --gn-dropdown-line: rgba(246, 241, 232, 0.16);
+    --gn-dropdown-hover: rgba(246, 241, 232, 0.11);
+    --gn-dropdown-active: rgba(246, 241, 232, 0.16);
 }
 
 /* ------------------------------------------------------------
@@ -83,7 +91,7 @@ body .navbar-vertical .nav-link-icon {
 }
 body .navbar-vertical .dropdown-menu,
 body .app-sidebar .dropdown-menu {
-    background: rgba(246, 241, 232, 0.55) !important;
+    background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
 }
@@ -117,14 +125,14 @@ body .navbar-vertical .dropdown-menu .dropdown-item:focus,
 body .app-sidebar .dropdown-menu .dropdown-item:hover,
 body .app-sidebar .dropdown-menu .dropdown-item:focus {
     color: var(--gn-ink) !important;
-    background: rgba(26, 23, 19, 0.07) !important;
+    background: var(--gn-dropdown-hover) !important;
 }
 body .navbar-vertical .dropdown-menu .dropdown-item.active,
 body .navbar-vertical .dropdown-menu .dropdown-item.show,
 body .app-sidebar .dropdown-menu .dropdown-item.active,
 body .app-sidebar .dropdown-menu .dropdown-item.show {
     color: var(--gn-ink) !important;
-    background: rgba(26, 23, 19, 0.11) !important;
+    background: var(--gn-dropdown-active) !important;
     font-weight: 700;
 }
 
@@ -179,6 +187,121 @@ body header.navbar.navbar-expand-md.d-print-none .navbar-toggler-icon {
 }
 body header.navbar.navbar-expand-md.d-print-none .text-muted {
     color: var(--gn-ink-soft) !important;
+}
+
+/* ------------------------------------------------------------
+   Dropdowns / popovers — readable solid panels across admin
+   ------------------------------------------------------------ */
+body .dropdown-menu:not(.navbar-vertical .dropdown-menu):not(.app-sidebar .dropdown-menu),
+body .dropdown-menu.show:not(.navbar-vertical .dropdown-menu):not(.app-sidebar .dropdown-menu),
+body .navbar .dropdown-menu:not(.navbar-vertical .dropdown-menu),
+body .page-wrapper .dropdown-menu:not(.navbar-vertical .dropdown-menu):not(.app-sidebar .dropdown-menu),
+body .select2-dropdown,
+body .select2-container--default .select2-dropdown,
+body .select2-container--bootstrap-5 .select2-dropdown,
+body .flatpickr-calendar,
+body .datepicker-dropdown {
+    background: var(--gn-dropdown-bg) !important;
+    border: 1px solid var(--gn-dropdown-line) !important;
+    box-shadow: 0 22px 54px rgba(26, 23, 19, 0.2) !important;
+    color: var(--gn-ink) !important;
+    opacity: 1 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+body .dropdown-menu:not(.navbar-vertical .dropdown-menu):not(.app-sidebar .dropdown-menu) *,
+body .select2-dropdown *,
+body .flatpickr-calendar *,
+body .datepicker-dropdown * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+body .dropdown-menu .dropdown-header,
+body .dropdown-menu .dropdown-item,
+body .dropdown-menu a,
+body .dropdown-menu button,
+body .dropdown-menu p,
+body .dropdown-menu span,
+body .dropdown-menu small,
+body .dropdown-menu strong,
+body .dropdown-menu h1,
+body .dropdown-menu h2,
+body .dropdown-menu h3,
+body .dropdown-menu h4,
+body .dropdown-menu h5,
+body .dropdown-menu h6,
+body .dropdown-menu .text-muted {
+    color: var(--gn-ink) !important;
+}
+body .dropdown-menu .text-secondary,
+body .dropdown-menu small,
+body .dropdown-menu .small {
+    color: var(--gn-ink-soft) !important;
+}
+body .dropdown-menu .dropdown-item,
+body .dropdown-menu a:not(.btn),
+body .dropdown-menu button:not(.btn) {
+    background: transparent !important;
+}
+body .dropdown-menu .dropdown-item:hover,
+body .dropdown-menu .dropdown-item:focus,
+body .dropdown-menu a:not(.btn):hover,
+body .dropdown-menu a:not(.btn):focus,
+body .dropdown-menu button:not(.btn):hover,
+body .dropdown-menu button:not(.btn):focus,
+body .select2-results__option--highlighted,
+body .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+    background: var(--gn-dropdown-hover) !important;
+    color: var(--gn-ink) !important;
+}
+body .dropdown-menu .dropdown-item.active,
+body .dropdown-menu .dropdown-item:active,
+body .dropdown-menu .active > a,
+body .select2-results__option[aria-selected="true"],
+body .select2-results__option--selected {
+    background: var(--gn-dropdown-active) !important;
+    color: var(--gn-ink) !important;
+}
+body .dropdown-menu .dropdown-divider {
+    border-top-color: var(--gn-dropdown-line) !important;
+    opacity: 1 !important;
+}
+body .dropdown-menu .avatar,
+body .dropdown-menu .badge,
+body .dropdown-menu .status-dot {
+    opacity: 1 !important;
+}
+body .navbar-vertical .dropdown-menu,
+body .app-sidebar .dropdown-menu {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+body .navbar-vertical .dropdown-menu .dropdown-item,
+body .navbar-vertical .dropdown-menu a:not(.btn),
+body .navbar-vertical .dropdown-menu button:not(.btn),
+body .app-sidebar .dropdown-menu .dropdown-item,
+body .app-sidebar .dropdown-menu a:not(.btn),
+body .app-sidebar .dropdown-menu button:not(.btn) {
+    color: var(--gn-ink-muted) !important;
+}
+body .navbar-vertical .dropdown-menu .dropdown-item:hover,
+body .navbar-vertical .dropdown-menu .dropdown-item:focus,
+body .navbar-vertical .dropdown-menu a:not(.btn):hover,
+body .navbar-vertical .dropdown-menu a:not(.btn):focus,
+body .app-sidebar .dropdown-menu .dropdown-item:hover,
+body .app-sidebar .dropdown-menu .dropdown-item:focus,
+body .app-sidebar .dropdown-menu a:not(.btn):hover,
+body .app-sidebar .dropdown-menu a:not(.btn):focus {
+    color: var(--gn-ink) !important;
+    background: var(--gn-dropdown-hover) !important;
+}
+body .navbar-vertical .dropdown-menu .dropdown-item.active,
+body .navbar-vertical .dropdown-menu .dropdown-item.show,
+body .app-sidebar .dropdown-menu .dropdown-item.active,
+body .app-sidebar .dropdown-menu .dropdown-item.show {
+    color: var(--gn-ink) !important;
+    background: var(--gn-dropdown-active) !important;
 }
 
 /* ------------------------------------------------------------
@@ -261,6 +384,23 @@ body .btn-outline-primary:hover {
     background: var(--gn-ink) !important;
     color: var(--gn-paper) !important;
 }
+body .btn-outline-secondary,
+body header.navbar.navbar-expand-md.d-print-none .btn-outline-secondary,
+body header.navbar.navbar-expand-md.d-print-none .btn:not(.btn-primary):not(.btn-danger):not(.btn-warning):not(.btn-success):not(.btn-info):not(.btn-link) {
+    background: rgba(255, 255, 255, 0.68) !important;
+    border-color: rgba(26, 23, 19, 0.22) !important;
+    color: var(--gn-ink) !important;
+}
+body .btn-outline-secondary:hover,
+body .btn-outline-secondary:focus,
+body header.navbar.navbar-expand-md.d-print-none .btn-outline-secondary:hover,
+body header.navbar.navbar-expand-md.d-print-none .btn-outline-secondary:focus,
+body header.navbar.navbar-expand-md.d-print-none .btn:not(.btn-primary):not(.btn-danger):not(.btn-warning):not(.btn-success):not(.btn-info):not(.btn-link):hover,
+body header.navbar.navbar-expand-md.d-print-none .btn:not(.btn-primary):not(.btn-danger):not(.btn-warning):not(.btn-success):not(.btn-info):not(.btn-link):focus {
+    background: rgba(26, 23, 19, 0.08) !important;
+    border-color: rgba(26, 23, 19, 0.32) !important;
+    color: var(--gn-ink) !important;
+}
 
 /* ------------------------------------------------------------
    Status badges — map Bootstrap hues to paper-friendly tones
@@ -297,103 +437,141 @@ body .alert[style*="background: #f39c12"] { display: none !important; }
    Dark-mode parity sweep (S62)
    ------------------------------------------------------------ */
 html[data-bs-theme="dark"] body,
-html[data-bs-theme="dark"] body .page-body {
+body[data-bs-theme="dark"],
+html[data-bs-theme="dark"] body .page-body,
+body[data-bs-theme="dark"] .page-body {
     background: var(--gn-paper) !important;
     color: var(--gn-ink);
 }
-html[data-bs-theme="dark"] body .card {
+html[data-bs-theme="dark"] body .card,
+body[data-bs-theme="dark"] .card {
     background: var(--gn-paper-warm) !important;
     color: var(--gn-ink);
     border-color: rgba(255, 255, 255, 0.08) !important;
 }
-html[data-bs-theme="dark"] body .card-header {
+html[data-bs-theme="dark"] body .card-header,
+body[data-bs-theme="dark"] .card-header {
     border-bottom-color: rgba(255, 255, 255, 0.08) !important;
 }
 html[data-bs-theme="dark"] body .card-title,
+body[data-bs-theme="dark"] .card-title,
 html[data-bs-theme="dark"] body strong,
+body[data-bs-theme="dark"] strong,
 html[data-bs-theme="dark"] body b {
     color: var(--gn-ink) !important;
 }
-html[data-bs-theme="dark"] body .text-muted {
+html[data-bs-theme="dark"] body .text-muted,
+body[data-bs-theme="dark"] .text-muted {
     color: var(--gn-ink-soft) !important;
 }
-html[data-bs-theme="dark"] body .table tbody tr:hover {
+html[data-bs-theme="dark"] body .table tbody tr:hover,
+body[data-bs-theme="dark"] .table tbody tr:hover {
     background: rgba(255, 255, 255, 0.04) !important;
 }
 html[data-bs-theme="dark"] body .table tbody td,
-html[data-bs-theme="dark"] body .table thead th {
+html[data-bs-theme="dark"] body .table thead th,
+body[data-bs-theme="dark"] .table tbody td,
+body[data-bs-theme="dark"] .table thead th {
     border-bottom-color: rgba(255, 255, 255, 0.08) !important;
     color: var(--gn-ink);
 }
 html[data-bs-theme="dark"] body .form-control,
-html[data-bs-theme="dark"] body .form-select {
+html[data-bs-theme="dark"] body .form-select,
+body[data-bs-theme="dark"] .form-control,
+body[data-bs-theme="dark"] .form-select {
     background: rgba(255, 255, 255, 0.04) !important;
     color: var(--gn-ink) !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
-html[data-bs-theme="dark"] body .form-control::placeholder {
+html[data-bs-theme="dark"] body .form-control::placeholder,
+body[data-bs-theme="dark"] .form-control::placeholder {
     color: var(--gn-ink-soft) !important;
 }
-html[data-bs-theme="dark"] body .btn-outline-primary {
+html[data-bs-theme="dark"] body .btn-outline-primary,
+body[data-bs-theme="dark"] .btn-outline-primary {
     color: var(--gn-ink) !important;
     border-color: rgba(255, 255, 255, 0.3) !important;
 }
-html[data-bs-theme="dark"] body .btn-outline-primary:hover {
+html[data-bs-theme="dark"] body .btn-outline-primary:hover,
+body[data-bs-theme="dark"] .btn-outline-primary:hover {
     background: var(--gn-ink) !important;
     color: var(--gn-paper) !important;
 }
-html[data-bs-theme="dark"] body .btn-outline-secondary {
+html[data-bs-theme="dark"] body .btn-outline-secondary,
+body[data-bs-theme="dark"] .btn-outline-secondary {
+    background: rgba(246, 241, 232, 0.08) !important;
     color: var(--gn-ink) !important;
     border-color: rgba(255, 255, 255, 0.25) !important;
 }
-html[data-bs-theme="dark"] body .btn-outline-danger {
+html[data-bs-theme="dark"] body .btn-outline-danger,
+body[data-bs-theme="dark"] .btn-outline-danger {
     color: #ff9b91 !important;
     border-color: rgba(232, 76, 61, 0.35) !important;
 }
 html[data-bs-theme="dark"] body .breadcrumb a,
-html[data-bs-theme="dark"] body .breadcrumb .active {
+html[data-bs-theme="dark"] body .breadcrumb .active,
+body[data-bs-theme="dark"] .breadcrumb a,
+body[data-bs-theme="dark"] .breadcrumb .active {
     color: var(--gn-ink) !important;
 }
-html[data-bs-theme="dark"] body .navbar-vertical {
+html[data-bs-theme="dark"] body .navbar-vertical,
+body[data-bs-theme="dark"] .navbar-vertical {
     background: #1c1811 !important;
     border-right-color: rgba(255, 255, 255, 0.08);
 }
-html[data-bs-theme="dark"] body .navbar-vertical .nav-link {
+html[data-bs-theme="dark"] body .navbar-vertical .nav-link,
+body[data-bs-theme="dark"] .navbar-vertical .nav-link {
     color: var(--gn-ink-muted) !important;
 }
-html[data-bs-theme="dark"] body .navbar-vertical .nav-link:hover {
+html[data-bs-theme="dark"] body .navbar-vertical .nav-link:hover,
+body[data-bs-theme="dark"] .navbar-vertical .nav-link:hover {
     color: var(--gn-ink) !important;
     background: rgba(255, 255, 255, 0.06);
 }
 html[data-bs-theme="dark"] body .navbar-vertical .nav-link.active,
-html[data-bs-theme="dark"] body .navbar-vertical .nav-item.active > .nav-link {
+html[data-bs-theme="dark"] body .navbar-vertical .nav-item.active > .nav-link,
+body[data-bs-theme="dark"] .navbar-vertical .nav-link.active,
+body[data-bs-theme="dark"] .navbar-vertical .nav-item.active > .nav-link {
     background: var(--gn-paper) !important;
     color: var(--gn-paper-warm) !important;
 }
 html[data-bs-theme="dark"] body .navbar-vertical .dropdown-menu,
-html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu {
-    background: rgba(18, 16, 7, 0.52) !important;
+html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu,
+body[data-bs-theme="dark"] .navbar-vertical .dropdown-menu,
+body[data-bs-theme="dark"] .app-sidebar .dropdown-menu {
+    background: transparent !important;
 }
 html[data-bs-theme="dark"] body .navbar-vertical .dropdown-menu .dropdown-item,
-html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item {
+html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item,
+body[data-bs-theme="dark"] .navbar-vertical .dropdown-menu .dropdown-item,
+body[data-bs-theme="dark"] .app-sidebar .dropdown-menu .dropdown-item {
     color: var(--gn-ink-muted) !important;
     background: transparent !important;
 }
 html[data-bs-theme="dark"] body .navbar-vertical .dropdown-menu .dropdown-item:hover,
 html[data-bs-theme="dark"] body .navbar-vertical .dropdown-menu .dropdown-item:focus,
 html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item:hover,
-html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item:focus {
+html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item:focus,
+body[data-bs-theme="dark"] .navbar-vertical .dropdown-menu .dropdown-item:hover,
+body[data-bs-theme="dark"] .navbar-vertical .dropdown-menu .dropdown-item:focus,
+body[data-bs-theme="dark"] .app-sidebar .dropdown-menu .dropdown-item:hover,
+body[data-bs-theme="dark"] .app-sidebar .dropdown-menu .dropdown-item:focus {
     color: var(--gn-ink) !important;
-    background: rgba(246, 241, 232, 0.08) !important;
+    background: var(--gn-dropdown-hover) !important;
 }
 html[data-bs-theme="dark"] body .navbar-vertical .dropdown-menu .dropdown-item.active,
 html[data-bs-theme="dark"] body .navbar-vertical .dropdown-menu .dropdown-item.show,
 html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item.active,
-html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item.show {
+html[data-bs-theme="dark"] body .app-sidebar .dropdown-menu .dropdown-item.show,
+body[data-bs-theme="dark"] .navbar-vertical .dropdown-menu .dropdown-item.active,
+body[data-bs-theme="dark"] .navbar-vertical .dropdown-menu .dropdown-item.show,
+body[data-bs-theme="dark"] .app-sidebar .dropdown-menu .dropdown-item.active,
+body[data-bs-theme="dark"] .app-sidebar .dropdown-menu .dropdown-item.show {
     color: var(--gn-ink) !important;
-    background: rgba(246, 241, 232, 0.13) !important;
+    background: var(--gn-dropdown-active) !important;
 }
-html[data-bs-theme="dark"] body .navbar.navbar-expand-md.d-print-none {
+html[data-bs-theme="dark"] body .navbar.navbar-expand-md.d-print-none,
+body[data-bs-theme="dark"] .navbar.navbar-expand-md.d-print-none {
     background: rgba(18, 16, 7, 0.92) !important;
     color: var(--gn-ink) !important;
     border-bottom-color: rgba(255, 255, 255, 0.06) !important;
