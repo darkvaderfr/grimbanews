@@ -452,6 +452,58 @@ body .badge.text-bg-danger  { background: rgba(232, 76, 61, 0.15) !important; co
 body .badge.text-bg-secondary { background: rgba(107, 100, 89, 0.15) !important; color: var(--gn-ink-soft) !important; border: 1px solid var(--gn-rule); }
 
 /* ------------------------------------------------------------
+   Alerts / diagnostics — solid editorial feedback surfaces
+   ------------------------------------------------------------ */
+body .grimba-admin-screen .alert,
+body .grimba-cockpit .alert,
+body .grimba-llm-admin .alert {
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-radius: 18px !important;
+    color: var(--gn-ink) !important;
+    box-shadow: 0 14px 34px rgba(26, 23, 19, 0.08);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+body .grimba-admin-screen .alert-success,
+body .grimba-cockpit .alert-success,
+body .grimba-llm-admin .alert-success {
+    background: rgba(34, 197, 94, 0.13) !important;
+    border-color: rgba(34, 197, 94, 0.28) !important;
+}
+body .grimba-admin-screen .alert-warning,
+body .grimba-cockpit .alert-warning,
+body .grimba-llm-admin .alert-warning,
+body .grimba-admin-screen .table-warning > *,
+body .grimba-cockpit .table-warning > *,
+body .grimba-llm-admin .table-warning > * {
+    background: rgba(217, 119, 6, 0.12) !important;
+    border-color: rgba(217, 119, 6, 0.28) !important;
+    color: var(--gn-ink) !important;
+}
+body .grimba-admin-screen .alert-danger,
+body .grimba-cockpit .alert-danger,
+body .grimba-llm-admin .alert-danger {
+    background: rgba(232, 76, 61, 0.12) !important;
+    border-color: rgba(232, 76, 61, 0.3) !important;
+}
+body .grimba-admin-screen .alert-secondary,
+body .grimba-admin-screen .alert-info,
+body .grimba-cockpit .alert-secondary,
+body .grimba-cockpit .alert-info,
+body .grimba-llm-admin .alert-secondary,
+body .grimba-llm-admin .alert-info {
+    background: rgba(255, 255, 255, 0.74) !important;
+    border-color: rgba(26, 23, 19, 0.14) !important;
+}
+body .grimba-admin-screen .alert a:not(.btn),
+body .grimba-cockpit .alert a:not(.btn),
+body .grimba-llm-admin .alert a:not(.btn) {
+    color: #9f2f26 !important;
+    font-weight: 800;
+}
+
+/* ------------------------------------------------------------
    Breadcrumb
    ------------------------------------------------------------ */
 body .page-header .breadcrumb,
@@ -645,6 +697,30 @@ html[data-bs-theme="dark"] body .alert-success {
     background: rgba(34, 197, 94, 0.15) !important;
     color: #86efac !important;
     border-color: rgba(34, 197, 94, 0.3) !important;
+}
+html[data-bs-theme="dark"] body .grimba-admin-screen .alert,
+html[data-bs-theme="dark"] body .grimba-cockpit .alert,
+html[data-bs-theme="dark"] body .grimba-llm-admin .alert,
+body[data-bs-theme="dark"] .grimba-admin-screen .alert,
+body[data-bs-theme="dark"] .grimba-cockpit .alert,
+body[data-bs-theme="dark"] .grimba-llm-admin .alert {
+    color: var(--gn-ink) !important;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+}
+html[data-bs-theme="dark"] body .grimba-admin-screen .alert-secondary,
+html[data-bs-theme="dark"] body .grimba-admin-screen .alert-info,
+html[data-bs-theme="dark"] body .grimba-cockpit .alert-secondary,
+html[data-bs-theme="dark"] body .grimba-cockpit .alert-info,
+html[data-bs-theme="dark"] body .grimba-llm-admin .alert-secondary,
+html[data-bs-theme="dark"] body .grimba-llm-admin .alert-info,
+body[data-bs-theme="dark"] .grimba-admin-screen .alert-secondary,
+body[data-bs-theme="dark"] .grimba-admin-screen .alert-info,
+body[data-bs-theme="dark"] .grimba-cockpit .alert-secondary,
+body[data-bs-theme="dark"] .grimba-cockpit .alert-info,
+body[data-bs-theme="dark"] .grimba-llm-admin .alert-secondary,
+body[data-bs-theme="dark"] .grimba-llm-admin .alert-info {
+    background: rgba(36, 32, 22, 0.86) !important;
+    border-color: rgba(246, 241, 232, 0.14) !important;
 }
 html[data-bs-theme="dark"] body .badge.text-bg-success { background: rgba(34, 197, 94, 0.2) !important; color: #86efac !important; }
 html[data-bs-theme="dark"] body .badge.text-bg-warning { background: rgba(234, 179, 8, 0.22) !important; color: #fde68a !important; }

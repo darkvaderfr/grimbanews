@@ -33,6 +33,10 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('body .grimba-admin-form-section', $css);
         $this->assertStringContainsString('body .grimba-admin-form-section__hint', $css);
         $this->assertStringContainsString('body .grimba-admin-form-actions', $css);
+        $this->assertStringContainsString('body .grimba-admin-screen .alert', $css);
+        $this->assertStringContainsString('body .grimba-admin-screen .alert-warning', $css);
+        $this->assertStringContainsString('body .grimba-admin-screen .alert-danger', $css);
+        $this->assertStringContainsString('body[data-bs-theme="dark"] .grimba-admin-screen .alert-secondary', $css);
         $this->assertStringContainsString('@media (max-width: 767.98px)', $css);
         $this->assertStringContainsString('grid-template-columns: minmax(7rem, 42%) 1fr;', $css);
         $this->assertStringContainsString('body .grimba-admin-screen .btn-outline-danger', $css);

@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `b9e4dd3` Polish admin form sections
 - `a4c5224` Polish responsive admin tables
 - `89e36e3` Add admin empty-state cards
 - `ba8f803` Polish admin action center
 - `bf3bc60` Finish futuristic admin shell audit
-- `e9f4a2e` Add guardrail quick-fix links
 
 Latest verification:
 
-- `php artisan test` passed with `48` tests and `694` assertions.
+- `php artisan test` passed with `48` tests and `700` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
 ## Completed Sprint Bands
@@ -47,7 +47,7 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S240 — Maturity, Accessibility, Admin, And Tests
+### S185-S241 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
@@ -72,6 +72,7 @@ Latest verification:
 - S238 replaced plain admin empty rows with shared Grimba empty-state cards across RSS drafts, NewsAPI drafts, subscribers, sources, and clusters, each with a direct next action.
 - S239 added responsive admin table cards and full-width mobile action rows so RSS, NewsAPI, subscriber, source, and cluster queues remain readable on narrow screens.
 - S240 added shared admin form sections/actions across source, RSS feed, story cluster, and NobuAI provider settings forms, with light/dark contrast locked by tests.
+- S241 added solid, high-contrast Grimba alert and diagnostic styling across custom admin pages, including warning rows and dark-mode alert surfaces.
 
 ## Active Systems
 
@@ -106,15 +107,15 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S241 — Admin Feedback And Alert Polish
+### S242 — Admin Navigation Final Sweep
 
-Goal: Make admin alerts, diagnostics, and status feedback match the futuristic backend design instead of default Bootstrap blocks.
+Goal: Finish the custom backend feel by tightening the remaining Grimba admin navigation affordances and page-level wayfinding.
 
 Acceptance:
 
-- Success/error/warning alerts in Grimba admin pages use shared solid, high-contrast styling.
-- Diagnostic blocks and inline warnings avoid translucent or default Bootstrap surfaces in both themes.
-- Tests cover alert CSS markers and representative admin render.
+- Grimba admin breadcrumbs, back links, and page headers have consistent readable hierarchy.
+- Custom admin pages expose a clear return/action path without relying on tiny default links.
+- Tests cover navigation CSS markers and representative admin render.
 
 ## Operating Rules
 
