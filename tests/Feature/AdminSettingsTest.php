@@ -81,6 +81,12 @@ class AdminSettingsTest extends TestCase
             ->assertSee('Coverage map')
             ->assertSee('Carte de couverture');
 
+        $this->actingAs($this->admin())
+            ->get('/admin/grimba/cockpit')
+            ->assertOk()
+            ->assertSee('Insights dossiers')
+            ->assertSee('Dernier insight');
+
         $clusterId = DB::table('story_clusters')->orderBy('id')->value('id');
         $this->assertNotNull($clusterId, 'Fixture database must contain at least one story cluster.');
 

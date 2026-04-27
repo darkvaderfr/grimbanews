@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Services\GrimbaNobuAi;
 use App\Services\GrimbaTranslator;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class GrimbaNobuAiHealth extends Command
@@ -23,6 +25,7 @@ class GrimbaNobuAiHealth extends Command
         $this->line('NobuAI wrapper');
         $this->line('  LLM providers: ' . ($llmDrivers === [] ? 'none configured' : implode(', ', $llmDrivers)));
         $this->line('  Translation fallback chain: ' . ($translationDrivers === [] ? 'none configured' : implode(', ', $translationDrivers)));
+        $this->line('  Story insights: ' . $this->storyInsightSummary());
 
         if (! $this->option('live')) {
             if ($llmDrivers === []) {
@@ -51,5 +54,37 @@ class GrimbaNobuAiHealth extends Command
         $this->line('  Response: ' . Str::limit(str_replace(["\r", "\n"], ' ', $result['text']), 160));
 
         return self::SUCCESS;
+    }
+
+    private function storyInsightSummary(): string
+    {
+        if (! Schema::hasColumn('posts', 'summary_nobuai')) {
+            return 'summary columns missing';
+        }
+
+        $clusters = DB::table('posts')
+            ->where('status', 'published')
+            ->whereNotNull('story_cluster_id')
+            ->selectRaw("
+                story_cluster_id,
+                COUNT(*) as post_count,
+                MAX(CASE WHEN summary_nobuai IS NOT NULL AND summary_nobuai != '' THEN 1 ELSE 0 END) as has_summary
+            ")
+            ->groupBy('story_cluster_id')
+            ->havingRaw('COUNT(*) >= 2')
+            ->get();
+
+        $ready = $clusters->where('has_summary', 1)->count();
+        $pending = $clusters->count() - $ready;
+        $latest = DB::table('posts')
+            ->whereNotNull('summary_generated_at')
+            ->max('summary_generated_at');
+
+        return sprintf(
+            '%d ready / %d pending%s',
+            $ready,
+            $pending,
+            $latest ? ' · latest ' . $latest : ''
+        );
     }
 }

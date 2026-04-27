@@ -17,6 +17,7 @@ use App\Services\GrimbaNobuAi;
 use App\Services\GrimbaTranslator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 
 Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
     ->middleware(['web', 'core', 'auth'])
@@ -139,6 +140,29 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $translator = app(GrimbaTranslator::class);
             $nobuDrivers = $nobuAi->configuredDrivers();
             $translationDrivers = $translator->configuredDrivers();
+            $nobuInsightReady = 0;
+            $nobuInsightPending = 0;
+            $nobuInsightLatest = null;
+
+            if (Schema::hasColumn('posts', 'summary_nobuai')) {
+                $insightClusters = DB::table('posts')
+                    ->where('status', 'published')
+                    ->whereNotNull('story_cluster_id')
+                    ->selectRaw("
+                        story_cluster_id,
+                        COUNT(*) as post_count,
+                        MAX(CASE WHEN summary_nobuai IS NOT NULL AND summary_nobuai != '' THEN 1 ELSE 0 END) as has_summary
+                    ")
+                    ->groupBy('story_cluster_id')
+                    ->havingRaw('COUNT(*) >= 2')
+                    ->get();
+
+                $nobuInsightReady = $insightClusters->where('has_summary', 1)->count();
+                $nobuInsightPending = $insightClusters->count() - $nobuInsightReady;
+                $nobuInsightLatest = DB::table('posts')
+                    ->whereNotNull('summary_generated_at')
+                    ->max('summary_generated_at');
+            }
 
             return view('grimba-admin.cockpit', compact(
                 'coverage', 'coverageTotal',
@@ -149,7 +173,8 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'publishedToday', 'draftCount',
                 'publishedTotal', 'clusterCount', 'activeClusterCount',
                 'translationReady', 'translationPending',
-                'latestDrafts', 'nobuDrivers', 'translationDrivers'
+                'latestDrafts', 'nobuDrivers', 'translationDrivers',
+                'nobuInsightReady', 'nobuInsightPending', 'nobuInsightLatest'
             ));
         })->name('cockpit');
     });

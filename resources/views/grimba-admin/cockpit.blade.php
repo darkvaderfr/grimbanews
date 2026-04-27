@@ -110,6 +110,14 @@
                         <span>Traduction</span>
                         <strong>{{ count($translationDrivers) ? implode(' → ', $translationDrivers) : 'aucun fournisseur' }}</strong>
                     </div>
+                    <div class="grimba-provider-row">
+                        <span>Insights dossiers</span>
+                        <strong>{{ $nobuInsightReady }} prêts · {{ $nobuInsightPending }} à générer</strong>
+                    </div>
+                    <div class="grimba-provider-row">
+                        <span>Dernier insight</span>
+                        <strong>{{ $nobuInsightLatest ? \Carbon\Carbon::parse($nobuInsightLatest)->locale('fr')->diffForHumans() : 'jamais généré' }}</strong>
+                    </div>
                     <div class="d-flex gap-2 flex-wrap mt-3">
                         <a href="{{ route('grimba.translation.index') }}" class="btn btn-sm btn-primary">Configurer les clés</a>
                         <a href="{{ route('grimba.story-clusters.index') }}" class="btn btn-sm btn-outline-primary">Gérer les dossiers</a>

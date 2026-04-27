@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Artisan;
 use Tests\TestCase;
 
 class NobuAiSummaryCommandTest extends TestCase
@@ -83,5 +84,54 @@ class NobuAiSummaryCommandTest extends TestCase
             $this->assertNotNull($row->summary_generated_at);
             $this->assertSame('openai', $row->summary_driver);
         }
+    }
+
+    public function test_nobuai_health_reports_story_insight_readiness(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        $clusterId = 990012;
+        $postIds = DB::table('posts')
+            ->where('status', 'published')
+            ->orderByDesc('id')
+            ->limit(2)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->assertCount(2, $postIds, 'Fixture database must contain at least two published posts.');
+
+        DB::table('story_clusters')->updateOrInsert(
+            ['id' => $clusterId],
+            [
+                'topic' => 'NobuAI health readiness test',
+                'description' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
+        foreach ($postIds as $postId) {
+            DB::table('posts')->where('id', $postId)->update([
+                'story_cluster_id' => $clusterId,
+                'summary_nobuai' => "Ce qui est confirmé: Le dossier est prêt pour NobuAI.",
+                'summary_generated_at' => now(),
+                'summary_driver' => 'openai',
+            ]);
+        }
+
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'grimba_translator_openai_key'],
+            ['value' => 'sk-test-openai', 'created_at' => now(), 'updated_at' => now()]
+        );
+
+        Artisan::call('grimba:nobuai-health');
+        $output = Artisan::output();
+
+        $this->assertStringContainsString('NobuAI wrapper', $output);
+        $this->assertStringContainsString('LLM providers: openai', $output);
+        $this->assertStringContainsString('Story insights:', $output);
+        $this->assertStringContainsString('ready', $output);
+        $this->assertStringContainsString('pending', $output);
     }
 }
