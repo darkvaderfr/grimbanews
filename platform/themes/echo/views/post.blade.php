@@ -341,12 +341,19 @@
                     @php
                         $__gnSummaryItems = [];
                         $__gnSummaryMode = 'fallback';
+                        $__gnNobuAiScrub = static function (string $value): string {
+                            $pattern = '/\b(?:OpenAI|OpenRouter|Anthropic|Claude|ChatGPT|GPT(?:-\d+(?:\.\d+)?)?|xAI|Grok|Google|Gemini|Mistral|Perplexity|Groq|DeepL|LibreTranslate)\b/iu';
+
+                            return trim(preg_replace($pattern, 'NobuAI', $value) ?? $value);
+                        };
 
                         if (! empty($post->summary_nobuai ?? null)) {
-                            $__gnSummaryItems = array_filter(array_map(
-                                'trim',
-                                preg_split("/\r\n|\n|\r/", (string) $post->summary_nobuai)
-                            ));
+                            $__gnSummaryItems = collect(preg_split("/\r\n|\n|\r/", (string) $post->summary_nobuai) ?: [])
+                                ->map(fn ($line) => $__gnNobuAiScrub(trim((string) $line)))
+                                ->filter()
+                                ->unique(fn ($line) => mb_strtolower((string) $line))
+                                ->values()
+                                ->all();
                             $__gnSummaryMode = 'nobuai';
                         } elseif ($__gnClusterPosts->count() >= 2) {
                             // Extractive: one bullet per source's lead sentence.
@@ -498,6 +505,7 @@
                                                 return ['label' => $label, 'body' => $body];
                                             })
                                             ->filter(fn ($item) => $item['body'] !== '')
+                                            ->unique(fn ($item) => mb_strtolower($item['label'] . '|' . $item['body']))
                                             ->take(6)
                                             ->values();
                                     @endphp

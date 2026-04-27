@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `df7b14d` Add cockpit NobuAI insight batch action
 - `8fd4bc7` Keep admin dropdowns above content
 - `b1dae35` Clarify NobuAI live health prompt
 - `67b2958` Surface NobuAI insight readiness
 - `a733b8e` Fix admin dropdown and theme chrome
-- `7caa305` Localize source and search pages
 
 Latest verification:
 
-- `php artisan test` passed with `33` tests.
+- `php artisan test` passed with `34` tests and `293` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
 ## Completed Sprint Bands
@@ -47,9 +47,11 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S218 — Maturity, Accessibility, Admin, And Tests
+### S185-S220 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
+- S219 added a clamped cockpit action for small-batch NobuAI insight generation.
+- S220 hardened public NobuAI insight rendering so reader pages dedupe lines and scrub provider names from saved insight copy.
 
 ## Active Systems
 
@@ -83,27 +85,6 @@ Latest verification:
 - Cookie banner settings
 
 ## Next Sprint Queue
-
-### S219 — Cockpit Bulk NobuAI Insight Generation
-
-Goal: The cockpit already shows ready/pending NobuAI story insight counts. Add a safe admin action to generate a small batch of pending story insights directly from the cockpit.
-
-Acceptance:
-
-- Admin can trigger `grimba:nobuai-summaries` from `/admin/grimba/cockpit`.
-- Batch size is clamped to a small limit to avoid long web requests.
-- Success/failure output is summarized in the admin flash message.
-- Test covers the route with a faked provider response.
-
-### S220 — NobuAI Insight Reader QA
-
-Goal: Ensure generated insight text behaves like GroundNews-style insight copy on public story pages.
-
-Acceptance:
-
-- Reader shows only `NobuAI`, never provider names.
-- Empty/pending insight states are clear.
-- Generated insight lines are short, labeled, non-duplicated, and do not invent sides.
 
 ### S221 — Translation Cache Audit
 

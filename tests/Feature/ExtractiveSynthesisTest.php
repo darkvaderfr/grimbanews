@@ -57,6 +57,9 @@ class ExtractiveSynthesisTest extends TestCase
                     'translated_name' => null,
                     'translated_description' => null,
                     'translated_to' => null,
+                    'summary_nobuai' => null,
+                    'summary_generated_at' => null,
+                    'summary_driver' => null,
                     'updated_at' => now()->subSeconds($index),
                     'created_at' => now()->subSeconds($index),
                 ]);
