@@ -251,4 +251,23 @@ class AdminChromeAssetsTest extends TestCase
             }
         }
     }
+
+    public function test_admin_backend_closeout_index_links_required_artifacts(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $doc = file_get_contents($root . '/docs/GRIMBANEWS_ADMIN_BACKEND_CLOSEOUT_INDEX.md');
+        $required = [
+            'GRIMBANEWS_ADMIN_CINEMATIC_SOK.md',
+            'GRIMBANEWS_ADMIN_PROD_READINESS_SMOKE.md',
+            'GRIMBANEWS_ADMIN_DEPLOYMENT_CHECKLIST.md',
+            'GRIMBANEWS_ADMIN_VISUAL_REGRESSION_ROUTES.md',
+            'GRIMBANEWS_SPRINT_PLAN.md',
+        ];
+
+        foreach ($required as $artifact) {
+            $this->assertStringContainsString($artifact, $doc);
+        }
+
+        $this->assertStringContainsString('Deployment is intentionally deferred', $doc);
+    }
 }
