@@ -123,7 +123,7 @@
                                             —
                                         @endif
                                     </td>
-                                    <td data-label="Actions" class="text-end">
+                                    <td data-label="Actions" class="text-end grimba-admin-inline-actions">
                                         <form method="POST" action="{{ route('grimba.rss-feeds.poll-now', $f->id) }}" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-outline-primary">Poll</button>
@@ -138,7 +138,7 @@
                                         <form method="POST" action="{{ route('grimba.rss-feeds.destroy', $f->id) }}" class="d-inline"
                                               onsubmit="return confirm('Supprimer ce flux et son historique ?');">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">×</button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
                                         </form>
                                     </td>
                                 </tr>

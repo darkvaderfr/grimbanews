@@ -97,7 +97,7 @@
                                             <span class="badge text-bg-success">Actif</span>
                                         @endif
                                     </td>
-                                    <td data-label="Actions" class="text-end">
+                                    <td data-label="Actions" class="text-end grimba-admin-inline-actions">
                                         <form method="POST" action="{{ route('grimba.subscribers.toggle', $s->id) }}" class="d-inline">
                                             @csrf
                                             <button class="btn btn-sm btn-outline-primary">

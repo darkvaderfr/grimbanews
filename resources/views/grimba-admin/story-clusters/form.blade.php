@@ -235,7 +235,7 @@
                                         <td><span class="badge" style="background:{{ $bc }}22; color:{{ $bc }}; border:1px solid {{ $bc }}44;">{{ $biasLabel[$p->bias_rating] ?? '—' }}</span></td>
                                         <td>{{ $p->source_name ?? '—' }}</td>
                                         <td>{{ $p->name }}</td>
-                                        <td class="text-end">
+                                        <td class="text-end grimba-admin-inline-actions">
                                             <form method="POST" action="{{ route('grimba.story-clusters.detach', $cluster->id) }}" class="d-inline">
                                                 @csrf
                                                 <input type="hidden" name="post_id" value="{{ $p->id }}">

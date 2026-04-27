@@ -1019,6 +1019,24 @@ body .grimba-admin-form .form-check {
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.54);
 }
+body .grimba-admin-inline-actions {
+    white-space: normal;
+}
+body .grimba-admin-inline-actions > .btn,
+body .grimba-admin-inline-actions > form,
+body .grimba-admin-inline-actions > a {
+    margin: 0.18rem 0 0.18rem 0.35rem;
+}
+body .grimba-admin-inline-actions form.d-inline {
+    display: inline-flex !important;
+}
+body .grimba-admin-inline-actions .btn-sm {
+    min-height: 34px;
+    padding-inline: 0.75rem;
+}
+body .grimba-admin-inline-actions .btn-outline-danger {
+    font-weight: 900;
+}
 body .table {
     --bb-table-color: var(--gn-ink);
     --bb-table-bg: transparent;
@@ -1141,6 +1159,11 @@ body pre.bg-light {
         flex-wrap: wrap;
         justify-content: flex-start !important;
         gap: 0.4rem;
+    }
+    body .grimba-admin-inline-actions > .btn,
+    body .grimba-admin-inline-actions > form,
+    body .grimba-admin-inline-actions > a {
+        margin-left: 0;
     }
     body .grimba-admin-table-responsive .grimba-admin-table td[data-label="Actions"]::before {
         flex: 1 0 100%;

@@ -132,7 +132,7 @@
                                                 </td>
                                                 <td data-label="Source" class="small">{{ $draft->source_name ?: '—' }}</td>
                                                 <td data-label="Biais" class="small">{{ $biasLabel }}</td>
-                                                <td data-label="Actions" class="text-end">
+                                                <td data-label="Actions" class="text-end grimba-admin-inline-actions">
                                                     <a href="{{ route('posts.edit', $draft->id) }}" target="_blank" class="btn btn-sm btn-outline-primary">Éditer</a>
                                                 </td>
                                             </tr>

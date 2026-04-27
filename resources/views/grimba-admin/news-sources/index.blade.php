@@ -76,7 +76,7 @@
                                     <td data-label="Crédibilité" class="text-end">{{ $src->credibility_score ?? '—' }}</td>
                                     <td data-label="Pays">{{ $src->country ?? '—' }}</td>
                                     <td data-label="Langue" class="text-uppercase">{{ $src->language ?? '—' }}</td>
-                                    <td data-label="Actions" class="text-end">
+                                    <td data-label="Actions" class="text-end grimba-admin-inline-actions">
                                         <a href="{{ route('grimba.news-sources.edit', $src->id) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
                                         <form method="POST" action="{{ route('grimba.news-sources.destroy', $src->id) }}"
                                               class="d-inline"

@@ -163,7 +163,7 @@
                                             <td data-label="Reçu" class="small text-muted">
                                                 {{ \Carbon\Carbon::parse($d->created_at)->diffForHumans() }}
                                             </td>
-                                            <td data-label="Actions" class="text-end">
+                                            <td data-label="Actions" class="text-end grimba-admin-inline-actions">
                                                 <button type="submit"
                                                         formaction="{{ route('grimba.rss-drafts.publish-one', $d->id) }}"
                                                         class="btn btn-sm btn-outline-success"

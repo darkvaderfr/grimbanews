@@ -72,7 +72,7 @@
                                     <td data-label="Statut">
                                         <span class="badge text-bg-{{ $barStatus[1] }}">{{ $barStatus[0] }}</span>
                                     </td>
-                                    <td data-label="Actions" class="text-end">
+                                    <td data-label="Actions" class="text-end grimba-admin-inline-actions">
                                         <a href="{{ route('grimba.story-clusters.edit', $c->id) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
                                         @if($c->total > 0)
                                             <a href="{{ url('/comparatif/' . $c->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary">Voir</a>
