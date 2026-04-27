@@ -45,7 +45,10 @@ class AdminSettingsTest extends TestCase
             ->assertSee('Score');
 
         $sourceName = 'S134 Bias Score Test Source';
-        DB::table('news_sources')->where('name', $sourceName)->delete();
+        DB::table('news_sources')
+            ->where('name', $sourceName)
+            ->orWhere('slug', 's134-bias-score-test-source')
+            ->delete();
 
         $this->actingAs($this->admin())
             ->get('/admin/grimba/news-sources/create')
@@ -95,6 +98,7 @@ class AdminSettingsTest extends TestCase
             ->assertSee('NewsAPI 24h')
             ->assertSee('Pending translations')
             ->assertSee('Duplicate groups')
+            ->assertSee('stale')
             ->assertSee('NobuAI health')
             ->assertSee('Poll 1 RSS')
             ->assertSee('Fetch NewsAPI')

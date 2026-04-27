@@ -211,4 +211,26 @@ class ClusterPageTest extends TestCase
             ->assertDontSee('OpenAI')
             ->assertDontSee('Claude');
     }
+
+    public function test_story_marks_nobuai_insights_stale_when_new_coverage_arrives(): void
+    {
+        $ids = $this->publishedPostIds(2, 19);
+        $post = $this->assignCluster($ids, 910008, ['left', 'right']);
+
+        DB::table('posts')
+            ->where('story_cluster_id', 910008)
+            ->update([
+                'summary_nobuai' => 'Ce qui est confirmé: le dossier dispose déjà d’un résumé.',
+                'summary_generated_at' => now()->subDay(),
+                'summary_driver' => 'openai',
+                'updated_at' => now(),
+            ]);
+
+        $this->withUnencryptedCookies($this->readerCookies())
+            ->get($this->pathFor($post))
+            ->assertOk()
+            ->assertSee('Insights par NobuAI')
+            ->assertSee('NobuAI à rafraîchir')
+            ->assertSee('une nouvelle couverture est arrivée après ce résumé');
+    }
 }

@@ -128,7 +128,7 @@
                 <a href="{{ route('grimba.story-clusters.index') }}" class="grimba-ops-tile {{ $nobuInsightPending > 0 ? 'is-warn' : '' }}">
                     <span>Pending insights</span>
                     <strong>{{ number_format($nobuInsightPending) }}</strong>
-                    <small>{{ $nobuInsightReady }} dossiers prêts</small>
+                    <small>{{ $nobuInsightReady }} dossiers prêts · {{ $nobuInsightStale }} stale</small>
                 </a>
                 <div class="grimba-ops-tile {{ $duplicateGroups > 0 ? 'is-warn' : '' }}">
                     <span>Duplicate groups</span>
@@ -190,7 +190,7 @@
                     </div>
                     <div class="grimba-provider-row">
                         <span>Insights dossiers</span>
-                        <strong>{{ $nobuInsightReady }} prêts · {{ $nobuInsightPending }} à générer</strong>
+                        <strong>{{ $nobuInsightReady }} prêts · {{ $nobuInsightPending }} à générer · {{ $nobuInsightStale }} stale</strong>
                     </div>
                     <div class="grimba-provider-row">
                         <span>Dernier insight</span>

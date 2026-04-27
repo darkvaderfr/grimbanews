@@ -429,10 +429,16 @@
                             $__gnNobuAiGeneratedAt = ! empty($post->summary_generated_at ?? null)
                                 ? \Carbon\Carbon::parse($post->summary_generated_at)->locale($__gnTarget)->diffForHumans()
                                 : null;
+                            $__gnNobuAiIsStale = false;
+                            if (! empty($post->summary_generated_at ?? null) && ! empty($__gnLatest)) {
+                                $__gnNobuAiIsStale = \Carbon\Carbon::parse($__gnLatest)->gt(\Carbon\Carbon::parse($post->summary_generated_at));
+                            }
                             $__badgeFootnote = match ($__gnSummaryMode) {
-                                'nobuai'     => $__gnNobuAiGeneratedAt
+                                'nobuai'     => $__gnNobuAiIsStale
+                                    ? __('NobuAI à rafraîchir : une nouvelle couverture est arrivée après ce résumé.')
+                                    : ($__gnNobuAiGeneratedAt
                                     ? __('Généré par NobuAI :time.', ['time' => $__gnNobuAiGeneratedAt])
-                                    : __('Généré par NobuAI.'),
+                                    : __('Généré par NobuAI.')),
                                 'extractive' => __('Première phrase de chaque source · résumé NobuAI à venir.'),
                                 default      => __("Résumé multi-sources à venir dès qu'une autre couverture rejoint cette histoire."),
                             };

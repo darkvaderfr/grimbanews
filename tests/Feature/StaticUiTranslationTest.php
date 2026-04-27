@@ -78,6 +78,7 @@ class StaticUiTranslationTest extends TestCase
             'Propriété',
             'Lire cette source',
             'Source inconnue',
+            'NobuAI à rafraîchir : une nouvelle couverture est arrivée après ce résumé.',
         ];
 
         foreach ([

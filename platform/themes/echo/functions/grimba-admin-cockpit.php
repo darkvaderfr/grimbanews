@@ -189,6 +189,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $translationDrivers = $translator->configuredDrivers();
             $nobuInsightReady = 0;
             $nobuInsightPending = 0;
+            $nobuInsightStale = 0;
             $nobuInsightLatest = null;
 
             if (Schema::hasColumn('posts', 'summary_nobuai')) {
@@ -198,7 +199,9 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                     ->selectRaw("
                         story_cluster_id,
                         COUNT(*) as post_count,
-                        MAX(CASE WHEN summary_nobuai IS NOT NULL AND summary_nobuai != '' THEN 1 ELSE 0 END) as has_summary
+                        MAX(CASE WHEN summary_nobuai IS NOT NULL AND summary_nobuai != '' THEN 1 ELSE 0 END) as has_summary,
+                        MAX(summary_generated_at) as summary_generated_at,
+                        MAX(updated_at) as latest_post_at
                     ")
                     ->groupBy('story_cluster_id')
                     ->havingRaw('COUNT(*) >= 2')
@@ -206,6 +209,12 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
                 $nobuInsightReady = $insightClusters->where('has_summary', 1)->count();
                 $nobuInsightPending = $insightClusters->count() - $nobuInsightReady;
+                $nobuInsightStale = $insightClusters
+                    ->filter(fn ($cluster) => (int) $cluster->has_summary === 1
+                        && $cluster->summary_generated_at
+                        && $cluster->latest_post_at
+                        && \Carbon\Carbon::parse($cluster->latest_post_at)->gt(\Carbon\Carbon::parse($cluster->summary_generated_at)))
+                    ->count();
                 $nobuInsightLatest = DB::table('posts')
                     ->whereNotNull('summary_generated_at')
                     ->max('summary_generated_at');
@@ -224,7 +233,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'newsApiActive', 'newsApiConfigured', 'newsApiItems24', 'newsApiLastFetch',
                 'duplicateGroups', 'englishTranslationPending',
                 'latestDrafts', 'nobuDrivers', 'translationDrivers',
-                'nobuInsightReady', 'nobuInsightPending', 'nobuInsightLatest'
+                'nobuInsightReady', 'nobuInsightPending', 'nobuInsightStale', 'nobuInsightLatest'
             ));
         })->name('cockpit');
 
