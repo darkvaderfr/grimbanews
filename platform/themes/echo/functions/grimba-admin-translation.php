@@ -6,7 +6,7 @@
  *
  * Routes under /admin/grimba/translation :
  *   GET   /            → form (one password field per provider + driver pin)
- *   POST  /            → save settings (uses Botble's setting(...)->save())
+ *   POST  /            → save settings through Botble's SettingStore
  *   POST  /test        → round-trip "Hello world" through the chain and
  *                        report which driver won + the translation
  *
@@ -67,7 +67,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $modelDrivers = ['mistral', 'openrouter', 'openai', 'anthropic', 'google', 'xai', 'perplexity', 'groq'];
 
             /** @var SettingStore $store */
-            $store = app('core.setting');
+            $store = app(SettingStore::class);
 
             foreach ($drivers as $d) {
                 $fieldName = $d . '_key';

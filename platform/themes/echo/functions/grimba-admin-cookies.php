@@ -45,7 +45,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
         Route::post('cookies', function (Request $request) {
             /** @var SettingStore $store */
-            $store = app('core.setting');
+            $store = app(SettingStore::class);
 
             $store->set('grimba_cookie_active',       (bool)   $request->input('active', false));
             $store->set('grimba_cookie_title',        (string) $request->input('title', 'Cookies'));

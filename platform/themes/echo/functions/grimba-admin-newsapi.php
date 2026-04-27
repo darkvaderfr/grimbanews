@@ -49,7 +49,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
         Route::post('newsapi', function (Request $request) {
             /** @var SettingStore $store */
-            $store = app('core.setting');
+            $store = app(SettingStore::class);
 
             $store->set('grimba_newsapi_key',       (string) $request->input('key', ''));
             $store->set('grimba_newsapi_queries',   (string) $request->input('queries', ''));
