@@ -67,4 +67,37 @@ class StaticUiTranslationTest extends TestCase
             ->assertSee('Coverage details')
             ->assertSee('Read the full article');
     }
+
+    public function test_english_search_and_source_shells_use_saved_catalog_copy(): void
+    {
+        $this->withUnencryptedCookies([
+            'grimba_lang' => 'en',
+            'grimba_onboarded' => '1',
+        ])
+            ->get('/search?q=fixture-with-no-results&bias=left')
+            ->assertOk()
+            ->assertSee('Search')
+            ->assertSee('All sources')
+            ->assertSee('All bias')
+            ->assertSee('Reset filters', false);
+
+        $this->withUnencryptedCookies([
+            'grimba_lang' => 'en',
+            'grimba_onboarded' => '1',
+        ])
+            ->get('/sources')
+            ->assertOk()
+            ->assertSee('Ranked sources')
+            ->assertSee('All countries')
+            ->assertSee('Ownership map');
+
+        $this->withUnencryptedCookies([
+            'grimba_lang' => 'en',
+            'grimba_onboarded' => '1',
+        ])
+            ->get('/proprietaires')
+            ->assertOk()
+            ->assertSee('Media ownership')
+            ->assertSee('Who owns what');
+    }
 }

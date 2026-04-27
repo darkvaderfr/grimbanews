@@ -9,35 +9,35 @@
     $selectedSource   = $selectedSource   ?? null;
     $selectedBias     = $selectedBias     ?? null;
     $biasChoices      = [
-        ''        => 'Tous biais',
-        'left'    => 'Gauche',
-        'center'  => 'Centre',
-        'right'   => 'Droite',
-        'unknown' => 'Non classé',
+        ''        => __('Tous biais'),
+        'left'    => __('Gauche'),
+        'center'  => __('Centre'),
+        'right'   => __('Droite'),
+        'unknown' => __('Non classé'),
     ];
 @endphp
 
 <section class="grimba-search-page container py-5">
     <header class="glass-panel p-4 p-md-5 mb-4">
-        <span class="grimba-methodology__kicker">Recherche</span>
+        <span class="grimba-methodology__kicker">{{ __('Recherche') }}</span>
         <h1 class="grimba-methodology__title mt-2 mb-2">
             @if($query === '')
-                Que cherchez-vous ?
+                {{ __('Que cherchez-vous ?') }}
             @else
-                {{ $total }} {{ $total === 1 ? 'résultat' : 'résultats' }}
-                <span class="opacity-75">pour «&nbsp;{{ $query }}&nbsp;»</span>
+                {{ trans_choice(':count résultat|:count résultats', $total, ['count' => $total]) }}
+                <span class="opacity-75">{{ __('pour « :query »', ['query' => $query]) }}</span>
             @endif
         </h1>
         <form method="GET" action="{{ url('/search') }}" class="mt-3" role="search">
             <div class="d-flex gap-2 flex-wrap align-items-center">
                 <input type="search" name="q" value="{{ $query }}"
-                       placeholder="Rechercher une histoire, un sujet, une source…"
+                       placeholder="{{ __('Rechercher une histoire, un sujet, une source…') }}"
                        class="flex-grow-1"
                        style="min-width: 280px; padding: 0.6rem 1rem; border-radius: 9999px; border: 1px solid var(--gn-rule); background: rgba(255,255,255,0.8);">
 
-                <select name="source" aria-label="Filtrer par source"
+                <select name="source" aria-label="{{ __('Filtrer par source') }}"
                         style="padding: 0.6rem 1rem; border-radius: 9999px; border: 1px solid var(--gn-rule); background: rgba(255,255,255,0.8);">
-                    <option value="">Toutes sources</option>
+                    <option value="">{{ __('Toutes sources') }}</option>
                     @foreach($availableSources as $src)
                         <option value="{{ $src->id }}" @selected((int) $selectedSource === (int) $src->id)>
                             {{ $src->name }}
@@ -45,18 +45,18 @@
                     @endforeach
                 </select>
 
-                <select name="bias" aria-label="Filtrer par biais"
+                <select name="bias" aria-label="{{ __('Filtrer par biais') }}"
                         style="padding: 0.6rem 1rem; border-radius: 9999px; border: 1px solid var(--gn-rule); background: rgba(255,255,255,0.8);">
                     @foreach($biasChoices as $key => $label)
                         <option value="{{ $key }}" @selected((string) $selectedBias === (string) $key)>{{ $label }}</option>
                     @endforeach
                 </select>
 
-                <button type="submit" class="btn-grimba btn-grimba--solid">Chercher</button>
+                <button type="submit" class="btn-grimba btn-grimba--solid">{{ __('Chercher') }}</button>
 
                 @if($selectedSource || $selectedBias)
                     <a href="{{ url('/search?q=' . urlencode($query)) }}"
-                       class="small" style="color: var(--gn-ink); opacity: .6;">Réinitialiser les filtres</a>
+                       class="small" style="color: var(--gn-ink); opacity: .6;">{{ __('Réinitialiser les filtres') }}</a>
                 @endif
             </div>
         </form>
@@ -78,12 +78,12 @@
         @endif
     @elseif($query !== '')
         <div class="glass-panel p-4 text-center">
-            <p class="mb-2"><strong>Aucun résultat pour «&nbsp;{{ $query }}&nbsp;».</strong></p>
+            <p class="mb-2"><strong>{{ __('Aucun résultat pour « :query ».', ['query' => $query]) }}</strong></p>
             <p class="small opacity-75 mb-3">
-                Essayez un autre mot-clé, ou parcourez les
-                <a href="{{ url('/comparatif') }}">dossiers ouverts</a>,
-                le <a href="{{ url('/angles-morts') }}">fil des angles morts</a>
-                ou les <a href="{{ url('/sources') }}">sources classées</a>.
+                {{ __('Essayez un autre mot-clé, ou parcourez les') }}
+                <a href="{{ url('/comparatif') }}">{{ __('dossiers ouverts') }}</a>,
+                {{ __('le') }} <a href="{{ url('/angles-morts') }}">{{ __('fil des angles morts') }}</a>
+                {{ __('ou les') }} <a href="{{ url('/sources') }}">{{ __('sources classées') }}</a>.
             </p>
         </div>
     @endif

@@ -8,10 +8,10 @@
      */
 
     $biasMeta = [
-        'left'    => ['label' => 'Gauche',     'color' => '#3b82f6'],
-        'center'  => ['label' => 'Centre',     'color' => '#a8a8a8'],
-        'right'   => ['label' => 'Droite',     'color' => '#e84c3d'],
-        'unknown' => ['label' => 'Non classé', 'color' => '#6b6459'],
+        'left'    => ['label' => __('Gauche'),     'color' => '#3b82f6'],
+        'center'  => ['label' => __('Centre'),     'color' => '#a8a8a8'],
+        'right'   => ['label' => __('Droite'),     'color' => '#e84c3d'],
+        'unknown' => ['label' => __('Non classé'), 'color' => '#6b6459'],
     ];
 @endphp
 
@@ -19,26 +19,22 @@
     <div class="container">
 
         <header class="glass-panel p-4 p-md-5 mb-4">
-            <span class="grimba-methodology__kicker">Propriété des médias</span>
+            <span class="grimba-methodology__kicker">{{ __('Propriété des médias') }}</span>
             <h1 class="grimba-methodology__title mt-2 mb-3">
-                Qui possède quoi
+                {{ __('Qui possède quoi') }}
             </h1>
             <p class="mb-2 opacity-85" style="font-size:17px; line-height:1.5; max-width: 65ch;">
-                {{ $totalOwners }} propriétaires identifiés contrôlent {{ $totalSources }} des sources que GrimbaNews suit.
-                La concentration éditoriale n'est pas un détail — quand un même groupe possède
-                des outlets de différents biais, la diversité apparente du paysage médiatique
-                cache une convergence d'intérêts au sommet.
+                {{ __(':owners propriétaires identifiés contrôlent :sources des sources que GrimbaNews suit.', ['owners' => $totalOwners, 'sources' => $totalSources]) }}
+                {{ __("La concentration éditoriale n'est pas un détail — quand un même groupe possède des outlets de différents biais, la diversité apparente du paysage médiatique cache une convergence d'intérêts au sommet.") }}
             </p>
             <p class="small opacity-65 mb-0" style="max-width:65ch;">
-                Données issues de sources publiques (registres d'entreprises, rapports
-                annuels, AllSides, MBFC). Ouvrez une fiche source via le panneau du dessous
-                pour voir le profil détaillé.
+                {{ __("Données issues de sources publiques (registres d'entreprises, rapports annuels, AllSides, MBFC). Ouvrez une fiche source via le panneau du dessous pour voir le profil détaillé.") }}
             </p>
         </header>
 
         @if($owners->isEmpty())
             <div class="glass-panel p-4 text-center">
-                <p class="mb-0">Aucune donnée de propriété pour l'instant.</p>
+                <p class="mb-0">{{ __("Aucune donnée de propriété pour l'instant.") }}</p>
             </div>
         @else
             <ul class="list-unstyled m-0">
@@ -50,8 +46,7 @@
                                     {{ $owner['name'] }}
                                 </h2>
                                 <div class="small opacity-75">
-                                    {{ count($owner['sources']) }} {{ count($owner['sources']) === 1 ? 'source' : 'sources' }}
-                                    suivie{{ count($owner['sources']) === 1 ? '' : 's' }} ·
+                                    {{ trans_choice(':count source suivie|:count sources suivies', count($owner['sources']), ['count' => count($owner['sources'])]) }} ·
                                     @php
                                         $byBias = ['left'=>0,'center'=>0,'right'=>0,'unknown'=>0];
                                         foreach ($owner['sources'] as $s) $byBias[$s->bias_rating ?? 'unknown']++;
@@ -59,7 +54,7 @@
                                         $parts = [];
                                         foreach (['left','center','right'] as $b) if ($byBias[$b] > 0) $parts[] = $byBias[$b] . ' ' . mb_strtolower($biasMeta[$b]['label']);
                                     @endphp
-                                    {{ $parts ? implode(' · ', $parts) : 'biais à classer' }}
+                                    {{ $parts ? implode(' · ', $parts) : __('biais à classer') }}
                                 </div>
                             </div>
 
@@ -69,8 +64,8 @@
                                     background:rgba(192,57,43,0.10); color:#c0392b;
                                     font-family:'Public Sans',system-ui,sans-serif;
                                     font-size:12px; font-weight:700; letter-spacing:0.4px; text-transform:uppercase;
-                                " title="Possède des médias sur ≥2 côtés du spectre">
-                                    Multi-biais
+                                " title="{{ __('Possède des médias sur ≥2 côtés du spectre') }}">
+                                    {{ __('Multi-biais') }}
                                 </span>
                             @endif
                         </header>
@@ -115,8 +110,8 @@
         @endif
 
         <p class="mt-4 small opacity-60 text-center">
-            Vous remarquez une erreur ou un propriétaire manquant ?
-            <a href="{{ url('/contact') }}" class="text-decoration-underline">Signalez-le</a>.
+            {{ __('Vous remarquez une erreur ou un propriétaire manquant ?') }}
+            <a href="{{ url('/contact') }}" class="text-decoration-underline">{{ __('Signalez-le') }}</a>.
         </p>
     </div>
 </section>

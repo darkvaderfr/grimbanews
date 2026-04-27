@@ -6,17 +6,17 @@
      */
 
     $biasMeta = [
-        'left'    => ['label' => 'Gauche',      'color' => '#3b82f6'],
-        'center'  => ['label' => 'Centre',      'color' => '#a8a8a8'],
-        'right'   => ['label' => 'Droite',      'color' => '#ef4444'],
-        'unknown' => ['label' => 'Non évalué',  'color' => '#9ca3af'],
+        'left'    => ['label' => __('Gauche'),      'color' => '#3b82f6'],
+        'center'  => ['label' => __('Centre'),      'color' => '#a8a8a8'],
+        'right'   => ['label' => __('Droite'),      'color' => '#ef4444'],
+        'unknown' => ['label' => __('Non évalué'),  'color' => '#9ca3af'],
     ];
 
     $ownershipLabel = [
-        'state'       => 'État',
-        'corporate'   => 'Privé',
-        'independent' => 'Indépendant',
-        'nonprofit'   => 'Associatif',
+        'state'       => __('État'),
+        'corporate'   => __('Privé'),
+        'independent' => __('Indépendant'),
+        'nonprofit'   => __('Associatif'),
     ];
 
     // Build the list of unique countries represented for the country filter.
@@ -33,48 +33,47 @@
     <div class="container">
 
         <header class="glass-panel p-4 mb-4">
-            <span class="grimba-methodology__kicker">Sources classées</span>
+            <span class="grimba-methodology__kicker">{{ __('Sources classées') }}</span>
             <h1 class="grimba-methodology__title mt-2 mb-2">
-                {{ $total }} médias sous notre grille d'analyse
+                {{ trans_choice(':count média sous notre grille d’analyse|:count médias sous notre grille d’analyse', $total, ['count' => $total]) }}
             </h1>
             <p class="mb-3 opacity-85">
-                Biais éditorial, type de propriété, score de crédibilité, pays
-                d'origine et langue. Classements ouverts et révisables — voir la
-                <a href="{{ url('/methodologie') }}" class="text-decoration-underline">méthodologie</a>.
+                {{ __('Biais éditorial, type de propriété, score de crédibilité, pays d’origine et langue. Classements ouverts et révisables — voir la') }}
+                <a href="{{ url('/methodologie') }}" class="text-decoration-underline">{{ __('méthodologie') }}</a>.
             </p>
             <a href="{{ url('/proprietaires') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">
-                Carte des propriétaires →
+                {{ __('Carte des propriétaires') }} →
             </a>
         </header>
 
         <div class="grimba-sources__controls glass-panel p-3 mb-4">
             <div class="row g-3 align-items-center">
                 <div class="col-lg-4 col-md-5 col-12">
-                    <label class="small text-uppercase opacity-75 fw-semibold mb-1 d-block">Rechercher</label>
+                    <label class="small text-uppercase opacity-75 fw-semibold mb-1 d-block">{{ __('Rechercher') }}</label>
                     <input
                         type="search"
                         id="grimba-sources-search"
                         class="form-control"
-                        placeholder="Nom du média, site, pays…"
-                        aria-label="Rechercher une source"
+                        placeholder="{{ __('Nom du média, site, pays…') }}"
+                        aria-label="{{ __('Rechercher une source') }}"
                     >
                 </div>
                 <div class="col-lg-5 col-md-7 col-12">
-                    <label class="small text-uppercase opacity-75 fw-semibold mb-1 d-block">Biais</label>
+                    <label class="small text-uppercase opacity-75 fw-semibold mb-1 d-block">{{ __('Biais') }}</label>
                     <div class="grimba-sources__bias-filter d-flex gap-2 flex-wrap" role="tablist">
-                        <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--solid" data-bias="all">Tous</button>
+                        <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--solid" data-bias="all">{{ __('Tous') }}</button>
                         <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--ghost" data-bias="left"
-                                style="color:{{ $biasMeta['left']['color'] }};border-color:{{ $biasMeta['left']['color'] }}44;">● Gauche</button>
+                                style="color:{{ $biasMeta['left']['color'] }};border-color:{{ $biasMeta['left']['color'] }}44;">● {{ __('Gauche') }}</button>
                         <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--ghost" data-bias="center"
-                                style="color:{{ $biasMeta['center']['color'] }};border-color:{{ $biasMeta['center']['color'] }}44;">● Centre</button>
+                                style="color:{{ $biasMeta['center']['color'] }};border-color:{{ $biasMeta['center']['color'] }}44;">● {{ __('Centre') }}</button>
                         <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--ghost" data-bias="right"
-                                style="color:{{ $biasMeta['right']['color'] }};border-color:{{ $biasMeta['right']['color'] }}44;">● Droite</button>
+                                style="color:{{ $biasMeta['right']['color'] }};border-color:{{ $biasMeta['right']['color'] }}44;">● {{ __('Droite') }}</button>
                     </div>
                 </div>
                 <div class="col-lg-3 col-12">
-                    <label class="small text-uppercase opacity-75 fw-semibold mb-1 d-block">Pays</label>
+                    <label class="small text-uppercase opacity-75 fw-semibold mb-1 d-block">{{ __('Pays') }}</label>
                     <select id="grimba-sources-country" class="form-select">
-                        <option value="all">Tous les pays</option>
+                        <option value="all">{{ __('Tous les pays') }}</option>
                         @foreach($allCountries as $cc)
                             <option value="{{ $cc }}">{{ $cc }}</option>
                         @endforeach
@@ -83,9 +82,9 @@
             </div>
 
             <div class="d-flex justify-content-between align-items-center mt-3 small opacity-75">
-                <span id="grimba-sources-count">{{ $total }} sources affichées</span>
+                <span id="grimba-sources-count">{{ trans_choice(':count source affichée|:count sources affichées', $total, ['count' => $total]) }}</span>
                 <button type="button" id="grimba-sources-reset" class="btn-grimba btn-grimba--ghost btn-grimba--sm">
-                    Réinitialiser
+                    {{ __('Réinitialiser') }}
                 </button>
             </div>
         </div>
@@ -153,10 +152,10 @@
 
                                     <div class="d-flex flex-wrap gap-2 mt-3 small">
                                         <span style="padding:4px 9px;border-radius:9999px;background:rgba(26,23,19,0.05);">
-                                            {{ (int) ($src->recent_cluster_count ?? 0) }} dossiers / 30 j
+                                            {{ trans_choice(':count dossier / 30 j|:count dossiers / 30 j', (int) ($src->recent_cluster_count ?? 0), ['count' => (int) ($src->recent_cluster_count ?? 0)]) }}
                                         </span>
                                         <span style="padding:4px 9px;border-radius:9999px;background:rgba(26,23,19,0.05);">
-                                            {{ (int) ($src->article_count ?? 0) }} articles
+                                            {{ trans_choice(':count article|:count articles', (int) ($src->article_count ?? 0), ['count' => (int) ($src->article_count ?? 0)]) }}
                                         </span>
                                     </div>
 
@@ -167,7 +166,7 @@
                                         @endphp
                                         <div class="mt-3">
                                             <div class="d-flex justify-content-between small mb-1">
-                                                <span class="opacity-75">Crédibilité</span>
+                                                <span class="opacity-75">{{ __('Crédibilité') }}</span>
                                                 <strong>{{ $score }}/100</strong>
                                             </div>
                                             <div style="height:6px;border-radius:9999px;background:rgba(0,0,0,0.08);overflow:hidden;">
@@ -184,7 +183,7 @@
         </div>
 
         <div id="grimba-sources-empty" class="glass-panel p-4 text-center d-none">
-            <p class="mb-0">Aucune source ne correspond à ces filtres.</p>
+            <p class="mb-0">{{ __('Aucune source ne correspond à ces filtres.') }}</p>
         </div>
     </div>
 </section>
@@ -226,7 +225,9 @@
                 if (countEl) countEl.textContent = '(' + remaining + ')';
             });
 
-            count.textContent = shown + ' source' + (shown === 1 ? '' : 's') + ' affichée' + (shown === 1 ? '' : 's');
+            count.textContent = shown === 1
+                ? @json(__(':count source affichée', ['count' => 1]))
+                : @json(__(':count sources affichées', ['count' => '__COUNT__'])).replace('__COUNT__', shown);
             empty.classList.toggle('d-none', shown !== 0);
             list.classList.toggle('d-none', shown === 0);
         }
