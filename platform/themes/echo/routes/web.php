@@ -432,11 +432,44 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $email = mb_strtolower($data['email']);
             $table = DB::table('newsletter_subscriptions');
             $existing = $table->where('email', $email)->first();
+            $readIds = collect(explode(',', (string) $request->cookie('grimba_read', '')))
+                ->filter(fn ($id) => ctype_digit((string) $id))
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->take(30)
+                ->values();
+
+            $readerBias = ['left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0];
+            if ($readIds->isNotEmpty()) {
+                DB::table('posts')
+                    ->whereIn('id', $readIds)
+                    ->get(['bias_rating'])
+                    ->each(function ($post) use (&$readerBias): void {
+                        $bias = in_array($post->bias_rating, ['left', 'center', 'right'], true)
+                            ? $post->bias_rating
+                            : 'unknown';
+                        $readerBias[$bias]++;
+                    });
+            }
+
+            $knownBias = collect($readerBias)->only(['left', 'center', 'right']);
+            $digestVariant = null;
+            if ($knownBias->sum() > 0) {
+                $min = $knownBias->min();
+                $max = $knownBias->max();
+                $underBias = $knownBias->sort()->keys()->first();
+                $digestVariant = ($max - $min) <= 1 ? 'balanced' : 'rebalance_' . $underBias;
+            }
 
             $payload = [
                 'email'      => $email,
                 'locale'     => $locale,
                 'source_key' => $data['source_key'] ?? 'unknown',
+                'reader_bias_left' => $readerBias['left'],
+                'reader_bias_center' => $readerBias['center'],
+                'reader_bias_right' => $readerBias['right'],
+                'reader_bias_unknown' => $readerBias['unknown'],
+                'digest_variant' => $digestVariant,
                 'ip_address' => $request->ip(),
                 'user_agent' => mb_substr((string) $request->userAgent(), 0, 255),
                 'updated_at' => $now,

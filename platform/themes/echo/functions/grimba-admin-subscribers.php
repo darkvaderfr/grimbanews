@@ -74,7 +74,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
         Route::get('subscribers/export.csv', function () {
             $response = new StreamedResponse(function () {
                 $out = fopen('php://output', 'w');
-                fputcsv($out, ['email', 'locale', 'source_key', 'created_at', 'unsubscribed_at', 'ip_address']);
+                fputcsv($out, ['email', 'locale', 'source_key', 'digest_variant', 'reader_bias_left', 'reader_bias_center', 'reader_bias_right', 'reader_bias_unknown', 'created_at', 'unsubscribed_at', 'ip_address']);
                 DB::table('newsletter_subscriptions')
                     ->orderBy('created_at')
                     ->lazy()
@@ -83,6 +83,11 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                             $row->email,
                             $row->locale,
                             $row->source_key,
+                            $row->digest_variant,
+                            $row->reader_bias_left,
+                            $row->reader_bias_center,
+                            $row->reader_bias_right,
+                            $row->reader_bias_unknown,
                             $row->created_at,
                             $row->unsubscribed_at,
                             $row->ip_address,

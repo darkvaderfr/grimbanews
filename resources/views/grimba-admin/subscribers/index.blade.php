@@ -67,6 +67,7 @@
                                 <th>Email</th>
                                 <th>Locale</th>
                                 <th>Source</th>
+                                <th>Signal biais</th>
                                 <th>Inscrit le</th>
                                 <th>Statut</th>
                                 <th class="text-end">Actions</th>
@@ -78,6 +79,12 @@
                                     <td><strong>{{ $s->email }}</strong></td>
                                     <td class="text-uppercase">{{ $s->locale }}</td>
                                     <td><span class="text-muted small font-monospace">{{ $s->source_key ?? '—' }}</span></td>
+                                    <td>
+                                        <span class="badge text-bg-light border">{{ $s->digest_variant ?? '—' }}</span>
+                                        <div class="small text-muted">
+                                            L {{ $s->reader_bias_left ?? 0 }} · C {{ $s->reader_bias_center ?? 0 }} · R {{ $s->reader_bias_right ?? 0 }}
+                                        </div>
+                                    </td>
                                     <td><span class="text-muted">{{ \Carbon\Carbon::parse($s->created_at)->locale('fr')->isoFormat('D MMM YYYY') }}</span></td>
                                     <td>
                                         @if($s->unsubscribed_at)
@@ -102,7 +109,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">Aucun abonné pour ces filtres.</td>
+                                    <td colspan="7" class="text-center text-muted py-4">Aucun abonné pour ces filtres.</td>
                                 </tr>
                             @endforelse
                         </tbody>
