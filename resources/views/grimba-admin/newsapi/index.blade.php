@@ -1,7 +1,20 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div class="max-width-900">
+    <div class="grimba-admin-screen max-width-1100">
+        <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
+            <div>
+                <span class="grimba-admin-kicker">Ingest engine</span>
+                <h1 class="grimba-admin-title">NewsAPI pipeline</h1>
+                <p class="grimba-admin-copy">
+                    Control the secondary ingest stream, test provider access, and launch a fetch without leaving the editorial backend.
+                </p>
+            </div>
+            <span class="grimba-admin-status">
+                {{ $key ? 'Key configured' : 'No key' }} · {{ $active ? 'Active' : 'Paused' }}
+            </span>
+        </section>
+
         <x-core::card>
             <x-core::card.header class="d-flex align-items-center justify-content-between">
                 <x-core::card.title>GrimbaNews — NewsAPI</x-core::card.title>
@@ -19,14 +32,16 @@
             @endif
 
             <x-core::card.body>
-                <p class="text-muted small">
+                <div class="grimba-admin-section mb-4">
+                    <p class="text-muted small mb-0">
                     Pipeline d'ingest secondaire — récupère <strong>top-headlines</strong> (par pays) et
                     <strong>everything</strong> (recherche par mots-clés) toutes les 30 minutes,
                     dédoublonne par URL d'article (sha1) et crée des brouillons que la file d'éditeur
                     peut publier. Les sources connues (50+ outlets dans <code>NewsApiSourceBiasSeeder</code>)
                     sont mappées automatiquement avec leur biais L/C/R, propriétaire et crédibilité.
                     Les sources inconnues sont créées en <code>biais=unknown</code> pour révision manuelle.
-                </p>
+                    </p>
+                </div>
 
                 <form method="POST" action="{{ route('grimba.newsapi.save') }}">
                     @csrf

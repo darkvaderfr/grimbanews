@@ -26,19 +26,19 @@
             <x-core::card.body>
                 <div class="row mb-3 g-2">
                     <div class="col">
-                        <div class="p-2 border rounded text-center">
+                        <div class="grimba-admin-stat p-2 border rounded text-center">
                             <div class="text-muted small text-uppercase">Total</div>
                             <div class="fs-4 fw-semibold">{{ $stats['total'] }}</div>
                         </div>
                     </div>
                     <div class="col">
-                        <div class="p-2 border rounded text-center">
+                        <div class="grimba-admin-stat p-2 border rounded text-center">
                             <div class="text-muted small text-uppercase">Actifs</div>
                             <div class="fs-4 fw-semibold">{{ $stats['active'] }}</div>
                         </div>
                     </div>
                     <div class="col">
-                        <div class="p-2 border rounded text-center">
+                        <div class="grimba-admin-stat p-2 border rounded text-center">
                             <div class="text-muted small text-uppercase">Malades (≥5 échecs)</div>
                             <div class="fs-4 fw-semibold" style="color: {{ $stats['sick'] > 0 ? '#e84c3d' : 'inherit' }}">
                                 {{ $stats['sick'] }}
@@ -46,7 +46,7 @@
                         </div>
                     </div>
                     <div class="col">
-                        <div class="p-2 border rounded text-center">
+                        <div class="grimba-admin-stat p-2 border rounded text-center">
                             <div class="text-muted small text-uppercase">Articles ingérés</div>
                             <div class="fs-4 fw-semibold">{{ number_format($stats['ingested'], 0, ',', ' ') }}</div>
                         </div>

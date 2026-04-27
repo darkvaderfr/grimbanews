@@ -437,3 +437,171 @@ html[data-bs-theme="dark"] body .badge.text-bg-secondary { background: rgba(255,
    ------------------------------------------------------------ */
 body .page-body { background: var(--gn-paper) !important; }
 body .footer { background: transparent !important; border-top: 1px solid var(--gn-rule); color: var(--gn-ink-soft); }
+
+/* ------------------------------------------------------------
+   Grimba admin UI kit — shared readable shells for custom pages
+   ------------------------------------------------------------ */
+body .grimba-admin-screen {
+    color: var(--gn-ink);
+}
+body .max-width-900,
+body .max-width-1000,
+body .max-width-1100,
+body .max-width-1200 {
+    width: min(100%, var(--grimba-admin-max, 1200px));
+    margin-inline: auto;
+}
+body .max-width-900 { --grimba-admin-max: 900px; }
+body .max-width-1000 { --grimba-admin-max: 1000px; }
+body .max-width-1100 { --grimba-admin-max: 1100px; }
+body .max-width-1200 { --grimba-admin-max: 1200px; }
+body .grimba-admin-hero {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    margin-bottom: 1rem;
+    border: 1px solid var(--gn-rule);
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at 12% 12%, rgba(220, 200, 160, 0.42), transparent 30%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(246, 241, 232, 0.74));
+    box-shadow: 0 24px 64px rgba(26, 23, 19, 0.09);
+}
+body .grimba-admin-kicker {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 0.32rem 0.75rem;
+    border-radius: 9999px;
+    background: var(--gn-ink);
+    color: var(--gn-paper);
+    font-family: var(--gn-font-mono);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+body .grimba-admin-title {
+    margin: 0.85rem 0 0.45rem;
+    color: var(--gn-ink) !important;
+    font-family: var(--gn-font-display) !important;
+    font-size: clamp(2rem, 4vw, 3.65rem);
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+}
+body .grimba-admin-copy {
+    max-width: 760px;
+    margin: 0;
+    color: var(--gn-ink-muted);
+    font-size: 0.98rem;
+    line-height: 1.55;
+}
+body .grimba-admin-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--gn-rule);
+    border-radius: 9999px;
+    color: var(--gn-ink-muted);
+    background: rgba(255, 255, 255, 0.64);
+    font-family: var(--gn-font-mono);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+body .grimba-admin-section {
+    padding: 1rem;
+    border: 1px solid var(--gn-rule);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.66);
+}
+body .grimba-admin-stat {
+    background: rgba(255, 255, 255, 0.72) !important;
+    border-color: var(--gn-rule) !important;
+    color: var(--gn-ink);
+}
+body .table {
+    --bb-table-color: var(--gn-ink);
+    --bb-table-bg: transparent;
+    --bb-table-striped-color: var(--gn-ink);
+    --bb-table-striped-bg: rgba(26, 23, 19, 0.025);
+    --bb-table-hover-color: var(--gn-ink);
+    --bb-table-hover-bg: rgba(26, 23, 19, 0.045);
+    color: var(--gn-ink) !important;
+}
+body .table > :not(caption) > * > * {
+    color: var(--gn-ink);
+    background-color: transparent;
+    border-color: var(--gn-rule);
+}
+body .table a,
+body .card a:not(.btn) {
+    color: #9f2f26;
+    font-weight: 650;
+}
+body .table .text-muted,
+body .card .text-muted,
+body .form-text {
+    color: var(--gn-ink-soft) !important;
+}
+body pre.bg-light {
+    background: rgba(26, 23, 19, 0.045) !important;
+    color: var(--gn-ink) !important;
+}
+
+html[data-bs-theme="dark"] body .grimba-cockpit__hero,
+body[data-bs-theme="dark"] .grimba-cockpit__hero,
+html[data-bs-theme="dark"] body .grimba-admin-hero,
+body[data-bs-theme="dark"] .grimba-admin-hero {
+    background:
+        radial-gradient(circle at 14% 10%, rgba(201, 174, 118, 0.18), transparent 32%),
+        linear-gradient(135deg, rgba(36, 32, 22, 0.96), rgba(18, 16, 7, 0.86));
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+}
+html[data-bs-theme="dark"] body .grimba-kpi,
+body[data-bs-theme="dark"] .grimba-kpi,
+html[data-bs-theme="dark"] body .grimba-admin-section,
+body[data-bs-theme="dark"] .grimba-admin-section,
+html[data-bs-theme="dark"] body .grimba-admin-stat,
+body[data-bs-theme="dark"] .grimba-admin-stat {
+    background: rgba(36, 32, 22, 0.84) !important;
+    border-color: rgba(246, 241, 232, 0.14) !important;
+    color: var(--gn-ink);
+}
+html[data-bs-theme="dark"] body .grimba-kpi--warn,
+body[data-bs-theme="dark"] .grimba-kpi--warn {
+    background: linear-gradient(135deg, rgba(36, 32, 22, 0.88), rgba(232, 76, 61, 0.11)) !important;
+}
+html[data-bs-theme="dark"] body .grimba-admin-status,
+body[data-bs-theme="dark"] .grimba-admin-status {
+    background: rgba(246, 241, 232, 0.08);
+    border-color: rgba(246, 241, 232, 0.14);
+    color: var(--gn-ink-muted);
+}
+html[data-bs-theme="dark"] body .table,
+body[data-bs-theme="dark"] .table {
+    --bb-table-color: var(--gn-ink);
+    --bb-table-bg: transparent;
+    --bb-table-striped-color: var(--gn-ink);
+    --bb-table-striped-bg: rgba(246, 241, 232, 0.035);
+    --bb-table-hover-color: var(--gn-ink);
+    --bb-table-hover-bg: rgba(246, 241, 232, 0.06);
+}
+html[data-bs-theme="dark"] body .table > :not(caption) > * > *,
+body[data-bs-theme="dark"] .table > :not(caption) > * > * {
+    color: var(--gn-ink);
+    border-color: rgba(246, 241, 232, 0.1);
+}
+html[data-bs-theme="dark"] body .table a,
+body[data-bs-theme="dark"] .table a,
+html[data-bs-theme="dark"] body .card a:not(.btn),
+body[data-bs-theme="dark"] .card a:not(.btn) {
+    color: #ffb0a8;
+}
+html[data-bs-theme="dark"] body pre.bg-light,
+body[data-bs-theme="dark"] pre.bg-light {
+    background: rgba(246, 241, 232, 0.07) !important;
+    color: var(--gn-ink) !important;
+}

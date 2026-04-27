@@ -1,7 +1,18 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div class="max-width-900">
+    <div class="grimba-admin-screen max-width-1000">
+        <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
+            <div>
+                <span class="grimba-admin-kicker">Consent layer</span>
+                <h1 class="grimba-admin-title">Cookie banner</h1>
+                <p class="grimba-admin-copy">
+                    Edit the public consent copy and keep the privacy banner readable across the GrimbaNews front-end.
+                </p>
+            </div>
+            <span class="grimba-admin-status">{{ $active ? 'Active' : 'Disabled' }}</span>
+        </section>
+
         <x-core::card>
             <x-core::card.header class="d-flex align-items-center justify-content-between">
                 <x-core::card.title>GrimbaNews — Bandeau cookies</x-core::card.title>
@@ -15,12 +26,14 @@
             @endif
 
             <x-core::card.body>
-                <p class="text-muted small">
-                    Bandeau de consentement cookies — apparaît en bas à droite de chaque page jusqu'à
-                    ce que le visiteur clique sur Accepter ou Refuser. Le choix est stocké dans le cookie
-                    <code>grimba_cookie_consent</code> (1 an, non chiffré pour permettre la lecture côté client).
-                    Endpoint : <code>POST /cookie-consent/{accept|reject}</code>.
-                </p>
+                <div class="grimba-admin-section mb-4">
+                    <p class="text-muted small mb-0">
+                        Bandeau de consentement cookies — apparaît en bas à droite de chaque page jusqu'à
+                        ce que le visiteur clique sur Accepter ou Refuser. Le choix est stocké dans le cookie
+                        <code>grimba_cookie_consent</code> (1 an, non chiffré pour permettre la lecture côté client).
+                        Endpoint : <code>POST /cookie-consent/{accept|reject}</code>.
+                    </p>
+                </div>
 
                 <form method="POST" action="{{ route('grimba.cookies.save') }}">
                     @csrf
