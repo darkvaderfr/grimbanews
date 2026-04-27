@@ -37,12 +37,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->filter(fn ($c) => $c->total > 0)
                 ->values();
 
-            SeoHelper::setTitle('Comparer les sources — GrimbaNews')
-                ->setDescription("Tous les dossiers en cours — chaque histoire vue sous plusieurs angles.");
+            SeoHelper::setTitle(__('Comparer les sources') . ' — GrimbaNews')
+                ->setDescription(__("Tous les dossiers en cours — chaque histoire vue sous plusieurs angles."));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Comparer les sources', url('/comparatif'));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Comparer les sources'), url('/comparatif'));
 
             return Theme::scope('comparison-index', compact('clusters'))->render();
         })->name('public.comparison.index');
@@ -56,12 +56,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             $storyTitle = $posts->first()->name ?? ('Dossier #' . $clusterId);
 
-            SeoHelper::setTitle('Comparaison des sources — ' . $storyTitle)
-                ->setDescription('Comparez comment les médias couvrent la même histoire.');
+            SeoHelper::setTitle(__('Comparaison des sources') . ' — ' . $storyTitle)
+                ->setDescription(__('Comparez comment les médias couvrent la même histoire.'));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Comparaison', url('/comparatif/' . $clusterId));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Comparaison'), url('/comparatif/' . $clusterId));
 
             return Theme::scope('comparison', [
                 'posts'      => $posts,
@@ -261,12 +261,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             $availableSources = DB::table('news_sources')->orderBy('name')->get(['id', 'name']);
 
-            SeoHelper::setTitle(($q !== '' ? "Recherche : {$q}" : 'Recherche') . ' — GrimbaNews')
-                ->setDescription('Explorez les articles, sources et dossiers de GrimbaNews.');
+            SeoHelper::setTitle(($q !== '' ? __('Recherche : :query', ['query' => $q]) : __('Recherche')) . ' — GrimbaNews')
+                ->setDescription(__('Explorez les articles, sources et dossiers de GrimbaNews.'));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Recherche', url('/search'));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Recherche'), url('/search'));
 
             return Theme::scope('search', [
                 'posts'            => $posts,
@@ -488,12 +488,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         })->name('public.newsletter.subscribe');
 
         Route::get('methodologie', function () {
-            SeoHelper::setTitle('Méthodologie — GrimbaNews')
-                ->setDescription("Comment GrimbaNews classe les biais, repère les angles morts et note la crédibilité des sources.");
+            SeoHelper::setTitle(__('Méthodologie') . ' — GrimbaNews')
+                ->setDescription(__('Comment GrimbaNews classe les biais, repère les angles morts et note la crédibilité des sources.'));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Méthodologie', url('/methodologie'));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Méthodologie'), url('/methodologie'));
 
             return Theme::scope('methodology', [])->render();
         })->name('public.methodology');
@@ -509,10 +509,10 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             if (! $user) {
                 return redirect(route('public.member.login'));
             }
-            SeoHelper::setTitle('Mon compte — GrimbaNews');
+            SeoHelper::setTitle(__('Mon compte') . ' — GrimbaNews');
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Mon compte', url('/account'));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Mon compte'), url('/account'));
             return Theme::scope('account', compact('user'))->render();
         })->name('public.account');
 
@@ -612,13 +612,13 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->sortByDesc(fn ($o) => count($o['sources']))
                 ->values();
 
-            SeoHelper::setTitle('Qui possède quoi — GrimbaNews')
-                ->setDescription("Carte de la concentration des médias suivis par GrimbaNews.");
+            SeoHelper::setTitle(__('Qui possède quoi') . ' — GrimbaNews')
+                ->setDescription(__('Carte de la concentration des médias suivis par GrimbaNews.'));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Sources', url('/sources'))
-                ->add('Propriétaires', url('/proprietaires'));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Sources'), url('/sources'))
+                ->add(__('Propriétaires'), url('/proprietaires'));
 
             return Theme::scope('owners', [
                 'owners'       => $owners,
@@ -652,12 +652,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             $grouped = $rows->groupBy(fn ($r) => in_array($r->bias_rating, ['left','center','right']) ? $r->bias_rating : 'unknown');
 
-            SeoHelper::setTitle('Sources classées — GrimbaNews')
-                ->setDescription('Biais, propriété, crédibilité et origine des sources suivies.');
+            SeoHelper::setTitle(__('Sources classées') . ' — GrimbaNews')
+                ->setDescription(__('Biais, propriété, crédibilité et origine des sources suivies.'));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Sources', url('/sources'));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Sources'), url('/sources'));
 
             return Theme::scope('sources', [
                 'grouped' => $grouped,
@@ -696,15 +696,14 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->paginate(12);
 
             SeoHelper::setTitle($source->name . ' — GrimbaNews')
-                ->setDescription(sprintf(
-                    '%s — biais déclaré : %s. Couverture archivée par GrimbaNews.',
-                    $source->name,
-                    $source->bias_rating ?? 'non classé'
-                ));
+                ->setDescription(__(':source — biais déclaré :bias. Couverture archivée par GrimbaNews.', [
+                    'source' => $source->name,
+                    'bias' => $source->bias_rating ?? __('non classé'),
+                ]));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Sources', url('/sources'))
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Sources'), url('/sources'))
                 ->add($source->name, url('/sources/' . $source->slug));
 
             return Theme::scope('source', [
@@ -843,12 +842,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->latest()
                 ->paginate(12);
 
-            SeoHelper::setTitle('Angles morts — GrimbaNews')
-                ->setDescription("Les histoires qu'un seul camp couvre.");
+            SeoHelper::setTitle(__('Angles morts') . ' — GrimbaNews')
+                ->setDescription(__("Les histoires qu'un seul camp couvre."));
 
             Theme::breadcrumb()
-                ->add('Accueil', url('/'))
-                ->add('Angles morts', url('/angles-morts'));
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Angles morts'), url('/angles-morts'));
 
             return Theme::scope('blindspot', [
                 'posts' => $posts,

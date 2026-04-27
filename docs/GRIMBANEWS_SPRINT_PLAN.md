@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `f9bea23` Harden public NobuAI insight branding
 - `df7b14d` Add cockpit NobuAI insight batch action
 - `8fd4bc7` Keep admin dropdowns above content
 - `b1dae35` Clarify NobuAI live health prompt
 - `67b2958` Surface NobuAI insight readiness
-- `a733b8e` Fix admin dropdown and theme chrome
 
 Latest verification:
 
-- `php artisan test` passed with `34` tests and `293` assertions.
+- `php artisan test` passed with `36` tests and `417` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
 ## Completed Sprint Bands
@@ -47,11 +47,12 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S220 — Maturity, Accessibility, Admin, And Tests
+### S185-S221 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
 - S220 hardened public NobuAI insight rendering so reader pages dedupe lines and scrub provider names from saved insight copy.
+- S221 moved remaining core public chrome, metadata, blindspot, comparison, and error-page copy behind saved EN/FR catalogs, with regression tests for catalog coverage.
 
 ## Active Systems
 
@@ -85,15 +86,6 @@ Latest verification:
 - Cookie banner settings
 
 ## Next Sprint Queue
-
-### S221 — Translation Cache Audit
-
-Goal: Confirm whole-site static EN/FR UI strings are saved in JSON catalogs while article translation remains NobuTranslation-driven.
-
-Acceptance:
-
-- No hardcoded public UI strings on core Grimba pages without catalog fallback.
-- Static catalog tests cover homepage, story, search, sources, and ownership pages.
 
 ### S222 — Admin UX Sweep
 

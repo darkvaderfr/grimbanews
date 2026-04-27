@@ -35,6 +35,55 @@ class StaticUiTranslationTest extends TestCase
         }
     }
 
+    public function test_core_public_chrome_keys_are_saved_in_catalogs(): void
+    {
+        $keys = [
+            'Tous les dossiers en cours — chaque histoire vue sous plusieurs angles.',
+            'Comparaison des sources',
+            'Comparez comment les médias couvrent la même histoire.',
+            'Recherche : :query',
+            'Explorez les articles, sources et dossiers de GrimbaNews.',
+            'Comment GrimbaNews classe les biais, repère les angles morts et note la crédibilité des sources.',
+            'Carte de la concentration des médias suivis par GrimbaNews.',
+            'Biais, propriété, crédibilité et origine des sources suivies.',
+            ':source — biais déclaré :bias. Couverture archivée par GrimbaNews.',
+            "Les histoires qu'un seul camp couvre",
+            "Un angle mort est une histoire importante rapportée presque exclusivement par un côté du spectre politique. GrimbaNews les signale pour que vous sachiez ce qu'on ne vous raconte pas.",
+            'Aucun angle mort identifié pour le moment.',
+            'Histoire liée',
+            'Dossier',
+            'Même histoire, plusieurs angles. Comparez comment chaque média couvre le sujet — et repérez les silences.',
+            "Aucune source n'a été trouvée pour ce dossier.",
+            '404 — Page introuvable',
+            'Erreur 404',
+            'Cette page a disparu du radar.',
+            "Le lien que vous avez suivi n'existe plus, a été déplacé, ou n'a jamais existé. Ça arrive. Voici par où repartir.",
+            "Retour à l'accueil",
+            'Voir le fil',
+            '500 — Erreur interne',
+            'Erreur 500',
+            "Quelque chose s'est cassé côté serveur.",
+            "Une erreur interne nous empêche de servir cette page pour l'instant. L'équipe a été notifiée. Réessayez dans quelques minutes, ou revenez à la liste des dernières histoires.",
+            '503 — Service indisponible',
+            'Maintenance',
+            'GrimbaNews est en maintenance.',
+            'Nous améliorons la plateforme. Nous revenons très vite. Merci pour votre patience.',
+        ];
+
+        foreach ([
+            lang_path('en.json'),
+            lang_path('fr.json'),
+            base_path('platform/themes/echo/lang/en.json'),
+            base_path('platform/themes/echo/lang/fr.json'),
+        ] as $path) {
+            $catalog = json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+
+            foreach ($keys as $key) {
+                $this->assertArrayHasKey($key, $catalog, $path . ' is missing ' . $key);
+            }
+        }
+    }
+
     public function test_english_story_shell_uses_saved_catalog_copy(): void
     {
         $postId = DB::table('posts')
@@ -99,5 +148,18 @@ class StaticUiTranslationTest extends TestCase
             ->assertOk()
             ->assertSee('Media ownership')
             ->assertSee('Who owns what');
+    }
+
+    public function test_english_blindspot_shell_uses_saved_catalog_copy(): void
+    {
+        $this->withUnencryptedCookies([
+            'grimba_lang' => 'en',
+            'grimba_onboarded' => '1',
+        ])
+            ->get('/angles-morts')
+            ->assertOk()
+            ->assertSee('Blindspot')
+            ->assertSee('Stories only one side covers')
+            ->assertSee('reported almost exclusively by one side');
     }
 }
