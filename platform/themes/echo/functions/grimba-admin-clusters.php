@@ -168,6 +168,31 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->latest()
                 ->get();
 
+            $attachedSourceIds = $attached
+                ->pluck('source_id')
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+
+            $sourceColumns = array_values(array_filter([
+                'id',
+                'name',
+                'website',
+                'bias_rating',
+                'ownership_type',
+                'credibility_score',
+                Schema::hasColumn('news_sources', 'owner_name') ? 'owner_name' : null,
+                Schema::hasColumn('news_sources', 'slug') ? 'slug' : null,
+            ]));
+
+            $attachedSourceMeta = empty($attachedSourceIds)
+                ? collect()
+                : DB::table('news_sources')
+                    ->whereIn('id', $attachedSourceIds)
+                    ->get($sourceColumns)
+                    ->keyBy('id');
+
             $available = Post::query()
                 ->where(function ($q) use ($id) {
                     $q->whereNull('story_cluster_id')
@@ -189,7 +214,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
             $nobuAiReady = app(GrimbaNobuAi::class)->enabled();
 
-            return view('grimba-admin.story-clusters.form', compact('cluster', 'attached', 'available', 'summaryInfo', 'nobuAiReady'));
+            return view('grimba-admin.story-clusters.form', compact('cluster', 'attached', 'attachedSourceMeta', 'available', 'summaryInfo', 'nobuAiReady'));
         })->name('story-clusters.edit');
 
         Route::post('story-clusters', function (Request $request) {

@@ -112,14 +112,90 @@ class AdminSettingsTest extends TestCase
             ->assertRedirect('/admin/grimba/cockpit')
             ->assertSessionHas('success_msg');
 
-        $clusterId = DB::table('story_clusters')->orderBy('id')->value('id');
-        $this->assertNotNull($clusterId, 'Fixture database must contain at least one story cluster.');
+        $diagnosticClusterId = 990016;
+        $diagnosticSourceName = 'S228 Low Cred Test Source';
+        $diagnosticSourceSlug = 's228-low-cred-test-source';
+
+        $staleDiagnosticSourceIds = DB::table('news_sources')
+            ->where('name', $diagnosticSourceName)
+            ->orWhere('slug', $diagnosticSourceSlug)
+            ->pluck('id')
+            ->all();
+
+        if ($staleDiagnosticSourceIds !== []) {
+            DB::table('posts')
+                ->whereIn('source_id', $staleDiagnosticSourceIds)
+                ->update(['source_id' => null, 'source_name' => null]);
+        }
+
+        DB::table('news_sources')
+            ->where('name', $diagnosticSourceName)
+            ->orWhere('slug', $diagnosticSourceSlug)
+            ->delete();
+
+        $diagnosticSourceId = DB::table('news_sources')->insertGetId([
+            'name' => $diagnosticSourceName,
+            'website' => 'https://lowcred.example',
+            'bias_rating' => 'right',
+            'ownership_type' => 'corporate',
+            'credibility_score' => 42,
+            'country' => 'US',
+            'language' => 'en',
+            'notes' => 'S228 admin drilldown fixture',
+            'slug' => $diagnosticSourceSlug,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('story_clusters')->updateOrInsert(
+            ['id' => $diagnosticClusterId],
+            [
+                'topic' => 'Admin source drilldown diagnostics',
+                'description' => 'S228 regression fixture',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
+        $diagnosticPostIds = DB::table('posts')
+            ->where('status', 'published')
+            ->orderBy('id')
+            ->limit(2)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->assertCount(2, $diagnosticPostIds, 'Fixture database must contain at least two published posts.');
+
+        DB::table('posts')->where('id', $diagnosticPostIds[0])->update([
+            'story_cluster_id' => $diagnosticClusterId,
+            'source_id' => null,
+            'source_name' => null,
+            'bias_rating' => 'unknown',
+            'description' => 'Article sans métadonnées source pour vérifier le diagnostic admin.',
+            'updated_at' => now(),
+        ]);
+
+        DB::table('posts')->where('id', $diagnosticPostIds[1])->update([
+            'story_cluster_id' => $diagnosticClusterId,
+            'source_id' => $diagnosticSourceId,
+            'source_name' => $diagnosticSourceName,
+            'bias_rating' => 'right',
+            'description' => 'Article avec crédibilité basse pour vérifier le signal éditorial.',
+            'updated_at' => now(),
+        ]);
 
         $this->actingAs($this->admin())
-            ->get("/admin/grimba/story-clusters/{$clusterId}/edit")
+            ->get("/admin/grimba/story-clusters/{$diagnosticClusterId}/edit")
             ->assertOk()
             ->assertSee('NobuAI insights')
-            ->assertSee('insight NobuAI');
+            ->assertSee('insight NobuAI')
+            ->assertSee('Diagnostic sources')
+            ->assertSee('Métadonnées source manquantes')
+            ->assertSee('Biais inconnu')
+            ->assertSee('Crédibilité basse')
+            ->assertSee($diagnosticSourceName)
+            ->assertSee('Modifier l');
 
         $this->actingAs($this->admin())
             ->post('/admin/grimba/translation', [

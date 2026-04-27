@@ -1,6 +1,8 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @php
+    use Illuminate\Support\Str;
+
     $isEdit = (bool) $cluster;
     $action = $isEdit
         ? route('grimba.story-clusters.update', $cluster->id)
@@ -15,6 +17,7 @@
     $biasLabel = [
         'left' => 'Gauche', 'center' => 'Centre', 'right' => 'Droite', 'unknown' => '—',
     ];
+    $sources = $attachedSourceMeta ?? collect();
 @endphp
 
 @section('content')
@@ -117,6 +120,85 @@
                 </x-core::card.body>
             </x-core::card>
 
+            <x-core::card class="mb-4">
+                <x-core::card.header>
+                    <x-core::card.title>Diagnostic sources</x-core::card.title>
+                    <p class="text-muted small mb-0">
+                        Vérifiez les angles, les métadonnées source et la crédibilité avant publication.
+                    </p>
+                </x-core::card.header>
+                <x-core::card.body>
+                    @if($attached->isEmpty())
+                        <p class="text-muted mb-0">Aucun article attaché à diagnostiquer.</p>
+                    @else
+                        <div class="grimba-cluster-drilldown">
+                            @foreach($attached as $p)
+                                @php
+                                    $bias = isset($biasLabel[$p->bias_rating ?? '']) ? $p->bias_rating : 'unknown';
+                                    $bc = $biasColor[$bias] ?? $biasColor['unknown'];
+                                    $source = $p->source_id && isset($sources[$p->source_id]) ? $sources[$p->source_id] : null;
+                                    $sourceName = $p->source_name ?: ($source->name ?? 'Source inconnue');
+                                    $excerpt = trim(strip_tags((string) ($p->description ?: $p->name)));
+                                    $flags = collect();
+
+                                    if (! $source) {
+                                        $flags->push(['label' => 'Métadonnées source manquantes', 'tone' => 'danger']);
+                                    }
+
+                                    if ($bias === 'unknown') {
+                                        $flags->push(['label' => 'Biais inconnu', 'tone' => 'warning']);
+                                    }
+
+                                    if ($source && $source->credibility_score !== null && (int) $source->credibility_score < 60) {
+                                        $flags->push(['label' => 'Crédibilité basse', 'tone' => 'danger']);
+                                    }
+                                @endphp
+                                <article class="grimba-cluster-drilldown__row" style="--cluster-bias-color: {{ $bc }};">
+                                    <div class="grimba-cluster-drilldown__bias">
+                                        <span></span>
+                                        {{ $biasLabel[$bias] ?? '—' }}
+                                    </div>
+                                    <div class="grimba-cluster-drilldown__body">
+                                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                                            <div>
+                                                <strong>{{ $sourceName }}</strong>
+                                                <p class="mb-1">{{ Str::limit($excerpt, 150) }}</p>
+                                            </div>
+                                            <a href="{{ route('posts.edit', $p->id) }}" class="btn btn-sm btn-outline-secondary">
+                                                Modifier l'article
+                                            </a>
+                                        </div>
+                                        <div class="grimba-cluster-drilldown__meta">
+                                            @if($source && $source->credibility_score !== null)
+                                                <span>Crédibilité {{ (int) $source->credibility_score }}/100</span>
+                                            @endif
+                                            @if($source && ! empty($source->ownership_type))
+                                                <span>Propriété {{ $source->ownership_type }}</span>
+                                            @endif
+                                            @if($source && ! empty($source->owner_name))
+                                                <span>Owner {{ $source->owner_name }}</span>
+                                            @endif
+                                            @if($source && ! empty($source->website))
+                                                <span>{{ $source->website }}</span>
+                                            @endif
+                                        </div>
+                                        @if($flags->isNotEmpty())
+                                            <div class="grimba-cluster-drilldown__flags">
+                                                @foreach($flags as $flag)
+                                                    <span class="grimba-cluster-drilldown__flag grimba-cluster-drilldown__flag--{{ $flag['tone'] }}">
+                                                        {{ $flag['label'] }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    @endif
+                </x-core::card.body>
+            </x-core::card>
+
             <x-core::card>
                 <x-core::card.header>
                     <x-core::card.title>Articles attachés ({{ $attached->count() }})</x-core::card.title>
@@ -173,4 +255,103 @@
             </x-core::card>
         @endif
     </div>
+
+    <style>
+        .grimba-cluster-drilldown {
+            display: grid;
+            gap: 12px;
+        }
+        .grimba-cluster-drilldown__row {
+            display: grid;
+            grid-template-columns: minmax(92px, 140px) 1fr;
+            gap: 14px;
+            padding: 14px;
+            border: 1px solid rgba(26, 23, 19, 0.12);
+            border-left: 4px solid var(--cluster-bias-color);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.88);
+        }
+        .grimba-cluster-drilldown__bias {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--cluster-bias-color);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .grimba-cluster-drilldown__bias span {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: var(--cluster-bias-color);
+        }
+        .grimba-cluster-drilldown__body strong {
+            color: #17130f;
+            font-size: 16px;
+        }
+        .grimba-cluster-drilldown__body p {
+            color: #5f584f;
+            line-height: 1.5;
+        }
+        .grimba-cluster-drilldown__meta,
+        .grimba-cluster-drilldown__flags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .grimba-cluster-drilldown__meta span {
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: rgba(26, 23, 19, 0.06);
+            color: #5f584f;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .grimba-cluster-drilldown__flag {
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .grimba-cluster-drilldown__flag--danger {
+            background: rgba(220, 38, 38, 0.1);
+            color: #b91c1c;
+        }
+        .grimba-cluster-drilldown__flag--warning {
+            background: rgba(217, 119, 6, 0.12);
+            color: #92400e;
+        }
+        [data-bs-theme="dark"] .grimba-cluster-drilldown__row,
+        .theme-dark .grimba-cluster-drilldown__row,
+        body.dark .grimba-cluster-drilldown__row {
+            border-color: rgba(255, 255, 255, 0.16);
+            background: rgba(25, 25, 23, 0.88);
+        }
+        [data-bs-theme="dark"] .grimba-cluster-drilldown__body strong,
+        .theme-dark .grimba-cluster-drilldown__body strong,
+        body.dark .grimba-cluster-drilldown__body strong {
+            color: #f7f2e8;
+        }
+        [data-bs-theme="dark"] .grimba-cluster-drilldown__body p,
+        [data-bs-theme="dark"] .grimba-cluster-drilldown__meta span,
+        .theme-dark .grimba-cluster-drilldown__body p,
+        .theme-dark .grimba-cluster-drilldown__meta span,
+        body.dark .grimba-cluster-drilldown__body p,
+        body.dark .grimba-cluster-drilldown__meta span {
+            color: #d6cfc3;
+        }
+        [data-bs-theme="dark"] .grimba-cluster-drilldown__meta span,
+        .theme-dark .grimba-cluster-drilldown__meta span,
+        body.dark .grimba-cluster-drilldown__meta span {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        @media (max-width: 720px) {
+            .grimba-cluster-drilldown__row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 @endsection
