@@ -426,8 +426,13 @@
                                 'extractive' => __('Synthèse multi-sources'),
                                 default      => __('Aperçu'),
                             };
+                            $__gnNobuAiGeneratedAt = ! empty($post->summary_generated_at ?? null)
+                                ? \Carbon\Carbon::parse($post->summary_generated_at)->locale($__gnTarget)->diffForHumans()
+                                : null;
                             $__badgeFootnote = match ($__gnSummaryMode) {
-                                'nobuai'     => null,
+                                'nobuai'     => $__gnNobuAiGeneratedAt
+                                    ? __('Généré par NobuAI :time.', ['time' => $__gnNobuAiGeneratedAt])
+                                    : __('Généré par NobuAI.'),
                                 'extractive' => __('Première phrase de chaque source · résumé NobuAI à venir.'),
                                 default      => __("Résumé multi-sources à venir dès qu'une autre couverture rejoint cette histoire."),
                             };

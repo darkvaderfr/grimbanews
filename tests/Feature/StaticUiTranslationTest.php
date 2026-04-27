@@ -68,6 +68,8 @@ class StaticUiTranslationTest extends TestCase
             'Maintenance',
             'GrimbaNews est en maintenance.',
             'Nous améliorons la plateforme. Nous revenons très vite. Merci pour votre patience.',
+            'Généré par NobuAI :time.',
+            'Généré par NobuAI.',
         ];
 
         foreach ([
@@ -86,13 +88,22 @@ class StaticUiTranslationTest extends TestCase
 
     public function test_english_story_shell_uses_saved_catalog_copy(): void
     {
-        $postId = DB::table('posts')
+        $clusterId = DB::table('posts')
             ->where('status', 'published')
             ->whereNotNull('story_cluster_id')
+            ->select('story_cluster_id')
+            ->groupBy('story_cluster_id')
+            ->havingRaw('COUNT(*) >= 2')
+            ->orderBy('story_cluster_id')
+            ->value('story_cluster_id');
+
+        $this->assertNotNull($clusterId, 'Fixture database must contain a multi-post clustered published story.');
+
+        $postId = DB::table('posts')
+            ->where('status', 'published')
+            ->where('story_cluster_id', $clusterId)
             ->orderBy('id')
             ->value('id');
-
-        $this->assertNotNull($postId, 'Fixture database must contain a clustered published post.');
 
         $slug = DB::table('slugs')
             ->where('reference_type', 'Botble\\Blog\\Models\\Post')

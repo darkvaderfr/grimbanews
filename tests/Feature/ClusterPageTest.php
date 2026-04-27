@@ -146,4 +146,35 @@ class ClusterPageTest extends TestCase
             ->assertDontSee('Claude')
             ->assertDontSee('summary_driver');
     }
+
+    public function test_public_nobuai_insights_show_groundnews_style_labels_and_note(): void
+    {
+        $post = $this->assignCluster($this->publishedPostIds(2, 13), 910006, ['left', 'center']);
+
+        DB::table('posts')
+            ->where('story_cluster_id', 910006)
+            ->update([
+                'summary_nobuai' => implode("\n", [
+                    'Ce qui est confirmé: deux sources décrivent le même calendrier.',
+                    'Ce que dit la gauche: le cadrage insiste sur le coût social.',
+                    'Ce que dit le centre: le cadrage insiste sur la procédure.',
+                    'Angle mort: aucune source de droite publiée dans ce dossier.',
+                    'Pourquoi ça compte: le lecteur voit consensus et lacunes séparément.',
+                ]),
+                'summary_generated_at' => now()->subMinutes(12),
+                'summary_driver' => 'openai',
+            ]);
+
+        $this->withUnencryptedCookies($this->readerCookies())
+            ->get($this->pathFor($post))
+            ->assertOk()
+            ->assertSee('Insights par NobuAI')
+            ->assertSee('Ce qui est confirmé')
+            ->assertSee('Ce que dit la gauche')
+            ->assertSee('Ce que dit le centre')
+            ->assertSee('Angle mort')
+            ->assertSee('Pourquoi ça compte')
+            ->assertSee('Généré par NobuAI')
+            ->assertDontSee('Première phrase de chaque source');
+    }
 }
