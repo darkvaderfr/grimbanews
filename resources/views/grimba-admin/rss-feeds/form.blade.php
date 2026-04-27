@@ -9,6 +9,12 @@
     @endphp
 
     <div class="grimba-admin-screen max-width-1000">
+        <nav class="grimba-admin-wayfinder" aria-label="GrimbaNews admin navigation">
+            <a href="{{ route('grimba.cockpit') }}">GrimbaNews</a>
+            <a href="{{ route('grimba.rss-feeds.index') }}">Flux RSS</a>
+            <span>{{ $isEdit ? 'Modifier' : 'Créer' }}</span>
+        </nav>
+
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
                 <span class="grimba-admin-kicker">RSS intake</span>

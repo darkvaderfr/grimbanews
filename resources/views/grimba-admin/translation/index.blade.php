@@ -218,6 +218,12 @@
     </style>
 
     <div class="grimba-llm-admin max-width-1200 grimba-admin-form">
+        <nav class="grimba-admin-wayfinder" aria-label="GrimbaNews admin navigation">
+            <a href="{{ route('grimba.cockpit') }}">GrimbaNews</a>
+            <span>NobuAI</span>
+            <span>Provider vault</span>
+        </nav>
+
         <section class="grimba-llm-hero">
             <span class="grimba-llm-kicker">NobuAI Provider Vault</span>
             <h1 class="grimba-llm-title">LLM keys and translation controls</h1>

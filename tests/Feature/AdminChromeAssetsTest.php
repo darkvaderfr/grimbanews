@@ -37,6 +37,8 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('body .grimba-admin-screen .alert-warning', $css);
         $this->assertStringContainsString('body .grimba-admin-screen .alert-danger', $css);
         $this->assertStringContainsString('body[data-bs-theme="dark"] .grimba-admin-screen .alert-secondary', $css);
+        $this->assertStringContainsString('body .grimba-admin-wayfinder', $css);
+        $this->assertStringContainsString('body .grimba-admin-wayfinder a:hover', $css);
         $this->assertStringContainsString('@media (max-width: 767.98px)', $css);
         $this->assertStringContainsString('grid-template-columns: minmax(7rem, 42%) 1fr;', $css);
         $this->assertStringContainsString('body .grimba-admin-screen .btn-outline-danger', $css);
@@ -131,6 +133,7 @@ class AdminChromeAssetsTest extends TestCase
 
             $this->assertStringContainsString('grimba-admin-form', $contents, $view);
             $this->assertStringContainsString('grimba-admin-form-section', $contents, $view);
+            $this->assertStringContainsString('grimba-admin-wayfinder', $contents, $view);
         }
     }
 }

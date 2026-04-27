@@ -825,6 +825,37 @@ body .grimba-admin-status {
     letter-spacing: 0.06em;
     text-transform: uppercase;
 }
+body .grimba-admin-wayfinder {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.85rem;
+    color: var(--gn-ink-soft);
+    font-family: var(--gn-font-mono);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+body .grimba-admin-wayfinder a,
+body .grimba-admin-wayfinder span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--gn-rule);
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.58);
+    color: var(--gn-ink-muted) !important;
+    text-decoration: none;
+}
+body .grimba-admin-wayfinder a:hover,
+body .grimba-admin-wayfinder a:focus {
+    background: var(--gn-ink);
+    border-color: var(--gn-ink);
+    color: var(--gn-paper) !important;
+}
 body .grimba-admin-section {
     padding: 1rem;
     border: 1px solid var(--gn-rule);
@@ -1158,6 +1189,22 @@ body[data-bs-theme="dark"] .grimba-admin-status {
     background: rgba(246, 241, 232, 0.08);
     border-color: rgba(246, 241, 232, 0.14);
     color: var(--gn-ink-muted);
+}
+html[data-bs-theme="dark"] body .grimba-admin-wayfinder a,
+html[data-bs-theme="dark"] body .grimba-admin-wayfinder span,
+body[data-bs-theme="dark"] .grimba-admin-wayfinder a,
+body[data-bs-theme="dark"] .grimba-admin-wayfinder span {
+    background: rgba(246, 241, 232, 0.08);
+    border-color: rgba(246, 241, 232, 0.14);
+    color: var(--gn-ink-muted) !important;
+}
+html[data-bs-theme="dark"] body .grimba-admin-wayfinder a:hover,
+html[data-bs-theme="dark"] body .grimba-admin-wayfinder a:focus,
+body[data-bs-theme="dark"] .grimba-admin-wayfinder a:hover,
+body[data-bs-theme="dark"] .grimba-admin-wayfinder a:focus {
+    background: rgba(246, 241, 232, 0.92);
+    border-color: rgba(246, 241, 232, 0.92);
+    color: #17140f !important;
 }
 html[data-bs-theme="dark"] body .grimba-admin-screen .btn-outline-primary,
 html[data-bs-theme="dark"] body .grimba-cockpit .btn-outline-primary,

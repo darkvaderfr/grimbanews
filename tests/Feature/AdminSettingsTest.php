@@ -46,6 +46,7 @@ class AdminSettingsTest extends TestCase
             ->get('/admin/grimba/translation')
             ->assertOk()
             ->assertSee('NobuAI Provider Vault')
+            ->assertSee('grimba-admin-wayfinder', false)
             ->assertSee('grimba-admin-form-section', false)
             ->assertSee('Provider diagnostics')
             ->assertSee('Dernier échec')
@@ -160,6 +161,7 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin/grimba/rss-feeds/create')
             ->assertOk()
+            ->assertSee('grimba-admin-wayfinder', false)
             ->assertSee('grimba-admin-form-section', false)
             ->assertSee('Connexion du flux');
 
@@ -194,6 +196,7 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin/grimba/news-sources/create')
             ->assertOk()
+            ->assertSee('grimba-admin-wayfinder', false)
             ->assertSee('grimba-admin-form-section', false)
             ->assertSee('Score biais');
 
@@ -342,6 +345,7 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($this->admin())
             ->get("/admin/grimba/story-clusters/{$diagnosticClusterId}/edit")
             ->assertOk()
+            ->assertSee('grimba-admin-wayfinder', false)
             ->assertSee('grimba-admin-form-section', false)
             ->assertSee('NobuAI insights')
             ->assertSee('insight NobuAI')
