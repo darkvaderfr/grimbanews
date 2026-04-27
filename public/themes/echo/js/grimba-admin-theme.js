@@ -3,6 +3,20 @@
     var applying = false;
     var preferDomUntil = 0;
 
+    function disablePublicWorkerOnAdmin() {
+        if (!('serviceWorker' in navigator) || ! window.location.pathname.match(/^\/admin(?:\/|$)/)) {
+            return;
+        }
+
+        navigator.serviceWorker.getRegistrations()
+            .then(function (registrations) {
+                registrations.forEach(function (registration) {
+                    registration.unregister().catch(function () {});
+                });
+            })
+            .catch(function () {});
+    }
+
     function normalize(value) {
         return value === 'dark' ? 'dark' : value === 'light' ? 'light' : null;
     }
@@ -92,6 +106,7 @@
         }
     }
 
+    disablePublicWorkerOnAdmin();
     applyMode();
 
     window.addEventListener('storage', applyMode);

@@ -49,6 +49,9 @@ class AdminChromeAssetsTest extends TestCase
 
         $this->assertStringContainsString("window.localStorage.getItem('tablerTheme')", $js);
         $this->assertStringContainsString("window.localStorage.setItem('tablerTheme', mode)", $js);
+        $this->assertStringContainsString('function disablePublicWorkerOnAdmin()', $js);
+        $this->assertStringContainsString("window.location.pathname.match(/^\\/admin(?:\\/|$)/)", $js);
+        $this->assertStringContainsString('navigator.serviceWorker.getRegistrations()', $js);
         $this->assertStringContainsString('function currentMode(preferDom)', $js);
         $this->assertStringContainsString('applyMode(true)', $js);
         $this->assertStringContainsString("document.documentElement.setAttribute('data-bs-theme', effective)", $js);
