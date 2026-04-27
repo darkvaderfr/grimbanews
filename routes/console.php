@@ -25,12 +25,19 @@ Schedule::command('grimba:poll-feeds')
     ->withoutOverlapping(20)
     ->runInBackground();
 
-// GrimbaNews — translation of un-translated posts. Runs 15 min after
-// each poll-feeds tick so new drafts get their French translation
-// before an editor opens the queue. Safe no-op if no provider keys
-// are configured; no cost incurred until a key is set.
-Schedule::command('grimba:translate-pending --limit=50')
+// GrimbaNews — translation of un-translated posts. French and English
+// queues run separately so the public language switch can serve both
+// English-source articles in French and French-source articles in English.
+// Safe no-op if no provider keys are configured; no cost incurred until
+// a key is set.
+Schedule::command('grimba:translate-pending --to=fr --limit=50')
     ->cron('15,45 * * * *')
+    ->onOneServer()
+    ->withoutOverlapping(20)
+    ->runInBackground();
+
+Schedule::command('grimba:translate-pending --to=en --limit=50')
+    ->cron('20,50 * * * *')
     ->onOneServer()
     ->withoutOverlapping(20)
     ->runInBackground();
