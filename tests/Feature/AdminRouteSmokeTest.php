@@ -43,4 +43,21 @@ class AdminRouteSmokeTest extends TestCase
                 ->assertSee($marker, false);
         }
     }
+
+    public function test_admin_entrypoints_do_not_loop_between_stock_admin_and_grimba_cockpit(): void
+    {
+        $this->get('/admin')
+            ->assertRedirect('/admin/login');
+
+        $this->get('/admin/grimba/cockpit')
+            ->assertRedirect('/admin/login');
+
+        $this->actingAs($this->admin())
+            ->get('/admin')
+            ->assertRedirect('/admin/grimba/cockpit');
+
+        $this->actingAs($this->admin())
+            ->get('/admin?stock=1')
+            ->assertOk();
+    }
 }
