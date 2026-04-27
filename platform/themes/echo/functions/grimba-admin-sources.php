@@ -82,12 +82,14 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
             $data = Validator::make($request->all(), [
                 'bias_rating'       => 'required|in:left,center,right,unknown',
+                'bias_score'        => 'nullable|numeric|min:-2|max:2',
                 'ownership_type'    => 'nullable|in:state,corporate,independent,nonprofit',
                 'credibility_score' => 'nullable|integer|min:0|max:100',
                 'country'           => 'nullable|string|max:8',
                 'language'          => 'nullable|string|max:8',
             ])->validate();
 
+            $data = grimba_normalize_news_source_bias_score($data);
             $data['updated_at'] = now();
             DB::table('news_sources')->where('id', $id)->update($data);
 
@@ -109,6 +111,8 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
         Route::post('news-sources', function (Request $request) {
             $data = Validator::make($request->all(), grimba_news_source_rules())->validate();
+            $data = grimba_normalize_news_source_bias_score($data);
+            $data['slug'] = grimba_unique_news_source_slug($data['name']);
             $data['created_at'] = now();
             $data['updated_at'] = now();
 
@@ -127,6 +131,11 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 $request->all(),
                 grimba_news_source_rules($id)
             )->validate();
+            $data = grimba_normalize_news_source_bias_score($data);
+            $currentSlug = (string) DB::table('news_sources')->where('id', $id)->value('slug');
+            if ($currentSlug === '') {
+                $data['slug'] = grimba_unique_news_source_slug($data['name'], $id);
+            }
             $data['updated_at'] = now();
 
             DB::table('news_sources')->where('id', $id)->update($data);
@@ -158,12 +167,60 @@ if (! function_exists('grimba_news_source_rules')) {
             'name'              => ['required', 'string', 'max:120', $unique],
             'website'           => ['nullable', 'string', 'max:255'],
             'bias_rating'       => ['required', 'in:left,center,right,unknown'],
+            'bias_score'        => ['nullable', 'numeric', 'min:-2', 'max:2'],
             'ownership_type'    => ['nullable', 'in:state,corporate,independent,nonprofit'],
             'credibility_score' => ['nullable', 'integer', 'min:0', 'max:100'],
             'country'           => ['nullable', 'string', 'max:3'],
             'language'          => ['nullable', 'string', 'max:5'],
             'notes'             => ['nullable', 'string'],
         ];
+    }
+}
+
+if (! function_exists('grimba_default_bias_score')) {
+    function grimba_default_bias_score(?string $bias): ?float
+    {
+        return match ($bias) {
+            'left' => -1.0,
+            'center' => 0.0,
+            'right' => 1.0,
+            default => null,
+        };
+    }
+}
+
+if (! function_exists('grimba_normalize_news_source_bias_score')) {
+    function grimba_normalize_news_source_bias_score(array $data): array
+    {
+        if (($data['bias_score'] ?? null) === null || $data['bias_score'] === '') {
+            $data['bias_score'] = grimba_default_bias_score($data['bias_rating'] ?? null);
+        } else {
+            $data['bias_score'] = round((float) $data['bias_score'], 1);
+        }
+
+        return $data;
+    }
+}
+
+if (! function_exists('grimba_unique_news_source_slug')) {
+    function grimba_unique_news_source_slug(string $name, ?int $ignoreId = null): string
+    {
+        $base = \Illuminate\Support\Str::slug($name) ?: 'source';
+        $slug = \Illuminate\Support\Str::limit($base, 180, '');
+        $candidate = $slug;
+        $i = 2;
+
+        while (
+            DB::table('news_sources')
+                ->where('slug', $candidate)
+                ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))
+                ->exists()
+        ) {
+            $candidate = \Illuminate\Support\Str::limit($slug, 170, '') . '-' . $i;
+            $i++;
+        }
+
+        return $candidate;
     }
 }
 

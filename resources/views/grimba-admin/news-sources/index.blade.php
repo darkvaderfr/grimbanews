@@ -45,6 +45,7 @@
                                 <th>Nom</th>
                                 <th>Site</th>
                                 <th>Biais</th>
+                                <th class="text-end">Score</th>
                                 <th>Propriété</th>
                                 <th class="text-end">Crédibilité</th>
                                 <th>Pays</th>
@@ -70,6 +71,7 @@
                                             {{ $biasLabel }}
                                         </span>
                                     </td>
+                                    <td class="text-end">{{ isset($src->bias_score) ? number_format((float) $src->bias_score, 1) : '—' }}</td>
                                     <td class="text-muted">{{ ['state'=>'État','corporate'=>'Privé','independent'=>'Indépendant','nonprofit'=>'Associatif'][$src->ownership_type] ?? '—' }}</td>
                                     <td class="text-end">{{ $src->credibility_score ?? '—' }}</td>
                                     <td>{{ $src->country ?? '—' }}</td>
@@ -86,7 +88,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted py-4">Aucune source trouvée.</td>
+                                    <td colspan="9" class="text-center text-muted py-4">Aucune source trouvée.</td>
                                 </tr>
                             @endforelse
                         </tbody>

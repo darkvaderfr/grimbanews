@@ -47,6 +47,7 @@
                                 <th class="text-end">Articles</th>
                                 <th>Échantillon</th>
                                 <th>Biais</th>
+                                <th>Score</th>
                                 <th>Propriété</th>
                                 <th>Crédibilité</th>
                                 <th>Pays</th>
@@ -75,6 +76,9 @@
                                         <option value="center" {{ $r->bias_rating === 'center' ? 'selected' : '' }}>Centre</option>
                                         <option value="right"  {{ $r->bias_rating === 'right'  ? 'selected' : '' }}>Droite</option>
                                     </select>
+                                </td>
+                                <td style="width:105px;">
+                                    <input type="number" min="-2" max="2" step="0.1" class="form-control form-control-sm" data-field="bias_score" value="{{ $r->bias_score }}" placeholder="-2..2">
                                 </td>
                                 <td style="min-width:140px;">
                                     <select class="form-select form-select-sm" data-field="ownership_type">

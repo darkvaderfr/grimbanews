@@ -37,7 +37,43 @@ class AdminSettingsTest extends TestCase
             ->get('/admin/grimba/news-sources/triage')
             ->assertOk()
             ->assertSee('Classification queue')
-            ->assertSee('Sources à classer');
+            ->assertSee('Sources à classer')
+            ->assertSee('Score');
+
+        $sourceName = 'S134 Bias Score Test Source';
+        DB::table('news_sources')->where('name', $sourceName)->delete();
+
+        $this->actingAs($this->admin())
+            ->get('/admin/grimba/news-sources/create')
+            ->assertOk()
+            ->assertSee('Score biais');
+
+        $this->actingAs($this->admin())
+            ->post('/admin/grimba/news-sources', [
+                'name' => $sourceName,
+                'website' => 'example.test',
+                'bias_rating' => 'left',
+                'bias_score' => '-1.7',
+                'ownership_type' => 'independent',
+                'credibility_score' => '82',
+                'country' => 'FR',
+                'language' => 'fr',
+                'notes' => 'S134 regression fixture',
+            ])
+            ->assertRedirect('/admin/grimba/news-sources');
+
+        $createdSource = DB::table('news_sources')->where('name', $sourceName)->first();
+        $this->assertNotNull($createdSource);
+        $this->assertSame('-1.7', number_format((float) $createdSource->bias_score, 1));
+
+        $publicSource = DB::table('news_sources')->whereNotNull('slug')->where('slug', '!=', '')->first();
+        $this->assertNotNull($publicSource, 'Fixture database must contain at least one public source slug.');
+        DB::table('news_sources')->where('id', $publicSource->id)->update(['bias_score' => -1.6]);
+
+        $this->get('/sources/' . $publicSource->slug)
+            ->assertOk()
+            ->assertSee('score biais')
+            ->assertSee('-1.6');
 
         $this->actingAs($this->admin())
             ->get('/admin/grimba/coverage-map')

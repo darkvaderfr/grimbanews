@@ -27,6 +27,8 @@
         'cooperative'    => 'Coopérative',
         default          => '—',
     };
+    $biasScore = is_numeric($source->bias_score ?? null) ? max(-2.0, min(2.0, (float) $source->bias_score)) : null;
+    $biasScorePosition = $biasScore === null ? null : (($biasScore + 2.0) / 4.0) * 100;
 
     $known = ($stats['left'] ?? 0) + ($stats['center'] ?? 0) + ($stats['right'] ?? 0);
     $pct = [
@@ -51,6 +53,9 @@
                     ">{{ $biasLabel }}</span>
                 <span class="small opacity-75">
                     Crédibilité {{ $source->credibility_score ?? '—' }} · {{ $ownershipLabel }}
+                    @if($biasScore !== null)
+                        · score biais <strong>{{ number_format($biasScore, 1) }}</strong>
+                    @endif
                     @if($source->owner_name)
                         · propriété de <strong>{{ $source->owner_name }}</strong>
                     @endif
@@ -86,6 +91,29 @@
                    class="btn-grimba btn-grimba--ghost btn-grimba--sm">
                     Visiter {{ $source->website }} ↗
                 </a>
+            @endif
+
+            @if($biasScore !== null)
+                <div class="mt-4" style="max-width:540px;">
+                    <div class="d-flex justify-content-between small opacity-75 mb-2">
+                        <span>Très gauche</span>
+                        <span>Centre</span>
+                        <span>Très droite</span>
+                    </div>
+                    <div style="position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,#3b82f6 0%,#a8a8a8 50%,#e84c3d 100%);">
+                        <span style="
+                            position:absolute;top:50%;left:{{ $biasScorePosition }}%;
+                            width:22px;height:22px;border-radius:999px;
+                            transform:translate(-50%,-50%);
+                            background:var(--gn-paper,#f6f1e8);
+                            border:3px solid {{ $biasColor }};
+                            box-shadow:0 8px 20px rgba(0,0,0,.18);
+                        " aria-hidden="true"></span>
+                    </div>
+                    <p class="small opacity-60 mt-2 mb-0">
+                        Score fin -2.0 à +2.0. Le badge L/C/R reste compatible avec les anciennes vues.
+                    </p>
+                </div>
             @endif
         </header>
 

@@ -69,6 +69,14 @@
                         </div>
 
                         <div class="col-md-3">
+                            <label class="form-label">Score biais (-2 à +2)</label>
+                            <input name="bias_score" type="number" min="-2" max="2" step="0.1" class="form-control"
+                                   value="{{ old('bias_score', $source->bias_score ?? '') }}"
+                                   placeholder="-2.0 gauche · 0 centre · +2.0 droite">
+                            <small class="text-muted">Laissez vide pour utiliser la valeur par défaut du biais.</small>
+                        </div>
+
+                        <div class="col-md-3">
                             <label class="form-label">Type de propriété</label>
                             <select name="ownership_type" class="form-select">
                                 <option value="">—</option>
