@@ -56,9 +56,10 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $translator   = app(GrimbaTranslator::class);
             $nobuAi       = app(GrimbaNobuAi::class);
             $nobuConfigured = $nobuAi->configuredDrivers();
+            $nobuFailures = $nobuAi->failureDiagnostics();
 
             return view('grimba-admin.translation.index', compact(
-                'drivers', 'settings', 'pinned', 'models', 'modelDrivers', 'translator', 'nobuConfigured', 'autoPublish'
+                'drivers', 'settings', 'pinned', 'models', 'modelDrivers', 'translator', 'nobuConfigured', 'nobuFailures', 'autoPublish'
             ));
         })->name('translation.index');
 

@@ -4,6 +4,8 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 /*
@@ -54,7 +56,10 @@ class GrimbaNobuAi
                 if ($text !== null && $text !== '') {
                     return ['text' => $text, 'driver' => $driver];
                 }
+
+                $this->recordFailure($driver, 'Empty response or upstream HTTP error.');
             } catch (Throwable $e) {
+                $this->recordFailure($driver, $e->getMessage());
                 Log::warning('[GrimbaNobuAi] driver failed, trying next', [
                     'driver' => $driver,
                     'error' => $e->getMessage(),
@@ -63,6 +68,47 @@ class GrimbaNobuAi
         }
 
         return null;
+    }
+
+    /**
+     * @return array<string, array{driver:string, message:string, at:string|null}>
+     */
+    public function failureDiagnostics(?array $drivers = null): array
+    {
+        if (! Schema::hasTable('settings')) {
+            return [];
+        }
+
+        $drivers = $drivers ?: self::CHAIN;
+        $keys = collect($drivers)
+            ->mapWithKeys(fn (string $driver): array => ['grimba_nobuai_failure_' . $driver => $driver])
+            ->all();
+
+        if ($keys === []) {
+            return [];
+        }
+
+        return DB::table('settings')
+            ->whereIn('key', array_keys($keys))
+            ->pluck('value', 'key')
+            ->mapWithKeys(function (?string $value, string $key) use ($keys): array {
+                $payload = json_decode((string) $value, true);
+                if (! is_array($payload)) {
+                    return [];
+                }
+
+                $driver = $keys[$key] ?? (string) ($payload['driver'] ?? '');
+                if ($driver === '') {
+                    return [];
+                }
+
+                return [$driver => [
+                    'driver' => $driver,
+                    'message' => (string) ($payload['message'] ?? 'Unknown failure.'),
+                    'at' => $payload['at'] ?? null,
+                ]];
+            })
+            ->all();
     }
 
     /**
@@ -160,6 +206,34 @@ class GrimbaNobuAi
             ),
             default => null,
         };
+    }
+
+    private function recordFailure(string $driver, string $message): void
+    {
+        if (! Schema::hasTable('settings')) {
+            return;
+        }
+
+        $payload = json_encode([
+            'driver' => $driver,
+            'message' => $this->sanitizeFailureMessage($message),
+            'at' => now()->toDateTimeString(),
+        ]);
+
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'grimba_nobuai_failure_' . $driver],
+            ['value' => $payload, 'created_at' => now(), 'updated_at' => now()]
+        );
+    }
+
+    private function sanitizeFailureMessage(string $message): string
+    {
+        $message = preg_replace('/sk-[A-Za-z0-9_\-]{8,}/', 'sk-...[redacted]', $message) ?? $message;
+        $message = preg_replace('/Bearer\s+[A-Za-z0-9_\-\.]{8,}/i', 'Bearer ...[redacted]', $message) ?? $message;
+        $message = preg_replace('/[A-Za-z0-9_\-]{24,}\.[A-Za-z0-9_\-]{8,}\.[A-Za-z0-9_\-]{8,}/', '[token redacted]', $message) ?? $message;
+        $message = trim(strip_tags($message));
+
+        return mb_substr($message !== '' ? $message : 'Unknown upstream failure.', 0, 220);
     }
 
     private function viaOpenAiCompatible(string $endpoint, string $key, string $model, string $prompt, string $system, array $extraHeaders = []): ?string

@@ -187,6 +187,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $translator = app(GrimbaTranslator::class);
             $nobuDrivers = $nobuAi->configuredDrivers();
             $translationDrivers = $translator->configuredDrivers();
+            $nobuFailureDiagnostics = $nobuAi->failureDiagnostics($nobuDrivers);
             $nobuInsightReady = 0;
             $nobuInsightPending = 0;
             $nobuInsightStale = 0;
@@ -233,6 +234,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'newsApiActive', 'newsApiConfigured', 'newsApiItems24', 'newsApiLastFetch',
                 'duplicateGroups', 'englishTranslationPending',
                 'latestDrafts', 'nobuDrivers', 'translationDrivers',
+                'nobuFailureDiagnostics',
                 'nobuInsightReady', 'nobuInsightPending', 'nobuInsightStale', 'nobuInsightLatest'
             ));
         })->name('cockpit');

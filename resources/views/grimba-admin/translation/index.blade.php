@@ -257,6 +257,20 @@
                     actuelle, ou saisissez <code>__clear__</code> pour l'effacer.
                 </p>
 
+                <section class="grimba-llm-section">
+                    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                        <div>
+                            <h3 class="h5 mb-1">Provider diagnostics</h3>
+                            <p class="form-text mb-0">
+                                Dernières erreurs NobuAI enregistrées côté admin seulement. Les pages publiques restent brandées NobuAI.
+                            </p>
+                        </div>
+                        <span class="grimba-status-pill {{ empty($nobuFailures) ? 'is-on' : 'is-off' }}">
+                            {{ empty($nobuFailures) ? 'Aucune erreur' : count($nobuFailures) . ' erreur(s)' }}
+                        </span>
+                    </div>
+                </section>
+
                 <form method="POST" action="{{ route('grimba.translation.save') }}">
                     @csrf
 
@@ -286,6 +300,7 @@
                                     @php
                                         $meta = $driverLabels[$d];
                                         $hasValue = ! empty($settings[$d]);
+                                        $failure = $nobuFailures[$d] ?? null;
                                     @endphp
                                     <div class="grimba-provider-card">
                                         <label class="form-label d-flex align-items-center justify-content-between gap-2">
@@ -301,6 +316,12 @@
                                                class="form-control"
                                                placeholder="{{ $hasValue ? '••••••••• (laisser vide pour conserver)' : ($d === 'libre' ? 'https://libretranslate.example.com' : 'sk-...') }}">
                                         <div class="form-text">{{ $meta['hint'] }}</div>
+                                        @if($failure)
+                                            <div class="grimba-provider-meta mt-2">
+                                                Dernier échec {{ ! empty($failure['at']) ? \Carbon\Carbon::parse($failure['at'])->locale('fr')->diffForHumans() : 'date inconnue' }} :
+                                                {{ $failure['message'] }}
+                                            </div>
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>

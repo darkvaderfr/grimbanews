@@ -187,6 +187,69 @@ class NobuAiSummaryCommandTest extends TestCase
         $this->assertNull($pendingSummary);
     }
 
+    public function test_nobuai_records_sanitized_provider_failure_diagnostics(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        $clusterId = 990022;
+        $postIds = DB::table('posts')
+            ->where('status', 'published')
+            ->orderByDesc('id')
+            ->limit(2)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->assertCount(2, $postIds, 'Fixture database must contain at least two published posts.');
+
+        DB::table('story_clusters')->updateOrInsert(
+            ['id' => $clusterId],
+            [
+                'topic' => 'NobuAI failure diagnostics test',
+                'description' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
+        foreach ($postIds as $postId) {
+            DB::table('posts')->where('id', $postId)->update([
+                'story_cluster_id' => $clusterId,
+                'bias_rating' => 'center',
+                'description' => 'Fixture that forces a provider failure.',
+                'summary_nobuai' => null,
+                'summary_generated_at' => null,
+                'summary_driver' => null,
+                'updated_at' => now(),
+            ]);
+        }
+
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'grimba_translator_openai_key'],
+            ['value' => 'sk-test-openai', 'created_at' => now(), 'updated_at' => now()]
+        );
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'grimba_translator_driver'],
+            ['value' => 'openai', 'created_at' => now(), 'updated_at' => now()]
+        );
+
+        Http::fake([
+            'api.openai.com/v1/chat/completions' => function (): never {
+                throw new \RuntimeException('Bearer abcdefghijklmnopqrstuvwxyz0123456789 rejected upstream');
+            },
+        ]);
+
+        $this->artisan('grimba:nobuai-summaries', [
+            '--cluster' => $clusterId,
+            '--limit' => 1,
+        ])->assertExitCode(1);
+
+        $payload = (string) DB::table('settings')->where('key', 'grimba_nobuai_failure_openai')->value('value');
+
+        $this->assertStringContainsString('Bearer ...[redacted]', $payload);
+        $this->assertStringNotContainsString('abcdefghijklmnopqrstuvwxyz0123456789', $payload);
+    }
+
     public function test_nobuai_health_reports_story_insight_readiness(): void
     {
         $this->artisan('migrate', ['--force' => true])->assertExitCode(0);

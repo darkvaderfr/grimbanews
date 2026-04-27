@@ -25,10 +25,30 @@ class AdminSettingsTest extends TestCase
 
     public function test_grimba_admin_settings_pages_render_and_save_through_setting_store(): void
     {
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'grimba_translator_openai_key'],
+            ['value' => 'sk-test-admin-diagnostics', 'created_at' => now(), 'updated_at' => now()]
+        );
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'grimba_nobuai_failure_openai'],
+            [
+                'value' => json_encode([
+                    'driver' => 'openai',
+                    'message' => 'quota test failure',
+                    'at' => now()->subMinute()->toDateTimeString(),
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
         $this->actingAs($this->admin())
             ->get('/admin/grimba/translation')
             ->assertOk()
             ->assertSee('NobuAI Provider Vault')
+            ->assertSee('Provider diagnostics')
+            ->assertSee('Dernier échec')
+            ->assertSee('quota test failure')
             ->assertSee('OpenAI')
             ->assertSee('OpenRouter')
             ->assertSee('Anthropic')
@@ -100,6 +120,8 @@ class AdminSettingsTest extends TestCase
             ->assertSee('Duplicate groups')
             ->assertSee('stale')
             ->assertSee('NobuAI health')
+            ->assertSee('Dernières erreurs NobuAI')
+            ->assertSee('quota test failure')
             ->assertSee('Poll 1 RSS')
             ->assertSee('Fetch NewsAPI')
             ->assertSee('Translate 3 FR');

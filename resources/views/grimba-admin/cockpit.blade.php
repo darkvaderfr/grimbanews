@@ -196,6 +196,17 @@
                         <span>Dernier insight</span>
                         <strong>{{ $nobuInsightLatest ? \Carbon\Carbon::parse($nobuInsightLatest)->locale('fr')->diffForHumans() : 'jamais généré' }}</strong>
                     </div>
+                    @if(! empty($nobuFailureDiagnostics))
+                        <div class="grimba-provider-failures mt-3">
+                            <span class="grimba-cockpit__kicker">Dernières erreurs NobuAI</span>
+                            @foreach($nobuFailureDiagnostics as $failure)
+                                <div class="grimba-provider-row">
+                                    <span>{{ $failure['driver'] }} · {{ ! empty($failure['at']) ? \Carbon\Carbon::parse($failure['at'])->locale('fr')->diffForHumans() : 'date inconnue' }}</span>
+                                    <strong>{{ $failure['message'] }}</strong>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                     <div class="d-flex gap-2 flex-wrap mt-3">
                         <a href="{{ route('grimba.translation.index') }}" class="btn btn-sm btn-primary">Configurer les clés</a>
                         <a href="{{ route('grimba.story-clusters.index') }}" class="btn btn-sm btn-outline-primary">Gérer les dossiers</a>
