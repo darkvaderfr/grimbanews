@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Botble\ACL\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class AdminSettingsTest extends TestCase
@@ -109,6 +110,68 @@ class AdminSettingsTest extends TestCase
         $this->assertSame('openai', $this->settingValue('grimba_translator_driver'));
         $this->assertSame('gpt-test', $this->settingValue('grimba_translator_openai_model'));
         $this->assertSame('1', $this->settingValue('grimba_ingest_auto_publish'));
+
+        $batchClusterId = 990014;
+        $batchPostIds = DB::table('posts')
+            ->where('status', 'published')
+            ->orderBy('id')
+            ->limit(2)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->assertCount(2, $batchPostIds, 'Fixture database must contain at least two published posts.');
+
+        DB::table('story_clusters')->updateOrInsert(
+            ['id' => $batchClusterId],
+            [
+                'topic' => 'Cockpit NobuAI batch test',
+                'description' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
+        foreach ($batchPostIds as $index => $postId) {
+            DB::table('posts')->where('id', $postId)->update([
+                'story_cluster_id' => $batchClusterId,
+                'bias_rating' => $index === 0 ? 'left' : 'right',
+                'description' => $index === 0
+                    ? 'Une source insiste sur le risque social et le calendrier parlementaire.'
+                    : 'Une autre source insiste sur la réponse exécutive et les arbitrages budgétaires.',
+                'summary_nobuai' => null,
+                'summary_generated_at' => null,
+                'summary_driver' => null,
+                'updated_at' => now()->addMinute(),
+            ]);
+        }
+
+        Http::fake([
+            'api.openai.com/v1/chat/completions' => Http::response([
+                'choices' => [[
+                    'message' => [
+                        'content' => "Ce qui est confirmé: Les articles décrivent un même dossier depuis deux cadrages.\nAngle mort: Le dossier manque une source classée au centre.\nPourquoi ça compte: NobuAI aide à distinguer consensus et cadrage.",
+                    ],
+                ]],
+            ]),
+        ]);
+
+        $this->actingAs($this->admin())
+            ->post('/admin/grimba/cockpit/nobuai-summaries', ['limit' => 12])
+            ->assertRedirect('/admin/grimba/cockpit')
+            ->assertSessionHas('success_msg');
+
+        foreach ($batchPostIds as $postId) {
+            $row = DB::table('posts')->where('id', $postId)->first([
+                'summary_nobuai',
+                'summary_generated_at',
+                'summary_driver',
+            ]);
+
+            $this->assertStringContainsString('deux cadrages', $row->summary_nobuai);
+            $this->assertNotNull($row->summary_generated_at);
+            $this->assertSame('openai', $row->summary_driver);
+        }
 
         $this->actingAs($this->admin())
             ->post('/admin/grimba/newsapi', [

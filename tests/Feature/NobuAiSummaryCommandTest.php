@@ -134,4 +134,5 @@ class NobuAiSummaryCommandTest extends TestCase
         $this->assertStringContainsString('ready', $output);
         $this->assertStringContainsString('pending', $output);
     }
+
 }

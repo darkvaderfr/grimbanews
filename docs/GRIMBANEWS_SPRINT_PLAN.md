@@ -1,137 +1,142 @@
-# GrimbaNews — Sprint Planning Status
+# GrimbaNews — Master Sprint Ledger
 
-**Product:** GrimbaNews (daily news platform)  
-**Platform:** Echo News CMS v3.1.1 (Laravel)  
-**Domain:** grimbanews.com  
-**Git:** `darkvaderfr/grimbanews` (private)  
-**Status:** Phase 0 — Local dev setup  
-**Date Initiated:** 2026-04-23
+**Product:** GrimbaNews
+**Platform:** Echo News CMS v3.1.1 on Laravel 12
+**Repo:** `darkvaderfr/grimbanews`
+**Local server:** `http://127.0.0.1:8002`
+**Last updated:** 2026-04-27
 
----
+This is the active implementation ledger. The original Mythos 500-sprint output referenced by the early handoff was not present on disk, so this file now tracks the real shipped state from git history and defines the next sprint queue.
 
-## Current State
+## Current Status
 
-### Completed (Session 1)
-- [x] Echo News CMS source extracted to `/Users/vb/GrimbaNews/`
-- [x] Git repo initialized locally
-- [x] GitHub repo created: `darkvaderfr/grimbanews`
-- [x] Initial commit pushed (sha: 0236563 — cleaned of large files)
-- [x] Product brief written (`GRIMBA_NEWS_BRIEF.md`)
-- [x] IBOGA_VENTURES_MASTER.md updated (GrimbaNews vs GrimbaTimes distinction)
-- [x] IBOGA_HISTORY.md updated (deployment timeline)
-- [x] **Sprint 1 COMPLETE** (2026-04-23)
-  - [x] Steve design audit (Echo theme structure mapped)
-  - [x] Elon backend audit (Laravel 12, RSS plugin v1.2.2, AI Writer v1.0.2)
-  - [x] Setup documentation (`SPRINT_001_AUDIT.md`, `SETUP.md`)
-  - [x] PHP 8.2 + Composer 2.9.7 installed
-  - [x] Composer + npm dependencies installed
-  - [x] SQLite database configured + migrations run
-  - [x] Dev server verified (http://localhost:8000 → 200 OK)
-  - [x] Pushed to GitHub (sha: d625bcd — 7 commits total)
+GrimbaNews is past the baseline phase. The product now has a GroundNews-style reader experience, RSS/NewsAPI ingest, source/bias intelligence, story clusters, NobuAI translation, NobuAI story insights, a custom admin cockpit, and test coverage for the critical public/admin flows.
 
-### In Progress
-- [ ] 500-sprint implementation plan (Mythos — writing-plans skill running)
+Latest pushed commits:
 
-### Completed (Session 1 continued)
-- [x] **Sprint 2 COMPLETE** (2026-04-23)
-  - [x] 24 plugins active (RSS Feed, AI Writer, Newsletter, Language, etc.)
-  - [x] French configured as default language (APP_LOCALE=fr)
-  - [x] Pushed to GitHub (sha: dd7b30f)
+- `8fd4bc7` Keep admin dropdowns above content
+- `b1dae35` Clarify NobuAI live health prompt
+- `67b2958` Surface NobuAI insight readiness
+- `a733b8e` Fix admin dropdown and theme chrome
+- `7caa305` Localize source and search pages
 
-### Completed (Session 2 continued)
-- [x] **Sprint 3 COMPLETE** (2026-04-23)
-  - [x] Admin password reset (GrimbaNews2026!)
-  - [x] First French test article created
-  - [x] Article verified on landing page
-  - [x] Pushed to GitHub (sha: 655db21)
+Latest verification:
 
-- [x] **Sprint 4 COMPLETE** (2026-04-23) — Design Fleet Sprint 1
-  - [x] Bias badge component (Left/Center/Right/Unknown)
-  - [x] Glass/translucency CSS (Steve's cinematic language)
-  - [x] Article card redesign with bias indicators
-  - [x] Database migration (bias_rating, is_blindspot, credibility_score, ownership_type)
-  - [x] Pushed to GitHub (sha: 05e5870)
+- `php artisan test` passed with `33` tests.
+- `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
-### Completed (Session 4 — 2026-04-23)
-- [x] **Sprint 5 COMPLETE** — Article Comparison View (`/comparatif/{id}`)
-  - [x] `story_cluster_id` + `source_name` migration
-  - [x] Source diversity meter partial (L/C/R %)
-  - [x] Side-by-side 3-column comparison partial
-  - [x] Seeded cluster 1 (Le Monde / AFP / Le Figaro)
-- [x] **Sprint 6 COMPLETE** — Blindspot Feed (`/angles-morts`)
-- [x] **Sprint 7 COMPLETE** — Bias legend + feed balance widgets on `/blog`
-- [x] **Sprint 8 COMPLETE** — `news_sources` table + 20-source seeder
-- [x] **Sprint 9 COMPLETE** — `grimba.css` authored + enqueued (Mix broken)
-- [x] **Sprint 10 COMPLETE** — Commit + Session 4 handoff
+## Completed Sprint Bands
 
-### In Progress (Sprint 11+)
-- [ ] **Homepage widgets as shortcodes** (legend + balance on `/`)
-- [ ] **Posts → Sources FK** (`posts.source_id → news_sources.id`)
-- [ ] **Backend Features** (Elon)
-  - [ ] Bias detection algorithm
-  - [ ] AI rewriting engine (multi-perspective)
-  - [ ] RSS aggregation + deduplication
-- [ ] **Mix → Vite migration** (unblock SASS pipeline)
+### S1-S10 — Baseline And First GroundNews Layer
 
-### Sprint Fleet Structure (500 sprints total)
+- Echo CMS extracted, dependencies installed, SQLite local dev verified.
+- French locale configured.
+- Admin credentials reset.
+- Bias columns, first source/story cluster tables, comparison view, blindspot feed, source seed, and initial Grimba CSS shipped.
 
-| Fleet | Sprints | Focus | Owner |
-|---|---|---|---|
-| Design Fleet | 1-50 | GroundNews UI + glass design | Steve |
-| Bias Detection | 51-100 | Bias indicators, blindspot | Elon |
-| AI Rewriting | 101-200 | Multi-perspective articles | Elon |
-| RSS Aggregation | 201-250 | Multi-source RSS | Elon |
-| Comparison View | 251-300 | Side-by-side articles | Steve + Elon |
-| Personalization | 301-350 | User prefs, bias score | Elon |
-| Mobile Fleet | 351-400 | Mobile-first, messaging | Steve |
-| Distribution | 401-450 | Newsletter, push | Elon |
-| Scale Fleet | 451-500 | Performance, CDN | Elon |
+### S84-S108 — Ingest Hardening And NobuAI Seed
 
----
+- Image backfill, RSS ingest hardening, dedupe, personalization, newsletter popup polish, and NobuAI branding rules.
+- `CLAUDE.md` established the project rule: reader surfaces say only `NobuAI`; provider names remain admin-only.
 
-## Team Assignments
+### S111-S165 — Source Intelligence, Translation, And GroundNews Fidelity
 
-| Role | Name | First Assignment |
-|---|---|---|
-| **UI/UX Design Lead** | Steve Jobs | Theme audit + Grimba brand design language |
-| **Backend/API Lead** | Elon Musk | RSS aggregation engine architecture |
-| **DevOps Lead** | Sara Kim | Local dev bootstrap + CI/CD setup |
+- Source profile pages, ownership data, NewsAPI ingest, high-volume source classification, canonical URL dedupe, region picker/filtering, story pages, media-ownership map, translation fallback, cross-language clustering, source logos, full article fetch, and French news taxonomy.
 
----
+### S166-S184 — Reader Account, Vault, Story Polish
 
-## 500-Sprint Roadmap Overview
+- Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-| Phase | Sprints | Focus | Owner |
-|---|---|---|---|
-| 1. Echo CMS Baseline | 1-50 | Local dev, branding, i18n | Steve + Elon |
-| 2. RSS Aggregation | 51-100 | Multi-source parser, categorization | Elon |
-| 3. AI Rewriting Portal | 101-200 | LLM integration, summarization | Elon |
-| 4. Bias Tagging | 201-250 | GroundNews-inspired features | Steve + Elon |
-| 5. Newsletter System | 251-300 | Daily digest, Acelle integration | Elon |
-| 6. Multi-Channel | 301-350 | WhatsApp, Telegram, social | Elon |
-| 7. Francophone Opt. | 351-400 | FR-first, African sources | Steve |
-| 8. Premium Features | 401-450 | Paywall, subscriptions | Elon |
-| 9. Observability | 451-500 | Analytics, scale, CI/CD | Sara |
+### S185-S218 — Maturity, Accessibility, Admin, And Tests
 
----
+- Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 
-## Next Session Resume
+## Active Systems
 
-**To continue work on GrimbaNews:**
+### Public Reader
 
-1. Check if 500-sprint plan was completed (see output file below)
-2. If complete: Begin Sprint 1 (local dev setup)
-3. If incomplete: Wait for Mythos to finish planning
+- Homepage with GroundNews-style story rails, most-read-by-bias, topic chips, region selector, translation note, vault controls, PWA shell, and localized static UI.
+- Story pages with multi-source comparison, bias distribution, timeline, extractive synthesis, coverage-gap callout, source logos, and NobuAI chips.
+- Source pages, search, ownership map, local page, vault, member auth/dashboard, and translated EN/FR UI.
 
----
+### Ingest And Intelligence
 
-## Reference Files
+- RSS polling: `grimba:poll-feeds`
+- NewsAPI fetching: `grimba:fetch-newsapi`
+- Trusted-source auto-publishing: `grimba:publish-trusted`
+- Dedupe: `grimba:dedupe-posts`
+- Full article extraction: `grimba:fetch-full-articles`
+- Category backfill: `grimba:classify-categories`
+- Translation queue: `grimba:translate-pending`
+- NobuAI story insights: `grimba:nobuai-summaries`
+- System health: `grimba:health`, `grimba:nobuai-health`
 
-- **Product Brief:** `/Users/vb/GrimbaNews/GRIMBA_NEWS_BRIEF.md`
-- **500-Sprint Plan:** `/Users/vb/kaizen/docs/superpowers/plans/2026-04-23-grimbanews-500-sprint-plan.md` (if completed)
-- **Echo CMS Docs:** https://docs.archielite.com/echo
-- **Support:** https://support.archielite.com
+### Admin Backend
 
----
+- GrimbaNews cockpit: `/admin/grimba/cockpit`
+- Source registry + source triage
+- RSS feed registry + RSS draft queue
+- NewsAPI settings
+- Story clusters + coverage map + per-cluster NobuAI insight action
+- Translation/provider vault for OpenAI, OpenRouter, Anthropic, xAI, Google, Mistral, Perplexity, Groq, DeepL, Libre
+- Newsletter/subscriber export
+- Cookie banner settings
 
-*Last updated: 2026-04-23*
+## Next Sprint Queue
+
+### S219 — Cockpit Bulk NobuAI Insight Generation
+
+Goal: The cockpit already shows ready/pending NobuAI story insight counts. Add a safe admin action to generate a small batch of pending story insights directly from the cockpit.
+
+Acceptance:
+
+- Admin can trigger `grimba:nobuai-summaries` from `/admin/grimba/cockpit`.
+- Batch size is clamped to a small limit to avoid long web requests.
+- Success/failure output is summarized in the admin flash message.
+- Test covers the route with a faked provider response.
+
+### S220 — NobuAI Insight Reader QA
+
+Goal: Ensure generated insight text behaves like GroundNews-style insight copy on public story pages.
+
+Acceptance:
+
+- Reader shows only `NobuAI`, never provider names.
+- Empty/pending insight states are clear.
+- Generated insight lines are short, labeled, non-duplicated, and do not invent sides.
+
+### S221 — Translation Cache Audit
+
+Goal: Confirm whole-site static EN/FR UI strings are saved in JSON catalogs while article translation remains NobuTranslation-driven.
+
+Acceptance:
+
+- No hardcoded public UI strings on core Grimba pages without catalog fallback.
+- Static catalog tests cover homepage, story, search, sources, and ownership pages.
+
+### S222 — Admin UX Sweep
+
+Goal: Continue Steve-level admin polish without fighting Botble internals.
+
+Acceptance:
+
+- Dropdowns, modals, alerts, tables, selects, and hover states read correctly in light and dark mode.
+- No page content overlaps top-bar dropdowns.
+- Tests lock the admin chrome contracts.
+
+### S223 — Ingest Operations Board
+
+Goal: Add a compact admin operations panel for RSS/NewsAPI/dedupe/translation queue health.
+
+Acceptance:
+
+- Cockpit exposes last run, last 24h ingest count, sick feeds, duplicate groups, pending translations, and pending insights.
+- Admin links jump to the relevant queue.
+
+## Operating Rules
+
+- Commit and push every completed sprint to `origin/main`.
+- Do not deploy to production until explicitly requested.
+- Keep reader-facing AI/provider copy branded as `NobuAI`.
+- Provider names are allowed only behind the admin guard.
+- Keep `php artisan test` green before pushing.

@@ -15,6 +15,8 @@ use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\DashboardMenuItem;
 use App\Services\GrimbaNobuAi;
 use App\Services\GrimbaTranslator;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -177,6 +179,29 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'nobuInsightReady', 'nobuInsightPending', 'nobuInsightLatest'
             ));
         })->name('cockpit');
+
+        Route::post('cockpit/nobuai-summaries', function (Request $request) {
+            $limit = min(5, max(1, (int) $request->input('limit', 3)));
+
+            $exitCode = Artisan::call('grimba:nobuai-summaries', [
+                '--limit' => $limit,
+            ]);
+
+            $output = trim(Artisan::output());
+            $summary = collect(preg_split("/\r\n|\n|\r/", $output) ?: [])
+                ->map(fn (string $line): string => trim(strip_tags($line)))
+                ->filter()
+                ->take(-4)
+                ->implode(' ');
+
+            $message = $summary !== ''
+                ? 'NobuAI: ' . $summary
+                : 'NobuAI: génération terminée.';
+
+            return redirect()
+                ->route('grimba.cockpit')
+                ->with($exitCode === 0 ? 'success_msg' : 'error_msg', $message);
+        })->name('cockpit.nobuai-summaries');
     });
 
 app()->booted(function (): void {

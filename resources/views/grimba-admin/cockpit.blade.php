@@ -121,6 +121,15 @@
                     <div class="d-flex gap-2 flex-wrap mt-3">
                         <a href="{{ route('grimba.translation.index') }}" class="btn btn-sm btn-primary">Configurer les clés</a>
                         <a href="{{ route('grimba.story-clusters.index') }}" class="btn btn-sm btn-outline-primary">Gérer les dossiers</a>
+                        @if($nobuInsightPending > 0 && count($nobuDrivers))
+                            <form method="POST" action="{{ route('grimba.cockpit.nobuai-summaries') }}" class="d-inline-flex gap-2 align-items-center">
+                                @csrf
+                                <input type="hidden" name="limit" value="3">
+                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                    Générer 3 insights
+                                </button>
+                            </form>
+                        @endif
                     </div>
                 </div>
             </div>
