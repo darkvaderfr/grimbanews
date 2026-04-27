@@ -410,6 +410,85 @@ class AdminSettingsTest extends TestCase
         $this->assertSame('1', $this->settingValue('grimba_newsapi_active'));
         $this->assertSame('72', $this->settingValue('grimba_newsapi_everything_window_hours'));
 
+        $newsApiDraftIds = DB::table('posts')
+            ->where('status', 'published')
+            ->orderByDesc('id')
+            ->limit(2)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->assertCount(2, $newsApiDraftIds, 'Fixture database must contain at least two posts for NewsAPI draft guardrails.');
+
+        DB::table('newsapi_items')
+            ->whereIn('article_url_hash', ['s232-blocked-hash', 's232-ready-hash'])
+            ->delete();
+
+        DB::table('posts')->where('id', $newsApiDraftIds[0])->update([
+            'status' => 'draft',
+            'source_id' => null,
+            'source_name' => null,
+            'bias_rating' => 'unknown',
+            'original_language' => 'en',
+            'translated_name' => null,
+            'description' => 'Tiny.',
+            'updated_at' => now(),
+        ]);
+
+        DB::table('posts')->where('id', $newsApiDraftIds[1])->update([
+            'status' => 'draft',
+            'source_id' => $rssSource->id,
+            'source_name' => $rssSource->name,
+            'bias_rating' => 'center',
+            'original_language' => 'fr',
+            'translated_name' => null,
+            'description' => 'Ce brouillon NewsAPI contient un extrait suffisamment long pour valider les garde-fous avant publication.',
+            'updated_at' => now(),
+        ]);
+
+        DB::table('newsapi_items')->insert([
+            [
+                'source_id' => null,
+                'api_source_id' => null,
+                'article_url' => 'https://example.test/s232-blocked',
+                'article_url_hash' => 's232-blocked-hash',
+                'post_id' => $newsApiDraftIds[0],
+                'published_at' => now(),
+                'fetched_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'source_id' => $rssSource->id,
+                'api_source_id' => 's232-ready',
+                'article_url' => 'https://example.test/s232-ready',
+                'article_url_hash' => 's232-ready-hash',
+                'post_id' => $newsApiDraftIds[1],
+                'published_at' => now(),
+                'fetched_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/grimba/newsapi')
+            ->assertOk()
+            ->assertSee('NewsAPI draft readiness')
+            ->assertSee('source manquante')
+            ->assertSee('biais inconnu')
+            ->assertSee('traduction manquante')
+            ->assertSee('extrait trop court')
+            ->assertSee('Prêt à publier');
+
+        $this->actingAs($this->admin())
+            ->post('/admin/grimba/newsapi/publish-drafts', ['ids' => $newsApiDraftIds])
+            ->assertRedirect()
+            ->assertSessionHas('success_msg');
+
+        $this->assertSame('draft', DB::table('posts')->where('id', $newsApiDraftIds[0])->value('status'));
+        $this->assertSame('published', DB::table('posts')->where('id', $newsApiDraftIds[1])->value('status'));
+
         $this->actingAs($this->admin())
             ->post('/admin/grimba/cookies', [
                 'active' => '1',

@@ -23,6 +23,7 @@ use App\Services\GrimbaNewsApiFetcher;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\DashboardMenuItem;
+use Botble\Blog\Models\Post;
 use Botble\Setting\Supports\SettingStore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -41,9 +42,19 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $countries = (string) setting('grimba_newsapi_countries', 'fr,us,gb');
             $active    = (bool) setting('grimba_newsapi_active', true);
             $window    = (int) setting('grimba_newsapi_everything_window_hours', 48);
+            $newsApiDrafts = Post::query()
+                ->whereIn('id', function ($sub): void {
+                    $sub->select('post_id')
+                        ->from('newsapi_items')
+                        ->whereNotNull('post_id');
+                })
+                ->where('status', 'draft')
+                ->orderByDesc('id')
+                ->limit(10)
+                ->get();
 
             return view('grimba-admin.newsapi.index', compact(
-                'key', 'queries', 'language', 'countries', 'active', 'window'
+                'key', 'queries', 'language', 'countries', 'active', 'window', 'newsApiDrafts'
             ));
         })->name('newsapi.index');
 
@@ -120,7 +131,96 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'output'   => $out,
             ]);
         })->name('newsapi.run');
+
+        Route::post('newsapi/publish-drafts', function (Request $request) {
+            $ids = array_filter(array_map('intval', (array) $request->input('ids', [])));
+            if ($ids === []) {
+                return back()->with('success_msg', 'Aucun brouillon NewsAPI sélectionné.');
+            }
+
+            $result = grimba_newsapi_publish_posts($ids);
+            $message = "{$result['published']} brouillon(s) NewsAPI publié(s).";
+            if ($result['blocked'] > 0) {
+                $message .= " {$result['blocked']} bloqué(s) par les garde-fous: " . implode(', ', $result['reasons']) . '.';
+            }
+
+            return back()->with('success_msg', $message);
+        })->name('newsapi.publish-drafts');
     });
+
+if (! function_exists('grimba_newsapi_draft_guardrails')) {
+    /**
+     * @return array<int, string>
+     */
+    function grimba_newsapi_draft_guardrails(Post $post): array
+    {
+        $flags = [];
+        $bias = (string) ($post->bias_rating ?? 'unknown');
+        $excerpt = trim(strip_tags((string) ($post->description ?? '')));
+        $originalLanguage = strtolower(substr((string) ($post->original_language ?? ''), 0, 2));
+
+        if (! $post->source_id || ! trim((string) ($post->source_name ?? ''))) {
+            $flags[] = 'source manquante';
+        }
+
+        if (! in_array($bias, ['left', 'center', 'right'], true)) {
+            $flags[] = 'biais inconnu';
+        }
+
+        if ($originalLanguage !== '' && $originalLanguage !== 'fr' && ! trim((string) ($post->translated_name ?? ''))) {
+            $flags[] = 'traduction manquante';
+        }
+
+        if (mb_strlen($excerpt) < 80) {
+            $flags[] = 'extrait trop court';
+        }
+
+        return $flags;
+    }
+}
+
+if (! function_exists('grimba_newsapi_publish_posts')) {
+    /**
+     * @return array{published:int, blocked:int, reasons:array<int, string>}
+     */
+    function grimba_newsapi_publish_posts(array $ids): array
+    {
+        $published = 0;
+        $blocked = 0;
+        $reasons = [];
+
+        foreach ($ids as $id) {
+            $post = Post::query()
+                ->where('id', $id)
+                ->where('status', 'draft')
+                ->whereIn('id', function ($sub): void {
+                    $sub->select('post_id')->from('newsapi_items')->whereNotNull('post_id');
+                })
+                ->first();
+
+            if (! $post) {
+                continue;
+            }
+
+            $flags = grimba_newsapi_draft_guardrails($post);
+            if ($flags !== []) {
+                $blocked++;
+                $reasons = array_merge($reasons, $flags);
+                continue;
+            }
+
+            $post->status = 'published';
+            $post->save();
+            $published++;
+        }
+
+        return [
+            'published' => $published,
+            'blocked' => $blocked,
+            'reasons' => array_values(array_unique($reasons)),
+        ];
+    }
+}
 
 DashboardMenu::default()->beforeRetrieving(function (): void {
     DashboardMenu::make()->registerItem(

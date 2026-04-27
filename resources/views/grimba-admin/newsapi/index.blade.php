@@ -43,6 +43,75 @@
                     </p>
                 </div>
 
+                <div class="grimba-admin-section mb-4">
+                    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
+                        <div>
+                            <h3 class="h5 mb-1">NewsAPI draft readiness</h3>
+                            <p class="text-muted small mb-0">Même garde-fous que RSS : source, biais, traduction et extrait avant publication.</p>
+                        </div>
+                        <span class="badge bg-secondary">{{ $newsApiDrafts->count() }} brouillon(s)</span>
+                    </div>
+
+                    @if($newsApiDrafts->isEmpty())
+                        <p class="text-muted small mb-0">Aucun brouillon NewsAPI en attente.</p>
+                    @else
+                        <form method="POST" action="{{ route('grimba.newsapi.publish-drafts') }}">
+                            @csrf
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 34px;"></th>
+                                            <th>Article</th>
+                                            <th>Source</th>
+                                            <th>Biais</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($newsApiDrafts as $draft)
+                                            @php
+                                                $flags = grimba_newsapi_draft_guardrails($draft);
+                                                $isReady = empty($flags);
+                                                $biasLabel = ['left'=>'Gauche','center'=>'Centre','right'=>'Droite','unknown'=>'—'][$draft->bias_rating] ?? '—';
+                                            @endphp
+                                            <tr @class(['table-warning' => ! $isReady])>
+                                                <td>
+                                                    <input type="checkbox" name="ids[]" value="{{ $draft->id }}" class="form-check-input" @disabled(! $isReady)>
+                                                </td>
+                                                <td>
+                                                    <a href="{{ route('posts.edit', $draft->id) }}" target="_blank">
+                                                        <strong>{{ \Illuminate\Support\Str::limit($draft->name, 86) }}</strong>
+                                                    </a>
+                                                    <div class="small text-muted">{{ \Illuminate\Support\Str::limit(strip_tags((string) $draft->description), 120) }}</div>
+                                                    @if(! $isReady)
+                                                        <div class="d-flex flex-wrap gap-1 mt-2">
+                                                            @foreach($flags as $flag)
+                                                                <span class="badge bg-warning text-dark">{{ $flag }}</span>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <div class="small text-success mt-1">Prêt à publier</div>
+                                                    @endif
+                                                </td>
+                                                <td class="small">{{ $draft->source_name ?: '—' }}</td>
+                                                <td class="small">{{ $biasLabel }}</td>
+                                                <td class="text-end">
+                                                    <a href="{{ route('posts.edit', $draft->id) }}" target="_blank" class="btn btn-sm btn-outline-primary">Éditer</a>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-success">
+                                Publier les prêts
+                            </button>
+                            <span class="text-muted small ms-2">Les brouillons signalés restent bloqués côté serveur.</span>
+                        </form>
+                    @endif
+                </div>
+
                 <form method="POST" action="{{ route('grimba.newsapi.save') }}">
                     @csrf
 
