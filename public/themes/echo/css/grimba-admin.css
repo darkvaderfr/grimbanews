@@ -21,12 +21,13 @@ body {
     --gn-font-display: 'Fraunces', 'Playfair Display', Georgia, serif;
     --gn-font-body:    'Public Sans', 'Inter', system-ui, sans-serif;
     --gn-font-mono:    'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
-    --gn-dropdown-bg:  rgba(255, 255, 255, 0.96);
+    --gn-dropdown-bg:  rgba(255, 255, 255, 0.98);
     --gn-dropdown-line: rgba(26, 23, 19, 0.18);
     --gn-dropdown-hover: rgba(26, 23, 19, 0.075);
     --gn-dropdown-active: rgba(26, 23, 19, 0.12);
-    --gn-z-admin-header: 1080;
-    --gn-z-admin-dropdown: 1090;
+    --gn-z-admin-content: 1;
+    --gn-z-admin-header: 4000;
+    --gn-z-admin-dropdown: 5000;
 
     font-family: var(--gn-font-body);
     color: var(--gn-ink);
@@ -40,7 +41,7 @@ html[data-bs-theme="dark"] body {
     --gn-ink-muted:    #e6ddc7;
     --gn-ink-soft:     #c9bea5;
     --gn-rule:         rgba(246, 241, 232, 0.12);
-    --gn-dropdown-bg:  rgba(28, 24, 17, 0.97);
+    --gn-dropdown-bg:  rgba(28, 24, 17, 0.98);
     --gn-dropdown-line: rgba(246, 241, 232, 0.16);
     --gn-dropdown-hover: rgba(246, 241, 232, 0.11);
     --gn-dropdown-active: rgba(246, 241, 232, 0.16);
@@ -150,6 +151,27 @@ body .navbar.navbar-expand-md.d-print-none {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
+body .page-wrapper,
+body .page-body,
+body .page-header,
+body .container-xl,
+body .container-fluid {
+    position: relative;
+    z-index: var(--gn-z-admin-content);
+}
+body .page-header .btn-list,
+body .page-header .page-actions,
+body .grimba-admin-screen {
+    position: relative;
+    z-index: var(--gn-z-admin-content);
+}
+body header.navbar.navbar-expand-md.d-print-none,
+body header.navbar.navbar-expand-md.d-print-none .navbar-collapse,
+body header.navbar.navbar-expand-md.d-print-none .navbar-nav,
+body header.navbar.navbar-expand-md.d-print-none .nav-item,
+body header.navbar.navbar-expand-md.d-print-none .dropdown {
+    z-index: var(--gn-z-admin-header) !important;
+}
 body header.navbar.navbar-expand-md.d-print-none .navbar-toggler,
 body header.navbar.navbar-expand-md.d-print-none .nav-link,
 body header.navbar.navbar-expand-md.d-print-none .nav-link.text-reset,
@@ -213,6 +235,14 @@ body .datepicker-dropdown {
     opacity: 1 !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+}
+body .dropdown-menu.show,
+body .navbar .dropdown-menu.show,
+body .dropdown-menu[data-bs-popper],
+body .dropdown-menu.show[data-bs-popper],
+body .dropdown-menu.show .dropdown-menu,
+body .dropdown-menu .dropdown-menu.show {
+    z-index: var(--gn-z-admin-dropdown) !important;
 }
 body .dropdown-menu:not(.navbar-vertical .dropdown-menu):not(.app-sidebar .dropdown-menu) *,
 body .select2-dropdown *,

@@ -32,7 +32,10 @@ class AdminSettingsTest extends TestCase
             ->assertSee('OpenAI')
             ->assertSee('OpenRouter')
             ->assertSee('Anthropic')
-            ->assertSee('xAI / Grok');
+            ->assertSee('xAI / Grok')
+            ->assertSee('LLM insight providers')
+            ->assertSee('Dedicated translation fallbacks')
+            ->assertSee('Enregistrer les clés NobuAI');
 
         $this->actingAs($this->admin())
             ->get('/admin/grimba/news-sources/triage')

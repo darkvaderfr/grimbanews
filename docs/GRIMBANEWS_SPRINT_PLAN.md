@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `12a2125` Audit static UI translation catalogs
 - `f9bea23` Harden public NobuAI insight branding
 - `df7b14d` Add cockpit NobuAI insight batch action
 - `8fd4bc7` Keep admin dropdowns above content
 - `b1dae35` Clarify NobuAI live health prompt
-- `67b2958` Surface NobuAI insight readiness
 
 Latest verification:
 
-- `php artisan test` passed with `36` tests and `417` assertions.
+- `php artisan test` passed with `36` tests and `426` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
 ## Completed Sprint Bands
@@ -47,12 +47,13 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S221 — Maturity, Accessibility, Admin, And Tests
+### S185-S222 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
 - S220 hardened public NobuAI insight rendering so reader pages dedupe lines and scrub provider names from saved insight copy.
 - S221 moved remaining core public chrome, metadata, blindspot, comparison, and error-page copy behind saved EN/FR catalogs, with regression tests for catalog coverage.
+- S222 raised admin dropdown/header stacking above page actions, made dropdown panels effectively solid in both themes, fixed dark-mode switch sync against stale local storage, and reorganized the NobuAI provider vault into readable provider groups.
 
 ## Active Systems
 
@@ -86,16 +87,6 @@ Latest verification:
 - Cookie banner settings
 
 ## Next Sprint Queue
-
-### S222 — Admin UX Sweep
-
-Goal: Continue Steve-level admin polish without fighting Botble internals.
-
-Acceptance:
-
-- Dropdowns, modals, alerts, tables, selects, and hover states read correctly in light and dark mode.
-- No page content overlaps top-bar dropdowns.
-- Tests lock the admin chrome contracts.
 
 ### S223 — Ingest Operations Board
 

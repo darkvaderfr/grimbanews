@@ -1,6 +1,7 @@
 /* GrimbaNews — keep Botble admin theme mode in sync with our CSS hooks. */
 (function () {
     var applying = false;
+    var preferDomUntil = 0;
 
     function normalize(value) {
         return value === 'dark' ? 'dark' : value === 'light' ? 'light' : null;
@@ -23,31 +24,52 @@
         }
     }
 
-    function currentMode() {
+    function domMode() {
+        return normalize(document.documentElement.getAttribute('data-bs-theme'))
+            || (document.body ? normalize(document.body.getAttribute('data-bs-theme')) : null);
+    }
+
+    function persistMode(mode) {
+        if (! window.localStorage) {
+            return;
+        }
+
+        window.localStorage.setItem('tablerTheme', mode);
+        window.localStorage.setItem('grimba_theme', mode);
+        window.localStorage.setItem('echo-theme', mode);
+        window.localStorage.setItem('themeMode', mode);
+    }
+
+    function currentMode(preferDom) {
+        var dom = domMode();
+
+        if (preferDom && dom) {
+            return dom;
+        }
+
         var stored = storedMode(false);
 
         if (stored) {
             return stored;
         }
 
-        if (document.body) {
-            return normalize(document.body.getAttribute('data-bs-theme')) || 'light';
+        if (dom) {
+            return dom;
         }
 
-        return normalize(document.documentElement.getAttribute('data-bs-theme'))
-            || storedMode(true)
+        return storedMode(true)
             || cookieMode()
             || 'light';
     }
 
-    function applyMode() {
+    function applyMode(preferDom) {
         if (applying) {
             return;
         }
 
         try {
             applying = true;
-            var effective = currentMode();
+            var effective = currentMode(preferDom || Date.now() < preferDomUntil);
 
             if (document.documentElement.getAttribute('data-bs-theme') !== effective) {
                 document.documentElement.setAttribute('data-bs-theme', effective);
@@ -63,7 +85,7 @@
                 document.body.removeAttribute('data-bs-theme');
             }
 
-            window.localStorage && window.localStorage.setItem('themeMode', effective);
+            persistMode(effective);
         } catch (_) {}
         finally {
             applying = false;
@@ -74,12 +96,16 @@
 
     window.addEventListener('storage', applyMode);
     document.addEventListener('click', function () {
-        window.setTimeout(applyMode, 0);
-        window.setTimeout(applyMode, 80);
+        preferDomUntil = Date.now() + 700;
+        window.setTimeout(function () { applyMode(true); }, 0);
+        window.setTimeout(function () { applyMode(true); }, 80);
+        window.setTimeout(function () { applyMode(true); }, 250);
     }, true);
 
     if (window.MutationObserver) {
-        var observer = new MutationObserver(applyMode);
+        var observer = new MutationObserver(function () {
+            applyMode(true);
+        });
 
         observer.observe(document.documentElement, {
             attributes: true,

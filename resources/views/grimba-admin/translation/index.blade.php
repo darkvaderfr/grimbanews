@@ -23,6 +23,16 @@
         'perplexity' => 'sonar-pro',
         'groq' => 'llama-3.3-70b-versatile',
     ];
+    $providerGroups = [
+        'LLM insight providers' => [
+            'description' => 'Used by NobuAI story insights and as high-quality translation wrappers.',
+            'drivers' => ['openai', 'openrouter', 'anthropic', 'xai', 'mistral', 'google', 'perplexity', 'groq'],
+        ],
+        'Dedicated translation fallbacks' => [
+            'description' => 'Used when a dedicated translation API should handle FR/EN conversion before LLM fallback.',
+            'drivers' => ['deepl', 'libre'],
+        ],
+    ];
     $configured = $translator->configuredDrivers();
 @endphp
 
@@ -100,6 +110,28 @@
             padding: 16px;
             height: 100%;
             background: var(--llm-panel-strong) !important;
+            box-shadow: 0 14px 34px rgba(26, 23, 19, 0.08);
+            transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+        }
+        .grimba-provider-card:hover {
+            border-color: color-mix(in srgb, var(--llm-accent) 34%, var(--llm-rule)) !important;
+            box-shadow: 0 18px 42px rgba(26, 23, 19, 0.12);
+            transform: translateY(-1px);
+        }
+        .grimba-provider-group-title {
+            color: var(--llm-ink) !important;
+            font-family: var(--gn-font-display, Georgia, serif) !important;
+            letter-spacing: -0.02em;
+        }
+        .grimba-provider-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        @media (max-width: 991.98px) {
+            .grimba-provider-grid {
+                grid-template-columns: 1fr;
+            }
         }
         .grimba-provider-card .form-control,
         .grimba-provider-card .form-select,
@@ -108,6 +140,11 @@
             background: var(--llm-panel-strong) !important;
             border-color: var(--llm-rule) !important;
             color: var(--llm-ink) !important;
+        }
+        .grimba-provider-card .form-control {
+            min-height: 44px;
+            font-family: var(--gn-font-mono, ui-monospace, monospace);
+            letter-spacing: 0.01em;
         }
         .grimba-provider-card .form-control::placeholder,
         .grimba-llm-admin .form-control::placeholder {
@@ -145,6 +182,39 @@
             background: rgba(131, 120, 106, 0.16);
             color: var(--llm-muted);
         }
+        .grimba-llm-actionbar {
+            position: sticky;
+            bottom: 16px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--llm-rule);
+            border-radius: 16px;
+            background: color-mix(in srgb, var(--llm-panel-strong) 94%, transparent);
+            box-shadow: 0 18px 44px rgba(26, 23, 19, 0.12);
+        }
+        .grimba-llm-test-form {
+            display: grid;
+            grid-template-columns: minmax(150px, .8fr) minmax(110px, .45fr) minmax(110px, .45fr) minmax(220px, 1.2fr) auto;
+            gap: 8px;
+            align-items: start;
+        }
+        @media (max-width: 1199.98px) {
+            .grimba-llm-test-form {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 575.98px) {
+            .grimba-llm-actionbar,
+            .grimba-llm-test-form {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
     </style>
 
     <div class="grimba-llm-admin max-width-1200">
@@ -155,6 +225,14 @@
                 Add provider keys here. Readers only see <strong>NobuAI</strong>; this backend can route through OpenAI,
                 OpenRouter, Anthropic, xAI, Mistral, Gemini, Perplexity, Groq, DeepL, or LibreTranslate.
             </p>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <span class="grimba-status-pill {{ count($configured) ? 'is-on' : 'is-off' }}">
+                    Translation: {{ count($configured) ? count($configured) . ' configured' : 'not configured' }}
+                </span>
+                <span class="grimba-status-pill {{ count($nobuConfigured) ? 'is-on' : 'is-off' }}">
+                    NobuAI: {{ count($nobuConfigured) ? count($nobuConfigured) . ' LLM ready' : 'no LLM key' }}
+                </span>
+            </div>
         </section>
 
         <x-core::card>
@@ -193,28 +271,41 @@
                         <div class="form-text">En <em>Auto</em>, la chaîne DeepL → Mistral → OpenRouter → OpenAI → Anthropic → Gemini → xAI → Perplexity → Groq → LibreTranslate est essayée dans l'ordre, avec basculement automatique en cas d'échec.</div>
                     </div>
 
-                    <div class="row g-3 mb-4">
-                        @foreach($driverLabels as $d => $meta)
-                            @php $hasValue = ! empty($settings[$d]); @endphp
-                            <div class="col-lg-6">
-                                <div class="grimba-provider-card">
-                                    <label class="form-label d-flex align-items-center justify-content-between gap-2">
-                                        <span>
-                                            <strong>{{ $meta['name'] }}</strong>
-                                            <span class="grimba-provider-meta d-block">{{ $meta['field'] }}</span>
-                                        </span>
-                                        <span class="grimba-status-pill {{ $hasValue ? 'is-on' : 'is-off' }}">
-                                            {{ $hasValue ? 'Configuré' : 'Vide' }}
-                                        </span>
-                                    </label>
-                                    <input type="password" name="{{ $d }}_key" autocomplete="off"
-                                           class="form-control"
-                                           placeholder="{{ $hasValue ? '••••••••• (laisser vide pour conserver)' : ($d === 'libre' ? 'https://libretranslate.example.com' : 'sk-...') }}">
-                                    <div class="form-text">{{ $meta['hint'] }}</div>
+                    @foreach($providerGroups as $groupTitle => $group)
+                        <div class="grimba-llm-section">
+                            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
+                                <div>
+                                    <h3 class="h4 grimba-provider-group-title mb-1">{{ $groupTitle }}</h3>
+                                    <p class="form-text mb-0">{{ $group['description'] }}</p>
                                 </div>
+                                <span class="grimba-status-pill is-off">{{ count($group['drivers']) }} providers</span>
                             </div>
+
+                            <div class="grimba-provider-grid">
+                                @foreach($group['drivers'] as $d)
+                                    @php
+                                        $meta = $driverLabels[$d];
+                                        $hasValue = ! empty($settings[$d]);
+                                    @endphp
+                                    <div class="grimba-provider-card">
+                                        <label class="form-label d-flex align-items-center justify-content-between gap-2">
+                                            <span>
+                                                <strong>{{ $meta['name'] }}</strong>
+                                                <span class="grimba-provider-meta d-block">{{ $meta['field'] }}</span>
+                                            </span>
+                                            <span class="grimba-status-pill {{ $hasValue ? 'is-on' : 'is-off' }}">
+                                                {{ $hasValue ? 'Configuré' : 'Vide' }}
+                                            </span>
+                                        </label>
+                                        <input type="password" name="{{ $d }}_key" autocomplete="off"
+                                               class="form-control"
+                                               placeholder="{{ $hasValue ? '••••••••• (laisser vide pour conserver)' : ($d === 'libre' ? 'https://libretranslate.example.com' : 'sk-...') }}">
+                                        <div class="form-text">{{ $meta['hint'] }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                         @endforeach
-                    </div>
 
                     <div class="grimba-llm-section">
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
@@ -259,8 +350,11 @@
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <div class="grimba-llm-actionbar">
+                        <div class="small text-muted">
+                            Empty fields keep existing secrets. Use <code>__clear__</code> to remove a saved key.
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enregistrer les clés NobuAI</button>
                     </div>
                 </form>
 
@@ -271,23 +365,23 @@
                         <section class="grimba-llm-section h-100">
                             <h3 class="h5">Test rapide</h3>
                             <p class="text-muted small mb-2">Teste la traduction dans les deux sens. Le site public utilise la même chaîne NobuAI.</p>
-                            <form method="POST" action="{{ route('grimba.translation.test') }}" class="d-flex gap-2 flex-wrap align-items-start">
+                            <form method="POST" action="{{ route('grimba.translation.test') }}" class="grimba-llm-test-form">
                                 @csrf
-                                <select name="driver" class="form-select form-select-sm" style="width: auto;">
+                                <select name="driver" class="form-select form-select-sm">
                                     <option value="auto">Auto (chaîne complète)</option>
                                     @foreach($driverLabels as $d => $meta)
                                         <option value="{{ $d }}">{{ $meta['name'] }} uniquement</option>
                                     @endforeach
                                 </select>
-                                <select name="from" class="form-select form-select-sm" style="width: auto;">
+                                <select name="from" class="form-select form-select-sm">
                                     <option value="en">EN source</option>
                                     <option value="fr">FR source</option>
                                 </select>
-                                <select name="to" class="form-select form-select-sm" style="width: auto;">
+                                <select name="to" class="form-select form-select-sm">
                                     <option value="fr">FR cible</option>
                                     <option value="en">EN cible</option>
                                 </select>
-                                <input type="text" name="sample" class="form-control form-control-sm" style="max-width: 380px;"
+                                <input type="text" name="sample" class="form-control form-control-sm"
                                        placeholder="The quick brown fox jumps over the lazy dog.">
                                 <button type="submit" class="btn btn-outline-primary btn-sm">Tester</button>
                             </form>
