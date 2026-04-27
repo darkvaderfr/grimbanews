@@ -61,6 +61,22 @@ Schedule::command('grimba:fetch-full-articles --limit=40')
     ->withoutOverlapping(25)
     ->runInBackground();
 
+// GrimbaNews — NobuAI insight treatment for newly published story
+// clusters. Runs after publish + full extraction + translation ticks so
+// reader-facing stories get GroundNews-style analysis automatically.
+Schedule::command('grimba:nobuai-summaries --limit=40')
+    ->cron('18,48 * * * *')
+    ->onOneServer()
+    ->withoutOverlapping(25)
+    ->runInBackground();
+
+// Refresh existing NobuAI insights when later coverage joins a cluster.
+Schedule::command('grimba:nobuai-summaries --stale --limit=25')
+    ->cron('25,55 * * * *')
+    ->onOneServer()
+    ->withoutOverlapping(25)
+    ->runInBackground();
+
 // GrimbaNews — NewsAPI ingest (S128). Runs at :15 and :45 past the
 // hour so it doesn't collide with the RSS poller (which fires on the
 // :00 / :30 boundary). Skips silently when the key isn't set; gated
