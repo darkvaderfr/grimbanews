@@ -173,6 +173,9 @@ class AdminSettingsTest extends TestCase
             'source_name' => null,
             'bias_rating' => 'unknown',
             'description' => 'Article sans métadonnées source pour vérifier le diagnostic admin.',
+            'summary_nobuai' => "Ce qui est confirmé: Ancien insight à rafraîchir.",
+            'summary_generated_at' => now()->subDay(),
+            'summary_driver' => 'openai',
             'updated_at' => now(),
         ]);
 
@@ -182,6 +185,9 @@ class AdminSettingsTest extends TestCase
             'source_name' => $diagnosticSourceName,
             'bias_rating' => 'right',
             'description' => 'Article avec crédibilité basse pour vérifier le signal éditorial.',
+            'summary_nobuai' => "Ce qui est confirmé: Ancien insight à rafraîchir.",
+            'summary_generated_at' => now()->subDay(),
+            'summary_driver' => 'openai',
             'updated_at' => now(),
         ]);
 
@@ -195,7 +201,13 @@ class AdminSettingsTest extends TestCase
             ->assertSee('Biais inconnu')
             ->assertSee('Crédibilité basse')
             ->assertSee($diagnosticSourceName)
-            ->assertSee('Modifier l');
+            ->assertSee('Modifier l')
+            ->assertSee('Insight stale');
+
+        $this->actingAs($this->admin())
+            ->get('/admin/grimba/cockpit')
+            ->assertOk()
+            ->assertSee('Rafraîchir 3 stale');
 
         $this->actingAs($this->admin())
             ->post('/admin/grimba/translation', [

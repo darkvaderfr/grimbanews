@@ -239,10 +239,17 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
         Route::post('cockpit/nobuai-summaries', function (Request $request) {
             $limit = min(5, max(1, (int) $request->input('limit', 3)));
+            $staleOnly = $request->boolean('stale_only');
 
-            $exitCode = Artisan::call('grimba:nobuai-summaries', [
+            $args = [
                 '--limit' => $limit,
-            ]);
+            ];
+
+            if ($staleOnly) {
+                $args['--stale'] = true;
+            }
+
+            $exitCode = Artisan::call('grimba:nobuai-summaries', $args);
 
             $output = trim(Artisan::output());
             $summary = collect(preg_split("/\r\n|\n|\r/", $output) ?: [])
@@ -251,9 +258,10 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->take(-4)
                 ->implode(' ');
 
+            $prefix = $staleOnly ? 'NobuAI stale refresh' : 'NobuAI';
             $message = $summary !== ''
-                ? 'NobuAI: ' . $summary
-                : 'NobuAI: génération terminée.';
+                ? $prefix . ': ' . $summary
+                : $prefix . ': génération terminée.';
 
             return redirect()
                 ->route('grimba.cockpit')

@@ -14,6 +14,7 @@ class GrimbaGenerateNobuAiSummaries extends Command
         {--limit=20 : Max story clusters to process}
         {--cluster= : Process one story_cluster_id only}
         {--force : Regenerate summaries that already exist}
+        {--stale : Regenerate only summaries older than their latest article update}
         {--dry-run : Show queued clusters without calling providers or writing}';
 
     protected $description = 'Generate cluster-level NobuAI summaries from multi-source coverage and persist them onto posts.';
@@ -33,12 +34,19 @@ class GrimbaGenerateNobuAiSummaries extends Command
         $limit = max(1, (int) $this->option('limit'));
         $clusterId = $this->option('cluster') ? (int) $this->option('cluster') : null;
         $force = (bool) $this->option('force');
+        $staleOnly = (bool) $this->option('stale');
         $dryRun = (bool) $this->option('dry-run');
 
         $query = DB::table('posts')
             ->where('status', 'published')
             ->whereNotNull('story_cluster_id')
-            ->selectRaw('story_cluster_id, COUNT(*) as post_count, MAX(updated_at) as latest_at')
+            ->selectRaw("
+                story_cluster_id,
+                COUNT(*) as post_count,
+                MAX(updated_at) as latest_at,
+                MAX(summary_generated_at) as summary_generated_at,
+                MAX(CASE WHEN summary_nobuai IS NOT NULL AND summary_nobuai != '' THEN 1 ELSE 0 END) as has_summary
+            ")
             ->groupBy('story_cluster_id')
             ->havingRaw('COUNT(*) >= 2')
             ->orderByDesc('latest_at')
@@ -48,7 +56,12 @@ class GrimbaGenerateNobuAiSummaries extends Command
             $query->where('story_cluster_id', $clusterId);
         }
 
-        if (! $force) {
+        if ($staleOnly) {
+            $query
+                ->havingRaw("MAX(CASE WHEN summary_nobuai IS NOT NULL AND summary_nobuai != '' THEN 1 ELSE 0 END) = 1")
+                ->havingRaw('MAX(summary_generated_at) IS NOT NULL')
+                ->havingRaw('MAX(updated_at) > MAX(summary_generated_at)');
+        } elseif (! $force) {
             $query->where(function ($q): void {
                 $q->whereNull('summary_nobuai')
                     ->orWhere('summary_nobuai', '');
@@ -63,7 +76,7 @@ class GrimbaGenerateNobuAiSummaries extends Command
         }
 
         $this->info(sprintf('NobuAI providers available: %s', implode(', ', $nobuAi->configuredDrivers())));
-        $this->info(sprintf('%d cluster(s) queued.', $clusters->count()));
+        $this->info(sprintf('%d cluster(s) queued%s.', $clusters->count(), $staleOnly ? ' for stale refresh' : ''));
 
         $ok = 0;
         $fail = 0;

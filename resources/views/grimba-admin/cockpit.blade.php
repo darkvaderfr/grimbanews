@@ -208,6 +208,16 @@
                                 </button>
                             </form>
                         @endif
+                        @if($nobuInsightStale > 0 && count($nobuDrivers))
+                            <form method="POST" action="{{ route('grimba.cockpit.nobuai-summaries') }}" class="d-inline-flex gap-2 align-items-center">
+                                @csrf
+                                <input type="hidden" name="limit" value="3">
+                                <input type="hidden" name="stale_only" value="1">
+                                <button type="submit" class="btn btn-sm btn-outline-warning">
+                                    Rafraîchir 3 stale
+                                </button>
+                            </form>
+                        @endif
                     </div>
                 </div>
             </div>

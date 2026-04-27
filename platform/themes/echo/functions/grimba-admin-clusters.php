@@ -203,6 +203,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->get();
 
             $summaryInfo = null;
+            $summaryIsStale = false;
             if (Schema::hasColumn('posts', 'summary_nobuai')) {
                 $summaryInfo = DB::table('posts')
                     ->where('story_cluster_id', $id)
@@ -210,11 +211,21 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                     ->where('summary_nobuai', '!=', '')
                     ->orderByDesc('summary_generated_at')
                     ->first(['summary_nobuai', 'summary_generated_at', 'summary_driver']);
+
+                if ($summaryInfo?->summary_generated_at) {
+                    $latestArticleAt = DB::table('posts')
+                        ->where('story_cluster_id', $id)
+                        ->where('status', 'published')
+                        ->max('updated_at');
+
+                    $summaryIsStale = $latestArticleAt
+                        && \Carbon\Carbon::parse($latestArticleAt)->gt(\Carbon\Carbon::parse($summaryInfo->summary_generated_at));
+                }
             }
 
             $nobuAiReady = app(GrimbaNobuAi::class)->enabled();
 
-            return view('grimba-admin.story-clusters.form', compact('cluster', 'attached', 'attachedSourceMeta', 'available', 'summaryInfo', 'nobuAiReady'));
+            return view('grimba-admin.story-clusters.form', compact('cluster', 'attached', 'attachedSourceMeta', 'available', 'summaryInfo', 'summaryIsStale', 'nobuAiReady'));
         })->name('story-clusters.edit');
 
         Route::post('story-clusters', function (Request $request) {

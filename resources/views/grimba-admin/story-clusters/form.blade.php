@@ -112,6 +112,11 @@
                                     @endif
                                 </span>
                             </div>
+                            @if($summaryIsStale ?? false)
+                                <div class="alert alert-warning py-2 mb-2">
+                                    Insight stale : une couverture plus récente est arrivée. Régénérez NobuAI avant publication.
+                                </div>
+                            @endif
                             <pre class="bg-light p-3 rounded mb-0" style="white-space:pre-wrap;">{{ $summaryInfo->summary_nobuai }}</pre>
                         </div>
                     @else
