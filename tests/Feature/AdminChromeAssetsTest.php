@@ -25,6 +25,9 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('body .grimba-admin-hero::after', $css);
         $this->assertStringContainsString('body .grimba-admin-metric-value', $css);
         $this->assertStringContainsString('body .grimba-admin-actions', $css);
+        $this->assertStringContainsString('body .grimba-admin-empty', $css);
+        $this->assertStringContainsString('body .grimba-admin-empty__copy', $css);
+        $this->assertStringContainsString('body .grimba-admin-empty__actions', $css);
         $this->assertStringContainsString('body .grimba-admin-screen .btn-outline-danger', $css);
         $this->assertStringContainsString('body .grimba-admin-screen .btn-outline-warning', $css);
         $this->assertStringContainsString('background-size: 42px 42px, 42px 42px, auto, auto;', $css);
@@ -60,5 +63,24 @@ class AdminChromeAssetsTest extends TestCase
         }
 
         $this->assertGreaterThan(10, $checked);
+    }
+
+    public function test_key_admin_queues_use_shared_empty_states(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $views = [
+            '/resources/views/grimba-admin/rss-drafts/index.blade.php',
+            '/resources/views/grimba-admin/newsapi/index.blade.php',
+            '/resources/views/grimba-admin/subscribers/index.blade.php',
+            '/resources/views/grimba-admin/news-sources/index.blade.php',
+            '/resources/views/grimba-admin/story-clusters/index.blade.php',
+        ];
+
+        foreach ($views as $view) {
+            $contents = file_get_contents($root . $view);
+
+            $this->assertStringContainsString('grimba-admin-empty', $contents, $view);
+            $this->assertStringContainsString('grimba-admin-empty__actions', $contents, $view);
+        }
     }
 }

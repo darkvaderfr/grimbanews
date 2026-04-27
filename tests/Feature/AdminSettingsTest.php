@@ -161,6 +161,12 @@ class AdminSettingsTest extends TestCase
             ->assertSee('Abonnés infolettre');
 
         $this->actingAs($this->admin())
+            ->get('/admin/grimba/subscribers?q=s238-empty-state-fixture')
+            ->assertOk()
+            ->assertSee('grimba-admin-empty', false)
+            ->assertSee('Aucun abonné pour ces filtres');
+
+        $this->actingAs($this->admin())
             ->post('/admin/grimba/rss-drafts/publish', ['ids' => $rssDraftIds])
             ->assertRedirect()
             ->assertSessionHas('success_msg');

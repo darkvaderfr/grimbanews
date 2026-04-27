@@ -69,7 +69,20 @@
                     </div>
 
                     @if($newsApiDrafts->isEmpty())
-                        <p class="text-muted small mb-0">Aucun brouillon NewsAPI en attente.</p>
+                        <div class="grimba-admin-empty">
+                            <div class="grimba-admin-empty__icon">API</div>
+                            <div class="grimba-admin-empty__title">Aucun brouillon NewsAPI en attente</div>
+                            <p class="grimba-admin-empty__copy">
+                                Lancez une récupération manuelle ou ajustez les requêtes si le flux secondaire doit alimenter la rédaction maintenant.
+                            </p>
+                            <div class="grimba-admin-empty__actions">
+                                <form method="POST" action="{{ route('grimba.newsapi.run') }}" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-primary">Lancer NewsAPI</button>
+                                </form>
+                                <a href="{{ route('grimba.news-sources.triage') }}" class="btn btn-sm btn-outline-primary">Classer les sources</a>
+                            </div>
+                        </div>
                     @else
                         <form method="POST" action="{{ route('grimba.newsapi.publish-drafts') }}">
                             @csrf

@@ -87,7 +87,19 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">Aucun dossier pour l'instant.</td>
+                                    <td colspan="6">
+                                        <div class="grimba-admin-empty">
+                                            <div class="grimba-admin-empty__icon">DOS</div>
+                                            <div class="grimba-admin-empty__title">Aucun dossier actif</div>
+                                            <p class="grimba-admin-empty__copy">
+                                                Créez un dossier pour regrouper les articles, suivre la balance gauche-centre-droite, et générer les insights NobuAI.
+                                            </p>
+                                            <div class="grimba-admin-empty__actions">
+                                                <a href="{{ route('grimba.story-clusters.create') }}" class="btn btn-sm btn-primary">Nouveau dossier</a>
+                                                <a href="{{ route('grimba.coverage-map.index') }}" class="btn btn-sm btn-outline-primary">Carte couverture</a>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>

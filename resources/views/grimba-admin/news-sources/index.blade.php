@@ -88,7 +88,22 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="text-center text-muted py-4">Aucune source trouvée.</td>
+                                    <td colspan="9">
+                                        <div class="grimba-admin-empty">
+                                            <div class="grimba-admin-empty__icon">SRC</div>
+                                            <div class="grimba-admin-empty__title">Aucune source trouvée</div>
+                                            <p class="grimba-admin-empty__copy">
+                                                Ajoutez une source, ouvrez la file de triage, ou retirez la recherche pour restaurer la carte de couverture.
+                                            </p>
+                                            <div class="grimba-admin-empty__actions">
+                                                <a href="{{ route('grimba.news-sources.create') }}" class="btn btn-sm btn-primary">Nouvelle source</a>
+                                                <a href="{{ route('grimba.news-sources.triage') }}" class="btn btn-sm btn-outline-primary">Sources à classer</a>
+                                                @if($q)
+                                                    <a href="{{ route('grimba.news-sources.index') }}" class="btn btn-sm btn-outline-secondary">Réinitialiser</a>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>

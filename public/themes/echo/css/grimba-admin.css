@@ -815,6 +815,52 @@ body .grimba-admin-metric-label {
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
+body .grimba-admin-empty {
+    display: grid;
+    place-items: center;
+    gap: 0.6rem;
+    min-height: 170px;
+    padding: 1.4rem;
+    border: 1px dashed rgba(26, 23, 19, 0.22);
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at 18% 18%, rgba(220, 200, 160, 0.26), transparent 34%),
+        rgba(255, 255, 255, 0.52);
+    color: var(--gn-ink-muted);
+    text-align: center;
+}
+body .grimba-admin-empty__icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    background: var(--gn-ink);
+    color: var(--gn-paper);
+    font-family: var(--gn-font-mono);
+    font-weight: 900;
+}
+body .grimba-admin-empty__title {
+    color: var(--gn-ink);
+    font-family: var(--gn-font-display);
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+body .grimba-admin-empty__copy {
+    max-width: 560px;
+    margin: 0;
+    color: var(--gn-ink-muted);
+    font-size: 0.94rem;
+    line-height: 1.55;
+}
+body .grimba-admin-empty__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.55rem;
+    margin-top: 0.2rem;
+}
 body .table {
     --bb-table-color: var(--gn-ink);
     --bb-table-bg: transparent;
@@ -902,6 +948,24 @@ body[data-bs-theme="dark"] .grimba-cockpit .btn-outline-danger,
 body[data-bs-theme="dark"] .grimba-llm-admin .btn-outline-danger {
     color: #ffb0a8 !important;
     background: rgba(232, 76, 61, 0.12) !important;
+}
+html[data-bs-theme="dark"] body .grimba-admin-empty,
+body[data-bs-theme="dark"] .grimba-admin-empty {
+    border-color: rgba(246, 241, 232, 0.2);
+    background:
+        radial-gradient(circle at 18% 18%, rgba(201, 174, 118, 0.14), transparent 34%),
+        rgba(36, 32, 22, 0.66);
+}
+html[data-bs-theme="dark"] body .grimba-admin-empty__icon,
+body[data-bs-theme="dark"] .grimba-admin-empty__icon {
+    background: rgba(246, 241, 232, 0.92);
+    color: #17140f;
+}
+html[data-bs-theme="dark"] body .grimba-admin-empty__title,
+body[data-bs-theme="dark"] .grimba-admin-empty__title,
+html[data-bs-theme="dark"] body .grimba-admin-empty__copy,
+body[data-bs-theme="dark"] .grimba-admin-empty__copy {
+    color: var(--gn-ink);
 }
 html[data-bs-theme="dark"] body .table,
 body[data-bs-theme="dark"] .table {

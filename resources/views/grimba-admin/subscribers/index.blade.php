@@ -113,7 +113,19 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">Aucun abonné pour ces filtres.</td>
+                                    <td colspan="7">
+                                        <div class="grimba-admin-empty">
+                                            <div class="grimba-admin-empty__icon">AUD</div>
+                                            <div class="grimba-admin-empty__title">Aucun abonné pour ces filtres</div>
+                                            <p class="grimba-admin-empty__copy">
+                                                Vérifiez la recherche ou revenez à la vue complète avant d'exporter un segment newsletter.
+                                            </p>
+                                            <div class="grimba-admin-empty__actions">
+                                                <a href="{{ route('grimba.subscribers.index') }}" class="btn btn-sm btn-primary">Réinitialiser les filtres</a>
+                                                <a href="{{ url('/') }}" target="_blank" class="btn btn-sm btn-outline-primary">Voir le site</a>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>

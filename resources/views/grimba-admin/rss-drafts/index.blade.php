@@ -68,9 +68,19 @@
                 </div>
 
                 @if($drafts->isEmpty())
-                    <div class="text-center text-muted py-5">
-                        <div class="display-6">📭</div>
-                        <p class="mt-2 mb-0">Aucun brouillon RSS à réviser pour ces filtres.</p>
+                    <div class="grimba-admin-empty">
+                        <div class="grimba-admin-empty__icon">RSS</div>
+                        <div class="grimba-admin-empty__title">Aucun brouillon RSS à réviser</div>
+                        <p class="grimba-admin-empty__copy">
+                            La file est vide pour ces filtres. Relancez les flux, ouvrez les sources à classer, ou retirez les filtres pour retrouver les brouillons bloqués ailleurs.
+                        </p>
+                        <div class="grimba-admin-empty__actions">
+                            <a href="{{ route('grimba.rss-feeds.index') }}" class="btn btn-sm btn-primary">Gérer les flux</a>
+                            <a href="{{ route('grimba.news-sources.triage') }}" class="btn btn-sm btn-outline-primary">Sources à classer</a>
+                            @if($sourceId || $bias)
+                                <a href="{{ route('grimba.rss-drafts.index') }}" class="btn btn-sm btn-outline-secondary">Réinitialiser</a>
+                            @endif
+                        </div>
                     </div>
                 @else
                     <form method="POST" id="rss-drafts-form">
