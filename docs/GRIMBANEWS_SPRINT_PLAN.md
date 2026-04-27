@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `8353243` Record admin production readiness smoke
 - `1de435f` Complete admin cinematic SOK
 - `fbf0a03` Polish admin inline actions
 - `19820da` Add admin wayfinder navigation
 - `e75f828` Polish admin alert surfaces
-- `b9e4dd3` Polish admin form sections
 
 Latest verification:
 
-- `php artisan test` passed with `50` tests and `754` assertions.
+- `php artisan test` passed with `51` tests and `758` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 - `php artisan grimba:health` passed and `php artisan route:list --path=admin/grimba` lists 52 Grimba admin routes.
 
@@ -48,7 +48,7 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S245 — Maturity, Accessibility, Admin, And Tests
+### S185-S246 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
@@ -78,6 +78,7 @@ Latest verification:
 - S243 tightened inline admin actions in dense tables and cards, including larger hit areas and explicit destructive labels instead of tiny symbol-only controls.
 - S244 completed the backend cinematic SOK checklist, added wayfinding to remaining list/control pages, finished responsive coverage/triage tables, and brought cookie settings into the shared form system.
 - S245 recorded a local production-readiness smoke without deploying: app health, NobuAI health, 52 admin routes, and the full test suite are green.
+- S246 documented the later production deployment cache order, post-deploy smoke, and rollback path for the admin redesign without deploying production.
 
 ## Active Systems
 
@@ -112,14 +113,14 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S246 — Admin Deployment Cache Checklist
+### S247 — Admin Visual Regression Hooks
 
-Goal: Prepare the exact no-surprises checklist for deploying the redesigned backend later, without running production deployment now.
+Goal: Add lightweight visual-regression hooks so future admin changes preserve the redesigned backend contract.
 
 Acceptance:
 
-- Document cache/build commands and smoke order for the later production deployment.
-- Include rollback notes for the admin CSS/view-only redesign.
+- Document the key admin screenshots/routes to capture before production deploy.
+- Add test coverage for the screenshot route list/document so it cannot drift silently.
 - Keep tests green and do not deploy production.
 
 ## Operating Rules

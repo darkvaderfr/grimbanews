@@ -167,4 +167,15 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('52` Grimba admin routes', $doc);
         $this->assertStringContainsString('php artisan test` passed with `50` tests and `754` assertions', $doc);
     }
+
+    public function test_admin_deployment_checklist_is_recorded_without_deploying(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $doc = file_get_contents($root . '/docs/GRIMBANEWS_ADMIN_DEPLOYMENT_CHECKLIST.md');
+
+        $this->assertStringContainsString('Production deployment is not run from this sprint', $doc);
+        $this->assertStringContainsString('php artisan optimize:clear', $doc);
+        $this->assertStringContainsString('/admin/grimba/cockpit', $doc);
+        $this->assertStringContainsString('no destructive migration is required for rollback', $doc);
+    }
 }
