@@ -18,7 +18,18 @@
 @endphp
 
 @section('content')
-    <div class="max-width-1200">
+    <div class="grimba-admin-screen max-width-1200">
+        <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
+            <div>
+                <span class="grimba-admin-kicker">Story desk</span>
+                <h1 class="grimba-admin-title">{{ $isEdit ? 'Edit story cluster' : 'New story cluster' }}</h1>
+                <p class="grimba-admin-copy">
+                    Curate story groupings, attach or detach articles, and keep the public comparison page coherent.
+                </p>
+            </div>
+            <span class="grimba-admin-status">{{ $isEdit ? 'Cluster #' . $cluster->id : 'Create mode' }}</span>
+        </section>
+
         @if(session('success_msg'))
             <div class="alert alert-success">{{ session('success_msg') }}</div>
         @endif

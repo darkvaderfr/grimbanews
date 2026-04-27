@@ -8,7 +8,18 @@
 @endphp
 
 @section('content')
-    <div class="max-width-1000">
+    <div class="grimba-admin-screen max-width-1000">
+        <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
+            <div>
+                <span class="grimba-admin-kicker">Source registry</span>
+                <h1 class="grimba-admin-title">{{ $isEdit ? 'Edit source' : 'New source' }}</h1>
+                <p class="grimba-admin-copy">
+                    Maintain source bias, ownership, language, and credibility signals used across story comparisons.
+                </p>
+            </div>
+            <span class="grimba-admin-status">{{ $isEdit ? 'Editing #' . $source->id : 'Create mode' }}</span>
+        </section>
+
         <form method="POST" action="{{ $action }}">
             @csrf
             @if($isEdit) @method('PUT') @endif

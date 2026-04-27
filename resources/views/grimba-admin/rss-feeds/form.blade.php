@@ -8,7 +8,18 @@
             : route('grimba.rss-feeds.store');
     @endphp
 
-    <div class="max-width-900">
+    <div class="grimba-admin-screen max-width-1000">
+        <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
+            <div>
+                <span class="grimba-admin-kicker">RSS intake</span>
+                <h1 class="grimba-admin-title">{{ $isEdit ? 'Edit feed' : 'New RSS feed' }}</h1>
+                <p class="grimba-admin-copy">
+                    Connect a publisher feed to a classified source. Ingested drafts inherit source bias, ownership, and credibility metadata.
+                </p>
+            </div>
+            <span class="grimba-admin-status">{{ $isEdit ? 'Feed #' . $feed->id : 'Create mode' }}</span>
+        </section>
+
         <x-core::card>
             <x-core::card.header class="d-flex align-items-center justify-content-between">
                 <x-core::card.title>
@@ -110,13 +121,17 @@
                             {{ $isEdit ? 'Mettre à jour' : 'Créer' }}
                         </button>
                         @if($isEdit)
-                            <form method="POST" action="{{ route('grimba.rss-feeds.poll-now', $feed->id) }}" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-outline-primary">Poll maintenant</button>
-                            </form>
+                            <button type="submit" class="btn btn-outline-primary" form="rss-feed-poll-now">
+                                Poll maintenant
+                            </button>
                         @endif
                     </div>
                 </form>
+                @if($isEdit)
+                    <form method="POST" action="{{ route('grimba.rss-feeds.poll-now', $feed->id) }}" id="rss-feed-poll-now" class="d-none">
+                        @csrf
+                    </form>
+                @endif
             </x-core::card.body>
         </x-core::card>
     </div>
