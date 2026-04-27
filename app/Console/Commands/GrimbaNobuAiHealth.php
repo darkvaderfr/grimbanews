@@ -30,8 +30,10 @@ class GrimbaNobuAiHealth extends Command
         if (! $this->option('live')) {
             if ($llmDrivers === []) {
                 $this->warn('No LLM provider keys are configured. NobuAI reader branding is present, but live LLM generation is not active locally.');
+                $this->comment('Re-run with --live after configuring an LLM key to test a real provider call.');
+            } else {
+                $this->comment('Re-run with --live to test a real provider call.');
             }
-            $this->comment('Re-run with --live after configuring an LLM key to test a real provider call.');
 
             return self::SUCCESS;
         }
