@@ -35,8 +35,9 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 });
             }
             $sources = $query->orderBy('name')->paginate(30)->withQueryString();
+            $unknownCount = DB::table('news_sources')->where('bias_rating', 'unknown')->count();
 
-            return view('grimba-admin.news-sources.index', compact('sources', 'q'));
+            return view('grimba-admin.news-sources.index', compact('sources', 'q', 'unknownCount'));
         })->name('news-sources.index');
 
         // S133 — unknown-bias triage queue. NewsAPI auto-creates
@@ -81,7 +82,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
             $data = Validator::make($request->all(), [
                 'bias_rating'       => 'required|in:left,center,right,unknown',
-                'ownership_type'    => 'nullable|string|max:64',
+                'ownership_type'    => 'nullable|in:state,corporate,independent,nonprofit',
                 'credibility_score' => 'nullable|integer|min:0|max:100',
                 'country'           => 'nullable|string|max:8',
                 'language'          => 'nullable|string|max:8',
@@ -189,6 +190,15 @@ app()->booted(function (): void {
                     ->name('Sources')
                     ->icon('ti ti-building-broadcast-tower')
                     ->route('grimba.news-sources.index')
+            )
+            ->registerItem(
+                DashboardMenuItem::make()
+                    ->id('grimba-news-sources-triage')
+                    ->priority(11)
+                    ->parentId('grimba-root')
+                    ->name('Sources à classer')
+                    ->icon('ti ti-adjustments')
+                    ->route('grimba.news-sources.triage')
             );
     });
 });

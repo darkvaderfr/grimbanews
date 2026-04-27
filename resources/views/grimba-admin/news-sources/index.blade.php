@@ -1,7 +1,18 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div class="max-width-1200">
+    <div class="grimba-admin-screen max-width-1200">
+        <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
+            <div>
+                <span class="grimba-admin-kicker">Source intelligence</span>
+                <h1 class="grimba-admin-title">Sources suivies</h1>
+                <p class="grimba-admin-copy">
+                    Review every outlet GrimbaNews knows about, classify unknown sources, and keep bias/ownership signals reliable.
+                </p>
+            </div>
+            <span class="grimba-admin-status">{{ $unknownCount }} à classer</span>
+        </section>
+
         <x-core::card>
             <x-core::card.header class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <x-core::card.title>GrimbaNews — Sources suivies</x-core::card.title>
@@ -10,6 +21,12 @@
                     <form method="GET" action="{{ route('grimba.news-sources.index') }}" class="d-flex">
                         <input name="q" value="{{ $q }}" class="form-control form-control-sm" placeholder="Chercher…">
                     </form>
+                    <a href="{{ route('grimba.news-sources.triage') }}" class="btn btn-outline-primary btn-sm">
+                        Sources à classer
+                        @if($unknownCount > 0)
+                            <span class="badge text-bg-danger ms-1">{{ $unknownCount }}</span>
+                        @endif
+                    </a>
                     <a href="{{ route('grimba.news-sources.create') }}" class="btn btn-primary btn-sm">
                         + Nouvelle source
                     </a>

@@ -1,7 +1,18 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div class="max-width-1200">
+    <div class="grimba-admin-screen max-width-1200">
+        <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
+            <div>
+                <span class="grimba-admin-kicker">Classification queue</span>
+                <h1 class="grimba-admin-title">Sources à classer</h1>
+                <p class="grimba-admin-copy">
+                    Classify automatically-created sources before their stories shape public bias distribution and NobuAI summaries.
+                </p>
+            </div>
+            <span class="grimba-admin-status">{{ $rows->count() }} en attente</span>
+        </section>
+
         <x-core::card>
             <x-core::card.header class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <x-core::card.title>
@@ -14,13 +25,15 @@
             </x-core::card.header>
 
             <x-core::card.body>
-                <p class="text-muted small">
-                    Sources créées automatiquement par l'ingest (RSS ou NewsAPI) sans biais classé.
-                    Donnez à chacune un biais L/C/R, un type de propriété et un score de crédibilité (0-100).
-                    Référencer <a href="https://www.allsides.com/media-bias/media-bias-chart" target="_blank" rel="noopener">AllSides</a>
-                    et <a href="https://adfontesmedia.com/interactive-media-bias-chart/" target="_blank" rel="noopener">Ad Fontes Media</a>
-                    pour les outlets EN ; pour la presse francophone, juger sur la ligne éditoriale globale.
-                </p>
+                <div class="grimba-admin-section mb-4">
+                    <p class="text-muted small mb-0">
+                        Sources créées automatiquement par l'ingest (RSS ou NewsAPI) sans biais classé.
+                        Donnez à chacune un biais L/C/R, un type de propriété et un score de crédibilité (0-100).
+                        Référencer <a href="https://www.allsides.com/media-bias/media-bias-chart" target="_blank" rel="noopener">AllSides</a>
+                        et <a href="https://adfontesmedia.com/interactive-media-bias-chart/" target="_blank" rel="noopener">Ad Fontes Media</a>
+                        pour les outlets EN ; pour la presse francophone, juger sur la ligne éditoriale globale.
+                    </p>
+                </div>
 
                 @if($rows->isEmpty())
                     <div class="alert alert-info mb-0">
@@ -66,7 +79,7 @@
                                 <td style="min-width:140px;">
                                     <select class="form-select form-select-sm" data-field="ownership_type">
                                         <option value="" {{ ! $r->ownership_type ? 'selected' : '' }}>—</option>
-                                        @foreach(['independent'=>'Indépendant','corporate'=>'Privé','public'=>'Public','state-owned'=>'État','foundation'=>'Fondation','cooperative'=>'Coopérative'] as $k => $v)
+                                        @foreach(['independent'=>'Indépendant','corporate'=>'Privé','state'=>'État','nonprofit'=>'Associatif'] as $k => $v)
                                             <option value="{{ $k }}" {{ $r->ownership_type === $k ? 'selected' : '' }}>{{ $v }}</option>
                                         @endforeach
                                     </select>

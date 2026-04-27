@@ -34,6 +34,12 @@ class AdminSettingsTest extends TestCase
             ->assertSee('xAI / Grok');
 
         $this->actingAs($this->admin())
+            ->get('/admin/grimba/news-sources/triage')
+            ->assertOk()
+            ->assertSee('Classification queue')
+            ->assertSee('Sources à classer');
+
+        $this->actingAs($this->admin())
             ->post('/admin/grimba/translation', [
                 'driver' => 'openai',
                 'openai_key' => 'sk-test-grimba-openai',
