@@ -58,6 +58,9 @@
                             <span class="text-muted small ms-auto">
                                 <span id="gn-draft-count">0</span> sélectionné(s) sur {{ $drafts->count() }} affiché(s)
                             </span>
+                            <span class="text-muted small w-100">
+                                Les brouillons signalés par les garde-fous sont désactivés jusqu'à correction.
+                            </span>
                         </div>
 
                         <div class="table-responsive">
@@ -79,10 +82,12 @@
                                         @php
                                             $biasLabel = ['left'=>'Gauche','center'=>'Centre','right'=>'Droite','unknown'=>'—'][$d->bias_rating] ?? '—';
                                             $biasColor = ['left'=>'#3b82f6','center'=>'#a8a8a8','right'=>'#ef4444','unknown'=>'#9ca3af'][$d->bias_rating] ?? '#9ca3af';
+                                            $guardrails = grimba_rss_draft_guardrails($d);
+                                            $isReady = empty($guardrails);
                                         @endphp
-                                        <tr>
+                                        <tr @class(['table-warning' => ! $isReady])>
                                             <td>
-                                                <input type="checkbox" name="ids[]" value="{{ $d->id }}" class="form-check-input gn-draft-check">
+                                                <input type="checkbox" name="ids[]" value="{{ $d->id }}" class="form-check-input gn-draft-check" @disabled(! $isReady)>
                                             </td>
                                             <td>
                                                 <a href="{{ route('posts.edit', $d->id) }}" target="_blank">
@@ -90,6 +95,15 @@
                                                 </a>
                                                 @if($d->description)
                                                     <div class="small text-muted">{{ \Illuminate\Support\Str::limit(strip_tags($d->description), 140) }}</div>
+                                                @endif
+                                                @if(! $isReady)
+                                                    <div class="d-flex flex-wrap gap-1 mt-2">
+                                                        @foreach($guardrails as $flag)
+                                                            <span class="badge bg-warning text-dark">{{ $flag }}</span>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <div class="small text-success mt-1">Prêt à publier</div>
                                                 @endif
                                             </td>
                                             <td class="small">{{ $d->source_name ?? '—' }}</td>
@@ -104,7 +118,8 @@
                                             <td class="text-end">
                                                 <button type="submit"
                                                         formaction="{{ route('grimba.rss-drafts.publish-one', $d->id) }}"
-                                                        class="btn btn-sm btn-outline-success">Publier</button>
+                                                        class="btn btn-sm btn-outline-success"
+                                                        @disabled(! $isReady)>Publier</button>
                                                 <a href="{{ route('posts.edit', $d->id) }}"
                                                    target="_blank"
                                                    class="btn btn-sm btn-outline-primary">Éditer</a>
@@ -135,17 +150,24 @@
 
             function refresh() {
                 var n = 0;
-                boxes.forEach(function (b) { if (b.checked) n++; });
+                var enabled = 0;
+                boxes.forEach(function (b) {
+                    if (b.disabled) return;
+                    enabled++;
+                    if (b.checked) n++;
+                });
                 if (count) count.textContent = n;
                 if (all) {
-                    all.checked = n > 0 && n === boxes.length;
-                    all.indeterminate = n > 0 && n < boxes.length;
+                    all.checked = n > 0 && n === enabled;
+                    all.indeterminate = n > 0 && n < enabled;
                 }
             }
 
             if (all) {
                 all.addEventListener('change', function () {
-                    boxes.forEach(function (b) { b.checked = all.checked; });
+                    boxes.forEach(function (b) {
+                        if (!b.disabled) b.checked = all.checked;
+                    });
                     refresh();
                 });
             }

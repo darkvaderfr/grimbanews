@@ -64,6 +64,91 @@ class AdminSettingsTest extends TestCase
             ->assertSee('Sources à classer')
             ->assertSee('Score');
 
+        $rssSource = DB::table('news_sources')->whereNotNull('name')->orderBy('id')->first(['id', 'name']);
+        $this->assertNotNull($rssSource, 'Fixture database must contain at least one news source.');
+
+        $rssDraftIds = DB::table('posts')
+            ->where('status', 'published')
+            ->orderByDesc('id')
+            ->limit(2)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->assertCount(2, $rssDraftIds, 'Fixture database must contain at least two posts for RSS draft guardrails.');
+
+        DB::table('rss_feed_items')
+            ->whereIn('guid', ['s231-blocked-draft', 's231-ready-draft'])
+            ->delete();
+
+        DB::table('posts')->where('id', $rssDraftIds[0])->update([
+            'status' => 'draft',
+            'source_id' => null,
+            'source_name' => null,
+            'bias_rating' => 'unknown',
+            'original_language' => 'en',
+            'translated_name' => null,
+            'description' => 'Short.',
+            'updated_at' => now(),
+        ]);
+
+        DB::table('posts')->where('id', $rssDraftIds[1])->update([
+            'status' => 'draft',
+            'source_id' => $rssSource->id,
+            'source_name' => $rssSource->name,
+            'bias_rating' => 'center',
+            'original_language' => 'fr',
+            'translated_name' => null,
+            'description' => 'Ce brouillon contient un extrait suffisamment long pour valider les garde-fous éditoriaux avant publication RSS.',
+            'updated_at' => now(),
+        ]);
+
+        DB::table('rss_feed_items')->insert([
+            [
+                'feed_id' => 990001,
+                'guid' => 's231-blocked-draft',
+                'link' => 'https://example.test/s231-blocked',
+                'title_snapshot' => 'S231 blocked draft',
+                'post_id' => $rssDraftIds[0],
+                'seen_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'feed_id' => 990001,
+                'guid' => 's231-ready-draft',
+                'link' => 'https://example.test/s231-ready',
+                'title_snapshot' => 'S231 ready draft',
+                'post_id' => $rssDraftIds[1],
+                'seen_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $this->actingAs($this->admin())
+            ->get('/admin/grimba/rss-drafts?bias=unknown')
+            ->assertOk()
+            ->assertSee('source manquante')
+            ->assertSee('biais inconnu')
+            ->assertSee('traduction manquante')
+            ->assertSee('extrait trop court')
+            ->assertSee('garde-fous');
+
+        $this->actingAs($this->admin())
+            ->get('/admin/grimba/rss-drafts?source=' . $rssSource->id . '&bias=center')
+            ->assertOk()
+            ->assertSee('Prêt à publier')
+            ->assertSee('garde-fous');
+
+        $this->actingAs($this->admin())
+            ->post('/admin/grimba/rss-drafts/publish', ['ids' => $rssDraftIds])
+            ->assertRedirect()
+            ->assertSessionHas('success_msg');
+
+        $this->assertSame('draft', DB::table('posts')->where('id', $rssDraftIds[0])->value('status'));
+        $this->assertSame('published', DB::table('posts')->where('id', $rssDraftIds[1])->value('status'));
+
         $sourceName = 'S134 Bias Score Test Source';
         DB::table('news_sources')
             ->where('name', $sourceName)

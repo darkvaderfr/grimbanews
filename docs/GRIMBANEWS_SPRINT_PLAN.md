@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `f2b0e99` Add NobuAI provider failure diagnostics
 - `e51cba4` Add stale NobuAI refresh action
 - `0cc09bf` Add admin source drilldown diagnostics
 - `3e01794` Add NobuAI insight freshness signals
 - `04fbb90` Add story source drilldown
-- `05f3349` Expand public NobuAI insight QA
 
 Latest verification:
 
-- `php artisan test` passed with `41` tests and `547` assertions.
+- `php artisan test` passed with `41` tests and `565` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
 ## Completed Sprint Bands
@@ -47,7 +47,7 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S230 — Maturity, Accessibility, Admin, And Tests
+### S185-S231 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
@@ -62,6 +62,7 @@ Latest verification:
 - S228 added admin source drilldown diagnostics on story cluster edit pages, including post edit links plus missing-source, unknown-bias, and low-credibility flags.
 - S229 added stale-only NobuAI insight refreshes, a cockpit refresh action, and stale warnings on story cluster edit pages.
 - S230 added sanitized NobuAI provider failure diagnostics in the cockpit and provider vault, with tests for admin-only visibility and secret redaction.
+- S231 added RSS draft publish guardrails that flag missing source, unknown bias, missing translation, and short excerpts, while blocking weak drafts from bulk/single publish.
 
 ## Active Systems
 
@@ -96,15 +97,15 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S231 — RSS Draft Publish Guardrails
+### S232 — NewsAPI Draft Publish Guardrails
 
-Goal: Reduce accidental low-quality RSS publishing by giving editors stronger publish readiness signals in the draft queue.
+Goal: Apply the same readiness checks to NewsAPI-ingested drafts so non-RSS intake follows the same editorial quality bar.
 
 Acceptance:
 
-- RSS draft rows flag missing source, unknown bias, missing translation, and short excerpts.
-- Bulk publish is disabled or warned when selected drafts fail readiness checks.
-- Tests cover readiness flags and guarded publish behavior.
+- NewsAPI draft/intake surfaces show source, bias, translation, and excerpt readiness flags.
+- Publishing from NewsAPI intake blocks drafts that fail readiness checks.
+- Tests cover guarded NewsAPI publish behavior without regressing RSS guardrails.
 
 ## Operating Rules
 

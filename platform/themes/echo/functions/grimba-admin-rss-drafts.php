@@ -76,11 +76,16 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 return back()->with('success_msg', 'Aucun brouillon sélectionné.');
             }
 
-            $count = grimba_publish_posts($ids);
+            $result = grimba_publish_posts($ids);
+            $message = "{$result['published']} brouillon(s) publié(s).";
+
+            if ($result['blocked'] > 0) {
+                $message .= " {$result['blocked']} bloqué(s) par les garde-fous: " . implode(', ', array_unique($result['reasons'])) . '.';
+            }
 
             return back()->with(
                 'success_msg',
-                "{$count} brouillon(s) publié(s)."
+                $message
             );
         })->name('rss-drafts.publish');
 
@@ -95,25 +100,78 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
         })->name('rss-drafts.delete');
 
         Route::post('rss-drafts/{id}/publish', function (int $id) {
-            $count = grimba_publish_posts([$id]);
-            $msg = $count > 0 ? 'Publié.' : 'Aucune action (article introuvable ou déjà publié).';
+            $result = grimba_publish_posts([$id]);
+            $msg = $result['published'] > 0
+                ? 'Publié.'
+                : ($result['blocked'] > 0
+                    ? 'Publication bloquée: ' . implode(', ', array_unique($result['reasons'])) . '.'
+                    : 'Aucune action (article introuvable ou déjà publié).');
             return back()->with('success_msg', $msg);
         })->name('rss-drafts.publish-one');
     });
 
-if (! function_exists('grimba_publish_posts')) {
-    function grimba_publish_posts(array $ids): int
+if (! function_exists('grimba_rss_draft_guardrails')) {
+    /**
+     * @return array<int, string>
+     */
+    function grimba_rss_draft_guardrails(Post $post): array
     {
-        $count = 0;
+        $flags = [];
+        $bias = (string) ($post->bias_rating ?? 'unknown');
+        $excerpt = trim(strip_tags((string) ($post->description ?? '')));
+        $originalLanguage = strtolower(substr((string) ($post->original_language ?? ''), 0, 2));
+
+        if (! $post->source_id || ! trim((string) ($post->source_name ?? ''))) {
+            $flags[] = 'source manquante';
+        }
+
+        if (! in_array($bias, ['left', 'center', 'right'], true)) {
+            $flags[] = 'biais inconnu';
+        }
+
+        if ($originalLanguage !== '' && $originalLanguage !== 'fr' && ! trim((string) ($post->translated_name ?? ''))) {
+            $flags[] = 'traduction manquante';
+        }
+
+        if (mb_strlen($excerpt) < 80) {
+            $flags[] = 'extrait trop court';
+        }
+
+        return $flags;
+    }
+}
+
+if (! function_exists('grimba_publish_posts')) {
+    /**
+     * @return array{published:int, blocked:int, reasons:array<int, string>}
+     */
+    function grimba_publish_posts(array $ids): array
+    {
+        $published = 0;
+        $blocked = 0;
+        $reasons = [];
+
         foreach ($ids as $id) {
             $post = Post::query()->where('id', $id)->where('status', 'draft')->first();
             if (! $post) continue;
 
+            $flags = grimba_rss_draft_guardrails($post);
+            if ($flags !== []) {
+                $blocked++;
+                $reasons = array_merge($reasons, $flags);
+                continue;
+            }
+
             $post->status = 'published';
             $post->save();
-            $count++;
+            $published++;
         }
-        return $count;
+
+        return [
+            'published' => $published,
+            'blocked' => $blocked,
+            'reasons' => array_values(array_unique($reasons)),
+        ];
     }
 }
 
