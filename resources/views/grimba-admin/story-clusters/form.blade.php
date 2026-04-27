@@ -78,6 +78,45 @@
         </form>
 
         @if($isEdit)
+            <x-core::card class="mb-4">
+                <x-core::card.header class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <x-core::card.title>NobuAI insights</x-core::card.title>
+                        <p class="text-muted mb-0 small">Génère une synthèse façon Ground: faits confirmés, cadrages par biais, angle mort.</p>
+                    </div>
+                    <form method="POST" action="{{ route('grimba.story-clusters.nobuai-summary', $cluster->id) }}">
+                        @csrf
+                        <button type="submit"
+                                class="btn btn-primary"
+                                @disabled(! $nobuAiReady || $attached->where('status', 'published')->count() < 2)>
+                            {{ $summaryInfo ? 'Régénérer' : 'Générer' }} l'insight NobuAI
+                        </button>
+                    </form>
+                </x-core::card.header>
+                <x-core::card.body>
+                    @if(! $nobuAiReady)
+                        <p class="text-muted mb-0">Aucun fournisseur LLM n'est configuré. Ajoutez une clé OpenAI, OpenRouter, Anthropic, xAI ou autre dans Traduction.</p>
+                    @elseif($attached->where('status', 'published')->count() < 2)
+                        <p class="text-muted mb-0">Ajoutez au moins deux articles publiés pour produire un insight multi-sources.</p>
+                    @elseif($summaryInfo)
+                        <div class="grimba-admin-section">
+                            <div class="d-flex justify-content-between gap-2 flex-wrap mb-2">
+                                <strong>Insight actuel</strong>
+                                <span class="text-muted small">
+                                    {{ $summaryInfo->summary_generated_at ? \Carbon\Carbon::parse($summaryInfo->summary_generated_at)->diffForHumans() : 'date inconnue' }}
+                                    @if($summaryInfo->summary_driver)
+                                        · via {{ $summaryInfo->summary_driver }}
+                                    @endif
+                                </span>
+                            </div>
+                            <pre class="bg-light p-3 rounded mb-0" style="white-space:pre-wrap;">{{ $summaryInfo->summary_nobuai }}</pre>
+                        </div>
+                    @else
+                        <p class="text-muted mb-0">Aucun insight généré pour ce dossier.</p>
+                    @endif
+                </x-core::card.body>
+            </x-core::card>
+
             <x-core::card>
                 <x-core::card.header>
                     <x-core::card.title>Articles attachés ({{ $attached->count() }})</x-core::card.title>

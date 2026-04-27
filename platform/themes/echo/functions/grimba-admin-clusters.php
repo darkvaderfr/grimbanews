@@ -9,13 +9,16 @@
  * page loads.
  */
 
+use App\Services\GrimbaNobuAi;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\DashboardMenuItem;
 use Botble\Blog\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 
 Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
@@ -174,7 +177,19 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->orderBy('name')
                 ->get();
 
-            return view('grimba-admin.story-clusters.form', compact('cluster', 'attached', 'available'));
+            $summaryInfo = null;
+            if (Schema::hasColumn('posts', 'summary_nobuai')) {
+                $summaryInfo = DB::table('posts')
+                    ->where('story_cluster_id', $id)
+                    ->whereNotNull('summary_nobuai')
+                    ->where('summary_nobuai', '!=', '')
+                    ->orderByDesc('summary_generated_at')
+                    ->first(['summary_nobuai', 'summary_generated_at', 'summary_driver']);
+            }
+
+            $nobuAiReady = app(GrimbaNobuAi::class)->enabled();
+
+            return view('grimba-admin.story-clusters.form', compact('cluster', 'attached', 'available', 'summaryInfo', 'nobuAiReady'));
         })->name('story-clusters.edit');
 
         Route::post('story-clusters', function (Request $request) {
@@ -242,6 +257,40 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->route('grimba.story-clusters.edit', $id)
                 ->with('success_msg', 'Article détaché.');
         })->name('story-clusters.detach');
+
+        Route::post('story-clusters/{id}/nobuai-summary', function (int $id) {
+            abort_unless(DB::table('story_clusters')->where('id', $id)->exists(), 404);
+
+            $publishedCount = DB::table('posts')
+                ->where('story_cluster_id', $id)
+                ->where('status', 'published')
+                ->count();
+
+            if ($publishedCount < 2) {
+                return redirect()
+                    ->route('grimba.story-clusters.edit', $id)
+                    ->with('success_msg', 'NobuAI : ajoutez au moins deux articles publiés avant de générer un insight.');
+            }
+
+            $exitCode = Artisan::call('grimba:nobuai-summaries', [
+                '--cluster' => $id,
+                '--limit' => 1,
+                '--force' => true,
+            ]);
+
+            $output = trim(Artisan::output());
+            $message = $exitCode === 0
+                ? 'NobuAI insight généré pour ce dossier.'
+                : 'NobuAI : génération échouée. Vérifiez les clés fournisseur.';
+
+            if ($output !== '') {
+                $message .= ' ' . \Illuminate\Support\Str::limit(preg_replace('/\s+/', ' ', $output), 180);
+            }
+
+            return redirect()
+                ->route('grimba.story-clusters.edit', $id)
+                ->with('success_msg', $message);
+        })->name('story-clusters.nobuai-summary');
     });
 
 app()->booted(function (): void {

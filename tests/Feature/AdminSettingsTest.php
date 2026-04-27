@@ -45,6 +45,15 @@ class AdminSettingsTest extends TestCase
             ->assertSee('Coverage map')
             ->assertSee('Carte de couverture');
 
+        $clusterId = DB::table('story_clusters')->orderBy('id')->value('id');
+        $this->assertNotNull($clusterId, 'Fixture database must contain at least one story cluster.');
+
+        $this->actingAs($this->admin())
+            ->get("/admin/grimba/story-clusters/{$clusterId}/edit")
+            ->assertOk()
+            ->assertSee('NobuAI insights')
+            ->assertSee('insight NobuAI');
+
         $this->actingAs($this->admin())
             ->post('/admin/grimba/translation', [
                 'driver' => 'openai',
