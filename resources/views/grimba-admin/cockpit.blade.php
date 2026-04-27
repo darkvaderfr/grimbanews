@@ -67,7 +67,41 @@
                 <span class="grimba-cockpit__kicker">Operations board</span>
                 <h3 class="card-title mt-2 mb-0">Ingest et files à surveiller</h3>
             </div>
-            <a href="{{ route('grimba.rss-feeds.index') }}" class="btn btn-sm btn-outline-primary">Ouvrir RSS</a>
+            <div class="grimba-runbook-actions">
+                <form method="POST" action="{{ route('grimba.cockpit.runbook') }}">
+                    @csrf
+                    <input type="hidden" name="action" value="health">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Health</button>
+                </form>
+                <form method="POST" action="{{ route('grimba.cockpit.runbook') }}">
+                    @csrf
+                    <input type="hidden" name="action" value="rss_poll_one">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Poll 1 RSS</button>
+                </form>
+                <form method="POST" action="{{ route('grimba.cockpit.runbook') }}">
+                    @csrf
+                    <input type="hidden" name="action" value="newsapi_fetch">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Fetch NewsAPI</button>
+                </form>
+                <form method="POST" action="{{ route('grimba.cockpit.runbook') }}">
+                    @csrf
+                    <input type="hidden" name="action" value="nobuai_health">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">NobuAI health</button>
+                </form>
+                <form method="POST" action="{{ route('grimba.cockpit.runbook') }}">
+                    @csrf
+                    <input type="hidden" name="action" value="translate_fr">
+                    <input type="hidden" name="limit" value="3">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Translate 3 FR</button>
+                </form>
+                <form method="POST" action="{{ route('grimba.cockpit.runbook') }}">
+                    @csrf
+                    <input type="hidden" name="action" value="translate_en">
+                    <input type="hidden" name="limit" value="3">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Translate 3 EN</button>
+                </form>
+                <a href="{{ route('grimba.rss-feeds.index') }}" class="btn btn-sm btn-outline-primary">Ouvrir RSS</a>
+            </div>
         </div>
         <div class="card-body">
             <div class="grimba-ops-grid">
@@ -405,6 +439,15 @@
     }
     .grimba-ops-board {
         overflow: hidden;
+    }
+    .grimba-runbook-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.45rem;
+    }
+    .grimba-runbook-actions form {
+        margin: 0;
     }
     .grimba-ops-grid {
         display: grid;

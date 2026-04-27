@@ -94,7 +94,19 @@ class AdminSettingsTest extends TestCase
             ->assertSee('RSS 24h')
             ->assertSee('NewsAPI 24h')
             ->assertSee('Pending translations')
-            ->assertSee('Duplicate groups');
+            ->assertSee('Duplicate groups')
+            ->assertSee('NobuAI health')
+            ->assertSee('Poll 1 RSS')
+            ->assertSee('Fetch NewsAPI')
+            ->assertSee('Translate 3 FR');
+
+        $this->actingAs($this->admin())
+            ->post('/admin/grimba/cockpit/runbook', [
+                'action' => 'health',
+                'limit' => 99,
+            ])
+            ->assertRedirect('/admin/grimba/cockpit')
+            ->assertSessionHas('success_msg');
 
         $clusterId = DB::table('story_clusters')->orderBy('id')->value('id');
         $this->assertNotNull($clusterId, 'Fixture database must contain at least one story cluster.');

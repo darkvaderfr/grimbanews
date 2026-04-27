@@ -250,6 +250,83 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->route('grimba.cockpit')
                 ->with($exitCode === 0 ? 'success_msg' : 'error_msg', $message);
         })->name('cockpit.nobuai-summaries');
+
+        Route::post('cockpit/runbook', function (Request $request) {
+            $action = (string) $request->input('action', 'health');
+            $limit = min(5, max(1, (int) $request->input('limit', 3)));
+
+            $actions = [
+                'health' => [
+                    'label' => 'Health',
+                    'command' => 'grimba:health',
+                    'args' => [],
+                ],
+                'rss_poll_one' => [
+                    'label' => 'RSS poll',
+                    'command' => 'grimba:poll-feeds',
+                    'args' => [],
+                ],
+                'nobuai_health' => [
+                    'label' => 'NobuAI health',
+                    'command' => 'grimba:nobuai-health',
+                    'args' => [],
+                ],
+                'translate_fr' => [
+                    'label' => 'Translate to FR',
+                    'command' => 'grimba:translate-pending',
+                    'args' => ['--to' => 'fr', '--limit' => $limit],
+                ],
+                'translate_en' => [
+                    'label' => 'Translate to EN',
+                    'command' => 'grimba:translate-pending',
+                    'args' => ['--to' => 'en', '--limit' => $limit],
+                ],
+                'newsapi_fetch' => [
+                    'label' => 'NewsAPI fetch',
+                    'command' => 'grimba:fetch-newsapi',
+                    'args' => [],
+                ],
+            ];
+
+            if (! isset($actions[$action])) {
+                return redirect()
+                    ->route('grimba.cockpit')
+                    ->with('error_msg', 'Runbook: action inconnue.');
+            }
+
+            $selected = $actions[$action];
+            if ($action === 'rss_poll_one') {
+                $feedId = Schema::hasTable('rss_feeds')
+                    ? DB::table('rss_feeds')
+                        ->where('is_active', true)
+                        ->orderByRaw('last_polled_at IS NULL DESC')
+                        ->orderBy('last_polled_at')
+                        ->value('id')
+                    : null;
+
+                if (! $feedId) {
+                    return redirect()
+                        ->route('grimba.cockpit')
+                        ->with('error_msg', 'RSS poll: aucun flux actif.');
+                }
+
+                $selected['args'] = ['--feed' => (int) $feedId];
+            }
+
+            $exitCode = Artisan::call($selected['command'], $selected['args']);
+            $output = trim(Artisan::output());
+            $summary = collect(preg_split("/\r\n|\n|\r/", $output) ?: [])
+                ->map(fn (string $line): string => trim(preg_replace('/\e\[[0-9;]*m/u', '', strip_tags($line)) ?? ''))
+                ->filter()
+                ->take(-5)
+                ->implode(' ');
+
+            $message = $selected['label'] . ': ' . ($summary !== '' ? $summary : 'commande terminée.');
+
+            return redirect()
+                ->route('grimba.cockpit')
+                ->with($exitCode === 0 ? 'success_msg' : 'error_msg', $message);
+        })->name('cockpit.runbook');
     });
 
 app()->booted(function (): void {
