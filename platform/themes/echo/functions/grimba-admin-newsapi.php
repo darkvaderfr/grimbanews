@@ -53,9 +53,17 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->orderByDesc('id')
                 ->limit(10)
                 ->get();
+            $guardrailStats = GrimbaIngestGuardrails::tally(Post::query()
+                ->whereIn('id', function ($sub): void {
+                    $sub->select('post_id')
+                        ->from('newsapi_items')
+                        ->whereNotNull('post_id');
+                })
+                ->where('status', 'draft')
+                ->get());
 
             return view('grimba-admin.newsapi.index', compact(
-                'key', 'queries', 'language', 'countries', 'active', 'window', 'newsApiDrafts'
+                'key', 'queries', 'language', 'countries', 'active', 'window', 'newsApiDrafts', 'guardrailStats'
             ));
         })->name('newsapi.index');
 

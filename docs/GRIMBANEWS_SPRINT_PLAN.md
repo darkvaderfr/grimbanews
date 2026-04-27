@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `ef2a4cd` Extract shared ingest guardrails
 - `5ac0fbf` Add NewsAPI draft publish guardrails
 - `8e9deae` Add RSS draft publish guardrails
 - `f2b0e99` Add NobuAI provider failure diagnostics
 - `e51cba4` Add stale NobuAI refresh action
-- `0cc09bf` Add admin source drilldown diagnostics
 
 Latest verification:
 
-- `php artisan test` passed with `43` tests and `581` assertions.
+- `php artisan test` passed with `44` tests and `591` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
 ## Completed Sprint Bands
@@ -47,7 +47,7 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S233 — Maturity, Accessibility, Admin, And Tests
+### S185-S234 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
@@ -65,6 +65,7 @@ Latest verification:
 - S231 added RSS draft publish guardrails that flag missing source, unknown bias, missing translation, and short excerpts, while blocking weak drafts from bulk/single publish.
 - S232 added NewsAPI draft readiness guardrails and a guarded publish action in the NewsAPI admin page.
 - S233 extracted shared ingest guardrails so RSS and NewsAPI publish paths use one tested readiness policy.
+- S234 added ingest guardrail metrics in cockpit plus per-queue RSS and NewsAPI blocker summaries.
 
 ## Active Systems
 
@@ -99,15 +100,15 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S234 — Ingest Guardrail Metrics
+### S235 — Guardrail Quick-Fix Links
 
-Goal: Surface how many draft blockers exist by reason so editors know what to fix first.
+Goal: Turn ingest blocker metrics into direct editor actions so weak drafts can be fixed faster.
 
 Acceptance:
 
-- Cockpit shows blocker counts grouped by source, bias, translation, and excerpt.
-- RSS and NewsAPI pages show per-queue blocker summaries above their tables.
-- Tests cover metric aggregation without changing publish behavior.
+- Guardrail badges link to the relevant edit form or filtered queue where practical.
+- Missing-source and unknown-bias blockers point editors toward source triage/classification.
+- Tests cover generated links and preserve publish blocking.
 
 ## Operating Rules
 

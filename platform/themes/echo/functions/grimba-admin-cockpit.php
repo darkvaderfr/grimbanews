@@ -15,6 +15,8 @@ use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\DashboardMenuItem;
 use App\Services\GrimbaNobuAi;
 use App\Services\GrimbaTranslator;
+use App\Support\GrimbaIngestGuardrails;
+use Botble\Blog\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -183,6 +185,20 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->limit(5)
                 ->get(['id', 'name', 'source_name', 'updated_at', 'bias_rating']);
 
+            $ingestGuardrailPosts = Post::query()
+                ->where('status', 'draft')
+                ->where(function ($query): void {
+                    $query
+                        ->whereIn('id', function ($sub): void {
+                            $sub->select('post_id')->from('rss_feed_items')->whereNotNull('post_id');
+                        })
+                        ->orWhereIn('id', function ($sub): void {
+                            $sub->select('post_id')->from('newsapi_items')->whereNotNull('post_id');
+                        });
+                })
+                ->get();
+            $ingestGuardrailStats = GrimbaIngestGuardrails::tally($ingestGuardrailPosts);
+
             $nobuAi = app(GrimbaNobuAi::class);
             $translator = app(GrimbaTranslator::class);
             $nobuDrivers = $nobuAi->configuredDrivers();
@@ -233,6 +249,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'rssActive', 'rssSick', 'rssLastPoll', 'rssItems24',
                 'newsApiActive', 'newsApiConfigured', 'newsApiItems24', 'newsApiLastFetch',
                 'duplicateGroups', 'englishTranslationPending',
+                'ingestGuardrailStats',
                 'latestDrafts', 'nobuDrivers', 'translationDrivers',
                 'nobuFailureDiagnostics',
                 'nobuInsightReady', 'nobuInsightPending', 'nobuInsightStale', 'nobuInsightLatest'

@@ -36,6 +36,16 @@
             @endif
 
             <x-core::card.body>
+                <div class="alert alert-secondary">
+                    <strong>Blockers RSS:</strong>
+                    {{ $guardrailStats['blocked'] }} bloqué(s), {{ $guardrailStats['ready'] }} prêt(s).
+                    @foreach($guardrailStats['reasons'] as $reason => $count)
+                        @if($count > 0)
+                            <span class="badge bg-warning text-dark ms-1">{{ $reason }} {{ $count }}</span>
+                        @endif
+                    @endforeach
+                </div>
+
                 @if($drafts->isEmpty())
                     <div class="text-center text-muted py-5">
                         <div class="display-6">📭</div>

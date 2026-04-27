@@ -51,6 +51,15 @@
                         </div>
                         <span class="badge bg-secondary">{{ $newsApiDrafts->count() }} brouillon(s)</span>
                     </div>
+                    <div class="alert alert-secondary py-2">
+                        <strong>Blockers NewsAPI:</strong>
+                        {{ $guardrailStats['blocked'] }} bloqué(s), {{ $guardrailStats['ready'] }} prêt(s).
+                        @foreach($guardrailStats['reasons'] as $reason => $count)
+                            @if($count > 0)
+                                <span class="badge bg-warning text-dark ms-1">{{ $reason }} {{ $count }}</span>
+                            @endif
+                        @endforeach
+                    </div>
 
                     @if($newsApiDrafts->isEmpty())
                         <p class="text-muted small mb-0">Aucun brouillon NewsAPI en attente.</p>

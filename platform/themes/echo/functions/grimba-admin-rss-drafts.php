@@ -55,6 +55,14 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
             $drafts  = $query->paginate(25)->withQueryString();
             $sources = DB::table('news_sources')->orderBy('name')->get(['id', 'name']);
+            $guardrailStats = GrimbaIngestGuardrails::tally(Post::query()
+                ->whereIn('id', function ($sub) {
+                    $sub->select('post_id')
+                        ->from('rss_feed_items')
+                        ->whereNotNull('post_id');
+                })
+                ->where('status', 'draft')
+                ->get());
 
             $stats = [
                 'total_queue' => Post::query()
@@ -67,7 +75,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             ];
 
             return view('grimba-admin.rss-drafts.index', compact(
-                'drafts', 'sources', 'sourceId', 'bias', 'stats'
+                'drafts', 'sources', 'sourceId', 'bias', 'stats', 'guardrailStats'
             ));
         })->name('rss-drafts.index');
 

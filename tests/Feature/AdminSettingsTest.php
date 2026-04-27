@@ -129,6 +129,7 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin/grimba/rss-drafts?bias=unknown')
             ->assertOk()
+            ->assertSee('Blockers RSS')
             ->assertSee('source manquante')
             ->assertSee('biais inconnu')
             ->assertSee('traduction manquante')
@@ -207,6 +208,7 @@ class AdminSettingsTest extends TestCase
             ->assertSee('NobuAI health')
             ->assertSee('Dernières erreurs NobuAI')
             ->assertSee('quota test failure')
+            ->assertSee('Draft blockers')
             ->assertSee('Poll 1 RSS')
             ->assertSee('Fetch NewsAPI')
             ->assertSee('Translate 3 FR');
@@ -475,6 +477,7 @@ class AdminSettingsTest extends TestCase
             ->get('/admin/grimba/newsapi')
             ->assertOk()
             ->assertSee('NewsAPI draft readiness')
+            ->assertSee('Blockers NewsAPI')
             ->assertSee('source manquante')
             ->assertSee('biais inconnu')
             ->assertSee('traduction manquante')

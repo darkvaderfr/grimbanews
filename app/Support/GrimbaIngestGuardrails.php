@@ -37,6 +37,42 @@ class GrimbaIngestGuardrails
     }
 
     /**
+     * @param iterable<object> $posts
+     * @return array{total:int, ready:int, blocked:int, reasons:array<string, int>}
+     */
+    public static function tally(iterable $posts): array
+    {
+        $stats = [
+            'total' => 0,
+            'ready' => 0,
+            'blocked' => 0,
+            'reasons' => [
+                'source manquante' => 0,
+                'biais inconnu' => 0,
+                'traduction manquante' => 0,
+                'extrait trop court' => 0,
+            ],
+        ];
+
+        foreach ($posts as $post) {
+            $stats['total']++;
+            $flags = self::flags($post);
+
+            if ($flags === []) {
+                $stats['ready']++;
+                continue;
+            }
+
+            $stats['blocked']++;
+            foreach ($flags as $flag) {
+                $stats['reasons'][$flag] = ($stats['reasons'][$flag] ?? 0) + 1;
+            }
+        }
+
+        return $stats;
+    }
+
+    /**
      * @param callable(Builder): Builder|void|null $scope
      * @return array{published:int, blocked:int, reasons:array<int, string>}
      */

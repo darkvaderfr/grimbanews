@@ -135,6 +135,17 @@
                     <strong>{{ number_format($duplicateGroups) }}</strong>
                     <small>{{ $duplicateGroups > 0 ? 'lancer grimba:dedupe-posts --apply' : 'aucun groupe détecté' }}</small>
                 </div>
+                <div class="grimba-ops-tile {{ $ingestGuardrailStats['blocked'] > 0 ? 'is-warn' : '' }}">
+                    <span>Draft blockers</span>
+                    <strong>{{ number_format($ingestGuardrailStats['blocked']) }}</strong>
+                    <small>
+                        {{ $ingestGuardrailStats['ready'] }} prêts ·
+                        source {{ $ingestGuardrailStats['reasons']['source manquante'] ?? 0 }} ·
+                        biais {{ $ingestGuardrailStats['reasons']['biais inconnu'] ?? 0 }} ·
+                        trad {{ $ingestGuardrailStats['reasons']['traduction manquante'] ?? 0 }} ·
+                        extrait {{ $ingestGuardrailStats['reasons']['extrait trop court'] ?? 0 }}
+                    </small>
+                </div>
             </div>
         </div>
     </section>
@@ -472,7 +483,7 @@
     }
     .grimba-ops-grid {
         display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
         gap: 0.75rem;
     }
     .grimba-ops-tile {
