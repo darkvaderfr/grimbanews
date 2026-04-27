@@ -656,6 +656,7 @@ body .footer { background: transparent !important; border-top: 1px solid var(--g
    ------------------------------------------------------------ */
 body .grimba-admin-screen {
     color: var(--gn-ink);
+    isolation: isolate;
 }
 body .max-width-900,
 body .max-width-1000,
@@ -679,6 +680,24 @@ body .grimba-admin-hero {
         radial-gradient(circle at 12% 12%, rgba(220, 200, 160, 0.42), transparent 30%),
         linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(246, 241, 232, 0.74));
     box-shadow: 0 24px 64px rgba(26, 23, 19, 0.09);
+}
+body .grimba-admin-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(90deg, rgba(26, 23, 19, 0.045) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(26, 23, 19, 0.035) 1px, transparent 1px),
+        radial-gradient(circle at 82% 18%, rgba(59, 130, 246, 0.12), transparent 26%),
+        radial-gradient(circle at 86% 76%, rgba(232, 76, 61, 0.10), transparent 28%);
+    background-size: 42px 42px, 42px 42px, auto, auto;
+    opacity: 0.78;
+    mix-blend-mode: multiply;
+}
+body .grimba-admin-hero > * {
+    position: relative;
+    z-index: 1;
 }
 body .grimba-admin-kicker {
     display: inline-flex;
@@ -734,6 +753,24 @@ body .grimba-admin-stat {
     background: rgba(255, 255, 255, 0.72) !important;
     border-color: var(--gn-rule) !important;
     color: var(--gn-ink);
+    box-shadow: 0 14px 34px rgba(26, 23, 19, 0.06);
+}
+body .grimba-admin-metric-value {
+    color: var(--gn-ink);
+    font-family: var(--gn-font-display);
+    font-size: clamp(1.75rem, 3vw, 2.35rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+body .grimba-admin-metric-label {
+    margin-top: 0.35rem;
+    color: var(--gn-ink-soft);
+    font-family: var(--gn-font-mono);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 body .table {
     --bb-table-color: var(--gn-ink);
@@ -772,6 +809,17 @@ body[data-bs-theme="dark"] .grimba-admin-hero {
         radial-gradient(circle at 14% 10%, rgba(201, 174, 118, 0.18), transparent 32%),
         linear-gradient(135deg, rgba(36, 32, 22, 0.96), rgba(18, 16, 7, 0.86));
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+}
+html[data-bs-theme="dark"] body .grimba-admin-hero::after,
+body[data-bs-theme="dark"] .grimba-admin-hero::after {
+    background:
+        linear-gradient(90deg, rgba(246, 241, 232, 0.055) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(246, 241, 232, 0.045) 1px, transparent 1px),
+        radial-gradient(circle at 82% 18%, rgba(59, 130, 246, 0.15), transparent 26%),
+        radial-gradient(circle at 86% 76%, rgba(255, 155, 145, 0.13), transparent 28%);
+    background-size: 42px 42px, 42px 42px, auto, auto;
+    mix-blend-mode: screen;
+    opacity: 0.62;
 }
 html[data-bs-theme="dark"] body .grimba-kpi,
 body[data-bs-theme="dark"] .grimba-kpi,

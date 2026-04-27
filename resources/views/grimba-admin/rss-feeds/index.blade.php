@@ -1,7 +1,21 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div class="max-width-1200">
+    <div class="grimba-admin-screen max-width-1200">
+        <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
+            <div>
+                <span class="grimba-admin-kicker">RSS control tower</span>
+                <h1 class="grimba-admin-title">Flux RSS</h1>
+                <p class="grimba-admin-copy">
+                    Pilotez les sources syndiquées, repérez les flux malades, et déclenchez les polls sans quitter le cockpit éditorial.
+                </p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap justify-content-end">
+                <span class="grimba-admin-status">{{ $stats['active'] }} actifs</span>
+                <span class="grimba-admin-status">{{ $stats['sick'] }} malades</span>
+            </div>
+        </section>
+
         <x-core::card>
             <x-core::card.header class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <x-core::card.title>GrimbaNews — Flux RSS</x-core::card.title>

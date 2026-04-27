@@ -22,6 +22,9 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('body[data-bs-theme="dark"] .navbar.navbar-expand-md.d-print-none', $css);
         $this->assertStringContainsString('body .dropdown-menu .dropdown-item:hover', $css);
         $this->assertStringContainsString('body .navbar-vertical .dropdown-menu', $css);
+        $this->assertStringContainsString('body .grimba-admin-hero::after', $css);
+        $this->assertStringContainsString('body .grimba-admin-metric-value', $css);
+        $this->assertStringContainsString('background-size: 42px 42px, 42px 42px, auto, auto;', $css);
 
         $this->assertStringContainsString("window.localStorage.getItem('tablerTheme')", $js);
         $this->assertStringContainsString("window.localStorage.setItem('tablerTheme', mode)", $js);
@@ -30,5 +33,29 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString("document.documentElement.setAttribute('data-bs-theme', effective)", $js);
         $this->assertStringContainsString("document.body.setAttribute('data-bs-theme', effective)", $js);
         $this->assertStringContainsString("document.body.removeAttribute('data-bs-theme')", $js);
+    }
+
+    public function test_custom_grimba_admin_views_use_shared_shell(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $dir = $root . '/resources/views/grimba-admin';
+        $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+        $checked = 0;
+
+        foreach ($it as $file) {
+            if (! $file->isFile() || ! str_ends_with($file->getFilename(), '.blade.php')) {
+                continue;
+            }
+
+            $contents = file_get_contents($file->getPathname());
+            $this->assertMatchesRegularExpression(
+                '/grimba-admin-screen|grimba-llm-admin|grimba-cockpit/',
+                $contents,
+                $file->getPathname() . ' must use the shared Grimba admin shell.'
+            );
+            $checked++;
+        }
+
+        $this->assertGreaterThan(10, $checked);
     }
 }

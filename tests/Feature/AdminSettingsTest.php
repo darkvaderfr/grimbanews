@@ -146,6 +146,18 @@ class AdminSettingsTest extends TestCase
             ->assertSee('garde-fous');
 
         $this->actingAs($this->admin())
+            ->get('/admin/grimba/rss-feeds')
+            ->assertOk()
+            ->assertSee('RSS control tower')
+            ->assertSee('Flux RSS');
+
+        $this->actingAs($this->admin())
+            ->get('/admin/grimba/subscribers')
+            ->assertOk()
+            ->assertSee('Audience command')
+            ->assertSee('Abonnés infolettre');
+
+        $this->actingAs($this->admin())
             ->post('/admin/grimba/rss-drafts/publish', ['ids' => $rssDraftIds])
             ->assertRedirect()
             ->assertSessionHas('success_msg');

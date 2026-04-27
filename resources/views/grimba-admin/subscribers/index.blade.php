@@ -1,43 +1,47 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div class="max-width-1200">
+    <div class="grimba-admin-screen max-width-1200">
+        <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
+            <div>
+                <span class="grimba-admin-kicker">Audience command</span>
+                <h1 class="grimba-admin-title">Abonnés infolettre</h1>
+                <p class="grimba-admin-copy">
+                    Suivez les inscriptions, exportez les segments, et gardez le signal biais du lectorat visible pour l'équipe éditoriale.
+                </p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap justify-content-end">
+                <span class="grimba-admin-status">{{ $total }} total</span>
+                <span class="grimba-admin-status">+{{ $last7d }} sur 7 j</span>
+            </div>
+        </section>
 
         <div class="row g-3 mb-3">
             <div class="col-md-3 col-6">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <div style="font-family:var(--gn-font-display); font-size:2rem; font-weight:700; color:var(--gn-ink);">{{ $total }}</div>
-                        <div class="small text-muted text-uppercase" style="letter-spacing:0.08em;">Total abonnés</div>
-                    </div>
+                <div class="grimba-admin-stat rounded-3 p-3 h-100 text-center">
+                    <div class="grimba-admin-metric-value">{{ $total }}</div>
+                    <div class="grimba-admin-metric-label">Total abonnés</div>
                 </div>
             </div>
             <div class="col-md-3 col-6">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <div style="font-family:var(--gn-font-display); font-size:2rem; font-weight:700; color:#166534;">{{ $activeCount }}</div>
-                        <div class="small text-muted text-uppercase" style="letter-spacing:0.08em;">Actifs</div>
-                    </div>
+                <div class="grimba-admin-stat rounded-3 p-3 h-100 text-center">
+                    <div class="grimba-admin-metric-value" style="color:#166534;">{{ $activeCount }}</div>
+                    <div class="grimba-admin-metric-label">Actifs</div>
                 </div>
             </div>
             <div class="col-md-3 col-6">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <div style="font-family:var(--gn-font-display); font-size:2rem; font-weight:700; color:var(--gn-ink-soft);">{{ $unsubCount }}</div>
-                        <div class="small text-muted text-uppercase" style="letter-spacing:0.08em;">Désabonnés</div>
-                    </div>
+                <div class="grimba-admin-stat rounded-3 p-3 h-100 text-center">
+                    <div class="grimba-admin-metric-value" style="color:var(--gn-ink-soft);">{{ $unsubCount }}</div>
+                    <div class="grimba-admin-metric-label">Désabonnés</div>
                 </div>
             </div>
             <div class="col-md-3 col-6">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <div style="font-family:var(--gn-font-display); font-size:2rem; font-weight:700; color:var(--gn-left);">+{{ $last7d }}</div>
-                        <div class="small text-muted text-uppercase" style="letter-spacing:0.08em;">7 derniers jours</div>
-                    </div>
+                <div class="grimba-admin-stat rounded-3 p-3 h-100 text-center">
+                    <div class="grimba-admin-metric-value" style="color:var(--gn-left);">+{{ $last7d }}</div>
+                    <div class="grimba-admin-metric-label">7 derniers jours</div>
                 </div>
             </div>
         </div>
-
         <x-core::card>
             <x-core::card.header class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <x-core::card.title>Abonnés à l'infolettre</x-core::card.title>
