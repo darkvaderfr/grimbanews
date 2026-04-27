@@ -134,7 +134,10 @@ class AdminSettingsTest extends TestCase
             ->assertSee('biais inconnu')
             ->assertSee('traduction manquante')
             ->assertSee('extrait trop court')
-            ->assertSee('garde-fous');
+            ->assertSee('garde-fous')
+            ->assertSee(route('grimba.news-sources.triage'), false)
+            ->assertSee(route('grimba.translation.index'), false)
+            ->assertSee(route('posts.edit', $rssDraftIds[0]), false);
 
         $this->actingAs($this->admin())
             ->get('/admin/grimba/rss-drafts?source=' . $rssSource->id . '&bias=center')
@@ -209,6 +212,8 @@ class AdminSettingsTest extends TestCase
             ->assertSee('Dernières erreurs NobuAI')
             ->assertSee('quota test failure')
             ->assertSee('Draft blockers')
+            ->assertSee(route('grimba.news-sources.triage'), false)
+            ->assertSee(route('grimba.translation.index'), false)
             ->assertSee('Poll 1 RSS')
             ->assertSee('Fetch NewsAPI')
             ->assertSee('Translate 3 FR');
@@ -482,7 +487,10 @@ class AdminSettingsTest extends TestCase
             ->assertSee('biais inconnu')
             ->assertSee('traduction manquante')
             ->assertSee('extrait trop court')
-            ->assertSee('Prêt à publier');
+            ->assertSee('Prêt à publier')
+            ->assertSee(route('grimba.news-sources.triage'), false)
+            ->assertSee(route('grimba.translation.index'), false)
+            ->assertSee(route('posts.edit', $newsApiDraftIds[0]), false);
 
         $this->actingAs($this->admin())
             ->post('/admin/grimba/newsapi/publish-drafts', ['ids' => $newsApiDraftIds])

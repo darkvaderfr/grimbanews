@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `efd8ea2` Add ingest guardrail metrics
 - `ef2a4cd` Extract shared ingest guardrails
 - `5ac0fbf` Add NewsAPI draft publish guardrails
 - `8e9deae` Add RSS draft publish guardrails
 - `f2b0e99` Add NobuAI provider failure diagnostics
-- `e51cba4` Add stale NobuAI refresh action
 
 Latest verification:
 
-- `php artisan test` passed with `44` tests and `591` assertions.
+- `php artisan test` passed with `44` tests and `599` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
 ## Completed Sprint Bands
@@ -47,7 +47,7 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S234 — Maturity, Accessibility, Admin, And Tests
+### S185-S235 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
@@ -66,6 +66,7 @@ Latest verification:
 - S232 added NewsAPI draft readiness guardrails and a guarded publish action in the NewsAPI admin page.
 - S233 extracted shared ingest guardrails so RSS and NewsAPI publish paths use one tested readiness policy.
 - S234 added ingest guardrail metrics in cockpit plus per-queue RSS and NewsAPI blocker summaries.
+- S235 linked guardrail badges and cockpit blocker counts to source triage, translation settings, or the relevant article editor for faster remediation.
 
 ## Active Systems
 
@@ -100,15 +101,15 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S235 — Guardrail Quick-Fix Links
+### S236 — Futuristic Admin Shell Audit
 
-Goal: Turn ingest blocker metrics into direct editor actions so weak drafts can be fixed faster.
+Goal: Finish the backend visual revamp by enforcing a consistent futuristic Grimba admin shell across remaining custom pages.
 
 Acceptance:
 
-- Guardrail badges link to the relevant edit form or filtered queue where practical.
-- Missing-source and unknown-bias blockers point editors toward source triage/classification.
-- Tests cover generated links and preserve publish blocking.
+- All custom Grimba admin pages use the shared admin shell, hero, cards, readable dropdowns, and dark/light tokens.
+- Remaining inline one-off styles are minimized or aligned to shared classes.
+- Tests cover the admin CSS markers and representative page chrome.
 
 ## Operating Rules
 

@@ -140,10 +140,10 @@
                     <strong>{{ number_format($ingestGuardrailStats['blocked']) }}</strong>
                     <small>
                         {{ $ingestGuardrailStats['ready'] }} prêts ·
-                        source {{ $ingestGuardrailStats['reasons']['source manquante'] ?? 0 }} ·
-                        biais {{ $ingestGuardrailStats['reasons']['biais inconnu'] ?? 0 }} ·
-                        trad {{ $ingestGuardrailStats['reasons']['traduction manquante'] ?? 0 }} ·
-                        extrait {{ $ingestGuardrailStats['reasons']['extrait trop court'] ?? 0 }}
+                        <a href="{{ route('grimba.news-sources.triage') }}">source {{ $ingestGuardrailStats['reasons']['source manquante'] ?? 0 }}</a> ·
+                        <a href="{{ route('grimba.news-sources.triage') }}">biais {{ $ingestGuardrailStats['reasons']['biais inconnu'] ?? 0 }}</a> ·
+                        <a href="{{ route('grimba.translation.index') }}">trad {{ $ingestGuardrailStats['reasons']['traduction manquante'] ?? 0 }}</a> ·
+                        <a href="{{ route('grimba.rss-drafts.index') }}">extrait {{ $ingestGuardrailStats['reasons']['extrait trop court'] ?? 0 }}</a>
                     </small>
                 </div>
             </div>

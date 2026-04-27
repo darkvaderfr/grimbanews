@@ -56,7 +56,14 @@
                         {{ $guardrailStats['blocked'] }} bloqué(s), {{ $guardrailStats['ready'] }} prêt(s).
                         @foreach($guardrailStats['reasons'] as $reason => $count)
                             @if($count > 0)
-                                <span class="badge bg-warning text-dark ms-1">{{ $reason }} {{ $count }}</span>
+                                @php
+                                    $fixUrl = match ($reason) {
+                                        'source manquante', 'biais inconnu' => route('grimba.news-sources.triage'),
+                                        'traduction manquante' => route('grimba.translation.index'),
+                                        default => route('grimba.newsapi.index'),
+                                    };
+                                @endphp
+                                <a href="{{ $fixUrl }}" class="badge bg-warning text-dark ms-1 text-decoration-none">{{ $reason }} {{ $count }}</a>
                             @endif
                         @endforeach
                     </div>
@@ -96,7 +103,14 @@
                                                     @if(! $isReady)
                                                         <div class="d-flex flex-wrap gap-1 mt-2">
                                                             @foreach($flags as $flag)
-                                                                <span class="badge bg-warning text-dark">{{ $flag }}</span>
+                                                                @php
+                                                                    $fixUrl = match ($flag) {
+                                                                        'source manquante', 'biais inconnu' => route('grimba.news-sources.triage'),
+                                                                        'traduction manquante' => route('grimba.translation.index'),
+                                                                        default => route('posts.edit', $draft->id),
+                                                                    };
+                                                                @endphp
+                                                                <a href="{{ $fixUrl }}" class="badge bg-warning text-dark text-decoration-none">{{ $flag }}</a>
                                                             @endforeach
                                                         </div>
                                                     @else
