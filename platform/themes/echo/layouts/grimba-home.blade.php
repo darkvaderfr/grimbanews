@@ -64,6 +64,7 @@
                  has cross-spectrum coverage; hides itself otherwise. --}}
             @include(Theme::getThemeNamespace('partials.home.all-sides-rail'))
             @include(Theme::getThemeNamespace('partials.home.hero-grid'))
+            @include(Theme::getThemeNamespace('partials.home.most-read-by-bias'))
             @include(Theme::getThemeNamespace('partials.home.top-news'))
             @include(Theme::getThemeNamespace('partials.home.section-blocks'))
             @include(Theme::getThemeNamespace('partials.home.latest-plus-topics'))

@@ -1048,7 +1048,181 @@ button.btn-grimba--solid,
 .grimba-latest .grimba-coverage__chip--r { color: var(--gn-right); }
 
 /* ------------------------------------------------------------
-   10. Section blocks (Israel-Gaza / US Politics equivalents)
+   10. Most read by bias
+   ------------------------------------------------------------ */
+.grimba-most-read {
+    padding: 1.2rem;
+    border: 1px solid var(--gn-rule);
+    border-radius: 22px;
+    background:
+        linear-gradient(135deg, rgba(59, 130, 246, 0.08), transparent 26%),
+        linear-gradient(225deg, rgba(232, 76, 61, 0.08), transparent 26%),
+        rgba(255, 255, 255, 0.58);
+    box-shadow: 0 18px 50px rgba(26, 23, 19, 0.07);
+}
+.grimba-most-read__head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+.grimba-most-read__eyebrow {
+    display: inline-flex;
+    margin-bottom: 0.25rem;
+    font-family: var(--gn-font-mono);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gn-ink-soft);
+}
+.grimba-most-read__title {
+    margin: 0;
+    font-size: clamp(1.55rem, 3vw, 2.4rem);
+    line-height: 1.02;
+}
+.grimba-most-read__dek {
+    max-width: 36ch;
+    margin: 0;
+    color: var(--gn-ink-soft);
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+.grimba-most-read__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+.grimba-most-read__panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--gn-rule);
+    border-radius: 18px;
+    background: rgba(246, 241, 232, 0.86);
+}
+.grimba-most-read__panel::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: var(--gn-center);
+}
+.grimba-most-read__panel--left::before { background: var(--gn-left); }
+.grimba-most-read__panel--right::before { background: var(--gn-right); }
+.grimba-most-read__panel-head {
+    display: flex;
+    gap: 0.65rem;
+    padding: 1rem 1rem 0.75rem;
+    border-bottom: 1px solid var(--gn-rule);
+}
+.grimba-most-read__panel-head h3 {
+    margin: 0;
+    font-family: var(--gn-font-display);
+    font-size: 1.25rem;
+    line-height: 1.1;
+}
+.grimba-most-read__panel-head p {
+    margin: 0.2rem 0 0;
+    color: var(--gn-ink-soft);
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+.grimba-most-read__dot {
+    width: 13px;
+    height: 13px;
+    margin-top: 0.1rem;
+    border-radius: 999px;
+    background: var(--gn-center);
+    box-shadow: 0 0 0 4px rgba(168, 168, 168, 0.16);
+    flex: 0 0 auto;
+}
+.grimba-most-read__dot--left {
+    background: var(--gn-left);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+}
+.grimba-most-read__dot--right {
+    background: var(--gn-right);
+    box-shadow: 0 0 0 4px rgba(232, 76, 61, 0.14);
+}
+.grimba-most-read__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.grimba-most-read__item {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 0.7rem;
+    padding: 0.9rem 1rem;
+    border-top: 1px solid rgba(26, 23, 19, 0.06);
+}
+.grimba-most-read__item:first-child { border-top: 0; }
+.grimba-most-read__rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: var(--gn-ink);
+    color: var(--gn-paper);
+    font-family: var(--gn-font-mono);
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+.grimba-most-read__body {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+.grimba-most-read__headline {
+    color: var(--gn-ink);
+    font-family: var(--gn-font-display);
+    font-size: 1.03rem;
+    font-weight: 700;
+    line-height: 1.22;
+    text-decoration: none;
+}
+.grimba-most-read__headline:hover { color: var(--gn-ink-muted); }
+.grimba-most-read__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.65rem;
+    color: var(--gn-ink-soft);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.grimba-most-read__empty {
+    margin: 0;
+    padding: 1rem;
+    color: var(--gn-ink-soft);
+    font-size: 0.88rem;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-most-read {
+    background:
+        linear-gradient(135deg, rgba(59, 130, 246, 0.16), transparent 26%),
+        linear-gradient(225deg, rgba(232, 76, 61, 0.16), transparent 26%),
+        rgba(255, 255, 255, 0.035);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.3);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-most-read__panel {
+    background: rgba(28, 24, 17, 0.88);
+    border-color: rgba(246, 241, 232, 0.12);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-most-read__item {
+    border-top-color: rgba(246, 241, 232, 0.08);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-most-read__rank {
+    background: var(--gn-paper);
+    color: #1a1713;
+}
+
+/* ------------------------------------------------------------
+   11. Section blocks (Israel-Gaza / US Politics equivalents)
    ------------------------------------------------------------ */
 .grimba-section__title {
     font-size: 1.75rem;
@@ -1790,6 +1964,18 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
 @media (max-width: 767.98px) {
     body.grimba-home {
         padding-bottom: 86px;
+    }
+    .grimba-most-read {
+        padding: 0.85rem;
+        border-radius: 18px;
+    }
+    .grimba-most-read__head {
+        align-items: start;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+    .grimba-most-read__grid {
+        grid-template-columns: 1fr;
     }
     .grimba-mobile-nav {
         display: grid;
