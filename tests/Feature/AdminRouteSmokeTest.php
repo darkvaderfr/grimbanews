@@ -60,4 +60,29 @@ class AdminRouteSmokeTest extends TestCase
             ->get('/admin?stock=1')
             ->assertOk();
     }
+
+    public function test_admin_login_lands_on_grimba_cockpit_instead_of_login_form(): void
+    {
+        $this->admin()->forceFill(['password' => 'password'])->save();
+
+        $this->post('/admin/login', [
+            'username' => 'admin',
+            'password' => 'password',
+            'remember' => '1',
+        ])->assertRedirect('/admin/grimba/cockpit');
+    }
+
+    public function test_admin_login_discards_stale_login_intended_url(): void
+    {
+        $this->admin()->forceFill(['password' => 'password'])->save();
+
+        $this
+            ->withSession(['url.intended' => url('/admin/login')])
+            ->post('/admin/login', [
+                'username' => 'admin',
+                'password' => 'password',
+                'remember' => '1',
+            ])
+            ->assertRedirect('/admin/grimba/cockpit');
+    }
 }

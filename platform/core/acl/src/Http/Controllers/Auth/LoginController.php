@@ -22,7 +22,8 @@ class LoginController extends BaseController
     {
         $this->middleware('guest', ['except' => 'logout']);
 
-        $this->redirectTo = route('dashboard.index');
+        $adminPrefix = trim((string) config('core.base.general.admin_dir', 'admin'), '/');
+        $this->redirectTo = '/' . $adminPrefix . '/grimba/cockpit';
     }
 
     public function showLoginForm()
@@ -74,12 +75,27 @@ class LoginController extends BaseController
                 },
             ]))
             ->then(function (Request $request) {
-                if (! session()->has('url.intended')) {
-                    session()->flash('url.intended', url()->current());
+                $intendedUrl = session('url.intended');
+
+                if ($intendedUrl && $this->isAuthUrl($intendedUrl)) {
+                    session()->forget('url.intended');
                 }
 
                 return $this->sendLoginResponse($request);
             });
+    }
+
+    protected function isAuthUrl(string $url): bool
+    {
+        $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
+        $adminPrefix = trim((string) config('core.base.general.admin_dir', 'admin'), '/');
+
+        return in_array($path, [
+            $adminPrefix . '/login',
+            $adminPrefix . '/logout',
+            $adminPrefix . '/password/email',
+            $adminPrefix . '/password/reset',
+        ], true);
     }
 
     public function username(): string
