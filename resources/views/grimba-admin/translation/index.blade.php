@@ -270,7 +270,7 @@
                     <div class="col-lg-6">
                         <section class="grimba-llm-section h-100">
                             <h3 class="h5">Test rapide</h3>
-                            <p class="text-muted small mb-2">Envoie <code>The quick brown fox jumps over the lazy dog.</code> à travers la chaîne et affiche le résultat.</p>
+                            <p class="text-muted small mb-2">Teste la traduction dans les deux sens. Le site public utilise la même chaîne NobuAI.</p>
                             <form method="POST" action="{{ route('grimba.translation.test') }}" class="d-flex gap-2 flex-wrap align-items-start">
                                 @csrf
                                 <select name="driver" class="form-select form-select-sm" style="width: auto;">
@@ -278,6 +278,14 @@
                                     @foreach($driverLabels as $d => $meta)
                                         <option value="{{ $d }}">{{ $meta['name'] }} uniquement</option>
                                     @endforeach
+                                </select>
+                                <select name="from" class="form-select form-select-sm" style="width: auto;">
+                                    <option value="en">EN source</option>
+                                    <option value="fr">FR source</option>
+                                </select>
+                                <select name="to" class="form-select form-select-sm" style="width: auto;">
+                                    <option value="fr">FR cible</option>
+                                    <option value="en">EN cible</option>
                                 </select>
                                 <input type="text" name="sample" class="form-control form-control-sm" style="max-width: 380px;"
                                        placeholder="The quick brown fox jumps over the lazy dog.">

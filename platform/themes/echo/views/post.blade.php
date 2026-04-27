@@ -65,7 +65,7 @@
             ],
         ],
         'isAccessibleForFree' => true,
-        'inLanguage' => $__gnHasTr ? 'fr' : ($post->original_language ?: 'fr'),
+        'inLanguage' => $__gnHasTr ? $__gnTarget : ($post->original_language ?: 'fr'),
     ];
 
     if ($post->relationLoaded('categories') || method_exists($post, 'categories')) {
@@ -136,6 +136,11 @@
     $__gnTitle   = GnTr::title($post);
     $__gnDesc    = GnTr::description($post);
     $__gnOriginalTitle = $__gnHasTr ? $post->name : null;
+    $__gnTargetLabel = match ($__gnTarget) {
+        'en' => 'anglais',
+        'fr' => 'français',
+        default => strtoupper($__gnTarget),
+    };
 
     Theme::set('breadcrumb_background_image', $post->getMetaData('breadcrumb_background_image', true));
     Theme::set('breadcrumb_background_color', $post->getMetaData('breadcrumb_background_color', true));
@@ -232,7 +237,7 @@
                         </span>
                         @if($__gnLatest)
                             <span class="opacity-50">·</span>
-                            <span class="opacity-75">Mis à jour {{ $__gnLatest->locale('fr')->diffForHumans() }}</span>
+                            <span class="opacity-75">Mis à jour {{ $__gnLatest->locale($__gnTarget)->diffForHumans() }}</span>
                         @endif
                         {{-- S179 — reading time chip on the story hero meta line --}}
                         {!! Theme::partial('reading-time', ['post' => $post]) !!}
@@ -246,7 +251,7 @@
                         <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
                             {!! Theme::partial('nobuai-chip', ['size' => 'md']) !!}
                             <span class="small opacity-65">
-                                Article original en {{ strtoupper((string) $post->original_language) }} affiché en français.
+                                Article original en {{ strtoupper((string) $post->original_language) }} affiché en {{ $__gnTargetLabel }}.
                             </span>
                         </div>
                     @endif
@@ -396,8 +401,9 @@
                         // post.translated_content (S91) when the
                         // reader is in NobuAI mode.
                         $__gnFullActive  = (bool) setting('grimba_full_article_active', false);
+                        $__gnTranslatedBody = $__gnHasTr ? GnTr::body($post) : null;
                         $__gnFullBody = $__gnFullActive
-                            ? ($__gnHasTr && $post->translated_content ? $post->translated_content : ($post->full_content ?? null))
+                            ? ($__gnHasTr && GnTr::hasTranslatedBody($post, $__gnTarget) ? $__gnTranslatedBody : ($post->full_content ?? null))
                             : null;
                     @endphp
 
@@ -694,7 +700,7 @@
                                         <span class="opacity-75">Lu chez {{ $post->source_name }}</span>
                                     @endif
                                     <span class="opacity-50">·</span>
-                                    <span class="opacity-75">{{ optional($post->created_at)->locale('fr')->diffForHumans() }}</span>
+                                    <span class="opacity-75">{{ optional($post->created_at)->locale($__gnTarget)->diffForHumans() }}</span>
                                     {!! Theme::partial('reading-time', ['post' => $post]) !!}
                                 </div>
 
@@ -711,7 +717,7 @@
                                     <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
                                         {!! Theme::partial('nobuai-chip', ['size' => 'md']) !!}
                                         <span class="small opacity-65">
-                                            Article original en {{ strtoupper((string) $post->original_language) }} affiché en français.
+                                            Article original en {{ strtoupper((string) $post->original_language) }} affiché en {{ $__gnTargetLabel }}.
                                         </span>
                                     </div>
                                 @endif
@@ -761,7 +767,7 @@
 
                         @php
                             $__gnBody = GnTr::body($post);
-                            $__gnShowOrig = $__gnHasTr && $post->translated_content;
+                            $__gnShowOrig = $__gnHasTr && GnTr::hasTranslatedBody($post, $__gnTarget);
                         @endphp
                         @if ($content = $__gnBody)
                             <div class="ck-content">

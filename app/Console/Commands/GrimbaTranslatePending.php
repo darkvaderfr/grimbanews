@@ -6,6 +6,7 @@ use App\Services\GrimbaTranslator;
 use Botble\Blog\Models\Post;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class GrimbaTranslatePending extends Command
 {
@@ -40,9 +41,21 @@ class GrimbaTranslatePending extends Command
 
         if (! $force) {
             $query->where(function ($q) use ($to) {
-                $q->whereNull('translated_to')
-                  ->orWhere('translated_to', '!=', $to)
-                  ->orWhereNull('translated_name');
+                $q->where(function ($legacy) use ($to) {
+                    $legacy->whereNull('translated_to')
+                        ->orWhere('translated_to', '!=', $to)
+                        ->orWhereNull('translated_name');
+                });
+
+                if (Schema::hasTable('grimba_post_translations')) {
+                    $q->whereNotExists(function ($sub) use ($to) {
+                        $sub->selectRaw('1')
+                            ->from('grimba_post_translations')
+                            ->whereColumn('grimba_post_translations.post_id', 'posts.id')
+                            ->where('grimba_post_translations.locale', $to)
+                            ->whereNotNull('grimba_post_translations.translated_name');
+                    });
+                }
             });
         }
 
@@ -82,14 +95,33 @@ class GrimbaTranslatePending extends Command
                 continue;
             }
 
-            DB::table('posts')->where('id', $p->id)->update([
+            $payload = [
                 'translated_name'        => $tName['text'],
                 'translated_description' => $tDesc['text'] ?? null,
                 'translated_content'     => $tContent['text'] ?? null,
                 'translated_to'          => $to,
                 'translated_at'          => now(),
                 'translation_driver'     => $tName['driver'],
-            ]);
+            ];
+
+            DB::table('posts')->where('id', $p->id)->update($payload);
+
+            if (Schema::hasTable('grimba_post_translations')) {
+                $now = now();
+                DB::table('grimba_post_translations')->updateOrInsert(
+                    ['post_id' => $p->id, 'locale' => $to],
+                    [
+                        'translated_name' => $payload['translated_name'],
+                        'translated_description' => $payload['translated_description'],
+                        'translated_content' => $payload['translated_content'],
+                        'translation_driver' => $payload['translation_driver'],
+                        'translated_at' => $payload['translated_at'],
+                        'updated_at' => $now,
+                        'created_at' => $now,
+                    ]
+                );
+            }
+
             $this->line(sprintf('    → %s via %s', \Illuminate\Support\Str::limit($tName['text'], 60), $tName['driver']));
             $ok++;
         }

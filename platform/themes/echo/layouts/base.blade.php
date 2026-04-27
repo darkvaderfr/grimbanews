@@ -19,10 +19,11 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
-    <meta name="theme-color" content="#f6f1e8">
+    @include(Theme::getThemeNamespace('partials.pwa-head'))
 
     {!! Theme::header() !!}
 </head>
 
 {!! Theme::partial('body.index') !!}
+@include(Theme::getThemeNamespace('partials.pwa-register'))
 </html>

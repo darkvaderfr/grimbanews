@@ -39,7 +39,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
-    <meta name="theme-color" content="#f6f1e8">
+    @include(Theme::getThemeNamespace('partials.pwa-head'))
 
     <link rel="alternate" type="application/rss+xml" title="GrimbaNews — Flux RSS" href="{{ url('/feed.xml') }}">
     <meta property="og:image" content="{{ url('/og/home.png') }}">
@@ -79,6 +79,7 @@
     {{-- S145 — cookie consent overlay (mirrors grimba-chrome). --}}
     @include(Theme::getThemeNamespace('partials.cookie-consent'))
     @include(Theme::getThemeNamespace('partials.home.vault-script'))
+    @include(Theme::getThemeNamespace('partials.pwa-register'))
 
     <script>'use strict'; window.siteConfig = {};</script>
     {!! Theme::footer() !!}

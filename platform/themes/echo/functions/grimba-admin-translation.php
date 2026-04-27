@@ -105,7 +105,18 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
         Route::post('translation/test', function (Request $request) {
             $pinDriver = (string) $request->input('driver', '');
-            $sample    = (string) $request->input('sample', 'The quick brown fox jumps over the lazy dog.');
+            $from      = strtolower(substr((string) $request->input('from', 'en'), 0, 2)) ?: 'en';
+            $to        = strtolower(substr((string) $request->input('to', 'fr'), 0, 2)) ?: 'fr';
+            $sample    = (string) $request->input('sample', $from === 'fr'
+                ? 'Le renard brun rapide saute par-dessus le chien paresseux.'
+                : 'The quick brown fox jumps over the lazy dog.');
+
+            if (! in_array($from, ['en', 'fr'], true)) {
+                $from = 'en';
+            }
+            if (! in_array($to, ['en', 'fr'], true) || $to === $from) {
+                $to = $from === 'en' ? 'fr' : 'en';
+            }
 
             /** @var GrimbaTranslator $translator */
             $translator = app(GrimbaTranslator::class);
@@ -119,21 +130,21 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 $m = $r->getMethod('dispatch');
                 $m->setAccessible(true);
                 $start = microtime(true);
-                $out = $m->invoke($translator, $pinDriver, $sample, 'en', 'fr');
+                $out = $m->invoke($translator, $pinDriver, $sample, $from, $to);
                 $ms = (int) round((microtime(true) - $start) * 1000);
                 return back()->with('success_msg', $out
-                    ? sprintf('Test %s OK (%dms) : %s', $pinDriver, $ms, \Illuminate\Support\Str::limit($out, 120))
+                    ? sprintf('Test %s %s→%s OK (%dms) : %s', $pinDriver, strtoupper($from), strtoupper($to), $ms, \Illuminate\Support\Str::limit($out, 120))
                     : sprintf('Test %s : aucune réponse (clé absente ou erreur amont).', $pinDriver)
                 );
             }
 
             $start = microtime(true);
-            $res = $translator->translate($sample, 'en', 'fr');
+            $res = $translator->translate($sample, $from, $to);
             $ms = (int) round((microtime(true) - $start) * 1000);
             if ($res) {
                 return back()->with('success_msg', sprintf(
-                    'Test auto OK (%dms) via %s : %s',
-                    $ms, $res['driver'], \Illuminate\Support\Str::limit($res['text'], 120)
+                    'Test auto %s→%s OK (%dms) via %s : %s',
+                    strtoupper($from), strtoupper($to), $ms, $res['driver'], \Illuminate\Support\Str::limit($res['text'], 120)
                 ));
             }
             return back()->with('success_msg', 'Test auto : aucun fournisseur configuré ou tous en échec.');

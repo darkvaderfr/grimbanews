@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f1e8">
+    <title>GrimbaNews hors ligne</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            --paper: #f6f1e8;
+            --ink: #16130e;
+            --muted: #70685c;
+            --line: rgba(22, 19, 14, .18);
+            --card: rgba(255, 252, 244, .88);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --paper: #121007;
+                --ink: #f7efe1;
+                --muted: #b9ad99;
+                --line: rgba(247, 239, 225, .18);
+                --card: rgba(28, 24, 15, .9);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 28px;
+            background:
+                radial-gradient(circle at top left, rgba(231, 69, 52, .16), transparent 32rem),
+                radial-gradient(circle at bottom right, rgba(30, 85, 190, .13), transparent 34rem),
+                var(--paper);
+            color: var(--ink);
+            font-family: Georgia, "Times New Roman", serif;
+        }
+
+        main {
+            width: min(680px, 100%);
+            padding: clamp(28px, 7vw, 64px);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background: var(--card);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, .16);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            margin-bottom: 18px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: var(--ink);
+            color: var(--paper);
+            font: 700 12px/1.1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(42px, 11vw, 92px);
+            line-height: .88;
+            letter-spacing: -.06em;
+        }
+
+        p {
+            max-width: 38rem;
+            margin: 22px 0 0;
+            color: var(--muted);
+            font: 500 clamp(17px, 3vw, 22px)/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        a {
+            display: inline-flex;
+            margin-top: 30px;
+            padding: 13px 18px;
+            border: 1px solid var(--ink);
+            border-radius: 999px;
+            color: var(--ink);
+            font: 800 14px/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <span class="eyebrow">Mode hors ligne</span>
+        <h1>GrimbaNews est en attente de reseau.</h1>
+        <p>Les pages deja consultees peuvent rester disponibles. Reconnectez-vous puis relancez la page pour recuperer les derniers articles et traductions NobuAI.</p>
+        <a href="/">Revenir a l'accueil</a>
+    </main>
+</body>
+</html>

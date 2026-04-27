@@ -43,7 +43,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
-    <meta name="theme-color" content="#f6f1e8">
+    @include(Theme::getThemeNamespace('partials.pwa-head'))
 
     @php($__grimbaOgImage = Theme::get('grimba_og_image') ?: url('/og/home.png'))
     <link rel="alternate" type="application/rss+xml" title="GrimbaNews — Flux RSS" href="{{ url('/feed.xml') }}">
@@ -78,6 +78,7 @@
 
     {{-- S173/S185 — shared vault toggle handler for all layouts. --}}
     @include(Theme::getThemeNamespace('partials.home.vault-script'))
+    @include(Theme::getThemeNamespace('partials.pwa-register'))
 
     @include(Theme::getThemeNamespace('partials.home.footer-dark'))
 
