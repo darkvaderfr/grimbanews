@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Botble\Blog\Models\Post;
+use Botble\Member\Models\Member;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -234,5 +235,45 @@ class ClusterPageTest extends TestCase
             ->assertSee('Insights par NobuAI')
             ->assertSee('NobuAI à rafraîchir')
             ->assertSee('une nouvelle couverture est arrivée après ce résumé');
+    }
+
+    public function test_anonymous_reader_sees_full_article_subscriber_gate(): void
+    {
+        $post = $this->assignCluster($this->publishedPostIds(2, 22), 910009, ['left', 'center']);
+
+        DB::table('posts')->where('id', $post->id)->update([
+            'full_content' => '<p>Texte intégral réservé avec une enquête complète sur les données publiques.</p>',
+            'full_fetched_at' => now(),
+            'full_extract_error' => null,
+        ]);
+
+        $this->withUnencryptedCookies($this->readerCookies())
+            ->get($this->pathFor($post))
+            ->assertOk()
+            ->assertSee('Réservé aux abonnés')
+            ->assertSee('Connectez-vous pour lire le texte intégral')
+            ->assertDontSee('Texte intégral réservé avec une enquête complète');
+    }
+
+    public function test_logged_in_member_can_read_extracted_full_article(): void
+    {
+        $post = $this->assignCluster($this->publishedPostIds(2, 24), 910010, ['left', 'center']);
+        $member = Member::query()->first();
+
+        $this->assertNotNull($member, 'Fixture database must contain at least one member account.');
+
+        DB::table('posts')->where('id', $post->id)->update([
+            'full_content' => '<p>Texte intégral visible par un membre connecté avec les détails complets.</p>',
+            'full_fetched_at' => now(),
+            'full_extract_error' => null,
+        ]);
+
+        $this->actingAs($member, 'member')
+            ->withUnencryptedCookies($this->readerCookies())
+            ->get($this->pathFor($post))
+            ->assertOk()
+            ->assertSee("Lire l'article complet")
+            ->assertSee('Texte intégral visible par un membre connecté')
+            ->assertDontSee('Réservé aux abonnés');
     }
 }

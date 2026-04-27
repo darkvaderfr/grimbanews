@@ -72,7 +72,8 @@ class BlogService
                     );
                 }
 
-                if (function_exists('shortcode')) {
+                $authenticatedUser = auth()->user();
+                if (function_exists('shortcode') && $authenticatedUser && method_exists($authenticatedUser, 'hasPermission')) {
                     shortcode()->getCompiler()->setEditLink(route('posts.edit', $post->id), 'posts.edit');
                 }
 

@@ -52,6 +52,15 @@ Schedule::command('grimba:publish-trusted')
     ->withoutOverlapping(15)
     ->runInBackground();
 
+// GrimbaNews — full article extraction for subscriber/member reading.
+// Runs shortly after trusted auto-publish so newly public RSS/NewsAPI
+// posts get a readable body without waiting for an editor.
+Schedule::command('grimba:fetch-full-articles --limit=40')
+    ->cron('12,42 * * * *')
+    ->onOneServer()
+    ->withoutOverlapping(25)
+    ->runInBackground();
+
 // GrimbaNews — NewsAPI ingest (S128). Runs at :15 and :45 past the
 // hour so it doesn't collide with the RSS poller (which fires on the
 // :00 / :30 boundary). Skips silently when the key isn't set; gated

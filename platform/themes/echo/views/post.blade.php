@@ -141,6 +141,20 @@
         'fr' => __('français'),
         default => strtoupper($__gnTarget),
     };
+    $__gnMemberCanReadFull = (is_plugin_active('member') && auth('member')->check()) || auth()->check();
+    $__gnMemberLoginUrl = (is_plugin_active('member') && \Illuminate\Support\Facades\Route::has('public.member.login'))
+        ? route('public.member.login')
+        : url('/login');
+    $__gnFullActive = (bool) setting('grimba_full_article_active', true);
+    $__gnRawFullBody = trim((string) ($post->full_content ?? ''));
+    $__gnFullBody = $__gnFullActive && $__gnMemberCanReadFull && $__gnRawFullBody !== ''
+        ? ($__gnHasTr && GnTr::hasTranslatedBody($post, $__gnTarget) ? (GnTr::body($post) ?: $__gnRawFullBody) : $__gnRawFullBody)
+        : null;
+    $__gnFullArticleLocked = $__gnFullActive && ! $__gnMemberCanReadFull && $__gnRawFullBody !== '';
+    $__gnUpstream = $__gnRawFullBody !== ''
+        ? (\Illuminate\Support\Facades\DB::table('rss_feed_items')->where('post_id', $post->id)->value('link')
+            ?? \Illuminate\Support\Facades\DB::table('newsapi_items')->where('post_id', $post->id)->value('article_url'))
+        : null;
 
     Theme::set('breadcrumb_background_image', $post->getMetaData('breadcrumb_background_image', true));
     Theme::set('breadcrumb_background_color', $post->getMetaData('breadcrumb_background_color', true));
@@ -400,20 +414,6 @@
                         }
                     @endphp
 
-                    @php
-                        // S163 — full-article reading. Setting gates
-                        // the feature (paid-tier flag); rendering
-                        // gates on the post actually having extracted
-                        // full_content. Translated full body is
-                        // post.translated_content (S91) when the
-                        // reader is in NobuAI mode.
-                        $__gnFullActive  = (bool) setting('grimba_full_article_active', false);
-                        $__gnTranslatedBody = $__gnHasTr ? GnTr::body($post) : null;
-                        $__gnFullBody = $__gnFullActive
-                            ? ($__gnHasTr && GnTr::hasTranslatedBody($post, $__gnTarget) ? $__gnTranslatedBody : ($post->full_content ?? null))
-                            : null;
-                    @endphp
-
                     @if(! empty($__gnSummaryItems))
                         {{-- S171 → S175 — Insights block. Badge label flips
                              based on $__gnSummaryMode: NobuAI when LLM-
@@ -633,12 +633,6 @@
                         <div class="grimba-full-article__body mt-3" style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-size:17px; line-height:1.65; color:var(--gn-ink,#1a1713);">
                             {!! BaseHelper::clean($__gnFullBody) !!}
                         </div>
-                        @php
-                            $__gnUpstream = \Illuminate\Support\Facades\DB::table('rss_feed_items')
-                                ->where('post_id', $post->id)->value('link')
-                                ?? \Illuminate\Support\Facades\DB::table('newsapi_items')
-                                    ->where('post_id', $post->id)->value('article_url');
-                        @endphp
                         @if($__gnUpstream)
                             <p class="small opacity-60 mt-3 mb-0" style="font-family:'Public Sans',system-ui,sans-serif;">
                                 {{ __('Source originale') }} :
@@ -648,6 +642,19 @@
                             </p>
                         @endif
                     </details>
+                @elseif($__gnFullArticleLocked)
+                    <div class="grimba-full-article glass-panel p-3 p-md-4 mb-3">
+                        <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                            <div>
+                                <span class="grimba-methodology__kicker">{{ __('Réservé aux abonnés') }}</span>
+                                <h3 class="h5 mt-2 mb-1" style="color:var(--gn-ink,#1a1713);">{{ __("Lire l'article complet") }}</h3>
+                                <p class="mb-0 opacity-70" style="color:var(--gn-ink,#1a1713);">
+                                    {{ __("Connectez-vous pour lire le texte intégral extrait par GrimbaNews.") }}
+                                </p>
+                            </div>
+                            <a href="{{ $__gnMemberLoginUrl }}" class="btn-grimba btn-grimba--dark">{{ __('Se connecter') }}</a>
+                        </div>
+                    </div>
                 @endif
 
                 @include(Theme::getThemeNamespace('partials.story.article-list'), [
@@ -790,7 +797,7 @@
                         @endif
 
                         @php
-                            $__gnBody = GnTr::body($post);
+                            $__gnBody = $__gnFullBody ?: GnTr::body($post);
                             $__gnShowOrig = $__gnHasTr && GnTr::hasTranslatedBody($post, $__gnTarget);
                         @endphp
                         @if ($content = $__gnBody)
@@ -809,6 +816,21 @@
                                 @endif
 
                                 {!! apply_filters('ads_render', null, 'post_after', ['class' => 'my-2 text-center']) !!}
+                            </div>
+                        @endif
+
+                        @if($__gnFullArticleLocked)
+                            <div class="grimba-full-article glass-panel p-3 p-md-4 my-4">
+                                <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                                    <div>
+                                        <span class="grimba-methodology__kicker">{{ __('Réservé aux abonnés') }}</span>
+                                        <h3 class="h5 mt-2 mb-1" style="color:var(--gn-ink,#1a1713);">{{ __("Lire l'article complet") }}</h3>
+                                        <p class="mb-0 opacity-70" style="color:var(--gn-ink,#1a1713);">
+                                            {{ __("Connectez-vous pour lire le texte intégral extrait par GrimbaNews.") }}
+                                        </p>
+                                    </div>
+                                    <a href="{{ $__gnMemberLoginUrl }}" class="btn-grimba btn-grimba--dark">{{ __('Se connecter') }}</a>
+                                </div>
                             </div>
                         @endif
 
