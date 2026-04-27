@@ -94,7 +94,9 @@
             }
 
             if (effective === 'dark') {
-                document.body.setAttribute('data-bs-theme', effective);
+                if (document.body.getAttribute('data-bs-theme') !== effective) {
+                    document.body.setAttribute('data-bs-theme', effective);
+                }
             } else if (document.body.hasAttribute('data-bs-theme')) {
                 document.body.removeAttribute('data-bs-theme');
             }
@@ -141,5 +143,7 @@
         window.setTimeout(applyMode, 0);
     }
 
-    window.setInterval(applyMode, 1000);
+    window.addEventListener('pageshow', function () {
+        applyMode();
+    });
 })();

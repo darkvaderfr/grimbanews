@@ -38,6 +38,6 @@ app()->booted(function (): void {
     // Inline script at the end of head: mirror grimba_theme cookie onto
     // <html data-bs-theme>, so admin dark mode matches the reader.
     Assets::addScriptsDirectly([
-        '/themes/echo/js/grimba-admin-theme.js',
+        '/themes/echo/js/grimba-admin-theme.js?v=20260428.1',
     ]);
 });

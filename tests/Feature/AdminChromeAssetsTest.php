@@ -55,8 +55,13 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('function currentMode(preferDom)', $js);
         $this->assertStringContainsString('applyMode(true)', $js);
         $this->assertStringContainsString("document.documentElement.setAttribute('data-bs-theme', effective)", $js);
+        $this->assertStringContainsString("if (document.body.getAttribute('data-bs-theme') !== effective)", $js);
         $this->assertStringContainsString("document.body.setAttribute('data-bs-theme', effective)", $js);
         $this->assertStringContainsString("document.body.removeAttribute('data-bs-theme')", $js);
+        $this->assertStringNotContainsString('window.setInterval(applyMode', $js);
+
+        $chrome = file_get_contents($root . '/platform/themes/echo/functions/grimba-admin-chrome.php');
+        $this->assertStringContainsString('/themes/echo/js/grimba-admin-theme.js?v=20260428.1', $chrome);
     }
 
     public function test_custom_grimba_admin_views_use_shared_shell(): void
