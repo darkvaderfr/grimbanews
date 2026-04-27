@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `05f3349` Expand public NobuAI insight QA
 - `7089c45` Add cockpit runbook actions
 - `2e89b1c` Add cockpit ingest operations board
 - `81754cd` Polish admin chrome and provider vault
 - `12a2125` Audit static UI translation catalogs
-- `f9bea23` Harden public NobuAI insight branding
 
 Latest verification:
 
-- `php artisan test` passed with `37` tests and `460` assertions.
+- `php artisan test` passed with `38` tests and `508` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
 ## Completed Sprint Bands
@@ -47,7 +47,7 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S225 — Maturity, Accessibility, Admin, And Tests
+### S185-S226 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
@@ -57,6 +57,7 @@ Latest verification:
 - S223 added a cockpit operations board for RSS/NewsAPI 24h ingest, sick feeds, draft pressure, duplicate groups, pending translations, and pending NobuAI insights with direct admin links.
 - S224 added cockpit runbook actions for health checks, NobuAI health, one-feed RSS polling, NewsAPI fetch, and bounded FR/EN translation queue runs.
 - S225 expanded public story insight QA with GroundNews-style labels, provider-scrubbed NobuAI copy, generation notes, and stable multi-post story fixtures.
+- S226 added a story source drilldown that maps each bias/source row to its supporting excerpt and exact article anchor without exposing provider names.
 
 ## Active Systems
 
@@ -91,15 +92,25 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S226 — Story Source Drilldown
+### S227 — Insight Freshness Signals
 
-Goal: Make story pages more useful after insight generation by giving readers a compact drilldown of which source supports each angle.
+Goal: Show readers and editors when NobuAI insights are fresh, stale, or missing relative to the newest article in a story.
 
 Acceptance:
 
-- Story pages expose source-side details without cluttering the top summary.
-- Bias/source rows remain readable in mobile and dark mode.
-- Tests cover source attribution, links, and no provider-name leakage.
+- Story page labels stale insights when new coverage arrived after generation.
+- Cockpit/story cluster admin surfaces count stale insights separately from missing insights.
+- Tests cover fresh, stale, and missing states.
+
+### S228 — Source Drilldown Admin Parity
+
+Goal: Help editors diagnose weak stories from the admin side using the same source-drilldown signals shown to readers.
+
+Acceptance:
+
+- Story cluster edit page shows source/bias/excerpt rows with links to posts.
+- Rows flag missing source metadata, unknown bias, and low credibility.
+- Tests cover the admin render and no public provider leakage.
 
 ## Operating Rules
 

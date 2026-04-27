@@ -177,4 +177,38 @@ class ClusterPageTest extends TestCase
             ->assertSee('Généré par NobuAI')
             ->assertDontSee('Première phrase de chaque source');
     }
+
+    public function test_story_source_drilldown_links_sources_to_angles(): void
+    {
+        $ids = $this->publishedPostIds(3, 16);
+        $post = $this->assignCluster($ids, 910007, ['left', 'center', 'right']);
+
+        foreach ($ids as $index => $id) {
+            DB::table('posts')
+                ->where('id', $id)
+                ->update([
+                    'source_name' => ['Drill Left', 'Drill Center', 'Drill Right'][$index],
+                    'description' => [
+                        'La source de gauche soutient cet angle avec un détail social précis.',
+                        'La source du centre soutient cet angle avec une chronologie procédurale.',
+                        'La source de droite soutient cet angle avec une lecture budgétaire.',
+                    ][$index],
+                ]);
+        }
+
+        $this->withUnencryptedCookies($this->readerCookies())
+            ->get($this->pathFor($post))
+            ->assertOk()
+            ->assertSee('Détail des sources')
+            ->assertSee('Qui soutient quel angle ?')
+            ->assertSee('Drill Left')
+            ->assertSee('Drill Center')
+            ->assertSee('Drill Right')
+            ->assertSee('La source de gauche soutient cet angle')
+            ->assertSee('Voir dans le dossier')
+            ->assertSee('Lire cette source')
+            ->assertSee('href="#story-article-' . $ids[0] . '"', false)
+            ->assertDontSee('OpenAI')
+            ->assertDontSee('Claude');
+    }
 }

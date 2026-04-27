@@ -70,6 +70,14 @@ class StaticUiTranslationTest extends TestCase
             'Nous améliorons la plateforme. Nous revenons très vite. Merci pour votre patience.',
             'Généré par NobuAI :time.',
             'Généré par NobuAI.',
+            'Source drilldown',
+            'Qui soutient quel angle ?',
+            'Chaque ligne relie un camp, une source et le passage qui justifie le cadrage.',
+            'Voir tous les articles',
+            'Voir dans le dossier',
+            'Propriété',
+            'Lire cette source',
+            'Source inconnue',
         ];
 
         foreach ([

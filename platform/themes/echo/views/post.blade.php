@@ -611,6 +611,11 @@
                     'title' => $__gnTitle,
                 ])
 
+                @include(Theme::getThemeNamespace('partials.story.source-drilldown'), [
+                    'clusterPosts' => $__gnClusterPosts,
+                    'sourceMeta'   => $__gnSourceMeta,
+                ])
+
                 @if($__gnFullBody)
                     <details class="grimba-full-article glass-panel p-3 p-md-4 mb-3" style="cursor:pointer;">
                         <summary style="cursor:pointer; font-family:'Public Sans',system-ui,sans-serif; font-weight:700; font-size:14px; letter-spacing:0.4px; text-transform:uppercase; color:var(--gn-ink,#1a1713);">
