@@ -26,10 +26,10 @@
     ];
 
     $biasMeta = [
-        'left'    => ['label' => 'Gauche',     'color' => '#3b82f6', 'short' => 'L'],
-        'center'  => ['label' => 'Centre',     'color' => '#a8a8a8', 'short' => 'C'],
-        'right'   => ['label' => 'Droite',     'color' => '#e84c3d', 'short' => 'D'],
-        'unknown' => ['label' => 'Non classé', 'color' => '#6b6459', 'short' => '·'],
+        'left'    => ['label' => __('Gauche'),     'color' => '#3b82f6', 'short' => 'L'],
+        'center'  => ['label' => __('Centre'),     'color' => '#a8a8a8', 'short' => 'C'],
+        'right'   => ['label' => __('Droite'),     'color' => '#e84c3d', 'short' => 'D'],
+        'unknown' => ['label' => __('Non classé'), 'color' => '#6b6459', 'short' => '·'],
     ];
 
     $sortMode = request()->cookie('grimba_cluster_sort', 'bias') === 'recent' ? 'recent' : 'bias';
@@ -46,13 +46,13 @@
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <h2 class="m-0" style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:24px; letter-spacing:-0.2px;">
             <span style="opacity:0.55;">{{ $totalCount }}</span>
-            {{ $totalCount === 1 ? 'article' : 'articles' }}
+            {{ trans_choice('article|articles', $totalCount) }}
         </h2>
-        <div class="grimba-story-articles__tabs" role="tablist" aria-label="Filtrer les articles du dossier" data-grimba-cluster-tabs
+        <div class="grimba-story-articles__tabs" role="tablist" aria-label="{{ __('Filtrer les articles du dossier') }}" data-grimba-cluster-tabs
              style="display:flex; gap:4px; border-radius:9999px; background:rgba(0,0,0,0.04); padding:4px;">
             <button type="button" data-bias-tab="all" role="tab" aria-controls="grimba-cluster-panel" aria-selected="true"
                     style="padding:6px 12px; border-radius:9999px; border:none; background:var(--gn-ink,#1a1713); color:var(--gn-paper,#f6f1e8); font-weight:700; font-size:13px;">
-                Tous · {{ $totalCount }}
+                {{ __('Tous') }} · {{ $totalCount }}
             </button>
             @foreach(['left', 'center', 'right'] as $b)
                 @if($countLabels[$b] > 0)
@@ -69,7 +69,7 @@
     <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mb-3">
         @if(count($jumpList) >= 2)
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                <span class="small opacity-60">Lu chez</span>
+                <span class="small opacity-60">{{ __('Lu chez') }}</span>
                 @foreach($jumpList as $jump)
                     @php $color = $biasMeta[$jump['bias']]['color'] ?? 'rgba(26,23,19,0.45)'; @endphp
                     <a href="#story-article-{{ $jump['id'] }}"
@@ -83,18 +83,18 @@
         @endif
 
         <div class="d-flex align-items-center gap-2 ms-auto" data-grimba-cluster-sort>
-            <span class="small opacity-60">Trier</span>
+            <span class="small opacity-60">{{ __('Trier') }}</span>
             <button type="button"
                     class="btn-grimba btn-grimba--sm {{ $sortMode === 'bias' ? 'btn-grimba--solid' : 'btn-grimba--ghost' }}"
                     data-sort-mode="bias"
                     aria-pressed="{{ $sortMode === 'bias' ? 'true' : 'false' }}">
-                Par camp
+                {{ __('Par camp') }}
             </button>
             <button type="button"
                     class="btn-grimba btn-grimba--sm {{ $sortMode === 'recent' ? 'btn-grimba--solid' : 'btn-grimba--ghost' }}"
                     data-sort-mode="recent"
                     aria-pressed="{{ $sortMode === 'recent' ? 'true' : 'false' }}">
-                Plus récent
+                {{ __('Plus récent') }}
             </button>
         </div>
     </div>
@@ -162,7 +162,7 @@
                                 padding:2px 8px; border-radius:9999px;
                                 background:rgba(26,23,19,0.06); color:var(--gn-ink,#1a1713);
                                 font-size:11px; font-weight:600; letter-spacing:0.3px;
-                            " title="{{ $src->owner_name ? 'Propriété de ' . $src->owner_name : '' }}">
+                            " title="{{ $src->owner_name ? __('Propriété de :owner', ['owner' => $src->owner_name]) : '' }}">
                                 {{ ucfirst((string) $src->ownership_type) }}
                             </span>
                         @endif
@@ -176,7 +176,7 @@
                                 padding:2px 8px; border-radius:9999px;
                                 background:{{ $credColor }}15; color:{{ $credColor }};
                                 font-size:11px; font-weight:700; letter-spacing:0.3px;
-                            " title="Crédibilité éditoriale (0-100)">
+                            " title="{{ __('Crédibilité éditoriale (0-100)') }}">
                                 ⓘ {{ $src->credibility_score }}
                             </span>
                         @endif
@@ -199,7 +199,7 @@
                                 padding:3px 10px; border-radius:9999px;
                                 background:var(--gn-ink,#1a1713); color:var(--gn-paper,#f6f1e8);
                                 font-size:11px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;
-                            ">Vous lisez</span>
+                            ">{{ __('Vous lisez') }}</span>
                         @endif
 
                         {{-- S173 — save-for-later icon. Cookie-only, no auth. --}}
@@ -234,7 +234,7 @@
                         </span>
                         @if(! $isCurrent)
                             <a href="{{ $cp->url ?? '#' }}" target="_blank" rel="noopener" style="color:#c0392b; text-decoration:none; font-weight:700; font-size:13px;">
-                                Lire l'article complet ↗
+                                {{ __("Lire l'article complet") }} ↗
                             </a>
                         @endif
                     </div>

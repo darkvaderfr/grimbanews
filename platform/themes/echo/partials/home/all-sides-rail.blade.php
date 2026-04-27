@@ -79,12 +79,12 @@
 <section class="grimba-all-sides container-xxl py-3 py-md-4">
     <header class="d-flex align-items-end justify-content-between flex-wrap gap-2 mb-3">
         <div>
-            <span class="grimba-methodology__kicker">Couvert par tous les côtés</span>
+            <span class="grimba-methodology__kicker">{{ __('Couvert par tous les côtés') }}</span>
             <h2 class="grimba-methodology__title m-0 mt-1" style="font-size:clamp(22px, 2.6vw, 32px); letter-spacing:-0.3px;">
-                Histoires que gauche, centre et droite couvrent en même temps
+                {{ __('Histoires que gauche, centre et droite couvrent en même temps') }}
             </h2>
         </div>
-        <span class="small opacity-65">{{ count($cards) }} {{ count($cards) === 1 ? 'histoire' : 'histoires' }} ce moment</span>
+        <span class="small opacity-65">{{ trans_choice(':count histoire ce moment|:count histoires ce moment', count($cards), ['count' => count($cards)]) }}</span>
     </header>
 
     <div class="grimba-all-sides__rail" style="
@@ -155,7 +155,7 @@
                             @endif
                         @endforeach
                         <span class="ms-auto opacity-65" style="font-size:12px;">
-                            {{ $card['articles'] }} sources
+                            {{ trans_choice(':count source|:count sources', $card['articles'], ['count' => $card['articles']]) }}
                         </span>
                     </div>
                     <h3 style="

@@ -74,9 +74,11 @@
         {{-- Left: Daily Briefing --}}
         <aside class="col-xl-3 col-lg-4 col-12 grimba-briefing">
             <header class="grimba-briefing__head">
-                <h2 class="grimba-briefing__title">Briefing du jour</h2>
+                <h2 class="grimba-briefing__title">{{ __('Briefing du jour') }}</h2>
                 <p class="grimba-briefing__sub">
-                    {{ $briefingStats->count() }} histoires · {{ $totalArticles }} articles · {{ $readMinutes }} min de lecture
+                    {{ trans_choice(':count histoire|:count histoires', $briefingStats->count(), ['count' => $briefingStats->count()]) }} ·
+                    {{ trans_choice(':count article|:count articles', $totalArticles, ['count' => $totalArticles]) }} ·
+                    {{ trans_choice(':count min de lecture|:count min de lecture', $readMinutes, ['count' => $readMinutes]) }}
                 </p>
             </header>
 
@@ -105,7 +107,7 @@
             </ol>
 
             <a href="{{ url('/blog') }}" class="grimba-briefing__more">
-                Voir le briefing complet →
+                {{ __('Voir le briefing complet') }} →
             </a>
         </aside>
 
@@ -143,11 +145,11 @@
         <aside class="col-xl-3 col-lg-12 col-12 grimba-blindspot-rail">
             <header class="grimba-blindspot-rail__head">
                 <span class="grimba-blindspot-rail__kicker">
-                    <span class="blindspot-badge blindspot-badge--ghost">Angles morts</span>
+                    <span class="blindspot-badge blindspot-badge--ghost">{{ __('Angles morts') }}</span>
                 </span>
                 <p class="grimba-blindspot-rail__desc">
-                    Histoires couvertes de manière disproportionnée par un seul côté du spectre politique.
-                    <a href="{{ url('/angles-morts') }}">En savoir plus</a>
+                    {{ __('Histoires couvertes de manière disproportionnée par un seul côté du spectre politique.') }}
+                    <a href="{{ url('/angles-morts') }}">{{ __('En savoir plus') }}</a>
                 </p>
             </header>
 
@@ -162,7 +164,7 @@
                     </div>
                     <div class="grimba-blind-card__body">
                         <span class="grimba-blind-card__tag">
-                            <span class="blindspot-badge blindspot-badge--on-dark">Angle mort</span>
+                            <span class="blindspot-badge blindspot-badge--on-dark">{{ __('Angle mort') }}</span>
                         </span>
                         <h3 class="grimba-blind-card__title">{{ $blindTitle }}</h3>
                         @if($blindTranslated)
@@ -174,7 +176,7 @@
             @endforeach
 
             <a href="{{ url('/angles-morts') }}" class="grimba-blindspot-rail__more">
-                Voir le fil des angles morts →
+                {{ __('Voir le fil des angles morts') }} →
             </a>
 
             {!! Theme::partial('bias-mix', ['variant' => 'compact']) !!}

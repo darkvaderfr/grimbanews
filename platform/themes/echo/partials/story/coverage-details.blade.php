@@ -25,52 +25,52 @@
         ? array_keys($counts, max($counts['left'], $counts['center'], $counts['right']))[0]
         : null;
     $dominantLabel = match ($dominantBias) {
-        'left'   => 'Gauche',
-        'center' => 'Centre',
-        'right'  => 'Droite',
+        'left'   => __('Gauche'),
+        'center' => __('Centre'),
+        'right'  => __('Droite'),
         default  => '—',
     };
 @endphp
 
 <aside class="grimba-story-coverage glass-panel p-3 mb-3">
     <h2 class="h6 mb-3" style="font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; font-size:13px; opacity:0.75;">
-        Détails de la couverture
+        {{ __('Détails de la couverture') }}
     </h2>
 
     <dl class="m-0" style="display:grid; grid-template-columns:1fr auto; gap:6px 16px; font-size:14px;">
-        <dt class="opacity-75">Sources totales</dt>
+        <dt class="opacity-75">{{ __('Sources totales') }}</dt>
         <dd class="m-0 fw-semibold">{{ $total }}</dd>
 
         <dt class="opacity-75">
             <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#3b82f6; margin-right:6px;"></span>
-            Gauche
+            {{ __('Gauche') }}
         </dt>
         <dd class="m-0 fw-semibold">{{ $counts['left'] }}</dd>
 
         <dt class="opacity-75">
             <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#a8a8a8; margin-right:6px;"></span>
-            Centre
+            {{ __('Centre') }}
         </dt>
         <dd class="m-0 fw-semibold">{{ $counts['center'] }}</dd>
 
         <dt class="opacity-75">
             <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#e84c3d; margin-right:6px;"></span>
-            Droite
+            {{ __('Droite') }}
         </dt>
         <dd class="m-0 fw-semibold">{{ $counts['right'] }}</dd>
 
         @if($counts['unknown'] > 0)
-            <dt class="opacity-50 small">Non classé</dt>
+            <dt class="opacity-50 small">{{ __('Non classé') }}</dt>
             <dd class="m-0 small opacity-50">{{ $counts['unknown'] }}</dd>
         @endif
 
-        <dt class="opacity-75">Dernière mise à jour</dt>
+        <dt class="opacity-75">{{ __('Dernière mise à jour') }}</dt>
         <dd class="m-0 fw-semibold small">
             {{ $latestUpdated ? $latestUpdated->locale('fr')->diffForHumans() : '—' }}
         </dd>
 
         @if($known > 0)
-            <dt class="opacity-75">Distribution</dt>
+            <dt class="opacity-75">{{ __('Distribution') }}</dt>
             <dd class="m-0 fw-semibold">
                 {{ round($dominantPct) }}%&nbsp;{{ $dominantLabel }}
             </dd>

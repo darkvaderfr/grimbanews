@@ -137,8 +137,8 @@
     $__gnDesc    = GnTr::description($post);
     $__gnOriginalTitle = $__gnHasTr ? $post->name : null;
     $__gnTargetLabel = match ($__gnTarget) {
-        'en' => 'anglais',
-        'fr' => 'français',
+        'en' => __('anglais'),
+        'fr' => __('français'),
         default => strtoupper($__gnTarget),
     };
 
@@ -226,18 +226,18 @@
                 @endphp
                 <header class="glass-panel p-3 p-md-4 mb-3">
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-2 small">
-                        <span class="grimba-methodology__kicker">Histoire</span>
+                        <span class="grimba-methodology__kicker">{{ __('Histoire') }}</span>
                         @if($post->source_name)
                             <span class="opacity-50">·</span>
-                            <span class="opacity-75">Lu d'abord chez {{ $post->source_name }}</span>
+                            <span class="opacity-75">{{ __("Lu d'abord chez :source", ['source' => $post->source_name]) }}</span>
                         @endif
                         <span class="opacity-50">·</span>
                         <span class="opacity-75">
-                            {{ $__gnClusterPosts->count() }} {{ $__gnClusterPosts->count() === 1 ? 'couverture' : 'couvertures' }}
+                            {{ trans_choice(':count couverture|:count couvertures', $__gnClusterPosts->count(), ['count' => $__gnClusterPosts->count()]) }}
                         </span>
                         @if($__gnLatest)
                             <span class="opacity-50">·</span>
-                            <span class="opacity-75">Mis à jour {{ $__gnLatest->locale($__gnTarget)->diffForHumans() }}</span>
+                            <span class="opacity-75">{{ __('Mis à jour :time', ['time' => $__gnLatest->locale($__gnTarget)->diffForHumans()]) }}</span>
                         @endif
                         {{-- S179 — reading time chip on the story hero meta line --}}
                         {!! Theme::partial('reading-time', ['post' => $post]) !!}
@@ -251,7 +251,7 @@
                         <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
                             {!! Theme::partial('nobuai-chip', ['size' => 'md']) !!}
                             <span class="small opacity-65">
-                                Article original en {{ strtoupper((string) $post->original_language) }} affiché en {{ $__gnTargetLabel }}.
+                                {{ __('Article original en :source affiché en :target.', ['source' => strtoupper((string) $post->original_language), 'target' => $__gnTargetLabel]) }}
                             </span>
                         </div>
                     @endif
@@ -267,9 +267,9 @@
                             ->values();
                         $__oneSidedCoverage = $__gnClusterPosts->count() >= 2 && $__sidesPresent->count() === 1;
                         $__sideMeta = [
-                            'left'   => ['label' => 'la gauche', 'color' => '#3b82f6'],
-                            'center' => ['label' => 'le centre', 'color' => '#a8a8a8'],
-                            'right'  => ['label' => 'la droite', 'color' => '#e84c3d'],
+                            'left'   => ['label' => __('la gauche'), 'color' => '#3b82f6'],
+                            'center' => ['label' => __('le centre'), 'color' => '#a8a8a8'],
+                            'right'  => ['label' => __('la droite'), 'color' => '#e84c3d'],
                         ];
                     @endphp
                     @if($__oneSidedCoverage)
@@ -284,9 +284,9 @@
                              ">
                             <span aria-hidden="true" style="font-size:16px;">⚠</span>
                             <span>
-                                <strong>Couverture déséquilibrée</strong> — cette histoire n'est pour l'instant
-                                couverte que par {{ $__sideMeta[$__sole]['label'] }}.
-                                <a href="{{ url('/angles-morts') }}?cluster={{ (int) $post->story_cluster_id }}#cluster-{{ (int) $post->story_cluster_id }}" style="color:inherit; text-decoration:underline;">Voir cet angle mort</a>.
+                                <strong>{{ __('Couverture déséquilibrée') }}</strong> —
+                                {{ __("cette histoire n'est pour l'instant couverte que par :side.", ['side' => $__sideMeta[$__sole]['label']]) }}
+                                <a href="{{ url('/angles-morts') }}?cluster={{ (int) $post->story_cluster_id }}#cluster-{{ (int) $post->story_cluster_id }}" style="color:inherit; text-decoration:underline;">{{ __('Voir cet angle mort') }}</a>.
                             </span>
                         </div>
                     @endif
@@ -304,9 +304,9 @@
                         <div role="tablist" style="display:flex; gap:4px; border-radius:9999px; {{ $__pillBg }}">
                             <button type="button" data-bias-tab="all" role="tab" aria-selected="true"
                                     style="padding:6px 14px; border-radius:9999px; border:none; font-weight:700; font-size:13px; {{ $__activeBtn }}">
-                                Tous
+                                {{ __('Tous') }}
                             </button>
-                            @foreach(['left' => ['Gauche','#3b82f6'], 'center' => ['Centre','#a8a8a8'], 'right' => ['Droite','#e84c3d']] as $b => [$lbl,$col])
+                            @foreach(['left' => [__('Gauche'),'#3b82f6'], 'center' => [__('Centre'),'#a8a8a8'], 'right' => [__('Droite'),'#e84c3d']] as $b => [$lbl,$col])
                                 @if($__gnByBias[$b] > 0)
                                     <button type="button" data-bias-tab="{{ $b }}" role="tab" aria-selected="false"
                                             style="padding:6px 14px; border-radius:9999px; border:none; font-weight:600; font-size:13px; {{ $__inactiveBtn }}">
@@ -320,8 +320,8 @@
                         <button type="button"
                                 onclick="document.querySelector('.grimba-story-distribution')?.scrollIntoView({behavior:'smooth', block:'start'});"
                                 style="margin-left:auto; padding:6px 14px; border-radius:9999px; border:1px solid rgba(26,23,19,0.18); background:rgba(255,255,255,0.6); color:var(--gn-ink,#1a1713); font-weight:600; font-size:13px; cursor:pointer;"
-                                title="Voir la distribution des biais">
-                            ⚖️ Comparaison des biais
+                                title="{{ __('Voir la distribution des biais') }}">
+                            ⚖️ {{ __('Comparaison des biais') }}
                         </button>
 
                         {{-- S173 — save-for-later pill. Cookie-only (no auth).
@@ -415,14 +415,14 @@
                              default copy on single-bullet fallback. --}}
                         @php
                             $__badgeLabel = match ($__gnSummaryMode) {
-                                'nobuai'     => 'Insights par NobuAI',
-                                'extractive' => 'Synthèse multi-sources',
-                                default      => 'Aperçu',
+                                'nobuai'     => __('Insights par NobuAI'),
+                                'extractive' => __('Synthèse multi-sources'),
+                                default      => __('Aperçu'),
                             };
                             $__badgeFootnote = match ($__gnSummaryMode) {
                                 'nobuai'     => null,
-                                'extractive' => 'Première phrase de chaque source · résumé NobuAI à venir.',
-                                default      => "Résumé multi-sources à venir dès qu'une autre couverture rejoint cette histoire.",
+                                'extractive' => __('Première phrase de chaque source · résumé NobuAI à venir.'),
+                                default      => __("Résumé multi-sources à venir dès qu'une autre couverture rejoint cette histoire."),
                             };
                         @endphp
                         <div style="border-top:1px dashed rgba(26,23,19,0.15); padding-top:14px; margin-top:18px;">
@@ -441,7 +441,7 @@
                                         {{ $__badgeLabel }}
                                     </span>
                                     <span class="ms-auto small opacity-55" style="font-size:12px;">
-                                        ▾ <span style="margin-left:4px;">cliquer pour masquer</span>
+                                        ▾ <span style="margin-left:4px;">{{ __('cliquer pour masquer') }}</span>
                                     </span>
                                 </summary>
 
@@ -462,7 +462,7 @@
                                                 $__bColor = $__bulletColor[$item['bias'] ?? 'unknown'] ?? $__bulletColor['unknown'];
                                             @endphp
                                             <li style="display:flex; gap:10px; margin-bottom:12px; align-items:flex-start;">
-                                                <span aria-hidden="true" title="{{ $item['bias'] ?? 'non classé' }}"
+                                                <span aria-hidden="true" title="{{ __($item['bias'] ?? 'non classé') }}"
                                                       style="flex:0 0 8px; width:8px; height:8px; margin-top:8px; border-radius:50%; background:{{ $__bColor }};"></span>
                                                 <span style="flex:1;">
                                                     {{ $item['text'] }}
@@ -509,7 +509,7 @@
                                             <div class="grimba-nobuai-insight">
                                                 <span class="grimba-nobuai-insight__dot" style="--insight-tone: {{ $__meta['tone'] }};">{{ $__meta['icon'] }}</span>
                                                 <span class="grimba-nobuai-insight__copy">
-                                                    <strong>{{ $insight['label'] }}</strong>
+                                                    <strong>{{ __($insight['label']) }}</strong>
                                                     {{ $insight['body'] }}
                                                 </span>
                                             </div>
@@ -534,7 +534,7 @@
                                 <div class="d-flex justify-content-end mt-3">
                                     <a href="{{ url('/contact') }}?topic=insight&post={{ $post->id }}"
                                        style="font-size:12px; color:var(--gn-ink,#1a1713); opacity:0.55; text-decoration:underline;">
-                                        Ce résumé vous semble incorrect ?
+                                        {{ __('Ce résumé vous semble incorrect ?') }}
                                     </a>
                                 </div>
                             </details>
@@ -601,9 +601,9 @@
                 @if($__gnFullBody)
                     <details class="grimba-full-article glass-panel p-3 p-md-4 mb-3" style="cursor:pointer;">
                         <summary style="cursor:pointer; font-family:'Public Sans',system-ui,sans-serif; font-weight:700; font-size:14px; letter-spacing:0.4px; text-transform:uppercase; color:var(--gn-ink,#1a1713);">
-                            Lire l'article complet ↓
+                            {{ __("Lire l'article complet") }} ↓
                             <span class="small opacity-65 ms-2" style="font-weight:500; text-transform:none; letter-spacing:0;">
-                                · {{ \Illuminate\Support\Str::words(strip_tags($__gnFullBody), 1, '') === '' ? '' : (\Illuminate\Support\Str::wordCount(strip_tags($__gnFullBody)) . ' mots') }}
+                                · {{ \Illuminate\Support\Str::words(strip_tags($__gnFullBody), 1, '') === '' ? '' : trans_choice(':count mot|:count mots', \Illuminate\Support\Str::wordCount(strip_tags($__gnFullBody)), ['count' => \Illuminate\Support\Str::wordCount(strip_tags($__gnFullBody))]) }}
                             </span>
                         </summary>
                         <div class="grimba-full-article__body mt-3" style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-size:17px; line-height:1.65; color:var(--gn-ink,#1a1713);">
@@ -617,9 +617,9 @@
                         @endphp
                         @if($__gnUpstream)
                             <p class="small opacity-60 mt-3 mb-0" style="font-family:'Public Sans',system-ui,sans-serif;">
-                                Source originale :
+                                {{ __('Source originale') }} :
                                 <a href="{{ $__gnUpstream }}" target="_blank" rel="noopener" style="color:#c0392b;">
-                                    {{ $post->source_name ?? 'lire chez l\'éditeur' }} ↗
+                                    {{ $post->source_name ?? __("lire chez l'éditeur") }} ↗
                                 </a>
                             </p>
                         @endif
@@ -694,10 +694,10 @@
 
                             <div class="p-3 p-md-4">
                                 <div class="d-flex align-items-center gap-2 flex-wrap mb-2 small">
-                                    <span class="grimba-methodology__kicker">Article</span>
+                                    <span class="grimba-methodology__kicker">{{ __('Article') }}</span>
                                     @if($post->source_name)
                                         <span class="opacity-50">·</span>
-                                        <span class="opacity-75">Lu chez {{ $post->source_name }}</span>
+                                        <span class="opacity-75">{{ __('Lu chez :source', ['source' => $post->source_name]) }}</span>
                                     @endif
                                     <span class="opacity-50">·</span>
                                     <span class="opacity-75">{{ optional($post->created_at)->locale($__gnTarget)->diffForHumans() }}</span>
@@ -717,7 +717,7 @@
                                     <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
                                         {!! Theme::partial('nobuai-chip', ['size' => 'md']) !!}
                                         <span class="small opacity-65">
-                                            Article original en {{ strtoupper((string) $post->original_language) }} affiché en {{ $__gnTargetLabel }}.
+                                            {{ __('Article original en :source affiché en :target.', ['source' => strtoupper((string) $post->original_language), 'target' => $__gnTargetLabel]) }}
                                         </span>
                                     </div>
                                 @endif
@@ -736,9 +736,9 @@
                                                 font-size:11.5px; font-weight:700; letter-spacing:0.5px;
                                             ">
                                                 <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#f6f1e8;"></span>
-                                                Aperçu
+                                                {{ __('Aperçu') }}
                                             </span>
-                                            <span class="small opacity-55">Résumé multi-sources à venir si d'autres couvertures rejoignent cette histoire.</span>
+                                            <span class="small opacity-55">{{ __("Résumé multi-sources à venir si d'autres couvertures rejoignent cette histoire.") }}</span>
                                         </div>
                                         <p class="m-0" style="font-size:15.5px; line-height:1.6; color:var(--gn-ink,#1a1713);">
                                             {{ \Illuminate\Support\Str::limit($description, 260) }}

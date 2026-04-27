@@ -13,7 +13,7 @@
 @endphp
 
 @if($chips->isNotEmpty())
-    <div class="grimba-chips" aria-label="Sujets à suivre">
+    <div class="grimba-chips" aria-label="{{ __('Sujets à suivre') }}">
         <div class="container-xxl">
             <div class="grimba-chips__row">
                 @foreach($chips as $chip)
@@ -26,7 +26,9 @@
                         <button type="button"
                                 class="grimba-chip__follow"
                                 data-grimba-follow="{{ $chip->id }}"
-                                aria-label="{{ $isFollowed ? 'Ne plus suivre' : 'Suivre' }} {{ $chip->name }}">{{ $isFollowed ? '✓' : '+' }}</button>
+                                data-label-follow="{{ __('Suivre') }}"
+                                data-label-unfollow="{{ __('Ne plus suivre') }}"
+                                aria-label="{{ ($isFollowed ? __('Ne plus suivre') : __('Suivre')) . ' ' . $chip->name }}">{{ $isFollowed ? '✓' : '+' }}</button>
                     </span>
                 @endforeach
             </div>
@@ -52,7 +54,7 @@
                     const nowFollowed = res.followed.includes(parseInt(id));
                     chip.classList.toggle('grimba-chip--followed', nowFollowed);
                     btn.textContent = nowFollowed ? '✓' : '+';
-                    btn.setAttribute('aria-label', (nowFollowed ? 'Ne plus suivre' : 'Suivre'));
+                    btn.setAttribute('aria-label', nowFollowed ? btn.dataset.labelUnfollow : btn.dataset.labelFollow);
                     // Update counter in header meta strip if present.
                     const counter = document.getElementById('grimba-follow-count');
                     if (counter) counter.textContent = String(res.count);

@@ -20,8 +20,8 @@
     <div class="row g-4">
         <div class="col-lg-8 col-12">
             <header class="grimba-latest__head d-flex justify-content-between align-items-center mb-3">
-                <h2 class="grimba-latest__title">Dernières histoires</h2>
-                <a href="{{ url('/blog') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">Tout voir</a>
+                <h2 class="grimba-latest__title">{{ __('Dernières histoires') }}</h2>
+                <a href="{{ url('/blog') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Tout voir') }}</a>
             </header>
 
             <ul class="grimba-latest__list">
@@ -59,15 +59,15 @@
 
         <aside class="col-lg-4 col-12">
             <header class="grimba-similar__head mb-3">
-                <h2 class="h5 mb-1">Sujets à suivre</h2>
-                <p class="small opacity-75 mb-0">Constituez votre fil équilibré.</p>
+                <h2 class="h5 mb-1">{{ __('Sujets à suivre') }}</h2>
+                <p class="small opacity-75 mb-0">{{ __('Constituez votre fil équilibré.') }}</p>
             </header>
             <ul class="grimba-similar__list">
                 @foreach($followChips as $c)
                     <li>
                         <a class="grimba-similar__chip" href="{{ $c->url }}">
                             <span>{{ $c->name }}</span>
-                            <span class="grimba-similar__plus" aria-label="Suivre">+</span>
+                            <span class="grimba-similar__plus" aria-label="{{ __('Suivre') }}">+</span>
                         </a>
                     </li>
                 @endforeach

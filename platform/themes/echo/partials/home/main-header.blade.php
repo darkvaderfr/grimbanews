@@ -49,9 +49,9 @@
                 @include(Theme::getThemeNamespace('partials.home.lang-switch'))
                 <span class="opacity-25 d-none d-lg-inline">·</span>
                 <span class="grimba-header-pulse d-none d-lg-inline">
-                    {{ $pulse['new'] }} nouveau{{ $pulse['new'] === 1 ? '' : 'x' }} ce matin ·
-                    {{ $pulse['blindspots'] }} angle{{ $pulse['blindspots'] === 1 ? '' : 's' }} mort{{ $pulse['blindspots'] === 1 ? '' : 's' }} ·
-                    {{ $pulse['clusters'] }} dossiers actifs
+                    {{ trans_choice(':count nouveau ce matin|:count nouveaux ce matin', $pulse['new'], ['count' => $pulse['new']]) }} ·
+                    {{ trans_choice(':count angle mort|:count angles morts', $pulse['blindspots'], ['count' => $pulse['blindspots']]) }} ·
+                    {{ trans_choice(':count dossier actif|:count dossiers actifs', $pulse['clusters'], ['count' => $pulse['clusters']]) }}
                 </span>
             </div>
             <div class="small opacity-75 d-flex align-items-center gap-2">
@@ -73,7 +73,7 @@
 
     <div class="grimba-header__main glass-panel">
         <div class="container-xxl d-flex align-items-center gap-4 py-3">
-            <a href="{{ url('/') }}" class="grimba-wordmark" aria-label="Grimba News — accueil">
+            <a href="{{ url('/') }}" class="grimba-wordmark" aria-label="{{ __('Grimba News — accueil') }}">
                 <span class="grimba-wordmark__mark">Grimba</span>
                 <span class="grimba-wordmark__tag">News</span>
             </a>

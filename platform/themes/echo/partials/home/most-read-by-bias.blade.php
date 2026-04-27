@@ -5,16 +5,16 @@
 
     $biasMeta = [
         'left' => [
-            'label' => 'Gauche',
-            'description' => 'Les articles les plus lus côté gauche.',
+            'label' => __('Gauche'),
+            'description' => __('Les articles les plus lus côté gauche.'),
         ],
         'center' => [
-            'label' => 'Centre',
-            'description' => 'Ce qui attire le plus les lecteurs du centre.',
+            'label' => __('Centre'),
+            'description' => __('Ce qui attire le plus les lecteurs du centre.'),
         ],
         'right' => [
-            'label' => 'Droite',
-            'description' => 'Les titres qui performent côté droit.',
+            'label' => __('Droite'),
+            'description' => __('Les titres qui performent côté droit.'),
         ],
     ];
 
@@ -38,11 +38,11 @@
     <section class="grimba-most-read mt-5" aria-labelledby="grimba-most-read-title">
         <header class="grimba-most-read__head">
             <div>
-                <span class="grimba-most-read__eyebrow">Lecture publique</span>
-                <h2 id="grimba-most-read-title" class="grimba-most-read__title">Les plus lus par tendance</h2>
+                <span class="grimba-most-read__eyebrow">{{ __('Lecture publique') }}</span>
+                <h2 id="grimba-most-read-title" class="grimba-most-read__title">{{ __('Les plus lus par tendance') }}</h2>
             </div>
             <p class="grimba-most-read__dek">
-                Un instantané GroundNews-style de ce qui monte à gauche, au centre et à droite.
+                {{ __('Un instantané GroundNews-style de ce qui monte à gauche, au centre et à droite.') }}
             </p>
         </header>
 
@@ -74,7 +74,7 @@
                                             @if($source)
                                                 <span>{{ Str::limit($source, 32) }}</span>
                                             @endif
-                                            <span>{{ number_format((int) $post->views) }} vues</span>
+                                            <span>{{ trans_choice(':count vue|:count vues', (int) $post->views, ['count' => number_format((int) $post->views)]) }}</span>
                                         </div>
                                         @if($isTranslated)
                                             {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
@@ -85,7 +85,7 @@
                         </ol>
                     @else
                         <p class="grimba-most-read__empty">
-                            Pas encore assez de lectures classées {{ mb_strtolower($meta['label']) }}.
+                            {{ __('Pas encore assez de lectures classées :bias.', ['bias' => mb_strtolower($meta['label'])]) }}
                         </p>
                     @endif
                 </article>

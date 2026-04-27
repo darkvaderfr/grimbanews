@@ -39,7 +39,7 @@
 
 <section class="grimba-topnews mt-4">
     <header class="grimba-topnews__head">
-        <h2 class="grimba-topnews__title">Principales histoires</h2>
+        <h2 class="grimba-topnews__title">{{ __('Principales histoires') }}</h2>
     </header>
     <ul class="grimba-topnews__list">
         @foreach($topNews as $p)
