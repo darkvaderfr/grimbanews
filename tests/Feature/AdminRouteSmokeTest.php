@@ -86,13 +86,23 @@ class AdminRouteSmokeTest extends TestCase
             ->assertRedirect('/admin/grimba/cockpit');
     }
 
-    public function test_admin_login_does_not_inject_debugbar_payload(): void
+    public function test_admin_login_uses_minimal_guest_shell_without_admin_runtime_scripts(): void
     {
         $this->get('/admin/login')
             ->assertOk()
+            ->assertSee('grimba-auth-minimal', false)
+            ->assertSee('/vendor/core/core/base/css/core.css', false)
             ->assertDontSee('browser-logger-active', false)
             ->assertDontSee('/_boost/browser-logs', false)
             ->assertDontSee('phpdebugbar', false)
-            ->assertDontSee('/_debugbar/assets', false);
+            ->assertDontSee('/_debugbar/assets', false)
+            ->assertDontSee('/vendor/core/core/base/js/app.js', false)
+            ->assertDontSee('/vendor/core/core/base/js/core-ui.js', false)
+            ->assertDontSee('/vendor/core/core/base/js/core.js', false)
+            ->assertDontSee('js-validation.js', false)
+            ->assertDontSee('jquery.are-you-sure', false)
+            ->assertDontSee('mcustom-scrollbar', false)
+            ->assertDontSee('language-global.js', false)
+            ->assertDontSee('grimba-admin-theme.js', false);
     }
 }
