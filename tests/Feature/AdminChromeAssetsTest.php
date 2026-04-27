@@ -13,7 +13,9 @@ class AdminChromeAssetsTest extends TestCase
         $js = file_get_contents($root . '/public/themes/echo/js/grimba-admin-theme.js');
 
         $this->assertStringContainsString('--gn-dropdown-bg:  rgba(255, 255, 255, 0.96);', $css);
+        $this->assertStringContainsString('--gn-z-admin-dropdown: 1090;', $css);
         $this->assertStringContainsString('backdrop-filter: none !important;', $css);
+        $this->assertStringContainsString('z-index: var(--gn-z-admin-dropdown) !important;', $css);
         $this->assertStringContainsString('body[data-bs-theme="dark"] .navbar.navbar-expand-md.d-print-none', $css);
         $this->assertStringContainsString('body .dropdown-menu .dropdown-item:hover', $css);
         $this->assertStringContainsString('body .navbar-vertical .dropdown-menu', $css);

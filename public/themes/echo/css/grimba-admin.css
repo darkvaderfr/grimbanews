@@ -25,6 +25,8 @@ body {
     --gn-dropdown-line: rgba(26, 23, 19, 0.18);
     --gn-dropdown-hover: rgba(26, 23, 19, 0.075);
     --gn-dropdown-active: rgba(26, 23, 19, 0.12);
+    --gn-z-admin-header: 1080;
+    --gn-z-admin-dropdown: 1090;
 
     font-family: var(--gn-font-body);
     color: var(--gn-ink);
@@ -140,6 +142,8 @@ body .app-sidebar .dropdown-menu .dropdown-item.show {
    Top navbar
    ------------------------------------------------------------ */
 body .navbar.navbar-expand-md.d-print-none {
+    position: relative;
+    z-index: var(--gn-z-admin-header) !important;
     background: rgba(246, 241, 232, 0.9) !important;
     border-bottom: 1px solid var(--gn-rule) !important;
     color: var(--gn-ink) !important;
@@ -201,6 +205,7 @@ body .select2-container--default .select2-dropdown,
 body .select2-container--bootstrap-5 .select2-dropdown,
 body .flatpickr-calendar,
 body .datepicker-dropdown {
+    z-index: var(--gn-z-admin-dropdown) !important;
     background: var(--gn-dropdown-bg) !important;
     border: 1px solid var(--gn-dropdown-line) !important;
     box-shadow: 0 22px 54px rgba(26, 23, 19, 0.2) !important;
