@@ -149,7 +149,9 @@ class ClusterPageTest extends TestCase
 
     public function test_public_nobuai_insights_show_groundnews_style_labels_and_note(): void
     {
-        $post = $this->assignCluster($this->publishedPostIds(2, 13), 910006, ['left', 'center']);
+        $ids = $this->publishedPostIds(2, 13);
+        $post = $this->assignCluster($ids, 910006, ['left', 'center']);
+        $generatedAt = \Carbon\Carbon::parse(DB::table('posts')->whereIn('id', $ids)->max('updated_at'))->addMinute();
 
         DB::table('posts')
             ->where('story_cluster_id', 910006)
@@ -161,7 +163,7 @@ class ClusterPageTest extends TestCase
                     'Angle mort: aucune source de droite publiée dans ce dossier.',
                     'Pourquoi ça compte: le lecteur voit consensus et lacunes séparément.',
                 ]),
-                'summary_generated_at' => now()->subMinutes(12),
+                'summary_generated_at' => $generatedAt,
                 'summary_driver' => 'openai',
             ]);
 

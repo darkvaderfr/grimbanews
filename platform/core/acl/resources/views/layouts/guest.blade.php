@@ -178,15 +178,34 @@
         }
 
         .grimba-auth-visual__caption {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
             z-index: 2;
             max-width: 30rem;
             padding: 1.25rem 1.5rem;
             border: 1px solid rgba(246, 241, 232, 0.24);
             border-radius: 1.25rem;
-            background: rgba(15, 13, 8, 0.42);
+            background: rgba(15, 13, 8, 0.34);
             box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+            transform: translateZ(0);
+        }
+
+        .grimba-auth-visual__caption::before {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            content: "";
+            background: rgba(15, 13, 8, 0.46);
             backdrop-filter: blur(14px) saturate(1.15);
             -webkit-backdrop-filter: blur(14px) saturate(1.15);
+        }
+
+        .grimba-auth-visual__caption h1,
+        .grimba-auth-visual__caption p {
+            position: relative;
+            z-index: 1;
+            filter: none;
         }
 
         .grimba-auth-minimal .form-control,
