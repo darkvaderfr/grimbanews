@@ -467,6 +467,48 @@
                                             </li>
                                         @endforeach
                                     </ul>
+                                @elseif($__gnSummaryMode === 'nobuai')
+                                    @php
+                                        $__insightMeta = [
+                                            'Ce qui est confirmé' => ['icon' => '✓', 'tone' => '#166534'],
+                                            'Ce que dit la gauche' => ['icon' => '●', 'tone' => '#3b82f6'],
+                                            'Ce que dit le centre' => ['icon' => '●', 'tone' => '#8a8a8a'],
+                                            'Ce que dit la droite' => ['icon' => '●', 'tone' => '#e84c3d'],
+                                            'Angle mort' => ['icon' => '!', 'tone' => '#8a2be2'],
+                                            'Pourquoi ça compte' => ['icon' => '→', 'tone' => '#1a1713'],
+                                        ];
+                                        $__parsedInsights = collect($__gnSummaryItems)
+                                            ->map(function ($line) use ($__insightMeta) {
+                                                $text = trim((string) (is_array($line) ? ($line['text'] ?? '') : $line));
+                                                $label = 'NobuAI';
+                                                $body = $text;
+                                                if (str_contains($text, ':')) {
+                                                    [$candidate, $rest] = array_map('trim', explode(':', $text, 2));
+                                                    if (isset($__insightMeta[$candidate])) {
+                                                        $label = $candidate;
+                                                        $body = $rest;
+                                                    }
+                                                }
+                                                return ['label' => $label, 'body' => $body];
+                                            })
+                                            ->filter(fn ($item) => $item['body'] !== '')
+                                            ->take(6)
+                                            ->values();
+                                    @endphp
+                                    <div class="grimba-nobuai-insights">
+                                        @foreach($__parsedInsights as $insight)
+                                            @php
+                                                $__meta = $__insightMeta[$insight['label']] ?? ['icon' => '•', 'tone' => 'var(--gn-ink,#1a1713)'];
+                                            @endphp
+                                            <div class="grimba-nobuai-insight">
+                                                <span class="grimba-nobuai-insight__dot" style="--insight-tone: {{ $__meta['tone'] }};">{{ $__meta['icon'] }}</span>
+                                                <span class="grimba-nobuai-insight__copy">
+                                                    <strong>{{ $insight['label'] }}</strong>
+                                                    {{ $insight['body'] }}
+                                                </span>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 @elseif(count($__gnSummaryItems) === 1)
                                     <p class="m-0" style="font-size:15.5px; line-height:1.6; color:var(--gn-ink,#1a1713);">
                                         {{ is_array($__gnSummaryItems[0]) ? $__gnSummaryItems[0]['text'] : $__gnSummaryItems[0] }}
@@ -496,6 +538,51 @@
                             .grimba-insights__summary::-webkit-details-marker { display: none; }
                             .grimba-insights[open] .grimba-insights__summary span:last-child::before {
                                 content: '▴ ';
+                            }
+                            .grimba-nobuai-insights {
+                                display: grid;
+                                gap: 10px;
+                            }
+                            .grimba-nobuai-insight {
+                                display: flex;
+                                gap: 10px;
+                                align-items: flex-start;
+                                padding: 11px 12px;
+                                border: 1px solid rgba(26,23,19,0.11);
+                                border-radius: 14px;
+                                background: rgba(255,255,255,0.52);
+                                color: var(--gn-ink,#1a1713);
+                                font-size: 15px;
+                                line-height: 1.48;
+                            }
+                            .grimba-nobuai-insight__dot {
+                                flex: 0 0 24px;
+                                width: 24px;
+                                height: 24px;
+                                border-radius: 9999px;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                margin-top: 1px;
+                                background: color-mix(in srgb, var(--insight-tone) 14%, transparent);
+                                color: var(--insight-tone);
+                                font-size: 12px;
+                                font-weight: 800;
+                            }
+                            .grimba-nobuai-insight__copy strong {
+                                display: block;
+                                margin-bottom: 1px;
+                                color: var(--gn-ink,#1a1713);
+                                font-size: 12px;
+                                font-family: 'Public Sans', system-ui, sans-serif;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
+                            }
+                            [data-theme="dark"] .grimba-nobuai-insight,
+                            body[data-theme="dark"] .grimba-nobuai-insight,
+                            html[data-bs-theme="dark"] .grimba-nobuai-insight {
+                                background: rgba(246,241,232,0.08);
+                                border-color: rgba(246,241,232,0.14);
                             }
                         </style>
                     @endif
