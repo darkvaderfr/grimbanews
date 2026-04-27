@@ -17,14 +17,14 @@
 @endphp
 
 @if(! $skip)
-    <div id="grimba-onboard-modal" class="grimba-newsletter-modal is-open" role="dialog" aria-labelledby="grimba-onboard-title">
+    <div id="grimba-onboard-modal" class="grimba-newsletter-modal is-open" role="dialog" aria-modal="true" aria-labelledby="grimba-onboard-title">
         <div class="grimba-newsletter-modal__backdrop" data-grimba-onboard-close></div>
         <div class="grimba-newsletter-modal__panel glass-panel grimba-onboard-panel" role="document">
-            <button type="button" class="grimba-newsletter-modal__close" aria-label="Fermer" data-grimba-onboard-close>×</button>
+            <button type="button" class="grimba-newsletter-modal__close" aria-label="{{ __('Fermer') }}" data-grimba-onboard-close>×</button>
 
-            <span class="grimba-methodology__kicker">Bienvenue sur GrimbaNews</span>
+            <span class="grimba-methodology__kicker">{{ __('Bienvenue sur GrimbaNews') }}</span>
             <h2 id="grimba-onboard-title" class="grimba-methodology__title mt-2 mb-3">
-                Voyez chaque angle de chaque histoire.
+                {{ __('Voyez chaque angle de chaque histoire.') }}
             </h2>
 
             <div class="row g-3 mb-4 grimba-onboard-pillars">
@@ -35,29 +35,29 @@
                             <span style="background:#a8a8a8;"></span>
                             <span style="background:#ef4444;"></span>
                         </div>
-                        <strong>Biais classé</strong>
-                        <p class="small opacity-85 mb-0">Gauche, Centre, Droite. Chaque source, chaque article.</p>
+                        <strong>{{ __('Biais classé') }}</strong>
+                        <p class="small opacity-85 mb-0">{{ __('Gauche, Centre, Droite. Chaque source, chaque article.') }}</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="grimba-onboard-pillar">
                         <div class="grimba-onboard-pillar__dot" style="background:#c0392b;" aria-hidden="true">!</div>
-                        <strong>Angles morts</strong>
-                        <p class="small opacity-85 mb-0">Les histoires qu'un seul camp couvre — on les signale.</p>
+                        <strong>{{ __('Angles morts') }}</strong>
+                        <p class="small opacity-85 mb-0">{{ __("Les histoires qu'un seul camp couvre — on les signale.") }}</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="grimba-onboard-pillar">
                         <div class="grimba-onboard-pillar__score" aria-hidden="true">92<span>/100</span></div>
-                        <strong>Crédibilité</strong>
-                        <p class="small opacity-85 mb-0">Score transparent par média, révisable en continu.</p>
+                        <strong>{{ __('Crédibilité') }}</strong>
+                        <p class="small opacity-85 mb-0">{{ __('Score transparent par média, révisable en continu.') }}</p>
                     </div>
                 </div>
             </div>
 
-            <div class="mb-2"><strong>Choisissez 3 sujets</strong> pour démarrer votre fil (optionnel) :</div>
+            <div class="mb-2"><strong>{{ __('Choisissez 3 sujets') }}</strong> {{ __('pour démarrer votre fil (optionnel) :') }}</div>
             <p class="small opacity-75 mb-3">
-                Astuce : l'étoile <span aria-hidden="true">★</span> sauvegarde n'importe quel article dans votre coffre pour plus tard, sans créer de compte.
+                {{ __("Astuce : l'étoile") }} <span aria-hidden="true">★</span> {{ __("sauvegarde n'importe quel article dans votre coffre pour plus tard, sans créer de compte.") }}
             </p>
             <div class="d-flex flex-wrap gap-2 mb-3 grimba-onboard-topics">
                 @foreach($topics as $topic)
@@ -71,10 +71,10 @@
             </div>
 
             <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
-                <span class="small opacity-75"><span id="grimba-onboard-count">0</span> sélectionné(s)</span>
+                <span class="small opacity-75"><span id="grimba-onboard-count">0</span> {{ __('sélectionné(s)') }}</span>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn-grimba btn-grimba--ghost" data-grimba-onboard-skip>Passer</button>
-                    <button type="button" class="btn-grimba btn-grimba--solid" data-grimba-onboard-submit>C'est parti</button>
+                    <button type="button" class="btn-grimba btn-grimba--ghost" data-grimba-onboard-skip>{{ __('Passer') }}</button>
+                    <button type="button" class="btn-grimba btn-grimba--solid" data-grimba-onboard-submit>{{ __("C'est parti") }}</button>
                 </div>
             </div>
         </div>
@@ -88,11 +88,23 @@
             const closeBtns = modal.querySelectorAll('[data-grimba-onboard-close], [data-grimba-onboard-skip]');
             const submit    = modal.querySelector('[data-grimba-onboard-submit]');
             const csrf      = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
             const selected = new Set();
+            const emptyLabel = @json(__('Explorer sans suivre'));
+            const readyLabel = @json(__("C'est parti"));
+
+            document.body.style.overflow = 'hidden';
+            requestAnimationFrame(() => {
+                (topics[0] || submit || modal.querySelector(focusableSelector))?.focus();
+            });
+
+            function focusables() {
+                return Array.from(modal.querySelectorAll(focusableSelector)).filter(el => el.offsetParent !== null);
+            }
 
             function refresh() {
                 counter.textContent = selected.size;
-                submit.textContent = selected.size === 0 ? 'Explorer sans suivre' : 'C’est parti';
+                submit.textContent = selected.size === 0 ? emptyLabel : readyLabel;
             }
 
             topics.forEach(btn => btn.addEventListener('click', () => {
@@ -107,17 +119,21 @@
 
             function close() {
                 modal.classList.remove('is-open');
+                document.body.style.overflow = '';
                 setTimeout(() => modal.remove(), 200);
             }
 
             closeBtns.forEach(b => b.addEventListener('click', async () => {
-                // Still set the onboarded cookie so we don't nag.
-                await fetch(@json(route('public.onboarding.complete')), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
-                    body: JSON.stringify({ category_ids: [] })
-                });
-                close();
+                try {
+                    // Still set the onboarded cookie so we don't nag.
+                    await fetch(@json(route('public.onboarding.complete')), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                        body: JSON.stringify({ category_ids: [] })
+                    });
+                } finally {
+                    close();
+                }
             }));
 
             submit.addEventListener('click', async () => {
@@ -136,7 +152,28 @@
                 }
             });
 
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+            document.addEventListener('keydown', (e) => {
+                if (! document.body.contains(modal) || ! modal.classList.contains('is-open')) return;
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeBtns[0]?.click();
+                    return;
+                }
+                if (e.key !== 'Tab') return;
+
+                const nodes = focusables();
+                if (! nodes.length) return;
+                const first = nodes[0];
+                const last = nodes[nodes.length - 1];
+
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (! e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            });
         })();
     </script>
 @endif

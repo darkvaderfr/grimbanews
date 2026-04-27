@@ -2,18 +2,17 @@
     $flash = session('newsletter_flash');
 @endphp
 
-<div id="grimba-newsletter-modal" class="grimba-newsletter-modal" aria-hidden="true" role="dialog">
+<div id="grimba-newsletter-modal" class="grimba-newsletter-modal" aria-hidden="true" aria-modal="true" role="dialog" aria-labelledby="grimba-newsletter-title">
     <div class="grimba-newsletter-modal__backdrop" data-grimba-newsletter-close></div>
     <div class="grimba-newsletter-modal__panel glass-panel" role="document">
-        <button type="button" class="grimba-newsletter-modal__close" aria-label="Fermer" data-grimba-newsletter-close>×</button>
+        <button type="button" class="grimba-newsletter-modal__close" aria-label="{{ __('Fermer') }}" data-grimba-newsletter-close>×</button>
 
-        <span class="grimba-methodology__kicker">Infolettre</span>
-        <h2 class="grimba-methodology__title mt-2 mb-2">
-            Chaque matin, chaque angle.
+        <span class="grimba-methodology__kicker">{{ __('Infolettre') }}</span>
+        <h2 id="grimba-newsletter-title" class="grimba-methodology__title mt-2 mb-2">
+            {{ __('Chaque matin, chaque angle.') }}
         </h2>
         <p class="mb-3 opacity-85">
-            Les histoires clés du jour, classées par biais, avec les angles morts que
-            les autres médias ignorent. En français, livrées à 7h.
+            {{ __('Les histoires clés du jour, classées par biais, avec les angles morts que les autres médias ignorent. En français, livrées à 7h.') }}
         </p>
 
         @if($flash)
@@ -28,11 +27,11 @@
             <div class="d-flex gap-2 flex-wrap">
                 <input type="email" name="email" required placeholder="votre@email.fr"
                        class="flex-grow-1" style="min-width:220px;padding:0.6rem 0.9rem;border-radius:9999px;border:1px solid rgba(0,0,0,0.12);">
-                <button type="submit" class="btn-grimba btn-grimba--solid">S'abonner</button>
+                <button type="submit" class="btn-grimba btn-grimba--solid">{{ __("S'abonner") }}</button>
             </div>
             <p class="small opacity-75 mt-2 mb-0">
-                Gratuit, désabonnement en un clic. Voir la
-                <a href="{{ url('/confidentialite') }}" class="text-decoration-underline">politique de confidentialité</a>.
+                {{ __('Gratuit, désabonnement en un clic. Voir la') }}
+                <a href="{{ url('/confidentialite') }}" class="text-decoration-underline">{{ __('politique de confidentialité') }}</a>.
             </p>
         </form>
     </div>
@@ -43,13 +42,54 @@
         const modal = document.getElementById('grimba-newsletter-modal');
         const openers = document.querySelectorAll('[data-grimba-newsletter-open]');
         const closers = modal.querySelectorAll('[data-grimba-newsletter-close]');
+        const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+        let lastFocus = null;
 
-        function open()  { modal.classList.add('is-open'); modal.setAttribute('aria-hidden','false'); }
-        function close() { modal.classList.remove('is-open'); modal.setAttribute('aria-hidden','true'); }
+        function focusables() {
+            return Array.from(modal.querySelectorAll(focusableSelector)).filter(el => el.offsetParent !== null);
+        }
 
-        openers.forEach(b => b.addEventListener('click', (e) => { e.preventDefault(); open(); }));
+        function open(trigger) {
+            lastFocus = trigger || document.activeElement;
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            requestAnimationFrame(() => {
+                (modal.querySelector('input[name="email"]') || focusables()[0])?.focus();
+            });
+        }
+
+        function close() {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+        }
+
+        openers.forEach(b => b.addEventListener('click', (e) => { e.preventDefault(); open(b); }));
         closers.forEach(b => b.addEventListener('click', close));
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+        document.addEventListener('keydown', (e) => {
+            if (! modal.classList.contains('is-open')) return;
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                close();
+                return;
+            }
+            if (e.key !== 'Tab') return;
+
+            const nodes = focusables();
+            if (! nodes.length) return;
+            const first = nodes[0];
+            const last = nodes[nodes.length - 1];
+
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (! e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        });
 
         @if($flash)
             open();
