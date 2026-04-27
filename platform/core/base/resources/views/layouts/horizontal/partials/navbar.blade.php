@@ -1,6 +1,6 @@
 <header
     class="navbar navbar-expand-md d-print-none"
-    data-bs-theme="dark"
+    @if (AdminHelper::themeMode() === 'dark') data-bs-theme="dark" @endif
 >
     <div class="{{ AdminAppearance::getContainerWidth() }}">
         <button

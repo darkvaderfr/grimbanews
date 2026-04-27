@@ -4,7 +4,7 @@
         'navbar-minimal' =>
             Auth::user()->getMeta('minimal_sidebar', 'no') === 'yes',
     ])
-    data-bs-theme="dark"
+    @if (AdminHelper::themeMode() === 'dark') data-bs-theme="dark" @endif
     id="sidebar-menu-main"
 >
     <div class="{{ AdminAppearance::getContainerWidth() }}">

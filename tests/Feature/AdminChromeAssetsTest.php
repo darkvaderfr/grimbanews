@@ -52,6 +52,10 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('function disablePublicWorkerOnAdmin()', $js);
         $this->assertStringContainsString("window.location.pathname.match(/^\\/admin(?:\\/|$)/)", $js);
         $this->assertStringContainsString('navigator.serviceWorker.getRegistrations()', $js);
+        $this->assertStringContainsString('function serverMode()', $js);
+        $this->assertStringContainsString('a[href*="/toggle-theme-mode?theme="]', $js);
+        $this->assertStringContainsString("if (href.indexOf('theme=dark') !== -1)", $js);
+        $this->assertStringContainsString("if (server) {\n            return server;", $js);
         $this->assertStringContainsString('function currentMode(preferDom)', $js);
         $this->assertStringContainsString('applyMode(true)', $js);
         $this->assertStringContainsString("document.documentElement.setAttribute('data-bs-theme', effective)", $js);
@@ -61,7 +65,7 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringNotContainsString('window.setInterval(applyMode', $js);
 
         $chrome = file_get_contents($root . '/platform/themes/echo/functions/grimba-admin-chrome.php');
-        $this->assertStringContainsString('/themes/echo/js/grimba-admin-theme.js?v=20260428.1', $chrome);
+        $this->assertStringContainsString('/themes/echo/js/grimba-admin-theme.js?v=20260428.2', $chrome);
     }
 
     public function test_custom_grimba_admin_views_use_shared_shell(): void
@@ -86,6 +90,24 @@ class AdminChromeAssetsTest extends TestCase
         }
 
         $this->assertGreaterThan(10, $checked);
+    }
+
+    public function test_admin_layout_chrome_does_not_hardcode_dark_mode(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $partials = [
+            '/platform/core/base/resources/views/layouts/vertical/partials/header.blade.php',
+            '/platform/core/base/resources/views/layouts/vertical/partials/aside.blade.php',
+            '/platform/core/base/resources/views/layouts/vertical/partials/navbar.blade.php',
+            '/platform/core/base/resources/views/layouts/horizontal/partials/navbar.blade.php',
+        ];
+
+        foreach ($partials as $partial) {
+            $contents = file_get_contents($root . $partial);
+
+            $this->assertStringContainsString("AdminHelper::themeMode() === 'dark'", $contents, $partial);
+            $this->assertStringNotContainsString("\n    data-bs-theme=\"dark\"\n", $contents, $partial);
+        }
     }
 
     public function test_key_admin_queues_use_shared_empty_states(): void
