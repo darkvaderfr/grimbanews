@@ -2,6 +2,12 @@
 
 @section('content')
     <div class="grimba-admin-screen max-width-1200">
+        <nav class="grimba-admin-wayfinder" aria-label="GrimbaNews admin navigation">
+            <a href="{{ route('grimba.cockpit') }}">GrimbaNews</a>
+            <a href="{{ route('grimba.news-sources.index') }}">Sources</a>
+            <span>Triage</span>
+        </nav>
+
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
                 <span class="grimba-admin-kicker">Classification queue</span>
@@ -36,11 +42,19 @@
                 </div>
 
                 @if($rows->isEmpty())
-                    <div class="alert alert-info mb-0">
-                        Aucune source en attente — la file de triage est vide.
+                    <div class="grimba-admin-empty">
+                        <div class="grimba-admin-empty__icon">OK</div>
+                        <div class="grimba-admin-empty__title">File de triage vide</div>
+                        <p class="grimba-admin-empty__copy">
+                            Aucune source générée automatiquement n'attend une classification.
+                        </p>
+                        <div class="grimba-admin-empty__actions">
+                            <a href="{{ route('grimba.news-sources.index') }}" class="btn btn-sm btn-primary">Toutes les sources</a>
+                        </div>
                     </div>
                 @else
-                    <table class="table table-hover align-middle">
+                    <div class="table-responsive grimba-admin-table-responsive">
+                    <table class="table table-hover align-middle grimba-admin-table">
                         <thead>
                             <tr>
                                 <th>Source</th>
@@ -58,18 +72,18 @@
                         <tbody>
                         @foreach($rows as $r)
                             <tr data-source-id="{{ $r->id }}">
-                                <td>
+                                <td data-label="Source">
                                     <strong>{{ $r->name }}</strong>
                                     @if($r->website)<br><small class="text-muted">{{ $r->website }}</small>@endif
                                     @if($r->api_id)<br><small class="text-muted">api: <code>{{ $r->api_id }}</code></small>@endif
                                 </td>
-                                <td class="text-end">{{ $counts[$r->id] ?? 0 }}</td>
-                                <td>
+                                <td data-label="Articles" class="text-end">{{ $counts[$r->id] ?? 0 }}</td>
+                                <td data-label="Échantillon">
                                     @foreach(($samples[$r->id] ?? []) as $s)
                                         <div class="small text-muted text-truncate" style="max-width:280px;" title="{{ $s }}">{{ $s }}</div>
                                     @endforeach
                                 </td>
-                                <td style="min-width:140px;">
+                                <td data-label="Biais" style="min-width:140px;">
                                     <select class="form-select form-select-sm" data-field="bias_rating">
                                         <option value="unknown" {{ $r->bias_rating === 'unknown' ? 'selected' : '' }}>—</option>
                                         <option value="left"   {{ $r->bias_rating === 'left'   ? 'selected' : '' }}>Gauche</option>
@@ -77,10 +91,10 @@
                                         <option value="right"  {{ $r->bias_rating === 'right'  ? 'selected' : '' }}>Droite</option>
                                     </select>
                                 </td>
-                                <td style="width:105px;">
+                                <td data-label="Score" style="width:105px;">
                                     <input type="number" min="-2" max="2" step="0.1" class="form-control form-control-sm" data-field="bias_score" value="{{ $r->bias_score }}" placeholder="-2..2">
                                 </td>
-                                <td style="min-width:140px;">
+                                <td data-label="Propriété" style="min-width:140px;">
                                     <select class="form-select form-select-sm" data-field="ownership_type">
                                         <option value="" {{ ! $r->ownership_type ? 'selected' : '' }}>—</option>
                                         @foreach(['independent'=>'Indépendant','corporate'=>'Privé','state'=>'État','nonprofit'=>'Associatif'] as $k => $v)
@@ -88,16 +102,16 @@
                                         @endforeach
                                     </select>
                                 </td>
-                                <td style="width:90px;">
+                                <td data-label="Crédibilité" style="width:90px;">
                                     <input type="number" min="0" max="100" class="form-control form-control-sm" data-field="credibility_score" value="{{ $r->credibility_score }}" placeholder="0-100">
                                 </td>
-                                <td style="width:80px;">
+                                <td data-label="Pays" style="width:80px;">
                                     <input type="text" class="form-control form-control-sm" data-field="country" value="{{ $r->country }}" placeholder="FR">
                                 </td>
-                                <td style="width:80px;">
+                                <td data-label="Langue" style="width:80px;">
                                     <input type="text" class="form-control form-control-sm" data-field="language" value="{{ $r->language }}" placeholder="fr">
                                 </td>
-                                <td>
+                                <td data-label="Actions" class="grimba-admin-inline-actions">
                                     <button type="button" class="btn btn-sm btn-primary" data-save-row>Enregistrer</button>
                                     <span class="text-success small d-none" data-saved-flag>✓</span>
                                 </td>
@@ -105,6 +119,7 @@
                         @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @endif
             </x-core::card.body>
         </x-core::card>

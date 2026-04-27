@@ -88,6 +88,8 @@ class AdminChromeAssetsTest extends TestCase
             '/resources/views/grimba-admin/newsapi/index.blade.php',
             '/resources/views/grimba-admin/subscribers/index.blade.php',
             '/resources/views/grimba-admin/news-sources/index.blade.php',
+            '/resources/views/grimba-admin/news-sources/triage.blade.php',
+            '/resources/views/grimba-admin/coverage-map/index.blade.php',
             '/resources/views/grimba-admin/story-clusters/index.blade.php',
         ];
 
@@ -108,6 +110,8 @@ class AdminChromeAssetsTest extends TestCase
             '/resources/views/grimba-admin/newsapi/index.blade.php',
             '/resources/views/grimba-admin/subscribers/index.blade.php',
             '/resources/views/grimba-admin/news-sources/index.blade.php',
+            '/resources/views/grimba-admin/news-sources/triage.blade.php',
+            '/resources/views/grimba-admin/coverage-map/index.blade.php',
             '/resources/views/grimba-admin/story-clusters/index.blade.php',
         ];
 
@@ -129,6 +133,7 @@ class AdminChromeAssetsTest extends TestCase
             '/resources/views/grimba-admin/rss-feeds/form.blade.php',
             '/resources/views/grimba-admin/story-clusters/form.blade.php',
             '/resources/views/grimba-admin/translation/index.blade.php',
+            '/resources/views/grimba-admin/cookies/index.blade.php',
         ];
 
         foreach ($views as $view) {
@@ -138,5 +143,17 @@ class AdminChromeAssetsTest extends TestCase
             $this->assertStringContainsString('grimba-admin-form-section', $contents, $view);
             $this->assertStringContainsString('grimba-admin-wayfinder', $contents, $view);
         }
+    }
+
+    public function test_admin_cinematic_sok_checklist_is_recorded(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $doc = file_get_contents($root . '/docs/GRIMBANEWS_ADMIN_CINEMATIC_SOK.md');
+
+        $this->assertStringContainsString('Decision:** Ship after S244', $doc);
+        $this->assertStringContainsString('No translucent dropdowns', $doc);
+        $this->assertStringContainsString('Dark/light parity', $doc);
+        $this->assertStringContainsString('Clear wayfinding', $doc);
+        $this->assertStringContainsString('The SOK outcome is **ship / continue**', $doc);
     }
 }

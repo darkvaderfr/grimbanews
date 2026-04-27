@@ -27,6 +27,12 @@
     @endphp
 
     <div class="grimba-admin-screen max-width-1200">
+        <nav class="grimba-admin-wayfinder" aria-label="GrimbaNews admin navigation">
+            <a href="{{ route('grimba.cockpit') }}">GrimbaNews</a>
+            <a href="{{ route('grimba.story-clusters.index') }}">Dossiers</a>
+            <span>Carte couverture</span>
+        </nav>
+
         <section class="grimba-admin-hero">
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                 <div>
@@ -85,8 +91,8 @@
             </x-core::card.header>
 
             <x-core::card.body>
-                <div class="table-responsive">
-                    <table class="table table-striped align-middle">
+                <div class="table-responsive grimba-admin-table-responsive">
+                    <table class="table table-striped align-middle grimba-admin-table">
                         <thead>
                             <tr>
                                 <th>Dossier</th>
@@ -104,7 +110,7 @@
                                     $meta = $statusMeta[$row->status] ?? $statusMeta['empty'];
                                 @endphp
                                 <tr>
-                                    <td style="min-width: 280px;">
+                                    <td data-label="Dossier" style="min-width: 280px;">
                                         <strong>{{ $row->topic }}</strong>
                                         @if($row->description)
                                             <div class="text-muted small">{{ \Illuminate\Support\Str::limit($row->description, 120) }}</div>
@@ -113,8 +119,8 @@
                                             <div class="text-muted small">Dernier article: {{ \Carbon\Carbon::parse($row->latest_article_at)->diffForHumans() }}</div>
                                         @endif
                                     </td>
-                                    <td class="text-end fw-bold">{{ $row->total }}</td>
-                                    <td style="min-width: 260px;">
+                                    <td data-label="Articles" class="text-end fw-bold">{{ $row->total }}</td>
+                                    <td data-label="Balance" style="min-width: 260px;">
                                         <div class="grimba-coverage-bar" aria-label="Balance gauche centre droite">
                                             <span style="width: {{ ($row->left_count / $total) * 100 }}%; background: var(--gn-left);"></span>
                                             <span style="width: {{ ($row->center_count / $total) * 100 }}%; background: var(--gn-center);"></span>
@@ -132,7 +138,7 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Manque">
                                         @if(count($row->missing))
                                             <div class="d-flex gap-1 flex-wrap">
                                                 @foreach($row->missing as $missing)
@@ -143,10 +149,10 @@
                                             <span class="text-muted">Aucun</span>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td data-label="Statut">
                                         <span class="badge text-bg-{{ $meta['class'] }}">{{ $meta['label'] }}</span>
                                     </td>
-                                    <td class="text-end">
+                                    <td data-label="Actions" class="text-end grimba-admin-inline-actions">
                                         <a href="{{ route('grimba.story-clusters.edit', $row->id) }}" class="btn btn-sm btn-outline-primary">Corriger</a>
                                         @if($row->total > 0)
                                             <a href="{{ url('/comparatif/' . $row->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary">Voir</a>
@@ -155,8 +161,18 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-5">
-                                        Aucun dossier pour ce filtre.
+                                    <td colspan="6">
+                                        <div class="grimba-admin-empty">
+                                            <div class="grimba-admin-empty__icon">MAP</div>
+                                            <div class="grimba-admin-empty__title">Aucun dossier pour ce filtre</div>
+                                            <p class="grimba-admin-empty__copy">
+                                                Changez le filtre ou revenez aux dossiers actifs pour revoir la couverture.
+                                            </p>
+                                            <div class="grimba-admin-empty__actions">
+                                                <a href="{{ route('grimba.coverage-map.index', ['filter' => 'all']) }}" class="btn btn-sm btn-primary">Tous les dossiers</a>
+                                                <a href="{{ route('grimba.story-clusters.index') }}" class="btn btn-sm btn-outline-primary">Dossiers actifs</a>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse

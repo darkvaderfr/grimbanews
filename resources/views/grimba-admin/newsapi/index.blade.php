@@ -2,6 +2,11 @@
 
 @section('content')
     <div class="grimba-admin-screen max-width-1100">
+        <nav class="grimba-admin-wayfinder" aria-label="GrimbaNews admin navigation">
+            <a href="{{ route('grimba.cockpit') }}">GrimbaNews</a>
+            <span>NewsAPI</span>
+        </nav>
+
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
                 <span class="grimba-admin-kicker">Ingest engine</span>

@@ -2,6 +2,11 @@
 
 @section('content')
     <div class="grimba-admin-screen max-width-1000">
+        <nav class="grimba-admin-wayfinder" aria-label="GrimbaNews admin navigation">
+            <a href="{{ route('grimba.cockpit') }}">GrimbaNews</a>
+            <span>Cookies</span>
+        </nav>
+
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
                 <span class="grimba-admin-kicker">Consent layer</span>
@@ -35,53 +40,65 @@
                     </p>
                 </div>
 
-                <form method="POST" action="{{ route('grimba.cookies.save') }}">
+                <form method="POST" action="{{ route('grimba.cookies.save') }}" class="grimba-admin-form">
                     @csrf
 
-                    <div class="form-check form-switch mb-4">
-                        <input type="hidden" name="active" value="0">
-                        <input type="checkbox" class="form-check-input" name="active" id="cookie-active" value="1" {{ $active ? 'checked' : '' }}>
-                        <label class="form-check-label" for="cookie-active">
-                            <strong>Bandeau actif</strong>
-                            <span class="text-muted small d-block">
-                                Désactiver pour cacher le bandeau sur tout le site (pour les régions sans obligation, par exemple).
-                            </span>
-                        </label>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Titre</strong></label>
-                        <input type="text" name="title" class="form-control" value="{{ $title }}">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Corps du message</strong></label>
-                        <textarea name="body" class="form-control" rows="4">{{ $body }}</textarea>
-                        <div class="form-text">Sauts de ligne respectés.</div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label"><strong>Bouton Accepter</strong></label>
-                            <input type="text" name="accept_label" class="form-control" value="{{ $accept_label }}">
+                    <section class="grimba-admin-form-section">
+                        <h2 class="grimba-admin-form-section__title">Activation</h2>
+                        <div class="form-check form-switch">
+                            <input type="hidden" name="active" value="0">
+                            <input type="checkbox" class="form-check-input" name="active" id="cookie-active" value="1" {{ $active ? 'checked' : '' }}>
+                            <label class="form-check-label" for="cookie-active">
+                                <strong>Bandeau actif</strong>
+                                <span class="text-muted small d-block">
+                                    Désactiver pour cacher le bandeau sur tout le site (pour les régions sans obligation, par exemple).
+                                </span>
+                            </label>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label"><strong>Bouton Refuser</strong></label>
-                            <input type="text" name="reject_label" class="form-control" value="{{ $reject_label }}">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label"><strong>Lien "En savoir plus"</strong></label>
-                            <input type="text" name="more_label" class="form-control" value="{{ $more_label }}">
-                        </div>
-                    </div>
+                    </section>
 
-                    <div class="mb-4">
-                        <label class="form-label"><strong>URL "En savoir plus"</strong></label>
-                        <input type="text" name="more_url" class="form-control" value="{{ $more_url }}" placeholder="/confidentialite">
-                        <div class="form-text">Chemin relatif (recommandé) ou URL absolue.</div>
-                    </div>
+                    <section class="grimba-admin-form-section">
+                        <h2 class="grimba-admin-form-section__title">Copie publique</h2>
+                        <p class="grimba-admin-form-section__hint mb-3">
+                            Gardez le texte court: ce bloc apparaît sur chaque page publique tant que le choix n'est pas enregistré.
+                        </p>
 
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Titre</strong></label>
+                            <input type="text" name="title" class="form-control" value="{{ $title }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Corps du message</strong></label>
+                            <textarea name="body" class="form-control" rows="4">{{ $body }}</textarea>
+                            <div class="form-text">Sauts de ligne respectés.</div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label"><strong>Bouton Accepter</strong></label>
+                                <input type="text" name="accept_label" class="form-control" value="{{ $accept_label }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><strong>Bouton Refuser</strong></label>
+                                <input type="text" name="reject_label" class="form-control" value="{{ $reject_label }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><strong>Lien "En savoir plus"</strong></label>
+                                <input type="text" name="more_label" class="form-control" value="{{ $more_label }}">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="form-label"><strong>URL "En savoir plus"</strong></label>
+                            <input type="text" name="more_url" class="form-control" value="{{ $more_url }}" placeholder="/confidentialite">
+                            <div class="form-text">Chemin relatif (recommandé) ou URL absolue.</div>
+                        </div>
+                    </section>
+
+                    <div class="grimba-admin-form-actions">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
                 </form>
 
                 <hr class="my-4">

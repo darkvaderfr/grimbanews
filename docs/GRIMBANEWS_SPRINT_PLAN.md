@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `fbf0a03` Polish admin inline actions
 - `19820da` Add admin wayfinder navigation
 - `e75f828` Polish admin alert surfaces
 - `b9e4dd3` Polish admin form sections
 - `a4c5224` Polish responsive admin tables
-- `89e36e3` Add admin empty-state cards
 
 Latest verification:
 
-- `php artisan test` passed with `48` tests and `721` assertions.
+- `php artisan test` passed with `49` tests and `750` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
 ## Completed Sprint Bands
@@ -47,7 +47,7 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S243 — Maturity, Accessibility, Admin, And Tests
+### S185-S244 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
@@ -75,6 +75,7 @@ Latest verification:
 - S241 added solid, high-contrast Grimba alert and diagnostic styling across custom admin pages, including warning rows and dark-mode alert surfaces.
 - S242 added shared wayfinder navigation to source, RSS feed, story cluster, and NobuAI provider settings pages, with light/dark hierarchy locked by tests.
 - S243 tightened inline admin actions in dense tables and cards, including larger hit areas and explicit destructive labels instead of tiny symbol-only controls.
+- S244 completed the backend cinematic SOK checklist, added wayfinding to remaining list/control pages, finished responsive coverage/triage tables, and brought cookie settings into the shared form system.
 
 ## Active Systems
 
@@ -109,15 +110,15 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S244 — Admin Backend SOK Checklist
+### S245 — Admin Production Readiness Smoke
 
-Goal: Produce the final backend design acceptance checklist and close any remaining high-visibility admin UI regressions found by the audit.
+Goal: Verify the redesigned backend is ready for a later production deployment without deploying now.
 
 Acceptance:
 
-- Document the backend UI/UX SOK checklist against the redesigned Grimba admin surfaces.
-- Fix any remaining blocking contrast, dropdown, navigation, or action-affordance issue found during the pass.
-- Tests remain green and the ledger records the final audit outcome.
+- Run local health checks that cover app boot, NobuAI readiness, and representative admin routes.
+- Record the smoke outcome and any non-blocking deployment notes in the sprint ledger.
+- Keep tests green and do not deploy production.
 
 ## Operating Rules
 

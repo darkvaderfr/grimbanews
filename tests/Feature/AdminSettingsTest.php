@@ -62,6 +62,8 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin/grimba/news-sources/triage')
             ->assertOk()
+            ->assertSee('grimba-admin-wayfinder', false)
+            ->assertSee('grimba-admin-table-responsive', false)
             ->assertSee('Classification queue')
             ->assertSee('Sources à classer')
             ->assertSee('Score');
@@ -232,8 +234,17 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin/grimba/coverage-map')
             ->assertOk()
+            ->assertSee('grimba-admin-wayfinder', false)
+            ->assertSee('grimba-admin-table-responsive', false)
             ->assertSee('Coverage map')
             ->assertSee('Carte de couverture');
+
+        $this->actingAs($this->admin())
+            ->get('/admin/grimba/cookies')
+            ->assertOk()
+            ->assertSee('grimba-admin-wayfinder', false)
+            ->assertSee('grimba-admin-form-section', false)
+            ->assertSee('Cookie banner');
 
         $this->actingAs($this->admin())
             ->get('/admin/grimba/cockpit')
