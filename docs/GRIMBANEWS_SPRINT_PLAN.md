@@ -14,15 +14,15 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
+- `bf3bc60` Finish futuristic admin shell audit
 - `e9f4a2e` Add guardrail quick-fix links
 - `efd8ea2` Add ingest guardrail metrics
 - `ef2a4cd` Extract shared ingest guardrails
 - `5ac0fbf` Add NewsAPI draft publish guardrails
-- `8e9deae` Add RSS draft publish guardrails
 
 Latest verification:
 
-- `php artisan test` passed with `45` tests and `625` assertions.
+- `php artisan test` passed with `45` tests and `633` assertions.
 - `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
 
 ## Completed Sprint Bands
@@ -47,7 +47,7 @@ Latest verification:
 
 - Member auth/dashboard restyle, local page, footer refresh, GroundNews-style hero, dark-mode coverage, save-for-later vault, CSV export, story timeline, one-sided coverage callouts, and bias-filtered vault.
 
-### S185-S236 — Maturity, Accessibility, Admin, And Tests
+### S185-S237 — Maturity, Accessibility, Admin, And Tests
 
 - Story/vault maturity, orphan layout, reading progress, NobuAI health/confidence polish, public cache, SEO, accessibility skip links/focus states, contrast tokens, admin cockpit, admin settings/dark mode fixes, extractive synthesis tests, cluster page tests, admin UI kit, edit forms, source triage, coverage map, NobuAI insight generation, NobuTranslation integration, most-read-by-bias, fine-grained source bias scores, newsletter bias signal, bidirectional translation queues, static UI localization, and admin dropdown/theme chrome hardening.
 - S219 added a clamped cockpit action for small-batch NobuAI insight generation.
@@ -68,6 +68,7 @@ Latest verification:
 - S234 added ingest guardrail metrics in cockpit plus per-queue RSS and NewsAPI blocker summaries.
 - S235 linked guardrail badges and cockpit blocker counts to source triage, translation settings, or the relevant article editor for faster remediation.
 - S236 finished the shared futuristic admin shell audit: RSS drafts, RSS feeds, and subscribers now use the Grimba hero shell, shared metric cards, dark/light tokens, and enforced Blade-shell tests.
+- S237 added a shared admin action system for cockpit, RSS, NewsAPI, subscribers, source, and cluster pages with distinct primary, warning, and destructive button states.
 
 ## Active Systems
 
@@ -102,15 +103,15 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S237 — Admin Action Center Polish
+### S238 — Admin Empty-State Polish
 
-Goal: Make primary backend actions feel intentional and consistent across the revamped futuristic admin pages.
+Goal: Replace plain empty rows/messages with useful futuristic empty states that tell editors what to do next.
 
 Acceptance:
 
-- Shared action-row/button styling covers cockpit, RSS, NewsAPI, subscribers, source, and cluster pages.
-- Destructive, warning, and primary actions are visually distinct in dark and light mode.
-- Tests cover shared action CSS markers and representative admin pages.
+- RSS drafts, NewsAPI drafts, subscribers, sources, and clusters use shared empty-state cards.
+- Empty states include a next action or diagnostic link where practical.
+- Tests cover shared empty-state CSS markers and representative admin render.
 
 ## Operating Rules
 

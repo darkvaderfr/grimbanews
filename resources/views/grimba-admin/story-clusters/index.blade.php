@@ -11,7 +11,7 @@
                         Regroupez les articles par histoire, vérifiez la balance gauche-centre-droite, puis ouvrez la carte de couverture pour traiter les angles manquants.
                     </p>
                 </div>
-                <div class="d-flex gap-2 flex-wrap justify-content-end">
+                <div class="grimba-admin-actions justify-content-end">
                     <span class="grimba-admin-status">{{ $coverageStats['one_sided'] ?? 0 }} unilatéraux</span>
                     <span class="grimba-admin-status">{{ $coverageStats['partial'] ?? 0 }} partiels</span>
                     <a href="{{ route('grimba.coverage-map.index') }}" class="btn btn-outline-primary btn-sm">Carte couverture</a>

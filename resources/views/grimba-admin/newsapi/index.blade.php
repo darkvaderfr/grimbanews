@@ -210,7 +210,7 @@
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2 flex-wrap mt-4">
+                    <div class="grimba-admin-actions mt-4">
                         <button type="submit" class="btn btn-primary">Enregistrer</button>
                         <button type="button" class="btn btn-outline-secondary" id="newsapi-test-btn">
                             Tester la clé

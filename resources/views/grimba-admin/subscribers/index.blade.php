@@ -45,7 +45,7 @@
         <x-core::card>
             <x-core::card.header class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <x-core::card.title>Abonnés à l'infolettre</x-core::card.title>
-                <div class="d-flex gap-2 align-items-center flex-wrap">
+                <div class="grimba-admin-actions">
                     <form method="GET" action="{{ route('grimba.subscribers.index') }}" class="d-flex gap-2">
                         <input name="q" value="{{ $q }}" class="form-control form-control-sm" placeholder="Chercher email, locale…" style="min-width:200px;">
                         <select name="active" class="form-select form-select-sm">

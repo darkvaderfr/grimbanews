@@ -129,6 +129,7 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin/grimba/rss-drafts?bias=unknown')
             ->assertOk()
+            ->assertSee('grimba-admin-actions', false)
             ->assertSee('Blockers RSS')
             ->assertSee('source manquante')
             ->assertSee('biais inconnu')
@@ -148,12 +149,14 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin/grimba/rss-feeds')
             ->assertOk()
+            ->assertSee('grimba-admin-actions', false)
             ->assertSee('RSS control tower')
             ->assertSee('Flux RSS');
 
         $this->actingAs($this->admin())
             ->get('/admin/grimba/subscribers')
             ->assertOk()
+            ->assertSee('grimba-admin-actions', false)
             ->assertSee('Audience command')
             ->assertSee('Abonnés infolettre');
 
@@ -212,6 +215,7 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin/grimba/cockpit')
             ->assertOk()
+            ->assertSee('grimba-admin-actions', false)
             ->assertSee('Insights dossiers')
             ->assertSee('Dernier insight')
             ->assertSee('Operations board')
@@ -493,6 +497,7 @@ class AdminSettingsTest extends TestCase
         $this->actingAs($this->admin())
             ->get('/admin/grimba/newsapi')
             ->assertOk()
+            ->assertSee('grimba-admin-actions', false)
             ->assertSee('NewsAPI draft readiness')
             ->assertSee('Blockers NewsAPI')
             ->assertSee('source manquante')

@@ -17,7 +17,7 @@
             <x-core::card.header class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <x-core::card.title>GrimbaNews — Sources suivies</x-core::card.title>
 
-                <div class="d-flex gap-2 align-items-center">
+                <div class="grimba-admin-actions">
                     <form method="GET" action="{{ route('grimba.news-sources.index') }}" class="d-flex">
                         <input name="q" value="{{ $q }}" class="form-control form-control-sm" placeholder="Chercher…">
                     </form>

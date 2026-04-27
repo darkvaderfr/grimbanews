@@ -25,7 +25,7 @@
                     </span>
                 </x-core::card.title>
 
-                <form method="GET" action="{{ route('grimba.rss-drafts.index') }}" class="d-flex gap-2 align-items-center">
+                <form method="GET" action="{{ route('grimba.rss-drafts.index') }}" class="grimba-admin-actions">
                     <select name="source" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
                         <option value="">Toutes sources</option>
                         @foreach($sources as $src)
@@ -75,7 +75,7 @@
                 @else
                     <form method="POST" id="rss-drafts-form">
                         @csrf
-                        <div class="d-flex gap-2 mb-3 align-items-center flex-wrap">
+                        <div class="grimba-admin-actions mb-3">
                             <button type="submit" formaction="{{ route('grimba.rss-drafts.publish') }}"
                                     class="btn btn-sm btn-success"
                                     onclick="return confirm('Publier les brouillons sélectionnés ?');">

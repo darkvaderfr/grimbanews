@@ -24,6 +24,9 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('body .navbar-vertical .dropdown-menu', $css);
         $this->assertStringContainsString('body .grimba-admin-hero::after', $css);
         $this->assertStringContainsString('body .grimba-admin-metric-value', $css);
+        $this->assertStringContainsString('body .grimba-admin-actions', $css);
+        $this->assertStringContainsString('body .grimba-admin-screen .btn-outline-danger', $css);
+        $this->assertStringContainsString('body .grimba-admin-screen .btn-outline-warning', $css);
         $this->assertStringContainsString('background-size: 42px 42px, 42px 42px, auto, auto;', $css);
 
         $this->assertStringContainsString("window.localStorage.getItem('tablerTheme')", $js);

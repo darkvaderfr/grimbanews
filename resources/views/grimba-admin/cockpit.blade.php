@@ -31,7 +31,7 @@
             <h1>Tableau de bord éditorial</h1>
             <p>Surveillez la pression brouillons, la couverture, les traductions NobuAI et les dossiers actifs avant publication.</p>
         </div>
-        <div class="grimba-cockpit__hero-actions">
+        <div class="grimba-cockpit__hero-actions grimba-admin-actions">
             <a href="{{ route('posts.create') }}" class="btn btn-primary">+ Nouvel article</a>
             <a href="{{ route('grimba.translation.index') }}" class="btn btn-outline-primary">Clés NobuAI</a>
             <a href="{{ url('/') }}" target="_blank" class="btn btn-outline-secondary">Voir le site →</a>
@@ -67,7 +67,7 @@
                 <span class="grimba-cockpit__kicker">Operations board</span>
                 <h3 class="card-title mt-2 mb-0">Ingest et files à surveiller</h3>
             </div>
-            <div class="grimba-runbook-actions">
+            <div class="grimba-runbook-actions grimba-admin-actions">
                 <form method="POST" action="{{ route('grimba.cockpit.runbook') }}">
                     @csrf
                     <input type="hidden" name="action" value="health">
