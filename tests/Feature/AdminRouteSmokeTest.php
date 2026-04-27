@@ -85,4 +85,14 @@ class AdminRouteSmokeTest extends TestCase
             ])
             ->assertRedirect('/admin/grimba/cockpit');
     }
+
+    public function test_admin_login_does_not_inject_debugbar_payload(): void
+    {
+        $this->get('/admin/login')
+            ->assertOk()
+            ->assertDontSee('browser-logger-active', false)
+            ->assertDontSee('/_boost/browser-logs', false)
+            ->assertDontSee('phpdebugbar', false)
+            ->assertDontSee('/_debugbar/assets', false);
+    }
 }
