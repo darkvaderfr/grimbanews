@@ -44,8 +44,113 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                     return $c;
                 });
 
-            return view('grimba-admin.story-clusters.index', compact('clusters'));
+            $coverageStats = [
+                'balanced' => 0,
+                'partial' => 0,
+                'one_sided' => 0,
+                'empty' => 0,
+            ];
+
+            foreach ($clusters as $cluster) {
+                $activeSides = count(array_filter([
+                    $cluster->spread['left'] ?? 0,
+                    $cluster->spread['center'] ?? 0,
+                    $cluster->spread['right'] ?? 0,
+                ]));
+
+                match ($activeSides) {
+                    3 => $coverageStats['balanced']++,
+                    2 => $coverageStats['partial']++,
+                    1 => $coverageStats['one_sided']++,
+                    default => $coverageStats['empty']++,
+                };
+            }
+
+            return view('grimba-admin.story-clusters.index', compact('clusters', 'coverageStats'));
         })->name('story-clusters.index');
+
+        Route::get('coverage-map', function (Request $request) {
+            $filter = $request->query('filter', 'gaps');
+            $allowedFilters = ['all', 'gaps', 'one-sided', 'missing-left', 'missing-center', 'missing-right', 'empty'];
+
+            if (! in_array($filter, $allowedFilters, true)) {
+                $filter = 'gaps';
+            }
+
+            $rows = DB::table('story_clusters as clusters')
+                ->leftJoin('posts', function ($join): void {
+                    $join->on('posts.story_cluster_id', '=', 'clusters.id')
+                        ->where('posts.status', '=', 'published');
+                })
+                ->select([
+                    'clusters.id',
+                    'clusters.topic',
+                    'clusters.description',
+                    'clusters.updated_at',
+                ])
+                ->selectRaw('COUNT(posts.id) as total')
+                ->selectRaw("SUM(CASE WHEN posts.bias_rating = 'left' THEN 1 ELSE 0 END) as left_count")
+                ->selectRaw("SUM(CASE WHEN posts.bias_rating = 'center' THEN 1 ELSE 0 END) as center_count")
+                ->selectRaw("SUM(CASE WHEN posts.bias_rating = 'right' THEN 1 ELSE 0 END) as right_count")
+                ->selectRaw("SUM(CASE WHEN posts.id IS NOT NULL AND (posts.bias_rating IS NULL OR posts.bias_rating NOT IN ('left', 'center', 'right')) THEN 1 ELSE 0 END) as unknown_count")
+                ->selectRaw('MAX(posts.updated_at) as latest_article_at')
+                ->groupBy('clusters.id', 'clusters.topic', 'clusters.description', 'clusters.updated_at')
+                ->orderByDesc('latest_article_at')
+                ->orderByDesc('clusters.id')
+                ->get()
+                ->map(function ($row) {
+                    $row->left_count = (int) $row->left_count;
+                    $row->center_count = (int) $row->center_count;
+                    $row->right_count = (int) $row->right_count;
+                    $row->unknown_count = (int) $row->unknown_count;
+                    $row->total = (int) $row->total;
+
+                    $row->active_sides = count(array_filter([
+                        $row->left_count,
+                        $row->center_count,
+                        $row->right_count,
+                    ]));
+
+                    $row->missing = collect([
+                        'left' => $row->left_count === 0,
+                        'center' => $row->center_count === 0,
+                        'right' => $row->right_count === 0,
+                    ])->filter()->keys()->all();
+
+                    $row->status = match ($row->active_sides) {
+                        3 => 'balanced',
+                        2 => 'partial',
+                        1 => 'one-sided',
+                        default => 'empty',
+                    };
+
+                    return $row;
+                });
+
+            $stats = [
+                'total' => $rows->count(),
+                'balanced' => $rows->where('status', 'balanced')->count(),
+                'partial' => $rows->where('status', 'partial')->count(),
+                'one_sided' => $rows->where('status', 'one-sided')->count(),
+                'empty' => $rows->where('status', 'empty')->count(),
+            ];
+
+            $rows = $rows
+                ->filter(function ($row) use ($filter): bool {
+                    return match ($filter) {
+                        'all' => true,
+                        'one-sided' => $row->status === 'one-sided',
+                        'missing-left' => in_array('left', $row->missing, true) && $row->total > 0,
+                        'missing-center' => in_array('center', $row->missing, true) && $row->total > 0,
+                        'missing-right' => in_array('right', $row->missing, true) && $row->total > 0,
+                        'empty' => $row->status === 'empty',
+                        default => $row->status !== 'balanced',
+                    };
+                })
+                ->values();
+
+            return view('grimba-admin.coverage-map.index', compact('rows', 'stats', 'filter'));
+        })->name('coverage-map.index');
 
         Route::get('story-clusters/create', function () {
             return view('grimba-admin.story-clusters.form', ['cluster' => null]);
@@ -153,6 +258,16 @@ app()->booted(function (): void {
                 ->name('Dossiers (clusters)')
                 ->icon('ti ti-layout-collage')
                 ->route('grimba.story-clusters.index')
+        );
+
+        DashboardMenu::make()->registerItem(
+            DashboardMenuItem::make()
+                ->id('grimba-coverage-map')
+                ->priority(21)
+                ->parentId('grimba-root')
+                ->name('Carte couverture')
+                ->icon('ti ti-radar')
+                ->route('grimba.coverage-map.index')
         );
     });
 });

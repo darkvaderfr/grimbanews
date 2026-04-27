@@ -40,6 +40,12 @@ class AdminSettingsTest extends TestCase
             ->assertSee('Sources à classer');
 
         $this->actingAs($this->admin())
+            ->get('/admin/grimba/coverage-map')
+            ->assertOk()
+            ->assertSee('Coverage map')
+            ->assertSee('Carte de couverture');
+
+        $this->actingAs($this->admin())
             ->post('/admin/grimba/translation', [
                 'driver' => 'openai',
                 'openai_key' => 'sk-test-grimba-openai',

@@ -1,0 +1,191 @@
+@extends(BaseHelper::getAdminMasterLayoutTemplate())
+
+@section('content')
+    @php
+        $filters = [
+            'gaps' => 'Tous les gaps',
+            'one-sided' => 'Unilatéraux',
+            'missing-left' => 'Sans gauche',
+            'missing-center' => 'Sans centre',
+            'missing-right' => 'Sans droite',
+            'empty' => 'Vides',
+            'all' => 'Tous',
+        ];
+
+        $statusMeta = [
+            'balanced' => ['label' => 'Équilibrée', 'class' => 'success'],
+            'partial' => ['label' => 'Partielle', 'class' => 'warning'],
+            'one-sided' => ['label' => 'Unilatérale', 'class' => 'danger'],
+            'empty' => ['label' => 'Vide', 'class' => 'secondary'],
+        ];
+
+        $sideMeta = [
+            'left' => ['label' => 'Gauche', 'color' => 'var(--gn-left)'],
+            'center' => ['label' => 'Centre', 'color' => 'var(--gn-center)'],
+            'right' => ['label' => 'Droite', 'color' => 'var(--gn-right)'],
+        ];
+    @endphp
+
+    <div class="grimba-admin-screen max-width-1200">
+        <section class="grimba-admin-hero">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <span class="grimba-admin-kicker">Coverage map</span>
+                    <h1 class="grimba-admin-title">Carte de couverture</h1>
+                    <p class="grimba-admin-copy">
+                        Repérez les dossiers qui n'ont qu'un angle politique ou qui manquent une source gauche, centre ou droite avant publication.
+                    </p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap justify-content-end">
+                    <span class="grimba-admin-status">{{ $stats['one_sided'] }} unilatéraux</span>
+                    <span class="grimba-admin-status">{{ $stats['partial'] }} partiels</span>
+                    <a href="{{ route('grimba.story-clusters.index') }}" class="btn btn-outline-primary btn-sm">Dossiers</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="row g-3 mb-3">
+            <div class="col-sm-6 col-lg-3">
+                <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                    <div class="text-muted text-uppercase fw-bold small">Dossiers</div>
+                    <div class="display-6 fw-bold">{{ $stats['total'] }}</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                    <div class="text-muted text-uppercase fw-bold small">Équilibrés</div>
+                    <div class="display-6 fw-bold">{{ $stats['balanced'] }}</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                    <div class="text-muted text-uppercase fw-bold small">Partiels</div>
+                    <div class="display-6 fw-bold">{{ $stats['partial'] }}</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                    <div class="text-muted text-uppercase fw-bold small">Unilatéraux</div>
+                    <div class="display-6 fw-bold">{{ $stats['one_sided'] }}</div>
+                </div>
+            </div>
+        </div>
+
+        <x-core::card>
+            <x-core::card.header class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <x-core::card.title>Gaps éditoriaux</x-core::card.title>
+                <div class="d-flex gap-2 flex-wrap">
+                    @foreach($filters as $key => $label)
+                        <a href="{{ route('grimba.coverage-map.index', ['filter' => $key]) }}"
+                           class="btn btn-sm {{ $filter === $key ? 'btn-primary' : 'btn-outline-secondary' }}">
+                            {{ $label }}
+                        </a>
+                    @endforeach
+                </div>
+            </x-core::card.header>
+
+            <x-core::card.body>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Dossier</th>
+                                <th class="text-end">Articles</th>
+                                <th>Balance</th>
+                                <th>Manque</th>
+                                <th>Statut</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($rows as $row)
+                                @php
+                                    $total = max(1, $row->left_count + $row->center_count + $row->right_count + $row->unknown_count);
+                                    $meta = $statusMeta[$row->status] ?? $statusMeta['empty'];
+                                @endphp
+                                <tr>
+                                    <td style="min-width: 280px;">
+                                        <strong>{{ $row->topic }}</strong>
+                                        @if($row->description)
+                                            <div class="text-muted small">{{ \Illuminate\Support\Str::limit($row->description, 120) }}</div>
+                                        @endif
+                                        @if($row->latest_article_at)
+                                            <div class="text-muted small">Dernier article: {{ \Carbon\Carbon::parse($row->latest_article_at)->diffForHumans() }}</div>
+                                        @endif
+                                    </td>
+                                    <td class="text-end fw-bold">{{ $row->total }}</td>
+                                    <td style="min-width: 260px;">
+                                        <div class="grimba-coverage-bar" aria-label="Balance gauche centre droite">
+                                            <span style="width: {{ ($row->left_count / $total) * 100 }}%; background: var(--gn-left);"></span>
+                                            <span style="width: {{ ($row->center_count / $total) * 100 }}%; background: var(--gn-center);"></span>
+                                            <span style="width: {{ ($row->right_count / $total) * 100 }}%; background: var(--gn-right);"></span>
+                                            @if($row->unknown_count > 0)
+                                                <span style="width: {{ ($row->unknown_count / $total) * 100 }}%; background: var(--gn-ink-soft);"></span>
+                                            @endif
+                                        </div>
+                                        <div class="d-flex gap-3 flex-wrap mt-2 small">
+                                            @foreach($sideMeta as $side => $sideInfo)
+                                                <span style="color: {{ $sideInfo['color'] }};">● {{ $sideInfo['label'] }} {{ $row->{$side . '_count'} }}</span>
+                                            @endforeach
+                                            @if($row->unknown_count > 0)
+                                                <span class="text-muted">● Inconnu {{ $row->unknown_count }}</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if(count($row->missing))
+                                            <div class="d-flex gap-1 flex-wrap">
+                                                @foreach($row->missing as $missing)
+                                                    <span class="badge text-bg-secondary">{{ $sideMeta[$missing]['label'] }}</span>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <span class="text-muted">Aucun</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="badge text-bg-{{ $meta['class'] }}">{{ $meta['label'] }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ route('grimba.story-clusters.edit', $row->id) }}" class="btn btn-sm btn-outline-primary">Corriger</a>
+                                        @if($row->total > 0)
+                                            <a href="{{ url('/comparatif/' . $row->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary">Voir</a>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-5">
+                                        Aucun dossier pour ce filtre.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </x-core::card.body>
+        </x-core::card>
+    </div>
+
+    <style>
+        .grimba-coverage-bar {
+            display: flex;
+            width: 100%;
+            min-width: 180px;
+            height: 0.62rem;
+            overflow: hidden;
+            border-radius: 999px;
+            background: rgba(26, 23, 19, 0.08);
+        }
+
+        .grimba-coverage-bar span {
+            display: block;
+            min-width: 0;
+        }
+
+        html[data-bs-theme="dark"] .grimba-coverage-bar,
+        body[data-bs-theme="dark"] .grimba-coverage-bar {
+            background: rgba(246, 241, 232, 0.12);
+        }
+    </style>
+@endsection

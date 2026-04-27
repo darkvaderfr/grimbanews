@@ -1,13 +1,29 @@
 @extends(BaseHelper::getAdminMasterLayoutTemplate())
 
 @section('content')
-    <div class="max-width-1200">
+    <div class="grimba-admin-screen max-width-1200">
+        <section class="grimba-admin-hero">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <span class="grimba-admin-kicker">Cluster desk</span>
+                    <h1 class="grimba-admin-title">Dossiers actifs</h1>
+                    <p class="grimba-admin-copy">
+                        Regroupez les articles par histoire, vérifiez la balance gauche-centre-droite, puis ouvrez la carte de couverture pour traiter les angles manquants.
+                    </p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap justify-content-end">
+                    <span class="grimba-admin-status">{{ $coverageStats['one_sided'] ?? 0 }} unilatéraux</span>
+                    <span class="grimba-admin-status">{{ $coverageStats['partial'] ?? 0 }} partiels</span>
+                    <a href="{{ route('grimba.coverage-map.index') }}" class="btn btn-outline-primary btn-sm">Carte couverture</a>
+                    <a href="{{ route('grimba.story-clusters.create') }}" class="btn btn-primary btn-sm">+ Nouveau dossier</a>
+                </div>
+            </div>
+        </section>
+
         <x-core::card>
             <x-core::card.header class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <x-core::card.title>GrimbaNews — Dossiers (story clusters)</x-core::card.title>
-                <a href="{{ route('grimba.story-clusters.create') }}" class="btn btn-primary btn-sm">
-                    + Nouveau dossier
-                </a>
+                <a href="{{ route('grimba.coverage-map.index', ['filter' => 'gaps']) }}" class="btn btn-outline-primary btn-sm">Voir les gaps</a>
             </x-core::card.header>
 
             @if(session('success_msg'))
