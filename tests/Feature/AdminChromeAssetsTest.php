@@ -156,4 +156,15 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('Clear wayfinding', $doc);
         $this->assertStringContainsString('The SOK outcome is **ship / continue**', $doc);
     }
+
+    public function test_admin_production_readiness_smoke_is_recorded(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $doc = file_get_contents($root . '/docs/GRIMBANEWS_ADMIN_PROD_READINESS_SMOKE.md');
+
+        $this->assertStringContainsString('No production deployment was run', $doc);
+        $this->assertStringContainsString('php artisan grimba:health` passed', $doc);
+        $this->assertStringContainsString('52` Grimba admin routes', $doc);
+        $this->assertStringContainsString('php artisan test` passed with `50` tests and `754` assertions', $doc);
+    }
 }
