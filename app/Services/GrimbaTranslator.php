@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Modules\NobuTranslation\Support\NobuTranslator;
 use Throwable;
 
 /*
@@ -68,10 +69,13 @@ class GrimbaTranslator
     public function configuredDrivers(): array
     {
         $out = [];
+        if (class_exists(NobuTranslator::class)) {
+            $out[] = 'nobutranslation';
+        }
         foreach (self::CHAIN as $name) {
             if ($this->credentialFor($name) !== null) $out[] = $name;
         }
-        return $out;
+        return array_values(array_unique($out));
     }
 
     /**
@@ -86,6 +90,28 @@ class GrimbaTranslator
         $text = trim($text);
         if ($text === '' || strtolower(substr($from, 0, 2)) === strtolower(substr($to, 0, 2))) {
             return null;
+        }
+
+        if (class_exists(NobuTranslator::class) && app()->bound(NobuTranslator::class)) {
+            try {
+                /** @var NobuTranslator $nobuTranslator */
+                $nobuTranslator = app(NobuTranslator::class);
+                $translated = $nobuTranslator->translate($text, $to, $from);
+                if (trim($translated) !== '' && trim($translated) !== $text) {
+                    $health = $nobuTranslator->health();
+
+                    return [
+                        'text' => $translated,
+                        'driver' => 'nobutranslation:' . (string) ($health['driver'] ?? 'unknown'),
+                    ];
+                }
+            } catch (Throwable $e) {
+                Log::warning('[GrimbaTranslator] NobuTranslation module failed, trying legacy chain', [
+                    'from' => $from,
+                    'to' => $to,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         $order = $this->failoverOrder();
