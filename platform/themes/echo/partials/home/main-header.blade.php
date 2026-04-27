@@ -6,8 +6,8 @@
     // S178 — vault count for the header link. Derived from the same
     // grimba_vault cookie /coffre reads, so the SSR badge matches the
     // landing page on first paint. Live JS updates handled below.
-    $rawVault = (string) request()->cookie('grimba_vault', '');
-    $vaultCount = count(array_filter(array_map('intval', explode(',', $rawVault))));
+    $rawVault = (string) request()->cookie(\App\Support\GrimbaVault::COOKIE, '');
+    $vaultCount = count(\App\Support\GrimbaVault::parseIds($rawVault));
 
     // S206/D3 — cached editorial pulse for first paint.
     $pulse = \Illuminate\Support\Facades\Cache::remember('grimba_header_pulse_v1', 300, function (): array {
