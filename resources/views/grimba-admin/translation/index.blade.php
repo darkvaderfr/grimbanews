@@ -217,7 +217,7 @@
         }
     </style>
 
-    <div class="grimba-llm-admin max-width-1200">
+    <div class="grimba-llm-admin max-width-1200 grimba-admin-form">
         <section class="grimba-llm-hero">
             <span class="grimba-llm-kicker">NobuAI Provider Vault</span>
             <h1 class="grimba-llm-title">LLM keys and translation controls</h1>
@@ -257,7 +257,7 @@
                     actuelle, ou saisissez <code>__clear__</code> pour l'effacer.
                 </p>
 
-                <section class="grimba-llm-section">
+                <section class="grimba-llm-section grimba-admin-form-section">
                     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
                         <div>
                             <h3 class="h5 mb-1">Provider diagnostics</h3>
@@ -271,10 +271,10 @@
                     </div>
                 </section>
 
-                <form method="POST" action="{{ route('grimba.translation.save') }}">
+                <form method="POST" action="{{ route('grimba.translation.save') }}" class="grimba-admin-form">
                     @csrf
 
-                    <div class="grimba-llm-section">
+                    <div class="grimba-llm-section grimba-admin-form-section">
                         <label class="form-label"><strong>Fournisseur préféré</strong></label>
                         <select name="driver" class="form-select" style="max-width: 300px;">
                             <option value="auto" @selected($pinned === 'auto')>Auto (chaîne de basculement)</option>
@@ -286,7 +286,7 @@
                     </div>
 
                     @foreach($providerGroups as $groupTitle => $group)
-                        <div class="grimba-llm-section">
+                        <div class="grimba-llm-section grimba-admin-form-section">
                             <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
                                 <div>
                                     <h3 class="h4 grimba-provider-group-title mb-1">{{ $groupTitle }}</h3>
@@ -328,7 +328,7 @@
                         </div>
                         @endforeach
 
-                    <div class="grimba-llm-section">
+                    <div class="grimba-llm-section grimba-admin-form-section">
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                             <div>
                                 <h3 class="h5 mb-1">Modèles LLM optionnels</h3>
@@ -353,7 +353,7 @@
                         </div>
                     </div>
 
-                    <div class="grimba-llm-section">
+                    <div class="grimba-llm-section grimba-admin-form-section">
                         <h3 class="h5">Flux RSS — publication automatique</h3>
                         <div class="form-check form-switch mb-2">
                             <input type="hidden" name="ingest_auto_publish" value="0">
@@ -383,7 +383,7 @@
 
                 <div class="row g-3">
                     <div class="col-lg-6">
-                        <section class="grimba-llm-section h-100">
+                        <section class="grimba-llm-section grimba-admin-form-section h-100">
                             <h3 class="h5">Test rapide</h3>
                             <p class="text-muted small mb-2">Teste la traduction dans les deux sens. Le site public utilise la même chaîne NobuAI.</p>
                             <form method="POST" action="{{ route('grimba.translation.test') }}" class="grimba-llm-test-form">
@@ -409,7 +409,7 @@
                         </section>
                     </div>
                     <div class="col-lg-6">
-                        <section class="grimba-llm-section h-100">
+                        <section class="grimba-llm-section grimba-admin-form-section h-100">
                             <h3 class="h5">NobuAI — wrapper LLM public</h3>
                             <p class="text-muted small mb-2">
                                 Le public voit seulement <strong>NobuAI</strong>. Fournisseurs LLM configurés :

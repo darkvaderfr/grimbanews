@@ -37,7 +37,7 @@
             <div class="alert alert-success">{{ session('success_msg') }}</div>
         @endif
 
-        <form method="POST" action="{{ $action }}" class="mb-4">
+        <form method="POST" action="{{ $action }}" class="grimba-admin-form mb-4">
             @csrf
             @if($isEdit) @method('PUT') @endif
 
@@ -59,19 +59,25 @@
                 @endif
 
                 <x-core::card.body>
-                    <div class="mb-3">
-                        <label class="form-label">Titre du dossier<span class="text-danger">*</span></label>
-                        <input name="topic" class="form-control"
-                               value="{{ old('topic', $cluster->topic ?? '') }}" required maxlength="200">
-                    </div>
+                    <section class="grimba-admin-form-section">
+                        <h2 class="grimba-admin-form-section__title">Signal éditorial du dossier</h2>
+                        <p class="grimba-admin-form-section__hint mb-3">
+                            Le titre public doit rester court et lisible; la description sert aux notes internes de regroupement.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label">Titre du dossier<span class="text-danger">*</span></label>
+                            <input name="topic" class="form-control"
+                                   value="{{ old('topic', $cluster->topic ?? '') }}" required maxlength="200">
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Description (interne)</label>
-                        <textarea name="description" class="form-control" rows="3">{{ old('description', $cluster->description ?? '') }}</textarea>
-                    </div>
+                        <div>
+                            <label class="form-label">Description (interne)</label>
+                            <textarea name="description" class="form-control" rows="3">{{ old('description', $cluster->description ?? '') }}</textarea>
+                        </div>
+                    </section>
                 </x-core::card.body>
 
-                <x-core::card.footer class="d-flex justify-content-between">
+                <x-core::card.footer class="grimba-admin-form-actions">
                     <a href="{{ route('grimba.story-clusters.index') }}" class="btn btn-outline-secondary">Annuler</a>
                     <button type="submit" class="btn btn-primary">
                         {{ $isEdit ? 'Enregistrer le titre' : 'Créer le dossier' }}
@@ -87,7 +93,7 @@
                         <x-core::card.title>NobuAI insights</x-core::card.title>
                         <p class="text-muted mb-0 small">Génère une synthèse façon Ground: faits confirmés, cadrages par biais, angle mort.</p>
                     </div>
-                    <form method="POST" action="{{ route('grimba.story-clusters.nobuai-summary', $cluster->id) }}">
+                    <form method="POST" action="{{ route('grimba.story-clusters.nobuai-summary', $cluster->id) }}" class="grimba-admin-form-actions">
                         @csrf
                         <button type="submit"
                                 class="btn btn-primary"
@@ -243,7 +249,7 @@
                     <x-core::card.title>Attacher un article</x-core::card.title>
                 </x-core::card.header>
                 <x-core::card.body>
-                    <form method="POST" action="{{ route('grimba.story-clusters.attach', $cluster->id) }}" class="d-flex gap-2 align-items-center">
+                    <form method="POST" action="{{ route('grimba.story-clusters.attach', $cluster->id) }}" class="grimba-admin-form-actions">
                         @csrf
                         <select name="post_id" class="form-select" required>
                             <option value="">— Choisir un article —</option>

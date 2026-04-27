@@ -867,6 +867,51 @@ body .grimba-admin-empty__actions {
     gap: 0.55rem;
     margin-top: 0.2rem;
 }
+body .grimba-admin-form {
+    display: grid;
+    gap: 1rem;
+}
+body .grimba-admin-form-section {
+    padding: 1rem;
+    border: 1px solid var(--gn-rule);
+    border-radius: 18px;
+    background:
+        radial-gradient(circle at 6% 0%, rgba(220, 200, 160, 0.18), transparent 30%),
+        rgba(255, 255, 255, 0.7);
+}
+body .grimba-admin-form-section__title {
+    margin: 0 0 0.25rem;
+    color: var(--gn-ink);
+    font-family: var(--gn-font-display);
+    font-size: 1.24rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+body .grimba-admin-form-section__hint,
+body .grimba-admin-form .form-text,
+body .grimba-admin-form .text-muted,
+body .grimba-llm-admin .form-text,
+body .grimba-llm-admin .text-muted {
+    color: var(--gn-ink-muted) !important;
+    line-height: 1.55;
+}
+body .grimba-admin-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+}
+body .grimba-admin-form-actions .form-control,
+body .grimba-admin-form-actions .form-select {
+    flex: 1 1 260px;
+}
+body .grimba-admin-form .form-check {
+    padding: 0.85rem 0.9rem 0.85rem 2.75rem;
+    border: 1px solid var(--gn-rule);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.54);
+}
 body .table {
     --bb-table-color: var(--gn-ink);
     --bb-table-bg: transparent;
@@ -931,6 +976,16 @@ body pre.bg-light {
     body .grimba-admin-empty {
         min-height: 0;
         padding: 1rem;
+    }
+    body .grimba-admin-form-section {
+        padding: 0.85rem;
+    }
+    body .grimba-admin-form-actions,
+    body .grimba-admin-form-actions .btn {
+        width: 100%;
+    }
+    body .grimba-admin-form-actions .btn {
+        justify-content: center;
     }
     body .grimba-admin-table-responsive {
         overflow: visible;
@@ -1064,6 +1119,24 @@ body[data-bs-theme="dark"] .grimba-admin-empty__title,
 html[data-bs-theme="dark"] body .grimba-admin-empty__copy,
 body[data-bs-theme="dark"] .grimba-admin-empty__copy {
     color: var(--gn-ink);
+}
+html[data-bs-theme="dark"] body .grimba-admin-form-section,
+body[data-bs-theme="dark"] .grimba-admin-form-section {
+    background:
+        radial-gradient(circle at 6% 0%, rgba(201, 174, 118, 0.13), transparent 30%),
+        rgba(36, 32, 22, 0.74);
+    border-color: rgba(246, 241, 232, 0.14);
+}
+html[data-bs-theme="dark"] body .grimba-admin-form-section__title,
+body[data-bs-theme="dark"] .grimba-admin-form-section__title,
+html[data-bs-theme="dark"] body .grimba-admin-form-section__hint,
+body[data-bs-theme="dark"] .grimba-admin-form-section__hint {
+    color: var(--gn-ink);
+}
+html[data-bs-theme="dark"] body .grimba-admin-form .form-check,
+body[data-bs-theme="dark"] .grimba-admin-form .form-check {
+    background: rgba(246, 241, 232, 0.06);
+    border-color: rgba(246, 241, 232, 0.14);
 }
 html[data-bs-theme="dark"] body .table,
 body[data-bs-theme="dark"] .table {

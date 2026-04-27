@@ -30,6 +30,9 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('body .grimba-admin-empty__actions', $css);
         $this->assertStringContainsString('body .grimba-admin-table-responsive', $css);
         $this->assertStringContainsString('body .grimba-admin-table td[data-label]::before', $css);
+        $this->assertStringContainsString('body .grimba-admin-form-section', $css);
+        $this->assertStringContainsString('body .grimba-admin-form-section__hint', $css);
+        $this->assertStringContainsString('body .grimba-admin-form-actions', $css);
         $this->assertStringContainsString('@media (max-width: 767.98px)', $css);
         $this->assertStringContainsString('grid-template-columns: minmax(7rem, 42%) 1fr;', $css);
         $this->assertStringContainsString('body .grimba-admin-screen .btn-outline-danger', $css);
@@ -106,6 +109,24 @@ class AdminChromeAssetsTest extends TestCase
             $this->assertStringContainsString('grimba-admin-table-responsive', $contents, $view);
             $this->assertStringContainsString('grimba-admin-table', $contents, $view);
             $this->assertStringContainsString('data-label="Actions"', $contents, $view);
+        }
+    }
+
+    public function test_key_admin_forms_use_shared_form_sections(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $views = [
+            '/resources/views/grimba-admin/news-sources/form.blade.php',
+            '/resources/views/grimba-admin/rss-feeds/form.blade.php',
+            '/resources/views/grimba-admin/story-clusters/form.blade.php',
+            '/resources/views/grimba-admin/translation/index.blade.php',
+        ];
+
+        foreach ($views as $view) {
+            $contents = file_get_contents($root . $view);
+
+            $this->assertStringContainsString('grimba-admin-form', $contents, $view);
+            $this->assertStringContainsString('grimba-admin-form-section', $contents, $view);
         }
     }
 }

@@ -43,59 +43,67 @@
             @endif
 
             <x-core::card.body>
-                <form method="POST" action="{{ $action }}">
+                <form method="POST" action="{{ $action }}" class="grimba-admin-form">
                     @csrf
                     @if($isEdit) @method('PUT') @endif
 
-                    <div class="mb-3">
-                        <label class="form-label">Source</label>
-                        <select name="source_id" class="form-select" required>
-                            <option value="">— Choisir une source —</option>
-                            @foreach($sources as $src)
-                                <option value="{{ $src->id }}"
-                                    @selected(old('source_id', $feed->source_id ?? '') == $src->id)>
-                                    {{ $src->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="form-text">Les articles ingérés hériteront du biais, propriété et crédibilité de cette source.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">URL du flux</label>
-                        <input type="url" name="url" class="form-control"
-                               value="{{ old('url', $feed->url ?? '') }}"
-                               placeholder="https://exemple.com/rss.xml"
-                               required maxlength="500">
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Format</label>
-                            <select name="feed_format" class="form-select" required>
-                                <option value="rss"  @selected(old('feed_format', $feed->feed_format ?? 'rss') === 'rss')>RSS 2.0</option>
-                                <option value="atom" @selected(old('feed_format', $feed->feed_format ?? 'rss') === 'atom')>Atom</option>
+                    <section class="grimba-admin-form-section">
+                        <h2 class="grimba-admin-form-section__title">Connexion du flux</h2>
+                        <p class="grimba-admin-form-section__hint mb-3">
+                            Reliez chaque URL RSS à une source classée pour que les brouillons héritent des bons signaux éditoriaux.
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label">Source</label>
+                            <select name="source_id" class="form-select" required>
+                                <option value="">— Choisir une source —</option>
+                                @foreach($sources as $src)
+                                    <option value="{{ $src->id }}"
+                                        @selected(old('source_id', $feed->source_id ?? '') == $src->id)>
+                                        {{ $src->name }}
+                                    </option>
+                                @endforeach
                             </select>
+                            <div class="form-text">Les articles ingérés hériteront du biais, propriété et crédibilité de cette source.</div>
                         </div>
-                        <div class="col-md-6 mb-3 d-flex align-items-end">
-                            <div class="form-check form-switch">
-                                <input type="hidden" name="is_active" value="0">
-                                <input class="form-check-input" type="checkbox" role="switch"
-                                       id="is_active" name="is_active" value="1"
-                                       @checked(old('is_active', $feed->is_active ?? true))>
-                                <label class="form-check-label" for="is_active">Flux actif (inclus au poll)</label>
+
+                        <div class="mb-3">
+                            <label class="form-label">URL du flux</label>
+                            <input type="url" name="url" class="form-control"
+                                   value="{{ old('url', $feed->url ?? '') }}"
+                                   placeholder="https://exemple.com/rss.xml"
+                                   required maxlength="500">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Format</label>
+                                <select name="feed_format" class="form-select" required>
+                                    <option value="rss"  @selected(old('feed_format', $feed->feed_format ?? 'rss') === 'rss')>RSS 2.0</option>
+                                    <option value="atom" @selected(old('feed_format', $feed->feed_format ?? 'rss') === 'atom')>Atom</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3 d-flex align-items-end">
+                                <div class="form-check form-switch w-100">
+                                    <input type="hidden" name="is_active" value="0">
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           id="is_active" name="is_active" value="1"
+                                           @checked(old('is_active', $feed->is_active ?? true))>
+                                    <label class="form-check-label" for="is_active">Flux actif (inclus au poll)</label>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Notes</label>
-                        <textarea name="notes" class="form-control" rows="3"
-                                  placeholder="Remarques internes — quelle rubrique, pourquoi, etc.">{{ old('notes', $feed->notes ?? '') }}</textarea>
-                    </div>
+                        <div>
+                            <label class="form-label">Notes</label>
+                            <textarea name="notes" class="form-control" rows="3"
+                                      placeholder="Remarques internes — quelle rubrique, pourquoi, etc.">{{ old('notes', $feed->notes ?? '') }}</textarea>
+                        </div>
+                    </section>
 
                     @if($isEdit)
-                        <div class="row mb-3">
+                        <section class="grimba-admin-form-section">
+                            <h2 class="grimba-admin-form-section__title">Diagnostic du poll</h2>
+                            <div class="row g-3">
                             <div class="col-md-4">
                                 <div class="text-muted small text-uppercase">Dernier poll</div>
                                 <div>{{ $feed->last_polled_at ? \Carbon\Carbon::parse($feed->last_polled_at)->diffForHumans() : '—' }}</div>
@@ -108,15 +116,16 @@
                                 <div class="text-muted small text-uppercase">Articles ingérés</div>
                                 <div>{{ $feed->items_ingested }}</div>
                             </div>
-                        </div>
-                        @if($feed->last_error)
-                            <div class="alert alert-warning small mb-3">
-                                <strong>Dernière erreur:</strong> {{ $feed->last_error }}
                             </div>
-                        @endif
+                            @if($feed->last_error)
+                                <div class="alert alert-warning small mt-3 mb-0">
+                                    <strong>Dernière erreur:</strong> {{ $feed->last_error }}
+                                </div>
+                            @endif
+                        </section>
                     @endif
 
-                    <div class="d-flex gap-2">
+                    <div class="grimba-admin-form-actions">
                         <button type="submit" class="btn btn-primary">
                             {{ $isEdit ? 'Mettre à jour' : 'Créer' }}
                         </button>
