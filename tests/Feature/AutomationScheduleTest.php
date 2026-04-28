@@ -16,8 +16,8 @@ class AutomationScheduleTest extends TestCase
         $this->assertStringContainsString('grimba:poll-feeds', $output);
         $this->assertStringContainsString('grimba:publish-trusted', $output);
         $this->assertStringContainsString('grimba:publish-guardrail-categories', $output);
-        $this->assertStringContainsString('grimba:fetch-full-articles --limit=40', $output);
-        $this->assertStringContainsString('grimba:nobuai-summaries --limit=40', $output);
+        $this->assertStringContainsString('grimba:fetch-full-articles --limit=80', $output);
+        $this->assertStringContainsString('grimba:nobuai-summaries --limit=80', $output);
         $this->assertStringContainsString('grimba:nobuai-summaries --stale --limit=25', $output);
         $this->assertStringContainsString('grimba:translate-pending --to=fr --limit=50', $output);
         $this->assertStringContainsString('grimba:translate-pending --to=en --limit=50', $output);

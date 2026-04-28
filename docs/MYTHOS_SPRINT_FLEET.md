@@ -40,7 +40,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **B** | Story Page Completion | B1–B10 | 10/10 done |
 | **C** | Vault Maturity | C1–C8 | 4/8 done |
 | **D** | Discovery & Navigation | D1–D8 | 6/8 done |
-| **E** | NobuAI Integration | E1–E7 | 0/7 (gated on API key) |
+| **E** | NobuAI Integration | E1–E7 | 4/7 done |
 | **F** | Performance & SEO | F1–F8 | 8/8 done |
 | **G** | A11y & I18n | G1–G6 | 4/6 done |
 | **H** | Testing & QA | H1–H7 | 0/7 |
@@ -172,10 +172,10 @@ NobuAI key lands, swap to true LLM summaries. All sprints below are gated on
 
 | ID | Sprint | Acceptance |
 |----|--------|------------|
-| **E1** | **Schema migration** — add `posts.summary_nobuai TEXT NULL` + `summary_generated_at TIMESTAMP NULL` + index on `summary_generated_at` | Migration runs on fresh + existing DB |
-| **E2** | **`GrimbaNobuaiSummarizer` service** — provider-agnostic interface; first impl uses Anthropic / OpenAI key from `nobuai.providers.*` config (NOT user-facing). Server logs may name provider; user-facing labels are "NobuAI" only | Service generates a 5-bullet summary for a 3-source cluster in < 8 s |
-| **E3** | **Cron `grimba:summarize-clusters`** — every 15 min, find clusters with ≥ 3 published posts, no `summary_nobuai`, updated in last 24h. Generate + persist | Cron picks up at least one cluster on a fresh run |
-| **E4** | **Story-hero swap** — when `$post->summary_nobuai` is non-null, badge label flips to "Insights par NobuAI", bullets show LLM output, footnote disappears | Verified on a cluster with a generated summary |
+| ✅ **E1** | **Schema migration** — add `posts.summary_nobuai TEXT NULL` + `summary_generated_at TIMESTAMP NULL` + index on `summary_generated_at` | Summary columns are present and exercised by `grimba:nobuai-summaries` |
+| ✅ **E2** | **`GrimbaNobuaiSummarizer` service** — provider-agnostic interface; first impl uses Anthropic / OpenAI key from `nobuai.providers.*` config (NOT user-facing). Server logs may name provider; user-facing labels are "NobuAI" only | `grimba:nobuai-health` reports OpenAI configured; live generation wrote summaries |
+| ✅ **E3** | **Cron `grimba:summarize-clusters`** — every 15 min, find clusters with ≥ 3 published posts, no `summary_nobuai`, updated in last 24h. Generate + persist | `grimba:nobuai-summaries --limit=80` is scheduled twice hourly plus stale refresh |
+| ✅ **E4** | **Story-hero swap** — when `$post->summary_nobuai` is non-null, badge label flips to "Insights par NobuAI", bullets show LLM output, footnote disappears | Public story tests verify NobuAI labels and provider scrubbing |
 | **E5** | **Per-source bias detection (LLM)** — replace `news_sources.bias_rating` editorial flag with NobuAI auto-classification when score < 50 (mark with subscript per B9) | Backfill command exists; 10 sources reclassified |
 | **E6** | **NobuAI translation re-light (optional)** — re-introduce translation as a **per-paragraph** opt-in on the story page (not site-wide). Cookie `grimba_translate_para_X`. Translation badge says "Traduit par NobuAI" | One paragraph translates on click |
 | **E7** | **Admin "regenerate summary" button** — on the post edit screen, a button that clears `summary_nobuai` + queues regeneration | Admin click triggers cron pickup within 60 s |

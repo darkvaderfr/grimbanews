@@ -27,7 +27,7 @@ class GrimbaRssPoller
 {
     private const USER_AGENT = 'GrimbaNewsBot/1.0 (+https://grimbanews.com/bot)';
     private const FETCH_TIMEOUT = 15;
-    private const MAX_ITEMS_PER_FEED = 25;
+    private const MAX_ITEMS_PER_FEED = 50;
 
     /**
      * Poll every active feed. Returns a summary array suitable for CLI

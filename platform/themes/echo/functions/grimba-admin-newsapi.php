@@ -15,6 +15,7 @@
  *   grimba_newsapi_queries           — newline- or comma-separated
  *   grimba_newsapi_language
  *   grimba_newsapi_countries         — csv
+ *   grimba_newsapi_categories        — csv, NewsAPI top-headlines categories
  *   grimba_newsapi_active            — bool
  *   grimba_newsapi_everything_window_hours — int
  */
@@ -41,6 +42,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $queries   = (string) setting('grimba_newsapi_queries', "macron OR retraites OR énergie OR climat OR ukraine OR israël");
             $language  = (string) setting('grimba_newsapi_language', 'fr');
             $countries = (string) setting('grimba_newsapi_countries', 'fr,us,gb,ca');
+            $categories = (string) setting('grimba_newsapi_categories', 'business,entertainment,general,health,science,sports,technology');
             $active    = (bool) setting('grimba_newsapi_active', true);
             $window    = (int) setting('grimba_newsapi_everything_window_hours', 48);
             $newsApiDrafts = Post::query()
@@ -63,7 +65,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->get());
 
             return view('grimba-admin.newsapi.index', compact(
-                'key', 'queries', 'language', 'countries', 'active', 'window', 'newsApiDrafts', 'guardrailStats'
+                'key', 'queries', 'language', 'countries', 'categories', 'active', 'window', 'newsApiDrafts', 'guardrailStats'
             ));
         })->name('newsapi.index');
 
@@ -75,6 +77,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $store->set('grimba_newsapi_queries',   (string) $request->input('queries', ''));
             $store->set('grimba_newsapi_language',  (string) $request->input('language', 'fr'));
             $store->set('grimba_newsapi_countries', (string) $request->input('countries', 'fr,us,gb,ca'));
+            $store->set('grimba_newsapi_categories', (string) $request->input('categories', 'business,entertainment,general,health,science,sports,technology'));
             $store->set('grimba_newsapi_active',    (bool)   $request->input('active', false));
             $store->set('grimba_newsapi_everything_window_hours',
                 (int) max(24, min(720, (int) $request->input('window', 48))));

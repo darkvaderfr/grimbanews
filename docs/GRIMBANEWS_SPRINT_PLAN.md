@@ -18,13 +18,15 @@ Latest pushed commits:
 - `d0c8e1f` Add Canada coverage and solid edition menu
 - `58428ca` Improve hero image text contrast
 - `55785e7` Add owner and date search facets
+- `bcc57ae` Add avoided topics to For You
 
 Latest verification:
 
-- `php artisan test` passed with `66` tests and `1201` assertions after the D5 search-facet sprint.
-- Focused D2 verification passed: `ForYouAvoidedTopicsTest`.
-- Local scheduler was started with `CACHE_STORE=array LOG_CHANNEL=stderr php -d max_execution_time=0 artisan schedule:work`.
-- Local Canada coverage now has 10 published CA-source articles from Global News, all with extracted full content.
+- `php artisan test` passed with `67` tests and `1206` assertions after the D2 `/pour-vous` sprint.
+- Focused S257 verification passed: `NewsApiCategorySweepTest` and `AutomationScheduleTest`.
+- Local scheduler is running in session `47929` with `CACHE_STORE=array LOG_CHANNEL=stderr php -d max_execution_time=0 artisan schedule:work`.
+- Local automation smoke on 2026-04-28: category-aware NewsAPI saw 482 articles and ingested 314 new items in one live sweep; NobuAI then cleared the cluster backlog to `55 ready / 0 pending`.
+- Local Canada coverage has 10 published CA-source articles from Global News, all with extracted full content.
 
 ## Completed Sprint Bands
 
@@ -88,6 +90,7 @@ Latest verification:
 - S253 hardened the homepage featured-story image overlay so title, excerpt, and source metadata remain readable on busy photos.
 - S254 added `/search` facets for source, bias, owner, and date range, with regression coverage for owner/date filtering.
 - S255 added `/pour-vous` avoided-topic personalization for readers with more than 10 local read-history items, linking recent unread categories to `/blog?categorie=X`.
+- S257 expanded automatic NewsAPI intake to sweep every configured top-headline category for every configured country five times per day, doubled RSS per-feed item depth, doubled full-article and NobuAI scheduled batch limits, exposed NewsAPI categories in admin, fixed local storage ownership, and verified the live NobuAI backlog at zero pending clusters.
 
 ## Active Systems
 
@@ -100,7 +103,7 @@ Latest verification:
 ### Ingest And Intelligence
 
 - RSS polling: `grimba:poll-feeds`
-- NewsAPI fetching: `grimba:fetch-newsapi`
+- NewsAPI fetching: `grimba:fetch-newsapi` sweeps configured countries × NewsAPI categories five times per day.
 - Trusted-source auto-publishing: `grimba:publish-trusted`
 - Dedupe: `grimba:dedupe-posts`
 - Full article extraction: `grimba:fetch-full-articles`
@@ -138,7 +141,22 @@ Acceptance:
 
 Status: S251-S255 shipped locally; S255 pending final full-suite verification and push in the current working session.
 
-### S256 — Next Feature Sprint
+### S256-S257 — Automation Hardening
+
+Goal: Ensure the site is not dependent on manual dashboard work for daily publishing or NobuAI insight generation.
+
+Acceptance:
+
+- Scheduler process is running locally.
+- RSS and NewsAPI have scheduled automatic intake.
+- NewsAPI covers top-headline categories, not just one broad query.
+- New posts auto-publish when `grimba_ingest_auto_publish=1`.
+- NobuAI story insight backlog reaches zero pending clusters.
+- Admin can edit configured NewsAPI categories.
+
+Status: S257 shipped locally; pending final full-suite verification and push in the current working session.
+
+### S258 — Next Feature Sprint
 
 Goal: Continue Discovery & Navigation after D5.
 

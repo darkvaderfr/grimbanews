@@ -80,9 +80,14 @@ class GrimbaNewsApiFetcher
 
         $summary = [];
 
-        // Top-headlines per configured country. Always-on, very cheap.
+        // Top-headlines per configured country/category. This is the
+        // high-volume automatic intake path: every scheduled sweep asks
+        // NewsAPI for each configured category instead of waiting for an
+        // editor to manually seed the dashboard.
         foreach ($this->countries() as $country) {
-            $summary[] = $this->fetchTopHeadlines($country);
+            foreach ($this->categories() as $category) {
+                $summary[] = $this->fetchTopHeadlines($country, $category);
+            }
         }
 
         // /everything queries: full-text searches on the topic feed.
@@ -110,6 +115,23 @@ class GrimbaNewsApiFetcher
     /**
      * @return array<string>
      */
+    private function categories(): array
+    {
+        $allowed = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'];
+        $raw = (string) setting('grimba_newsapi_categories', implode(',', $allowed));
+        $list = collect(explode(',', str_replace("\n", ',', $raw)))
+            ->map(fn ($s) => mb_strtolower(trim((string) $s)))
+            ->filter(fn ($s) => in_array($s, $allowed, true))
+            ->unique()
+            ->values()
+            ->all();
+
+        return $list ?: $allowed;
+    }
+
+    /**
+     * @return array<string>
+     */
     private function everythingQueries(): array
     {
         $raw = (string) setting('grimba_newsapi_queries', 'macron OR retraites OR énergie OR climat OR ukraine OR israël');
@@ -119,10 +141,11 @@ class GrimbaNewsApiFetcher
     /**
      * @return array{query:string, kind:string, status:string, total:int, ingested:int, error:?string}
      */
-    private function fetchTopHeadlines(string $country): array
+    private function fetchTopHeadlines(string $country, string $category): array
     {
-        return $this->run('top-headlines', "country={$country}", [
+        return $this->run('top-headlines', "country={$country} category={$category}", [
             'country'  => $country,
+            'category' => $category,
             'pageSize' => self::MAX_PAGE_SIZE,
         ]);
     }

@@ -218,6 +218,16 @@
                         </div>
 
                         <div class="col-md-4">
+                            <label class="form-label"><strong>Catégories /top-headlines</strong></label>
+                            <input type="text"
+                                   name="categories"
+                                   class="form-control"
+                                   value="{{ $categories }}"
+                                   placeholder="business,entertainment,general,health,science,sports,technology">
+                            <div class="form-text">Balayées 5 fois par jour pour chaque pays configuré.</div>
+                        </div>
+
+                        <div class="col-md-4">
                             <label class="form-label"><strong>Fenêtre /everything</strong></label>
                             <input type="number"
                                    name="window"

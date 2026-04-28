@@ -64,7 +64,7 @@ Schedule::command('grimba:publish-guardrail-categories')
 // GrimbaNews — full article extraction for subscriber/member reading.
 // Runs shortly after trusted auto-publish so newly public RSS/NewsAPI
 // posts get a readable body without waiting for an editor.
-Schedule::command('grimba:fetch-full-articles --limit=40')
+Schedule::command('grimba:fetch-full-articles --limit=80')
     ->cron('12,42 * * * *')
     ->onOneServer()
     ->withoutOverlapping(25)
@@ -73,7 +73,7 @@ Schedule::command('grimba:fetch-full-articles --limit=40')
 // GrimbaNews — NobuAI insight treatment for newly published story
 // clusters. Runs after publish + full extraction + translation ticks so
 // reader-facing stories get GroundNews-style analysis automatically.
-Schedule::command('grimba:nobuai-summaries --limit=40')
+Schedule::command('grimba:nobuai-summaries --limit=80')
     ->cron('18,48 * * * *')
     ->onOneServer()
     ->withoutOverlapping(25)
@@ -86,12 +86,12 @@ Schedule::command('grimba:nobuai-summaries --stale --limit=25')
     ->withoutOverlapping(25)
     ->runInBackground();
 
-// GrimbaNews — NewsAPI ingest (S128). Runs at :15 and :45 past the
-// hour so it doesn't collide with the RSS poller (which fires on the
-// :00 / :30 boundary). Skips silently when the key isn't set; gated
-// on the active toggle in /admin/grimba/newsapi.
+// GrimbaNews — NewsAPI category sweeps (S128/S257). Runs five times
+// per day and, on each sweep, fetches every configured NewsAPI
+// category for every configured country. Skips silently when the key
+// isn't set; gated on the active toggle in /admin/grimba/newsapi.
 Schedule::command('grimba:fetch-newsapi')
-    ->cron('15,45 * * * *')
+    ->cron('15 6,10,14,18,22 * * *')
     ->onOneServer()
     ->withoutOverlapping(20)
     ->runInBackground()
