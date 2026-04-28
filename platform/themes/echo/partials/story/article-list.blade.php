@@ -108,7 +108,7 @@
             $__sources = empty($__sourceIds) ? collect() :
                 \Illuminate\Support\Facades\DB::table('news_sources')
                     ->whereIn('id', $__sourceIds)
-                    ->get(['id','name','website','ownership_type','credibility_score','owner_name'])
+                    ->get(['id','name','website','ownership_type','credibility_score','owner_name','logo_url','logo_status','logo_checked_at'])
                     ->keyBy('id');
         }
     @endphp
@@ -148,8 +148,12 @@
                     {{-- Source row: logo + name + ownership/credibility chips + lean badge --}}
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
                         {!! Theme::partial('source-logo', [
+                            'source_id' => $src->id ?? 0,
                             'name'    => $cp->source_name ?? '—',
                             'website' => $src->website ?? null,
+                            'logo_url' => $src->logo_url ?? null,
+                            'logo_status' => $src->logo_status ?? 'unknown',
+                            'logo_checked_at' => $src->logo_checked_at ?? null,
                             'size'    => 28,
                             'color'   => $meta['color'],
                         ]) !!}

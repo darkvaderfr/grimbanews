@@ -116,8 +116,12 @@
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div class="d-flex align-items-center gap-3 min-w-0">
                                             {!! Theme::partial('source-logo', [
+                                                'source_id' => $src->id,
                                                 'name' => $src->name,
                                                 'website' => $src->website,
+                                                'logo_url' => $src->logo_url ?? null,
+                                                'logo_status' => $src->logo_status ?? 'unknown',
+                                                'logo_checked_at' => $src->logo_checked_at ?? null,
                                                 'size' => 44,
                                                 'color' => $biasMeta[$biasKey]['color'],
                                             ]) !!}

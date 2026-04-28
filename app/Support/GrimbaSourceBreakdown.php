@@ -55,7 +55,7 @@ class GrimbaSourceBreakdown
             ? collect()
             : DB::table('news_sources')
                 ->whereIn('id', $sourceIds)
-                ->get(['id', 'name', 'website', 'bias_rating', 'ownership_type', 'credibility_score', 'owner_name']);
+                ->get(['id', 'name', 'website', 'bias_rating', 'ownership_type', 'credibility_score', 'owner_name', 'logo_url', 'logo_status', 'logo_checked_at']);
 
         $sourcesById = $sourceRows->keyBy('id');
         $fallbackNames = $posts->pluck('source_name')->filter()->unique()->values();
@@ -63,7 +63,7 @@ class GrimbaSourceBreakdown
             ? collect()
             : DB::table('news_sources')
                 ->whereIn('name', $fallbackNames)
-                ->get(['id', 'name', 'website', 'bias_rating', 'ownership_type', 'credibility_score', 'owner_name'])
+                ->get(['id', 'name', 'website', 'bias_rating', 'ownership_type', 'credibility_score', 'owner_name', 'logo_url', 'logo_status', 'logo_checked_at'])
                 ->keyBy(fn ($row) => Str::lower((string) $row->name));
 
         return $posts
@@ -79,6 +79,9 @@ class GrimbaSourceBreakdown
                     'credibility' => $meta->credibility_score ?? $post->credibility_score ?? null,
                     'ownership' => (string) ($meta->ownership_type ?? $post->ownership_type ?? 'unknown'),
                     'owner' => (string) ($meta->owner_name ?? ''),
+                    'logo_url' => $meta->logo_url ?? null,
+                    'logo_status' => $meta->logo_status ?? 'unknown',
+                    'logo_checked_at' => $meta->logo_checked_at ?? null,
                 ];
             })
             ->unique('key')

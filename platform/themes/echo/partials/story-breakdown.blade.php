@@ -566,8 +566,12 @@
                             @foreach($bucket->items->take(5) as $source)
                                 <span class="grimba-breakdown__logo-pop" style="--delay: {{ $loop->index * 55 }}ms;">
                                     {!! Theme::partial('source-logo', [
+                                        'source_id' => $source->key,
                                         'name' => $source->name,
                                         'website' => $source->website,
+                                        'logo_url' => $source->logo_url ?? null,
+                                        'logo_status' => $source->logo_status ?? 'unknown',
+                                        'logo_checked_at' => $source->logo_checked_at ?? null,
                                         'size' => 34,
                                         'color' => $bucket->color,
                                     ]) !!}
@@ -623,8 +627,12 @@
                             <div class="grimba-breakdown__logos">
                                 @foreach($bucket->items->take(6) as $source)
                                     {!! Theme::partial('source-logo', [
+                                        'source_id' => $source->key,
                                         'name' => $source->name,
                                         'website' => $source->website,
+                                        'logo_url' => $source->logo_url ?? null,
+                                        'logo_status' => $source->logo_status ?? 'unknown',
+                                        'logo_checked_at' => $source->logo_checked_at ?? null,
                                         'size' => 30,
                                         'color' => $bucket->color,
                                     ]) !!}
@@ -661,8 +669,12 @@
                                 <div class="grimba-breakdown__logos">
                                     @foreach($bucket->items->take(6) as $source)
                                         {!! Theme::partial('source-logo', [
+                                            'source_id' => $source->key,
                                             'name' => $source->name,
                                             'website' => $source->website,
+                                            'logo_url' => $source->logo_url ?? null,
+                                            'logo_status' => $source->logo_status ?? 'unknown',
+                                            'logo_checked_at' => $source->logo_checked_at ?? null,
                                             'size' => 30,
                                             'color' => $bucket->color,
                                         ]) !!}

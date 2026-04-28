@@ -251,12 +251,16 @@ class AdminSettingsTest extends TestCase
             ->assertOk()
             ->assertSee('grimba-admin-wayfinder', false)
             ->assertSee('grimba-admin-form-section', false)
-            ->assertSee('Score biais');
+            ->assertSee('Score biais')
+            ->assertSee('Logo manuel')
+            ->assertSee('État logo');
 
         $this->actingAs($this->admin())
             ->post('/admin/grimba/news-sources', [
                 'name' => $sourceName,
                 'website' => 'example.test',
+                'logo_url' => 'https://example.test/logo.png',
+                'logo_status' => 'unknown',
                 'bias_rating' => 'left',
                 'bias_score' => '-1.7',
                 'ownership_type' => 'independent',
@@ -270,6 +274,8 @@ class AdminSettingsTest extends TestCase
         $createdSource = DB::table('news_sources')->where('name', $sourceName)->first();
         $this->assertNotNull($createdSource);
         $this->assertSame('-1.7', number_format((float) $createdSource->bias_score, 1));
+        $this->assertSame('manual', $createdSource->logo_status);
+        $this->assertSame('https://example.test/logo.png', $createdSource->logo_url);
 
         $publicSource = DB::table('news_sources')->whereNotNull('slug')->where('slug', '!=', '')->first();
         $this->assertNotNull($publicSource, 'Fixture database must contain at least one public source slug.');

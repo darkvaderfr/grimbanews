@@ -70,6 +70,26 @@
                                    placeholder="lemonde.fr">
                             </div>
 
+                            <div class="col-md-8">
+                            <label class="form-label">Logo manuel</label>
+                            <input name="logo_url" class="form-control"
+                                   value="{{ old('logo_url', $source->logo_url ?? '') }}"
+                                   placeholder="https://.../logo.png">
+                            <small class="text-muted">Optionnel. Sinon GrimbaNews tente Clearbit puis favicon Google via le proxy local.</small>
+                            </div>
+
+                            <div class="col-md-4">
+                            <label class="form-label">État logo</label>
+                            <select name="logo_status" class="form-select">
+                                @foreach(['unknown' => 'À vérifier', 'manual' => 'Manuel', 'clearbit' => 'Clearbit OK', 'favicon' => 'Favicon OK', 'fallback' => 'Fallback requis', 'missing' => 'Introuvable'] as $k => $label)
+                                    <option value="{{ $k }}" @selected(old('logo_status', $source->logo_status ?? 'unknown') === $k)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            @if($isEdit && ($source->logo_checked_at ?? null))
+                                <small class="text-muted">Dernière vérification: {{ \Carbon\Carbon::parse($source->logo_checked_at)->diffForHumans() }}</small>
+                            @endif
+                            </div>
+
                             <div class="col-md-3">
                             <label class="form-label">Biais<span class="text-danger">*</span></label>
                             <select name="bias_rating" class="form-select" required>

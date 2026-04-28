@@ -112,6 +112,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
         Route::post('news-sources', function (Request $request) {
             $data = Validator::make($request->all(), grimba_news_source_rules())->validate();
             $data = grimba_normalize_news_source_bias_score($data);
+            $data = grimba_normalize_news_source_logo($data);
             $data['slug'] = grimba_unique_news_source_slug($data['name']);
             $data['created_at'] = now();
             $data['updated_at'] = now();
@@ -132,6 +133,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 grimba_news_source_rules($id)
             )->validate();
             $data = grimba_normalize_news_source_bias_score($data);
+            $data = grimba_normalize_news_source_logo($data);
             $currentSlug = (string) DB::table('news_sources')->where('id', $id)->value('slug');
             if ($currentSlug === '') {
                 $data['slug'] = grimba_unique_news_source_slug($data['name'], $id);
@@ -166,6 +168,8 @@ if (! function_exists('grimba_news_source_rules')) {
         return [
             'name'              => ['required', 'string', 'max:120', $unique],
             'website'           => ['nullable', 'string', 'max:255'],
+            'logo_url'          => ['nullable', 'url:http,https', 'max:500'],
+            'logo_status'       => ['nullable', 'in:unknown,clearbit,favicon,fallback,missing,manual'],
             'bias_rating'       => ['required', 'in:left,center,right,unknown'],
             'bias_score'        => ['nullable', 'numeric', 'min:-2', 'max:2'],
             'ownership_type'    => ['nullable', 'in:state,corporate,independent,nonprofit'],
@@ -196,6 +200,21 @@ if (! function_exists('grimba_normalize_news_source_bias_score')) {
             $data['bias_score'] = grimba_default_bias_score($data['bias_rating'] ?? null);
         } else {
             $data['bias_score'] = round((float) $data['bias_score'], 1);
+        }
+
+        return $data;
+    }
+}
+
+if (! function_exists('grimba_normalize_news_source_logo')) {
+    function grimba_normalize_news_source_logo(array $data): array
+    {
+        $data['logo_status'] = $data['logo_status'] ?? 'unknown';
+        if (($data['logo_url'] ?? '') !== '' && $data['logo_status'] === 'unknown') {
+            $data['logo_status'] = 'manual';
+        }
+        if (($data['logo_url'] ?? '') === '' && $data['logo_status'] === 'manual') {
+            $data['logo_status'] = 'unknown';
         }
 
         return $data;

@@ -15,7 +15,7 @@
         $sourceMeta = empty($sourceIds) ? collect() :
             \Illuminate\Support\Facades\DB::table('news_sources')
                 ->whereIn('id', $sourceIds)
-                ->get(['id', 'name', 'website'])
+                ->get(['id', 'name', 'website', 'logo_url', 'logo_status', 'logo_checked_at'])
                 ->keyBy('id');
     }
 
@@ -32,7 +32,8 @@
         $website = $cp->source_id && isset($sourceMeta[$cp->source_id])
             ? $sourceMeta[$cp->source_id]->website
             : null;
-        $sourcesByBias[$b][] = ['name' => $name, 'website' => $website];
+        $logo = $cp->source_id && isset($sourceMeta[$cp->source_id]) ? $sourceMeta[$cp->source_id] : null;
+        $sourcesByBias[$b][] = ['id' => $cp->source_id, 'name' => $name, 'website' => $website, 'logo' => $logo];
     }
 
     $counts = [
@@ -90,8 +91,12 @@
                 <div style="display:flex; flex-direction:column; align-items:center; gap:6px; min-height:1px;">
                     @foreach(array_slice($sourcesByBias[$b], 0, 6) as $entry)
                         {!! Theme::partial('source-logo', [
+                            'source_id' => $entry['id'] ?? 0,
                             'name'    => $entry['name'],
                             'website' => $entry['website'] ?? null,
+                            'logo_url' => $entry['logo']->logo_url ?? null,
+                            'logo_status' => $entry['logo']->logo_status ?? 'unknown',
+                            'logo_checked_at' => $entry['logo']->logo_checked_at ?? null,
                             'size'    => 36,
                             'color'   => $biasMeta[$b]['color'],
                         ]) !!}

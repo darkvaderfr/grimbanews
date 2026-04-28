@@ -11,8 +11,33 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Theme\Echo\Http\Controllers\EchoController;
+
+if (! function_exists('grimba_record_source_logo_probe')) {
+    function grimba_record_source_logo_probe(int $sourceId, string $provider, bool $ok, string $url): void
+    {
+        if ($sourceId <= 0 || ! in_array($provider, ['clearbit', 'favicon'], true)) {
+            return;
+        }
+        if (! Schema::hasColumn('news_sources', 'logo_status')) {
+            return;
+        }
+
+        $status = $ok
+            ? ($provider === 'clearbit' ? 'clearbit' : 'favicon')
+            : ($provider === 'favicon' ? 'missing' : 'fallback');
+
+        DB::table('news_sources')->where('id', $sourceId)->update([
+            'logo_status' => $status,
+            'logo_url' => $ok ? $url : DB::raw('logo_url'),
+            'logo_checked_at' => now(),
+            'logo_error' => $ok ? null : ($provider . ' logo probe failed'),
+            'updated_at' => now(),
+        ]);
+    }
+}
 
 Route::group(['middleware' => ['web', 'core']], function (): void {
     Theme::registerRoutes(function (): void {
@@ -151,6 +176,8 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         // become a general-purpose open proxy.
         Route::get('img-proxy', function (Request $request) {
             $url = (string) $request->query('u', '');
+            $sourceId = (int) $request->query('sid', 0);
+            $provider = (string) $request->query('provider', '');
             $parts = parse_url($url);
             $host = strtolower((string) ($parts['host'] ?? ''));
 
@@ -178,7 +205,9 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     \Illuminate\Support\Facades\File::ensureDirectoryExists(dirname($cachePath));
                     \Illuminate\Support\Facades\File::put($cachePath, $res->body());
                     \Illuminate\Support\Facades\File::put($metaPath, strtok($type, ';') ?: 'image/png');
+                    grimba_record_source_logo_probe($sourceId, $provider, true, $url);
                 } catch (\Throwable) {
+                    grimba_record_source_logo_probe($sourceId, $provider, false, $url);
                     abort(404);
                 }
             }
@@ -792,7 +821,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->whereNotNull('owner_name')
                 ->where('owner_name', '!=', '')
                 ->orderBy('name')
-                ->get(['name','slug','owner_name','bias_rating','country','credibility_score','website']);
+                ->get(['id','name','slug','owner_name','bias_rating','country','credibility_score','website','logo_url','logo_status','logo_checked_at']);
 
             $owners = $sources
                 ->groupBy('owner_name')

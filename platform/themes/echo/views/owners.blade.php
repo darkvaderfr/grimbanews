@@ -85,8 +85,12 @@
                                        text-decoration:none;
                                    ">
                                     {!! Theme::partial('source-logo', [
+                                        'source_id' => $s->id,
                                         'name'    => $s->name,
                                         'website' => $s->website ?? null,
+                                        'logo_url' => $s->logo_url ?? null,
+                                        'logo_status' => $s->logo_status ?? 'unknown',
+                                        'logo_checked_at' => $s->logo_checked_at ?? null,
                                         'size'    => 34,
                                         'color'   => $meta['color'],
                                     ]) !!}

@@ -16,8 +16,11 @@
      * Required props:
      *   $name    — string display name
      * Optional props:
+     *   $source_id — news_sources.id; enables provider status caching
      *   $website — host or full URL; without this we go straight
      *              to initials
+     *   $logo_url / $logo_status / $logo_checked_at — cached admin
+     *              logo diagnostics from news_sources
      *   $size    — px (default 36) — sets width + height
      *   $color   — hex; ring / initials accent (default ink)
      */
@@ -25,6 +28,10 @@
     $size    = $size ?? 36;
     $name    = (string) ($name ?? '');
     $website = (string) ($website ?? '');
+    $sourceId = (int) ($source_id ?? 0);
+    $logoUrl = trim((string) ($logo_url ?? ''));
+    $logoStatus = (string) ($logo_status ?? 'unknown');
+    $logoCheckedAt = (string) ($logo_checked_at ?? '');
     $color   = $color ?? '#1a1713';
 
     // Extract host from a website-like string. Accepts "lemonde.fr",
@@ -46,8 +53,35 @@
         ? mb_strtoupper(mb_substr($words[0], 0, 2))
         : mb_strtoupper(mb_substr($words[0], 0, 1) . mb_substr($words[1] ?? '', 0, 1));
 
-    $clearbit = $host ? url('/img-proxy?u=' . rawurlencode("https://logo.clearbit.com/{$host}?size={$size}")) : null;
-    $googleS2 = $host ? url('/img-proxy?u=' . rawurlencode("https://www.google.com/s2/favicons?domain={$host}&sz=64")) : null;
+    $recentMiss = false;
+    if ($logoStatus === 'missing' && $logoCheckedAt !== '') {
+        try {
+            $recentMiss = \Illuminate\Support\Carbon::parse($logoCheckedAt)->gt(now()->subDays(30));
+        } catch (\Throwable) {
+            $recentMiss = false;
+        }
+    }
+
+    $proxy = function (string $remote, string $provider) use ($sourceId): string {
+        $qs = ['u' => $remote, 'provider' => $provider];
+        if ($sourceId > 0) $qs['sid'] = $sourceId;
+        return url('/img-proxy?' . http_build_query($qs));
+    };
+
+    $clearbitRemote = $host ? "https://logo.clearbit.com/{$host}?size={$size}" : '';
+    $faviconRemote = $host ? "https://www.google.com/s2/favicons?domain={$host}&sz=64" : '';
+
+    $manualLogo = $logoUrl !== '' && $logoStatus === 'manual' ? $logoUrl : null;
+    $cachedLogo = $logoUrl !== '' && in_array($logoStatus, ['clearbit', 'favicon'], true)
+        ? $proxy($logoUrl, $logoStatus === 'clearbit' ? 'clearbit' : 'favicon')
+        : null;
+    $clearbit = (! $manualLogo && ! $cachedLogo && ! $recentMiss && $clearbitRemote !== '')
+        ? $proxy($clearbitRemote, 'clearbit')
+        : null;
+    $googleS2 = (! $manualLogo && $faviconRemote !== '')
+        ? $proxy($faviconRemote, 'favicon')
+        : null;
+    $primaryLogo = $manualLogo ?: ($cachedLogo ?: $clearbit);
 
     $uid = 'sl-' . bin2hex(random_bytes(4));
 @endphp
@@ -65,8 +99,8 @@
           position:relative;
       "
       title="{{ $name }}">
-    @if($clearbit)
-        <img src="{{ $clearbit }}"
+    @if($primaryLogo)
+        <img src="{{ $primaryLogo }}"
              alt="{{ $name }}"
              loading="lazy"
              decoding="async"

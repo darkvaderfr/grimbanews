@@ -48,6 +48,7 @@
                         <thead>
                             <tr>
                                 <th>Nom</th>
+                                <th>Logo</th>
                                 <th>Site</th>
                                 <th>Biais</th>
                                 <th class="text-end">Score</th>
@@ -62,6 +63,19 @@
                             @forelse($sources as $src)
                                 <tr>
                                     <td data-label="Nom"><strong>{{ $src->name }}</strong></td>
+                                    <td data-label="Logo">
+                                        {!! Theme::partial('source-logo', [
+                                            'source_id' => $src->id,
+                                            'name' => $src->name,
+                                            'website' => $src->website,
+                                            'logo_url' => $src->logo_url ?? null,
+                                            'logo_status' => $src->logo_status ?? 'unknown',
+                                            'logo_checked_at' => $src->logo_checked_at ?? null,
+                                            'size' => 34,
+                                            'color' => '#1a1713',
+                                        ]) !!}
+                                        <div class="small text-muted mt-1">{{ $src->logo_status ?? 'unknown' }}</div>
+                                    </td>
                                     <td data-label="Site">
                                         @if($src->website)
                                             <a href="https://{{ $src->website }}" target="_blank" rel="noopener">{{ $src->website }}</a>
@@ -93,7 +107,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9">
+                                    <td colspan="10">
                                         <div class="grimba-admin-empty">
                                             <div class="grimba-admin-empty__icon">SRC</div>
                                             <div class="grimba-admin-empty__title">Aucune source trouvée</div>
