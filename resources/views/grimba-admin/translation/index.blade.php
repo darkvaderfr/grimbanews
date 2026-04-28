@@ -277,6 +277,61 @@
                     </div>
                 </section>
 
+                <section class="grimba-llm-section grimba-admin-form-section">
+                    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                        <div>
+                            <h3 class="h5 mb-1">Translation retry queue</h3>
+                            <p class="form-text mb-0">
+                                Failed article translations stay queued for the next scheduler run. Use
+                                <code>php artisan grimba:translate-pending --failed-only --to=fr</code> or
+                                <code>--to=en</code> to retry only failures.
+                            </p>
+                        </div>
+                        <span class="grimba-status-pill {{ ($translationFailureStats['total'] ?? 0) === 0 ? 'is-on' : 'is-off' }}">
+                            {{ ($translationFailureStats['total'] ?? 0) === 0 ? 'No stuck translations' : ($translationFailureStats['total'] ?? 0) . ' retrying' }}
+                        </span>
+                    </div>
+
+                    @if(($translationFailureStats['locales'] ?? []) !== [])
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            @foreach($translationFailureStats['locales'] as $locale => $count)
+                                <span class="grimba-status-pill is-off">{{ strtoupper($locale) }} · {{ $count }}</span>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @if($translationFailures->isNotEmpty())
+                        <div class="table-responsive mt-3">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Article</th>
+                                        <th>Langue</th>
+                                        <th>Essais</th>
+                                        <th>Dernier échec</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($translationFailures as $failure)
+                                        <tr>
+                                            <td>
+                                                <strong>{{ \Illuminate\Support\Str::limit((string) ($failure->post_name ?: '#' . $failure->post_id), 72) }}</strong>
+                                                <div class="grimba-provider-meta mt-1">{{ \Illuminate\Support\Str::limit((string) $failure->error_message, 180) }}</div>
+                                                @if($failure->driver_chain)
+                                                    <div class="grimba-provider-meta">Chain: {{ $failure->driver_chain }}</div>
+                                                @endif
+                                            </td>
+                                            <td>{{ strtoupper((string) $failure->source_language) }} → {{ strtoupper((string) $failure->locale) }}</td>
+                                            <td>{{ (int) $failure->attempts }}</td>
+                                            <td>{{ $failure->failed_at ? \Carbon\Carbon::parse($failure->failed_at)->locale('fr')->diffForHumans() : 'unknown' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </section>
+
                 <form method="POST" action="{{ route('grimba.translation.save') }}" class="grimba-admin-form">
                     @csrf
 

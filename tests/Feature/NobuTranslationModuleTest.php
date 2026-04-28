@@ -209,6 +209,64 @@ class NobuTranslationModuleTest extends TestCase
         $this->assertSame([$nativeId, $translatedId, $unknownId, $untranslatedId], $orderedIds);
     }
 
+    public function test_failed_pending_translations_are_recorded_and_retryable_in_admin(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+        Cache::flush();
+
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'grimba_translator_openai_key'],
+            ['value' => 'sk-test-failure', 'created_at' => now(), 'updated_at' => now()]
+        );
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'grimba_translator_driver'],
+            ['value' => 'openai', 'created_at' => now(), 'updated_at' => now()]
+        );
+
+        $postId = $this->translationFixturePostId(
+            'language failure retry fixture ' . Str::lower(Str::random(8)),
+            'en',
+            now()
+        );
+
+        Http::fake([
+            '*' => Http::response(['error' => 'upstream rejected fixture request'], 500),
+        ]);
+
+        $this->artisan('grimba:translate-pending', [
+            '--to' => 'fr',
+            '--limit' => 1,
+            '--force' => true,
+        ])->assertSuccessful();
+
+        $this->assertDatabaseHas('grimba_translation_failures', [
+            'post_id' => $postId,
+            'locale' => 'fr',
+            'attempts' => 1,
+        ]);
+
+        $this->artisan('grimba:translate-pending', [
+            '--to' => 'fr',
+            '--limit' => 1,
+            '--failed-only' => true,
+        ])->assertSuccessful();
+
+        $this->assertDatabaseHas('grimba_translation_failures', [
+            'post_id' => $postId,
+            'locale' => 'fr',
+            'attempts' => 2,
+        ]);
+
+        $failure = DB::table('grimba_translation_failures')
+            ->where('post_id', $postId)
+            ->where('locale', 'fr')
+            ->first();
+
+        $this->assertNotNull($failure);
+        $this->assertStringContainsString('openai', (string) $failure->driver_chain);
+        $this->assertStringContainsString('googletx', (string) $failure->error_message);
+    }
+
     private function translationFixturePostId(string $name, string $language, mixed $createdAt): int
     {
         return (int) DB::table('posts')->insertGetId([

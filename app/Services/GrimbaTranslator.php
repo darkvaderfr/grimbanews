@@ -53,6 +53,9 @@ class GrimbaTranslator
 {
     private const TIMEOUT = 10;
 
+    /** @var array<int, array{driver: string, message: string}> */
+    private array $lastFailures = [];
+
     /** @var array<int, string> Provider preference order when driver=auto.
      *  `googletx` (S158) is the always-on fallback — Google Translate's
      *  unofficial gtx endpoint, no API key required. Quality is "good
@@ -87,6 +90,7 @@ class GrimbaTranslator
      */
     public function translate(string $text, string $from, string $to = 'fr'): ?array
     {
+        $this->lastFailures = [];
         $text = trim($text);
         if ($text === '' || strtolower(substr($from, 0, 2)) === strtolower(substr($to, 0, 2))) {
             return null;
@@ -106,6 +110,10 @@ class GrimbaTranslator
                     ];
                 }
             } catch (Throwable $e) {
+                $this->lastFailures[] = [
+                    'driver' => 'nobutranslation',
+                    'message' => $e->getMessage(),
+                ];
                 Log::warning('[GrimbaTranslator] NobuTranslation module failed, trying legacy chain', [
                     'from' => $from,
                     'to' => $to,
@@ -122,7 +130,15 @@ class GrimbaTranslator
                 if ($out !== null && $out !== '') {
                     return ['text' => $out, 'driver' => $driver];
                 }
+                $this->lastFailures[] = [
+                    'driver' => $driver,
+                    'message' => 'Empty response or unsupported provider response.',
+                ];
             } catch (Throwable $e) {
+                $this->lastFailures[] = [
+                    'driver' => $driver,
+                    'message' => $e->getMessage(),
+                ];
                 Log::warning('[GrimbaTranslator] driver failed, trying next', [
                     'driver' => $driver, 'from' => $from, 'to' => $to, 'error' => $e->getMessage(),
                 ]);
@@ -130,6 +146,14 @@ class GrimbaTranslator
         }
 
         return null;
+    }
+
+    /**
+     * @return array<int, array{driver: string, message: string}>
+     */
+    public function failureDiagnostics(): array
+    {
+        return $this->lastFailures;
     }
 
     /** @return array<int, string> */

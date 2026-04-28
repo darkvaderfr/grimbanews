@@ -29,6 +29,8 @@ class AdminSettingsTest extends TestCase
 
     public function test_grimba_admin_settings_pages_render_and_save_through_setting_store(): void
     {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
         DB::table('settings')->updateOrInsert(
             ['key' => 'grimba_translator_openai_key'],
             ['value' => 'sk-test-admin-diagnostics', 'created_at' => now(), 'updated_at' => now()]
@@ -46,6 +48,24 @@ class AdminSettingsTest extends TestCase
             ]
         );
 
+        $failedPost = DB::table('posts')
+            ->where('status', 'published')
+            ->orderByDesc('id')
+            ->first(['id', 'name']);
+        $this->assertNotNull($failedPost, 'Fixture database must contain a published post for translation queue diagnostics.');
+        DB::table('grimba_translation_failures')->updateOrInsert(
+            ['post_id' => $failedPost->id, 'locale' => 'fr'],
+            [
+                'source_language' => 'en',
+                'driver_chain' => 'openai → googletx',
+                'error_message' => 'openai: quota test failure',
+                'attempts' => 2,
+                'failed_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
         $this->actingAs($this->admin())
             ->get('/admin/grimba/translation')
             ->assertOk()
@@ -55,6 +75,9 @@ class AdminSettingsTest extends TestCase
             ->assertSee('Provider diagnostics')
             ->assertSee('Dernier échec')
             ->assertSee('quota test failure')
+            ->assertSee('Translation retry queue')
+            ->assertSee('retrying')
+            ->assertSee('openai → googletx')
             ->assertSee('OpenAI')
             ->assertSee('OpenRouter')
             ->assertSee('Anthropic')

@@ -14,6 +14,7 @@ class GrimbaTranslatePending extends Command
         {--limit=50 : Max posts to translate per run}
         {--to=fr : Target locale}
         {--force : Retranslate even if already has a translation in the target locale}
+        {--failed-only : Retry only posts currently recorded in the translation failure queue}
         {--dry-run : Report what would be translated without calling providers}';
 
     protected $description = 'Translate pending un-translated posts via the configured provider chain (OpenAI / OpenRouter / Anthropic / xAI / Perplexity / Mistral / DeepL / Gemini / Groq / LibreTranslate).';
@@ -23,6 +24,7 @@ class GrimbaTranslatePending extends Command
         $to       = (string) $this->option('to') ?: 'fr';
         $limit    = (int) $this->option('limit');
         $force    = (bool) $this->option('force');
+        $failedOnly = (bool) $this->option('failed-only');
         $dry      = (bool) $this->option('dry-run');
 
         if (! $translator->enabled()) {
@@ -38,6 +40,20 @@ class GrimbaTranslatePending extends Command
             ->where('original_language', '!=', $to)
             ->limit($limit)
             ->orderByDesc('id');
+
+        if ($failedOnly) {
+            if (! Schema::hasTable('grimba_translation_failures')) {
+                $this->warn('Translation failure queue table is not installed yet.');
+                return self::SUCCESS;
+            }
+
+            $query->whereExists(function ($sub) use ($to) {
+                $sub->selectRaw('1')
+                    ->from('grimba_translation_failures')
+                    ->whereColumn('grimba_translation_failures.post_id', 'posts.id')
+                    ->where('grimba_translation_failures.locale', $to);
+            });
+        }
 
         if (! $force) {
             $query->where(function ($q) use ($to) {
@@ -91,6 +107,7 @@ class GrimbaTranslatePending extends Command
 
             if ($tName === null) {
                 $this->line('    (skipped — all providers failed)');
+                $this->recordFailure($p, $to, $translator);
                 $fail++;
                 continue;
             }
@@ -122,11 +139,65 @@ class GrimbaTranslatePending extends Command
                 );
             }
 
+            $this->clearFailure((int) $p->id, $to);
+
             $this->line(sprintf('    → %s via %s', \Illuminate\Support\Str::limit($tName['text'], 60), $tName['driver']));
             $ok++;
         }
 
         $this->info(sprintf('Done. ok=%d fail=%d%s', $ok, $fail, $dry ? ' (dry-run)' : ''));
         return self::SUCCESS;
+    }
+
+    private function recordFailure(object $post, string $to, GrimbaTranslator $translator): void
+    {
+        if (! Schema::hasTable('grimba_translation_failures')) {
+            return;
+        }
+
+        $diagnostics = $translator->failureDiagnostics();
+        $message = collect($diagnostics)
+            ->map(fn (array $item) => $item['driver'] . ': ' . $item['message'])
+            ->filter()
+            ->implode(' | ');
+
+        if ($message === '') {
+            $message = 'All configured translation providers failed.';
+        }
+
+        $existing = DB::table('grimba_translation_failures')
+            ->where('post_id', $post->id)
+            ->where('locale', $to)
+            ->first(['attempts']);
+
+        $payload = [
+            'source_language' => strtolower(substr((string) ($post->original_language ?? ''), 0, 8)) ?: null,
+            'driver_chain' => implode(' → ', $translator->configuredDrivers()),
+            'error_message' => \Illuminate\Support\Str::limit($message, 1000, ''),
+            'attempts' => ((int) ($existing->attempts ?? 0)) + 1,
+            'failed_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        if (! $existing) {
+            $payload['created_at'] = now();
+        }
+
+        DB::table('grimba_translation_failures')->updateOrInsert(
+            ['post_id' => $post->id, 'locale' => $to],
+            $payload
+        );
+    }
+
+    private function clearFailure(int $postId, string $to): void
+    {
+        if (! Schema::hasTable('grimba_translation_failures')) {
+            return;
+        }
+
+        DB::table('grimba_translation_failures')
+            ->where('post_id', $postId)
+            ->where('locale', $to)
+            ->delete();
     }
 }

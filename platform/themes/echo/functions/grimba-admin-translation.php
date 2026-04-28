@@ -34,6 +34,7 @@ use Botble\Setting\Supports\SettingStore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 
 Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
     ->middleware(['web', 'core', 'auth'])
@@ -57,9 +58,41 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $nobuAi       = app(GrimbaNobuAi::class);
             $nobuConfigured = $nobuAi->configuredDrivers();
             $nobuFailures = $nobuAi->failureDiagnostics();
+            $translationFailures = collect();
+            $translationFailureStats = [
+                'total' => 0,
+                'locales' => [],
+            ];
+
+            if (Schema::hasTable('grimba_translation_failures')) {
+                $translationFailures = DB::table('grimba_translation_failures as failures')
+                    ->leftJoin('posts', 'posts.id', '=', 'failures.post_id')
+                    ->orderByDesc('failures.failed_at')
+                    ->limit(8)
+                    ->get([
+                        'failures.post_id',
+                        'failures.locale',
+                        'failures.source_language',
+                        'failures.driver_chain',
+                        'failures.error_message',
+                        'failures.attempts',
+                        'failures.failed_at',
+                        'posts.name as post_name',
+                    ]);
+
+                $translationFailureStats = [
+                    'total' => (int) DB::table('grimba_translation_failures')->count(),
+                    'locales' => DB::table('grimba_translation_failures')
+                        ->selectRaw('locale, count(*) as total')
+                        ->groupBy('locale')
+                        ->pluck('total', 'locale')
+                        ->map(fn ($count) => (int) $count)
+                        ->all(),
+                ];
+            }
 
             return view('grimba-admin.translation.index', compact(
-                'drivers', 'settings', 'pinned', 'models', 'modelDrivers', 'translator', 'nobuConfigured', 'nobuFailures', 'autoPublish'
+                'drivers', 'settings', 'pinned', 'models', 'modelDrivers', 'translator', 'nobuConfigured', 'nobuFailures', 'translationFailures', 'translationFailureStats', 'autoPublish'
             ));
         })->name('translation.index');
 
