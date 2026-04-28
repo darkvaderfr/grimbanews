@@ -52,6 +52,15 @@ Schedule::command('grimba:publish-trusted')
     ->withoutOverlapping(15)
     ->runInBackground();
 
+// GrimbaNews — editorial override buckets for drafts that fail the
+// trusted auto-publish guardrails. They still publish, but under
+// explicit review categories instead of silently staying in draft.
+Schedule::command('grimba:publish-guardrail-categories')
+    ->cron('8,38 * * * *')
+    ->onOneServer()
+    ->withoutOverlapping(15)
+    ->runInBackground();
+
 // GrimbaNews — full article extraction for subscriber/member reading.
 // Runs shortly after trusted auto-publish so newly public RSS/NewsAPI
 // posts get a readable body without waiting for an editor.
