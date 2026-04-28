@@ -126,6 +126,18 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                         1 => 'one-sided',
                         default => 'empty',
                     };
+                    $row->coverage_score = match ($row->active_sides) {
+                        3 => 100,
+                        2 => 67,
+                        1 => 33,
+                        default => 0,
+                    };
+                    $row->priority_score = match ($row->status) {
+                        'one-sided' => 300,
+                        'partial' => 200,
+                        'empty' => 100,
+                        default => 0,
+                    } + min(99, $row->total);
 
                     return $row;
                 });
@@ -137,6 +149,9 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'one_sided' => $rows->where('status', 'one-sided')->count(),
                 'empty' => $rows->where('status', 'empty')->count(),
             ];
+            $stats['completion_rate'] = $stats['total'] > 0
+                ? (int) round($stats['balanced'] * 100 / $stats['total'])
+                : 0;
 
             $rows = $rows
                 ->filter(function ($row) use ($filter): bool {
@@ -150,6 +165,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                         default => $row->status !== 'balanced',
                     };
                 })
+                ->sortByDesc('priority_score')
                 ->values();
 
             return view('grimba-admin.coverage-map.index', compact('rows', 'stats', 'filter'));

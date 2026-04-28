@@ -18,6 +18,12 @@
             'one-sided' => ['label' => 'Unilatérale', 'class' => 'danger'],
             'empty' => ['label' => 'Vide', 'class' => 'secondary'],
         ];
+        $statusColors = [
+            'balanced' => '#10b981',
+            'partial' => '#f59e0b',
+            'one-sided' => '#ef4444',
+            'empty' => '#6b7280',
+        ];
 
         $sideMeta = [
             'left' => ['label' => 'Gauche', 'color' => 'var(--gn-left)'],
@@ -45,6 +51,7 @@
                 <div class="d-flex gap-2 flex-wrap justify-content-end">
                     <span class="grimba-admin-status">{{ $stats['one_sided'] }} unilatéraux</span>
                     <span class="grimba-admin-status">{{ $stats['partial'] }} partiels</span>
+                    <span class="grimba-admin-status">{{ $stats['completion_rate'] }}% complets</span>
                     <a href="{{ route('grimba.story-clusters.index') }}" class="btn btn-outline-primary btn-sm">Dossiers</a>
                 </div>
             </div>
@@ -61,6 +68,7 @@
                 <div class="grimba-admin-stat rounded-3 p-3 h-100">
                     <div class="text-muted text-uppercase fw-bold small">Équilibrés</div>
                     <div class="display-6 fw-bold">{{ $stats['balanced'] }}</div>
+                    <div class="text-muted small">{{ $stats['completion_rate'] }}% de complétion</div>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-3">
@@ -97,6 +105,7 @@
                             <tr>
                                 <th>Dossier</th>
                                 <th class="text-end">Articles</th>
+                                <th>Score</th>
                                 <th>Balance</th>
                                 <th>Manque</th>
                                 <th>Statut</th>
@@ -120,6 +129,12 @@
                                         @endif
                                     </td>
                                     <td data-label="Articles" class="text-end fw-bold">{{ $row->total }}</td>
+                                    <td data-label="Score" style="min-width: 130px;">
+                                        <div class="grimba-coverage-score" style="--score: {{ $row->coverage_score }}%; --score-color: {{ $statusColors[$row->status] ?? '#6b7280' }};">
+                                            <span></span>
+                                        </div>
+                                        <strong style="color: {{ $statusColors[$row->status] ?? '#6b7280' }};">{{ $row->coverage_score }}%</strong>
+                                    </td>
                                     <td data-label="Balance" style="min-width: 260px;">
                                         <div class="grimba-coverage-bar" aria-label="Balance gauche centre droite">
                                             <span style="width: {{ ($row->left_count / $total) * 100 }}%; background: var(--gn-left);"></span>
@@ -142,7 +157,7 @@
                                         @if(count($row->missing))
                                             <div class="d-flex gap-1 flex-wrap">
                                                 @foreach($row->missing as $missing)
-                                                    <span class="badge text-bg-secondary">{{ $sideMeta[$missing]['label'] }}</span>
+                                                    <span class="grimba-coverage-gap-chip">{{ $sideMeta[$missing]['label'] }}</span>
                                                 @endforeach
                                             </div>
                                         @else
@@ -151,6 +166,7 @@
                                     </td>
                                     <td data-label="Statut">
                                         <span class="badge text-bg-{{ $meta['class'] }}">{{ $meta['label'] }}</span>
+                                        <div class="text-muted small">priorité {{ $row->priority_score }}</div>
                                     </td>
                                     <td data-label="Actions" class="text-end grimba-admin-inline-actions">
                                         <a href="{{ route('grimba.story-clusters.edit', $row->id) }}" class="btn btn-sm btn-outline-primary">Corriger</a>
@@ -161,7 +177,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6">
+                                    <td colspan="7">
                                         <div class="grimba-admin-empty">
                                             <div class="grimba-admin-empty__icon">MAP</div>
                                             <div class="grimba-admin-empty__title">Aucun dossier pour ce filtre</div>
@@ -199,9 +215,47 @@
             min-width: 0;
         }
 
+        .grimba-coverage-score {
+            width: 100%;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(26, 23, 19, 0.10);
+            overflow: hidden;
+            margin-bottom: 0.35rem;
+        }
+
+        .grimba-coverage-score span {
+            display: block;
+            width: var(--score);
+            height: 100%;
+            border-radius: inherit;
+            background: var(--score-color);
+        }
+
+        .grimba-coverage-gap-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.22rem 0.5rem;
+            border-radius: 999px;
+            background: rgba(26, 23, 19, 0.08);
+            color: var(--gn-ink, #1a1713);
+            border: 1px solid rgba(26, 23, 19, 0.12);
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+
         html[data-bs-theme="dark"] .grimba-coverage-bar,
-        body[data-bs-theme="dark"] .grimba-coverage-bar {
+        body[data-bs-theme="dark"] .grimba-coverage-bar,
+        html[data-bs-theme="dark"] .grimba-coverage-score,
+        body[data-bs-theme="dark"] .grimba-coverage-score {
             background: rgba(246, 241, 232, 0.12);
+        }
+
+        html[data-bs-theme="dark"] .grimba-coverage-gap-chip,
+        body[data-bs-theme="dark"] .grimba-coverage-gap-chip {
+            background: rgba(246, 241, 232, 0.10);
+            color: #f6f1e8;
+            border-color: rgba(246, 241, 232, 0.18);
         }
     </style>
 @endsection

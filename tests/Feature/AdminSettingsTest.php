@@ -297,7 +297,9 @@ class AdminSettingsTest extends TestCase
             ->assertSee('grimba-admin-wayfinder', false)
             ->assertSee('grimba-admin-table-responsive', false)
             ->assertSee('Carte couverture')
-            ->assertSee('Carte de couverture');
+            ->assertSee('Carte de couverture')
+            ->assertSee('Score')
+            ->assertSee('% complets');
 
         $this->actingAs($this->admin())
             ->get('/admin/grimba/cookies')
