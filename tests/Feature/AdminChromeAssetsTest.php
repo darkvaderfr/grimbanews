@@ -20,6 +20,12 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('body .page-header .btn-list', $css);
         $this->assertStringContainsString('body .dropdown-menu.show[data-bs-popper]', $css);
         $this->assertStringContainsString('body[data-bs-theme="dark"] .navbar.navbar-expand-md.d-print-none', $css);
+        $this->assertStringContainsString('body[data-bs-theme="dark"] {', $css);
+        $this->assertStringContainsString('color-scheme: dark;', $css);
+        $this->assertStringContainsString('body[data-bs-theme="dark"] .dropdown-menu:not(.navbar-vertical .dropdown-menu)', $css);
+        $this->assertStringContainsString('body[data-bs-theme="dark"] .input-group-text', $css);
+        $this->assertStringContainsString('body[data-bs-theme="dark"] .modal-content', $css);
+        $this->assertStringContainsString('body[data-bs-theme="dark"] .nav-tabs .nav-link.active', $css);
         $this->assertStringContainsString('body .dropdown-menu .dropdown-item:hover', $css);
         $this->assertStringContainsString('body .navbar-vertical .dropdown-menu', $css);
         $this->assertStringContainsString('body .grimba-admin-hero::after', $css);
@@ -57,6 +63,8 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString("if (href.indexOf('theme=dark') !== -1)", $js);
         $this->assertStringContainsString("if (server) {\n            return server;", $js);
         $this->assertStringContainsString('function currentMode(preferDom)', $js);
+        $this->assertStringContainsString("if (stored) {\n            return stored;", $js);
+        $this->assertStringContainsString("var cookie = cookieMode();", $js);
         $this->assertStringContainsString('applyMode(true)', $js);
         $this->assertStringContainsString("document.documentElement.setAttribute('data-bs-theme', effective)", $js);
         $this->assertStringContainsString("if (document.body.getAttribute('data-bs-theme') !== effective)", $js);

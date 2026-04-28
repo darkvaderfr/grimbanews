@@ -76,14 +76,9 @@
 
     function currentMode(preferDom) {
         var dom = domMode();
-        var server = serverMode();
 
         if (preferDom && dom) {
             return dom;
-        }
-
-        if (server) {
-            return server;
         }
 
         var stored = storedMode(false);
@@ -92,12 +87,23 @@
             return stored;
         }
 
+        var cookie = cookieMode();
+
+        if (cookie) {
+            return cookie;
+        }
+
+        var server = serverMode();
+
+        if (server) {
+            return server;
+        }
+
         if (dom) {
             return dom;
         }
 
         return storedMode(true)
-            || cookieMode()
             || 'light';
     }
 

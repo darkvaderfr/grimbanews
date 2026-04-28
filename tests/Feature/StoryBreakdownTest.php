@@ -87,6 +87,8 @@ class StoryBreakdownTest extends TestCase
             ->assertSee('grimba-breakdown__owner-grid', false)
             ->assertSee('grimba-breakdown__mini-fill', false)
             ->assertSee('position: relative;', false)
+            ->assertSee('[data-bs-theme="dark"]', false)
+            ->assertSee('--gbd-card:', false)
             ->assertSee('Breakdown Left', false)
             ->assertSee('Private equity', false);
     }

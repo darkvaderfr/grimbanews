@@ -10,132 +10,18 @@
 
     $uid = 'gbd-' . substr(md5((string) ($posts->pluck('id')->join('-') ?: uniqid('', true))), 0, 10);
 
-    $sourceIds = $posts->pluck('source_id')->filter()->unique()->values();
-    $sourceRows = $sourceIds->isEmpty()
-        ? collect()
-        : \Illuminate\Support\Facades\DB::table('news_sources')
-            ->whereIn('id', $sourceIds)
-            ->get(['id', 'name', 'website', 'bias_rating', 'ownership_type', 'credibility_score', 'owner_name']);
-
-    $sourcesById = $sourceRows->keyBy('id');
-    $fallbackByName = \Illuminate\Support\Facades\DB::table('news_sources')
-        ->whereIn('name', $posts->pluck('source_name')->filter()->unique()->values())
-        ->get(['id', 'name', 'website', 'bias_rating', 'ownership_type', 'credibility_score', 'owner_name'])
-        ->keyBy(fn ($row) => \Illuminate\Support\Str::lower((string) $row->name));
-
-    $sources = $posts
-        ->map(function ($post) use ($sourcesById, $fallbackByName) {
-            $meta = $post->source_id ? $sourcesById->get($post->source_id) : null;
-            $meta ??= $fallbackByName->get(\Illuminate\Support\Str::lower((string) $post->source_name));
-
-            return (object) [
-                'key' => $post->source_id ?: \Illuminate\Support\Str::lower((string) ($post->source_name ?: $post->id)),
-                'name' => (string) ($meta->name ?? $post->source_name ?? __('Source inconnue')),
-                'website' => (string) ($meta->website ?? ''),
-                'bias' => (string) ($meta->bias_rating ?? $post->bias_rating ?? 'unknown'),
-                'credibility' => $meta->credibility_score ?? $post->credibility_score ?? null,
-                'ownership' => (string) ($meta->ownership_type ?? $post->ownership_type ?? 'unknown'),
-                'owner' => (string) ($meta->owner_name ?? ''),
-            ];
-        })
-        ->unique('key')
-        ->values();
-
-    $total = max(1, $sources->count());
-
-    $biasConfig = [
-        'left' => ['label' => __('Gauche'), 'color' => '#3b82f6'],
-        'center' => ['label' => __('Centre'), 'color' => '#9ca3af'],
-        'right' => ['label' => __('Droite'), 'color' => '#ef4444'],
-        'unknown' => ['label' => __('Non classé'), 'color' => '#6b7280'],
-    ];
-
-    $biasBuckets = collect($biasConfig)->map(function ($meta, $key) use ($sources) {
-        $items = $sources->filter(fn ($source) => ($source->bias ?: 'unknown') === $key)->values();
-
-        return (object) [
-            'key' => $key,
-            'label' => $meta['label'],
-            'color' => $meta['color'],
-            'items' => $items,
-            'count' => $items->count(),
-        ];
-    })->values();
-
-    $knownBiasBuckets = $biasBuckets->filter(fn ($bucket) => in_array($bucket->key, ['left', 'center', 'right'], true));
-    $weakestBias = $knownBiasBuckets->sortBy('count')->first();
-    $weakestPct = $weakestBias ? (int) round($weakestBias->count * 100 / $total) : 0;
-
-    $factBuckets = collect([
-        'very-high' => (object) ['label' => __('Très factuel'), 'range' => __('85-100'), 'color' => '#16a34a', 'items' => collect()],
-        'high' => (object) ['label' => __('Factuel'), 'range' => __('70-84'), 'color' => '#22c55e', 'items' => collect()],
-        'mixed' => (object) ['label' => __('À vérifier'), 'range' => __('50-69'), 'color' => '#d97706', 'items' => collect()],
-        'low' => (object) ['label' => __('Faible'), 'range' => __('< 50'), 'color' => '#dc2626', 'items' => collect()],
-        'unknown' => (object) ['label' => __('Non coté'), 'range' => __('N/A'), 'color' => '#64748b', 'items' => collect()],
-    ]);
-
-    foreach ($sources as $source) {
-        $score = is_numeric($source->credibility) ? (int) $source->credibility : null;
-        $bucket = match (true) {
-            $score === null => 'unknown',
-            $score >= 85 => 'very-high',
-            $score >= 70 => 'high',
-            $score >= 50 => 'mixed',
-            default => 'low',
-        };
-        $factBuckets[$bucket]->items->push($source);
-    }
-
-    $ownershipLabel = function (string $ownership): string {
-        $normalized = \Illuminate\Support\Str::of($ownership)->lower()->replace(['_', '-'], ' ')->squish()->toString();
-
-        return match (true) {
-            str_contains($normalized, 'government') || str_contains($normalized, 'state') || str_contains($normalized, 'public') => __('Gouvernement / public'),
-            str_contains($normalized, 'independent') => __('Indépendant'),
-            str_contains($normalized, 'individual') || str_contains($normalized, 'family') => __('Individuel / familial'),
-            str_contains($normalized, 'private') || str_contains($normalized, 'equity') => __('Private equity'),
-            str_contains($normalized, 'conglomerate') || str_contains($normalized, 'corporate') || str_contains($normalized, 'company') => __('Conglomérat média'),
-            $normalized === '' || $normalized === 'unknown' => __('Non classé'),
-            default => \Illuminate\Support\Str::headline($ownership),
-        };
-    };
-
-    $ownershipColors = ['#111827', '#2085c7', '#6254b2', '#174f47', '#d12854', '#ca9700', '#64748b', '#7c3aed'];
-    $ownershipBuckets = $sources
-        ->groupBy(fn ($source) => $ownershipLabel($source->ownership))
-        ->map(function ($items, $label) use (&$ownershipColors) {
-            return (object) [
-                'label' => $label,
-                'color' => array_shift($ownershipColors) ?: '#64748b',
-                'items' => $items->values(),
-                'count' => $items->count(),
-            ];
-        })
-        ->sortByDesc('count')
-        ->values();
-
-    $donutStops = [];
-    $cursor = 0;
-    foreach ($ownershipBuckets as $bucket) {
-        $slice = $bucket->count * 100 / $total;
-        $gap = min(1.8, max(0.45, $slice * 0.08));
-        $start = $cursor;
-        $colorStart = min(100, $cursor + ($slice > 3 ? $gap / 2 : 0));
-        $colorEnd = max($colorStart, min(100, $cursor + $slice - ($slice > 3 ? $gap / 2 : 0)));
-        $end = min(100, $cursor + $slice);
-
-        if ($colorStart > $start) {
-            $donutStops[] = "transparent {$start}% {$colorStart}%";
-        }
-        $donutStops[] = "{$bucket->color} {$colorStart}% {$colorEnd}%";
-        if ($end > $colorEnd) {
-            $donutStops[] = "transparent {$colorEnd}% {$end}%";
-        }
-        $cursor += $slice;
-    }
-    $donutGradient = $donutStops ? implode(', ', $donutStops) : '#e5e7eb 0% 100%';
-    $topOwner = $ownershipBuckets->first();
-    $topOwnerPct = $topOwner ? (int) round($topOwner->count * 100 / $total) : 0;
+    $breakdown = \App\Support\GrimbaSourceBreakdown::fromPosts($posts);
+    $sources = $breakdown['sources'];
+    $total = $breakdown['total'];
+    $biasBuckets = $breakdown['biasBuckets'];
+    $knownBiasBuckets = $breakdown['knownBiasBuckets'];
+    $weakestBias = $breakdown['weakestBias'];
+    $weakestPct = $breakdown['weakestPct'];
+    $factBuckets = $breakdown['factBuckets'];
+    $ownershipBuckets = $breakdown['ownershipBuckets'];
+    $donutGradient = $breakdown['donutGradient'];
+    $topOwner = $breakdown['topOwner'];
+    $topOwnerPct = $breakdown['topOwnerPct'];
 @endphp
 
 <section class="grimba-breakdown glass-panel p-3 p-md-4 mb-4" id="{{ $uid }}">
@@ -146,6 +32,9 @@
             --gbd-line: rgba(23, 23, 23, .12);
             --gbd-paper: rgba(255, 255, 255, .86);
             --gbd-surface: rgba(255, 255, 255, .62);
+            --gbd-card: rgba(255, 255, 255, .76);
+            --gbd-track: rgba(23, 23, 23, .10);
+            --gbd-tab: #15130f;
             --gbd-shadow: 0 24px 70px rgba(22, 18, 12, .10);
             color: var(--gbd-ink);
             position: relative;
@@ -161,6 +50,9 @@
             --gbd-line: rgba(248, 243, 234, .16);
             --gbd-paper: rgba(15, 14, 11, .88);
             --gbd-surface: rgba(24, 22, 17, .78);
+            --gbd-card: rgba(31, 28, 23, .88);
+            --gbd-track: rgba(248, 243, 234, .12);
+            --gbd-tab: #f8f3ea;
             --gbd-shadow: 0 24px 70px rgba(0, 0, 0, .36);
         }
 
@@ -173,6 +65,13 @@
                 radial-gradient(circle at 18% 8%, rgba(59, 130, 246, .12), transparent 28%),
                 radial-gradient(circle at 84% 18%, rgba(209, 40, 84, .10), transparent 32%),
                 linear-gradient(135deg, rgba(255, 255, 255, .18), transparent 42%);
+        }
+
+        [data-bs-theme="dark"] #{{ $uid }}::before {
+            background:
+                radial-gradient(circle at 18% 8%, rgba(70, 126, 255, .16), transparent 30%),
+                radial-gradient(circle at 84% 18%, rgba(239, 68, 68, .13), transparent 32%),
+                linear-gradient(135deg, rgba(255, 255, 255, .05), transparent 46%);
         }
 
         #{{ $uid }} > * {
@@ -244,7 +143,7 @@
             left: 7px;
             width: calc((100% - 14px) / 3);
             border-radius: 14px;
-            background: #15130f;
+            background: var(--gbd-tab);
             box-shadow: 0 16px 34px rgba(0, 0, 0, .22);
             transform: translateX(var(--tab-x, 0));
             transition: transform .24s cubic-bezier(.2,.8,.2,1);
@@ -264,6 +163,18 @@
 
         #{{ $uid }} #{{ $uid }}-owner:checked ~ .grimba-breakdown__tabs::before {
             background: linear-gradient(135deg, #111827, #a06a00);
+        }
+
+        [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-bias:checked ~ .grimba-breakdown__tabs::before {
+            background: linear-gradient(135deg, #f8f3ea, #4778ff);
+        }
+
+        [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-fact:checked ~ .grimba-breakdown__tabs::before {
+            background: linear-gradient(135deg, #f8f3ea, #22c55e);
+        }
+
+        [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-owner:checked ~ .grimba-breakdown__tabs::before {
+            background: linear-gradient(135deg, #f8f3ea, #d69a00);
         }
 
         #{{ $uid }} input[type="radio"] {
@@ -290,6 +201,13 @@
         #{{ $uid }} #{{ $uid }}-owner:checked ~ .grimba-breakdown__tabs label[for="{{ $uid }}-owner"] {
             color: #fff;
             text-shadow: 0 1px 10px rgba(0, 0, 0, .42);
+        }
+
+        [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-bias:checked ~ .grimba-breakdown__tabs label[for="{{ $uid }}-bias"],
+        [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-fact:checked ~ .grimba-breakdown__tabs label[for="{{ $uid }}-fact"],
+        [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-owner:checked ~ .grimba-breakdown__tabs label[for="{{ $uid }}-owner"] {
+            color: #15130f;
+            text-shadow: none;
         }
 
         #{{ $uid }} .grimba-breakdown__panel {
@@ -325,10 +243,14 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: #15130f;
+            background: var(--gbd-tab);
             color: #fff;
             flex: 0 0 auto;
             box-shadow: 0 14px 28px rgba(0, 0, 0, .18);
+        }
+
+        [data-bs-theme="dark"] #{{ $uid }} .grimba-breakdown__icon {
+            color: #15130f;
         }
 
         #{{ $uid }} .grimba-breakdown__bias-lanes {
@@ -351,7 +273,7 @@
             border-radius: 18px;
             background:
                 linear-gradient(180deg, color-mix(in srgb, var(--lane-color) 10%, transparent), transparent),
-                linear-gradient(180deg, var(--gbd-surface), transparent);
+                linear-gradient(180deg, var(--gbd-card), var(--gbd-surface));
             box-shadow: inset 0 -12px 24px color-mix(in srgb, var(--lane-color) 9%, transparent);
         }
 
@@ -403,7 +325,7 @@
             height: 28px;
             overflow: hidden;
             border-radius: 999px;
-            background: rgba(127, 127, 127, .14);
+            background: var(--gbd-track);
             box-shadow: inset 0 0 0 1px var(--gbd-line);
         }
 
@@ -470,7 +392,7 @@
         #{{ $uid }} .grimba-breakdown__mini-track {
             height: 9px;
             border-radius: 999px;
-            background: rgba(127, 127, 127, .14);
+            background: var(--gbd-track);
             overflow: hidden;
             box-shadow: inset 0 0 0 1px var(--gbd-line);
         }
@@ -551,7 +473,7 @@
             padding: 12px;
             border: 1px solid var(--gbd-line);
             border-radius: 18px;
-            background: var(--gbd-surface);
+            background: var(--gbd-card);
         }
 
         #{{ $uid }} .grimba-breakdown__stat strong {

@@ -34,7 +34,8 @@ body {
     background: var(--gn-paper);
 }
 
-html[data-bs-theme="dark"] body {
+html[data-bs-theme="dark"] body,
+body[data-bs-theme="dark"] {
     --gn-paper:        #121007;
     --gn-paper-warm:   #1c1811;
     --gn-ink:          #f6f1e8;
@@ -45,6 +46,11 @@ html[data-bs-theme="dark"] body {
     --gn-dropdown-line: rgba(246, 241, 232, 0.16);
     --gn-dropdown-hover: rgba(246, 241, 232, 0.11);
     --gn-dropdown-active: rgba(246, 241, 232, 0.16);
+}
+
+html[data-bs-theme="dark"] body,
+body[data-bs-theme="dark"] {
+    color-scheme: dark;
 }
 
 /* ------------------------------------------------------------
@@ -357,6 +363,15 @@ html[data-bs-theme="dark"] body .card {
     background: #1c1811 !important;
 }
 
+html[data-bs-theme="dark"] body .modal-content,
+html[data-bs-theme="dark"] body .offcanvas,
+body[data-bs-theme="dark"] .modal-content,
+body[data-bs-theme="dark"] .offcanvas {
+    background: var(--gn-paper-warm) !important;
+    border-color: rgba(246, 241, 232, 0.14) !important;
+    color: var(--gn-ink) !important;
+}
+
 /* ------------------------------------------------------------
    Tables
    ------------------------------------------------------------ */
@@ -570,8 +585,10 @@ body[data-bs-theme="dark"] .table thead th {
 }
 html[data-bs-theme="dark"] body .form-control,
 html[data-bs-theme="dark"] body .form-select,
+html[data-bs-theme="dark"] body .input-group-text,
 body[data-bs-theme="dark"] .form-control,
-body[data-bs-theme="dark"] .form-select {
+body[data-bs-theme="dark"] .form-select,
+body[data-bs-theme="dark"] .input-group-text {
     background: rgba(255, 255, 255, 0.04) !important;
     color: var(--gn-ink) !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
@@ -579,6 +596,11 @@ body[data-bs-theme="dark"] .form-select {
 html[data-bs-theme="dark"] body .form-control::placeholder,
 body[data-bs-theme="dark"] .form-control::placeholder {
     color: var(--gn-ink-soft) !important;
+}
+html[data-bs-theme="dark"] body .form-control:-webkit-autofill,
+body[data-bs-theme="dark"] .form-control:-webkit-autofill {
+    -webkit-text-fill-color: var(--gn-ink) !important;
+    box-shadow: 0 0 0 1000px rgba(36, 32, 22, 0.98) inset !important;
 }
 html[data-bs-theme="dark"] body .btn-outline-primary,
 body[data-bs-theme="dark"] .btn-outline-primary {
@@ -668,6 +690,47 @@ body[data-bs-theme="dark"] .navbar.navbar-expand-md.d-print-none {
     background: rgba(18, 16, 7, 0.92) !important;
     color: var(--gn-ink) !important;
     border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+html[data-bs-theme="dark"] body .dropdown-menu:not(.navbar-vertical .dropdown-menu):not(.app-sidebar .dropdown-menu),
+html[data-bs-theme="dark"] body .dropdown-menu.show:not(.navbar-vertical .dropdown-menu):not(.app-sidebar .dropdown-menu),
+html[data-bs-theme="dark"] body .select2-dropdown,
+html[data-bs-theme="dark"] body .flatpickr-calendar,
+html[data-bs-theme="dark"] body .datepicker-dropdown,
+body[data-bs-theme="dark"] .dropdown-menu:not(.navbar-vertical .dropdown-menu):not(.app-sidebar .dropdown-menu),
+body[data-bs-theme="dark"] .dropdown-menu.show:not(.navbar-vertical .dropdown-menu):not(.app-sidebar .dropdown-menu),
+body[data-bs-theme="dark"] .select2-dropdown,
+body[data-bs-theme="dark"] .flatpickr-calendar,
+body[data-bs-theme="dark"] .datepicker-dropdown {
+    background: rgba(28, 24, 17, 0.98) !important;
+    border-color: rgba(246, 241, 232, 0.18) !important;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.42) !important;
+    color: var(--gn-ink) !important;
+}
+
+html[data-bs-theme="dark"] body .dropdown-menu .dropdown-item,
+html[data-bs-theme="dark"] body .dropdown-menu a:not(.btn),
+html[data-bs-theme="dark"] body .dropdown-menu button:not(.btn),
+body[data-bs-theme="dark"] .dropdown-menu .dropdown-item,
+body[data-bs-theme="dark"] .dropdown-menu a:not(.btn),
+body[data-bs-theme="dark"] .dropdown-menu button:not(.btn) {
+    color: var(--gn-ink-muted) !important;
+}
+
+html[data-bs-theme="dark"] body .dropdown-menu .dropdown-item:hover,
+html[data-bs-theme="dark"] body .dropdown-menu .dropdown-item:focus,
+html[data-bs-theme="dark"] body .dropdown-menu a:not(.btn):hover,
+html[data-bs-theme="dark"] body .dropdown-menu a:not(.btn):focus,
+html[data-bs-theme="dark"] body .dropdown-menu button:not(.btn):hover,
+html[data-bs-theme="dark"] body .dropdown-menu button:not(.btn):focus,
+body[data-bs-theme="dark"] .dropdown-menu .dropdown-item:hover,
+body[data-bs-theme="dark"] .dropdown-menu .dropdown-item:focus,
+body[data-bs-theme="dark"] .dropdown-menu a:not(.btn):hover,
+body[data-bs-theme="dark"] .dropdown-menu a:not(.btn):focus,
+body[data-bs-theme="dark"] .dropdown-menu button:not(.btn):hover,
+body[data-bs-theme="dark"] .dropdown-menu button:not(.btn):focus {
+    background: rgba(246, 241, 232, 0.11) !important;
+    color: var(--gn-ink) !important;
 }
 html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .navbar-toggler,
 html[data-bs-theme="dark"] body header.navbar.navbar-expand-md.d-print-none .nav-link,
@@ -1297,6 +1360,28 @@ html[data-bs-theme="dark"] body .table > :not(caption) > * > *,
 body[data-bs-theme="dark"] .table > :not(caption) > * > * {
     color: var(--gn-ink);
     border-color: rgba(246, 241, 232, 0.1);
+}
+
+html[data-bs-theme="dark"] body .list-group,
+html[data-bs-theme="dark"] body .list-group-item,
+html[data-bs-theme="dark"] body .nav-tabs,
+html[data-bs-theme="dark"] body .pagination .page-link,
+body[data-bs-theme="dark"] .list-group,
+body[data-bs-theme="dark"] .list-group-item,
+body[data-bs-theme="dark"] .nav-tabs,
+body[data-bs-theme="dark"] .pagination .page-link {
+    background: rgba(36, 32, 22, 0.84) !important;
+    border-color: rgba(246, 241, 232, 0.12) !important;
+    color: var(--gn-ink-muted) !important;
+}
+
+html[data-bs-theme="dark"] body .nav-tabs .nav-link.active,
+html[data-bs-theme="dark"] body .pagination .page-item.active .page-link,
+body[data-bs-theme="dark"] .nav-tabs .nav-link.active,
+body[data-bs-theme="dark"] .pagination .page-item.active .page-link {
+    background: rgba(246, 241, 232, 0.92) !important;
+    border-color: rgba(246, 241, 232, 0.92) !important;
+    color: #17140f !important;
 }
 @media (max-width: 767.98px) {
     html[data-bs-theme="dark"] body .grimba-admin-table-responsive .grimba-admin-table tbody tr,
