@@ -45,7 +45,6 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     @include(Theme::getThemeNamespace('partials.pwa-head'))
     @include(Theme::getThemeNamespace('partials.home.ad-styles'))
-    @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
 
     @php($__grimbaOgImage = Theme::get('grimba_og_image') ?: url('/og/home.png'))
     <link rel="alternate" type="application/rss+xml" title="GrimbaNews — Flux RSS" href="{{ url('/feed.xml') }}">
@@ -55,6 +54,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="{{ $__grimbaOgImage }}">
     {!! Theme::header() !!}
+    @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
 </head>
 <body class="grimba-home grimba-subpage" {!! Theme::bodyAttributes() !!}>
     {!! apply_filters(THEME_FRONT_BODY, null) !!}

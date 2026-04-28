@@ -9,6 +9,7 @@
     $storyTitle = $storyTitle ?? ($posts->first()->name ?? 'Comparaison');
 @endphp
 
+{!! Theme::partial('story-breakdown', ['posts' => $posts]) !!}
 {!! Theme::partial('source-diversity-meter', ['posts' => $posts]) !!}
 
 <div class="story-comparison">

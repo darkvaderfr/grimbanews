@@ -41,7 +41,6 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     @include(Theme::getThemeNamespace('partials.pwa-head'))
     @include(Theme::getThemeNamespace('partials.home.ad-styles'))
-    @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
 
     <link rel="alternate" type="application/rss+xml" title="GrimbaNews — Flux RSS" href="{{ url('/feed.xml') }}">
     <meta property="og:image" content="{{ url('/og/home.png') }}">
@@ -50,6 +49,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="{{ url('/og/home.png') }}">
     {!! Theme::header() !!}
+    @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
 </head>
 <body class="grimba-home" {!! Theme::bodyAttributes() !!}>
     {!! apply_filters(THEME_FRONT_BODY, null) !!}

@@ -318,6 +318,120 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
         Route::get('search', $searchHandler)->name('public.grimba-search');
 
+        Route::get('article/{slug}', function (string $slug) {
+            return app(\Botble\Theme\Http\Controllers\PublicController::class)->getView($slug, 'blog');
+        })->where('slug', '[A-Za-z0-9\-_]+')->name('public.grimba-article');
+
+        Route::get('command-palette.json', function () {
+            $stories = DB::table('posts')
+                ->leftJoin('slugs', function ($join): void {
+                    $join->on('slugs.reference_id', '=', 'posts.id')
+                        ->where('slugs.reference_type', Post::class)
+                        ->where('slugs.prefix', 'blog');
+                })
+                ->where('posts.status', 'published')
+                ->orderByDesc('posts.created_at')
+                ->limit(30)
+                ->get([
+                    'posts.id',
+                    'posts.name',
+                    'posts.description',
+                    'posts.source_name',
+                    'posts.bias_rating',
+                    'posts.created_at',
+                    'slugs.key as slug',
+                ])
+                ->map(fn ($post): array => [
+                    'type' => 'story',
+                    'label' => __('Article'),
+                    'title' => (string) $post->name,
+                    'subtitle' => trim((string) ($post->source_name ?: $post->description)),
+                    'meta' => (string) ($post->bias_rating ?: __('non classé')),
+                    'url' => $post->slug
+                        ? route('public.grimba-article', $post->slug)
+                        : url('/search?q=' . rawurlencode((string) $post->name)),
+                ]);
+
+            $sources = DB::table('news_sources')
+                ->orderByDesc('credibility_score')
+                ->orderBy('name')
+                ->limit(24)
+                ->get(['name', 'slug', 'owner_name', 'bias_rating', 'credibility_score'])
+                ->map(fn ($source): array => [
+                    'type' => 'source',
+                    'label' => __('Source'),
+                    'title' => (string) $source->name,
+                    'subtitle' => trim((string) ($source->owner_name ?: __('Source suivie par GrimbaNews'))),
+                    'meta' => (int) ($source->credibility_score ?? 0) > 0
+                        ? __('Crédibilité :score', ['score' => (int) $source->credibility_score])
+                        : (string) ($source->bias_rating ?: __('non classé')),
+                    'url' => url('/sources/' . ($source->slug ?: \Illuminate\Support\Str::slug((string) $source->name))),
+                ]);
+
+            $recentCategoryActivity = DB::table('post_categories')
+                ->join('posts', 'posts.id', '=', 'post_categories.post_id')
+                ->where('posts.status', 'published')
+                ->where('posts.created_at', '>=', now()->subDays(30))
+                ->selectRaw('post_categories.category_id, COUNT(*) as article_count')
+                ->groupBy('post_categories.category_id');
+
+            $categories = DB::table('categories')
+                ->joinSub($recentCategoryActivity, 'activity', function ($join): void {
+                    $join->on('activity.category_id', '=', 'categories.id');
+                })
+                ->where('categories.status', 'published')
+                ->orderByDesc('activity.article_count')
+                ->orderBy('categories.name')
+                ->limit(24)
+                ->get(['categories.id', 'categories.name', 'categories.description', 'activity.article_count'])
+                ->map(fn ($category): array => [
+                    'type' => 'category',
+                    'label' => __('Sujet'),
+                    'title' => (string) $category->name,
+                    'subtitle' => (string) ($category->description ?: __('Rubrique active')),
+                    'meta' => trans_choice(':count article récent|:count articles récents', (int) $category->article_count, ['count' => (int) $category->article_count]),
+                    'url' => url('/search?categorie=' . $category->id),
+                ]);
+
+            $items = collect()
+                ->merge([
+                    [
+                        'type' => 'nav',
+                        'label' => __('Navigation'),
+                        'title' => __('Angles morts'),
+                        'subtitle' => __('Histoires peu couvertes ou déséquilibrées'),
+                        'meta' => 'GrimbaNews',
+                        'url' => url('/angles-morts'),
+                    ],
+                    [
+                        'type' => 'nav',
+                        'label' => __('Navigation'),
+                        'title' => __('Pour vous'),
+                        'subtitle' => __('Votre fil, vos suivis et vos angles morts personnels'),
+                        'meta' => 'GrimbaNews',
+                        'url' => url('/pour-vous'),
+                    ],
+                    [
+                        'type' => 'nav',
+                        'label' => __('Navigation'),
+                        'title' => __('Sources'),
+                        'subtitle' => __('Biais, crédibilité et propriété des médias suivis'),
+                        'meta' => 'GrimbaNews',
+                        'url' => url('/sources'),
+                    ],
+                ])
+                ->merge($stories)
+                ->merge($sources)
+                ->merge($categories)
+                ->values();
+
+            return response()->json([
+                'generated_at' => now()->toIso8601String(),
+                'ttl_seconds' => 300,
+                'items' => $items,
+            ])->header('Cache-Control', 'public, max-age=300, s-maxage=300');
+        })->name('public.command-palette.index');
+
         // S170 — POST /translate/set removed with the translation
         // feature. Legacy clients that hit it just get a no-op JSON;
         // the cookie is no longer read anywhere.
