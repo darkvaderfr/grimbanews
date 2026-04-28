@@ -4,8 +4,8 @@
      *
      * The defining GrimbaNews promise: stories covered across the
      * political spectrum. This rail surfaces them prominently — a
-     * horizontal scroll of cards, each linking to the story page
-     * for that cluster (the most-covered article picks up clicks).
+     * horizontal scroll of cards, each linking to the comparison
+     * page for that cluster, not the legacy blog index.
      *
      * Pulls only clusters with ≥2 bias sides — the legacy "single-
      * bias-cluster" output stays in the regular hero / blog grids
@@ -41,7 +41,7 @@
     $picks = Post::query()
         ->whereIn('story_cluster_id', $clusterIds)
         ->where('status', 'published')
-        ->orderByDesc('created_at')
+        ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
         ->get(['id', 'name', 'translated_name', 'translated_description', 'translated_to', 'original_language', 'story_cluster_id', 'bias_rating', 'image', 'source_name'])
         ->groupBy('story_cluster_id');
 
@@ -99,7 +99,7 @@
         @foreach($cards as $card)
             @php
                 $head = $card['head'];
-                $url = $head->url ?? url('/blog');
+                $url = url('/comparatif/' . $card['cluster_id']);
                 $title = GnTr::title($head);
                 $isTranslated = GnTr::isTranslated($head);
             @endphp

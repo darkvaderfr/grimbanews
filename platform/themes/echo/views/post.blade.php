@@ -787,6 +787,10 @@
                         @include(Theme::getThemeNamespace('partials.story.share-kit'), [
                             'title' => $__gnTitle,
                         ])
+                        @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+                            'location' => 'grimba_article_top',
+                            'class' => 'grimba-ad-slot--leaderboard my-3',
+                        ])
 
                         @if (echo_is_audio_post($post))
                             <div class="wrapper-audio-control">
@@ -802,6 +806,10 @@
                         @endphp
                         @if ($content = $__gnBody)
                             <div class="ck-content">
+                                @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+                                    'location' => 'grimba_article_mid',
+                                    'class' => 'grimba-ad-slot--native my-3',
+                                ])
                                 {!! apply_filters('ads_render', null, 'post_before', ['class' => 'my-2 text-center']) !!}
 
                                 {!! BaseHelper::clean($content) !!}

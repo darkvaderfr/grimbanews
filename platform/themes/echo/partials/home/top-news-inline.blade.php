@@ -20,7 +20,7 @@
             $q->where('is_featured', false)->orWhereNull('is_featured');
         })
         ->whereIn('story_cluster_id', $balancedClusters)
-        ->latest()
+        ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
         ->limit(6)
         ->get();
 
@@ -28,7 +28,7 @@
         $pad = Post::query()
             ->where('status', 'published')
             ->whereNotIn('id', $clustered->pluck('id'))
-            ->latest()
+            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
             ->limit(6 - $clustered->count())
             ->get();
         $topNews = $clustered->concat($pad);

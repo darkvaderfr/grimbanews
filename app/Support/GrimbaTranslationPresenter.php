@@ -73,6 +73,47 @@ class GrimbaTranslationPresenter
         return Str::limit(strip_tags((string) self::description($post)), $limit);
     }
 
+    public static function orderForTargetLocale(mixed $query, ?string $target = null): mixed
+    {
+        $target = strtolower(substr($target ?: self::targetLocale(), 0, 2));
+        if (! in_array($target, ['fr', 'en'], true)) {
+            $target = 'fr';
+        }
+
+        $existsSql = '';
+        if (Schema::hasTable('grimba_post_translations')) {
+            $existsSql = " OR EXISTS (
+                SELECT 1
+                FROM grimba_post_translations gpt
+                WHERE gpt.post_id = posts.id
+                  AND lower(gpt.locale) = ?
+                  AND gpt.translated_name IS NOT NULL
+                  AND trim(gpt.translated_name) != ''
+            )";
+        }
+
+        $bindings = [$target, $target];
+        if ($existsSql !== '') {
+            $bindings[] = $target;
+        }
+
+        return $query
+            ->orderByRaw(
+                "CASE
+                    WHEN lower(substr(coalesce(posts.original_language, ''), 1, 2)) = ? THEN 0
+                    WHEN (
+                        lower(substr(coalesce(posts.translated_to, ''), 1, 2)) = ?
+                        AND posts.translated_name IS NOT NULL
+                        AND trim(posts.translated_name) != ''
+                    ){$existsSql} THEN 1
+                    WHEN coalesce(posts.original_language, '') = '' THEN 2
+                    ELSE 3
+                END",
+                $bindings
+            )
+            ->orderByDesc('posts.created_at');
+    }
+
     protected static function translationRecord(object $post, string $target): ?object
     {
         $target = strtolower(substr($target, 0, 8));

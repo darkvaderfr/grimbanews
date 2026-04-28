@@ -100,8 +100,8 @@ class MenuSeeder extends BaseSeeder
                         ],
                     ],
                     [
-                        'title' => 'Blog',
-                        'url' => '/blog',
+                        'title' => 'News',
+                        'url' => '/search',
                         'children' => $childBlog,
                     ],
                     [

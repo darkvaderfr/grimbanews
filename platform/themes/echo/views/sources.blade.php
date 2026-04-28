@@ -45,6 +45,10 @@
                 {{ __('Carte des propriétaires') }} →
             </a>
         </header>
+        @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+            'location' => 'grimba_sources_top',
+            'class' => 'grimba-ad-slot--leaderboard mb-4',
+        ])
 
         <div class="grimba-sources__controls glass-panel p-3 mb-4">
             <div class="row g-3 align-items-center">
@@ -110,19 +114,27 @@
                                  data-bias="{{ $biasKey }}">
                                 <article class="glass-card p-3 h-100">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h3 class="h6 mb-0">
-                                            @if($src->slug ?? null)
-                                                <a href="{{ url('/sources/' . $src->slug) }}" class="text-decoration-none" style="color:var(--gn-ink,#1a1713);">
-                                                    {{ $src->name }} →
-                                                </a>
-                                            @elseif($src->website)
-                                                <a href="https://{{ $src->website }}" target="_blank" rel="noopener" class="text-decoration-none">
+                                        <div class="d-flex align-items-center gap-3 min-w-0">
+                                            {!! Theme::partial('source-logo', [
+                                                'name' => $src->name,
+                                                'website' => $src->website,
+                                                'size' => 44,
+                                                'color' => $biasMeta[$biasKey]['color'],
+                                            ]) !!}
+                                            <h3 class="h6 mb-0">
+                                                @if($src->slug ?? null)
+                                                    <a href="{{ url('/sources/' . $src->slug) }}" class="text-decoration-none" style="color:var(--gn-ink,#1a1713);">
+                                                        {{ $src->name }} →
+                                                    </a>
+                                                @elseif($src->website)
+                                                    <a href="https://{{ $src->website }}" target="_blank" rel="noopener" class="text-decoration-none">
+                                                        {{ $src->name }}
+                                                    </a>
+                                                @else
                                                     {{ $src->name }}
-                                                </a>
-                                            @else
-                                                {{ $src->name }}
-                                            @endif
-                                        </h3>
+                                                @endif
+                                            </h3>
+                                        </div>
                                         <span class="d-inline-flex flex-column align-items-end gap-1">
                                             <span class="bias-badge bias-badge--sm"
                                                   style="background: {{ $biasMeta[$biasKey]['color'] }}22;
@@ -179,6 +191,12 @@
                         @endforeach
                     </div>
                 </section>
+                @if($loop->first)
+                    @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+                        'location' => 'grimba_sources_mid',
+                        'class' => 'grimba-ad-slot--native my-4',
+                    ])
+                @endif
             @endforeach
         </div>
 

@@ -346,6 +346,15 @@ app()->booted(function (): void {
             'post_list_after' => __('Post List (after)'),
             'post_before' => __('Post Detail (before)'),
             'post_after' => __('Post Detail (after)'),
+            'grimba_home_top' => __('GrimbaNews Home — top billboard'),
+            'grimba_home_mid' => __('GrimbaNews Home — mid-feed leaderboard'),
+            'grimba_home_native' => __('GrimbaNews Home — native in-feed'),
+            'grimba_chrome_top' => __('GrimbaNews Pages — top billboard'),
+            'grimba_chrome_bottom' => __('GrimbaNews Pages — bottom leaderboard'),
+            'grimba_sources_top' => __('GrimbaNews Sources — top'),
+            'grimba_sources_mid' => __('GrimbaNews Sources — mid-list'),
+            'grimba_article_top' => __('GrimbaNews Article — top'),
+            'grimba_article_mid' => __('GrimbaNews Article — in-article'),
         ];
     }, 128);
 });

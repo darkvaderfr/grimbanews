@@ -10,11 +10,12 @@
     // last 200 published posts in this category. Reveals how the
     // topic is being covered overall — when one side dominates, the
     // bar surfaces it before the reader even scrolls.
+    use App\Support\GrimbaTranslationPresenter as GnTr;
     use Botble\Blog\Models\Post;
     $catBias = Post::query()
         ->whereHas('categories', fn ($q) => $q->where('categories.id', $category->id))
         ->where('status', 'published')
-        ->latest()
+        ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
         ->limit(200)
         ->get(['bias_rating'])
         ->reduce(function (array $a, $p) {

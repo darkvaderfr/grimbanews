@@ -23,15 +23,15 @@
     $hero = Post::query()->where('status', 'published')->where('is_featured', true)
             ->whereIn('story_cluster_id', $balancedClusters)
             ->tap($realImageFilter)
-            ->latest()->first()
+            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))->first()
         ?? Post::query()->where('status', 'published')->where('is_featured', true)
-            ->tap($realImageFilter)->latest()->first()
+            ->tap($realImageFilter)->tap(fn ($q) => GnTr::orderForTargetLocale($q))->first()
         ?? Post::query()->where('status', 'published')->where('is_featured', true)
             ->whereIn('story_cluster_id', $balancedClusters)
-            ->latest()->first()
-        ?? Post::query()->where('status', 'published')->where('is_featured', true)->latest()->first()
-        ?? Post::query()->where('status', 'published')->tap($realImageFilter)->latest()->first()
-        ?? Post::query()->where('status', 'published')->latest()->first();
+            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))->first()
+        ?? Post::query()->where('status', 'published')->where('is_featured', true)->tap(fn ($q) => GnTr::orderForTargetLocale($q))->first()
+        ?? Post::query()->where('status', 'published')->tap($realImageFilter)->tap(fn ($q) => GnTr::orderForTargetLocale($q))->first()
+        ?? Post::query()->where('status', 'published')->tap(fn ($q) => GnTr::orderForTargetLocale($q))->first();
 
     // Briefing prefers clustered posts (bar draws under each), then fills
     // with non-clustered recents so the column is always 5 items.
@@ -39,7 +39,7 @@
         ->where('status', 'published')
         ->whereIn('story_cluster_id', $balancedClusters)
         ->when($hero, fn ($q) => $q->where('id', '!=', $hero->id))
-        ->latest()
+        ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
         ->limit(5)
         ->get();
 
@@ -48,7 +48,7 @@
         $fill = Post::query()
             ->where('status', 'published')
             ->whereNotIn('id', $briefing->pluck('id')->push($hero?->id)->filter())
-            ->latest()
+            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
             ->limit(5 - $briefing->count())
             ->get();
         $briefing = $briefing->concat($fill);
@@ -57,12 +57,12 @@
     $blindspots = Post::query()
         ->where('status', 'published')
         ->where('is_blindspot', true)
-        ->latest()
+        ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
         ->limit(2)
         ->get();
 
     // Counter values — full published recent set, not just what we render.
-    $briefingStats = Post::query()->where('status', 'published')->latest()->limit(9)->get();
+    $briefingStats = Post::query()->where('status', 'published')->tap(fn ($q) => GnTr::orderForTargetLocale($q))->limit(9)->get();
 
     $totalArticles = $briefingStats->sum(fn ($p) => max(1, $p->views ?? 1));
     $readMinutes   = max(1, (int) round($briefingStats->count() * 1.2));
@@ -106,7 +106,7 @@
                 @endforeach
             </ol>
 
-            <a href="{{ url('/blog') }}" class="grimba-briefing__more">
+            <a href="{{ url('/search') }}" class="grimba-briefing__more">
                 {{ __('Voir le briefing complet') }} →
             </a>
         </aside>

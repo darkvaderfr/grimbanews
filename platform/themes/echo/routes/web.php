@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\GrimbaTranslationPresenter as GnTr;
 use App\Support\GrimbaVault;
 use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
 use Botble\Blog\Models\Category;
@@ -52,6 +53,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $posts = Post::query()
                 ->where('story_cluster_id', $clusterId)
                 ->where('status', 'published')
+                ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
                 ->orderByRaw("CASE bias_rating WHEN 'left' THEN 1 WHEN 'center' THEN 2 WHEN 'right' THEN 3 ELSE 4 END")
                 ->get();
 
@@ -74,7 +76,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         $feedHandler = function () {
             $posts = Post::query()
                 ->where('status', 'published')
-                ->latest()
+                ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
                 ->limit(30)
                 ->get();
 
@@ -393,7 +395,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             $postsQuery = Post::query()
                 ->where('status', 'published')
-                ->latest();
+                ->tap(fn ($q) => GnTr::orderForTargetLocale($q));
 
             if (! empty($ids)) {
                 $postsQuery->whereHas('categories', fn ($q) => $q->whereIn('categories.id', $ids));
@@ -616,7 +618,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             if ($cc !== '' || $city !== '') {
                 $q = Post::query()
                     ->where('status', 'published')
-                    ->latest();
+                    ->tap(fn ($q) => GnTr::orderForTargetLocale($q));
 
                 if ($cc !== '') {
                     $q->whereIn('source_id', function ($sub) use ($cc): void {
@@ -766,7 +768,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $posts = Post::query()
                 ->where('source_id', $source->id)
                 ->where('status', 'published')
-                ->latest()
+                ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
                 ->paginate(12);
 
             SeoHelper::setTitle($source->name . ' — GrimbaNews')
@@ -913,7 +915,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->when($clusterId > 0, static function ($query) use ($clusterId): void {
                     $query->orderByRaw('CASE WHEN story_cluster_id = ? THEN 0 ELSE 1 END', [$clusterId]);
                 })
-                ->latest()
+                ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
                 ->paginate(12);
 
             SeoHelper::setTitle(__('Angles morts') . ' — GrimbaNews')

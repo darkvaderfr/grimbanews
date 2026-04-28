@@ -16,14 +16,14 @@
         $latest = Post::query()
             ->whereHas('categories', fn ($q) => $q->where('categories.id', $cat->id))
             ->where('status', 'published')
-            ->latest()
+            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
             ->first();
 
         $categoryBlindspots = Post::query()
             ->whereHas('categories', fn ($q) => $q->where('categories.id', $cat->id))
             ->where('status', 'published')
             ->where('is_blindspot', true)
-            ->latest()
+            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
             ->limit(2)
             ->get();
 
@@ -32,7 +32,7 @@
                 ->where('status', 'published')
                 ->where('is_blindspot', true)
                 ->whereNotIn('id', $categoryBlindspots->pluck('id'))
-                ->latest()
+                ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
                 ->limit(2 - $categoryBlindspots->count())
                 ->get();
             $categoryBlindspots = $categoryBlindspots->concat($filler);

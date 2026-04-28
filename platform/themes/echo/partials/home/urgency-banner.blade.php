@@ -3,7 +3,7 @@
         <span class="grimba-urgency__text">
             {{ __('Voyez chaque angle de chaque histoire.') }}
         </span>
-        <a href="{{ url('/blog') }}" class="grimba-urgency__cta">
+        <a href="{{ url('/search') }}" class="grimba-urgency__cta">
             {{ __('Commencer') }}
             <span aria-hidden="true">→</span>
         </a>

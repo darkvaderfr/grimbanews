@@ -5,7 +5,7 @@
 
     $latest = Post::query()
         ->where('status', 'published')
-        ->latest()
+        ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
         ->limit(10)
         ->get();
 
@@ -21,7 +21,7 @@
         <div class="col-lg-8 col-12">
             <header class="grimba-latest__head d-flex justify-content-between align-items-center mb-3">
                 <h2 class="grimba-latest__title">{{ __('Dernières histoires') }}</h2>
-                <a href="{{ url('/blog') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Tout voir') }}</a>
+                <a href="{{ url('/search') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Tout voir') }}</a>
             </header>
 
             <ul class="grimba-latest__list">

@@ -22,7 +22,9 @@ class RssFeedsSeeder extends Seeder
 {
     public function run(): void
     {
-        // feedsByName: source_name => [url, is_active, notes]
+        // feedsByName: source_name => [url, is_active, notes] or
+        // source_name => [[url, is_active, notes], ...]. Multiple feeds per
+        // publisher are expected; rss_feeds is unique by source_id + url.
         // Broken feeds are retained with is_active=false so the admin UI
         // shows why (audit trail), not silently dropped.
         $feedsByName = [
@@ -39,8 +41,38 @@ class RssFeedsSeeder extends Seeder
             'BBC'               => ['url' => 'https://feeds.bbci.co.uk/news/rss.xml',                            'active' => true,  'notes' => null],
             'The Guardian'      => ['url' => 'https://www.theguardian.com/world/rss',                            'active' => true,  'notes' => null],
             'Reuters'           => ['url' => 'https://feeds.reuters.com/reuters/topNews',                        'active' => false, 'notes' => '2026-04-24: feeds.reuters.com DNS gone after their paywall migration. No replacement without API access.'],
-            'All Africa'        => ['url' => 'https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf',   'active' => true,  'notes' => 'Pan-African wire service — compensates for Cameroon Tribune outage.'],
-            'Global News'       => ['url' => 'https://globalnews.ca/canada/feed/',                              'active' => true,  'notes' => 'S209 — Canada edition coverage feed; official Global News RSS page lists a Canada section feed.'],
+            'All Africa'        => [
+                ['url' => 'https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf',        'active' => true, 'notes' => 'Pan-African English wire service.'],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/latest/headlines.rdf',     'active' => true, 'notes' => 'French latest headlines feed.'],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf', 'active' => true, 'notes' => 'French West Africa headlines.'],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/centralafrica/headlines.rdf','active' => true,'notes' => 'French Central Africa headlines.'],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/business/headlines.rdf',   'active' => true, 'notes' => 'French business headlines.'],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/health/headlines.rdf',     'active' => true, 'notes' => 'French health headlines.'],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/conflict/headlines.rdf',   'active' => true, 'notes' => 'French conflict and security headlines.'],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/environment/headlines.rdf','active' => true, 'notes' => 'French environment headlines.'],
+            ],
+            'Global News'       => [
+                ['url' => 'https://globalnews.ca/canada/feed/',      'active' => true, 'notes' => 'Official Canada section feed.'],
+                ['url' => 'https://globalnews.ca/world/feed/',       'active' => true, 'notes' => 'Official World section feed.'],
+                ['url' => 'https://globalnews.ca/politics/feed/',    'active' => true, 'notes' => 'Official Politics section feed.'],
+                ['url' => 'https://globalnews.ca/money/feed/',       'active' => true, 'notes' => 'Official Money section feed.'],
+                ['url' => 'https://globalnews.ca/health/feed/',      'active' => true, 'notes' => 'Official Health section feed.'],
+                ['url' => 'https://globalnews.ca/environment/feed/', 'active' => true, 'notes' => 'Official Environment section feed.'],
+                ['url' => 'https://globalnews.ca/sports/feed/',      'active' => true, 'notes' => 'Official Sports section feed.'],
+                ['url' => 'https://globalnews.ca/us-news/feed/',     'active' => true, 'notes' => 'Official US News section feed.'],
+            ],
+            'CBC News'          => [
+                ['url' => 'https://www.cbc.ca/cmlink/rss-topstories', 'active' => true, 'notes' => 'Canadian public broadcaster top stories feed.'],
+                ['url' => 'https://www.cbc.ca/cmlink/rss-canada',     'active' => true, 'notes' => 'Canadian public broadcaster Canada feed.'],
+                ['url' => 'https://www.cbc.ca/cmlink/rss-world',      'active' => true, 'notes' => 'Canadian public broadcaster world feed.'],
+            ],
+            'NPR'               => ['url' => 'https://feeds.npr.org/1001/rss.xml', 'active' => true, 'notes' => 'US public radio top stories feed.'],
+            'Al Jazeera English'=> ['url' => 'https://www.aljazeera.com/xml/rss/all.xml', 'active' => true, 'notes' => 'Al Jazeera English all-news RSS feed.'],
+            'VOA Afrique'       => ['url' => 'https://www.voaafrique.com/api/', 'active' => true, 'notes' => 'VOA Afrique official RSS endpoint.'],
+            'WHO Africa'        => [
+                ['url' => 'https://www.afro.who.int/rss/featured-news.xml', 'active' => true, 'notes' => 'WHO Africa featured news feed.'],
+                ['url' => 'https://www.afro.who.int/rss/emergencies.xml',   'active' => true, 'notes' => 'WHO Africa emergencies feed.'],
+            ],
 
             // S152 — right-leaning feeds added 2026-04-26 to balance the
             // FR/center-heavy default mix. Seven of these poll cleanly;
@@ -70,18 +102,22 @@ class RssFeedsSeeder extends Seeder
                 continue;
             }
 
-            DB::table('rss_feeds')->updateOrInsert(
-                ['source_id' => $source->id, 'url' => $cfg['url']],
-                [
-                    'feed_format' => str_contains($cfg['url'], '/atom') || str_ends_with($cfg['url'], '.atom')
-                        ? 'atom'
-                        : 'rss',
-                    'is_active'   => $cfg['active'],
-                    'notes'       => $cfg['notes'],
-                    'updated_at'  => $now,
-                    'created_at'  => $now,
-                ]
-            );
+            $feedConfigs = isset($cfg['url']) ? [$cfg] : $cfg;
+
+            foreach ($feedConfigs as $feed) {
+                DB::table('rss_feeds')->updateOrInsert(
+                    ['source_id' => $source->id, 'url' => $feed['url']],
+                    [
+                        'feed_format' => str_contains($feed['url'], '/atom') || str_ends_with($feed['url'], '.atom')
+                            ? 'atom'
+                            : 'rss',
+                        'is_active'   => $feed['active'],
+                        'notes'       => $feed['notes'],
+                        'updated_at'  => $now,
+                        'created_at'  => $now,
+                    ]
+                );
+            }
         }
 
         $active = DB::table('rss_feeds')->where('is_active', true)->count();

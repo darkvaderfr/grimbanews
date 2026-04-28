@@ -44,6 +44,8 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     @include(Theme::getThemeNamespace('partials.pwa-head'))
+    @include(Theme::getThemeNamespace('partials.home.ad-styles'))
+    @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
 
     @php($__grimbaOgImage = Theme::get('grimba_og_image') ?: url('/og/home.png'))
     <link rel="alternate" type="application/rss+xml" title="GrimbaNews — Flux RSS" href="{{ url('/feed.xml') }}">
@@ -62,6 +64,10 @@
     @include(Theme::getThemeNamespace('partials.home.main-header'))
     @include(Theme::getThemeNamespace('partials.home.topic-chips'))
     @include(Theme::getThemeNamespace('partials.home.translation-note'))
+    @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+        'location' => 'grimba_chrome_top',
+        'class' => 'grimba-ad-slot--billboard container-xxl',
+    ])
 
     <main class="grimba-sub-main" id="grimba-main-content" tabindex="-1">
         <div class="container-xxl py-4">
@@ -72,6 +78,10 @@
             @endif
         </div>
     </main>
+    @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+        'location' => 'grimba_chrome_bottom',
+        'class' => 'grimba-ad-slot--leaderboard container-xxl',
+    ])
 
     @include(Theme::getThemeNamespace('partials.home.vault-fab'))
     @include(Theme::getThemeNamespace('partials.home.mobile-bottom-nav'))

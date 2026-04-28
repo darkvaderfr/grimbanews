@@ -40,6 +40,8 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     @include(Theme::getThemeNamespace('partials.pwa-head'))
+    @include(Theme::getThemeNamespace('partials.home.ad-styles'))
+    @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
 
     <link rel="alternate" type="application/rss+xml" title="GrimbaNews — Flux RSS" href="{{ url('/feed.xml') }}">
     <meta property="og:image" content="{{ url('/og/home.png') }}">
@@ -57,6 +59,10 @@
     @include(Theme::getThemeNamespace('partials.home.main-header'))
     @include(Theme::getThemeNamespace('partials.home.topic-chips'))
     @include(Theme::getThemeNamespace('partials.home.translation-note'))
+    @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+        'location' => 'grimba_home_top',
+        'class' => 'grimba-ad-slot--billboard container-xxl',
+    ])
 
     <main class="grimba-home-main" id="grimba-main-content" tabindex="-1">
         <div class="container-xxl">
@@ -64,8 +70,16 @@
                  has cross-spectrum coverage; hides itself otherwise. --}}
             @include(Theme::getThemeNamespace('partials.home.all-sides-rail'))
             @include(Theme::getThemeNamespace('partials.home.hero-grid'))
+            @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+                'location' => 'grimba_home_mid',
+                'class' => 'grimba-ad-slot--leaderboard my-4',
+            ])
             @include(Theme::getThemeNamespace('partials.home.most-read-by-bias'))
             @include(Theme::getThemeNamespace('partials.home.top-news'))
+            @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+                'location' => 'grimba_home_native',
+                'class' => 'grimba-ad-slot--native my-4',
+            ])
             @include(Theme::getThemeNamespace('partials.home.section-blocks'))
             @include(Theme::getThemeNamespace('partials.home.latest-plus-topics'))
         </div>
