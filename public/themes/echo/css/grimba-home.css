@@ -841,29 +841,41 @@ button.btn-grimba--solid,
 .grimba-hero__media:hover img { transform: scale(1.03); }
 .grimba-hero__gradient {
     position: absolute; inset: 0;
-    background: linear-gradient(180deg, transparent 35%, rgba(0,0,0,0.72) 100%);
+    background:
+        linear-gradient(90deg, rgba(0,0,0,0.64) 0%, rgba(0,0,0,0.34) 48%, rgba(0,0,0,0.08) 100%),
+        linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.22) 36%, rgba(0,0,0,0.82) 100%);
 }
 .grimba-hero__text {
     position: absolute;
     left: 1.5rem; right: 1.5rem; bottom: 4.25rem;
-    color: #fff;
+    color: #fff !important;
+    text-shadow: 0 3px 20px rgba(0,0,0,0.72), 0 1px 4px rgba(0,0,0,0.9);
 }
 .grimba-hero__title {
     font-size: clamp(1.6rem, 3vw, 2.4rem);
     line-height: 1.1;
     font-weight: 700;
     margin: 0 0 0.5rem;
-    color: #fff;
+    color: #fff !important;
+    text-shadow: 0 3px 22px rgba(0,0,0,0.78), 0 1px 4px rgba(0,0,0,0.95);
 }
 .grimba-hero__desc {
     font-size: 0.95rem;
-    opacity: 0.85;
+    opacity: 1;
     max-width: 44ch;
     margin: 0;
+    color: rgba(255,255,255,0.94) !important;
+    font-weight: 600;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.86), 0 1px 3px rgba(0,0,0,0.96);
 }
 .grimba-hero__coverage {
     position: absolute;
     left: 1.5rem; right: 1.5rem; bottom: 1rem;
+}
+.grimba-hero__coverage,
+.grimba-hero__coverage * {
+    color: rgba(255,255,255,0.92) !important;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.82);
 }
 
 /* ------------------------------------------------------------
