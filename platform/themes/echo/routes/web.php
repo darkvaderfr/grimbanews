@@ -53,7 +53,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $posts = Post::query()
                 ->where('story_cluster_id', $clusterId)
                 ->where('status', 'published')
-                ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
+                ->tap(fn ($q) => GnTr::orderForTargetLocale($q, withRecency: false))
                 ->orderByRaw("CASE bias_rating WHEN 'left' THEN 1 WHEN 'center' THEN 2 WHEN 'right' THEN 3 ELSE 4 END")
                 ->get();
 
@@ -273,8 +273,8 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                         $query->whereDate('posts.created_at', '<=', $toDate);
                     }
 
-                    // Preserve the BM25 ordering from the FTS result.
-                    $idOrder = implode(',', array_map('intval', $ids));
+                    // Preserve the BM25 ordering from the FTS result after locale priority.
+                    GnTr::orderForTargetLocale($query, withRecency: false);
                     $query->orderByRaw("CASE posts.id " .
                         collect($ids)
                             ->values()

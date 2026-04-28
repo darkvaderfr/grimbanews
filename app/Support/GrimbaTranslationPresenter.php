@@ -73,13 +73,45 @@ class GrimbaTranslationPresenter
         return Str::limit(strip_tags((string) self::description($post)), $limit);
     }
 
-    public static function orderForTargetLocale(mixed $query, ?string $target = null): mixed
+    public static function orderForTargetLocale(mixed $query, ?string $target = null, bool $withRecency = true): mixed
     {
         $target = strtolower(substr($target ?: self::targetLocale(), 0, 2));
         if (! in_array($target, ['fr', 'en'], true)) {
             $target = 'fr';
         }
 
+        [$sql, $bindings] = self::languagePrioritySql($target);
+
+        $query->orderByRaw($sql, $bindings);
+
+        return $withRecency ? $query->orderByDesc('posts.created_at') : $query;
+    }
+
+    public static function rankForTargetLocale(object $post, ?string $target = null): int
+    {
+        $target = strtolower(substr($target ?: self::targetLocale(), 0, 2));
+        if (! in_array($target, ['fr', 'en'], true)) {
+            $target = 'fr';
+        }
+
+        $source = strtolower(substr((string) ($post->original_language ?? ''), 0, 2));
+
+        if ($source === $target) {
+            return 0;
+        }
+
+        if ($source !== '' && self::isTranslated($post, $target)) {
+            return 1;
+        }
+
+        return $source === '' ? 2 : 3;
+    }
+
+    /**
+     * @return array{0: string, 1: array<int, string>}
+     */
+    protected static function languagePrioritySql(string $target): array
+    {
         $existsSql = '';
         if (Schema::hasTable('grimba_post_translations')) {
             $existsSql = " OR EXISTS (
@@ -97,21 +129,19 @@ class GrimbaTranslationPresenter
             $bindings[] = $target;
         }
 
-        return $query
-            ->orderByRaw(
-                "CASE
-                    WHEN lower(substr(coalesce(posts.original_language, ''), 1, 2)) = ? THEN 0
-                    WHEN (
-                        lower(substr(coalesce(posts.translated_to, ''), 1, 2)) = ?
-                        AND posts.translated_name IS NOT NULL
-                        AND trim(posts.translated_name) != ''
-                    ){$existsSql} THEN 1
-                    WHEN coalesce(posts.original_language, '') = '' THEN 2
-                    ELSE 3
-                END",
-                $bindings
-            )
-            ->orderByDesc('posts.created_at');
+        return [
+            "CASE
+                WHEN lower(substr(coalesce(posts.original_language, ''), 1, 2)) = ? THEN 0
+                WHEN (
+                    lower(substr(coalesce(posts.translated_to, ''), 1, 2)) = ?
+                    AND posts.translated_name IS NOT NULL
+                    AND trim(posts.translated_name) != ''
+                ){$existsSql} THEN 1
+                WHEN coalesce(posts.original_language, '') = '' THEN 2
+                ELSE 3
+            END",
+            $bindings,
+        ];
     }
 
     protected static function translationRecord(object $post, string $target): ?object

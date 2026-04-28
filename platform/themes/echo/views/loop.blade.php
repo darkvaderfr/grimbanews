@@ -1,7 +1,24 @@
 @php
+    use App\Support\GrimbaTranslationPresenter as GnTr;
+
     Theme::layout('grimba-chrome');
     $enableSidebar = theme_option('blog_sidebar_enabled', true);
     $postStyle = request()->input('style', theme_option('post_style', 'grid')) ;
+
+    $sortForLanguage = static function ($items) {
+        return collect($items)
+            ->sortBy([
+                fn ($post) => GnTr::rankForTargetLocale($post),
+                fn ($post) => - (int) optional($post->created_at)->getTimestamp(),
+            ])
+            ->values();
+    };
+
+    if ($posts instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator) {
+        $posts->setCollection($sortForLanguage($posts->getCollection()));
+    } elseif ($posts instanceof \Illuminate\Support\Collection) {
+        $posts = $sortForLanguage($posts);
+    }
 @endphp
 
 <section @class([
