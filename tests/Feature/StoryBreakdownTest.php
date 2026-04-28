@@ -84,6 +84,8 @@ class StoryBreakdownTest extends TestCase
             ->assertSee('Biais', false)
             ->assertSee('Factualité', false)
             ->assertSee('Propriété', false)
+            ->assertSee('grimba-breakdown__owner-grid', false)
+            ->assertSee('grimba-breakdown__mini-fill', false)
             ->assertSee('Breakdown Left', false)
             ->assertSee('Private equity', false);
     }
