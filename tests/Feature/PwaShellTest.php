@@ -25,6 +25,16 @@ class PwaShellTest extends TestCase
             ->assertSee('opacity: 1 !important', false);
     }
 
+    public function test_homepage_hero_copy_uses_readable_ink_plate(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('.grimba-hero__text', false)
+            ->assertSee('rgba(11, 10, 8, .93)', false)
+            ->assertSee('.grimba-hero .grimba-hero__desc', false)
+            ->assertSee('backdrop-filter: none;', false);
+    }
+
     public function test_manifest_and_offline_shell_assets_exist(): void
     {
         $manifestPath = public_path('manifest.webmanifest');

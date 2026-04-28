@@ -32,6 +32,16 @@
         z-index: 2;
     }
 
+    .grimba-hero__text,
+    .grimba-section__hero-body {
+        background:
+            linear-gradient(135deg, rgba(11, 10, 8, .93), rgba(11, 10, 8, .78)),
+            radial-gradient(circle at 0% 0%, rgba(255, 255, 255, .16), transparent 36%) !important;
+        border: 1px solid rgba(255, 255, 255, .22);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, .40);
+        color: #fff !important;
+    }
+
     .grimba-hero__title,
     .grimba-section__hero-title,
     .grimba-blind-card__title {
@@ -55,20 +65,19 @@
 
     .grimba-hero .grimba-hero__desc {
         display: block;
-        width: fit-content;
         max-width: min(760px, 100%);
-        margin-top: 16px;
-        padding: 10px 14px;
-        font-size: clamp(17px, 2vw, 22px);
+        margin-top: 12px;
+        padding: 0;
+        font-size: clamp(16px, 1.7vw, 20px);
         line-height: 1.45;
         font-weight: 700;
         color: #fff !important;
-        background: rgba(0, 0, 0, .66);
-        border: 1px solid rgba(255, 255, 255, .22);
-        border-radius: 18px;
-        box-shadow: 0 18px 38px rgba(0, 0, 0, .34);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
     }
 
     .grimba-hero__coverage .grimba-coverage__chip,

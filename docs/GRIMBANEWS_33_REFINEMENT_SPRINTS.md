@@ -8,7 +8,7 @@ Scope: Frontend + backend refinements after the core GroundNews-style product pa
 1. [Shipped] Breakdown elegance: compact desktop/mobile comparison UI, source chips, motion safety, and backend tests for containment.
 2. [Shipped] Breakdown data depth: normalize source factuality, ownership labels, and bias confidence so the UI is not just decorative.
 3. [Shipped] Story page hierarchy: refine article/comparison page spacing, NobuAI insight placement, subscriber gate, and full-article readability.
-4. Homepage hero readability: final contrast pass across all hero/card variants, with visual regression assertions.
+4. [Shipped] Homepage hero readability: final contrast pass across all hero/card variants, with visual regression assertions.
 5. Language-priority feed polish: validate native-language-first ordering on home, search, category, source, and comparison pages.
 6. Translation cache hardening: make NobuTranslation failures visible in admin, retryable, and safe for FR to EN plus EN to FR.
 7. Daily automation reliability: make RSS, NewsAPI, publish, full-text, category, translation, and NobuAI schedule health measurable.
