@@ -55,6 +55,31 @@
             {!! Theme::partial('bias-mix', ['variant' => 'full']) !!}
         </div>
 
+        @if(($readHistoryCount ?? 0) > 10 && isset($avoidedTopics) && $avoidedTopics->isNotEmpty())
+            <div class="glass-panel p-4 p-md-5 mb-4">
+                <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+                    <div>
+                        <span class="grimba-methodology__kicker">{{ __('Sujets que vous évitez') }}</span>
+                        <h2 class="h1 mt-2 mb-2">{{ __('Vos angles morts personnels') }}</h2>
+                        <p class="mb-0 opacity-85">
+                            {{ __('D’après vos derniers articles lus, ces rubriques récentes n’apparaissent pas encore dans votre historique.') }}
+                        </p>
+                    </div>
+                    <div class="text-lg-end opacity-75">
+                        <strong>{{ $readHistoryCount }}</strong><br>
+                        <span>{{ __('articles lus pris en compte') }}</span>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    @foreach($avoidedTopics as $topic)
+                        <a class="btn-grimba btn-grimba--ghost btn-grimba--sm" href="{{ url('/blog?categorie=' . $topic->id) }}">
+                            {{ $topic->name }}
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         @if($posts->isEmpty())
             <div class="glass-panel p-4 text-center">
                 <p class="mb-0">{{ __("Aucune histoire correspondant à vos sujets pour l'instant.") }}</p>

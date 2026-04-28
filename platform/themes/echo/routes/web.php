@@ -2,6 +2,7 @@
 
 use App\Support\GrimbaVault;
 use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
+use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
@@ -381,6 +382,14 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('pour-vous', function (Request $request) {
             $raw = (string) $request->cookie('grimba_follow', '');
             $ids = array_filter(array_map('intval', explode(',', $raw)));
+            $readIds = collect(explode(',', (string) $request->cookie('grimba_read', '')))
+                ->filter(fn ($id) => ctype_digit((string) $id))
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->take(30)
+                ->values();
+            $readHistoryCount = $readIds->count();
+            $avoidedTopics = collect();
 
             $postsQuery = Post::query()
                 ->where('status', 'published')
@@ -392,6 +401,32 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             $posts = $postsQuery->paginate(12);
 
+            if ($readHistoryCount > 10) {
+                $recentReadCategoryIds = DB::table('post_categories')
+                    ->join('posts', 'posts.id', '=', 'post_categories.post_id')
+                    ->whereIn('posts.id', $readIds)
+                    ->where('posts.status', 'published')
+                    ->where('posts.created_at', '>=', now()->subDays(14))
+                    ->pluck('post_categories.category_id')
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                $avoidedTopics = Category::query()
+                    ->where('status', 'published')
+                    ->whereNotIn('id', $recentReadCategoryIds ?: [0])
+                    ->whereIn('id', function ($query): void {
+                        $query->select('post_categories.category_id')
+                            ->from('post_categories')
+                            ->join('posts', 'posts.id', '=', 'post_categories.post_id')
+                            ->where('posts.status', 'published')
+                            ->where('posts.created_at', '>=', now()->subDays(14));
+                    })
+                    ->orderBy('name')
+                    ->limit(6)
+                    ->get(['id', 'name', 'description']);
+            }
+
             SeoHelper::setTitle(__('Pour vous') . ' — GrimbaNews')
                 ->setDescription(__('Votre fil personnalisé selon les sujets que vous suivez.'));
 
@@ -400,8 +435,10 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add(__('Pour vous'), url('/pour-vous'));
 
             return Theme::scope('for-you', [
-                'posts'         => $posts,
-                'followedIds'   => $ids,
+                'posts'            => $posts,
+                'followedIds'      => $ids,
+                'avoidedTopics'    => $avoidedTopics,
+                'readHistoryCount' => $readHistoryCount,
             ])->render();
         })->name('public.for-you');
 

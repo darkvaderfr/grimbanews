@@ -17,11 +17,12 @@ Latest pushed commits:
 - `dd2b650` Publish guardrail drafts into review categories
 - `d0c8e1f` Add Canada coverage and solid edition menu
 - `58428ca` Improve hero image text contrast
+- `55785e7` Add owner and date search facets
 
 Latest verification:
 
-- `php artisan test` passed with `65` tests and `1193` assertions before the D5 search-facet sprint.
-- Focused D5 verification passed: `SearchFacetsTest` and `StaticUiTranslationTest`.
+- `php artisan test` passed with `66` tests and `1201` assertions after the D5 search-facet sprint.
+- Focused D2 verification passed: `ForYouAvoidedTopicsTest`.
 - Local scheduler was started with `CACHE_STORE=array LOG_CHANNEL=stderr php -d max_execution_time=0 artisan schedule:work`.
 - Local Canada coverage now has 10 published CA-source articles from Global News, all with extracted full content.
 
@@ -86,6 +87,7 @@ Latest verification:
 - S252 added Canada coverage defaults and a Global News Canada RSS feed, seeded 10 local Canada articles, and made the public edition dropdown fully solid.
 - S253 hardened the homepage featured-story image overlay so title, excerpt, and source metadata remain readable on busy photos.
 - S254 added `/search` facets for source, bias, owner, and date range, with regression coverage for owner/date filtering.
+- S255 added `/pour-vous` avoided-topic personalization for readers with more than 10 local read-history items, linking recent unread categories to `/blog?categorie=X`.
 
 ## Active Systems
 
@@ -120,7 +122,7 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S251-S254 — Discovery And Coverage Continuation
+### S251-S255 — Discovery And Coverage Continuation
 
 Goal: Move from backend-redesign closeout into product-discovery work without breaking ingest or reader polish.
 
@@ -130,19 +132,20 @@ Acceptance:
 - Edition dropdowns stay solid and readable.
 - Featured-story hero details are readable over busy images.
 - `/search?q=...` supports source, bias, owner, `from_date`, and `to_date` facets.
+- `/pour-vous` surfaces personal blind-spot categories once local read history has enough signal.
 - Keep backend closeout artifacts intact.
 - Keep tests green and do not deploy production.
 
-Status: S251-S254 shipped locally; S254 pending final full-suite verification and push in the current working session.
+Status: S251-S255 shipped locally; S255 pending final full-suite verification and push in the current working session.
 
-### S255 — Next Feature Sprint
+### S256 — Next Feature Sprint
 
 Goal: Continue Discovery & Navigation after D5.
 
 Recommended next options:
 
 - D8 site-wide command palette, because it improves speed of navigation across stories, sources, and categories.
-- D2 `/pour-vous` polish, because reader personalization already exists but the avoidance/coverage-gap angle is underused.
+- D7 saved-search alerts, because search facets are now expressive enough to persist for members.
 - C8 vault analytics, because it will show which saved stories actually matter to readers without per-user tracking.
 
 ## Operating Rules

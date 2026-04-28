@@ -39,7 +39,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **A** | Push & Deploy Gate | A1–A5 | OPEN — pushing blocked |
 | **B** | Story Page Completion | B1–B10 | 10/10 done |
 | **C** | Vault Maturity | C1–C8 | 4/8 done |
-| **D** | Discovery & Navigation | D1–D8 | 5/8 done |
+| **D** | Discovery & Navigation | D1–D8 | 6/8 done |
 | **E** | NobuAI Integration | E1–E7 | 0/7 (gated on API key) |
 | **F** | Performance & SEO | F1–F8 | 8/8 done |
 | **G** | A11y & I18n | G1–G6 | 4/6 done |
@@ -154,7 +154,7 @@ need to feel as cinematic as the story pages.
 |----|--------|------------|
 | ✅ S176 | Region picker subtle translucency | `223e593` |
 | ✅ S197 | /sources index polish | Uncommitted worktree |
-| **D2** | **/pour-vous polish** — bias-mix block already there; add a "Sujets que vous évitez" section showing categories with 0 reads in the last 14 days, link to `/blog?categorie=X` | Renders when read history > 10 articles |
+| ✅ **D2** | **/pour-vous polish** — bias-mix block already there; add a "Sujets que vous évitez" section showing categories with 0 reads in the last 14 days, link to `/blog?categorie=X` | `ForYouAvoidedTopicsTest` verifies the read-history threshold and unread recent topic links |
 | ✅ S206 | Trending kicker on homepage | Uncommitted worktree |
 | ✅ S199 | Mobile floating bottom nav | Uncommitted worktree |
 | ✅ **D5** | **Search facets** — `/search?q=...` supports `source`, `bias`, `owner`, `from_date`, and `to_date`. `search.blade.php` exposes all facet controls. | `SearchFacetsTest` verifies owner + date range narrowing |
