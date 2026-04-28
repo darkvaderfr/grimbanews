@@ -622,40 +622,13 @@
                     'sourceMeta'   => $__gnSourceMeta,
                 ])
 
-                @if($__gnFullBody)
-                    <details class="grimba-full-article glass-panel p-3 p-md-4 mb-3" style="cursor:pointer;">
-                        <summary style="cursor:pointer; font-family:'Public Sans',system-ui,sans-serif; font-weight:700; font-size:14px; letter-spacing:0.4px; text-transform:uppercase; color:var(--gn-ink,#1a1713);">
-                            {{ __("Lire l'article complet") }} ↓
-                            <span class="small opacity-65 ms-2" style="font-weight:500; text-transform:none; letter-spacing:0;">
-                                · {{ \Illuminate\Support\Str::words(strip_tags($__gnFullBody), 1, '') === '' ? '' : trans_choice(':count mot|:count mots', \Illuminate\Support\Str::wordCount(strip_tags($__gnFullBody)), ['count' => \Illuminate\Support\Str::wordCount(strip_tags($__gnFullBody))]) }}
-                            </span>
-                        </summary>
-                        <div class="grimba-full-article__body mt-3" style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-size:17px; line-height:1.65; color:var(--gn-ink,#1a1713);">
-                            {!! BaseHelper::clean($__gnFullBody) !!}
-                        </div>
-                        @if($__gnUpstream)
-                            <p class="small opacity-60 mt-3 mb-0" style="font-family:'Public Sans',system-ui,sans-serif;">
-                                {{ __('Source originale') }} :
-                                <a href="{{ $__gnUpstream }}" target="_blank" rel="noopener" style="color:#c0392b;">
-                                    {{ $post->source_name ?? __("lire chez l'éditeur") }} ↗
-                                </a>
-                            </p>
-                        @endif
-                    </details>
-                @elseif($__gnFullArticleLocked)
-                    <div class="grimba-full-article glass-panel p-3 p-md-4 mb-3">
-                        <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-                            <div>
-                                <span class="grimba-methodology__kicker">{{ __('Réservé aux abonnés') }}</span>
-                                <h3 class="h5 mt-2 mb-1" style="color:var(--gn-ink,#1a1713);">{{ __("Lire l'article complet") }}</h3>
-                                <p class="mb-0 opacity-70" style="color:var(--gn-ink,#1a1713);">
-                                    {{ __("Connectez-vous pour lire le texte intégral extrait par GrimbaNews.") }}
-                                </p>
-                            </div>
-                            <a href="{{ $__gnMemberLoginUrl }}" class="btn-grimba btn-grimba--dark">{{ __('Se connecter') }}</a>
-                        </div>
-                    </div>
-                @endif
+                @include(Theme::getThemeNamespace('partials.story.full-article'), [
+                    'post' => $post,
+                    'body' => $__gnFullBody,
+                    'locked' => $__gnFullArticleLocked,
+                    'loginUrl' => $__gnMemberLoginUrl,
+                    'upstream' => $__gnUpstream,
+                ])
 
                 @include(Theme::getThemeNamespace('partials.story.article-list'), [
                     'clusterPosts' => $__gnClusterPosts,
@@ -801,7 +774,7 @@
                         @endif
 
                         @php
-                            $__gnBody = $__gnFullBody ?: GnTr::body($post);
+                            $__gnBody = GnTr::body($post);
                             $__gnShowOrig = $__gnHasTr && GnTr::hasTranslatedBody($post, $__gnTarget);
                         @endphp
                         @if ($content = $__gnBody)
@@ -827,20 +800,13 @@
                             </div>
                         @endif
 
-                        @if($__gnFullArticleLocked)
-                            <div class="grimba-full-article glass-panel p-3 p-md-4 my-4">
-                                <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-                                    <div>
-                                        <span class="grimba-methodology__kicker">{{ __('Réservé aux abonnés') }}</span>
-                                        <h3 class="h5 mt-2 mb-1" style="color:var(--gn-ink,#1a1713);">{{ __("Lire l'article complet") }}</h3>
-                                        <p class="mb-0 opacity-70" style="color:var(--gn-ink,#1a1713);">
-                                            {{ __("Connectez-vous pour lire le texte intégral extrait par GrimbaNews.") }}
-                                        </p>
-                                    </div>
-                                    <a href="{{ $__gnMemberLoginUrl }}" class="btn-grimba btn-grimba--dark">{{ __('Se connecter') }}</a>
-                                </div>
-                            </div>
-                        @endif
+                        @include(Theme::getThemeNamespace('partials.story.full-article'), [
+                            'post' => $post,
+                            'body' => $__gnFullBody,
+                            'locked' => $__gnFullArticleLocked,
+                            'loginUrl' => $__gnMemberLoginUrl,
+                            'upstream' => $__gnUpstream,
+                        ])
 
                         {{-- GrimbaNews other angles (sibling cluster posts) --}}
                         @include(Theme::getThemeNamespace('partials.blog.post.partials.other-angles'), ['post' => $post])

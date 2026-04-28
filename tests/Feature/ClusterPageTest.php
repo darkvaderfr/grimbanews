@@ -251,6 +251,7 @@ class ClusterPageTest extends TestCase
             ->get($this->pathFor($post))
             ->assertOk()
             ->assertSee('Réservé aux abonnés')
+            ->assertSee('grimba-full-article--locked', false)
             ->assertSee('Connectez-vous pour lire le texte intégral')
             ->assertDontSee('Texte intégral réservé avec une enquête complète');
     }
@@ -273,7 +274,10 @@ class ClusterPageTest extends TestCase
             ->get($this->pathFor($post))
             ->assertOk()
             ->assertSee("Lire l'article complet")
+            ->assertSee('Texte intégral')
+            ->assertSee('grimba-full-article--reader', false)
             ->assertSee('Texte intégral visible par un membre connecté')
-            ->assertDontSee('Réservé aux abonnés');
+            ->assertDontSee('Réservé aux abonnés')
+            ->assertDontSee('<details class="grimba-full-article', false);
     }
 }

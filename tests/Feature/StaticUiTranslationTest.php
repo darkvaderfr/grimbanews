@@ -79,6 +79,9 @@ class StaticUiTranslationTest extends TestCase
             'Lire cette source',
             'Source inconnue',
             'NobuAI à rafraîchir : une nouvelle couverture est arrivée après ce résumé.',
+            'Réservé aux abonnés',
+            'Texte intégral',
+            'Connectez-vous pour lire le texte intégral extrait par GrimbaNews.',
         ];
 
         foreach ([
@@ -93,6 +96,15 @@ class StaticUiTranslationTest extends TestCase
                 $this->assertArrayHasKey($key, $catalog, $path . ' is missing ' . $key);
             }
         }
+    }
+
+    public function test_full_article_reader_styles_are_present(): void
+    {
+        $css = file_get_contents(dirname(__DIR__, 2) . '/public/themes/echo/css/grimba-home.css');
+
+        $this->assertStringContainsString('.grimba-full-article--reader', $css);
+        $this->assertStringContainsString('.grimba-full-article__body', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-full-article', $css);
     }
 
     public function test_english_story_shell_uses_saved_catalog_copy(): void

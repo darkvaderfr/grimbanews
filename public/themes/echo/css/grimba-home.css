@@ -1767,6 +1767,123 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-insights .grimba-insights__s
     color: #1a1713 !important;
 }
 
+/* Subscriber full-text reader — explicit, readable, and not hidden in a disclosure. */
+.grimba-full-article {
+    position: relative;
+    overflow: hidden;
+}
+.grimba-full-article--reader {
+    scroll-margin-top: 110px;
+}
+.grimba-full-article::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 8% 0%, rgba(192, 57, 43, 0.10), transparent 30%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.30), transparent 48%);
+}
+.grimba-full-article > * {
+    position: relative;
+    z-index: 1;
+}
+.grimba-full-article__header,
+.grimba-full-article__lock {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.grimba-full-article__title {
+    margin: 0.55rem 0 0;
+    color: var(--gn-ink);
+    font-family: var(--gn-font-display);
+    font-size: clamp(1.4rem, 2.2vw, 2rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+}
+.grimba-full-article__count {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0.35rem 0.75rem;
+    border: 1px solid var(--gn-rule);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.54);
+    color: var(--gn-ink-muted);
+    font-family: var(--gn-font-mono);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.grimba-full-article__copy {
+    max-width: 620px;
+    margin: 0.5rem 0 0;
+    color: var(--gn-ink-muted);
+    line-height: 1.55;
+}
+.grimba-full-article__body {
+    max-width: 72ch;
+    margin-inline: auto;
+    padding-top: 0.35rem;
+    color: var(--gn-ink);
+    font-family: var(--gn-font-body);
+    font-size: clamp(1.02rem, 1.2vw, 1.12rem);
+    line-height: 1.78;
+}
+.grimba-full-article__body p,
+.grimba-full-article__body li {
+    margin-bottom: 1.05rem;
+    color: var(--gn-ink);
+}
+.grimba-full-article__body h2,
+.grimba-full-article__body h3 {
+    margin: 1.75rem 0 0.75rem;
+    color: var(--gn-ink);
+    font-family: var(--gn-font-display);
+    letter-spacing: -0.02em;
+}
+.grimba-full-article__source {
+    max-width: 72ch;
+    margin: 1rem auto 0;
+    color: var(--gn-ink-soft);
+    font-family: var(--gn-font-body);
+    font-size: 0.88rem;
+}
+.grimba-full-article__source a {
+    color: var(--gn-accent);
+    font-weight: 800;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-full-article {
+    background: rgba(28, 24, 17, 0.78);
+    border-color: rgba(246, 241, 232, 0.14);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-full-article::before {
+    background:
+        radial-gradient(circle at 8% 0%, rgba(255, 155, 145, 0.13), transparent 30%),
+        linear-gradient(135deg, rgba(246, 241, 232, 0.05), transparent 48%);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-full-article__count {
+    background: rgba(246, 241, 232, 0.08);
+    border-color: rgba(246, 241, 232, 0.16);
+    color: var(--gn-ink-muted);
+}
+@media (max-width: 575px) {
+    .grimba-full-article__header,
+    .grimba-full-article__lock {
+        flex-direction: column;
+    }
+    .grimba-full-article__lock .btn-grimba {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 /* Footer (already dark by design — make sure overlap with body OK) */
 html.grimba-home-html[data-bs-theme="dark"] .grimba-footer {
     background: #060503;
