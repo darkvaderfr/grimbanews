@@ -13,7 +13,7 @@ Scope: Frontend + backend refinements after the core GroundNews-style product pa
 6. [Shipped] Translation cache hardening: make NobuTranslation failures visible in admin, retryable, and safe for FR to EN plus EN to FR.
 7. [Shipped] Daily automation reliability: make RSS, NewsAPI, publish, full-text, category, translation, and NobuAI schedule health measurable.
 8. [Shipped] RSS scale-up: add source health scoring, timeout isolation, last-success timestamps, and stale-feed admin warnings.
-9. NewsAPI scale-up: category/country run ledger, per-country limits, dedupe metrics, and cost/usage guardrails.
+9. [Shipped] NewsAPI scale-up: category/country run ledger, per-country limits, dedupe metrics, and cost/usage guardrails.
 10. Source logo quality: cache logo misses, improve source logo fallbacks, and expose logo status in admin sources.
 11. Source credibility admin UX: improve source triage forms, sorting, bias confidence, factuality, and ownership workflows.
 12. Coverage map polish: make admin and public coverage maps faster, readable in light/dark mode, and actionable.

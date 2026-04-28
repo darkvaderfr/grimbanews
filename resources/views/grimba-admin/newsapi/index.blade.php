@@ -16,7 +16,7 @@
                 </p>
             </div>
             <span class="grimba-admin-status">
-                {{ $key ? 'Key configured' : 'No key' }} · {{ $active ? 'Active' : 'Paused' }}
+                {{ $key ? 'Key configured' : 'No key' }} · {{ $active ? 'Active' : 'Paused' }} · {{ $newsApiStats['calls_today'] }}/{{ $newsApiStats['daily_budget'] }} calls today
             </span>
         </section>
 
@@ -46,6 +46,98 @@
                     sont mappées automatiquement avec leur biais L/C/R, propriétaire et crédibilité.
                     Les sources inconnues sont créées en <code>biais=unknown</code> pour révision manuelle.
                     </p>
+                </div>
+
+                <div class="grimba-admin-section mb-4">
+                    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
+                        <div>
+                            <h3 class="h5 mb-1">NewsAPI run ledger</h3>
+                            <p class="text-muted small mb-0">
+                                Suivi par appel: pays, catégorie, articles retournés, ingérés, dédoublonnés et budget quotidien.
+                            </p>
+                        </div>
+                        <span class="badge {{ $newsApiStats['budget_pct'] >= 80 ? 'bg-warning text-dark' : 'bg-secondary' }}">
+                            {{ $newsApiStats['budget_pct'] }}% budget
+                        </span>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-3">
+                            <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                                <div class="text-muted small text-uppercase">Calls today</div>
+                                <div class="fs-4 fw-semibold">{{ $newsApiStats['calls_today'] }}/{{ $newsApiStats['daily_budget'] }}</div>
+                                <div class="progress mt-2" style="height: 7px;">
+                                    <div class="progress-bar" style="width: {{ $newsApiStats['budget_pct'] }}%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                                <div class="text-muted small text-uppercase">Planned/run</div>
+                                <div class="fs-4 fw-semibold">{{ $newsApiStats['planned_calls'] }}</div>
+                                <div class="text-muted small">Cap: {{ $newsApiStats['max_calls_per_run'] }} calls</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                                <div class="text-muted small text-uppercase">24h ingest</div>
+                                <div class="fs-4 fw-semibold">{{ $newsApiStats['ingested_24h'] }}</div>
+                                <div class="text-muted small">{{ $newsApiStats['returned_24h'] }} returned</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                                <div class="text-muted small text-uppercase">24h dedupe</div>
+                                <div class="fs-4 fw-semibold">{{ $newsApiStats['deduped_24h'] }}</div>
+                                <div class="text-muted small">{{ $newsApiStats['failed_24h'] }} failed calls</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if($recentRuns->isNotEmpty())
+                        <div class="table-responsive grimba-admin-table-responsive">
+                            <table class="table table-sm align-middle grimba-admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Scope</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Returned</th>
+                                        <th class="text-end">Ingested</th>
+                                        <th class="text-end">Deduped</th>
+                                        <th>When</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($recentRuns as $run)
+                                        <tr>
+                                            <td data-label="Scope">
+                                                <strong>{{ $run->endpoint }}</strong>
+                                                <div class="small text-muted">{{ \Illuminate\Support\Str::limit($run->query_label, 80) }}</div>
+                                            </td>
+                                            <td data-label="Status">
+                                                <span class="badge {{ $run->status === 'ok' ? 'bg-success' : ($run->status === 'failed' ? 'bg-danger' : 'bg-secondary') }}">
+                                                    {{ $run->status }}
+                                                </span>
+                                                @if($run->error_message)
+                                                    <div class="small text-danger">{{ \Illuminate\Support\Str::limit($run->error_message, 70) }}</div>
+                                                @endif
+                                            </td>
+                                            <td data-label="Returned" class="text-end">{{ $run->returned_articles }}</td>
+                                            <td data-label="Ingested" class="text-end">{{ $run->ingested_articles }}</td>
+                                            <td data-label="Deduped" class="text-end">{{ $run->deduped_articles }}</td>
+                                            <td data-label="When" class="small text-muted">
+                                                {{ $run->started_at ? \Carbon\Carbon::parse($run->started_at)->diffForHumans() : '—' }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="alert alert-secondary py-2 mb-0">
+                            Aucun run NewsAPI enregistré. Le prochain fetch remplira ce ledger.
+                        </div>
+                    @endif
                 </div>
 
                 <div class="grimba-admin-section mb-4">
@@ -235,6 +327,24 @@
                                    class="form-control"
                                    value="{{ $window }}">
                             <div class="form-text">Heures (24-720). Free tier indexe avec 24h de retard.</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Budget quotidien</strong></label>
+                            <input type="number"
+                                   name="daily_budget"
+                                   min="1" max="100000"
+                                   class="form-control"
+                                   value="{{ $dailyBudget }}">
+                            <div class="form-text">Arrête les appels avant dépassement du quota fournisseur.</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Max calls/run</strong></label>
+                            <input type="number"
+                                   name="max_calls_per_run"
+                                   min="1" max="200"
+                                   class="form-control"
+                                   value="{{ $maxCallsPerRun }}">
+                            <div class="form-text">Cap de sécurité pour éviter une explosion pays × catégories.</div>
                         </div>
                     </div>
 

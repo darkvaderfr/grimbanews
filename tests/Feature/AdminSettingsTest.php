@@ -506,8 +506,11 @@ class AdminSettingsTest extends TestCase
                 'queries' => "france\nclimat",
                 'language' => 'fr',
                 'countries' => 'fr,us',
+                'categories' => 'business,science',
                 'active' => '1',
                 'window' => '72',
+                'daily_budget' => '777',
+                'max_calls_per_run' => '12',
             ])
             ->assertRedirect('/admin/grimba/newsapi');
 
@@ -515,8 +518,11 @@ class AdminSettingsTest extends TestCase
         $this->assertSame("france\nclimat", $this->settingValue('grimba_newsapi_queries'));
         $this->assertSame('fr', $this->settingValue('grimba_newsapi_language'));
         $this->assertSame('fr,us', $this->settingValue('grimba_newsapi_countries'));
+        $this->assertSame('business,science', $this->settingValue('grimba_newsapi_categories'));
         $this->assertSame('1', $this->settingValue('grimba_newsapi_active'));
         $this->assertSame('72', $this->settingValue('grimba_newsapi_everything_window_hours'));
+        $this->assertSame('777', $this->settingValue('grimba_newsapi_daily_request_budget'));
+        $this->assertSame('12', $this->settingValue('grimba_newsapi_max_calls_per_run'));
 
         $newsApiDraftIds = DB::table('posts')
             ->where('status', 'published')
@@ -586,6 +592,8 @@ class AdminSettingsTest extends TestCase
             ->assertSee('grimba-admin-table-responsive', false)
             ->assertSee('grimba-admin-inline-actions', false)
             ->assertSee('NewsAPI draft readiness')
+            ->assertSee('NewsAPI run ledger')
+            ->assertSee('Calls today')
             ->assertSee('Blockers NewsAPI')
             ->assertSee('alert-secondary', false)
             ->assertSee('source manquante')

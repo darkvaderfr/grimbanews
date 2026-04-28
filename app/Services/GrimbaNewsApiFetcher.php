@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -65,7 +66,7 @@ class GrimbaNewsApiFetcher
      * `everything` searches) and ingest new articles. Returns
      * a per-query summary suitable for CLI display or admin UI.
      *
-     * @return array<int, array{query:string, kind:string, status:string, total:int, ingested:int, error:?string}>
+     * @return array<int, array{query:string, kind:string, status:string, total:int, returned:int, ingested:int, deduped:int, skipped:int, error:?string}>
      */
     public function fetchAll(): array
     {
@@ -73,12 +74,15 @@ class GrimbaNewsApiFetcher
         if ($key === null) {
             return [[
                 'query' => '-', 'kind' => '-', 'status' => 'skipped',
-                'total' => 0, 'ingested' => 0,
+                'total' => 0, 'returned' => 0, 'ingested' => 0, 'deduped' => 0, 'skipped' => 0,
                 'error' => 'NEWSAPI_KEY not set (env or setting).',
             ]];
         }
 
         $summary = [];
+        $calls = 0;
+        $maxCalls = $this->maxCallsPerRun();
+        $dailyBudget = $this->dailyRequestBudget();
 
         // Top-headlines per configured country/category. This is the
         // high-volume automatic intake path: every scheduled sweep asks
@@ -86,6 +90,11 @@ class GrimbaNewsApiFetcher
         // editor to manually seed the dashboard.
         foreach ($this->countries() as $country) {
             foreach ($this->categories() as $category) {
+                if (! $this->canSpendCall($calls, $maxCalls, $dailyBudget)) {
+                    $summary[] = $this->skippedSummary('top-headlines', "country={$country} category={$category}", 'NewsAPI request guardrail reached.');
+                    break 2;
+                }
+                $calls++;
                 $summary[] = $this->fetchTopHeadlines($country, $category);
             }
         }
@@ -96,16 +105,48 @@ class GrimbaNewsApiFetcher
         $lang = (string) setting('grimba_newsapi_language', 'fr');
 
         foreach ($queries as $q) {
+            if (! $this->canSpendCall($calls, $maxCalls, $dailyBudget)) {
+                $summary[] = $this->skippedSummary('everything', "q={$q} ({$lang})", 'NewsAPI request guardrail reached.');
+                break;
+            }
+            $calls++;
             $summary[] = $this->fetchEverything($q, $lang);
         }
 
         return $summary;
     }
 
+    public function plannedCallCount(): int
+    {
+        return count($this->countries()) * count($this->categories()) + count($this->everythingQueries());
+    }
+
+    public function dailyRequestBudget(): int
+    {
+        return max(1, (int) setting('grimba_newsapi_daily_request_budget', 900));
+    }
+
+    public function maxCallsPerRun(): int
+    {
+        return max(1, (int) setting('grimba_newsapi_max_calls_per_run', 40));
+    }
+
+    public function callsToday(): int
+    {
+        if (! Schema::hasTable('grimba_newsapi_runs')) {
+            return 0;
+        }
+
+        return DB::table('grimba_newsapi_runs')
+            ->where('status', '!=', 'skipped')
+            ->where('started_at', '>=', now()->startOfDay())
+            ->count();
+    }
+
     /**
      * @return array<string>
      */
-    private function countries(): array
+    public function countries(): array
     {
         $raw = (string) setting('grimba_newsapi_countries', 'fr,us,gb,ca');
         $list = array_filter(array_map(fn ($s) => mb_strtolower(trim((string) $s)), explode(',', $raw)));
@@ -115,7 +156,7 @@ class GrimbaNewsApiFetcher
     /**
      * @return array<string>
      */
-    private function categories(): array
+    public function categories(): array
     {
         $allowed = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'];
         $raw = (string) setting('grimba_newsapi_categories', implode(',', $allowed));
@@ -132,14 +173,14 @@ class GrimbaNewsApiFetcher
     /**
      * @return array<string>
      */
-    private function everythingQueries(): array
+    public function everythingQueries(): array
     {
         $raw = (string) setting('grimba_newsapi_queries', 'macron OR retraites OR énergie OR climat OR ukraine OR israël');
         return array_values(array_filter(array_map('trim', explode("\n", str_replace(',', "\n", $raw)))));
     }
 
     /**
-     * @return array{query:string, kind:string, status:string, total:int, ingested:int, error:?string}
+     * @return array{query:string, kind:string, status:string, total:int, returned:int, ingested:int, deduped:int, skipped:int, error:?string}
      */
     private function fetchTopHeadlines(string $country, string $category): array
     {
@@ -151,7 +192,7 @@ class GrimbaNewsApiFetcher
     }
 
     /**
-     * @return array{query:string, kind:string, status:string, total:int, ingested:int, error:?string}
+     * @return array{query:string, kind:string, status:string, total:int, returned:int, ingested:int, deduped:int, skipped:int, error:?string}
      */
     private function fetchEverything(string $query, string $lang): array
     {
@@ -177,10 +218,14 @@ class GrimbaNewsApiFetcher
      * Run one HTTP call against NewsAPI + ingest matched articles.
      *
      * @param array<string,mixed> $params
-     * @return array{query:string, kind:string, status:string, total:int, ingested:int, error:?string}
+     * @return array{query:string, kind:string, status:string, total:int, returned:int, ingested:int, deduped:int, skipped:int, error:?string}
      */
     private function run(string $endpoint, string $label, array $params): array
     {
+        $startedAt = microtime(true);
+        $started = now();
+        $runId = $this->startRun($endpoint, $label, $params, $started);
+
         try {
             $res = Http::withUserAgent(self::USER_AGENT)
                 ->withHeaders(['X-Api-Key' => $this->key()])
@@ -190,55 +235,72 @@ class GrimbaNewsApiFetcher
 
             if (! $res->successful()) {
                 $err = $res->json('message') ?: ('HTTP ' . $res->status());
-                return [
+                $summary = [
                     'query' => $label, 'kind' => $endpoint,
-                    'status' => 'failed', 'total' => 0, 'ingested' => 0,
+                    'status' => 'failed', 'total' => 0, 'returned' => 0, 'ingested' => 0, 'deduped' => 0, 'skipped' => 0,
                     'error' => Str::limit((string) $err, 160),
                 ];
+                $this->finishRun($runId, $summary, $startedAt);
+
+                return $summary;
             }
 
             $body = $res->json();
             $articles = (array) ($body['articles'] ?? []);
             $total = (int) ($body['totalResults'] ?? count($articles));
+            $returned = count($articles);
 
             $ingested = 0;
+            $deduped = 0;
+            $skipped = 0;
             foreach ($articles as $a) {
-                if ($this->ingestArticle($a)) {
+                $result = $this->ingestArticle($a);
+                if ($result === 'ingested') {
                     $ingested++;
+                } elseif ($result === 'duplicate') {
+                    $deduped++;
+                } else {
+                    $skipped++;
                 }
             }
 
-            return [
+            $summary = [
                 'query' => $label, 'kind' => $endpoint,
-                'status' => 'ok', 'total' => $total, 'ingested' => $ingested,
+                'status' => 'ok', 'total' => $total, 'returned' => $returned, 'ingested' => $ingested, 'deduped' => $deduped, 'skipped' => $skipped,
                 'error' => null,
             ];
+            $this->finishRun($runId, $summary, $startedAt);
+
+            return $summary;
         } catch (Throwable $e) {
             Log::warning('[GrimbaNewsApiFetcher] call failed', [
                 'endpoint' => $endpoint, 'label' => $label, 'error' => $e->getMessage(),
             ]);
-            return [
+            $summary = [
                 'query' => $label, 'kind' => $endpoint,
-                'status' => 'failed', 'total' => 0, 'ingested' => 0,
+                'status' => 'failed', 'total' => 0, 'returned' => 0, 'ingested' => 0, 'deduped' => 0, 'skipped' => 0,
                 'error' => Str::limit($e->getMessage(), 160),
             ];
+            $this->finishRun($runId, $summary, $startedAt);
+
+            return $summary;
         }
     }
 
     /**
-     * Returns true on a new ingest, false on dedup hit / skip.
+     * @return 'ingested'|'duplicate'|'skipped'
      */
-    private function ingestArticle(array $article): bool
+    private function ingestArticle(array $article): string
     {
         $url = (string) ($article['url'] ?? '');
         if ($url === '' || ! filter_var($url, FILTER_VALIDATE_URL)) {
-            return false;
+            return 'skipped';
         }
 
         $hash = sha1($url);
 
         if (DB::table('newsapi_items')->where('article_url_hash', $hash)->exists()) {
-            return false;
+            return 'duplicate';
         }
 
         $apiSourceId = (string) ($article['source']['id'] ?? '');
@@ -250,7 +312,7 @@ class GrimbaNewsApiFetcher
 
         $title = trim((string) ($article['title'] ?? ''));
         if ($title === '') {
-            return false;
+            return 'skipped';
         }
 
         // Strip the trailing source attribution that NewsAPI bakes
@@ -283,6 +345,10 @@ class GrimbaNewsApiFetcher
                 'source_name'  => $sourceName ?: null,
                 'published_at' => $publishedAt,
             ]);
+            if ($postId === null) {
+                DB::rollBack();
+                return 'skipped';
+            }
 
             DB::table('newsapi_items')->insert([
                 'source_id'        => $sourceId,
@@ -297,14 +363,80 @@ class GrimbaNewsApiFetcher
             ]);
 
             DB::commit();
-            return $postId !== null;
+            return 'ingested';
         } catch (Throwable $e) {
             DB::rollBack();
             Log::warning('[GrimbaNewsApiFetcher] ingest failed', [
                 'url' => $url, 'error' => $e->getMessage(),
             ]);
-            return false;
+            return 'skipped';
         }
+    }
+
+    /**
+     * @return array{query:string, kind:string, status:string, total:int, returned:int, ingested:int, deduped:int, skipped:int, error:?string}
+     */
+    private function skippedSummary(string $endpoint, string $label, string $reason): array
+    {
+        return [
+            'query' => $label,
+            'kind' => $endpoint,
+            'status' => 'skipped',
+            'total' => 0,
+            'returned' => 0,
+            'ingested' => 0,
+            'deduped' => 0,
+            'skipped' => 0,
+            'error' => $reason,
+        ];
+    }
+
+    private function canSpendCall(int $callsThisRun, int $maxCalls, int $dailyBudget): bool
+    {
+        return $callsThisRun < $maxCalls && $this->callsToday() < $dailyBudget;
+    }
+
+    private function startRun(string $endpoint, string $label, array $params, Carbon $started): ?int
+    {
+        if (! Schema::hasTable('grimba_newsapi_runs')) {
+            return null;
+        }
+
+        return (int) DB::table('grimba_newsapi_runs')->insertGetId([
+            'endpoint' => $endpoint,
+            'country' => $params['country'] ?? null,
+            'category' => $params['category'] ?? null,
+            'language' => $params['language'] ?? null,
+            'query_label' => Str::limit($label, 500, ''),
+            'request_params' => json_encode($params),
+            'status' => 'pending',
+            'started_at' => $started,
+            'created_at' => $started,
+            'updated_at' => $started,
+        ]);
+    }
+
+    /**
+     * @param array{query:string, kind:string, status:string, total:int, returned:int, ingested:int, deduped:int, skipped:int, error:?string} $summary
+     */
+    private function finishRun(?int $runId, array $summary, float $startedAt): void
+    {
+        if ($runId === null || ! Schema::hasTable('grimba_newsapi_runs')) {
+            return;
+        }
+
+        DB::table('grimba_newsapi_runs')->where('id', $runId)->update([
+            'status' => $summary['status'],
+            'total_results' => $summary['total'],
+            'returned_articles' => $summary['returned'],
+            'ingested_articles' => $summary['ingested'],
+            'deduped_articles' => $summary['deduped'],
+            'skipped_articles' => $summary['skipped'],
+            'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+            'error_message' => $summary['error'],
+            'finished_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     private function resolveSourceId(string $apiId, string $name): ?int

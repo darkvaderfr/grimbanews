@@ -29,15 +29,17 @@ use Botble\Blog\Models\Post;
 use Botble\Setting\Supports\SettingStore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 
 Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
     ->middleware(['web', 'core', 'auth'])
     ->as('grimba.')
     ->group(function (): void {
 
-        Route::get('newsapi', function () {
+        Route::get('newsapi', function (GrimbaNewsApiFetcher $fetcher) {
             $key       = (string) setting('grimba_newsapi_key', env('NEWSAPI_KEY', ''));
             $queries   = (string) setting('grimba_newsapi_queries', "macron OR retraites OR énergie OR climat OR ukraine OR israël");
             $language  = (string) setting('grimba_newsapi_language', 'fr');
@@ -45,6 +47,33 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $categories = (string) setting('grimba_newsapi_categories', 'business,entertainment,general,health,science,sports,technology');
             $active    = (bool) setting('grimba_newsapi_active', true);
             $window    = (int) setting('grimba_newsapi_everything_window_hours', 48);
+            $dailyBudget = $fetcher->dailyRequestBudget();
+            $maxCallsPerRun = $fetcher->maxCallsPerRun();
+            $plannedCalls = $fetcher->plannedCallCount();
+            $callsToday = $fetcher->callsToday();
+            $recentRuns = collect();
+            $newsApiStats = [
+                'calls_today' => $callsToday,
+                'daily_budget' => $dailyBudget,
+                'planned_calls' => $plannedCalls,
+                'max_calls_per_run' => $maxCallsPerRun,
+                'budget_pct' => min(100, (int) round($callsToday * 100 / max(1, $dailyBudget))),
+                'ingested_24h' => 0,
+                'deduped_24h' => 0,
+                'returned_24h' => 0,
+                'failed_24h' => 0,
+            ];
+            if (Schema::hasTable('grimba_newsapi_runs')) {
+                $recentRuns = DB::table('grimba_newsapi_runs')
+                    ->orderByDesc('started_at')
+                    ->limit(12)
+                    ->get();
+                $since = now()->subDay();
+                $newsApiStats['ingested_24h'] = (int) DB::table('grimba_newsapi_runs')->where('started_at', '>=', $since)->sum('ingested_articles');
+                $newsApiStats['deduped_24h'] = (int) DB::table('grimba_newsapi_runs')->where('started_at', '>=', $since)->sum('deduped_articles');
+                $newsApiStats['returned_24h'] = (int) DB::table('grimba_newsapi_runs')->where('started_at', '>=', $since)->sum('returned_articles');
+                $newsApiStats['failed_24h'] = (int) DB::table('grimba_newsapi_runs')->where('started_at', '>=', $since)->where('status', 'failed')->count();
+            }
             $newsApiDrafts = Post::query()
                 ->whereIn('id', function ($sub): void {
                     $sub->select('post_id')
@@ -65,7 +94,8 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->get());
 
             return view('grimba-admin.newsapi.index', compact(
-                'key', 'queries', 'language', 'countries', 'categories', 'active', 'window', 'newsApiDrafts', 'guardrailStats'
+                'key', 'queries', 'language', 'countries', 'categories', 'active', 'window',
+                'dailyBudget', 'maxCallsPerRun', 'newsApiStats', 'recentRuns', 'newsApiDrafts', 'guardrailStats'
             ));
         })->name('newsapi.index');
 
@@ -81,6 +111,10 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $store->set('grimba_newsapi_active',    (bool)   $request->input('active', false));
             $store->set('grimba_newsapi_everything_window_hours',
                 (int) max(24, min(720, (int) $request->input('window', 48))));
+            $store->set('grimba_newsapi_daily_request_budget',
+                (int) max(1, min(100000, (int) $request->input('daily_budget', 900))));
+            $store->set('grimba_newsapi_max_calls_per_run',
+                (int) max(1, min(200, (int) $request->input('max_calls_per_run', 40))));
             $store->save();
 
             return redirect()
