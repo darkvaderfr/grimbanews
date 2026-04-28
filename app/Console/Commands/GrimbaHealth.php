@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\GrimbaRssFeedHealth;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -111,19 +112,24 @@ class GrimbaHealth extends Command
         }
 
         // 6. Feed health
-        $feeds = DB::table('rss_feeds')
-            ->select(
-                DB::raw('SUM(CASE WHEN is_active = 1 AND consecutive_failures = 0 THEN 1 ELSE 0 END) as ok'),
-                DB::raw('SUM(CASE WHEN is_active = 1 AND consecutive_failures BETWEEN 1 AND 4 THEN 1 ELSE 0 END) as wobbly'),
-                DB::raw('SUM(CASE WHEN is_active = 1 AND consecutive_failures >= 5 THEN 1 ELSE 0 END) as sick'),
-                DB::raw('SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive'),
-            )->first();
+        $allFeeds = DB::table('rss_feeds')->get();
+        $activeFeeds = $allFeeds->filter(fn ($feed) => (bool) $feed->is_active);
+        $inactiveFeeds = $allFeeds->count() - $activeFeeds->count();
+        $healthyFeeds = $activeFeeds->filter(fn ($feed) => GrimbaRssFeedHealth::score($feed) >= 85)->count();
+        $watchFeeds = $activeFeeds->filter(fn ($feed) => GrimbaRssFeedHealth::score($feed) >= 65 && GrimbaRssFeedHealth::score($feed) < 85)->count();
+        $staleFeeds = $activeFeeds->filter(fn ($feed) => GrimbaRssFeedHealth::isStale($feed))->count();
+        $sickFeeds = $activeFeeds->filter(fn ($feed) => GrimbaRssFeedHealth::isSick($feed))->count();
+        $averageHealth = $activeFeeds->isEmpty()
+            ? 0
+            : (int) round($activeFeeds->avg(fn ($feed) => GrimbaRssFeedHealth::score($feed)));
         $this->newLine();
         $this->line('6. RSS feed health');
-        $this->line(sprintf('   🟢 healthy    %d', $feeds->ok));
-        $this->line(sprintf('   🟡 wobbly     %d  (1-4 consecutive failures)', $feeds->wobbly));
-        $this->line(sprintf('   🔴 sick       %d  (≥5 consecutive failures)', $feeds->sick));
-        $this->line(sprintf('   ⚫ inactive   %d', $feeds->inactive));
+        $this->line(sprintf('   average score %d%%', $averageHealth));
+        $this->line(sprintf('   🟢 healthy    %d  (score ≥85)', $healthyFeeds));
+        $this->line(sprintf('   🟡 watch      %d  (score 65-84)', $watchFeeds));
+        $this->line(sprintf('   🟠 stale      %d  (no success in 24h)', $staleFeeds));
+        $this->line(sprintf('   🔴 sick       %d  (≥5 consecutive failures)', $sickFeeds));
+        $this->line(sprintf('   ⚫ inactive   %d', $inactiveFeeds));
 
         // 7. Dedup state
         $duppedNames = DB::table('posts')

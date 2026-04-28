@@ -18,6 +18,7 @@
             <div class="d-flex gap-2 flex-wrap justify-content-end">
                 <span class="grimba-admin-status">{{ $stats['active'] }} actifs</span>
                 <span class="grimba-admin-status">{{ $stats['sick'] }} malades</span>
+                <span class="grimba-admin-status">{{ $stats['stale'] }} sans succès</span>
             </div>
         </section>
 
@@ -43,6 +44,13 @@
             @endif
 
             <x-core::card.body>
+                @if($stats['stale'] > 0)
+                    <div class="alert alert-warning border-0 mb-3">
+                        <strong>{{ $stats['stale'] }} flux actif(s) sans succès récent.</strong>
+                        Aucun poll réussi depuis 24 h ou aucun succès enregistré. Ces flux ne bloquent pas les autres, mais ils doivent être réparés ou désactivés.
+                    </div>
+                @endif
+
                 <div class="row mb-3 g-2">
                     <div class="col">
                         <div class="grimba-admin-stat p-2 border rounded text-center">
@@ -58,16 +66,26 @@
                     </div>
                     <div class="col">
                         <div class="grimba-admin-stat p-2 border rounded text-center">
-                            <div class="text-muted small text-uppercase">Malades (≥5 échecs)</div>
-                            <div class="fs-4 fw-semibold" style="color: {{ $stats['sick'] > 0 ? '#e84c3d' : 'inherit' }}">
-                                {{ $stats['sick'] }}
+                            <div class="text-muted small text-uppercase">Santé moyenne</div>
+                            <div class="fs-4 fw-semibold" style="color: {{ $stats['average_health'] < 65 ? '#e84c3d' : 'inherit' }}">
+                                {{ $stats['average_health'] }}%
                             </div>
                         </div>
                     </div>
                     <div class="col">
                         <div class="grimba-admin-stat p-2 border rounded text-center">
-                            <div class="text-muted small text-uppercase">Articles ingérés</div>
-                            <div class="fs-4 fw-semibold">{{ number_format($stats['ingested'], 0, ',', ' ') }}</div>
+                            <div class="text-muted small text-uppercase">Dernier succès</div>
+                            <div class="fs-5 fw-semibold">
+                                {{ $stats['last_success'] ? \Carbon\Carbon::parse($stats['last_success'])->diffForHumans() : 'Jamais' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="grimba-admin-stat p-2 border rounded text-center">
+                            <div class="text-muted small text-uppercase">Sans succès</div>
+                            <div class="fs-4 fw-semibold" style="color: {{ $stats['stale'] > 0 ? '#f97316' : 'inherit' }}">
+                                {{ $stats['stale'] }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -80,6 +98,7 @@
                                 <th>URL</th>
                                 <th>Format</th>
                                 <th>État</th>
+                                <th>Santé</th>
                                 <th class="text-end">Ingestés</th>
                                 <th>Dernier poll</th>
                                 <th class="text-end" style="min-width: 290px;">Actions</th>
@@ -88,10 +107,8 @@
                         <tbody>
                             @forelse($feeds as $f)
                                 @php
-                                    $sick = $f->consecutive_failures >= 5;
-                                    $warn = $f->consecutive_failures >= 1 && !$sick;
-                                    $badgeColor = !$f->is_active ? '#9ca3af' : ($sick ? '#e84c3d' : ($warn ? '#eab308' : '#10b981'));
-                                    $badgeText  = !$f->is_active ? 'Inactif' : ($sick ? 'Malade' : ($warn ? 'Instable' : 'OK'));
+                                    $badgeColor = $f->health_color;
+                                    $badgeText  = $f->health_label;
                                 @endphp
                                 <tr>
                                     <td data-label="Source">
@@ -114,18 +131,39 @@
                                         @if($f->consecutive_failures > 0)
                                             <span class="text-muted small ms-1">×{{ $f->consecutive_failures }}</span>
                                         @endif
+                                        @if($f->is_stale)
+                                            <div class="small" style="color:#f97316;">{{ $f->stale_reason }}</div>
+                                        @endif
                                         @if($f->last_error)
                                             <div class="small text-danger" title="{{ $f->last_error }}">
                                                 {{ \Illuminate\Support\Str::limit($f->last_error, 70) }}
                                             </div>
                                         @endif
                                     </td>
+                                    <td data-label="Santé">
+                                        <div class="d-flex align-items-center gap-2" style="min-width: 120px;">
+                                            <div class="progress flex-grow-1" style="height: 8px;">
+                                                <div class="progress-bar"
+                                                     style="width: {{ $f->health_score }}%; background: {{ $f->health_color }};"
+                                                     role="progressbar"
+                                                     aria-valuenow="{{ $f->health_score }}"
+                                                     aria-valuemin="0"
+                                                     aria-valuemax="100"></div>
+                                            </div>
+                                            <strong class="small">{{ $f->health_score }}%</strong>
+                                        </div>
+                                    </td>
                                     <td data-label="Ingestés" class="text-end">{{ $f->items_ingested }}</td>
                                     <td data-label="Dernier poll" class="small text-muted">
                                         @if($f->last_polled_at)
-                                            {{ \Carbon\Carbon::parse($f->last_polled_at)->diffForHumans() }}
+                                            <div>poll {{ \Carbon\Carbon::parse($f->last_polled_at)->diffForHumans() }}</div>
                                         @else
-                                            —
+                                            <div>poll jamais</div>
+                                        @endif
+                                        @if($f->last_success_at)
+                                            <div>succès {{ \Carbon\Carbon::parse($f->last_success_at)->diffForHumans() }}</div>
+                                        @else
+                                            <div>succès jamais</div>
                                         @endif
                                     </td>
                                     <td data-label="Actions" class="text-end grimba-admin-inline-actions">
@@ -149,7 +187,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">
+                                    <td colspan="8" class="text-center text-muted py-4">
                                         Aucun flux. <a href="{{ route('grimba.rss-feeds.create') }}">Ajoutez-en un</a>.
                                     </td>
                                 </tr>

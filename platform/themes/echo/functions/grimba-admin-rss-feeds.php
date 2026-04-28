@@ -19,6 +19,7 @@
  */
 
 use App\Services\GrimbaRssPoller;
+use App\Support\GrimbaRssFeedHealth;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\DashboardMenuItem;
@@ -52,12 +53,32 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             }
 
             $feeds = $query->orderBy('news_sources.name')->paginate(30)->withQueryString();
+            $feeds->getCollection()->transform(function ($feed) {
+                $feed->health_score = GrimbaRssFeedHealth::score($feed);
+                $feed->health_label = GrimbaRssFeedHealth::label($feed);
+                $feed->health_color = GrimbaRssFeedHealth::color($feed);
+                $feed->is_stale = GrimbaRssFeedHealth::isStale($feed);
+                $feed->stale_reason = GrimbaRssFeedHealth::staleReason($feed);
+
+                return $feed;
+            });
+
+            $activeFeeds = DB::table('rss_feeds')->where('is_active', true)->get();
+            $staleCount = $activeFeeds
+                ->filter(fn ($feed) => GrimbaRssFeedHealth::isStale($feed))
+                ->count();
+            $averageHealth = $activeFeeds->isEmpty()
+                ? 0
+                : (int) round($activeFeeds->avg(fn ($feed) => GrimbaRssFeedHealth::score($feed)));
 
             $stats = [
-                'total'    => DB::table('rss_feeds')->count(),
-                'active'   => DB::table('rss_feeds')->where('is_active', true)->count(),
-                'sick'     => DB::table('rss_feeds')->where('consecutive_failures', '>=', 5)->where('is_active', true)->count(),
-                'ingested' => (int) DB::table('rss_feeds')->sum('items_ingested'),
+                'total'          => DB::table('rss_feeds')->count(),
+                'active'         => $activeFeeds->count(),
+                'sick'           => $activeFeeds->filter(fn ($feed) => GrimbaRssFeedHealth::isSick($feed))->count(),
+                'stale'          => $staleCount,
+                'average_health' => $averageHealth,
+                'last_success'   => DB::table('rss_feeds')->where('is_active', true)->max('last_success_at'),
+                'ingested'       => (int) DB::table('rss_feeds')->sum('items_ingested'),
             ];
 
             return view('grimba-admin.rss-feeds.index', compact('feeds', 'q', 'stats'));

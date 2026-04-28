@@ -97,6 +97,24 @@ class AdminSettingsTest extends TestCase
 
         $rssSource = DB::table('news_sources')->whereNotNull('name')->orderBy('id')->first(['id', 'name']);
         $this->assertNotNull($rssSource, 'Fixture database must contain at least one news source.');
+        DB::table('rss_feeds')->updateOrInsert(
+            [
+                'source_id' => $rssSource->id,
+                'url' => 'https://example.test/sprint-8-stale-feed.xml',
+            ],
+            [
+                'feed_format' => 'rss',
+                'is_active' => true,
+                'last_polled_at' => now()->subHour(),
+                'last_success_at' => now()->subDays(3),
+                'last_error' => 'timeout on upstream',
+                'consecutive_failures' => 2,
+                'items_ingested' => 8,
+                'notes' => 'S8 health fixture',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
 
         $rssDraftIds = DB::table('posts')
             ->where('status', 'published')
@@ -181,13 +199,17 @@ class AdminSettingsTest extends TestCase
             ->assertSee('garde-fous');
 
         $this->actingAs($this->admin())
-            ->get('/admin/grimba/rss-feeds')
+            ->get('/admin/grimba/rss-feeds?q=sprint-8')
             ->assertOk()
             ->assertSee('grimba-admin-actions', false)
             ->assertSee('grimba-admin-table-responsive', false)
             ->assertSee('grimba-admin-inline-actions', false)
             ->assertSee('Tour de contrôle RSS')
-            ->assertSee('Flux RSS');
+            ->assertSee('Flux RSS')
+            ->assertSee('Santé moyenne')
+            ->assertSee('Dernier succès')
+            ->assertSee('flux actif(s) sans succès récent')
+            ->assertSee('S8 health fixture');
 
         $this->actingAs($this->admin())
             ->get('/admin/grimba/rss-feeds/create')

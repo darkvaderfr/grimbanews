@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\GrimbaRssPoller;
+use App\Support\GrimbaRssFeedHealth;
 use Botble\Blog\Models\Post;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -57,6 +58,7 @@ class GrimbaPollFeeds extends Command
         }
 
         $this->flagUnhealthyFeeds();
+        $this->flagStaleFeeds();
 
         return self::SUCCESS;
     }
@@ -166,6 +168,58 @@ class GrimbaPollFeeds extends Command
                 'url'                  => $f->url,
                 'consecutive_failures' => $f->consecutive_failures,
                 'last_error'           => $f->last_error,
+            ]);
+        }
+    }
+
+    /**
+     * Surface feeds that are not failing loudly but also have not
+     * produced a successful poll recently. This catches soft outages:
+     * empty bodies, stale redirects, and sources silently blocking us.
+     */
+    private function flagStaleFeeds(int $hours = GrimbaRssFeedHealth::STALE_HOURS): void
+    {
+        $feeds = DB::table('rss_feeds')
+            ->join('news_sources', 'news_sources.id', '=', 'rss_feeds.source_id')
+            ->where('rss_feeds.is_active', true)
+            ->orderBy('news_sources.name')
+            ->get([
+                'rss_feeds.id',
+                'rss_feeds.url',
+                'rss_feeds.last_success_at',
+                'rss_feeds.last_polled_at',
+                'rss_feeds.consecutive_failures',
+                'news_sources.name as source_name',
+            ])
+            ->filter(fn ($feed) => GrimbaRssFeedHealth::isStale($feed, $hours))
+            ->take(20);
+
+        if ($feeds->isEmpty()) {
+            return;
+        }
+
+        $this->warn(sprintf(
+            '%d active feed(s) have no successful poll in %d+ hours:',
+            $feeds->count(),
+            $hours
+        ));
+
+        foreach ($feeds as $feed) {
+            $this->line(sprintf(
+                '  feed #%d (%s) — %s — health %d%%',
+                $feed->id,
+                $feed->source_name,
+                GrimbaRssFeedHealth::staleReason($feed),
+                GrimbaRssFeedHealth::score($feed),
+            ));
+            Log::warning('[grimba:poll-feeds] stale feed', [
+                'feed_id' => $feed->id,
+                'source' => $feed->source_name,
+                'url' => $feed->url,
+                'last_success_at' => $feed->last_success_at,
+                'last_polled_at' => $feed->last_polled_at,
+                'consecutive_failures' => $feed->consecutive_failures,
+                'health_score' => GrimbaRssFeedHealth::score($feed),
             ]);
         }
     }
