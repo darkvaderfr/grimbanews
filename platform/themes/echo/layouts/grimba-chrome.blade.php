@@ -57,7 +57,7 @@
     @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
 </head>
 <body class="grimba-home grimba-subpage" {!! Theme::bodyAttributes() !!}>
-    {!! apply_filters(THEME_FRONT_BODY, null) !!}
+    @include(Theme::getThemeNamespace('partials.home.front-body-hooks'))
     <a class="grimba-skip-link" href="#grimba-main-content">Aller au contenu principal</a>
 
     @include(Theme::getThemeNamespace('partials.home.urgency-banner'))

@@ -44,8 +44,26 @@ class PwaShellTest extends TestCase
                 ->assertOk()
                 ->assertSee('grimba-onboard-modal', false)
                 ->assertDontSee('grimba-newsletter-modal grimba-onboard-modal is-open', false)
+                ->assertDontSee('id="newsletter-popup"', false)
+                ->assertDontSee('vendor/core/plugins/newsletter/js/newsletter.js', false)
+                ->assertDontSee('modal-backdrop', false)
+                ->assertDontSee('mfp-bg', false)
                 ->assertSee('aria-hidden="true"', false);
         }
+    }
+
+    public function test_uk_edition_homepage_does_not_render_stock_or_auto_open_overlays(): void
+    {
+        $this->withUnencryptedCookies(['grimba_region' => 'uk'])
+            ->get('/')
+            ->assertOk()
+            ->assertSee('Édition UK')
+            ->assertDontSee('grimba-newsletter-modal is-open', false)
+            ->assertDontSee('grimba-onboard-modal is-open', false)
+            ->assertDontSee('id="newsletter-popup"', false)
+            ->assertDontSee('vendor/core/plugins/newsletter/js/newsletter.js', false)
+            ->assertDontSee('modal-backdrop', false)
+            ->assertDontSee('mfp-bg', false);
     }
 
     public function test_explicit_onboarding_query_can_open_the_modal(): void
