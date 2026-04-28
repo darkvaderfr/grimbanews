@@ -148,7 +148,11 @@
             --gbd-surface: rgba(255, 255, 255, .62);
             --gbd-shadow: 0 24px 70px rgba(22, 18, 12, .10);
             color: var(--gbd-ink);
+            position: relative;
             overflow: hidden;
+            max-width: 1120px;
+            margin-inline: auto;
+            padding: clamp(16px, 2vw, 24px) !important;
         }
 
         [data-bs-theme="dark"] #{{ $uid }} {
@@ -216,7 +220,7 @@
 
         #{{ $uid }} .grimba-breakdown__title {
             margin: 0;
-            font: 700 clamp(22px, 2.4vw, 30px)/1.05 "Fraunces", Georgia, serif;
+            font: 700 clamp(22px, 2.1vw, 28px)/1.05 "Fraunces", Georgia, serif;
             letter-spacing: -.02em;
         }
 
@@ -329,26 +333,50 @@
 
         #{{ $uid }} .grimba-breakdown__bias-lanes {
             display: grid;
-            grid-template-columns: repeat(4, minmax(76px, 1fr));
-            gap: 12px;
-            align-items: end;
-            margin: 14px 0;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            align-items: stretch;
+            margin: 12px 0;
         }
 
         #{{ $uid }} .grimba-breakdown__lane {
-            min-height: 156px;
+            min-height: 0;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 8px;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 12px;
+            padding: 12px;
             border: 1px solid var(--gbd-line);
-            border-radius: 999px;
+            border-radius: 18px;
             background:
-                linear-gradient(180deg, color-mix(in srgb, var(--lane-color) 14%, transparent), transparent),
+                linear-gradient(180deg, color-mix(in srgb, var(--lane-color) 10%, transparent), transparent),
                 linear-gradient(180deg, var(--gbd-surface), transparent);
-            box-shadow: inset 0 -18px 34px color-mix(in srgb, var(--lane-color) 12%, transparent);
+            box-shadow: inset 0 -12px 24px color-mix(in srgb, var(--lane-color) 9%, transparent);
+        }
+
+        #{{ $uid }} .grimba-breakdown__lane-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            color: var(--gbd-muted);
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        #{{ $uid }} .grimba-breakdown__lane-head strong {
+            color: var(--gbd-ink);
+            font: 800 20px/1 "Fraunces", Georgia, serif;
+        }
+
+        #{{ $uid }} .grimba-breakdown__lane-sources {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            min-height: 34px;
         }
 
         #{{ $uid }} .grimba-breakdown__logo-pop {
@@ -359,8 +387,8 @@
 
         #{{ $uid }} .grimba-breakdown__more {
             display: inline-flex;
-            width: 42px;
-            height: 42px;
+            width: 32px;
+            height: 32px;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
@@ -372,7 +400,7 @@
 
         #{{ $uid }} .grimba-breakdown__bias-bar {
             display: flex;
-            height: 36px;
+            height: 28px;
             overflow: hidden;
             border-radius: 999px;
             background: rgba(127, 127, 127, .14);
@@ -386,7 +414,7 @@
             width: var(--w);
             color: #fff;
             font-weight: 900;
-            font-size: 13px;
+            font-size: 12px;
             text-shadow: 0 1px 8px rgba(0, 0, 0, .34);
             transform-origin: left;
             animation: gbd-fill .7s cubic-bezier(.2,.8,.2,1) both;
@@ -528,7 +556,7 @@
 
         #{{ $uid }} .grimba-breakdown__stat strong {
             display: block;
-            font: 800 24px/1 "Fraunces", Georgia, serif;
+            font: 800 22px/1 "Fraunces", Georgia, serif;
         }
 
         #{{ $uid }} .grimba-breakdown__stat span {
@@ -548,7 +576,7 @@
             }
 
             #{{ $uid }} .grimba-breakdown__lane {
-                min-height: 168px;
+            min-height: 0;
             }
 
             #{{ $uid }} .grimba-breakdown__donut {
@@ -608,19 +636,27 @@
             <div class="grimba-breakdown__bias-lanes">
                 @foreach($biasBuckets as $bucket)
                     <div class="grimba-breakdown__lane" style="--lane-color: {{ $bucket->color }};">
-                        @foreach($bucket->items->take(5) as $source)
-                            <span class="grimba-breakdown__logo-pop" style="--delay: {{ $loop->index * 55 }}ms;">
-                                {!! Theme::partial('source-logo', [
-                                    'name' => $source->name,
-                                    'website' => $source->website,
-                                    'size' => 44,
-                                    'color' => $bucket->color,
-                                ]) !!}
-                            </span>
-                        @endforeach
-                        @if($bucket->count > 5)
-                            <span class="grimba-breakdown__more">+{{ $bucket->count - 5 }}</span>
-                        @endif
+                        <div class="grimba-breakdown__lane-head">
+                            <span>{{ $bucket->label }}</span>
+                            <strong>{{ (int) round($bucket->count * 100 / $total) }}%</strong>
+                        </div>
+                        <div class="grimba-breakdown__lane-sources">
+                            @foreach($bucket->items->take(5) as $source)
+                                <span class="grimba-breakdown__logo-pop" style="--delay: {{ $loop->index * 55 }}ms;">
+                                    {!! Theme::partial('source-logo', [
+                                        'name' => $source->name,
+                                        'website' => $source->website,
+                                        'size' => 34,
+                                        'color' => $bucket->color,
+                                    ]) !!}
+                                </span>
+                            @endforeach
+                            @if($bucket->count > 5)
+                                <span class="grimba-breakdown__more">+{{ $bucket->count - 5 }}</span>
+                            @elseif($bucket->count === 0)
+                                <span class="small opacity-65">{{ __('Aucune') }}</span>
+                            @endif
+                        </div>
                     </div>
                 @endforeach
             </div>
