@@ -213,7 +213,7 @@
                                    name="countries"
                                    class="form-control"
                                    value="{{ $countries }}"
-                                   placeholder="fr,us,gb">
+                                   placeholder="fr,us,gb,ca">
                             <div class="form-text">CSV ISO-2.</div>
                         </div>
 

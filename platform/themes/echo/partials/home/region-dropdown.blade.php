@@ -65,6 +65,55 @@
     );
 @endphp
 
+<style>
+    .grimba-region__menu {
+        background: #f8f1e6 !important;
+        border: 1px solid rgba(26, 23, 19, 0.18) !important;
+        box-shadow: 0 24px 60px rgba(26, 23, 19, 0.24) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        opacity: 1 !important;
+        isolation: isolate;
+    }
+
+    .grimba-region__option {
+        background: transparent !important;
+        color: #1a1713 !important;
+    }
+
+    .grimba-region__option:hover,
+    .grimba-region__option:focus-visible {
+        background: #ebe0cf !important;
+        color: #1a1713 !important;
+    }
+
+    .grimba-region__option.is-active {
+        background: #1a1713 !important;
+        color: #f8f1e6 !important;
+    }
+
+    html[data-bs-theme="dark"] .grimba-region__menu {
+        background: #15130f !important;
+        border-color: rgba(248, 241, 230, 0.22) !important;
+        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.58) !important;
+    }
+
+    html[data-bs-theme="dark"] .grimba-region__option {
+        color: #f8f1e6 !important;
+    }
+
+    html[data-bs-theme="dark"] .grimba-region__option:hover,
+    html[data-bs-theme="dark"] .grimba-region__option:focus-visible {
+        background: #292217 !important;
+        color: #ffffff !important;
+    }
+
+    html[data-bs-theme="dark"] .grimba-region__option.is-active {
+        background: #f8f1e6 !important;
+        color: #15130f !important;
+    }
+</style>
+
 <div class="grimba-region" data-grimba-region-root>
     <button type="button" class="grimba-region__trigger" data-grimba-region-toggle
             aria-haspopup="listbox" aria-expanded="false">

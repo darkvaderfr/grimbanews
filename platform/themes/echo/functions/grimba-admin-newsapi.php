@@ -40,7 +40,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $key       = (string) setting('grimba_newsapi_key', env('NEWSAPI_KEY', ''));
             $queries   = (string) setting('grimba_newsapi_queries', "macron OR retraites OR énergie OR climat OR ukraine OR israël");
             $language  = (string) setting('grimba_newsapi_language', 'fr');
-            $countries = (string) setting('grimba_newsapi_countries', 'fr,us,gb');
+            $countries = (string) setting('grimba_newsapi_countries', 'fr,us,gb,ca');
             $active    = (bool) setting('grimba_newsapi_active', true);
             $window    = (int) setting('grimba_newsapi_everything_window_hours', 48);
             $newsApiDrafts = Post::query()
@@ -74,7 +74,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $store->set('grimba_newsapi_key',       (string) $request->input('key', ''));
             $store->set('grimba_newsapi_queries',   (string) $request->input('queries', ''));
             $store->set('grimba_newsapi_language',  (string) $request->input('language', 'fr'));
-            $store->set('grimba_newsapi_countries', (string) $request->input('countries', 'fr,us,gb'));
+            $store->set('grimba_newsapi_countries', (string) $request->input('countries', 'fr,us,gb,ca'));
             $store->set('grimba_newsapi_active',    (bool)   $request->input('active', false));
             $store->set('grimba_newsapi_everything_window_hours',
                 (int) max(24, min(720, (int) $request->input('window', 48))));

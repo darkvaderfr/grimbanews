@@ -102,7 +102,7 @@ class GrimbaNewsApiFetcher
      */
     private function countries(): array
     {
-        $raw = (string) setting('grimba_newsapi_countries', 'fr,us,gb');
+        $raw = (string) setting('grimba_newsapi_countries', 'fr,us,gb,ca');
         $list = array_filter(array_map(fn ($s) => mb_strtolower(trim((string) $s)), explode(',', $raw)));
         return $list ?: ['fr'];
     }

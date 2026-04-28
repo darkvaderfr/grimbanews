@@ -15,6 +15,16 @@ class PwaShellTest extends TestCase
             ->assertSee('apple-mobile-web-app-title');
     }
 
+    public function test_region_picker_is_solid_and_includes_canada(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('data-grimba-region="canada"', false)
+            ->assertSee('Canada')
+            ->assertSee('backdrop-filter: none !important', false)
+            ->assertSee('opacity: 1 !important', false);
+    }
+
     public function test_manifest_and_offline_shell_assets_exist(): void
     {
         $manifestPath = public_path('manifest.webmanifest');

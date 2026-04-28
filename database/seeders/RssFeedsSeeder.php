@@ -40,6 +40,7 @@ class RssFeedsSeeder extends Seeder
             'The Guardian'      => ['url' => 'https://www.theguardian.com/world/rss',                            'active' => true,  'notes' => null],
             'Reuters'           => ['url' => 'https://feeds.reuters.com/reuters/topNews',                        'active' => false, 'notes' => '2026-04-24: feeds.reuters.com DNS gone after their paywall migration. No replacement without API access.'],
             'All Africa'        => ['url' => 'https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf',   'active' => true,  'notes' => 'Pan-African wire service — compensates for Cameroon Tribune outage.'],
+            'Global News'       => ['url' => 'https://globalnews.ca/canada/feed/',                              'active' => true,  'notes' => 'S209 — Canada edition coverage feed; official Global News RSS page lists a Canada section feed.'],
 
             // S152 — right-leaning feeds added 2026-04-26 to balance the
             // FR/center-heavy default mix. Seven of these poll cleanly;
