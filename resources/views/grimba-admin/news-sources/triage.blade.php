@@ -41,6 +41,34 @@
                     </p>
                 </div>
 
+                <div class="row g-2 mb-4">
+                    <div class="col-md-3">
+                        <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                            <div class="text-muted small text-uppercase">À classer</div>
+                            <div class="fs-4 fw-semibold">{{ $priorityStats['total'] }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                            <div class="text-muted small text-uppercase">Avec articles</div>
+                            <div class="fs-4 fw-semibold">{{ $priorityStats['with_articles'] }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                            <div class="text-muted small text-uppercase">Priorité haute</div>
+                            <div class="fs-4 fw-semibold">{{ $priorityStats['high_volume'] }}</div>
+                            <div class="text-muted small">3+ articles ingérés</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                            <div class="text-muted small text-uppercase">Propriétaire manquant</div>
+                            <div class="fs-4 fw-semibold">{{ $priorityStats['owner_missing'] }}</div>
+                        </div>
+                    </div>
+                </div>
+
                 @if($rows->isEmpty())
                     <div class="grimba-admin-empty">
                         <div class="grimba-admin-empty__icon">OK</div>
@@ -63,6 +91,7 @@
                                 <th>Biais</th>
                                 <th>Score</th>
                                 <th>Propriété</th>
+                                <th>Propriétaire</th>
                                 <th>Crédibilité</th>
                                 <th>Pays</th>
                                 <th>Langue</th>
@@ -101,6 +130,9 @@
                                             <option value="{{ $k }}" {{ $r->ownership_type === $k ? 'selected' : '' }}>{{ $v }}</option>
                                         @endforeach
                                     </select>
+                                </td>
+                                <td data-label="Propriétaire" style="min-width:180px;">
+                                    <input type="text" class="form-control form-control-sm" data-field="owner_name" value="{{ $r->owner_name }}" placeholder="Groupe / famille / État">
                                 </td>
                                 <td data-label="Crédibilité" style="width:90px;">
                                     <input type="number" min="0" max="100" class="form-control form-control-sm" data-field="credibility_score" value="{{ $r->credibility_score }}" placeholder="0-100">

@@ -91,7 +91,12 @@
                                         </span>
                                     </td>
                                     <td data-label="Score" class="text-end">{{ isset($src->bias_score) ? number_format((float) $src->bias_score, 1) : '—' }}</td>
-                                    <td data-label="Propriété" class="text-muted">{{ ['state'=>'État','corporate'=>'Privé','independent'=>'Indépendant','nonprofit'=>'Associatif'][$src->ownership_type] ?? '—' }}</td>
+                                    <td data-label="Propriété" class="text-muted">
+                                        {{ ['state'=>'État','corporate'=>'Privé','independent'=>'Indépendant','nonprofit'=>'Associatif'][$src->ownership_type] ?? '—' }}
+                                        @if($src->owner_name ?? null)
+                                            <div class="small">{{ $src->owner_name }}</div>
+                                        @endif
+                                    </td>
                                     <td data-label="Crédibilité" class="text-end">{{ $src->credibility_score ?? '—' }}</td>
                                     <td data-label="Pays">{{ $src->country ?? '—' }}</td>
                                     <td data-label="Langue" class="text-uppercase">{{ $src->language ?? '—' }}</td>

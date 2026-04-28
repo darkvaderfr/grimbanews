@@ -15,7 +15,7 @@ Scope: Frontend + backend refinements after the core GroundNews-style product pa
 8. [Shipped] RSS scale-up: add source health scoring, timeout isolation, last-success timestamps, and stale-feed admin warnings.
 9. [Shipped] NewsAPI scale-up: category/country run ledger, per-country limits, dedupe metrics, and cost/usage guardrails.
 10. [Shipped] Source logo quality: cache logo misses, improve source logo fallbacks, and expose logo status in admin sources.
-11. Source credibility admin UX: improve source triage forms, sorting, bias confidence, factuality, and ownership workflows.
+11. [Shipped] Source credibility admin UX: improve source triage forms, sorting, bias confidence, factuality, and ownership workflows.
 12. Coverage map polish: make admin and public coverage maps faster, readable in light/dark mode, and actionable.
 13. Admin cockpit speed: reduce dashboard query cost, add run status cards, and keep dropdowns solid/readable.
 14. [Shipped] Admin dark/light fidelity: audit every `/admin/grimba/*` custom screen for theme parity and hover states.

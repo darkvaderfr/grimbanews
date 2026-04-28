@@ -117,6 +117,14 @@
                             </select>
                             </div>
 
+                            <div class="col-md-4">
+                            <label class="form-label">Propriétaire / groupe</label>
+                            <input name="owner_name" class="form-control"
+                                   value="{{ old('owner_name', $source->owner_name ?? '') }}"
+                                   placeholder="BBC, News Corp, famille, État...">
+                            <small class="text-muted">Utilisé dans la carte de propriété et les breakdowns publics.</small>
+                            </div>
+
                             <div class="col-md-2">
                             <label class="form-label">Crédibilité (0–100)</label>
                             <input name="credibility_score" type="number" min="0" max="100" class="form-control"

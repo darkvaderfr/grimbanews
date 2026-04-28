@@ -67,12 +67,24 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                     ->get(['id', 'name', 'source_id'])
                     ->groupBy('source_id')
                     ->map(fn ($g) => $g->take(2)->pluck('name')->all());
+
+                $rows = $rows
+                    ->sortByDesc(fn ($row) => (int) ($counts[$row->id] ?? 0))
+                    ->values();
             }
+
+            $priorityStats = [
+                'total' => $rows->count(),
+                'with_articles' => $rows->filter(fn ($row) => (int) ($counts[$row->id] ?? 0) > 0)->count(),
+                'high_volume' => $rows->filter(fn ($row) => (int) ($counts[$row->id] ?? 0) >= 3)->count(),
+                'owner_missing' => $rows->filter(fn ($row) => blank($row->owner_name ?? null))->count(),
+            ];
 
             return view('grimba-admin.news-sources.triage', [
                 'rows'    => $rows,
                 'counts'  => $counts,
                 'samples' => $samples,
+                'priorityStats' => $priorityStats,
             ]);
         })->name('news-sources.triage');
 
@@ -84,6 +96,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'bias_rating'       => 'required|in:left,center,right,unknown',
                 'bias_score'        => 'nullable|numeric|min:-2|max:2',
                 'ownership_type'    => 'nullable|in:state,corporate,independent,nonprofit',
+                'owner_name'        => 'nullable|string|max:191',
                 'credibility_score' => 'nullable|integer|min:0|max:100',
                 'country'           => 'nullable|string|max:8',
                 'language'          => 'nullable|string|max:8',
@@ -173,6 +186,7 @@ if (! function_exists('grimba_news_source_rules')) {
             'bias_rating'       => ['required', 'in:left,center,right,unknown'],
             'bias_score'        => ['nullable', 'numeric', 'min:-2', 'max:2'],
             'ownership_type'    => ['nullable', 'in:state,corporate,independent,nonprofit'],
+            'owner_name'        => ['nullable', 'string', 'max:191'],
             'credibility_score' => ['nullable', 'integer', 'min:0', 'max:100'],
             'country'           => ['nullable', 'string', 'max:3'],
             'language'          => ['nullable', 'string', 'max:5'],

@@ -93,7 +93,9 @@ class AdminSettingsTest extends TestCase
             ->assertSee('grimba-admin-table-responsive', false)
             ->assertSee('File de classification')
             ->assertSee('Sources à classer')
-            ->assertSee('Score');
+            ->assertSee('Score')
+            ->assertSee('Priorité haute')
+            ->assertSee('Propriétaire manquant');
 
         $rssSource = DB::table('news_sources')->whereNotNull('name')->orderBy('id')->first(['id', 'name']);
         $this->assertNotNull($rssSource, 'Fixture database must contain at least one news source.');
@@ -253,7 +255,8 @@ class AdminSettingsTest extends TestCase
             ->assertSee('grimba-admin-form-section', false)
             ->assertSee('Score biais')
             ->assertSee('Logo manuel')
-            ->assertSee('État logo');
+            ->assertSee('État logo')
+            ->assertSee('Propriétaire / groupe');
 
         $this->actingAs($this->admin())
             ->post('/admin/grimba/news-sources', [
@@ -264,6 +267,7 @@ class AdminSettingsTest extends TestCase
                 'bias_rating' => 'left',
                 'bias_score' => '-1.7',
                 'ownership_type' => 'independent',
+                'owner_name' => 'S134 Owner Group',
                 'credibility_score' => '82',
                 'country' => 'FR',
                 'language' => 'fr',
@@ -276,6 +280,7 @@ class AdminSettingsTest extends TestCase
         $this->assertSame('-1.7', number_format((float) $createdSource->bias_score, 1));
         $this->assertSame('manual', $createdSource->logo_status);
         $this->assertSame('https://example.test/logo.png', $createdSource->logo_url);
+        $this->assertSame('S134 Owner Group', $createdSource->owner_name);
 
         $publicSource = DB::table('news_sources')->whereNotNull('slug')->where('slug', '!=', '')->first();
         $this->assertNotNull($publicSource, 'Fixture database must contain at least one public source slug.');
