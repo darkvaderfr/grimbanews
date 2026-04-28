@@ -6,8 +6,12 @@
         ? $posts->total()
         : $posts->count();
     $availableSources = $availableSources ?? collect();
+    $availableOwners  = $availableOwners  ?? collect();
     $selectedSource   = $selectedSource   ?? null;
     $selectedBias     = $selectedBias     ?? null;
+    $selectedOwner    = $selectedOwner    ?? '';
+    $fromDate         = $fromDate         ?? '';
+    $toDate           = $toDate           ?? '';
     $biasChoices      = [
         ''        => __('Tous biais'),
         'left'    => __('Gauche'),
@@ -52,9 +56,27 @@
                     @endforeach
                 </select>
 
+                <select name="owner" aria-label="{{ __('Filtrer par propriétaire') }}"
+                        style="padding: 0.6rem 1rem; border-radius: 9999px; border: 1px solid var(--gn-rule); background: rgba(255,255,255,0.8); max-width: 260px;">
+                    <option value="">{{ __('Tous propriétaires') }}</option>
+                    @foreach($availableOwners as $owner)
+                        <option value="{{ $owner }}" @selected((string) $selectedOwner === (string) $owner)>
+                            {{ $owner }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <input type="date" name="from_date" value="{{ $fromDate }}"
+                       aria-label="{{ __('Date de début') }}"
+                       style="padding: 0.56rem 0.9rem; border-radius: 9999px; border: 1px solid var(--gn-rule); background: rgba(255,255,255,0.8);">
+
+                <input type="date" name="to_date" value="{{ $toDate }}"
+                       aria-label="{{ __('Date de fin') }}"
+                       style="padding: 0.56rem 0.9rem; border-radius: 9999px; border: 1px solid var(--gn-rule); background: rgba(255,255,255,0.8);">
+
                 <button type="submit" class="btn-grimba btn-grimba--solid">{{ __('Chercher') }}</button>
 
-                @if($selectedSource || $selectedBias)
+                @if($selectedSource || $selectedBias || $selectedOwner || $fromDate || $toDate)
                     <a href="{{ url('/search?q=' . urlencode($query)) }}"
                        class="small" style="color: var(--gn-ink); opacity: .6;">{{ __('Réinitialiser les filtres') }}</a>
                 @endif

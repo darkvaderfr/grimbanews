@@ -157,7 +157,7 @@ need to feel as cinematic as the story pages.
 | **D2** | **/pour-vous polish** — bias-mix block already there; add a "Sujets que vous évitez" section showing categories with 0 reads in the last 14 days, link to `/blog?categorie=X` | Renders when read history > 10 articles |
 | ✅ S206 | Trending kicker on homepage | Uncommitted worktree |
 | ✅ S199 | Mobile floating bottom nav | Uncommitted worktree |
-| **D5** | **Search facets** — `/search?q=...` already supports `source` and `bias` filters; add `from_date`, `to_date`, `owner` (drop the `news_sources.owner_name` enum). Update `search.blade.php` facet UI | Date range filter narrows results correctly |
+| ✅ **D5** | **Search facets** — `/search?q=...` supports `source`, `bias`, `owner`, `from_date`, and `to_date`. `search.blade.php` exposes all facet controls. | `SearchFacetsTest` verifies owner + date range narrowing |
 | ✅ S207 | Topic-chip strip persistence | Uncommitted worktree |
 | **D7** | **Saved-search alerts (member-only)** — let logged-in readers save a search query + facet combo. New `saved_searches` table; weekly cron emails new matches | One member can save & receive a digest |
 | **D8** | **Site-wide command palette (⌘K)** — fuzzy search across categories, sources, recent stories. Lazy-loaded JS, cookie-cached search index | ⌘K opens; typing 2 chars surfaces matches |

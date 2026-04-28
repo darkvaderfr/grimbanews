@@ -201,7 +201,8 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ->where('id', '[0-9]+')
             ->name('public.og.placeholder.alt');
 
-        // GrimbaNews /search — SQLite FTS5 with source + bias facets.
+        // GrimbaNews /search — SQLite FTS5 with source, owner, date,
+        // and bias facets.
         // Registered before Botble's default /search (Botble\Blog\Http\
         // Controllers\PublicController) so our handler wins. Keeps the
         // existing search.blade.php view (expects $posts) and layers on
@@ -213,6 +214,18 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $bias     = in_array($request->query('bias'), ['left', 'center', 'right', 'unknown'], true)
                 ? $request->query('bias')
                 : null;
+            $owner = trim((string) $request->query('owner', ''));
+            $owner = mb_strlen($owner) > 180 ? mb_substr($owner, 0, 180) : $owner;
+            $fromDate = trim((string) $request->query('from_date', ''));
+            $toDate = trim((string) $request->query('to_date', ''));
+
+            $validDate = static fn (string $date): bool => $date === '' || (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $date);
+            if (! $validDate($fromDate)) {
+                $fromDate = '';
+            }
+            if (! $validDate($toDate)) {
+                $toDate = '';
+            }
 
             $posts = collect();
 
@@ -243,6 +256,19 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     if ($bias) {
                         $query->where('posts.bias_rating', $bias);
                     }
+                    if ($owner !== '') {
+                        $query->whereIn('posts.source_id', function ($sub) use ($owner): void {
+                            $sub->select('id')
+                                ->from('news_sources')
+                                ->where('owner_name', $owner);
+                        });
+                    }
+                    if ($fromDate !== '') {
+                        $query->whereDate('posts.created_at', '>=', $fromDate);
+                    }
+                    if ($toDate !== '') {
+                        $query->whereDate('posts.created_at', '<=', $toDate);
+                    }
 
                     // Preserve the BM25 ordering from the FTS result.
                     $idOrder = implode(',', array_map('intval', $ids));
@@ -260,6 +286,13 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             }
 
             $availableSources = DB::table('news_sources')->orderBy('name')->get(['id', 'name']);
+            $availableOwners = DB::table('news_sources')
+                ->whereNotNull('owner_name')
+                ->where('owner_name', '!=', '')
+                ->select('owner_name')
+                ->distinct()
+                ->orderBy('owner_name')
+                ->pluck('owner_name');
 
             SeoHelper::setTitle(($q !== '' ? __('Recherche : :query', ['query' => $q]) : __('Recherche')) . ' — GrimbaNews')
                 ->setDescription(__('Explorez les articles, sources et dossiers de GrimbaNews.'));
@@ -271,8 +304,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             return Theme::scope('search', [
                 'posts'            => $posts,
                 'availableSources' => $availableSources,
+                'availableOwners'   => $availableOwners,
                 'selectedSource'   => $sourceId,
                 'selectedBias'     => $bias,
+                'selectedOwner'    => $owner,
+                'fromDate'         => $fromDate,
+                'toDate'           => $toDate,
             ])->render();
         };
 

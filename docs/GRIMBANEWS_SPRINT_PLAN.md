@@ -4,7 +4,7 @@
 **Platform:** Echo News CMS v3.1.1 on Laravel 12
 **Repo:** `darkvaderfr/grimbanews`
 **Local server:** `http://127.0.0.1:8002`
-**Last updated:** 2026-04-27
+**Last updated:** 2026-04-28
 
 This is the active implementation ledger. The original Mythos 500-sprint output referenced by the early handoff was not present on disk, so this file now tracks the real shipped state from git history and defines the next sprint queue.
 
@@ -14,17 +14,16 @@ GrimbaNews is past the baseline phase. The product now has a GroundNews-style re
 
 Latest pushed commits:
 
-- `8ba5718` Normalize admin editorial copy
-- `02f57a7` Add admin route smoke test
-- `51a218c` Document admin visual regression routes
-- `fe230c3` Document admin deployment checklist
-- `8353243` Record admin production readiness smoke
+- `dd2b650` Publish guardrail drafts into review categories
+- `d0c8e1f` Add Canada coverage and solid edition menu
+- `58428ca` Improve hero image text contrast
 
 Latest verification:
 
-- `php artisan test` passed with `55` tests and `1099` assertions.
-- `php artisan grimba:nobuai-health` reports OpenAI configured, NobuTranslation/OpenAI/GoogleTx translation chain, and story insight readiness.
-- `php artisan grimba:health` passed and `php artisan route:list --path=admin/grimba` lists 52 Grimba admin routes.
+- `php artisan test` passed with `65` tests and `1193` assertions before the D5 search-facet sprint.
+- Focused D5 verification passed: `SearchFacetsTest` and `StaticUiTranslationTest`.
+- Local scheduler was started with `CACHE_STORE=array LOG_CHANNEL=stderr php -d max_execution_time=0 artisan schedule:work`.
+- Local Canada coverage now has 10 published CA-source articles from Global News, all with extracted full content.
 
 ## Completed Sprint Bands
 
@@ -83,6 +82,10 @@ Latest verification:
 - S248 extracted an isolated focused admin route smoke test covering cockpit, provider vault, RSS, NewsAPI, sources, triage, clusters, coverage map, subscribers, and cookies.
 - S249 normalized remaining custom admin hero/page copy into French editorial language while preserving admin-only provider naming where appropriate.
 - S250 added a backend closeout index linking the cinematic SOK, production-readiness smoke, deployment checklist, visual-regression routes, and master sprint ledger.
+- S251 selected the next highest-impact post-redesign product sprint: Discovery D5 search facets.
+- S252 added Canada coverage defaults and a Global News Canada RSS feed, seeded 10 local Canada articles, and made the public edition dropdown fully solid.
+- S253 hardened the homepage featured-story image overlay so title, excerpt, and source metadata remain readable on busy photos.
+- S254 added `/search` facets for source, bias, owner, and date range, with regression coverage for owner/date filtering.
 
 ## Active Systems
 
@@ -117,15 +120,30 @@ Latest verification:
 
 ## Next Sprint Queue
 
-### S251 — Next Feature Sprint Selection
+### S251-S254 — Discovery And Coverage Continuation
 
-Goal: Select the next non-redesign GrimbaNews product sprint now that the backend redesign closeout is documented.
+Goal: Move from backend-redesign closeout into product-discovery work without breaking ingest or reader polish.
 
 Acceptance:
 
-- Review current active systems and choose the highest-impact next sprint.
+- Canada has a real source/feed path and visible published articles.
+- Edition dropdowns stay solid and readable.
+- Featured-story hero details are readable over busy images.
+- `/search?q=...` supports source, bias, owner, `from_date`, and `to_date` facets.
 - Keep backend closeout artifacts intact.
 - Keep tests green and do not deploy production.
+
+Status: S251-S254 shipped locally; S254 pending final full-suite verification and push in the current working session.
+
+### S255 — Next Feature Sprint
+
+Goal: Continue Discovery & Navigation after D5.
+
+Recommended next options:
+
+- D8 site-wide command palette, because it improves speed of navigation across stories, sources, and categories.
+- D2 `/pour-vous` polish, because reader personalization already exists but the avoidance/coverage-gap angle is underused.
+- C8 vault analytics, because it will show which saved stories actually matter to readers without per-user tracking.
 
 ## Operating Rules
 
