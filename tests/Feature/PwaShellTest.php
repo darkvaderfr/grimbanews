@@ -37,6 +37,26 @@ class PwaShellTest extends TestCase
         }
     }
 
+    public function test_fresh_public_pages_do_not_auto_open_onboarding_overlay(): void
+    {
+        foreach (['/', '/sources'] as $path) {
+            $this->get($path)
+                ->assertOk()
+                ->assertSee('grimba-onboard-modal', false)
+                ->assertDontSee('grimba-newsletter-modal grimba-onboard-modal is-open', false)
+                ->assertSee('aria-hidden="true"', false);
+        }
+    }
+
+    public function test_explicit_onboarding_query_can_open_the_modal(): void
+    {
+        $this->get('/?onboarding=1')
+            ->assertOk()
+            ->assertSee('grimba-onboard-modal', false)
+            ->assertSee('is-open', false)
+            ->assertSee('aria-hidden="false"', false);
+    }
+
     public function test_region_switch_marks_reader_onboarded(): void
     {
         $this->postJson('/region/set', ['region' => 'uk'])

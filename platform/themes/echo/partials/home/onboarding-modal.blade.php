@@ -11,6 +11,7 @@
     // switches reload the page; reopening this modal looks like a dark
     // broken edition overlay instead of onboarding.
     $skip = $onboarded || $hasEdition || ! empty($existingFollows);
+    $autoOpen = ((string) request()->query('onboarding')) === '1';
 
     $topics = Category::query()
         ->where('status', 'published')
@@ -20,7 +21,12 @@
 @endphp
 
 @if(! $skip)
-    <div id="grimba-onboard-modal" class="grimba-newsletter-modal is-open" role="dialog" aria-modal="true" aria-labelledby="grimba-onboard-title">
+    <div id="grimba-onboard-modal"
+         class="grimba-newsletter-modal grimba-onboard-modal @if($autoOpen) is-open @endif"
+         role="dialog"
+         aria-modal="true"
+         aria-hidden="{{ $autoOpen ? 'false' : 'true' }}"
+         aria-labelledby="grimba-onboard-title">
         <div class="grimba-newsletter-modal__backdrop" data-grimba-onboard-close></div>
         <div class="grimba-newsletter-modal__panel glass-panel grimba-onboard-panel" role="document">
             <button type="button" class="grimba-newsletter-modal__close" aria-label="{{ __('Fermer') }}" data-grimba-onboard-close>×</button>
@@ -96,13 +102,19 @@
             const emptyLabel = @json(__('Explorer sans suivre'));
             const readyLabel = @json(__("C'est parti"));
 
-            document.body.style.overflow = 'hidden';
-            requestAnimationFrame(() => {
-                (topics[0] || submit || modal.querySelector(focusableSelector))?.focus();
-            });
+            if (! modal) return;
 
             function focusables() {
                 return Array.from(modal.querySelectorAll(focusableSelector)).filter(el => el.offsetParent !== null);
+            }
+
+            function open() {
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                requestAnimationFrame(() => {
+                    (topics[0] || submit || modal.querySelector(focusableSelector))?.focus();
+                });
             }
 
             function refresh() {
@@ -122,8 +134,8 @@
 
             function close() {
                 modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
                 document.body.style.overflow = '';
-                setTimeout(() => modal.remove(), 200);
             }
 
             closeBtns.forEach(b => b.addEventListener('click', async () => {
@@ -177,6 +189,14 @@
                     first.focus();
                 }
             });
+
+            document.querySelectorAll('[data-grimba-onboard-open]').forEach(button => {
+                button.addEventListener('click', open);
+            });
+
+            if (modal.classList.contains('is-open')) {
+                open();
+            }
         })();
     </script>
 @endif
