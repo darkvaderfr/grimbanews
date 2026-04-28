@@ -1,8 +1,27 @@
 <?php
 
+use App\Support\GrimbaAutomationMonitor;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
+
+if (! function_exists('grimba_schedule_command')) {
+    function grimba_schedule_command(string $jobKey, string $command): \Illuminate\Console\Scheduling\Event
+    {
+        $runId = null;
+
+        return Schedule::command($command)
+            ->before(function () use ($jobKey, $command, &$runId): void {
+                $runId = GrimbaAutomationMonitor::start($jobKey, $command);
+            })
+            ->onSuccess(function () use (&$runId): void {
+                GrimbaAutomationMonitor::finish($runId, 'success', 0);
+            })
+            ->onFailure(function () use (&$runId): void {
+                GrimbaAutomationMonitor::finish($runId, 'failed', 1, 'Scheduled command failed.');
+            });
+    }
+}
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -19,7 +38,7 @@ Schedule::command('grimba:cleanup-slugs')
 // francophone publishing rhythm without hammering upstream feeds.
 // withoutOverlapping protects against a slow run overlapping the
 // next tick; runInBackground keeps artisan schedule:run itself snappy.
-Schedule::command('grimba:poll-feeds')
+grimba_schedule_command('rss_ingest', 'grimba:poll-feeds')
     ->everyThirtyMinutes()
     ->onOneServer()
     ->withoutOverlapping(20)
@@ -30,13 +49,13 @@ Schedule::command('grimba:poll-feeds')
 // English-source articles in French and French-source articles in English.
 // Safe no-op if no provider keys are configured; no cost incurred until
 // a key is set.
-Schedule::command('grimba:translate-pending --to=fr --limit=50')
+grimba_schedule_command('translate_fr', 'grimba:translate-pending --to=fr --limit=50')
     ->cron('15,45 * * * *')
     ->onOneServer()
     ->withoutOverlapping(20)
     ->runInBackground();
 
-Schedule::command('grimba:translate-pending --to=en --limit=50')
+grimba_schedule_command('translate_en', 'grimba:translate-pending --to=en --limit=50')
     ->cron('20,50 * * * *')
     ->onOneServer()
     ->withoutOverlapping(20)
@@ -46,7 +65,7 @@ Schedule::command('grimba:translate-pending --to=en --limit=50')
 // (S150). Runs every 15 min, 1h after each :15/:45 ingest cadence so
 // any new draft has settled before promotion. Editor still has the
 // 1h age window (+ the cron's :00/:30 offset) to manually demote.
-Schedule::command('grimba:publish-trusted')
+grimba_schedule_command('publish_trusted', 'grimba:publish-trusted')
     ->cron('5,35 * * * *')
     ->onOneServer()
     ->withoutOverlapping(15)
@@ -55,7 +74,7 @@ Schedule::command('grimba:publish-trusted')
 // GrimbaNews — editorial override buckets for drafts that fail the
 // trusted auto-publish guardrails. They still publish, but under
 // explicit review categories instead of silently staying in draft.
-Schedule::command('grimba:publish-guardrail-categories')
+grimba_schedule_command('publish_guardrails', 'grimba:publish-guardrail-categories')
     ->cron('8,38 * * * *')
     ->onOneServer()
     ->withoutOverlapping(15)
@@ -64,7 +83,7 @@ Schedule::command('grimba:publish-guardrail-categories')
 // GrimbaNews — full article extraction for subscriber/member reading.
 // Runs shortly after trusted auto-publish so newly public RSS/NewsAPI
 // posts get a readable body without waiting for an editor.
-Schedule::command('grimba:fetch-full-articles --limit=80')
+grimba_schedule_command('full_articles', 'grimba:fetch-full-articles --limit=80')
     ->cron('12,42 * * * *')
     ->onOneServer()
     ->withoutOverlapping(25)
@@ -73,14 +92,14 @@ Schedule::command('grimba:fetch-full-articles --limit=80')
 // GrimbaNews — NobuAI insight treatment for newly published story
 // clusters. Runs after publish + full extraction + translation ticks so
 // reader-facing stories get GroundNews-style analysis automatically.
-Schedule::command('grimba:nobuai-summaries --limit=80')
+grimba_schedule_command('nobuai_summaries', 'grimba:nobuai-summaries --limit=80')
     ->cron('18,48 * * * *')
     ->onOneServer()
     ->withoutOverlapping(25)
     ->runInBackground();
 
 // Refresh existing NobuAI insights when later coverage joins a cluster.
-Schedule::command('grimba:nobuai-summaries --stale --limit=25')
+grimba_schedule_command('nobuai_stale', 'grimba:nobuai-summaries --stale --limit=25')
     ->cron('25,55 * * * *')
     ->onOneServer()
     ->withoutOverlapping(25)
@@ -90,7 +109,7 @@ Schedule::command('grimba:nobuai-summaries --stale --limit=25')
 // per day and, on each sweep, fetches every configured NewsAPI
 // category for every configured country. Skips silently when the key
 // isn't set; gated on the active toggle in /admin/grimba/newsapi.
-Schedule::command('grimba:fetch-newsapi')
+grimba_schedule_command('newsapi_fetch', 'grimba:fetch-newsapi')
     ->cron('15 6,10,14,18,22 * * *')
     ->onOneServer()
     ->withoutOverlapping(20)

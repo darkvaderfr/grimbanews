@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Support\GrimbaAutomationMonitor;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class AutomationScheduleTest extends TestCase
@@ -21,5 +23,32 @@ class AutomationScheduleTest extends TestCase
         $this->assertStringContainsString('grimba:nobuai-summaries --stale --limit=25', $output);
         $this->assertStringContainsString('grimba:translate-pending --to=fr --limit=50', $output);
         $this->assertStringContainsString('grimba:translate-pending --to=en --limit=50', $output);
+    }
+
+    public function test_automation_monitor_records_success_and_failure_runs(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        $successId = GrimbaAutomationMonitor::start('rss_ingest', 'grimba:poll-feeds');
+        GrimbaAutomationMonitor::finish($successId, 'success', 0);
+
+        $failureId = GrimbaAutomationMonitor::start('nobuai_summaries', 'grimba:nobuai-summaries --limit=80');
+        GrimbaAutomationMonitor::finish($failureId, 'failed', 1, 'provider failed');
+
+        $this->assertDatabaseHas('grimba_automation_runs', [
+            'job_key' => 'rss_ingest',
+            'command' => 'grimba:poll-feeds',
+            'status' => 'success',
+            'exit_code' => 0,
+        ]);
+
+        $this->assertDatabaseHas('grimba_automation_runs', [
+            'job_key' => 'nobuai_summaries',
+            'status' => 'failed',
+            'exit_code' => 1,
+            'error_message' => 'provider failed',
+        ]);
+
+        $this->assertSame(2, DB::table('grimba_automation_runs')->count());
     }
 }

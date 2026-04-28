@@ -150,6 +150,42 @@
         </div>
     </section>
 
+    @if($automationStatus->isNotEmpty())
+        <section class="card grimba-ops-board mb-3">
+            <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                    <span class="grimba-cockpit__kicker">Scheduler health</span>
+                    <h3 class="card-title mt-2 mb-0">Automation run ledger</h3>
+                </div>
+                <span class="text-muted small">
+                    {{ $automationStatus->where('is_failed', true)->count() }} failed ·
+                    {{ $automationStatus->where('is_stale', true)->count() }} stale
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="grimba-ops-grid">
+                    @foreach($automationStatus as $job)
+                        <div class="grimba-ops-tile {{ $job->is_failed || $job->is_stale ? 'is-warn' : '' }}">
+                            <span>{{ $job->label }}</span>
+                            <strong>{{ $job->status === 'never' ? 'Never run' : ucfirst($job->status) }}</strong>
+                            <small>
+                                {{ $job->finished_at ? $job->finished_at->locale('fr')->diffForHumans() : 'No completed run yet' }}
+                                · every ~{{ $job->expected_minutes }}m
+                                @if($job->duration_ms)
+                                    · {{ round($job->duration_ms / 1000, 1) }}s
+                                @endif
+                            </small>
+                            @if($job->error_message)
+                                <small>{{ \Illuminate\Support\Str::limit($job->error_message, 90) }}</small>
+                            @endif
+                            <small style="font-family:var(--gn-font-mono);">{{ $job->command }}</small>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
     <div class="row g-3 mb-3">
         {{-- Coverage balance --}}
         <div class="col-xl-7 col-12">

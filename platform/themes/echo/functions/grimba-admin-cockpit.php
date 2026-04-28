@@ -15,6 +15,7 @@ use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\DashboardMenuItem;
 use App\Services\GrimbaNobuAi;
 use App\Services\GrimbaTranslator;
+use App\Support\GrimbaAutomationMonitor;
 use App\Support\GrimbaIngestGuardrails;
 use Botble\Blog\Models\Post;
 use Illuminate\Http\Request;
@@ -208,6 +209,37 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $nobuInsightPending = 0;
             $nobuInsightStale = 0;
             $nobuInsightLatest = null;
+            $automationJobs = GrimbaAutomationMonitor::jobs();
+            $automationStatus = collect();
+
+            if (Schema::hasTable('grimba_automation_runs')) {
+                $automationStatus = collect($automationJobs)->map(function (array $job, string $key) {
+                    $last = DB::table('grimba_automation_runs')
+                        ->where('job_key', $key)
+                        ->orderByDesc('finished_at')
+                        ->orderByDesc('id')
+                        ->first();
+
+                    $lastFinished = $last?->finished_at ? \Carbon\Carbon::parse($last->finished_at) : null;
+                    $expectedMinutes = (int) $job['expected_minutes'];
+                    $isStale = ! $lastFinished || $lastFinished->lt(now()->subMinutes($expectedMinutes * 2));
+                    $isFailed = $last && $last->status !== 'success';
+
+                    return (object) [
+                        'key' => $key,
+                        'label' => $job['label'],
+                        'command' => $job['command'],
+                        'expected_minutes' => $expectedMinutes,
+                        'status' => $last?->status ?: 'never',
+                        'exit_code' => $last?->exit_code,
+                        'finished_at' => $lastFinished,
+                        'duration_ms' => $last?->duration_ms,
+                        'error_message' => $last?->error_message,
+                        'is_stale' => $isStale,
+                        'is_failed' => $isFailed,
+                    ];
+                })->values();
+            }
 
             if (Schema::hasColumn('posts', 'summary_nobuai')) {
                 $insightClusters = DB::table('posts')
@@ -252,7 +284,8 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'ingestGuardrailStats',
                 'latestDrafts', 'nobuDrivers', 'translationDrivers',
                 'nobuFailureDiagnostics',
-                'nobuInsightReady', 'nobuInsightPending', 'nobuInsightStale', 'nobuInsightLatest'
+                'nobuInsightReady', 'nobuInsightPending', 'nobuInsightStale', 'nobuInsightLatest',
+                'automationStatus'
             ));
         })->name('cockpit');
 

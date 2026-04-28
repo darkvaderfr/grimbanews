@@ -25,6 +25,26 @@ class PwaShellTest extends TestCase
             ->assertSee('opacity: 1 !important', false);
     }
 
+    public function test_region_choice_suppresses_onboarding_overlay_across_editions(): void
+    {
+        foreach (['france', 'uk', 'us', 'canada', 'africa', 'international'] as $region) {
+            $this->withUnencryptedCookies(['grimba_region' => $region])
+                ->get('/')
+                ->assertOk()
+                ->assertSee('Édition')
+                ->assertDontSee('grimba-onboard-modal', false)
+                ->assertDontSee('grimba-newsletter-modal is-open', false);
+        }
+    }
+
+    public function test_region_switch_marks_reader_onboarded(): void
+    {
+        $this->postJson('/region/set', ['region' => 'uk'])
+            ->assertOk()
+            ->assertPlainCookie('grimba_region', 'uk')
+            ->assertPlainCookie('grimba_onboarded', '1');
+    }
+
     public function test_homepage_hero_copy_uses_readable_ink_plate(): void
     {
         $this->get('/')

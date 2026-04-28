@@ -456,7 +456,8 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             return response()
                 ->json(['ok' => true, 'region' => $region])
-                ->cookie('grimba_region', $region, 60 * 24 * 365, '/', null, false, false);
+                ->cookie('grimba_region', $region, 60 * 24 * 365, '/', null, false, false)
+                ->cookie('grimba_onboarded', '1', 60 * 24 * 365, '/', null, false, false);
         })->name('public.region.set');
 
         Route::post('onboarding/complete', function (Request $request) {

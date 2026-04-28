@@ -2,12 +2,15 @@
     use Botble\Blog\Models\Category;
 
     $onboarded  = request()->cookie('grimba_onboarded') === '1';
+    $hasEdition = request()->hasCookie('grimba_region');
     $rawFollow  = (string) request()->cookie('grimba_follow', '');
     $existingFollows = array_filter(array_map('intval', explode(',', $rawFollow)));
 
     // Skip onboarding when the user has already interacted (cookie set)
-    // OR already follows any topic (silent re-onboard avoided).
-    $skip = $onboarded || ! empty($existingFollows);
+    // OR already follows any topic OR has picked an edition. Region
+    // switches reload the page; reopening this modal looks like a dark
+    // broken edition overlay instead of onboarding.
+    $skip = $onboarded || $hasEdition || ! empty($existingFollows);
 
     $topics = Category::query()
         ->where('status', 'published')
