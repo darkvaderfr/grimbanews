@@ -74,6 +74,7 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S003 | `docs/GRIMBANEWS_S003_COMMAND_INVENTORY.md` | complete |
 | S004 | `docs/GRIMBANEWS_S004_SCHEDULER_INVENTORY.md` | complete |
 | S005 | `docs/GRIMBANEWS_S005_MODEL_INVENTORY.md` | complete |
+| S006 | `docs/GRIMBANEWS_S006_MIGRATION_INVENTORY.md` | complete |
 
 | Sprint IDs | Program | Atomic sprint outcomes |
 |---|---|---|
