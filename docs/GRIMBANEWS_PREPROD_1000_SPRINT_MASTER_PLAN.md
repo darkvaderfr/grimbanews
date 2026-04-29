@@ -65,6 +65,12 @@ All contributors should also follow `memory.md` and `docs/GRIMBANEWS_TANDEM_WORK
 
 Each row below contains 10 atomic sprint IDs. The row is not a single epic; the comma-delimited items are the individual sprints to execute and close with evidence.
 
+## Sprint Evidence Ledger
+
+| Sprint | Evidence | Status |
+|---|---|---|
+| S001 | `docs/GRIMBANEWS_S001_ROUTE_INVENTORY.md` | complete |
+
 | Sprint IDs | Program | Atomic sprint outcomes |
 |---|---|---|
 | S001-S010 | Current-state review | route inventory, admin route inventory, command inventory, scheduler inventory, model inventory, migration inventory, public surface inventory, admin surface inventory, shipped commit map, unresolved risk register |
