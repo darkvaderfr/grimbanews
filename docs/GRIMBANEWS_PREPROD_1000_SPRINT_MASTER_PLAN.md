@@ -70,6 +70,7 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | Sprint | Evidence | Status |
 |---|---|---|
 | S001 | `docs/GRIMBANEWS_S001_ROUTE_INVENTORY.md` | complete |
+| S002 | `docs/GRIMBANEWS_S002_ADMIN_ROUTE_INVENTORY.md` | complete |
 
 | Sprint IDs | Program | Atomic sprint outcomes |
 |---|---|---|
