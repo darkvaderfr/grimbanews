@@ -91,6 +91,23 @@
             }, STALL_TIMEOUT_MS);
         };
 
+        // GrimbaNews ships pre-seeded /storage/grimba-seeds/cluster-*.svg
+        // banners that are intentionally near-black editorial graphics.
+        // Combined with the contrast-styles `rgba(0,0,0,.86)` overlay,
+        // those cards render as a void. Treat them like fallback cards
+        // (lighter gradient) so the headline + bias chip stay readable.
+        const isSeedBanner = (img) => {
+            const src = img?.currentSrc || img?.src || '';
+            return src.indexOf('/storage/grimba-seeds/') !== -1
+                || src.indexOf('/og/placeholder/') !== -1;
+        };
+
+        const markSeedBanner = (img) => {
+            if (!isSeedBanner(img)) return;
+            const card = img.closest('.grimba-hero__media, .grimba-section__hero, .grimba-blind-card, .ratio');
+            if (card) card.classList.add('gn-fallback-card');
+        };
+
         const init = () => {
             document.querySelectorAll('img[data-grimba-post-id]').forEach((img) => {
                 // Already-failed sync imgs (cached error from previous load).
@@ -98,6 +115,10 @@
                     swapToPlaceholder(img);
                     return;
                 }
+                // Live-loaded seed banners: lighten gradient now.
+                markSeedBanner(img);
+                if (img.complete) return;
+                img.addEventListener('load', () => markSeedBanner(img), { once: true });
                 armStallWatch(img);
             });
         };
