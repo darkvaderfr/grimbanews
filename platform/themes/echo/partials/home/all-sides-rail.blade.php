@@ -127,6 +127,7 @@
                              decoding="async"
                              width="640"
                              height="360"
+                             data-grimba-post-id="{{ $head->id }}"
                              style="object-fit:cover; width:100%; height:100%;">
                     </div>
                 @else
@@ -136,6 +137,7 @@
                          decoding="async"
                          width="640"
                          height="360"
+                         data-grimba-post-id="{{ $head->id }}"
                          style="width:100%; aspect-ratio:16/9; object-fit:cover; background:rgba(0,0,0,0.04);">
                 @endif
 

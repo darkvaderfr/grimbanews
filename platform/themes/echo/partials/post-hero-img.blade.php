@@ -13,6 +13,7 @@
         'decoding' => $__eager ? 'sync' : 'async',
         'width' => 1200,
         'height' => 630,
+        'data-grimba-post-id' => (string) $post->id,
     ]) !!}
 @else
     <img
@@ -22,5 +23,6 @@
         decoding="{{ $__eager ? 'sync' : 'async' }}"
         width="1200" height="630"
         class="gn-placeholder"
+        data-grimba-post-id="{{ $post->id }}"
     />
 @endif

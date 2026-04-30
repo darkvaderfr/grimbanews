@@ -86,4 +86,21 @@
         border-color: rgba(255, 255, 255, .28) !important;
         backdrop-filter: blur(8px);
     }
+
+    /* Fallback cards (img.gn-placeholder swapped in by front-body-hooks
+       when an external publisher image fails to load). The cream/serif
+       editorial placeholder needs a dramatically lighter gradient so
+       the headline + source label remain visible. */
+    .grimba-hero__media.gn-fallback-card::after,
+    .grimba-section__hero.gn-fallback-card::after,
+    .grimba-blind-card.gn-fallback-card::after {
+        background: linear-gradient(180deg, transparent 50%, rgba(11, 10, 8, .22) 100%);
+    }
+    .grimba-hero__media.gn-fallback-card .grimba-hero__gradient {
+        background: linear-gradient(180deg, transparent 55%, rgba(11, 10, 8, .26) 100%);
+    }
+    .grimba-hero__media.gn-fallback-card .grimba-hero__text,
+    .grimba-section__hero.gn-fallback-card .grimba-section__hero-body {
+        background: linear-gradient(135deg, rgba(11, 10, 8, .82), rgba(11, 10, 8, .68)) !important;
+    }
 </style>

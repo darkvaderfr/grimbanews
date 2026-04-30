@@ -47,4 +47,73 @@
             }
         }).observe(document.documentElement, { childList: true, subtree: true });
     })();
+
+    /*
+     * Hero / grid card images come from external publishers (Le Figaro,
+     * BBC, L'Express, Huffington Post, …). Hot-link protection, signed-
+     * URL expiry, outbound network blocks, and silently-hanging
+     * connections turn those into broken or never-loading <img>s on top
+     * of a card with `background:#111` + a heavy dark gradient overlay —
+     * net result is a screen of solid black squares. Swap any failed or
+     * stalled img tagged with data-grimba-post-id to our own post-aware
+     * editorial placeholder so the card always shows something legible
+     * instead of a black hole.
+     */
+    (function () {
+        const STALL_TIMEOUT_MS = 6000;
+
+        const swapToPlaceholder = (img) => {
+            if (!img || img.dataset.grimbaFallback === '1') return;
+            const id = img.getAttribute('data-grimba-post-id');
+            if (!id) return;
+            img.dataset.grimbaFallback = '1';
+            img.removeAttribute('srcset');
+            img.src = '/og/placeholder/' + encodeURIComponent(id) + '.svg';
+            img.classList.add('gn-placeholder');
+            // Mark the photo container so CSS can dial back the dark
+            // gradient overlay (which is sized for vivid news photos and
+            // crushes the cream editorial placeholder).
+            const card = img.closest('.grimba-hero__media, .grimba-section__hero, .grimba-blind-card, .ratio');
+            if (card) card.classList.add('gn-fallback-card');
+        };
+
+        const armStallWatch = (img) => {
+            if (img.dataset.grimbaWatch === '1') return;
+            img.dataset.grimbaWatch = '1';
+            // If the image hasn't completed within the timeout, swap it.
+            // We check both `complete` and `naturalWidth` — a 0-width
+            // complete image is a decode failure on some browsers.
+            setTimeout(() => {
+                if (img.dataset.grimbaFallback === '1') return;
+                if (!img.complete || img.naturalWidth === 0) {
+                    swapToPlaceholder(img);
+                }
+            }, STALL_TIMEOUT_MS);
+        };
+
+        const init = () => {
+            document.querySelectorAll('img[data-grimba-post-id]').forEach((img) => {
+                // Already-failed sync imgs (cached error from previous load).
+                if (img.complete && img.naturalWidth === 0) {
+                    swapToPlaceholder(img);
+                    return;
+                }
+                armStallWatch(img);
+            });
+        };
+
+        // Catch errors as they fire (capture phase — img error doesn't bubble).
+        document.addEventListener('error', (e) => {
+            const el = e.target;
+            if (el && el.tagName === 'IMG' && el.hasAttribute('data-grimba-post-id')) {
+                swapToPlaceholder(el);
+            }
+        }, true);
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init, { once: true });
+        } else {
+            init();
+        }
+    })();
 </script>
