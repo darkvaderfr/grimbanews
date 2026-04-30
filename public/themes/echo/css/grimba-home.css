@@ -63,8 +63,13 @@ html.grimba-home-html[data-bs-theme="dark"] body.grimba-home {
     color: var(--gn-ink);
 }
 
-/* Homepage light lock: stock Echo uses html[data-theme=dark] and
-   --background-color-dark, separately from our Bootstrap theme flag. */
+/* Defensive: stock Echo's rts-dark-light toggle (used elsewhere in the
+   Botble theme) flips html[data-theme="dark"] and pulls in its own dark
+   palette. We never want that on Grimba pages — our dark mode keys off
+   data-bs-theme. The homepage layout hard-sets data-theme="light", so
+   these rules only fire if a stale localStorage entry from elsewhere
+   sneaks data-theme="dark" in; in that case we keep the surface light
+   and let data-bs-theme drive the real dark/light. */
 html.grimba-home-html[data-theme="dark"] {
     --background-color-dark: var(--gn-paper);
     --bg-dark-one: var(--gn-paper);

@@ -109,26 +109,38 @@
         const buttons = document.querySelectorAll('[data-grimba-theme]');
         if (!buttons.length) return;
 
-        const active = 'light';
-        buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.grimbaTheme === active)));
+        const root = document.documentElement;
+        const VALID = ['light', 'dark', 'auto'];
 
-        function apply(pref) {
-            document.documentElement.setAttribute('data-bs-theme', 'light');
-            document.documentElement.setAttribute('data-theme', 'light');
-            document.documentElement.setAttribute('data-grimba-theme-pref', 'light');
-            const oneYear = 60 * 60 * 24 * 365;
-            document.cookie = 'grimba_theme=light; path=/; max-age=' + oneYear + '; SameSite=Lax';
-            try {
-                window.localStorage.setItem('echo-theme', 'light');
-                window.localStorage.setItem('themeMode', 'light');
-                window.localStorage.setItem('grimba_theme', 'light');
-            } catch (e) {}
-            buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.grimbaTheme === 'light')));
+        function refresh() {
+            const pref = root.getAttribute('data-grimba-theme-pref') || 'auto';
+            buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.grimbaTheme === pref)));
         }
 
+        function apply(pref) {
+            if (!VALID.includes(pref)) pref = 'auto';
+            let effective = pref;
+            if (pref === 'auto') {
+                effective = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            root.setAttribute('data-bs-theme', effective);
+            root.setAttribute('data-grimba-theme-pref', pref);
+            const oneYear = 60 * 60 * 24 * 365;
+            document.cookie = 'grimba_theme=' + pref + '; path=/; max-age=' + oneYear + '; SameSite=Lax';
+            refresh();
+        }
+
+        refresh();
         buttons.forEach(b => b.addEventListener('click', () => apply(b.dataset.grimbaTheme)));
 
-        // Homepage dark mode is intentionally locked to light until the
-        // dark-mode audit closes.
+        // Live-track OS theme while user is in auto mode.
+        const mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+        if (mq && typeof mq.addEventListener === 'function') {
+            mq.addEventListener('change', (e) => {
+                if ((root.getAttribute('data-grimba-theme-pref') || 'auto') === 'auto') {
+                    root.setAttribute('data-bs-theme', e.matches ? 'dark' : 'light');
+                }
+            });
+        }
     })();
 </script>
