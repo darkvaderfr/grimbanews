@@ -14,7 +14,7 @@
 @php
     $__grimbaInitialTheme = 'light';
 @endphp
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ $__grimbaInitialTheme }}" class="grimba-home-html">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ $__grimbaInitialTheme }}" data-theme="light" class="grimba-home-html">
 <script>
     // Homepage dark mode is disabled until the dark/light audit closes.
     // This prevents stale dark-theme cookies from turning the reader
@@ -22,8 +22,14 @@
     (function () {
         const oneYear = 60 * 60 * 24 * 365;
         document.documentElement.setAttribute('data-bs-theme', 'light');
+        document.documentElement.setAttribute('data-theme', 'light');
         document.documentElement.setAttribute('data-grimba-theme-pref', 'light');
         document.cookie = 'grimba_theme=light; path=/; max-age=' + oneYear + '; SameSite=Lax';
+        try {
+            window.localStorage.setItem('echo-theme', 'light');
+            window.localStorage.setItem('themeMode', 'light');
+            window.localStorage.setItem('grimba_theme', 'light');
+        } catch (e) {}
     })();
 </script>
 <head>

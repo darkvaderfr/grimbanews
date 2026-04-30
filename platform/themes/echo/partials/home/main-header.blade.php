@@ -114,9 +114,15 @@
 
         function apply(pref) {
             document.documentElement.setAttribute('data-bs-theme', 'light');
+            document.documentElement.setAttribute('data-theme', 'light');
             document.documentElement.setAttribute('data-grimba-theme-pref', 'light');
             const oneYear = 60 * 60 * 24 * 365;
             document.cookie = 'grimba_theme=light; path=/; max-age=' + oneYear + '; SameSite=Lax';
+            try {
+                window.localStorage.setItem('echo-theme', 'light');
+                window.localStorage.setItem('themeMode', 'light');
+                window.localStorage.setItem('grimba_theme', 'light');
+            } catch (e) {}
             buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.grimbaTheme === 'light')));
         }
 

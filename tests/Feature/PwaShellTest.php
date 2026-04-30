@@ -65,13 +65,18 @@ class PwaShellTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('data-bs-theme="light"', false)
+            ->assertSee('data-theme="light"', false)
             ->assertSee("document.documentElement.setAttribute('data-bs-theme', 'light');", false)
+            ->assertSee("document.documentElement.setAttribute('data-theme', 'light');", false)
+            ->assertSee("window.localStorage.setItem('echo-theme', 'light');", false)
+            ->assertSee("window.localStorage.setItem('themeMode', 'light');", false)
             ->assertSee('grimba_theme=light', false);
 
         $this->withUnencryptedCookies(['grimba_theme' => 'dark'])
             ->get('/')
             ->assertOk()
             ->assertSee('data-bs-theme="light"', false)
+            ->assertSee('data-theme="light"', false)
             ->assertSee('grimba_theme=light', false);
     }
 
@@ -143,5 +148,15 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('body.grimba-home .modal-backdrop', $css);
         $this->assertStringContainsString('body.grimba-home.modal-open', $css);
         $this->assertStringContainsString('pointer-events: none !important', $css);
+    }
+
+    public function test_homepage_css_neutralizes_stock_echo_dark_theme_path(): void
+    {
+        $css = file_get_contents(dirname(__DIR__, 2) . '/public/themes/echo/css/grimba-home.css');
+
+        $this->assertStringContainsString('--background-color-dark: var(--gn-paper);', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-theme="dark"]', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-theme="dark"] body.grimba-home', $css);
+        $this->assertStringContainsString('color-scheme: light;', $css);
     }
 }

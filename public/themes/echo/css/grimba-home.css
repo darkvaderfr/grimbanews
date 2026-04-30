@@ -31,6 +31,12 @@
 
 html.grimba-home-html {
     background: linear-gradient(180deg, var(--gn-paper) 0%, #fbf7ee 55%, var(--gn-paper) 100%);
+    --background-color-dark: var(--gn-paper);
+    --bg-dark-one: var(--gn-paper);
+    --bg-dark-two: var(--gn-paper-warm);
+    --bg-dark-three: var(--gn-paper);
+    --dark-color-body: var(--gn-ink-muted);
+    --dark-color-heading-1: var(--gn-ink);
     /* Base font size — 15px (Vader calibration). Component bumps
        from S52 scale proportionally via rem. */
     font-size: 15px;
@@ -55,6 +61,34 @@ html.grimba-home-html[data-bs-theme="dark"] {
 
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home {
     color: var(--gn-ink);
+}
+
+/* Homepage light lock: stock Echo uses html[data-theme=dark] and
+   --background-color-dark, separately from our Bootstrap theme flag. */
+html.grimba-home-html[data-theme="dark"] {
+    --background-color-dark: var(--gn-paper);
+    --bg-dark-one: var(--gn-paper);
+    --bg-dark-two: var(--gn-paper-warm);
+    --bg-dark-three: var(--gn-paper);
+    --dark-color-body: var(--gn-ink-muted);
+    --dark-color-heading-1: var(--gn-ink);
+    background: linear-gradient(180deg, var(--gn-paper) 0%, #fbf7ee 55%, var(--gn-paper) 100%) !important;
+    color-scheme: light;
+}
+html.grimba-home-html[data-theme="dark"] body.grimba-home,
+html.grimba-home-html[data-theme="dark"] .grimba-home-main {
+    background: transparent !important;
+    color: var(--gn-ink) !important;
+}
+html.grimba-home-html[data-theme="dark"] .echo-feature-area,
+html.grimba-home-html[data-theme="dark"] .echo-latest-news-area,
+html.grimba-home-html[data-theme="dark"] .echo-hero-section,
+html.grimba-home-html[data-theme="dark"] .echo-popular-area,
+html.grimba-home-html[data-theme="dark"] .echo-trending-area,
+html.grimba-home-html[data-theme="dark"] .echo-home-1-hero-area-top-story {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: var(--gn-ink) !important;
 }
 
 .grimba-home .opacity-60,
