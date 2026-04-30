@@ -15,8 +15,9 @@
 
     $topics = Category::query()
         ->where('status', 'published')
+        ->whereIn('name', ['Afrique', 'International'])
         ->orderBy('order')
-        ->limit(12)
+        ->limit(2)
         ->get();
 @endphp
 

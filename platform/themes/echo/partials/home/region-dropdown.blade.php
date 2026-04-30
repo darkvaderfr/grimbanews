@@ -1,199 +1,173 @@
 @php
-    /**
-     * S146 — region map aligned with audience countries Vader actually
-     * publishes for: France, UK, US, Canada, Africa, International.
-     * Drops the previous Monde/Europe placeholders that didn't map
-     * cleanly to news-source country codes (FR/GB/US/CA/Africa/—).
+    /*
+     * Africa / International edition toggle.
      *
-     * The cookie value is the routing key the rest of the site reads
-     * (filtering RSS feeds, NewsAPI top-headlines, blog facets), so
-     * the keys are stable lowercase ISO-style strings.
-     *
-     * S155 — picker now shows (N) beside each region label, computed
-     * from the same country mapping as GrimbaRegionScope so what the
-     * reader sees in the dropdown matches what they get after the
-     * cookie flips. International always shows the unfiltered total.
+     * The cookie name stays `grimba_region` for compatibility with the
+     * existing GrimbaRegionScope, but the public product language is now
+     * "edition". Legacy six-region values are folded into International.
      */
     $currentRegion = (string) (request()->cookie('grimba_region') ?? 'international');
+    $migrationMap = [
+        'monde' => 'international',
+        'europe' => 'international',
+        'afrique' => 'africa',
+        'france' => 'international',
+        'uk' => 'international',
+        'us' => 'international',
+        'canada' => 'international',
+    ];
+    $currentRegion = $migrationMap[$currentRegion] ?? $currentRegion;
+    if (! in_array($currentRegion, ['africa', 'international'], true)) {
+        $currentRegion = 'international';
+    }
 
-    $regions = [
-        'france'        => ['label' => 'France',        'flag' => '🇫🇷'],
-        'uk'            => ['label' => 'UK',            'flag' => '🇬🇧'],
-        'us'            => ['label' => 'US',            'flag' => '🇺🇸'],
-        'canada'        => ['label' => 'Canada',        'flag' => '🇨🇦'],
-        'africa'        => ['label' => 'Afrique',       'flag' => '🌍'],
-        'international' => ['label' => 'International', 'flag' => '🌐'],
+    $editions = [
+        'africa' => [
+            'label' => 'Afrique',
+            'href' => route('public.edition.africa'),
+            'count_key' => 'africa',
+        ],
+        'international' => [
+            'label' => 'International',
+            'href' => route('public.edition.international'),
+            'count_key' => 'international',
+        ],
     ];
 
-    // Migrate legacy values: monde/europe → international, afrique → africa.
-    $migrationMap = ['monde' => 'international', 'europe' => 'international', 'afrique' => 'africa'];
-    if (isset($migrationMap[$currentRegion])) $currentRegion = $migrationMap[$currentRegion];
-
-    $current = $regions[$currentRegion] ?? $regions['international'];
-
-    // S155 — per-region published-post counts. Mirror the country-code
-    // map from GrimbaRegionScope (kept inline rather than coupling
-    // partials to Scope internals).
-    $regionCountryMap = [
-        'france' => ['FR'],
-        'uk'     => ['GB', 'UK'],
-        'us'     => ['US'],
-        'canada' => ['CA'],
-        'africa' => ['DZ','AO','BJ','BW','BF','BI','CV','CM','CF','TD','KM','CG','CD','DJ','EG','GQ','ER','SZ','ET','GA','GM','GH','GN','GW','CI','KE','LS','LR','LY','MG','MW','ML','MR','MU','MA','MZ','NA','NE','NG','RW','ST','SN','SC','SL','SO','ZA','SS','SD','TZ','TG','TN','UG','ZM','ZW'],
+    $africaCountries = [
+        'DZ','AO','BJ','BW','BF','BI','CV','CM','CF','TD','KM','CG','CD','DJ',
+        'EG','GQ','ER','SZ','ET','GA','GM','GH','GN','GW','CI','KE','LS','LR',
+        'LY','MG','MW','ML','MR','MU','MA','MZ','NA','NE','NG','RW','ST','SN',
+        'SC','SL','SO','ZA','SS','SD','TZ','TG','TN','UG','ZM','ZW',
     ];
 
-    // Cache the counts for a minute — every page load shouldn't re-aggregate.
-    $regionCounts = \Illuminate\Support\Facades\Cache::remember(
-        'grimba_region_counts_v1',
-        60,
-        function () use ($regionCountryMap) {
-            $counts = [];
-            // Total (international) = all published, scope-bypassed via withoutGlobalScope.
-            $counts['international'] = \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
+    $editionCounts = \Illuminate\Support\Facades\Cache::remember('grimba_edition_counts_v1', 60, function () use ($africaCountries) {
+        return [
+            'international' => \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
                 ->where('status', 'published')
-                ->count();
-            foreach ($regionCountryMap as $key => $codes) {
-                $counts[$key] = \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
-                    ->where('status', 'published')
-                    ->whereIn('source_id', function ($q) use ($codes): void {
-                        $q->select('id')->from('news_sources')->whereIn('country', $codes);
-                    })
-                    ->count();
-            }
-            return $counts;
-        }
-    );
+                ->count(),
+            'africa' => \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
+                ->where('status', 'published')
+                ->whereIn('source_id', function ($q) use ($africaCountries): void {
+                    $q->select('id')->from('news_sources')->whereIn('country', $africaCountries);
+                })
+                ->count(),
+        ];
+    });
 @endphp
 
 <style>
-    .grimba-region__menu {
-        background: #f8f1e6 !important;
-        border: 1px solid rgba(26, 23, 19, 0.18) !important;
-        box-shadow: 0 24px 60px rgba(26, 23, 19, 0.24) !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        opacity: 1 !important;
-        isolation: isolate;
+    .grimba-edition-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px;
+        border: 1px solid rgba(26, 23, 19, 0.14);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.58);
+        box-shadow: 0 10px 28px rgba(26, 23, 19, 0.08);
     }
 
-    .grimba-region__option {
-        background: transparent !important;
-        color: #1a1713 !important;
+    .grimba-edition-toggle__option {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 34px;
+        padding: 6px 12px;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: #1a1713;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1;
+        text-decoration: none;
+        cursor: pointer;
+        white-space: nowrap;
     }
 
-    .grimba-region__option:hover,
-    .grimba-region__option:focus-visible {
-        background: #ebe0cf !important;
-        color: #1a1713 !important;
+    .grimba-edition-toggle__option:hover,
+    .grimba-edition-toggle__option:focus-visible {
+        color: #1a1713;
+        background: rgba(26, 23, 19, 0.07);
+        outline: none;
     }
 
-    .grimba-region__option.is-active {
-        background: #1a1713 !important;
-        color: #f8f1e6 !important;
+    .grimba-edition-toggle__option.is-active {
+        background: #1a1713;
+        color: #f8f1e6;
+        box-shadow: 0 8px 18px rgba(26, 23, 19, 0.16);
     }
 
-    html[data-bs-theme="dark"] .grimba-region__menu {
-        background: #15130f !important;
-        border-color: rgba(248, 241, 230, 0.22) !important;
-        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.58) !important;
+    .grimba-edition-toggle__count {
+        opacity: .62;
+        font-size: 11px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
     }
 
-    html[data-bs-theme="dark"] .grimba-region__option {
-        color: #f8f1e6 !important;
+    html[data-bs-theme="dark"] .grimba-edition-toggle {
+        background: rgba(246, 241, 232, 0.08);
+        border-color: rgba(246, 241, 232, 0.18);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
     }
 
-    html[data-bs-theme="dark"] .grimba-region__option:hover,
-    html[data-bs-theme="dark"] .grimba-region__option:focus-visible {
-        background: #292217 !important;
-        color: #ffffff !important;
+    html[data-bs-theme="dark"] .grimba-edition-toggle__option {
+        color: #f8f1e6;
     }
 
-    html[data-bs-theme="dark"] .grimba-region__option.is-active {
-        background: #f8f1e6 !important;
-        color: #15130f !important;
+    html[data-bs-theme="dark"] .grimba-edition-toggle__option:hover,
+    html[data-bs-theme="dark"] .grimba-edition-toggle__option:focus-visible {
+        color: #ffffff;
+        background: rgba(246, 241, 232, 0.12);
+    }
+
+    html[data-bs-theme="dark"] .grimba-edition-toggle__option.is-active {
+        background: #f8f1e6;
+        color: #15130f;
     }
 </style>
 
-<div class="grimba-region" data-grimba-region-root>
-    <button type="button" class="grimba-region__trigger" data-grimba-region-toggle
-            aria-haspopup="listbox" aria-expanded="false">
-        <span aria-hidden="true">{{ $current['flag'] }}</span>
-        <span>Édition {{ $current['label'] }}</span>
-        <span aria-hidden="true" class="grimba-region__caret">▾</span>
-    </button>
-    <ul class="grimba-region__menu" role="listbox" aria-label="Édition régionale">
-        @foreach($regions as $key => $r)
-            @php
-                $count = (int) ($regionCounts[$key] ?? 0);
-                $disabled = $count === 0 && $key !== 'international';
-            @endphp
-            <li>
-                <button type="button"
-                        role="option"
-                        aria-selected="{{ $key === $currentRegion ? 'true' : 'false' }}"
-                        @if($disabled) aria-disabled="true" @endif
-                        data-grimba-region="{{ $key }}"
-                        class="grimba-region__option @if($key === $currentRegion) is-active @endif"
-                        @if($disabled) style="opacity:0.4; cursor:not-allowed;" disabled @endif>
-                    <span aria-hidden="true">{{ $r['flag'] }}</span>
-                    <span>{{ $r['label'] }}</span>
-                    <span class="ms-auto small opacity-65" style="font-variant-numeric: tabular-nums;">
-                        {{ number_format($count) }}
-                    </span>
-                </button>
-            </li>
-        @endforeach
-    </ul>
+<div class="grimba-edition-toggle" role="group" aria-label="{{ __('Choisir une édition') }}" data-grimba-edition-root>
+    @foreach($editions as $key => $edition)
+        @php
+            $count = (int) ($editionCounts[$edition['count_key']] ?? 0);
+            $isActive = $key === $currentRegion;
+        @endphp
+        <a href="{{ $edition['href'] }}"
+           class="grimba-edition-toggle__option @if($isActive) is-active @endif"
+           aria-pressed="{{ $isActive ? 'true' : 'false' }}"
+           data-grimba-edition="{{ $key }}">
+            <span>{{ $edition['label'] }}</span>
+            <span class="grimba-edition-toggle__count">{{ number_format($count) }}</span>
+        </a>
+    @endforeach
 </div>
 
 <script>
     (function () {
-        const root = document.querySelector('[data-grimba-region-root]');
+        const root = document.querySelector('[data-grimba-edition-root]');
         if (!root) return;
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-        const trigger = root.querySelector('[data-grimba-region-toggle]');
-        const menu    = root.querySelector('.grimba-region__menu');
-        const csrf    = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        root.querySelectorAll('[data-grimba-edition]').forEach(link => {
+            link.addEventListener('click', async event => {
+                event.preventDefault();
+                const region = link.dataset.grimbaEdition;
+                const res = await fetch(@json(route('public.region.set')), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrf,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ region })
+                }).then(r => r.json()).catch(() => null);
 
-        function positionMenu() {
-            const r = trigger.getBoundingClientRect();
-            menu.style.visibility = 'hidden';
-            menu.style.display = 'block';
-            const mw = menu.offsetWidth, mh = menu.offsetHeight;
-            menu.style.visibility = '';
-            menu.style.display = '';
-            let top  = r.bottom + 6;
-            if (top + mh > window.innerHeight - 8) top = Math.max(8, r.top - mh - 6);
-            const left = Math.max(8, r.right - mw);
-            menu.style.top  = top + 'px';
-            menu.style.left = left + 'px';
-            menu.style.right = 'auto';
-        }
-        function setOpen(open) {
-            if (open) positionMenu();
-            root.classList.toggle('is-open', open);
-            trigger.setAttribute('aria-expanded', String(open));
-        }
-
-        trigger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            setOpen(! root.classList.contains('is-open'));
+                if (res && res.ok) {
+                    window.location.href = link.href;
+                }
+            });
         });
-        document.addEventListener('click', (e) => {
-            if (! root.contains(e.target) && ! menu.contains(e.target)) setOpen(false);
-        });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
-        window.addEventListener('resize', () => { if (root.classList.contains('is-open')) positionMenu(); });
-        window.addEventListener('scroll', () => { if (root.classList.contains('is-open')) positionMenu(); }, { passive: true });
-
-        menu.querySelectorAll('[data-grimba-region]').forEach(btn => btn.addEventListener('click', async () => {
-            const region = btn.dataset.grimbaRegion;
-            const res = await fetch(@json(route('public.region.set')), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
-                body: JSON.stringify({ region })
-            }).then(r => r.json()).catch(() => null);
-            if (res && res.ok) window.location.reload();
-        }));
     })();
 </script>

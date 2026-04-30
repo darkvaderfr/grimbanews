@@ -10,23 +10,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /*
- * S165 — proper news categories.
+ * S165/S007 — canonical editorial categories.
  *
- * The Echo theme shipped placeholder taxonomy (Uncategorized,
- * Videos, Podcasts, Healthy, Travel, Business, Entertainment, Sport)
- * that doesn't match how leading newsrooms — Le Monde, NYT, BBC,
- * Guardian — organise coverage. Vader: "this is just subpar".
+ * The public editorial taxonomy is intentionally reduced to two
+ * editions: Afrique and International. Legacy topical rows are kept
+ * demoted so old pivots and URLs do not break, but new classification
+ * and the homepage chips use only these two categories.
  *
- * This seeder lays down 15 francophone-first news categories with
- * orderable position. Idempotent: existing categories matching by
- * name keep their id; everything else is created. Shipped with
- * matching slug rows so the /blog/{cat-slug} route resolves.
- *
- * Categories that the NewsAPI catalog uses (business, entertainment,
- * sports, technology, health, science) get aliased to French
- * equivalents inside GrimbaCategoryClassifier — those legacy rows
- * stay published so old post_category pivots don't break, but they
- * don't appear in the topic-chips strip (order > 100).
+ * Idempotent: existing categories matching by name keep their id.
+ * Slug rows are maintained so /blog/afrique and /blog/international
+ * remain stable Botble category routes.
  */
 class GrimbaCategoriesSeeder extends Seeder
 {
@@ -34,21 +27,8 @@ class GrimbaCategoriesSeeder extends Seeder
     {
         // Order: lower = earlier in the topic-chips strip.
         $catalog = [
-            ['name' => 'À la une',         'order' => 1,  'icon' => 'ti ti-flame',     'description' => 'Histoires majeures du moment, suivies par GrimbaNews.'],
-            ['name' => 'France',           'order' => 2,  'icon' => 'ti ti-flag',      'description' => 'Politique, société et actualité française.'],
-            ['name' => 'Monde',            'order' => 3,  'icon' => 'ti ti-world',     'description' => 'Couverture internationale, hors France.'],
-            ['name' => 'Politique',        'order' => 4,  'icon' => 'ti ti-building',  'description' => 'Vie politique, élections, parlement, gouvernement.'],
-            ['name' => 'Économie',         'order' => 5,  'icon' => 'ti ti-trending-up','description' => 'Marchés, entreprises, finance, emploi.'],
-            ['name' => 'Tech & Numérique', 'order' => 6,  'icon' => 'ti ti-cpu',       'description' => 'Technologie, IA, plateformes, cybersécurité, télécoms.'],
-            ['name' => 'Climat & Environnement','order' => 7,'icon' => 'ti ti-leaf',  'description' => 'Crise climatique, biodiversité, énergie, pollution.'],
-            ['name' => 'Santé',            'order' => 8,  'icon' => 'ti ti-heartbeat', 'description' => 'Santé publique, médecine, épidémies, système de soins.'],
-            ['name' => 'Sciences',         'order' => 9,  'icon' => 'ti ti-microscope','description' => 'Recherche scientifique, espace, découvertes.'],
-            ['name' => 'Sports',           'order' => 10, 'icon' => 'ti ti-soccer-field','description' => 'Compétitions, transferts, événements sportifs.'],
-            ['name' => 'Culture',          'order' => 11, 'icon' => 'ti ti-palette',   'description' => 'Cinéma, musique, livres, arts, spectacles.'],
-            ['name' => 'Société',          'order' => 12, 'icon' => 'ti ti-users',     'description' => 'Famille, éducation, religion, immigration, manifestations.'],
-            ['name' => 'Justice',          'order' => 13, 'icon' => 'ti ti-scale',     'description' => 'Affaires judiciaires, procès, droit, sécurité publique.'],
-            ['name' => 'Géopolitique',     'order' => 14, 'icon' => 'ti ti-globe',     'description' => 'Conflits, diplomatie, alliances, défense, tensions internationales.'],
-            ['name' => 'Afrique',          'order' => 15, 'icon' => 'ti ti-map-pin',   'description' => 'Actualité du continent africain, par sous-régions.'],
+            ['name' => 'Afrique', 'order' => 1, 'icon' => 'ti ti-map-pin', 'description' => 'Actualité du continent africain, de ses institutions, peuples, économies et diasporas.'],
+            ['name' => 'International', 'order' => 2, 'icon' => 'ti ti-world', 'description' => "Actualité mondiale lue depuis ses conséquences pour l'Afrique et ses publics."],
         ];
 
         $now = now();
@@ -103,14 +83,20 @@ class GrimbaCategoriesSeeder extends Seeder
             }
         }
 
-        // Demote the legacy placeholder cats to high-order so they fall
-        // off the topic-chips strip without orphaning old post pivots.
-        $demote = ['Uncategorized', 'Videos', 'Podcasts', 'Healthy', 'Travel', 'Business', 'Entertainment'];
+        // Demote legacy topical rows so they fall off public editorial
+        // navigation without orphaning old post pivots.
+        $demote = [
+            'À la une', 'France', 'Monde', 'Politique', 'Économie',
+            'Tech & Numérique', 'Climat & Environnement', 'Santé',
+            'Sciences', 'Sports', 'Culture', 'Société', 'Justice',
+            'Géopolitique', 'Uncategorized', 'Videos', 'Podcasts',
+            'Healthy', 'Travel', 'Business', 'Entertainment',
+        ];
         DB::table('categories')->whereIn('name', $demote)->update([
             'order'      => 999,
             'updated_at' => $now,
         ]);
 
-        $this->command?->info('GrimbaCategoriesSeeder: 15 news categories ordered 1-15, ' . count($demote) . ' legacy demoted to 999.');
+        $this->command?->info('GrimbaCategoriesSeeder: Afrique + International ordered first, ' . count($demote) . ' legacy categories demoted to 999.');
     }
 }

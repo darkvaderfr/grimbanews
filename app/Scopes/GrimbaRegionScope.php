@@ -8,29 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 
 /*
- * S147 — region scope.
+ * S147 — edition scope.
  *
- * Vader's region picker (S146) sets a `grimba_region` cookie but
- * nothing in the content pipeline read it — switching from "France"
- * to "UK" had no effect on the actual feed. This scope plumbs the
- * cookie into every Post query on the reader side: when the visitor
- * picks a specific region, only posts from sources whose country
- * matches that region's ISO list survive.
+ * The reader-facing edition toggle sets a `grimba_region` cookie.
+ * Public Post queries read it here. Africa filters to sources whose
+ * country is on the continent; International is intentionally broad
+ * and unfiltered.
  *
- * Region → ISO-2 country code map:
- *   france        → FR
- *   uk            → GB (also accepts UK)
- *   us            → US
- *   canada        → CA
+ * Edition → ISO-2 country code map:
  *   africa        → 54 African country codes
- *   international → no filter (all posts)
+ *   international → no filter
  *
  * Posts whose source has no country (or no source_id at all) are
- * EXCLUDED when a specific region is active. They reappear as soon
- * as the visitor switches back to International. This keeps the
- * regional feed editorial-clean — the auto-created NewsAPI sources
- * with bias=unknown that Vader will classify via the S133 triage
- * queue inherit a country at that step.
+ * excluded in Africa mode and reappear in International mode.
  *
  * Admin requests are bypassed unconditionally so the editor sees
  * the full corpus regardless of which region cookie they happen to
@@ -40,12 +30,8 @@ class GrimbaRegionScope implements Scope
 {
     private const COOKIE_NAME = 'grimba_region';
 
-    /** ISO-2 codes per region. NULL = no filter. */
+    /** ISO-2 codes per edition. NULL = no filter. */
     private const REGION_MAP = [
-        'france'  => ['FR'],
-        'uk'      => ['GB', 'UK'],
-        'us'      => ['US'],
-        'canada'  => ['CA'],
         'africa'  => [
             'DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CV', 'CM', 'CF', 'TD',
             'KM', 'CG', 'CD', 'DJ', 'EG', 'GQ', 'ER', 'SZ', 'ET', 'GA',
@@ -113,8 +99,16 @@ class GrimbaRegionScope implements Scope
     {
         $region = (string) $request->cookie(self::COOKIE_NAME, 'international');
 
-        // Migrate legacy values (matches the picker's own migration)
-        $migrate = ['monde' => 'international', 'europe' => 'international', 'afrique' => 'africa'];
+        // Migrate legacy picker values from the old six-region model.
+        $migrate = [
+            'monde' => 'international',
+            'europe' => 'international',
+            'afrique' => 'africa',
+            'france' => 'international',
+            'uk' => 'international',
+            'us' => 'international',
+            'canada' => 'international',
+        ];
         $region = $migrate[$region] ?? $region;
 
         if (! array_key_exists($region, self::REGION_MAP)) {

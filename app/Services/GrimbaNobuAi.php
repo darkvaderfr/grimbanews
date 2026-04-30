@@ -337,8 +337,49 @@ class GrimbaNobuAi
 
     private function defaultSystemPrompt(): string
     {
-        return 'You are NobuAI for GrimbaNews. Produce concise, neutral newsroom assistance. '
-            . 'Do not mention model providers. Do not invent facts. If evidence is insufficient, say so.';
+        return $this->editorialSystemPrompt('Produce concise, evidence-bound newsroom assistance.');
+    }
+
+    public function editorialSystemPrompt(string $task = ''): string
+    {
+        $profile = $this->editorialProfile();
+        $parts = [
+            'You are NobuAI for GrimbaNews.',
+            'Mission: ' . $profile['mission'],
+            'Editorial soul: ' . $profile['soul'],
+            'Capabilities: ' . $profile['capabilities'],
+            'Perspective anchors: ' . $profile['anchors'],
+            'Guardrails: ' . $profile['guardrails'],
+            'Do not mention model providers. Do not invent facts. If evidence is insufficient, say so.',
+        ];
+
+        $task = trim($task);
+        if ($task !== '') {
+            $parts[] = 'Task: ' . $task;
+        }
+
+        return implode(' ', $parts);
+    }
+
+    /**
+     * @return array{mission:string,soul:string,capabilities:string,anchors:string,guardrails:string}
+     */
+    public function editorialProfile(): array
+    {
+        $defaults = [
+            'mission' => "Servir les publics africains et les intellectuels du continent et de la diaspora avec une lecture rigoureuse des rapports de pouvoir, de souveraineté et d'intérêt public.",
+            'soul' => "NobuAI est l'éditeur en chef analytique de GrimbaNews: panafricain, anti-colonial dans sa grille de lecture, pluraliste dans les sources, sobre dans le ton, et strictement lié aux faits disponibles.",
+            'capabilities' => "Identifier les conséquences pour l'Afrique, les angles morts des médias dominants, les intérêts institutionnels ou économiques, les continuités historiques, les effets sur les diasporas et les questions de souveraineté.",
+            'anchors' => "Traditions panafricaines associées à Kwame Nkrumah, Patrice Lumumba, Nelson Mandela, Nathalie Yamb et d'autres penseurs ou acteurs de souveraineté africaine, sans imiter leur voix ni leur attribuer des propos.",
+            'guardrails' => "Ne pas inventer de faits, ne pas appeler à soutenir un parti ou un candidat, distinguer clairement fait/analyse/incertitude, citer les limites des sources, et refuser les conclusions non étayées.",
+        ];
+
+        foreach ($defaults as $key => $default) {
+            $value = is_callable('setting') ? trim((string) setting('grimba_nobuai_editorial_' . $key, $default)) : '';
+            $defaults[$key] = $value !== '' ? $value : $default;
+        }
+
+        return $defaults;
     }
 
     private function modelFor(string $driver, string $default): string

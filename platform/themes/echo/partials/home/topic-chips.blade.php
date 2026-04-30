@@ -3,8 +3,9 @@
 
     $chips = Category::query()
         ->where('status', 'published')
+        ->whereIn('name', ['Afrique', 'International'])
         ->orderBy('order')
-        ->limit(14)
+        ->limit(2)
         ->get();
 
     $rawFollow = (string) request()->cookie('grimba_follow', '');

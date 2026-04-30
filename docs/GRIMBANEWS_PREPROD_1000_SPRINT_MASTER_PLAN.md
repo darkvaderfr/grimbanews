@@ -10,7 +10,7 @@ This plan supersedes the short next-sprint queue for pre-production planning onl
 
 The plan starts by reviewing what is already shipped, then turns that review into an iteration and enhancement map for the full product: ingest, NobuAI, translation, GroundNews-style analysis, public UX, admin UX, monetization, reliability, tests, security, observability, deployment, and post-launch growth.
 
-All contributors should also follow `memory.md` and `docs/GRIMBANEWS_TANDEM_WORK_PROTOCOL.md`: keep the team moving in tandem, pick the next unblocked atomic sprint outcome, and leave evidence for every completed work block.
+All contributors should also follow `memory.md`, `docs/GRIMBANEWS_TANDEM_WORK_PROTOCOL.md`, and `docs/GRIMBANEWS_AFRICA_INTERNATIONAL_EDITORIAL_PIVOT.md`: keep the team moving in tandem, pick the next unblocked atomic sprint outcome, and leave evidence for every completed work block.
 
 ## Inputs Reviewed
 
@@ -195,7 +195,7 @@ Start with these before opening feature work:
 
 - The site cannot require manual dashboard work to publish normal daily news.
 - Every public article path must resolve to a real story/article page, not a generic news/blog homepage.
-- Editions must be readable in light and dark modes across France, UK, US, Canada, Africa, and International.
+- Editions must be readable in light and dark modes across the two canonical choices: Afrique and International.
 - GroundNews-style analysis must expose bias, factuality, ownership, source count, confidence, unknown states, and methodology.
 - Subscribers/logged-in users must have a clear full-article reading path with safe extraction and upstream attribution.
 - Admin provider key pages must be readable, solid, redacted, and testable in both themes.

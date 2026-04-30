@@ -206,25 +206,26 @@
 
                 @php
                     // Best hero image for the story: current post's image
-                    // first, else any cluster post that has one. The
-                    // cards below each carry their own image too — this
-                    // is the "above the fold" anchor.
+                    // first, else any cluster post that has one, else the
+                    // editorial placeholder route. The cards below each
+                    // carry their own image too.
                     $__gnHero = $post->image ?: $__gnClusterPosts->pluck('image')->filter()->first();
+                    $__gnHeroUrl = $__gnHero
+                        ? \Botble\Media\Facades\RvMedia::getImageUrl($__gnHero)
+                        : route('public.og.placeholder', $post->id);
                 @endphp
 
-                @if($__gnHero)
-                    <div class="grimba-story-hero glass-panel p-0 mb-3" style="overflow:hidden;">
-                        <div class="ratio ratio-21x9" style="background:rgba(0,0,0,0.04);">
-                            <img src="{{ \Botble\Media\Facades\RvMedia::getImageUrl($__gnHero) }}"
-                                 alt="{{ $__gnTitle }}"
-                                 loading="eager"
-                                 decoding="sync"
-                                 width="1200"
-                                 height="630"
-                                 style="object-fit:cover; width:100%; height:100%;">
-                        </div>
+                <div class="grimba-story-hero glass-panel p-0 mb-3" style="overflow:hidden;">
+                    <div class="ratio ratio-21x9" style="background:rgba(0,0,0,0.04);">
+                        <img src="{{ $__gnHeroUrl }}"
+                             alt="{{ $__gnTitle }}"
+                             loading="eager"
+                             decoding="sync"
+                             width="1200"
+                             height="630"
+                             style="object-fit:cover; width:100%; height:100%;">
                     </div>
-                @endif
+                </div>
 
                 {{-- S170 — Hero block matches GroundNews article display:
                      kicker → title → bias filter tabs + Bias Comparison
@@ -495,6 +496,7 @@
                                     @php
                                         $__insightMeta = [
                                             'Ce qui est confirmé' => ['icon' => '✓', 'tone' => '#166534'],
+                                            'Perspective africaine' => ['icon' => '◆', 'tone' => '#c0392b'],
                                             'Ce que dit la gauche' => ['icon' => '●', 'tone' => '#3b82f6'],
                                             'Ce que dit le centre' => ['icon' => '●', 'tone' => '#8a8a8a'],
                                             'Ce que dit la droite' => ['icon' => '●', 'tone' => '#e84c3d'],
@@ -613,6 +615,11 @@
                     @endif
                 </header>
 
+                @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+                    'location' => 'grimba_story_after_hero',
+                    'class' => 'grimba-ad-slot--leaderboard my-3',
+                ])
+
                 @include(Theme::getThemeNamespace('partials.story.share-kit'), [
                     'title' => $__gnTitle,
                 ])
@@ -628,6 +635,11 @@
                     'locked' => $__gnFullArticleLocked,
                     'loginUrl' => $__gnMemberLoginUrl,
                     'upstream' => $__gnUpstream,
+                ])
+
+                @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+                    'location' => 'grimba_story_mid',
+                    'class' => 'grimba-ad-slot--native my-3',
                 ])
 
                 @include(Theme::getThemeNamespace('partials.story.article-list'), [
@@ -646,6 +658,10 @@
                     @include(Theme::getThemeNamespace('partials.story.bias-distribution'), [
                         'clusterPosts' => $__gnClusterPosts,
                         'sourceMeta'   => $__gnSourceMeta,
+                    ])
+                    @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+                        'location' => 'grimba_story_sidebar',
+                        'class' => 'grimba-ad-slot--sidebar my-3',
                     ])
                     @include(Theme::getThemeNamespace('partials.story.timeline'), [
                         'clusterPosts' => $__gnClusterPosts,
@@ -693,6 +709,16 @@
                                         'width' => 1200,
                                         'height' => 630,
                                     ]) }}
+                                </div>
+                            @else
+                                <div class="ratio ratio-21x9" style="background:rgba(0,0,0,0.04);">
+                                    <img src="{{ route('public.og.placeholder', $post->id) }}"
+                                         alt="{{ $__gnTitle }}"
+                                         loading="eager"
+                                         decoding="sync"
+                                         width="1200"
+                                         height="630"
+                                         style="object-fit:cover;width:100%;height:100%;">
                                 </div>
                             @endif
 

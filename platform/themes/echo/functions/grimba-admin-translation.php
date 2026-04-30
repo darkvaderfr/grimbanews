@@ -54,6 +54,17 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             }
             $pinned       = (string) setting('grimba_translator_driver', 'auto');
             $autoPublish  = (bool) setting('grimba_ingest_auto_publish', false);
+            $nobuProfileDefaults = [
+                'mission' => "Servir les publics africains et les intellectuels du continent et de la diaspora avec une lecture rigoureuse des rapports de pouvoir, de souveraineté et d'intérêt public.",
+                'soul' => "NobuAI est l'éditeur en chef analytique de GrimbaNews: panafricain, anti-colonial dans sa grille de lecture, pluraliste dans les sources, sobre dans le ton, et strictement lié aux faits disponibles.",
+                'capabilities' => "Identifier les conséquences pour l'Afrique, les angles morts des médias dominants, les intérêts institutionnels ou économiques, les continuités historiques, les effets sur les diasporas et les questions de souveraineté.",
+                'anchors' => "Traditions panafricaines associées à Kwame Nkrumah, Patrice Lumumba, Nelson Mandela, Nathalie Yamb et d'autres penseurs ou acteurs de souveraineté africaine, sans imiter leur voix ni leur attribuer des propos.",
+                'guardrails' => "Ne pas inventer de faits, ne pas appeler à soutenir un parti ou un candidat, distinguer clairement fait/analyse/incertitude, citer les limites des sources, et refuser les conclusions non étayées.",
+            ];
+            $nobuProfile = [];
+            foreach ($nobuProfileDefaults as $key => $default) {
+                $nobuProfile[$key] = (string) setting('grimba_nobuai_editorial_' . $key, $default);
+            }
             $translator   = app(GrimbaTranslator::class);
             $nobuAi       = app(GrimbaNobuAi::class);
             $nobuConfigured = $nobuAi->configuredDrivers();
@@ -92,7 +103,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             }
 
             return view('grimba-admin.translation.index', compact(
-                'drivers', 'settings', 'pinned', 'models', 'modelDrivers', 'translator', 'nobuConfigured', 'nobuFailures', 'translationFailures', 'translationFailureStats', 'autoPublish'
+                'drivers', 'settings', 'pinned', 'models', 'modelDrivers', 'translator', 'nobuConfigured', 'nobuFailures', 'translationFailures', 'translationFailureStats', 'autoPublish', 'nobuProfile'
             ));
         })->name('translation.index');
 
@@ -124,6 +135,11 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
             foreach ($modelDrivers as $d) {
                 $store->set('grimba_translator_' . $d . '_model', trim((string) $request->input($d . '_model', '')));
+            }
+
+            foreach (['mission', 'soul', 'capabilities', 'anchors', 'guardrails'] as $field) {
+                $value = trim(strip_tags((string) $request->input('nobuai_' . $field, '')));
+                $store->set('grimba_nobuai_editorial_' . $field, mb_substr($value, 0, 4000));
             }
 
             // S92: RSS auto-publish toggle. Checkbox semantics — absent

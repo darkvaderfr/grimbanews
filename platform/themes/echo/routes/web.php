@@ -474,11 +474,31 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->cookie('grimba_lang', $lang, 60 * 24 * 365, '/', null, false, false);
         })->name('public.lang.set');
 
+        $editionRedirect = function (string $region) {
+            return redirect(url('/'))
+                ->cookie('grimba_region', $region, 60 * 24 * 365, '/', null, false, false)
+                ->cookie('grimba_onboarded', '1', 60 * 24 * 365, '/', null, false, false);
+        };
+
+        Route::get('afrique', fn () => $editionRedirect('africa'))->name('public.edition.africa');
+        Route::get('international', fn () => $editionRedirect('international'))->name('public.edition.international');
+
         Route::post('region/set', function (Request $request) {
-            // S146 — six audience regions aligned with the picker
-            // (france / uk / us / canada / africa / international).
+            // Africa / International editorial editions. The cookie name
+            // remains grimba_region so the existing query scope and old
+            // clients continue to work.
             $region = (string) $request->input('region', 'international');
-            $allowed = ['france', 'uk', 'us', 'canada', 'africa', 'international'];
+            $legacy = [
+                'monde' => 'international',
+                'europe' => 'international',
+                'afrique' => 'africa',
+                'france' => 'international',
+                'uk' => 'international',
+                'us' => 'international',
+                'canada' => 'international',
+            ];
+            $region = $legacy[$region] ?? $region;
+            $allowed = ['africa', 'international'];
             if (! in_array($region, $allowed, true)) {
                 $region = 'international';
             }

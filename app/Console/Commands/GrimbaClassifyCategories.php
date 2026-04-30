@@ -7,9 +7,10 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 /*
- * S165 — backfill post_categories pivots using GrimbaCategoryClassifier.
+ * S165/S007 — backfill post_categories pivots using GrimbaCategoryClassifier.
  *
- * Walks all posts and runs each through the keyword classifier.
+ * Walks all posts and runs each through the Afrique / International
+ * edition classifier.
  * Default behaviour: only re-classify posts that have ZERO category
  * pivots (treats existing categorisation as sacred). --force re-runs
  * against everything, replacing prior category pivots.
@@ -20,7 +21,7 @@ class GrimbaClassifyCategories extends Command
         {--force : replace existing category pivots}
         {--limit=0 : cap posts per run (0 = no cap)}';
 
-    protected $description = 'Classify posts into news categories using keyword + source heuristics (S165).';
+    protected $description = 'Classify posts into Afrique / International editorial categories.';
 
     public function handle(GrimbaCategoryClassifier $classifier): int
     {

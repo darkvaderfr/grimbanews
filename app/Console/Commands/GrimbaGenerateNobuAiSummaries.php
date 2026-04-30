@@ -104,7 +104,7 @@ class GrimbaGenerateNobuAiSummaries extends Command
                 continue;
             }
 
-            $result = $nobuAi->complete($this->buildPrompt($topic, $posts), $this->systemPrompt());
+            $result = $nobuAi->complete($this->buildPrompt($topic, $posts), $this->systemPrompt($nobuAi));
 
             if (! $result || trim($result['text']) === '') {
                 $this->warn('    failed: no provider returned a summary');
@@ -137,11 +137,12 @@ class GrimbaGenerateNobuAiSummaries extends Command
         return $fail > 0 ? self::FAILURE : self::SUCCESS;
     }
 
-    private function systemPrompt(): string
+    private function systemPrompt(GrimbaNobuAi $nobuAi): string
     {
-        return 'You are NobuAI for GrimbaNews. Write neutral, evidence-bound editorial synthesis in French. '
-            . 'Use only the supplied article metadata. Do not mention provider names. Do not invent facts. '
-            . 'Return labeled lines that help readers understand framing differences across sources.';
+        return $nobuAi->editorialSystemPrompt(
+            'Write evidence-bound editorial synthesis in French from an African and Pan-African analytical perspective. '
+            . 'Use only the supplied article metadata. Return labeled lines that help readers understand framing differences across sources.'
+        );
     }
 
     private function buildPrompt(string $topic, iterable $posts): string
@@ -173,7 +174,7 @@ class GrimbaGenerateNobuAiSummaries extends Command
 
         $lines[] = '';
         $lines[] = 'Tâche: Produis 4 à 6 lignes en français, format strict "Libellé: texte".';
-        $lines[] = 'Libellés autorisés: Ce qui est confirmé, Ce que dit la gauche, Ce que dit le centre, Ce que dit la droite, Angle mort, Pourquoi ça compte.';
+        $lines[] = 'Libellés autorisés: Ce qui est confirmé, Perspective africaine, Ce que dit la gauche, Ce que dit le centre, Ce que dit la droite, Angle mort, Pourquoi ça compte.';
         $lines[] = 'Inclure seulement les lignes supportées par les articles. Si un camp manque, utilise Angle mort pour le signaler.';
         $lines[] = 'Ne jamais écrire "Ce que dit la gauche/le centre/la droite: Angle mort"; cette information doit être une ligne "Angle mort: ...".';
         $lines[] = 'Chaque texte doit rester court, concret et vérifiable. Retourne seulement les lignes.';

@@ -336,6 +336,44 @@
                     @csrf
 
                     <div class="grimba-llm-section grimba-admin-form-section">
+                        <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
+                            <div>
+                                <h3 class="h4 grimba-provider-group-title mb-1">Âme éditoriale NobuAI</h3>
+                                <p class="form-text mb-0">
+                                    NobuAI agit comme éditeur en chef analytique: ces champs orientent ses synthèses, sans lui permettre d'inventer des faits.
+                                </p>
+                            </div>
+                            <span class="grimba-status-pill is-on">Editable</span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label"><strong>Mission</strong></label>
+                                <textarea name="nobuai_mission" class="form-control" rows="3">{{ $nobuProfile['mission'] ?? '' }}</textarea>
+                                <div class="form-text">Public visé, rôle de GrimbaNews et promesse éditoriale.</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label"><strong>Âme</strong></label>
+                                <textarea name="nobuai_soul" class="form-control" rows="3">{{ $nobuProfile['soul'] ?? '' }}</textarea>
+                                <div class="form-text">Ton, posture, grille de lecture et limites de style.</div>
+                            </div>
+                            <div class="col-lg-6">
+                                <label class="form-label"><strong>Capacités</strong></label>
+                                <textarea name="nobuai_capabilities" class="form-control" rows="5">{{ $nobuProfile['capabilities'] ?? '' }}</textarea>
+                            </div>
+                            <div class="col-lg-6">
+                                <label class="form-label"><strong>Références panafricaines</strong></label>
+                                <textarea name="nobuai_anchors" class="form-control" rows="5">{{ $nobuProfile['anchors'] ?? '' }}</textarea>
+                                <div class="form-text">Inspirations intellectuelles; NobuAI ne doit pas imiter une personne vivante.</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label"><strong>Garde-fous</strong></label>
+                                <textarea name="nobuai_guardrails" class="form-control" rows="3">{{ $nobuProfile['guardrails'] ?? '' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grimba-llm-section grimba-admin-form-section">
                         <label class="form-label"><strong>Fournisseur préféré</strong></label>
                         <select name="driver" class="form-select" style="max-width: 300px;">
                             <option value="auto" @selected($pinned === 'auto')>Auto (chaîne de basculement)</option>
