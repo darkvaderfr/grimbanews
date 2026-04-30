@@ -559,6 +559,39 @@
                                     </a>
                                 </div>
                             </details>
+
+                            {{-- S306 — Bias Comparison Summary (3-column framing).
+                                  Both extractive (already bias-attributed) and
+                                  nobuai (labelled "Ce que dit la gauche/centre/droite")
+                                  modes feed it. The partial bails when fewer than
+                                  2 sides have items. --}}
+                            @php
+                                $__gnComparisonItems = [];
+                                if ($__gnSummaryMode === 'extractive') {
+                                    $__gnComparisonItems = $__gnSummaryItems;
+                                } elseif ($__gnSummaryMode === 'nobuai' && ! empty($__parsedInsights)) {
+                                    $__sideMap = [
+                                        'Ce que dit la gauche' => 'left',
+                                        'Ce que dit le centre' => 'center',
+                                        'Ce que dit la droite' => 'right',
+                                    ];
+                                    foreach ($__parsedInsights as $ins) {
+                                        $side = $__sideMap[$ins['label']] ?? null;
+                                        if ($side) {
+                                            $__gnComparisonItems[] = [
+                                                'text'   => $ins['body'],
+                                                'source' => null,
+                                                'bias'   => $side,
+                                            ];
+                                        }
+                                    }
+                                }
+                            @endphp
+                            @if(! empty($__gnComparisonItems))
+                                @include(Theme::getThemeNamespace('partials.story.bias-comparison-summary'), [
+                                    'items' => $__gnComparisonItems,
+                                ])
+                            @endif
                         </div>
 
                         <style>
