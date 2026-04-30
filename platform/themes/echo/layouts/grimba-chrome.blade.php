@@ -15,12 +15,30 @@
     }
 @endphp
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ request()->cookie('grimba_theme', 'auto') }}" class="grimba-home-html">
+@php
+    // Mirror grimba-home: cookie-driven auto/light/dark with allowlist
+    // validation + SSR initial theme. data-theme="light" stays hard-set
+    // to keep stock Echo's [data-theme="dark"] body-bg rule from leaking
+    // a near-black canvas onto our paper-and-ink subpages.
+    $__grimbaPref = (string) request()->cookie('grimba_theme', 'auto');
+    if (! in_array($__grimbaPref, ['light', 'dark', 'auto'], true)) {
+        $__grimbaPref = 'auto';
+    }
+    $__grimbaInitialTheme = $__grimbaPref === 'dark' ? 'dark' : 'light';
+@endphp
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ $__grimbaInitialTheme }}" data-theme="light" data-grimba-theme-pref="{{ $__grimbaPref }}" class="grimba-home-html">
 <script>
     (function () {
-        const pref = document.cookie.match(/(?:^|; )grimba_theme=([^;]+)/)?.[1] || 'auto';
-        const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-        const effective = pref === 'auto' ? (prefersDark ? 'dark' : 'light') : pref;
+        const m = document.cookie.match(/(?:^|; )grimba_theme=([^;]+)/);
+        let pref = 'auto';
+        if (m) {
+            try { pref = decodeURIComponent(m[1]); } catch (_) { pref = m[1]; }
+        }
+        if (pref !== 'light' && pref !== 'dark' && pref !== 'auto') pref = 'auto';
+        let effective = pref;
+        if (pref === 'auto') {
+            effective = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
         document.documentElement.setAttribute('data-bs-theme', effective);
         document.documentElement.setAttribute('data-grimba-theme-pref', pref);
     })();

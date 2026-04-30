@@ -81,9 +81,22 @@ html.grimba-home-html[data-theme="dark"] {
     color-scheme: light;
 }
 html.grimba-home-html[data-theme="dark"] body.grimba-home,
-html.grimba-home-html[data-theme="dark"] .grimba-home-main {
+html.grimba-home-html[data-theme="dark"] body.grimba-subpage,
+html.grimba-home-html[data-theme="dark"] .grimba-home-main,
+html.grimba-home-html[data-theme="dark"] .grimba-sub-main {
     background: transparent !important;
     color: var(--gn-ink) !important;
+}
+
+/* Light-mode defense: pin body bg to transparent so any stock Echo /
+   Botble / Bootstrap rule that tries to paint the body dark in light
+   mode cannot win. The cream gradient lives on html.grimba-home-html;
+   body just inherits. Dark mode keeps its own explicit body gradient
+   further down in the stylesheet (the [data-bs-theme="dark"] body
+   rule in section 12d) so we don't accidentally erase the dark canvas. */
+html.grimba-home-html:not([data-bs-theme="dark"]) body.grimba-home,
+html.grimba-home-html:not([data-bs-theme="dark"]) body.grimba-subpage {
+    background: transparent !important;
 }
 html.grimba-home-html[data-theme="dark"] .echo-feature-area,
 html.grimba-home-html[data-theme="dark"] .echo-latest-news-area,
