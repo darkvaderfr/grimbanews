@@ -984,6 +984,48 @@ button.btn-grimba--solid,
 
 .grimba-coverage--compact .grimba-coverage__legend { display: none; }
 
+/* S304: single-side bar — every card now surfaces a coverage indicator
+   (Ground does this on 100% of cards). Visually toned down vs the
+   multi-side bar so the reader's eye still understands "this story
+   only has one side covering it" without it feeling like a percentage
+   distribution. The bar gets a faint diagonal hatch overlay to signal
+   "incomplete data" at a glance. */
+.grimba-coverage--single .grimba-coverage__bar {
+    position: relative;
+    height: 4px;
+    background: rgba(26, 23, 19, 0.06);
+}
+.grimba-coverage--single .grimba-coverage__bar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent 0,
+        transparent 4px,
+        rgba(26, 23, 19, 0.05) 4px,
+        rgba(26, 23, 19, 0.05) 8px
+    );
+    pointer-events: none;
+}
+.grimba-coverage--single.grimba-coverage--on-dark .grimba-coverage__bar {
+    background: rgba(255, 255, 255, 0.10);
+}
+.grimba-coverage--single.grimba-coverage--on-dark .grimba-coverage__bar::after {
+    background: repeating-linear-gradient(
+        45deg,
+        transparent 0,
+        transparent 4px,
+        rgba(255, 255, 255, 0.12) 4px,
+        rgba(255, 255, 255, 0.12) 8px
+    );
+}
+.grimba-coverage--single .grimba-coverage__legend {
+    margin-top: 0.3rem;
+    font-size: 0.7rem;
+    opacity: 0.85;
+}
+
 .grimba-coverage--label {
     display: inline-flex;
     align-items: center;
