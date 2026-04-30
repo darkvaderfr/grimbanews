@@ -186,7 +186,7 @@ class GrimbaGenerateNobuAiSummaries extends Command
     {
         $lines = preg_split("/\r\n|\n|\r/", trim($text)) ?: [];
 
-        return collect($lines)
+        $normalized = collect($lines)
             ->map(static function (string $line): string {
                 $line = trim(preg_replace('/^\s*[-*•\d\.)]+\s*/u', '', $line) ?? '');
 
@@ -200,11 +200,48 @@ class GrimbaGenerateNobuAiSummaries extends Command
                     return "Angle mort: Aucun article classé {$side} ne figure dans ce dossier.";
                 }
 
+                if (preg_match('/^([^:]{2,80})\s*:\s*(.+)$/u', $line, $matches)) {
+                    $label = self::canonicalSummaryLabel(trim($matches[1]));
+                    if ($label !== null) {
+                        return $label . ': ' . trim($matches[2]);
+                    }
+                }
+
                 return $line;
             })
             ->filter(static fn (string $line): bool => $line !== '')
             ->unique(static fn (string $line): string => mb_strtolower($line))
-            ->take(5)
+            ->values();
+
+        $selected = $normalized->take(5);
+        $perspective = $normalized->first(static fn (string $line): bool => str_starts_with($line, 'Perspective africaine:'));
+
+        if ($perspective !== null && ! $selected->contains($perspective)) {
+            $selected = $selected->take(4)->push($perspective);
+        }
+
+        return $selected
             ->implode("\n");
+    }
+
+    private static function canonicalSummaryLabel(string $label): ?string
+    {
+        $folded = Str::of($label)
+            ->lower()
+            ->ascii()
+            ->replaceMatches('/\s+/u', ' ')
+            ->trim()
+            ->toString();
+
+        return match ($folded) {
+            'ce qui est confirme', 'faits confirmes', 'confirme' => 'Ce qui est confirmé',
+            'perspective africaine', 'angle africain', 'lecture africaine' => 'Perspective africaine',
+            'ce que dit la gauche', 'gauche' => 'Ce que dit la gauche',
+            'ce que dit le centre', 'centre' => 'Ce que dit le centre',
+            'ce que dit la droite', 'droite' => 'Ce que dit la droite',
+            'angle mort', 'angles morts' => 'Angle mort',
+            'pourquoi ca compte', 'pourquoi cela compte', 'importance' => 'Pourquoi ça compte',
+            default => null,
+        };
     }
 }

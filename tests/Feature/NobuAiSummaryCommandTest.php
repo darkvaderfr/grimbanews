@@ -187,6 +187,81 @@ class NobuAiSummaryCommandTest extends TestCase
         $this->assertNull($pendingSummary);
     }
 
+    public function test_nobuai_summary_keeps_perspective_africaine_when_provider_returns_extra_lines(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        $clusterId = 990024;
+        $postIds = DB::table('posts')
+            ->where('status', 'published')
+            ->orderBy('id')
+            ->limit(2)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $this->assertCount(2, $postIds, 'Fixture database must contain at least two published posts.');
+
+        DB::table('story_clusters')->updateOrInsert(
+            ['id' => $clusterId],
+            [
+                'topic' => 'Perspective africaine normalization test',
+                'description' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
+        foreach ($postIds as $index => $postId) {
+            DB::table('posts')->where('id', $postId)->update([
+                'story_cluster_id' => $clusterId,
+                'bias_rating' => $index === 0 ? 'left' : 'right',
+                'description' => 'Fixture article for Perspective africaine normalization.',
+                'summary_nobuai' => null,
+                'summary_generated_at' => null,
+                'summary_driver' => null,
+                'updated_at' => now(),
+            ]);
+        }
+
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'grimba_translator_openai_key'],
+            ['value' => 'sk-test-openai', 'created_at' => now(), 'updated_at' => now()]
+        );
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'grimba_translator_driver'],
+            ['value' => 'openai', 'created_at' => now(), 'updated_at' => now()]
+        );
+
+        Http::fake([
+            'api.openai.com/v1/chat/completions' => Http::response([
+                'choices' => [[
+                    'message' => [
+                        'content' => implode("\n", [
+                            'Ce qui est confirmé: Les sources couvrent le même dossier.',
+                            'Ce que dit la gauche: La couverture insiste sur les effets sociaux.',
+                            'Ce que dit le centre: La couverture insiste sur les arbitrages institutionnels.',
+                            'Ce que dit la droite: La couverture insiste sur les contraintes budgétaires.',
+                            'Angle mort: Les sources africaines directes manquent.',
+                            'perspective africaine : Les conséquences régionales doivent rester liées aux faits cités.',
+                        ]),
+                    ],
+                ]],
+            ]),
+        ]);
+
+        $this->artisan('grimba:nobuai-summaries', [
+            '--cluster' => $clusterId,
+            '--limit' => 1,
+        ])->assertExitCode(0);
+
+        $summary = (string) DB::table('posts')->where('id', $postIds[0])->value('summary_nobuai');
+
+        $this->assertStringContainsString('Perspective africaine: Les conséquences régionales', $summary);
+        $this->assertStringNotContainsString('perspective africaine :', $summary);
+        $this->assertSame(5, substr_count($summary, "\n") + 1);
+    }
+
     public function test_nobuai_records_sanitized_provider_failure_diagnostics(): void
     {
         $this->artisan('migrate', ['--force' => true])->assertExitCode(0);

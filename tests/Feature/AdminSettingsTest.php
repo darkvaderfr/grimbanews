@@ -31,6 +31,19 @@ class AdminSettingsTest extends TestCase
     {
         $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
 
+        DB::table('settings')
+            ->whereIn('key', [
+                'grimba_nobuai_failure_mistral',
+                'grimba_nobuai_failure_openrouter',
+                'grimba_nobuai_failure_openai',
+                'grimba_nobuai_failure_anthropic',
+                'grimba_nobuai_failure_google',
+                'grimba_nobuai_failure_xai',
+                'grimba_nobuai_failure_perplexity',
+                'grimba_nobuai_failure_groq',
+            ])
+            ->delete();
+
         DB::table('settings')->updateOrInsert(
             ['key' => 'grimba_translator_openai_key'],
             ['value' => 'sk-test-admin-diagnostics', 'created_at' => now(), 'updated_at' => now()]
@@ -456,6 +469,11 @@ class AdminSettingsTest extends TestCase
                 'openai_key' => 'sk-test-grimba-openai',
                 'openai_model' => 'gpt-test',
                 'ingest_auto_publish' => '1',
+                'nobuai_mission' => 'Mission test: centrer les conséquences africaines vérifiables.',
+                'nobuai_soul' => 'Âme test: sobre, factuelle, non partisane.',
+                'nobuai_capabilities' => 'Tester la capacité à repérer les rapports de pouvoir documentés.',
+                'nobuai_anchors' => 'Références test sans imitation de personne vivante.',
+                'nobuai_guardrails' => 'Refuser les conclusions non étayées et signaler les limites.',
             ])
             ->assertRedirect('/admin/grimba/translation');
 
@@ -463,6 +481,56 @@ class AdminSettingsTest extends TestCase
         $this->assertSame('openai', $this->settingValue('grimba_translator_driver'));
         $this->assertSame('gpt-test', $this->settingValue('grimba_translator_openai_model'));
         $this->assertSame('1', $this->settingValue('grimba_ingest_auto_publish'));
+        $this->assertSame('Mission test: centrer les conséquences africaines vérifiables.', $this->settingValue('grimba_nobuai_editorial_mission'));
+
+        $this->actingAs($this->admin())
+            ->get('/admin/grimba/translation')
+            ->assertOk()
+            ->assertSee('Prévisualisation système')
+            ->assertSee('Mission test: centrer les conséquences africaines vérifiables.');
+
+        $nobuAiCallCount = 0;
+        Http::fake([
+            'api.openai.com/v1/chat/completions' => function ($request) use (&$nobuAiCallCount) {
+                $nobuAiCallCount++;
+
+                if ($nobuAiCallCount === 1) {
+                    $this->assertStringContainsString(
+                        'Mission test: centrer les conséquences africaines vérifiables.',
+                        (string) data_get($request->data(), 'messages.0.content')
+                    );
+                    $this->assertStringContainsString(
+                        'Perspective africaine',
+                        (string) data_get($request->data(), 'messages.1.content')
+                    );
+
+                    return Http::response([
+                        'choices' => [[
+                            'message' => [
+                                'content' => 'Perspective africaine: Le test reste lié aux faits fournis.',
+                            ],
+                        ]],
+                    ]);
+                }
+
+                return Http::response([
+                    'choices' => [[
+                        'message' => [
+                            'content' => "Ce qui est confirmé: Les articles décrivent un même dossier depuis deux cadrages.\nAngle mort: Le dossier manque une source classée au centre.\nPourquoi ça compte: NobuAI aide à distinguer consensus et cadrage.",
+                        ],
+                    ]],
+                ]);
+            },
+        ]);
+
+        $this->actingAs($this->admin())
+            ->post('/admin/grimba/translation/nobuai-test', [
+                'topic' => 'Dette africaine',
+                'sample' => 'Une source mentionne des conditions financières imposées aux pays africains.',
+            ])
+            ->assertRedirect('/admin/grimba/translation')
+            ->assertSessionHas('success_msg', fn ($message) => str_contains((string) $message, 'NobuAI profile test OK')
+                && str_contains((string) $message, 'Perspective africaine'));
 
         $batchClusterId = 990014;
         $batchPostIds = DB::table('posts')
@@ -474,6 +542,14 @@ class AdminSettingsTest extends TestCase
             ->all();
 
         $this->assertCount(2, $batchPostIds, 'Fixture database must contain at least two published posts.');
+
+        DB::table('posts')->where('story_cluster_id', $batchClusterId)->update([
+            'story_cluster_id' => null,
+            'summary_nobuai' => null,
+            'summary_generated_at' => null,
+            'summary_driver' => null,
+            'updated_at' => now()->subHour(),
+        ]);
 
         DB::table('story_clusters')->updateOrInsert(
             ['id' => $batchClusterId],
@@ -498,16 +574,6 @@ class AdminSettingsTest extends TestCase
                 'updated_at' => now()->addMinute(),
             ]);
         }
-
-        Http::fake([
-            'api.openai.com/v1/chat/completions' => Http::response([
-                'choices' => [[
-                    'message' => [
-                        'content' => "Ce qui est confirmé: Les articles décrivent un même dossier depuis deux cadrages.\nAngle mort: Le dossier manque une source classée au centre.\nPourquoi ça compte: NobuAI aide à distinguer consensus et cadrage.",
-                    ],
-                ]],
-            ]),
-        ]);
 
         $this->actingAs($this->admin())
             ->post('/admin/grimba/cockpit/nobuai-summaries', ['limit' => 12])

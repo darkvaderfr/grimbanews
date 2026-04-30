@@ -370,6 +370,11 @@
                                 <label class="form-label"><strong>Garde-fous</strong></label>
                                 <textarea name="nobuai_guardrails" class="form-control" rows="3">{{ $nobuProfile['guardrails'] ?? '' }}</textarea>
                             </div>
+                            <div class="col-12">
+                                <label class="form-label"><strong>Prévisualisation système</strong></label>
+                                <textarea class="form-control" rows="5" readonly>{{ $nobuSystemPreview ?? '' }}</textarea>
+                                <div class="form-text">Aperçu admin du profil actif injecté dans les synthèses NobuAI. Les fournisseurs restent invisibles côté lecteur.</div>
+                            </div>
                         </div>
                     </div>
 
@@ -516,10 +521,12 @@
                             </p>
                             <form method="POST" action="{{ route('grimba.translation.nobuai-test') }}" class="d-flex gap-2 flex-wrap align-items-start">
                                 @csrf
-                                <input type="text" name="prompt" class="form-control form-control-sm" style="max-width: 420px;"
-                                       value="Return exactly OK."
-                                       placeholder="Return exactly OK.">
-                                <button type="submit" class="btn btn-outline-primary btn-sm">Tester NobuAI</button>
+                                <input type="text" name="topic" class="form-control form-control-sm" style="max-width: 260px;"
+                                       value="Dette africaine et financement climatique"
+                                       placeholder="Sujet de test">
+                                <textarea name="sample" class="form-control form-control-sm" rows="3" style="max-width: 520px;"
+                                          placeholder="Résumé factuel à tester">Deux articles décrivent le même sommet: une source insiste sur les promesses de financement, une autre souligne les conditions imposées aux pays africains.</textarea>
+                                <button type="submit" class="btn btn-outline-primary btn-sm">Tester le profil NobuAI</button>
                             </form>
                         </section>
                     </div>

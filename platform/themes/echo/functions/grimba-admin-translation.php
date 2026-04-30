@@ -69,6 +69,9 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $nobuAi       = app(GrimbaNobuAi::class);
             $nobuConfigured = $nobuAi->configuredDrivers();
             $nobuFailures = $nobuAi->failureDiagnostics();
+            $nobuSystemPreview = $nobuAi->editorialSystemPrompt(
+                'Preview the active editor-in-chief profile for evidence-bound GrimbaNews story synthesis.'
+            );
             $translationFailures = collect();
             $translationFailureStats = [
                 'total' => 0,
@@ -103,7 +106,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             }
 
             return view('grimba-admin.translation.index', compact(
-                'drivers', 'settings', 'pinned', 'models', 'modelDrivers', 'translator', 'nobuConfigured', 'nobuFailures', 'translationFailures', 'translationFailureStats', 'autoPublish', 'nobuProfile'
+                'drivers', 'settings', 'pinned', 'models', 'modelDrivers', 'translator', 'nobuConfigured', 'nobuFailures', 'translationFailures', 'translationFailureStats', 'autoPublish', 'nobuProfile', 'nobuSystemPreview'
             ));
         })->name('translation.index');
 
@@ -201,10 +204,25 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
         })->name('translation.test');
 
         Route::post('translation/nobuai-test', function (Request $request) {
-            $prompt = trim((string) $request->input('prompt', 'Return exactly OK.'));
-            if ($prompt === '') {
-                $prompt = 'Return exactly OK.';
+            $topic = trim(strip_tags((string) $request->input('topic', 'Dette africaine et financement climatique')));
+            $sample = trim(strip_tags((string) $request->input('sample', 'Deux articles décrivent le même sommet: une source insiste sur les promesses de financement, une autre souligne les conditions imposées aux pays africains.')));
+            if ($topic === '') {
+                $topic = 'Dette africaine et financement climatique';
             }
+            if ($sample === '') {
+                $sample = 'Deux articles décrivent le même dossier depuis des cadrages différents.';
+            }
+
+            $prompt = implode("\n", [
+                'Sujet: ' . mb_substr($topic, 0, 240),
+                '',
+                'Articles de test:',
+                '- Source: Test Afrique | angle: center | résumé: ' . mb_substr($sample, 0, 900),
+                '',
+                'Tâche: Produis 3 lignes en français, format strict "Libellé: texte".',
+                'Inclure une ligne "Perspective africaine" seulement si elle est supportée par le résumé fourni.',
+                'Rester factuel, non partisan, et signaler les limites de preuve.',
+            ]);
 
             /** @var GrimbaNobuAi $nobuAi */
             $nobuAi = app(GrimbaNobuAi::class);
@@ -213,12 +231,17 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             }
 
             $start = microtime(true);
-            $res = $nobuAi->complete($prompt);
+            $res = $nobuAi->complete(
+                $prompt,
+                $nobuAi->editorialSystemPrompt(
+                    'Test the active editable editor-in-chief profile. Use only the supplied sample article facts.'
+                )
+            );
             $ms = (int) round((microtime(true) - $start) * 1000);
 
             if ($res) {
                 return back()->with('success_msg', sprintf(
-                    'NobuAI OK (%dms) via %s : %s',
+                    'NobuAI profile test OK (%dms) via %s : %s',
                     $ms, $res['driver'], \Illuminate\Support\Str::limit($res['text'], 120)
                 ));
             }
