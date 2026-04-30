@@ -74,10 +74,32 @@
             @endif
         </p>
 
-        <div style="display:flex;height:14px;border-radius:9999px;overflow:hidden;background:rgba(0,0,0,.08); margin-bottom:14px;">
-            <div style="width:{{ $pct['left'] }}%;background:#3b82f6;" title="Gauche {{ $pct['left'] }}%"></div>
-            <div style="width:{{ $pct['center'] }}%;background:#a8a8a8;" title="Centre {{ $pct['center'] }}%"></div>
-            <div style="width:{{ $pct['right'] }}%;background:#e84c3d;" title="Droite {{ $pct['right'] }}%"></div>
+        {{-- S308: clickable bar segments. Each segment is a button that
+              filters the article-list below to its side (left/center/right).
+              Wires up to the same data-bias-tab tabs in article-list.blade.php. --}}
+        <div role="group" aria-label="{{ __('Filtrer la liste par camp') }}"
+             style="display:flex;height:14px;border-radius:9999px;overflow:hidden;background:rgba(0,0,0,.08); margin-bottom:14px;">
+            @if($pct['left'] > 0)
+                <button type="button"
+                        data-grimba-bar-side="left"
+                        title="{{ __('Filtrer Gauche') }} · {{ $pct['left'] }}%"
+                        aria-label="{{ __('Filtrer la liste : Gauche') }} ({{ $pct['left'] }}%)"
+                        style="width:{{ $pct['left'] }}%;background:#3b82f6;border:0;padding:0;cursor:pointer;"></button>
+            @endif
+            @if($pct['center'] > 0)
+                <button type="button"
+                        data-grimba-bar-side="center"
+                        title="{{ __('Filtrer Centre') }} · {{ $pct['center'] }}%"
+                        aria-label="{{ __('Filtrer la liste : Centre') }} ({{ $pct['center'] }}%)"
+                        style="width:{{ $pct['center'] }}%;background:#a8a8a8;border:0;padding:0;cursor:pointer;"></button>
+            @endif
+            @if($pct['right'] > 0)
+                <button type="button"
+                        data-grimba-bar-side="right"
+                        title="{{ __('Filtrer Droite') }} · {{ $pct['right'] }}%"
+                        aria-label="{{ __('Filtrer la liste : Droite') }} ({{ $pct['right'] }}%)"
+                        style="width:{{ $pct['right'] }}%;background:#e84c3d;border:0;padding:0;cursor:pointer;"></button>
+            @endif
         </div>
 
         <div class="d-flex justify-content-between small mb-3">
@@ -117,4 +139,26 @@
             </div>
         @endif
     </aside>
+
+    <script>
+        /* S308: bar click → activate the matching bias tab in the
+           article-list partial below + smooth-scroll to it. Reuses
+           the existing tab handler (data-bias-tab) so we have one
+           filter source of truth. */
+        (function () {
+            const segs = document.querySelectorAll('[data-grimba-bar-side]');
+            if (! segs.length) return;
+            segs.forEach((seg) => {
+                seg.addEventListener('click', () => {
+                    const side = seg.dataset.grimbaBarSide;
+                    const tab = document.querySelector('[data-grimba-cluster-tabs] [data-bias-tab="' + side + '"]');
+                    if (tab) {
+                        tab.click();
+                        const list = document.querySelector('[data-grimba-cluster-list]');
+                        if (list) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+        })();
+    </script>
 @endif
