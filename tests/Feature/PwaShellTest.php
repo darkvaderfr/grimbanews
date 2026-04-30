@@ -15,23 +15,30 @@ class PwaShellTest extends TestCase
             ->assertSee('apple-mobile-web-app-title');
     }
 
-    public function test_region_picker_is_solid_and_includes_canada(): void
+    public function test_edition_picker_is_solid_and_only_exposes_canonical_public_editions(): void
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('data-grimba-region="canada"', false)
-            ->assertSee('Canada')
-            ->assertSee('backdrop-filter: none !important', false)
-            ->assertSee('opacity: 1 !important', false);
+            ->assertSee('data-grimba-edition="africa"', false)
+            ->assertSee('data-grimba-edition="international"', false)
+            ->assertSee('Afrique')
+            ->assertSee('International')
+            ->assertDontSee('data-grimba-edition="france"', false)
+            ->assertDontSee('data-grimba-edition="uk"', false)
+            ->assertDontSee('data-grimba-edition="us"', false)
+            ->assertDontSee('data-grimba-edition="canada"', false)
+            ->assertSee('.grimba-edition-toggle', false)
+            ->assertSee('background: #1a1713;', false);
     }
 
     public function test_region_choice_suppresses_onboarding_overlay_across_editions(): void
     {
-        foreach (['france', 'uk', 'us', 'canada', 'africa', 'international'] as $region) {
+        foreach (['africa' => 'Afrique', 'international' => 'International'] as $region => $label) {
             $this->withUnencryptedCookies(['grimba_region' => $region])
                 ->get('/')
                 ->assertOk()
-                ->assertSee('Édition')
+                ->assertSee($label)
+                ->assertSee('data-grimba-edition="' . $region . '"', false)
                 ->assertDontSee('grimba-onboard-modal', false)
                 ->assertDontSee('grimba-newsletter-modal is-open', false);
         }
@@ -46,23 +53,27 @@ class PwaShellTest extends TestCase
                 ->assertDontSee('grimba-newsletter-modal grimba-onboard-modal is-open', false)
                 ->assertDontSee('id="newsletter-popup"', false)
                 ->assertDontSee('vendor/core/plugins/newsletter/js/newsletter.js', false)
-                ->assertDontSee('modal-backdrop', false)
+                ->assertDontSee('<div class="modal-backdrop', false)
+                ->assertSee('cleanupStockBackdrop', false)
                 ->assertDontSee('mfp-bg', false)
                 ->assertSee('aria-hidden="true"', false);
         }
     }
 
-    public function test_uk_edition_homepage_does_not_render_stock_or_auto_open_overlays(): void
+    public function test_legacy_edition_cookie_maps_to_international_without_stock_overlays(): void
     {
         $this->withUnencryptedCookies(['grimba_region' => 'uk'])
             ->get('/')
             ->assertOk()
-            ->assertSee('Édition UK')
+            ->assertSee('International')
+            ->assertSee('data-grimba-edition="international"', false)
+            ->assertDontSee('Édition UK')
             ->assertDontSee('grimba-newsletter-modal is-open', false)
             ->assertDontSee('grimba-onboard-modal is-open', false)
             ->assertDontSee('id="newsletter-popup"', false)
             ->assertDontSee('vendor/core/plugins/newsletter/js/newsletter.js', false)
-            ->assertDontSee('modal-backdrop', false)
+            ->assertDontSee('<div class="modal-backdrop', false)
+            ->assertSee('cleanupStockBackdrop', false)
             ->assertDontSee('mfp-bg', false);
     }
 
@@ -75,11 +86,12 @@ class PwaShellTest extends TestCase
             ->assertSee('aria-hidden="false"', false);
     }
 
-    public function test_region_switch_marks_reader_onboarded(): void
+    public function test_legacy_region_switch_maps_to_canonical_edition_and_marks_reader_onboarded(): void
     {
         $this->postJson('/region/set', ['region' => 'uk'])
             ->assertOk()
-            ->assertPlainCookie('grimba_region', 'uk')
+            ->assertJsonPath('region', 'international')
+            ->assertPlainCookie('grimba_region', 'international')
             ->assertPlainCookie('grimba_onboarded', '1');
     }
 
@@ -107,5 +119,14 @@ class PwaShellTest extends TestCase
         $this->assertSame('/', $manifest['start_url']);
         $this->assertSame('standalone', $manifest['display']);
         $this->assertNotEmpty($manifest['icons']);
+    }
+
+    public function test_homepage_css_defuses_orphan_bootstrap_backdrops(): void
+    {
+        $css = file_get_contents(dirname(__DIR__, 2) . '/public/themes/echo/css/grimba-home.css');
+
+        $this->assertStringContainsString('body.grimba-home .modal-backdrop', $css);
+        $this->assertStringContainsString('body.grimba-home.modal-open', $css);
+        $this->assertStringContainsString('pointer-events: none !important', $css);
     }
 }

@@ -511,8 +511,21 @@ body.grimba-home a:not([class*="btn-grimba"]):not([class*="grimba-urgency__cta"]
 
 /* Kill stock newsletter popup + announcement on the new homepage */
 body.grimba-home .newsletter-popup-wrap,
+body.grimba-home #newsletter-popup,
+body.grimba-home .newsletter-popup,
+body.grimba-home > .modal-backdrop,
+body.grimba-home .modal-backdrop,
 body.grimba-home [data-bb-toggle="announcement"],
 body.grimba-home .announcement-bar { display: none !important; }
+body.grimba-home .modal-backdrop {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+body.grimba-home.modal-open {
+    overflow: auto !important;
+    padding-right: 0 !important;
+}
 
 /* Soften RvMedia placeholders (no content yet) */
 body.grimba-home img[src*="placehold"],
