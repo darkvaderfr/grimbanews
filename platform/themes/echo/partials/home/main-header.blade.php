@@ -109,21 +109,20 @@
         const buttons = document.querySelectorAll('[data-grimba-theme]');
         if (!buttons.length) return;
 
-        const active = document.documentElement.getAttribute('data-grimba-theme-pref') || 'auto';
+        const active = 'light';
         buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.grimbaTheme === active)));
 
         function apply(pref) {
-            const effective = pref === 'dark' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-bs-theme', effective);
-            document.documentElement.setAttribute('data-grimba-theme-pref', pref);
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+            document.documentElement.setAttribute('data-grimba-theme-pref', 'light');
             const oneYear = 60 * 60 * 24 * 365;
-            document.cookie = 'grimba_theme=' + pref + '; path=/; max-age=' + oneYear + '; SameSite=Lax';
-            buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.grimbaTheme === pref)));
+            document.cookie = 'grimba_theme=light; path=/; max-age=' + oneYear + '; SameSite=Lax';
+            buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.grimbaTheme === 'light')));
         }
 
         buttons.forEach(b => b.addEventListener('click', () => apply(b.dataset.grimbaTheme)));
 
-        // Auto intentionally resolves to light until the dark-mode audit
-        // closes; explicit dark remains available from the moon control.
+        // Homepage dark mode is intentionally locked to light until the
+        // dark-mode audit closes.
     })();
 </script>

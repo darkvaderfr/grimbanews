@@ -12,18 +12,18 @@
 @endphp
 <!doctype html>
 @php
-    $__grimbaTheme = (string) request()->cookie('grimba_theme', 'light');
-    $__grimbaInitialTheme = $__grimbaTheme === 'dark' ? 'dark' : 'light';
+    $__grimbaInitialTheme = 'light';
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ $__grimbaInitialTheme }}" class="grimba-home-html">
 <script>
-    // Apply theme early to avoid flash. Auto stays light until the
-    // dark-mode audit is complete; explicit dark remains available.
+    // Homepage dark mode is disabled until the dark/light audit closes.
+    // This prevents stale dark-theme cookies from turning the reader
+    // homepage into an unreadable black surface.
     (function () {
-        const pref = document.cookie.match(/(?:^|; )grimba_theme=([^;]+)/)?.[1] || 'auto';
-        const effective = pref === 'dark' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-bs-theme', effective);
-        document.documentElement.setAttribute('data-grimba-theme-pref', pref);
+        const oneYear = 60 * 60 * 24 * 365;
+        document.documentElement.setAttribute('data-bs-theme', 'light');
+        document.documentElement.setAttribute('data-grimba-theme-pref', 'light');
+        document.cookie = 'grimba_theme=light; path=/; max-age=' + oneYear + '; SameSite=Lax';
     })();
 </script>
 <head>
