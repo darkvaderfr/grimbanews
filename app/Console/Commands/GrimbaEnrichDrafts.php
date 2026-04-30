@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use SimpleXMLElement;
 use Throwable;
 
@@ -93,6 +94,10 @@ class GrimbaEnrichDrafts extends Command
         $got = 0;
         $via = ['feed' => 0, 'og' => 0, 'twitter' => 0, 'img' => 0];
         $missing = 0;
+        $hasImageProvenance = Schema::hasColumn('posts', 'image_source_url')
+            || Schema::hasColumn('posts', 'image_extraction_method')
+            || Schema::hasColumn('posts', 'image_extracted_at')
+            || Schema::hasColumn('posts', 'image_extract_error');
 
         $bar = $this->output->createProgressBar($targets->count());
         $bar->start();
@@ -117,17 +122,32 @@ class GrimbaEnrichDrafts extends Command
             }
 
             if ($url !== null) {
+                $how = $how ?: 'img';
                 if (! $dry) {
-                    DB::table('posts')
-                        ->where('id', $t->post_id)
-                        ->update([
-                            'image'      => $url,
-                            'updated_at' => now(),
-                        ]);
+                    $update = [
+                        'image'      => $url,
+                        'updated_at' => now(),
+                    ];
+
+                    if ($hasImageProvenance) {
+                        $update = array_merge($update, $this->imageProvenanceUpdate(
+                            (string) ($how === 'feed' ? $t->feed_url : $t->link),
+                            $how,
+                            null
+                        ));
+                    }
+
+                    DB::table('posts')->where('id', $t->post_id)->update($update);
                 }
                 $got++;
                 $via[$how] = ($via[$how] ?? 0) + 1;
             } else {
+                if (! $dry && $hasImageProvenance) {
+                    DB::table('posts')->where('id', $t->post_id)->update(array_merge(
+                        $this->imageProvenanceUpdate((string) ($t->link ?: $t->feed_url), null, 'no usable image found'),
+                        ['updated_at' => now()]
+                    ));
+                }
                 $missing++;
             }
 
@@ -162,6 +182,29 @@ class GrimbaEnrichDrafts extends Command
         ]);
 
         return self::SUCCESS;
+    }
+
+    /**
+     * @return array<string, string|null|\Carbon\CarbonInterface>
+     */
+    private function imageProvenanceUpdate(?string $sourceUrl, ?string $method, ?string $error): array
+    {
+        $update = [];
+
+        if (Schema::hasColumn('posts', 'image_source_url')) {
+            $update['image_source_url'] = $sourceUrl ? mb_substr($sourceUrl, 0, 2048) : null;
+        }
+        if (Schema::hasColumn('posts', 'image_extraction_method')) {
+            $update['image_extraction_method'] = $method ? mb_substr($method, 0, 32) : null;
+        }
+        if (Schema::hasColumn('posts', 'image_extracted_at')) {
+            $update['image_extracted_at'] = now();
+        }
+        if (Schema::hasColumn('posts', 'image_extract_error')) {
+            $update['image_extract_error'] = $error ? mb_substr($error, 0, 191) : null;
+        }
+
+        return $update;
     }
 
     /**

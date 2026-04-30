@@ -355,6 +355,9 @@ app()->booted(function (): void {
             'grimba_sources_mid' => __('GrimbaNews Sources — mid-list'),
             'grimba_article_top' => __('GrimbaNews Article — top'),
             'grimba_article_mid' => __('GrimbaNews Article — in-article'),
+            'grimba_story_after_hero' => __('GrimbaNews Story — after hero'),
+            'grimba_story_mid' => __('GrimbaNews Story — mid-story'),
+            'grimba_story_sidebar' => __('GrimbaNews Story — sidebar'),
         ];
     }, 128);
 });

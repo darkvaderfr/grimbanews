@@ -39,6 +39,11 @@
         border-style: dashed;
     }
 
+    .grimba-ad-slot--sidebar {
+        min-height: 250px;
+        align-items: flex-start;
+    }
+
     .grimba-ad-slot ins.adsbygoogle {
         display: block;
         width: 100%;

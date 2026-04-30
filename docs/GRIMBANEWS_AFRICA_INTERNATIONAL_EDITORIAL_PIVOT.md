@@ -23,6 +23,8 @@ The old France / UK / US / Canada / Europe / Monde style region taxonomy is lega
 - `/afrique` and `/international` routes set the edition cookie and return readers to the edition-filtered home surface.
 - Story and orphan article heroes now always render an image, falling back to the Grimba placeholder route when extraction has no usable image.
 - Story pages now expose dedicated ad locations: `grimba_story_after_hero`, `grimba_story_mid`, and `grimba_story_sidebar`.
+- Article image enrichment records provenance when the migration is applied: source URL, extraction method, extraction time, and last failure reason.
+- The ads location registry exposes the new story slots so they are configurable from the existing ads backend.
 
 ## NobuAI Editor-In-Chief
 
@@ -42,9 +44,9 @@ Cluster summaries can include a `Perspective africaine` insight line alongside t
 
 Do not force these into the current schema without a migration review:
 
-- Article image provenance: track extracted image URL, local media path, provider/source, confidence, dimensions, license/caption text, and extraction failure reason.
+- Article image provenance phase 2: track local media path, confidence, dimensions, license/caption text, and per-image audit history.
 - Article content blocks: store normalized block order so inline ads can be inserted between paragraphs without brittle HTML splitting.
-- Ad placements: define placement keys, consent requirements, subscriber suppression, reserved dimensions, frequency caps, and campaign metadata.
+- Ad placements phase 2: define consent requirements, subscriber suppression, frequency caps, and campaign metadata beyond the ads plugin's location registry.
 - Edition tagging: add a durable edition field or pivot if cookie/source-country filtering proves too coarse for editorial decisions.
 
 ## Acceptance Bar
