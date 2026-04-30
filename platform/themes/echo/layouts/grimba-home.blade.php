@@ -11,13 +11,17 @@
     }
 @endphp
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ request()->cookie('grimba_theme', 'auto') }}" class="grimba-home-html">
+@php
+    $__grimbaTheme = (string) request()->cookie('grimba_theme', 'light');
+    $__grimbaInitialTheme = $__grimbaTheme === 'dark' ? 'dark' : 'light';
+@endphp
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ $__grimbaInitialTheme }}" class="grimba-home-html">
 <script>
-    // Apply dark mode early to avoid flash. Reads cookie + respects system preference.
+    // Apply theme early to avoid flash. Auto stays light until the
+    // dark-mode audit is complete; explicit dark remains available.
     (function () {
         const pref = document.cookie.match(/(?:^|; )grimba_theme=([^;]+)/)?.[1] || 'auto';
-        const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-        const effective = pref === 'auto' ? (prefersDark ? 'dark' : 'light') : pref;
+        const effective = pref === 'dark' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-bs-theme', effective);
         document.documentElement.setAttribute('data-grimba-theme-pref', pref);
     })();

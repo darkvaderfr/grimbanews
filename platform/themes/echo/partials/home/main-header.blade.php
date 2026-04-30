@@ -113,8 +113,7 @@
         buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.grimbaTheme === active)));
 
         function apply(pref) {
-            const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-            const effective = pref === 'auto' ? (prefersDark ? 'dark' : 'light') : pref;
+            const effective = pref === 'dark' ? 'dark' : 'light';
             document.documentElement.setAttribute('data-bs-theme', effective);
             document.documentElement.setAttribute('data-grimba-theme-pref', pref);
             const oneYear = 60 * 60 * 24 * 365;
@@ -124,10 +123,7 @@
 
         buttons.forEach(b => b.addEventListener('click', () => apply(b.dataset.grimbaTheme)));
 
-        // Follow OS changes when in auto mode.
-        window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            const pref = document.documentElement.getAttribute('data-grimba-theme-pref');
-            if (pref === 'auto') apply('auto');
-        });
+        // Auto intentionally resolves to light until the dark-mode audit
+        // closes; explicit dark remains available from the moon control.
     })();
 </script>

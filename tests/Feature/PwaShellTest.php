@@ -60,6 +60,19 @@ class PwaShellTest extends TestCase
         }
     }
 
+    public function test_homepage_auto_theme_resolves_to_light_until_dark_mode_audit_finishes(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('data-bs-theme="light"', false)
+            ->assertSee("const effective = pref === 'dark' ? 'dark' : 'light';", false);
+
+        $this->withUnencryptedCookies(['grimba_theme' => 'dark'])
+            ->get('/')
+            ->assertOk()
+            ->assertSee('data-bs-theme="dark"', false);
+    }
+
     public function test_legacy_edition_cookie_maps_to_international_without_stock_overlays(): void
     {
         $this->withUnencryptedCookies(['grimba_region' => 'uk'])
