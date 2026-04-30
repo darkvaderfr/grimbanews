@@ -327,9 +327,15 @@ class GrimbaNewsApiFetcher
         // those that don't, fall back to article-page scrape (shared
         // with the RSS pipeline at S93).
         $image = (string) ($article['urlToImage'] ?? '');
+        $imageMethod = null;
+        $imageError = null;
         if ($image === '' || ! filter_var($image, FILTER_VALIDATE_URL)) {
-            [$scraped] = $this->imageScraper->extractFromUrl($url);
+            [$scraped, $scrapeMethod] = $this->imageScraper->extractFromUrl($url);
             $image = $scraped ?: '';
+            $imageMethod = $scraped ? ($scrapeMethod ?: 'scrape') : null;
+            $imageError = $scraped ? null : 'no usable image found';
+        } else {
+            $imageMethod = 'newsapi';
         }
 
         try {
@@ -341,6 +347,8 @@ class GrimbaNewsApiFetcher
                 'content'      => $content,
                 'url'          => $url,
                 'image'        => $image,
+                'image_method' => $imageMethod,
+                'image_error'  => $imageError,
                 'source_id'    => $sourceId,
                 'source_name'  => $sourceName ?: null,
                 'published_at' => $publishedAt,
@@ -529,6 +537,12 @@ class GrimbaNewsApiFetcher
             if ($a['image'] !== '') {
                 $post->image = $a['image'];
             }
+            $this->applyImageProvenance(
+                $post,
+                (string) ($a['url'] ?? ''),
+                $a['image_method'] ?? null,
+                $a['image_error'] ?? null
+            );
 
             // Reuse the static cluster helper (S132 + S159) — match
             // against existing clusters AND form new clusters from
@@ -589,6 +603,22 @@ class GrimbaNewsApiFetcher
             return Carbon::parse($raw)->toDateTimeString();
         } catch (Throwable) {
             return null;
+        }
+    }
+
+    private function applyImageProvenance(Post $post, ?string $sourceUrl, ?string $method, ?string $error): void
+    {
+        if (Schema::hasColumn('posts', 'image_source_url')) {
+            $post->image_source_url = $sourceUrl ? Str::limit($sourceUrl, 2048, '') : null;
+        }
+        if (Schema::hasColumn('posts', 'image_extraction_method')) {
+            $post->image_extraction_method = $method ? Str::limit($method, 32, '') : null;
+        }
+        if (Schema::hasColumn('posts', 'image_extracted_at')) {
+            $post->image_extracted_at = now();
+        }
+        if (Schema::hasColumn('posts', 'image_extract_error')) {
+            $post->image_extract_error = $error ? Str::limit($error, 191, '') : null;
         }
     }
 

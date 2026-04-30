@@ -8,6 +8,7 @@ use Botble\Slug\Models\Slug;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use SimpleXMLElement;
 use stdClass;
@@ -188,7 +189,7 @@ class GrimbaRssPoller
         $pub = (string) ($node->pubDate ?? '');
         $published = $pub !== '' ? $this->toIso($pub) : null;
 
-        $image = $this->extractImageUrl($node, $summary);
+        [$image, $imageMethod] = $this->extractImageUrlWithMethod($node, $summary);
 
         return [
             'guid'         => $guid,
@@ -197,6 +198,7 @@ class GrimbaRssPoller
             'summary'      => $this->cleanSummary($summary),
             'published_at' => $published,
             'image'        => $image,
+            'image_method' => $imageMethod,
         ];
     }
 
@@ -224,7 +226,12 @@ class GrimbaRssPoller
         $pub = (string) ($node->published ?? $node->updated ?? '');
         $published = $pub !== '' ? $this->toIso($pub) : null;
 
-        $image = $enclosure ?: $this->extractImageUrl($node, $summary);
+        if ($enclosure !== '') {
+            $image = $enclosure;
+            $imageMethod = 'atom_enclosure';
+        } else {
+            [$image, $imageMethod] = $this->extractImageUrlWithMethod($node, $summary);
+        }
 
         return [
             'guid'         => $guid,
@@ -233,6 +240,7 @@ class GrimbaRssPoller
             'summary'      => $this->cleanSummary($summary),
             'published_at' => $published,
             'image'        => $image,
+            'image_method' => $imageMethod,
         ];
     }
 
@@ -250,14 +258,15 @@ class GrimbaRssPoller
      * broken entries (no http/https scheme) so we never persist a
      * tracking-pixel data: URI as the hero image.
      */
-    private function extractImageUrl(SimpleXMLElement $node, string $summaryHtml): ?string
+    /** @return array{0:?string,1:?string} */
+    private function extractImageUrlWithMethod(SimpleXMLElement $node, string $summaryHtml): array
     {
         // 1. RSS 2.0 <enclosure>
         foreach ($node->enclosure as $enc) {
             $type = (string) $enc['type'];
             $url  = (string) $enc['url'];
             if ($url !== '' && str_starts_with($type, 'image/') && $this->looksLikeHttpUrl($url)) {
-                return $url;
+                return [$url, 'enclosure'];
             }
         }
 
@@ -292,17 +301,17 @@ class GrimbaRssPoller
                     }
                 }
             }
-            if ($thumb !== null) return $thumb;
-            if ($contentHit !== null) return $contentHit;
+            if ($thumb !== null) return [$thumb, 'media_thumbnail'];
+            if ($contentHit !== null) return [$contentHit, 'media_content'];
         }
 
         // 4. First <img src="…"> in body HTML
         if ($summaryHtml !== '' && preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $summaryHtml, $m)) {
             $url = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            if ($this->looksLikeHttpUrl($url)) return $url;
+            if ($this->looksLikeHttpUrl($url)) return [$url, 'summary_img'];
         }
 
-        return null;
+        return [null, null];
     }
 
     private function looksLikeHttpUrl(string $url): bool
@@ -423,14 +432,25 @@ class GrimbaRssPoller
             // scraping the article page for og:image / twitter:image.
             // Costs +1 HTTP req per image-less new item — bounded by
             // the per-tick dedup so it's ≤ MAX_ITEMS_PER_FEED.
+            $imageSourceUrl = ! empty($item['image']) ? (string) ($feed->url ?? '') : (string) ($item['link'] ?? '');
+            $imageMethod = $item['image_method'] ?? null;
+            $imageError = null;
+
             if (! empty($item['image'])) {
                 $post->image = $item['image'];
             } elseif (! empty($item['link'])) {
-                [$scraped] = app(GrimbaArticleImageScraper::class)->extractFromUrl($item['link']);
+                [$scraped, $scrapeMethod] = app(GrimbaArticleImageScraper::class)->extractFromUrl($item['link']);
                 if ($scraped) {
                     $post->image = $scraped;
+                    $imageMethod = $scrapeMethod ?: 'scrape';
+                } else {
+                    $imageError = 'no usable image found';
                 }
+            } else {
+                $imageError = 'missing upstream article url';
             }
+
+            $this->applyImageProvenance($post, $imageSourceUrl, $imageMethod, $imageError);
 
             // Near-duplicate detection (S78 + S132 + S159) — match
             // against existing clusters first; if none, attempt to form
@@ -741,6 +761,22 @@ class GrimbaRssPoller
         $intersection = count(array_intersect($a, $b));
         $union = count(array_unique(array_merge($a, $b)));
         return $union > 0 ? $intersection / $union : 0.0;
+    }
+
+    private function applyImageProvenance(Post $post, ?string $sourceUrl, ?string $method, ?string $error): void
+    {
+        if (Schema::hasColumn('posts', 'image_source_url')) {
+            $post->image_source_url = $sourceUrl ? Str::limit($sourceUrl, 2048, '') : null;
+        }
+        if (Schema::hasColumn('posts', 'image_extraction_method')) {
+            $post->image_extraction_method = $method ? Str::limit($method, 32, '') : null;
+        }
+        if (Schema::hasColumn('posts', 'image_extracted_at')) {
+            $post->image_extracted_at = now();
+        }
+        if (Schema::hasColumn('posts', 'image_extract_error')) {
+            $post->image_extract_error = $error ? Str::limit($error, 191, '') : null;
+        }
     }
 
     private function uniqueSlug(string $title): string

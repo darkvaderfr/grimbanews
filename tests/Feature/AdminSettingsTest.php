@@ -140,6 +140,10 @@ class AdminSettingsTest extends TestCase
             'original_language' => 'en',
             'translated_name' => null,
             'description' => 'Short.',
+            'image_source_url' => 'https://example.test/s231-blocked',
+            'image_extraction_method' => null,
+            'image_extract_error' => 'no usable image found',
+            'full_extract_error' => 'subscriber extractor timeout',
             'updated_at' => now(),
         ]);
 
@@ -151,6 +155,10 @@ class AdminSettingsTest extends TestCase
             'original_language' => 'fr',
             'translated_name' => null,
             'description' => 'Ce brouillon contient un extrait suffisamment long pour valider les garde-fous éditoriaux avant publication RSS.',
+            'image_source_url' => 'https://example.test/s231-ready',
+            'image_extraction_method' => 'og',
+            'image_extract_error' => null,
+            'full_extract_error' => null,
             'updated_at' => now(),
         ]);
 
@@ -189,6 +197,10 @@ class AdminSettingsTest extends TestCase
             ->assertSee('biais inconnu')
             ->assertSee('traduction manquante')
             ->assertSee('extrait trop court')
+            ->assertSee('Image provenance')
+            ->assertSee('no usable image found')
+            ->assertSee('Échec extraction article')
+            ->assertSee('subscriber extractor timeout')
             ->assertSee('garde-fous')
             ->assertSee(route('grimba.news-sources.triage'), false)
             ->assertSee(route('grimba.translation.index'), false)
@@ -198,6 +210,7 @@ class AdminSettingsTest extends TestCase
             ->get('/admin/grimba/rss-drafts?source=' . $rssSource->id . '&bias=center')
             ->assertOk()
             ->assertSee('Prêt à publier')
+            ->assertSee('méthode og')
             ->assertSee('garde-fous');
 
         $this->actingAs($this->admin())
@@ -559,6 +572,10 @@ class AdminSettingsTest extends TestCase
             'original_language' => 'en',
             'translated_name' => null,
             'description' => 'Tiny.',
+            'image_source_url' => 'https://example.test/s232-blocked',
+            'image_extraction_method' => null,
+            'image_extract_error' => 'no usable image found',
+            'full_extract_error' => 'paywall extraction blocked',
             'updated_at' => now(),
         ]);
 
@@ -570,6 +587,10 @@ class AdminSettingsTest extends TestCase
             'original_language' => 'fr',
             'translated_name' => null,
             'description' => 'Ce brouillon NewsAPI contient un extrait suffisamment long pour valider les garde-fous avant publication.',
+            'image_source_url' => 'https://example.test/s232-ready',
+            'image_extraction_method' => 'newsapi',
+            'image_extract_error' => null,
+            'full_extract_error' => null,
             'updated_at' => now(),
         ]);
 
@@ -613,6 +634,9 @@ class AdminSettingsTest extends TestCase
             ->assertSee('biais inconnu')
             ->assertSee('traduction manquante')
             ->assertSee('extrait trop court')
+            ->assertSee('Image provenance')
+            ->assertSee('paywall extraction blocked')
+            ->assertSee('méthode newsapi')
             ->assertSee('Prêt à publier')
             ->assertSee(route('grimba.news-sources.triage'), false)
             ->assertSee(route('grimba.translation.index'), false)

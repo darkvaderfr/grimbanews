@@ -210,6 +210,31 @@
                                                         <strong>{{ \Illuminate\Support\Str::limit($draft->name, 86) }}</strong>
                                                     </a>
                                                     <div class="small text-muted">{{ \Illuminate\Support\Str::limit(strip_tags((string) $draft->description), 120) }}</div>
+                                                    @php
+                                                        $imageMethod = trim((string) ($draft->image_extraction_method ?? ''));
+                                                        $imageSource = trim((string) ($draft->image_source_url ?? ''));
+                                                        $imageError = trim((string) ($draft->image_extract_error ?? ''));
+                                                        $fullError = trim((string) ($draft->full_extract_error ?? ''));
+                                                    @endphp
+                                                    @if($imageMethod !== '' || $imageSource !== '' || $imageError !== '')
+                                                        <div class="small mt-2 d-flex flex-wrap gap-1 align-items-center">
+                                                            <span class="badge bg-secondary">Image provenance</span>
+                                                            @if($imageMethod !== '')
+                                                                <span class="badge bg-light text-dark border">méthode {{ $imageMethod }}</span>
+                                                            @endif
+                                                            @if($imageError !== '')
+                                                                <span class="badge bg-danger">{{ \Illuminate\Support\Str::limit($imageError, 80) }}</span>
+                                                            @endif
+                                                            @if($imageSource !== '')
+                                                                <a href="{{ $imageSource }}" target="_blank" rel="noopener" class="badge bg-light text-dark border text-decoration-none">source image</a>
+                                                            @endif
+                                                        </div>
+                                                    @endif
+                                                    @if($fullError !== '')
+                                                        <div class="small mt-1 text-danger">
+                                                            Échec extraction article: {{ \Illuminate\Support\Str::limit($fullError, 110) }}
+                                                        </div>
+                                                    @endif
                                                     @if(! $isReady)
                                                         <div class="d-flex flex-wrap gap-1 mt-2">
                                                             @foreach($flags as $flag)
