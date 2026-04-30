@@ -135,6 +135,14 @@
                     id="story-article-{{ (int) $cp->id }}"
                     data-sort-ts="{{ $sortTs }}"
                     data-sort-bias="{{ $sortBias }}"
+                    data-grimba-compare-row
+                    data-compare-id="{{ (int) $cp->id }}"
+                    data-compare-bias="{{ $bucket }}"
+                    data-compare-side-color="{{ $meta['color'] }}"
+                    data-compare-source="{{ $cp->source_name ?? '—' }}"
+                    data-compare-title="{{ $title }}"
+                    data-compare-desc="{{ $description ? Str::limit(strip_tags($description), 280) : '' }}"
+                    data-compare-url="{{ $cp->url ?? '' }}"
                     class="grimba-story-article {{ $isCurrent ? 'grimba-story-article--current' : '' }}"
                     style="
                         padding: 16px 18px;
@@ -147,6 +155,18 @@
 
                     {{-- Source row: logo + name + ownership/credibility chips + lean badge --}}
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                        {{-- S307 — compare checkbox. Sits left of the logo, only
+                              activates after the reader checks one. --}}
+                        <label class="grimba-compare-toggle" title="{{ __('Sélectionner pour comparer côte à côte') }}"
+                               style="display:inline-flex; align-items:center; cursor:pointer; padding:0; margin:0;">
+                            <input type="checkbox" data-grimba-compare-toggle aria-label="{{ __('Comparer cette source') }}"
+                                   style="
+                                       width: 17px; height: 17px;
+                                       accent-color: {{ $meta['color'] }};
+                                       margin-right: 6px;
+                                       cursor: pointer;
+                                   ">
+                        </label>
                         {!! Theme::partial('source-logo', [
                             'source_id' => $src->id ?? 0,
                             'name'    => $cp->source_name ?? '—',
@@ -248,6 +268,82 @@
                 </li>
         @endforeach
     </ul>
+
+    {{-- S307 — Compare-sources toolbar (sticky, hidden until ≥2 selected). --}}
+    <div id="grimba-compare-toolbar"
+         role="region"
+         aria-label="{{ __('Outil de comparaison') }}"
+         hidden
+         style="
+            position: sticky;
+            bottom: 16px;
+            z-index: 30;
+            margin-top: 16px;
+            padding: 10px 14px;
+            background: var(--gn-ink, #1a1713);
+            color: var(--gn-paper, #f6f1e8);
+            border-radius: 14px;
+            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+         ">
+        <span style="font-weight:700; font-size:13.5px;">
+            <span data-grimba-compare-count>0</span>
+            <span style="opacity:0.75;">{{ __('sources sélectionnées') }}</span>
+        </span>
+        <span class="opacity-65" style="font-size:12.5px;">
+            {{ __('Sélectionnez 2 ou 3 sources pour les comparer côte à côte.') }}
+        </span>
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <button type="button"
+                    data-grimba-compare-clear
+                    class="btn-grimba btn-grimba--ghost btn-grimba--sm"
+                    style="border-color: rgba(246,241,232,0.35); color:#f6f1e8;">
+                {{ __('Effacer') }}
+            </button>
+            <button type="button"
+                    data-grimba-compare-open
+                    class="btn-grimba btn-grimba--solid btn-grimba--sm"
+                    disabled
+                    style="background:#f6f1e8; color:#1a1713; font-weight:700;">
+                {{ __('Comparer côte à côte') }}
+            </button>
+        </div>
+    </div>
+
+    {{-- S307 — Compare modal (3-up side-by-side). --}}
+    <div id="grimba-compare-modal"
+         class="grimba-newsletter-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-hidden="true"
+         aria-labelledby="grimba-compare-title">
+        <div class="grimba-newsletter-modal__backdrop" data-grimba-compare-close></div>
+        <div class="grimba-newsletter-modal__panel glass-panel"
+             role="document"
+             style="max-width: 1080px; padding: 22px 24px 20px;">
+            <button type="button"
+                    class="grimba-newsletter-modal__close"
+                    aria-label="{{ __('Fermer') }}"
+                    data-grimba-compare-close>×</button>
+
+            <header class="d-flex align-items-baseline gap-2 mb-3 flex-wrap">
+                <h2 id="grimba-compare-title" class="m-0"
+                    style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:22px; letter-spacing:-0.2px;">
+                    {{ __('Comparer le cadrage') }}
+                </h2>
+                <span class="opacity-65 small">{{ __('Voyez comment chaque source titre la même histoire.') }}</span>
+            </header>
+
+            <div class="row g-3" data-grimba-compare-grid></div>
+
+            <p class="small opacity-55 mt-3 mb-0" style="font-size:11.5px; line-height:1.5;">
+                {{ __('Le titre et l\'extrait sont reproduits depuis la source d\'origine. Cliquez sur "Lire l\'article complet" pour ouvrir l\'article chez l\'éditeur.') }}
+            </p>
+        </div>
+    </div>
 </section>
 
 <script>
@@ -298,6 +394,152 @@
         tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.biasTab)));
         sortWrap?.querySelectorAll('[data-sort-mode]').forEach(btn => {
             btn.addEventListener('click', () => sortItems(btn.dataset.sortMode || 'bias'));
+        });
+    })();
+
+    /* S307 — compare-sources state machine. Selection cap = 3.
+       Toolbar slides in once ≥1 selected; "Comparer" enables at ≥2;
+       modal opens with side-by-side cards. All DOM-built with
+       createElement / textContent — no innerHTML on user values. */
+    (function () {
+        const toolbar = document.getElementById('grimba-compare-toolbar');
+        const countEl = toolbar?.querySelector('[data-grimba-compare-count]');
+        const openBtn = toolbar?.querySelector('[data-grimba-compare-open]');
+        const clearBtn = toolbar?.querySelector('[data-grimba-compare-clear]');
+        const modal = document.getElementById('grimba-compare-modal');
+        const grid = modal?.querySelector('[data-grimba-compare-grid]');
+        if (!toolbar || !modal || !grid) return;
+
+        const MAX = 3;
+        const READ_FULL_LABEL = @json(__("Lire l'article complet"));
+        let selected = [];
+        let lastFocus = null;
+
+        function refreshToolbar() {
+            const n = selected.length;
+            if (countEl) countEl.textContent = String(n);
+            toolbar.hidden = n === 0;
+            if (openBtn) openBtn.disabled = n < 2;
+        }
+
+        function applyRowVisual(row) {
+            const checked = row.querySelector('[data-grimba-compare-toggle]')?.checked;
+            const color = row.dataset.compareSideColor || '#1a1713';
+            row.style.outline = checked ? '2px solid ' + color : '';
+            row.style.outlineOffset = checked ? '2px' : '';
+        }
+
+        function toggleRow(row) {
+            const cb = row.querySelector('[data-grimba-compare-toggle]');
+            if (!cb) return;
+            if (cb.checked) {
+                if (selected.length >= MAX) {
+                    cb.checked = false;
+                    return;
+                }
+                if (!selected.includes(row)) selected.push(row);
+            } else {
+                selected = selected.filter((r) => r !== row);
+            }
+            applyRowVisual(row);
+            refreshToolbar();
+        }
+
+        function clearAll() {
+            selected.forEach((r) => {
+                const cb = r.querySelector('[data-grimba-compare-toggle]');
+                if (cb) cb.checked = false;
+                applyRowVisual(r);
+            });
+            selected = [];
+            refreshToolbar();
+        }
+
+        function buildCard(row) {
+            const color  = row.dataset.compareSideColor || '#1a1713';
+            const source = row.dataset.compareSource || '—';
+            const title  = row.dataset.compareTitle || '—';
+            const desc   = row.dataset.compareDesc || '';
+            const url    = row.dataset.compareUrl || '';
+
+            const col = document.createElement('article');
+            col.className = (selected.length === 2 ? 'col-12 col-md-6' : 'col-12 col-md-4');
+
+            const inner = document.createElement('div');
+            inner.style.cssText =
+                'height: 100%; padding: 14px 14px 12px; border-radius: 12px;' +
+                'border: 1px solid ' + color + '33; border-top: 3px solid ' + color + ';' +
+                'background: ' + color + '08;';
+
+            const header = document.createElement('header');
+            header.style.marginBottom = '8px';
+            const sourceEl = document.createElement('strong');
+            sourceEl.style.cssText = "font-family:'Public Sans',system-ui,sans-serif; font-size:13px; font-weight:700; letter-spacing:0.4px; color:" + color + ';';
+            sourceEl.textContent = source;
+            header.appendChild(sourceEl);
+
+            const h3 = document.createElement('h3');
+            h3.style.cssText = "font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; line-height:1.3; letter-spacing:-0.2px; margin:0 0 10px; color: var(--gn-ink, #1a1713);";
+            h3.textContent = title;
+
+            inner.appendChild(header);
+            inner.appendChild(h3);
+
+            if (desc) {
+                const p = document.createElement('p');
+                p.style.cssText = 'font-size:14px; line-height:1.5; margin:0 0 10px; color: var(--gn-ink, #1a1713); opacity: 0.85;';
+                p.textContent = desc;
+                inner.appendChild(p);
+            }
+
+            if (url && /^https?:\/\//i.test(url)) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.target = '_blank';
+                a.rel = 'noopener';
+                a.style.cssText = 'color:#c0392b; text-decoration:none; font-weight:700; font-size:13px;';
+                a.textContent = READ_FULL_LABEL + ' ↗';
+                inner.appendChild(a);
+            }
+
+            col.appendChild(inner);
+            return col;
+        }
+
+        function openModal() {
+            if (selected.length < 2) return;
+            grid.replaceChildren();
+            selected.forEach((row) => grid.appendChild(buildCard(row)));
+
+            lastFocus = document.activeElement;
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            modal.querySelector('[data-grimba-compare-close]')?.focus();
+        }
+
+        function closeModal() {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            grid.replaceChildren();
+            if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+        }
+
+        document.querySelectorAll('[data-grimba-compare-toggle]').forEach((cb) => {
+            cb.addEventListener('change', () => {
+                const row = cb.closest('[data-grimba-compare-row]');
+                if (row) toggleRow(row);
+            });
+        });
+        clearBtn?.addEventListener('click', clearAll);
+        openBtn?.addEventListener('click', openModal);
+        modal.querySelectorAll('[data-grimba-compare-close]').forEach((b) => b.addEventListener('click', closeModal));
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+                e.preventDefault();
+                closeModal();
+            }
         });
     })();
 </script>
