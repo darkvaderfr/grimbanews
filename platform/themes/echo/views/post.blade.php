@@ -193,7 +193,7 @@
             $__gnSourceMeta = empty($__gnSourceIds) ? collect() :
                 \Illuminate\Support\Facades\DB::table('news_sources')
                     ->whereIn('id', $__gnSourceIds)
-                    ->get(['id','name','website','ownership_type','credibility_score','owner_name'])
+                    ->get(['id','name','website','bias_rating','bias_score','ownership_type','credibility_score','owner_name','logo_url','logo_status','logo_checked_at'])
                     ->keyBy('id');
         }
     }

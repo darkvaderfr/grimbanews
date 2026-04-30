@@ -108,7 +108,7 @@
             $__sources = empty($__sourceIds) ? collect() :
                 \Illuminate\Support\Facades\DB::table('news_sources')
                     ->whereIn('id', $__sourceIds)
-                    ->get(['id','name','website','ownership_type','credibility_score','owner_name','logo_url','logo_status','logo_checked_at'])
+                    ->get(['id','name','website','bias_rating','bias_score','ownership_type','credibility_score','owner_name','logo_url','logo_status','logo_checked_at'])
                     ->keyBy('id');
         }
     @endphp
@@ -161,37 +161,40 @@
                             {{ $cp->source_name ?? '—' }}
                         </strong>
 
-                        @if($src?->ownership_type)
-                            <span style="
-                                padding:2px 8px; border-radius:9999px;
-                                background:rgba(26,23,19,0.06); color:var(--gn-ink,#1a1713);
-                                font-size:11px; font-weight:600; letter-spacing:0.3px;
-                            " title="{{ $src->owner_name ? __('Propriété de :owner', ['owner' => $src->owner_name]) : '' }}">
-                                {{ ucfirst((string) $src->ownership_type) }}
-                            </span>
+                        {{-- S305: 7-tier bias / 5-tier factuality / 8-cat ownership chips
+                              from the Ground-fidelity Wave 0 atoms. The 3-tier border-left
+                              accent on the row stays (it's our visual anchor) — these chips
+                              add the higher-resolution metadata Ground shows in their
+                              full-coverage list. --}}
+                        @php
+                            $__biasTier = \App\Ground\Bias::tier($cp->bias_rating ?? null, $src->bias_score ?? null);
+                            $__factTier = \App\Ground\Factuality::tier($src->credibility_score ?? null);
+                            $__ownCat   = \App\Ground\Ownership::category($src->ownership_type ?? null, $src->owner_name ?? null);
+                        @endphp
+
+                        @if($__ownCat !== 'other')
+                            {!! Theme::partial('ownership-chip', [
+                                'category' => $__ownCat,
+                                'owner' => $src->owner_name ?? null,
+                                'size' => 'sm',
+                                'showLabel' => true,
+                            ]) !!}
                         @endif
 
-                        @if($src?->credibility_score)
-                            @php
-                                $credColor = $src->credibility_score >= 75 ? '#16a34a'
-                                          : ($src->credibility_score >= 60 ? '#a16207' : '#dc2626');
-                            @endphp
-                            <span style="
-                                padding:2px 8px; border-radius:9999px;
-                                background:{{ $credColor }}15; color:{{ $credColor }};
-                                font-size:11px; font-weight:700; letter-spacing:0.3px;
-                            " title="{{ __('Crédibilité éditoriale (0-100)') }}">
-                                ⓘ {{ $src->credibility_score }}
-                            </span>
+                        @if($__factTier !== 'unknown')
+                            {!! Theme::partial('factuality-chip', [
+                                'tier' => $__factTier,
+                                'size' => 'sm',
+                                'showLabel' => true,
+                            ]) !!}
                         @endif
 
-                        <span class="ms-auto" style="
-                            display:inline-flex; align-items:center; gap:4px;
-                            padding:3px 10px; border-radius:9999px;
-                            background:{{ $meta['color'] }}1a; color:{{ $meta['color'] }};
-                            font-size:11px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;
-                        ">
-                            {{ $meta['label'] }}
+                        <span class="ms-auto">
+                            {!! Theme::partial('bias-chip', [
+                                'tier' => $__biasTier,
+                                'size' => 'sm',
+                                'showLabel' => true,
+                            ]) !!}
                         </span>
                         @include(Theme::getThemeNamespace('partials.bias-confidence'), [
                             'source' => $src,
