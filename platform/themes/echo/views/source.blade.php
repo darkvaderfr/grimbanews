@@ -6,27 +6,16 @@
      * @var array $stats
      */
 
-    $biasColor = match ($source->bias_rating) {
-        'left'   => '#3b82f6',
-        'center' => '#a8a8a8',
-        'right'  => '#e84c3d',
-        default  => '#6b6459',
-    };
-    $biasLabel = match ($source->bias_rating) {
-        'left'   => __('Gauche'),
-        'center' => __('Centre'),
-        'right'  => __('Droite'),
-        default  => __('Non classé'),
-    };
-    $ownershipLabel = match ($source->ownership_type) {
-        'independent'    => __('Indépendant'),
-        'corporate'      => __('Privé'),
-        'public'         => __('Public'),
-        'state-owned'    => __('État'),
-        'foundation'     => __('Fondation'),
-        'cooperative'    => __('Coopérative'),
-        default          => '—',
-    };
+    // S309 — adopt the Wave 0 chip atoms for 7-tier bias / 5-tier
+    // factuality / 8-cat ownership. The 3-tier $biasColor stays as the
+    // header's accent rail (it's our visual anchor).
+    $__biasTier = \App\Ground\Bias::tier($source->bias_rating ?? null, $source->bias_score ?? null);
+    $__factTier = \App\Ground\Factuality::tier($source->credibility_score ?? null);
+    $__ownCat   = \App\Ground\Ownership::category($source->ownership_type ?? null, $source->owner_name ?? null);
+
+    $biasColor = \App\Ground\Bias::color(\App\Ground\Bias::side($__biasTier) === 'unknown' ? 'unknown' : \App\Ground\Bias::side($__biasTier));
+    $biasLabel = \App\Ground\Bias::label($__biasTier);
+
     $biasScore = is_numeric($source->bias_score ?? null) ? max(-2.0, min(2.0, (float) $source->bias_score)) : null;
     $biasScorePosition = $biasScore === null ? null : (($biasScore + 2.0) / 4.0) * 100;
 
@@ -42,24 +31,23 @@
     <div class="container">
 
         <header class="glass-panel p-4 p-md-5 mb-4" style="border-left:6px solid {{ $biasColor }};">
-            <div class="d-flex align-items-center gap-3 flex-wrap mb-2">
-                <span class="grimba-methodology__kicker">{{ __('Source') }} · {{ $source->country ?: '—' }}</span>
-                <span style="
-                        display:inline-block; padding:4px 10px;
-                        border-radius:999px;
-                        background: {{ $biasColor }}1a;
-                        color: {{ $biasColor }};
-                        font-size:12px; font-weight:700; letter-spacing:0.4px; text-transform:uppercase;
-                    ">{{ $biasLabel }}</span>
-                <span class="small opacity-75">
-                    {{ __('Crédibilité') }} {{ $source->credibility_score ?? '—' }} · {{ $ownershipLabel }}
-                    @if($biasScore !== null)
-                        · {{ __('score biais') }} <strong>{{ number_format($biasScore, 1) }}</strong>
-                    @endif
-                    @if($source->owner_name)
-                        · {{ __('propriété de') }} <strong>{{ $source->owner_name }}</strong>
-                    @endif
-                </span>
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+                <span class="grimba-methodology__kicker">{{ __('Source') }}{{ $source->country ? ' · ' . $source->country : '' }}</span>
+
+                {{-- S309 — three Ground-fidelity chips. --}}
+                {!! Theme::partial('bias-chip', ['tier' => $__biasTier, 'size' => 'md', 'showLabel' => true]) !!}
+                @if($__factTier !== 'unknown')
+                    {!! Theme::partial('factuality-chip', ['tier' => $__factTier, 'size' => 'md', 'showLabel' => true]) !!}
+                @endif
+                @if($__ownCat !== 'other')
+                    {!! Theme::partial('ownership-chip', ['category' => $__ownCat, 'owner' => $source->owner_name, 'size' => 'md', 'showLabel' => true]) !!}
+                @endif
+
+                @if($source->owner_name)
+                    <span class="small opacity-65">
+                        {{ __('propriété de') }} <strong>{{ $source->owner_name }}</strong>
+                    </span>
+                @endif
             </div>
 
             <h1 class="grimba-methodology__title mt-1 mb-3" style="font-size: clamp(32px, 4vw, 52px);">
@@ -161,6 +149,87 @@
             <div class="mt-4">
                 {!! $posts->links() !!}
             </div>
+        @endif
+
+        {{-- S309 — Sources avec un biais similaire. Pulls 6 sources
+              sharing the same 3-tier side that aren't this source. --}}
+        @php
+            $__sourceSide = \App\Ground\Bias::side($__biasTier);
+            $__similarSources = collect();
+            if ($__sourceSide !== 'unknown') {
+                // Safe column list: pre-logo-migration installs don't have
+                // logo_url / logo_status / logo_checked_at, so we resolve
+                // them defensively at render time.
+                $__simCols = ['id', 'slug', 'name', 'website', 'bias_rating', 'bias_score', 'credibility_score', 'ownership_type', 'owner_name', 'country'];
+                if (\Illuminate\Support\Facades\Schema::hasColumn('news_sources', 'logo_url')) {
+                    $__simCols[] = 'logo_url';
+                }
+                if (\Illuminate\Support\Facades\Schema::hasColumn('news_sources', 'logo_status')) {
+                    $__simCols[] = 'logo_status';
+                }
+                if (\Illuminate\Support\Facades\Schema::hasColumn('news_sources', 'logo_checked_at')) {
+                    $__simCols[] = 'logo_checked_at';
+                }
+                $__similarSources = \Illuminate\Support\Facades\DB::table('news_sources')
+                    ->where('id', '!=', $source->id)
+                    ->where('bias_rating', $__sourceSide)
+                    ->orderByDesc('credibility_score')
+                    ->orderBy('name')
+                    ->limit(6)
+                    ->get($__simCols);
+            }
+        @endphp
+
+        @if($__similarSources->isNotEmpty())
+            <section class="grimba-similar-sources mt-5 pt-4" style="border-top:1px dashed rgba(0,0,0,0.12);">
+                <h2 class="h6 mb-3" style="font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; font-size:13px; opacity:0.75;">
+                    {{ __('Sources avec un biais similaire') }}
+                </h2>
+                <div class="row g-3">
+                    @foreach($__similarSources as $sim)
+                        @php
+                            $__simBiasTier = \App\Ground\Bias::tier($sim->bias_rating ?? null, $sim->bias_score ?? null);
+                            $__simFactTier = \App\Ground\Factuality::tier($sim->credibility_score ?? null);
+                            $__simOwnCat   = \App\Ground\Ownership::category($sim->ownership_type ?? null, $sim->owner_name ?? null);
+                        @endphp
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <a href="{{ url('/sources/' . $sim->slug) }}"
+                               class="grimba-similar-source"
+                               style="
+                                   display:block; padding:14px 16px;
+                                   border:1px solid rgba(26,23,19,0.10);
+                                   border-radius:12px;
+                                   background:rgba(255,255,255,0.55);
+                                   color:var(--gn-ink,#1a1713);
+                                   text-decoration:none;
+                                   transition: transform 0.15s ease, box-shadow 0.15s ease;
+                               ">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    {!! Theme::partial('source-logo', [
+                                        'source_id' => $sim->id,
+                                        'name'      => $sim->name,
+                                        'website'   => $sim->website,
+                                        'logo_url'  => $sim->logo_url ?? null,
+                                        'logo_status' => $sim->logo_status ?? 'unknown',
+                                        'logo_checked_at' => $sim->logo_checked_at ?? null,
+                                        'size'      => 28,
+                                        'color'     => \App\Ground\Bias::color($__simBiasTier),
+                                    ]) !!}
+                                    <strong style="font-size:14.5px; font-family:'Public Sans',system-ui,sans-serif;">
+                                        {{ $sim->name }}
+                                    </strong>
+                                </div>
+                                <div class="d-flex align-items-center flex-wrap gap-1">
+                                    {!! Theme::partial('bias-chip', ['tier' => $__simBiasTier, 'size' => 'sm']) !!}
+                                    @if($__simFactTier !== 'unknown')
+                                        {!! Theme::partial('factuality-chip', ['tier' => $__simFactTier, 'size' => 'sm']) !!}
+                                    @endif
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
         @endif
 
         <p class="mt-5">

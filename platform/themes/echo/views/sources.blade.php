@@ -91,6 +91,25 @@
                     {{ __('Réinitialiser') }}
                 </button>
             </div>
+
+            {{-- S311 — factuality tier filter pills. --}}
+            <div class="row g-3 align-items-center mt-2">
+                <div class="col-12">
+                    <label class="small text-uppercase opacity-75 fw-semibold mb-1 d-block">{{ __('Fiabilité') }}</label>
+                    <div class="grimba-sources__fact-filter d-flex gap-2 flex-wrap" role="tablist">
+                        <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--solid" data-fact="all">{{ __('Toutes') }}</button>
+                        @foreach(['very_high' => 'Très haute', 'high' => 'Haute', 'mixed' => 'Mixte', 'low' => 'Basse', 'very_low' => 'Très basse'] as $tier => $label)
+                            @php $col = \App\Ground\Factuality::color($tier); @endphp
+                            <button type="button"
+                                    class="btn-grimba btn-grimba--sm btn-grimba--ghost"
+                                    data-fact="{{ $tier }}"
+                                    style="color:{{ $col }};border-color:{{ $col }}55;">
+                                {{ __($label) }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="grimba-sources-list">
@@ -111,7 +130,8 @@
                                  data-name="{{ strtolower($src->name) }}"
                                  data-website="{{ strtolower($src->website ?? '') }}"
                                  data-country="{{ $src->country ?? '' }}"
-                                 data-bias="{{ $biasKey }}">
+                                 data-bias="{{ $biasKey }}"
+                                 data-fact="{{ \App\Ground\Factuality::tier($src->credibility_score ?? null) }}">
                                 <article class="glass-card p-3 h-100">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div class="d-flex align-items-center gap-3 min-w-0">
@@ -140,29 +160,32 @@
                                             </h3>
                                         </div>
                                         <span class="d-inline-flex flex-column align-items-end gap-1">
-                                            <span class="bias-badge bias-badge--sm"
-                                                  style="background: {{ $biasMeta[$biasKey]['color'] }}22;
-                                                         color: {{ $biasMeta[$biasKey]['color'] }};
-                                                         border: 1px solid {{ $biasMeta[$biasKey]['color'] }}44;">
-                                                {{ $biasMeta[$biasKey]['label'] }}
-                                            </span>
-                                            @include(Theme::getThemeNamespace('partials.bias-confidence'), [
-                                                'source' => $src,
-                                            ])
+                                            @php
+                                                $__rowBias = \App\Ground\Bias::tier($src->bias_rating ?? null, $src->bias_score ?? null);
+                                                $__rowFact = \App\Ground\Factuality::tier($src->credibility_score ?? null);
+                                                $__rowOwn  = \App\Ground\Ownership::category($src->ownership_type ?? null, $src->owner_name ?? null);
+                                            @endphp
+                                            {!! Theme::partial('bias-chip', ['tier' => $__rowBias, 'size' => 'sm']) !!}
+                                            @if($__rowFact !== 'unknown')
+                                                {!! Theme::partial('factuality-chip', ['tier' => $__rowFact, 'size' => 'sm']) !!}
+                                            @endif
                                         </span>
                                     </div>
 
-                                    <div class="small opacity-85 d-flex flex-wrap gap-2">
-                                        @if($src->ownership_type)
-                                            <span>{{ $ownershipLabel[$src->ownership_type] ?? ucfirst($src->ownership_type) }}</span>
+                                    <div class="small opacity-85 d-flex flex-wrap gap-2 align-items-center">
+                                        @if($__rowOwn !== 'other')
+                                            {!! Theme::partial('ownership-chip', [
+                                                'category' => $__rowOwn,
+                                                'owner' => $src->owner_name ?? null,
+                                                'size' => 'sm',
+                                                'showLabel' => true,
+                                            ]) !!}
                                         @endif
                                         @if($src->country)
-                                            <span class="opacity-70">·</span>
-                                            <span>{{ $src->country }}</span>
+                                            <span class="opacity-70">{{ $src->country }}</span>
                                         @endif
                                         @if($src->language)
-                                            <span class="opacity-70">·</span>
-                                            <span class="text-uppercase">{{ $src->language }}</span>
+                                            <span class="opacity-70 text-uppercase">{{ $src->language }}</span>
                                         @endif
                                     </div>
 
@@ -219,7 +242,9 @@
         const empty   = document.getElementById('grimba-sources-empty');
         const list    = document.getElementById('grimba-sources-list');
         const biasBtns = document.querySelectorAll('.grimba-sources__bias-filter [data-bias]');
+        const factBtns = document.querySelectorAll('.grimba-sources__fact-filter [data-fact]');
         let   activeBias = 'all';
+        let   activeFact = 'all';
 
         function apply() {
             const q = (search.value || '').trim().toLowerCase();
@@ -228,13 +253,14 @@
             let shown = 0;
             document.querySelectorAll('.grimba-sources__item').forEach(item => {
                 const matchBias    = activeBias === 'all' || item.dataset.bias === activeBias;
+                const matchFact    = activeFact === 'all' || item.dataset.fact === activeFact;
                 const matchCountry = c === 'all' || item.dataset.country === c;
                 const matchText    = !q
                     || item.dataset.name.includes(q)
                     || item.dataset.website.includes(q)
                     || item.dataset.country.toLowerCase().includes(q);
 
-                const visible = matchBias && matchCountry && matchText;
+                const visible = matchBias && matchFact && matchCountry && matchText;
                 item.classList.toggle('d-none', !visible);
                 if (visible) shown++;
             });
@@ -263,8 +289,26 @@
             apply();
         }));
 
+        factBtns.forEach(btn => btn.addEventListener('click', () => {
+            activeFact = btn.dataset.fact;
+            factBtns.forEach(b => {
+                b.classList.toggle('btn-grimba--solid', b === btn);
+                b.classList.toggle('btn-grimba--ghost', b !== btn);
+            });
+            apply();
+        }));
+
         search.addEventListener('input', apply);
         country.addEventListener('change', apply);
+        // Reset also clears the factuality pill state
+        const resetFact = () => {
+            activeFact = 'all';
+            factBtns.forEach((b) => {
+                b.classList.toggle('btn-grimba--solid', b.dataset.fact === 'all');
+                b.classList.toggle('btn-grimba--ghost', b.dataset.fact !== 'all');
+            });
+        };
+
         reset.addEventListener('click', () => {
             search.value = '';
             country.value = 'all';
@@ -274,6 +318,7 @@
                 b.classList.toggle('btn-grimba--solid', isAll);
                 b.classList.toggle('btn-grimba--ghost', !isAll);
             });
+            resetFact();
             apply();
         });
     })();
