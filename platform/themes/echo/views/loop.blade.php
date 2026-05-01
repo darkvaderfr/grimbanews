@@ -36,7 +36,10 @@
                         'col-12' => ! $enableSidebar,
                     ])>
                         {!! Theme::partial('bias-legend') !!}
-                        {!! Theme::partial('feed-balance', ['posts' => $posts]) !!}
+                        {{-- S325: dropped feed-balance partial — duplicated the
+                              category-header "Couverture sur {topic}" aggregate
+                              AND the S316 top-sources rail. Kept bias-legend
+                              since it's the L/C/R color key, educational. --}}
                         {!! Theme::partial('blog.posts', compact('posts', 'postStyle', 'enableSidebar')) !!}
                     </div>
 
