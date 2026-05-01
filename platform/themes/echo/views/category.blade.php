@@ -104,7 +104,7 @@
 
     @if($__topSources->isNotEmpty())
         <section class="grimba-topic-top-sources container mt-4 mb-2">
-            <h2 class="h6 mb-3" style="font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; font-size:13px; opacity:0.75;">
+            <h2 class="h6 mb-3 grimba-section-eyebrow" style="font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; font-size:13px;">
                 {{ __('Sources qui couvrent le plus :topic ces 90 jours', ['topic' => $category->name]) }}
             </h2>
             <div class="row g-2">

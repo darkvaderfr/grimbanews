@@ -1832,6 +1832,64 @@ html.grimba-home-html[data-bs-theme="dark"] .glass-panel {
     color: var(--gn-ink);
 }
 
+/* S320 — site-wide dark-mode contrast fix for headings and body text
+   in our public surfaces. Bootstrap utility classes (h1-h6, .h1-.h6,
+   .lead) and bare <h*> elements were inheriting the body ink color
+   but rendering at very low opacity / wrong color in dark mode —
+   visible on /sources group headers, /comprendre-le-barometre h2s,
+   /faq section titles, /angles-morts h1, /a-propos sections, and the
+   topic-page "Sources qui couvrent…" rail header. Scope to body.grimba-home
+   (covers both grimba-home + grimba-subpage layouts) so admin views
+   are unaffected. */
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home h1,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home h2,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home h3,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home h4,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home h5,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home h6,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .h1,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .h2,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .h3,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .h4,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .h5,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .h6 {
+    color: var(--gn-ink) !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .lead {
+    color: var(--gn-ink-muted);
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home strong,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home summary,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home details {
+    color: var(--gn-ink);
+}
+/* Eyebrow / kicker label rule: muted in light, slightly more visible
+   in dark so it doesn't disappear into the near-black background. */
+.grimba-section-eyebrow {
+    color: var(--gn-ink-soft);
+    opacity: 0.85;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-section-eyebrow {
+    color: var(--gn-ink-muted);
+    opacity: 1;
+}
+/* Same fix for the methodology kicker, used on every explainer page
+   (was opacity:0.6 inline). */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-methodology__kicker {
+    opacity: 0.95;
+    color: var(--gn-ink-muted);
+}
+
+/* Compare modal panel + onboard modal panel: they're position:fixed
+   above the body so they don't inherit the body.grimba-home rule. */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-newsletter-modal__panel h1,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-newsletter-modal__panel h2,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-newsletter-modal__panel h3,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-newsletter-modal__panel .h2,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-newsletter-modal__panel .h4 {
+    color: var(--gn-ink) !important;
+}
+
 /* Botble / Echo legacy hardcoded bg-white surfaces */
 html.grimba-home-html[data-bs-theme="dark"] .echo-hero-section,
 html.grimba-home-html[data-bs-theme="dark"] .echo-feature-area,

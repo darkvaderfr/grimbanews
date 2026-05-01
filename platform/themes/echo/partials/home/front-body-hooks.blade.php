@@ -60,7 +60,17 @@
      * instead of a black hole.
      */
     (function () {
-        const STALL_TIMEOUT_MS = 6000;
+        // S320 — was 6000ms, but the user-visible cost of waiting six
+        // full seconds on every failed publisher CDN was a screen of
+        // empty card frames. 1500ms is enough for a successful image
+        // to decode on a normal connection (TCP + TLS + image transfer
+        // for ~80 KB hero photos averages 600-900ms in our network),
+        // and is short enough that a stalled publisher swaps before
+        // the reader has finished reading the headline. Once the
+        // backend img-proxy ships (PUBLISHER_IMAGE_PROXY_DIAGNOSIS.md)
+        // we can drop this to ~700ms because every image will hit our
+        // own origin.
+        const STALL_TIMEOUT_MS = 1500;
 
         const swapToPlaceholder = (img) => {
             if (!img || img.dataset.grimbaFallback === '1') return;
