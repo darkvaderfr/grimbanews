@@ -1919,8 +1919,14 @@ html.grimba-home-html[data-bs-theme="dark"] input[type="email"],
 html.grimba-home-html[data-bs-theme="dark"] input[type="password"],
 html.grimba-home-html[data-bs-theme="dark"] input[type="search"],
 html.grimba-home-html[data-bs-theme="dark"] input[type="url"],
+html.grimba-home-html[data-bs-theme="dark"] input[type="date"],
+html.grimba-home-html[data-bs-theme="dark"] input[type="datetime-local"],
+html.grimba-home-html[data-bs-theme="dark"] input[type="number"],
+html.grimba-home-html[data-bs-theme="dark"] input[type="tel"],
 html.grimba-home-html[data-bs-theme="dark"] textarea,
-html.grimba-home-html[data-bs-theme="dark"] select {
+html.grimba-home-html[data-bs-theme="dark"] select,
+html.grimba-home-html[data-bs-theme="dark"] .form-control,
+html.grimba-home-html[data-bs-theme="dark"] .form-select {
     background: rgba(255, 255, 255, 0.06) !important;
     color: var(--gn-ink) !important;
     border-color: rgba(246, 241, 232, 0.18) !important;
@@ -1929,11 +1935,31 @@ html.grimba-home-html[data-bs-theme="dark"] input::placeholder,
 html.grimba-home-html[data-bs-theme="dark"] textarea::placeholder {
     color: var(--gn-ink-soft) !important;
 }
+/* Native date-picker calendar icon: invert so it's visible against
+   our dark input background. Webkit-only; Firefox/Safari fall back
+   gracefully to the default rendering. */
+html.grimba-home-html[data-bs-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+html.grimba-home-html[data-bs-theme="dark"] input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) opacity(0.75);
+}
 
 /* Buttons + links inside content */
 html.grimba-home-html[data-bs-theme="dark"] .article-card,
 html.grimba-home-html[data-bs-theme="dark"] .article-card__title a {
     color: var(--gn-ink);
+}
+/* S322 — article-card was rendering with rgba(255,255,255,0.7) and a
+   black border in dark mode, popping as a bright cream rectangle on
+   the near-black canvas. Re-tint to glass-panel-dark style. */
+html.grimba-home-html[data-bs-theme="dark"] .article-card {
+    background: rgba(28, 24, 17, 0.55);
+    border-color: rgba(246, 241, 232, 0.10);
+}
+html.grimba-home-html[data-bs-theme="dark"] .article-card__content {
+    color: var(--gn-ink);
+}
+html.grimba-home-html[data-bs-theme="dark"] .article-card:hover {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
 }
 html.grimba-home-html[data-bs-theme="dark"] .echo-hero-discription,
 html.grimba-home-html[data-bs-theme="dark"] .blog-post-details-content p,
