@@ -738,6 +738,20 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             return Theme::scope('methodology', [])->render();
         })->name('public.methodology');
 
+        // S312 — Bias-bar explainer page. Standalone "how to read the bar"
+        // surface (the methodology page covers everything; this one drills
+        // into just the coverage bar with edge cases + edition convention).
+        Route::get('comprendre-le-barometre', function () {
+            SeoHelper::setTitle(__('Comprendre le baromètre de couverture') . ' — GrimbaNews')
+                ->setDescription(__('Comment lire le baromètre de couverture (gauche/centre/droite), pourquoi nous gardons la convention francophone et comment nous traitons les cas limites.'));
+
+            Theme::breadcrumb()
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Comprendre le baromètre'), url('/comprendre-le-barometre'));
+
+            return Theme::scope('explainer-bias-bar', [])->render();
+        })->name('public.bias-bar-explainer');
+
         // S168 — member dashboard hijack. Botble Member plugin's
         // dashboard ships an admin-style sidebar layout (built for
         // sites where members write blog posts). GrimbaNews members

@@ -161,6 +161,49 @@
             </p>
         </article>
 
+        {{-- S313 — chip reference. Every chip rendered alongside its
+              definition so readers can decode any chip they see anywhere
+              else on the site. --}}
+        <article class="glass-panel p-4 p-md-5 mb-4">
+            <h2 class="h4 mb-3">{{ __('Référence des étiquettes') }}</h2>
+            <p class="mb-3 opacity-85">
+                {{ __("Chaque source affiche jusqu'à trois étiquettes : son biais éditorial sur 7 niveaux, sa fiabilité sur 5 niveaux, son type de propriétaire sur 8 catégories. Voici à quoi elles ressemblent et ce qu'elles signifient.") }}
+            </p>
+
+            <h3 class="h6 mt-4 mb-3 text-uppercase opacity-65">{{ __('Biais éditorial') }}</h3>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                @foreach(['far_left','left','lean_left','center','lean_right','right','far_right'] as $tier)
+                    {!! Theme::partial('bias-chip', ['tier' => $tier, 'size' => 'md']) !!}
+                @endforeach
+            </div>
+            <p class="small opacity-75 mb-0">
+                {{ __("Moyenne pondérée des quatre signaux (AllSides + Ad Fontes + MBFC + comité GrimbaNews). Le baromètre de couverture sur chaque dossier compresse ces 7 niveaux en 3 camps (gauche / centre / droite) pour rester lisible.") }}
+                <a href="{{ url('/comprendre-le-barometre') }}" class="text-decoration-underline">
+                    {{ __('Comment lire le baromètre →') }}
+                </a>
+            </p>
+
+            <h3 class="h6 mt-4 mb-3 text-uppercase opacity-65">{{ __('Fiabilité éditoriale') }}</h3>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                @foreach(['very_low','low','mixed','high','very_high'] as $tier)
+                    {!! Theme::partial('factuality-chip', ['tier' => $tier, 'size' => 'md']) !!}
+                @endforeach
+            </div>
+            <p class="small opacity-75 mb-0">
+                {{ __("Combinaison de la qualité du sourcing, de la rapidité des corrections, du sensationnalisme du langage et du respect du contexte.") }}
+            </p>
+
+            <h3 class="h6 mt-4 mb-3 text-uppercase opacity-65">{{ __('Propriété') }}</h3>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                @foreach(['independent','government','conglomerate','private_equity','individual','telecom','corporation'] as $cat)
+                    {!! Theme::partial('ownership-chip', ['category' => $cat, 'size' => 'md']) !!}
+                @endforeach
+            </div>
+            <p class="small opacity-75 mb-0">
+                {{ __("Catégorie d'actionnaire principal. Mise à jour au cas par cas par le comité éditorial.") }}
+            </p>
+        </article>
+
         <footer class="grimba-methodology__footer glass-panel p-4 mt-4">
             <p class="mb-2"><strong>Version 1.0</strong> — publiée le {{ now()->locale(app()->getLocale())->isoFormat('D MMMM YYYY') }}.</p>
             <p class="small mb-0 opacity-75">
