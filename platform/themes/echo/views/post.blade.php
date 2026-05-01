@@ -223,6 +223,7 @@
                              decoding="sync"
                              width="1200"
                              height="630"
+                             data-grimba-post-id="{{ $post->id }}"
                              style="object-fit:cover; width:100%; height:100%;">
                     </div>
                 </div>
