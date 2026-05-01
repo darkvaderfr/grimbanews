@@ -41,28 +41,75 @@ if (! function_exists('grimba_record_source_logo_probe')) {
 
 Route::group(['middleware' => ['web', 'core']], function (): void {
     Theme::registerRoutes(function (): void {
-        Route::get('comparatif', function () {
-            $clusters = DB::table('story_clusters')
+        Route::get('comparatif', function (Request $request) {
+            // S324 — paginate (was rendering all 575 clusters in one wall,
+            // page measured 72,000px tall). 24 per page, ?diversity= filter.
+            $perPage = 24;
+            $page = max(1, (int) $request->query('page', 1));
+            $diversityFilter = (string) $request->query('diversity', 'all');
+            if (! in_array($diversityFilter, ['all', 'balanced', 'partial', 'one_sided'], true)) {
+                $diversityFilter = 'all';
+            }
+
+            // Pre-aggregate post counts per cluster + per bias side in
+            // a single grouped query so we don't fan out N+1 below.
+            $aggregateRows = DB::table('posts')
+                ->where('status', 'published')
+                ->whereNotNull('story_cluster_id')
+                ->select('story_cluster_id', 'bias_rating', DB::raw('count(*) as c'), DB::raw('max(created_at) as latest_at'))
+                ->groupBy('story_cluster_id', 'bias_rating')
+                ->get();
+
+            $aggByCluster = [];
+            foreach ($aggregateRows as $row) {
+                $cid = (int) $row->story_cluster_id;
+                if (! isset($aggByCluster[$cid])) {
+                    $aggByCluster[$cid] = ['left' => 0, 'center' => 0, 'right' => 0, 'total' => 0, 'latestAt' => null];
+                }
+                if (isset($aggByCluster[$cid][$row->bias_rating])) {
+                    $aggByCluster[$cid][$row->bias_rating] = (int) $row->c;
+                }
+                $aggByCluster[$cid]['total'] += (int) $row->c;
+                if ($aggByCluster[$cid]['latestAt'] === null || $row->latest_at > $aggByCluster[$cid]['latestAt']) {
+                    $aggByCluster[$cid]['latestAt'] = $row->latest_at;
+                }
+            }
+
+            $allClusters = DB::table('story_clusters')
                 ->orderByDesc('id')
                 ->get()
-                ->map(function ($c) {
-                    $rows = DB::table('posts')
-                        ->where('story_cluster_id', $c->id)
-                        ->where('status', 'published')
-                        ->get(['id', 'name', 'bias_rating', 'source_name', 'image', 'created_at']);
+                ->map(function ($c) use ($aggByCluster) {
+                    $cid = (int) $c->id;
+                    $agg = $aggByCluster[$cid] ?? ['left' => 0, 'center' => 0, 'right' => 0, 'total' => 0, 'latestAt' => null];
+                    $c->total    = $agg['total'];
+                    $c->counts   = ['left' => $agg['left'], 'center' => $agg['center'], 'right' => $agg['right']];
+                    $c->latestAt = $agg['latestAt'];
 
-                    $counts = ['left' => 0, 'center' => 0, 'right' => 0];
-                    foreach ($rows as $r) {
-                        if (isset($counts[$r->bias_rating])) $counts[$r->bias_rating]++;
-                    }
-                    $c->posts    = $rows;
-                    $c->total    = $rows->count();
-                    $c->counts   = $counts;
-                    $c->latestAt = $rows->max('created_at');
+                    $sidesPresent = (int) ($agg['left'] > 0) + (int) ($agg['center'] > 0) + (int) ($agg['right'] > 0);
+                    $c->diversity = match ($sidesPresent) {
+                        3 => 'balanced',
+                        2 => 'partial',
+                        1 => 'one_sided',
+                        default => 'unrated',
+                    };
                     return $c;
                 })
                 ->filter(fn ($c) => $c->total > 0)
                 ->values();
+
+            $filtered = $diversityFilter === 'all'
+                ? $allClusters
+                : $allClusters->filter(fn ($c) => $c->diversity === $diversityFilter)->values();
+
+            $totalCount = $filtered->count();
+            $clusters = $filtered->slice(($page - 1) * $perPage, $perPage)->values();
+
+            $pagination = (object) [
+                'currentPage' => $page,
+                'lastPage'    => max(1, (int) ceil($totalCount / $perPage)),
+                'totalCount'  => $totalCount,
+                'perPage'     => $perPage,
+            ];
 
             SeoHelper::setTitle(__('Comparer les sources') . ' — GrimbaNews')
                 ->setDescription(__("Tous les dossiers en cours — chaque histoire vue sous plusieurs angles."));
@@ -71,7 +118,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Comparer les sources'), url('/comparatif'));
 
-            return Theme::scope('comparison-index', compact('clusters'))->render();
+            return Theme::scope('comparison-index', compact('clusters', 'pagination', 'diversityFilter'))->render();
         })->name('public.comparison.index');
 
         Route::get('comparatif/{clusterId}', function (int $clusterId) {
