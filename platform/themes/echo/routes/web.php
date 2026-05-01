@@ -738,6 +738,30 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             return Theme::scope('methodology', [])->render();
         })->name('public.methodology');
 
+        // S317 — About page.
+        Route::get('a-propos', function () {
+            SeoHelper::setTitle(__('À propos') . ' — GrimbaNews')
+                ->setDescription(__('GrimbaNews est une plateforme francophone qui rend visible le biais éditorial et les angles morts de l\'actualité.'));
+
+            Theme::breadcrumb()
+                ->add(__('Accueil'), url('/'))
+                ->add(__('À propos'), url('/a-propos'));
+
+            return Theme::scope('about', [])->render();
+        })->name('public.about');
+
+        // S318 — FAQ page.
+        Route::get('faq', function () {
+            SeoHelper::setTitle(__('Foire aux questions') . ' — GrimbaNews')
+                ->setDescription(__('Questions fréquentes sur GrimbaNews : méthodologie, biais, NobuAI, vie privée et abonnement.'));
+
+            Theme::breadcrumb()
+                ->add(__('Accueil'), url('/'))
+                ->add(__('FAQ'), url('/faq'));
+
+            return Theme::scope('faq', [])->render();
+        })->name('public.faq');
+
         // S312 — Bias-bar explainer page. Standalone "how to read the bar"
         // surface (the methodology page covers everything; this one drills
         // into just the coverage bar with edge cases + edition convention).

@@ -48,6 +48,7 @@
                     <li><a href="{{ url('/sources') }}">{{ __('Tous les médias') }}</a></li>
                     <li><a href="{{ url('/proprietaires') }}">{{ __('Carte des propriétaires') }}</a></li>
                     <li><a href="{{ url('/methodologie') }}">{{ __('Méthodologie') }}</a></li>
+                    <li><a href="{{ url('/comprendre-le-barometre') }}">{{ __('Comprendre le baromètre') }}</a></li>
                     <li><a href="{{ url('/feed.xml') }}">{{ __('Flux RSS') }}</a></li>
                     <li><a href="#newsletter" data-grimba-newsletter-open>{{ __('Infolettre') }}</a></li>
                 </ul>
@@ -57,6 +58,7 @@
                 <h4 class="grimba-footer__heading">GrimbaNews</h4>
                 <ul>
                     <li><a href="{{ url('/a-propos') }}">{{ __('À propos') }}</a></li>
+                    <li><a href="{{ url('/faq') }}">{{ __('FAQ') }}</a></li>
                     <li><a href="{{ url('/contact') }}">{{ __('Contact') }}</a></li>
                     <li><a href="{{ url('/carrieres') }}">{{ __('Carrières') }}</a></li>
                     @auth('member')
