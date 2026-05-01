@@ -5,7 +5,9 @@
      *
      * @var \Illuminate\Contracts\Pagination\LengthAwarePaginator $posts
      * @var int $focusClusterId
+     * @var string $forFilter  Optional. 'all' | 'left' | 'right'.
      */
+    $forFilter = $forFilter ?? 'all';
 @endphp
 
 {!! Theme::partial('breadcrumbs', ['title' => __('Angles morts')]) !!}
@@ -15,9 +17,33 @@
         <header class="glass-panel p-4 mb-4">
             <span class="blindspot-badge mb-2">{{ __('Angle mort') }}</span>
             <h1 class="h2 mt-2 mb-2">{{ __("Les histoires qu'un seul camp couvre") }}</h1>
-            <p class="mb-0 opacity-85">
+            <p class="mb-3 opacity-85">
                 {{ __("Un angle mort est une histoire importante rapportée presque exclusivement par un côté du spectre politique. GrimbaNews les signale pour que vous sachiez ce qu'on ne vous raconte pas.") }}
             </p>
+
+            {{-- S315 — bias-side filter tabs (Ground-fidelity). --}}
+            <div class="d-flex gap-2 flex-wrap" role="tablist" aria-label="{{ __('Filtrer les angles morts') }}">
+                @php
+                    $tabs = [
+                        'all'   => ['label' => __('Tous'),               'color' => '#1a1713'],
+                        'left'  => ['label' => __('Pour la gauche'),     'color' => '#3b82f6'],
+                        'right' => ['label' => __('Pour la droite'),     'color' => '#e84c3d'],
+                    ];
+                @endphp
+                @foreach($tabs as $key => $meta)
+                    @php $active = $forFilter === $key; @endphp
+                    <a href="{{ url('/angles-morts') . ($key === 'all' ? '' : '?for=' . $key) }}"
+                       class="btn-grimba btn-grimba--sm {{ $active ? 'btn-grimba--solid' : 'btn-grimba--ghost' }}"
+                       role="tab"
+                       aria-selected="{{ $active ? 'true' : 'false' }}"
+                       @if(! $active) style="border-color:{{ $meta['color'] }}55;color:{{ $meta['color'] }};" @endif>
+                        @if($key !== 'all')
+                            <span aria-hidden="true" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:{{ $meta['color'] }};margin-right:6px;"></span>
+                        @endif
+                        {{ $meta['label'] }}
+                    </a>
+                @endforeach
+            </div>
         </header>
 
         @if($posts->isEmpty())

@@ -1087,14 +1087,31 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('angles-morts', function (Request $request) {
             $clusterId = (int) $request->query('cluster', 0);
 
+            // S315 — bias-side filter. ?for=left → blindspot AND covered
+            // mostly by left-leaning sources (= right blindspot). Inverse
+            // for ?for=right. ?for=all (default) shows all.
+            $for = (string) $request->query('for', 'all');
+            if (! in_array($for, ['all', 'left', 'right'], true)) {
+                $for = 'all';
+            }
+
             $posts = Post::query()
                 ->where('is_blindspot', true)
                 ->where('status', 'published')
+                ->when($for !== 'all', static function ($query) use ($for): void {
+                    // The post's bias_rating is the dominant covering side.
+                    // A blindspot "for the left" means right-leaning sources
+                    // dominate it (so left has nothing) — bias_rating='right'.
+                    // A blindspot "for the right" means left-leaning sources
+                    // dominate it — bias_rating='left'.
+                    $query->where('bias_rating', $for === 'left' ? 'right' : 'left');
+                })
                 ->when($clusterId > 0, static function ($query) use ($clusterId): void {
                     $query->orderByRaw('CASE WHEN story_cluster_id = ? THEN 0 ELSE 1 END', [$clusterId]);
                 })
                 ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-                ->paginate(12);
+                ->paginate(12)
+                ->appends($request->only(['for', 'cluster']));
 
             SeoHelper::setTitle(__('Angles morts') . ' — GrimbaNews')
                 ->setDescription(__("Les histoires qu'un seul camp couvre."));
@@ -1106,6 +1123,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             return Theme::scope('blindspot', [
                 'posts' => $posts,
                 'focusClusterId' => $clusterId,
+                'forFilter' => $for,
             ])->render();
         })->name('public.blindspot');
 

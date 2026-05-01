@@ -82,6 +82,64 @@
             </div>
         @endif
     </header>
+
+    {{-- S316 — Top sources for this topic. Surfaces which outlets cover
+          this topic most so the reader sees who's setting the agenda
+          before reading any individual story. Pulls top 8 sources by
+          article count in this category, last 90 days. --}}
+    @php
+        $__topSources = \Illuminate\Support\Facades\DB::table('news_sources as s')
+            ->join('posts as p', 'p.source_id', '=', 's.id')
+            ->join('post_categories as pc', 'pc.post_id', '=', 'p.id')
+            ->where('pc.category_id', $category->id)
+            ->where('p.status', 'published')
+            ->where('p.created_at', '>=', now()->subDays(90))
+            ->groupBy('s.id', 's.name', 's.slug', 's.bias_rating', 's.bias_score', 's.credibility_score', 's.ownership_type', 's.owner_name', 's.country')
+            ->select('s.id', 's.name', 's.slug', 's.bias_rating', 's.bias_score', 's.credibility_score', 's.ownership_type', 's.owner_name', 's.country',
+                \Illuminate\Support\Facades\DB::raw('COUNT(p.id) as article_count'))
+            ->orderByDesc('article_count')
+            ->limit(8)
+            ->get();
+    @endphp
+
+    @if($__topSources->isNotEmpty())
+        <section class="grimba-topic-top-sources container mt-4 mb-2">
+            <h2 class="h6 mb-3" style="font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; font-size:13px; opacity:0.75;">
+                {{ __('Sources qui couvrent le plus :topic ces 90 jours', ['topic' => $category->name]) }}
+            </h2>
+            <div class="row g-2">
+                @foreach($__topSources as $ts)
+                    @php
+                        $__tsBias = \App\Ground\Bias::tier($ts->bias_rating ?? null, $ts->bias_score ?? null);
+                        $__tsFact = \App\Ground\Factuality::tier($ts->credibility_score ?? null);
+                    @endphp
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <a href="{{ url('/sources/' . $ts->slug) }}"
+                           class="d-block"
+                           style="
+                               padding:10px 12px;
+                               border:1px solid rgba(26,23,19,0.10);
+                               border-radius:10px;
+                               background:rgba(255,255,255,0.55);
+                               color:var(--gn-ink,#1a1713);
+                               text-decoration:none;
+                           ">
+                            <strong style="font-size:13.5px; font-family:'Public Sans',system-ui,sans-serif;">{{ $ts->name }}</strong>
+                            <div class="small opacity-65 mt-1">
+                                {{ trans_choice(':count article|:count articles', (int) $ts->article_count, ['count' => (int) $ts->article_count]) }}
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mt-2">
+                                {!! Theme::partial('bias-chip', ['tier' => $__tsBias, 'size' => 'sm']) !!}
+                                @if($__tsFact !== 'unknown')
+                                    {!! Theme::partial('factuality-chip', ['tier' => $__tsFact, 'size' => 'sm', 'showLabel' => false]) !!}
+                                @endif
+                            </div>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endif
 </section>
 
 @include(Theme::getThemeNamespace('views.loop'))
