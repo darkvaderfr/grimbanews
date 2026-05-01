@@ -10,7 +10,8 @@
 @endphp
 
 {!! Theme::partial('story-breakdown', ['posts' => $posts]) !!}
-{!! Theme::partial('source-diversity-meter', ['posts' => $posts]) !!}
+{{-- S323: dropped redundant source-diversity-meter — the breakdown's
+      stacked bar + lane cards already surface the same L/C/R distribution. --}}
 
 <div class="story-comparison">
     <div class="row g-3">

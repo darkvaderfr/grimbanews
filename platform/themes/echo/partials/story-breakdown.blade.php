@@ -41,7 +41,7 @@
             overflow: hidden;
             max-width: 1120px;
             margin-inline: auto;
-            padding: clamp(16px, 2vw, 24px) !important;
+            padding: 14px 16px !important;
         }
 
         [data-bs-theme="dark"] #{{ $uid }} {
@@ -119,7 +119,7 @@
 
         #{{ $uid }} .grimba-breakdown__title {
             margin: 0;
-            font: 700 clamp(22px, 2.1vw, 28px)/1.05 "Fraunces", Georgia, serif;
+            font: 700 clamp(18px, 1.6vw, 22px)/1.05 "Fraunces", Georgia, serif;
             letter-spacing: -.02em;
         }
 
@@ -127,24 +127,24 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             position: relative;
-            padding: 4px;
+            padding: 3px;
             border: 1px solid var(--gbd-line);
-            border-radius: 18px;
+            border-radius: 12px;
             background: linear-gradient(180deg, var(--gbd-paper), var(--gbd-surface));
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18), var(--gbd-shadow);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12);
             overflow: hidden;
         }
 
         #{{ $uid }} .grimba-breakdown__tabs::before {
             content: "";
             position: absolute;
-            top: 7px;
-            bottom: 7px;
-            left: 7px;
-            width: calc((100% - 14px) / 3);
-            border-radius: 14px;
+            top: 4px;
+            bottom: 4px;
+            left: 4px;
+            width: calc((100% - 8px) / 3);
+            border-radius: 9px;
             background: var(--gbd-tab);
-            box-shadow: 0 16px 34px rgba(0, 0, 0, .22);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
             transform: translateX(var(--tab-x, 0));
             transition: transform .24s cubic-bezier(.2,.8,.2,1);
         }
@@ -185,10 +185,11 @@
 
         #{{ $uid }} .grimba-breakdown__tab {
             margin: 0;
-            padding: 9px 12px;
-            border-radius: 14px;
+            padding: 6px 10px;
+            border-radius: 10px;
             text-align: center;
-            font-weight: 800;
+            font-weight: 700;
+            font-size: 13px;
             color: var(--gbd-muted);
             cursor: pointer;
             position: relative;
@@ -212,7 +213,7 @@
 
         #{{ $uid }} .grimba-breakdown__panel {
             display: none;
-            padding-top: 16px;
+            padding-top: 10px;
         }
 
         #{{ $uid }} #{{ $uid }}-bias:checked ~ .grimba-breakdown__panels [data-panel="bias"],
@@ -225,11 +226,11 @@
         #{{ $uid }} .grimba-breakdown__callout {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 14px;
+            gap: 10px;
+            margin-bottom: 10px;
             color: var(--gbd-muted);
-            font-size: clamp(16px, 1.6vw, 20px);
-            line-height: 1.25;
+            font-size: clamp(13px, 1.2vw, 15px);
+            line-height: 1.3;
         }
 
         #{{ $uid }} .grimba-breakdown__callout strong {
@@ -238,15 +239,16 @@
 
         #{{ $uid }} .grimba-breakdown__icon {
             display: inline-flex;
-            width: 40px;
-            height: 40px;
+            width: 26px;
+            height: 26px;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             background: var(--gbd-tab);
             color: #fff;
             flex: 0 0 auto;
-            box-shadow: 0 14px 28px rgba(0, 0, 0, .18);
+            font-size: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, .14);
         }
 
         [data-bs-theme="dark"] #{{ $uid }} .grimba-breakdown__icon {
@@ -256,9 +258,9 @@
         #{{ $uid }} .grimba-breakdown__bias-lanes {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 10px;
+            gap: 6px;
             align-items: stretch;
-            margin: 12px 0;
+            margin: 8px 0;
         }
 
         #{{ $uid }} .grimba-breakdown__lane {
@@ -267,38 +269,40 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: stretch;
-            gap: 12px;
-            padding: 12px;
+            gap: 6px;
+            padding: 8px 10px;
             border: 1px solid var(--gbd-line);
-            border-radius: 18px;
+            border-radius: 12px;
             background:
-                linear-gradient(180deg, color-mix(in srgb, var(--lane-color) 10%, transparent), transparent),
+                linear-gradient(180deg, color-mix(in srgb, var(--lane-color) 8%, transparent), transparent),
                 linear-gradient(180deg, var(--gbd-card), var(--gbd-surface));
-            box-shadow: inset 0 -12px 24px color-mix(in srgb, var(--lane-color) 9%, transparent);
+            box-shadow: inset 0 -8px 16px color-mix(in srgb, var(--lane-color) 7%, transparent);
         }
 
         #{{ $uid }} .grimba-breakdown__lane-head {
             display: flex;
-            align-items: center;
+            align-items: baseline;
             justify-content: space-between;
-            gap: 8px;
+            gap: 6px;
             color: var(--gbd-muted);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
             line-height: 1.1;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         #{{ $uid }} .grimba-breakdown__lane-head strong {
             color: var(--gbd-ink);
-            font: 800 20px/1 "Fraunces", Georgia, serif;
+            font: 800 15px/1 "Fraunces", Georgia, serif;
         }
 
         #{{ $uid }} .grimba-breakdown__lane-sources {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 4px;
             align-items: center;
-            min-height: 34px;
+            min-height: 24px;
         }
 
         #{{ $uid }} .grimba-breakdown__logo-pop {
@@ -322,7 +326,7 @@
 
         #{{ $uid }} .grimba-breakdown__bias-bar {
             display: flex;
-            height: 28px;
+            height: 14px;
             overflow: hidden;
             border-radius: 999px;
             background: var(--gbd-track);
@@ -335,9 +339,10 @@
             justify-content: center;
             width: var(--w);
             color: #fff;
-            font-weight: 900;
-            font-size: 12px;
-            text-shadow: 0 1px 8px rgba(0, 0, 0, .34);
+            font-weight: 800;
+            font-size: 10px;
+            line-height: 1;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, .42);
             transform-origin: left;
             animation: gbd-fill .7s cubic-bezier(.2,.8,.2,1) both;
             animation-delay: var(--delay, 0ms);
@@ -345,16 +350,17 @@
 
         #{{ $uid }} .grimba-breakdown__rows {
             display: grid;
-            gap: 10px;
+            gap: 4px;
         }
 
         #{{ $uid }} .grimba-breakdown__row {
             display: grid;
             grid-template-columns: 1fr auto;
-            gap: 14px;
+            gap: 10px;
             align-items: center;
-            padding: 10px 0;
+            padding: 6px 0;
             border-bottom: 1px solid var(--gbd-line);
+            font-size: 13px;
         }
 
         #{{ $uid }} .grimba-breakdown__legend {
@@ -409,7 +415,7 @@
         }
 
         #{{ $uid }} .grimba-breakdown__donut {
-            width: min(300px, 100%);
+            width: min(180px, 100%);
             aspect-ratio: 1;
             margin: 0 auto;
             border-radius: 50%;
@@ -418,13 +424,13 @@
             transform: rotate(-90deg);
             animation: gbd-donut .72s cubic-bezier(.2,.8,.2,1) both;
             box-shadow:
-                inset 0 0 0 18px rgba(255, 255, 255, .9),
+                inset 0 0 0 14px rgba(255, 255, 255, .9),
                 0 0 0 1px var(--gbd-line),
-                0 24px 60px rgba(0, 0, 0, .16);
+                0 14px 36px rgba(0, 0, 0, .12);
         }
 
         [data-bs-theme="dark"] #{{ $uid }} .grimba-breakdown__donut {
-            box-shadow: inset 0 0 0 18px rgba(15, 14, 11, .9), 0 22px 48px rgba(0, 0, 0, .42);
+            box-shadow: inset 0 0 0 14px rgba(15, 14, 11, .9), 0 14px 30px rgba(0, 0, 0, .42);
         }
 
         #{{ $uid }} .grimba-breakdown__donut::after {
@@ -451,7 +457,7 @@
 
         #{{ $uid }} .grimba-breakdown__donut-center strong {
             display: block;
-            font-size: clamp(30px, 5vw, 48px);
+            font-size: clamp(20px, 3.4vw, 30px);
             line-height: 1;
         }
 
@@ -563,7 +569,7 @@
                             <strong>{{ (int) round($bucket->count * 100 / $total) }}%</strong>
                         </div>
                         <div class="grimba-breakdown__lane-sources">
-                            @foreach($bucket->items->take(5) as $source)
+                            @foreach($bucket->items->take(4) as $source)
                                 <span class="grimba-breakdown__logo-pop" style="--delay: {{ $loop->index * 55 }}ms;">
                                     {!! Theme::partial('source-logo', [
                                         'source_id' => $source->key,
@@ -572,13 +578,13 @@
                                         'logo_url' => $source->logo_url ?? null,
                                         'logo_status' => $source->logo_status ?? 'unknown',
                                         'logo_checked_at' => $source->logo_checked_at ?? null,
-                                        'size' => 34,
+                                        'size' => 22,
                                         'color' => $bucket->color,
                                     ]) !!}
                                 </span>
                             @endforeach
-                            @if($bucket->count > 5)
-                                <span class="grimba-breakdown__more">+{{ $bucket->count - 5 }}</span>
+                            @if($bucket->count > 4)
+                                <span class="grimba-breakdown__more">+{{ $bucket->count - 4 }}</span>
                             @elseif($bucket->count === 0)
                                 <span class="small opacity-65">{{ __('Aucune') }}</span>
                             @endif
@@ -587,20 +593,14 @@
                 @endforeach
             </div>
 
+            {{-- S323: removed the redundant __insight-grid stat block — it
+                  repeated the same percentages already shown in the 4 lane
+                  cards above and the stacked bar below, tripling the
+                  vertical footprint without adding information. --}}
             <div class="grimba-breakdown__bias-bar">
                 <span style="--w: {{ max(1, (int) round(($biasBuckets->firstWhere('key', 'left')?->count ?? 0) * 100 / $total)) }}%; --delay: 60ms; background:#3b82f6;">L {{ (int) round(($biasBuckets->firstWhere('key', 'left')?->count ?? 0) * 100 / $total) }}%</span>
                 <span style="--w: {{ max(1, (int) round(($biasBuckets->firstWhere('key', 'center')?->count ?? 0) * 100 / $total)) }}%; --delay: 140ms; background:#9ca3af;">C {{ (int) round(($biasBuckets->firstWhere('key', 'center')?->count ?? 0) * 100 / $total) }}%</span>
                 <span style="--w: {{ max(1, (int) round(($biasBuckets->firstWhere('key', 'right')?->count ?? 0) * 100 / $total)) }}%; --delay: 220ms; background:#ef4444;">R {{ (int) round(($biasBuckets->firstWhere('key', 'right')?->count ?? 0) * 100 / $total) }}%</span>
-            </div>
-
-            <div class="grimba-breakdown__insight-grid">
-                @foreach($knownBiasBuckets as $bucket)
-                    @php($pct = (int) round($bucket->count * 100 / $total))
-                    <div class="grimba-breakdown__stat">
-                        <strong style="color: {{ $bucket->color }};">{{ $pct }}%</strong>
-                        <span>{{ $bucket->label }} · {{ trans_choice(':count source|:count sources', $bucket->count, ['count' => $bucket->count]) }}</span>
-                    </div>
-                @endforeach
             </div>
         </div>
 
@@ -633,7 +633,7 @@
                                         'logo_url' => $source->logo_url ?? null,
                                         'logo_status' => $source->logo_status ?? 'unknown',
                                         'logo_checked_at' => $source->logo_checked_at ?? null,
-                                        'size' => 30,
+                                        'size' => 22,
                                         'color' => $bucket->color,
                                     ]) !!}
                                 @endforeach
@@ -675,7 +675,7 @@
                                             'logo_url' => $source->logo_url ?? null,
                                             'logo_status' => $source->logo_status ?? 'unknown',
                                             'logo_checked_at' => $source->logo_checked_at ?? null,
-                                            'size' => 30,
+                                            'size' => 22,
                                             'color' => $bucket->color,
                                         ]) !!}
                                     @endforeach
