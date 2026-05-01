@@ -31,16 +31,33 @@ class Ownership
      * and the first hit wins.
      */
     private const PARENT_MAP = [
-        // Specific persons (must precede their group/company forms below)
+        // Specific persons (must precede their group/company forms below).
+        // Order is "first match wins" via str_contains, so the more
+        // specific keys go first. S319 audit caught 'bouygues' alone
+        // being miscategorized as individual — the family is, the group
+        // is a conglomerate. Fix: put Martin/Olivier Bouygues here, then
+        // map the bare 'bouygues' to conglomerate below.
         'vincent bolloré' => 'individual',
         'bernard arnault' => 'individual',
         'xavier niel' => 'individual',
         'patrick drahi' => 'individual',
         'jeff bezos' => 'individual',
         'marc benioff' => 'individual',
+        'martin bouygues' => 'individual',
+        'olivier bouygues' => 'individual',
+        'serge dassault' => 'individual',
+        'marc ladreit de lacharrière' => 'individual',
+        'arnaud lagardère' => 'individual',
 
-        // French groups / parents (single-token forms)
-        'bouygues' => 'individual',
+        // Multi-token specific subsidiaries (must precede the bare
+        // single-token group form below, otherwise "Bouygues Telecom"
+        // gets caught by the "bouygues" → conglomerate rule).
+        'bouygues telecom' => 'telecom',
+        'tf1 group' => 'conglomerate',
+
+        // French groups / parents (single-token forms — any name reaching
+        // these has not matched a person or subsidiary above).
+        'bouygues' => 'conglomerate',
         'bolloré' => 'conglomerate',
         'vivendi' => 'conglomerate',
         'lagardère' => 'conglomerate',
@@ -48,7 +65,7 @@ class Ownership
         'lvmh' => 'corporation',
         'pinault' => 'individual',
         'kretinsky' => 'individual',
-        'dassault' => 'individual',
+        'dassault' => 'conglomerate',
         'niel' => 'individual',
         'drahi' => 'individual',
         'altice' => 'telecom',
