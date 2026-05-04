@@ -2286,6 +2286,15 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
     font-family: var(--gn-font-body);
     font-size: 12px;
 }
+/* S334 — dark variant. The light rule's rgba(26,23,19,0.045) is
+   essentially invisible against a dark canvas — flip to a faint
+   cream tint that reads as "informational chip" without competing
+   with content. */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-translation-note {
+    background: rgba(246, 241, 232, 0.06);
+    border-color: rgba(246, 241, 232, 0.14);
+    color: var(--gn-ink-muted);
+}
 .grimba-header-pulse {
     font-family: var(--gn-font-mono);
     font-size: 11px;
