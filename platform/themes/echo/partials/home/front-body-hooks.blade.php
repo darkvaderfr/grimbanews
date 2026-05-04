@@ -78,7 +78,11 @@
             if (!id) return;
             img.dataset.grimbaFallback = '1';
             img.removeAttribute('srcset');
-            img.src = '/og/placeholder/' + encodeURIComponent(id) + '.svg';
+            // S327 — pass current theme so the placeholder SVG renders
+            // in the same palette as the page (no cream-on-dark pop).
+            const themeAttr = document.documentElement.getAttribute('data-bs-theme');
+            const themeQs = themeAttr === 'dark' ? '?theme=dark' : '';
+            img.src = '/og/placeholder/' + encodeURIComponent(id) + '.svg' + themeQs;
             img.classList.add('gn-placeholder');
             // Mark the photo container so CSS can dial back the dark
             // gradient overlay (which is sized for vivid news photos and

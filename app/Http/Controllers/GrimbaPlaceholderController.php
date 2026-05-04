@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Botble\Blog\Models\Post;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +28,7 @@ class GrimbaPlaceholderController
     private const W = 1200;
     private const H = 630;
 
-    public function show(int $postId): Response
+    public function show(int $postId, Request $request): Response
     {
         $post = Post::query()->where('id', $postId)->first([
             'id', 'name', 'translated_name', 'translated_to',
@@ -47,16 +48,24 @@ class GrimbaPlaceholderController
                 ->value('country');
         }
 
-        $svg = $this->render($source, $title, $bias, $country);
+        // S327 — theme-aware placeholder. Reader's theme cookie or
+        // explicit ?theme=dark query forces the dark palette so the
+        // editorial fallback doesn't pop as a bright cream rectangle
+        // on dark-mode pages.
+        $themePref = (string) $request->query('theme', $request->cookie('grimba_theme', 'auto'));
+        $dark = $themePref === 'dark';
+
+        $svg = $this->render($source, $title, $bias, $country, $dark);
 
         return response($svg, 200, [
             'Content-Type'  => 'image/svg+xml; charset=UTF-8',
             'Cache-Control' => 'public, max-age=86400',
-            'X-GN-Source'   => 'placeholder',
+            'Vary'          => 'Cookie, ' . ($request->headers->get('Vary') ?? ''),
+            'X-GN-Source'   => 'placeholder' . ($dark ? '-dark' : ''),
         ]);
     }
 
-    private function render(string $source, string $title, string $bias, ?string $country = null): string
+    private function render(string $source, string $title, string $bias, ?string $country = null, bool $dark = false): string
     {
         $w = self::W;
         $h = self::H;
@@ -76,16 +85,16 @@ class GrimbaPlaceholderController
         };
 
         // S102 — deterministic source-derived hue accent so each
-        // outlet's placeholder is visually distinct without needing
-        // an admin-set brand_color column. Saturated 18%, lightness
-        // 92% keeps the wash subtle — newsprint, not neon.
+        // outlet's placeholder is visually distinct. S327 — flip
+        // saturation/lightness to keep the wash subtle in dark mode too.
         $hue = $this->sourceHue($source);
-        $sourceWash = "hsl({$hue}, 25%, 90%)";
+        $sourceWash = $dark ? "hsl({$hue}, 28%, 14%)" : "hsl({$hue}, 25%, 90%)";
 
-        // Soft editorial palette (matches --gn-paper / --gn-ink tokens).
-        $paper = '#f6f1e8';
-        $ink   = '#1a1713';
-        $rule  = '#1a171366';
+        // Editorial palette (matches --gn-paper / --gn-ink tokens, with
+        // dark counterparts from grimba-home.css's [data-bs-theme="dark"]).
+        $paper = $dark ? '#121007' : '#f6f1e8';
+        $ink   = $dark ? '#f6f1e8' : '#1a1713';
+        $rule  = $dark ? '#f6f1e866' : '#1a171366';
 
         $sourceEsc = htmlspecialchars(mb_strtoupper($source), ENT_QUOTES | ENT_XML1, 'UTF-8');
         $kickerCountry = $country
