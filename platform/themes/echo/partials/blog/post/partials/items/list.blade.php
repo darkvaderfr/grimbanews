@@ -20,7 +20,11 @@
             <div class="mb-2">{!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}</div>
         @endif
 
-        {!! Theme::partial('post-meta', ['post' => $post, 'wrapperClass' => 'echo-hero-area-titlepost-post-like-comment-share']) !!}
+        <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+            {!! Theme::partial('post-meta', ['post' => $post, 'wrapperClass' => 'echo-hero-area-titlepost-post-like-comment-share mb-0']) !!}
+            {{-- S340: reading-time chip on every card variant. --}}
+            {!! Theme::partial('reading-time', ['post' => $post]) !!}
+        </div>
         @if ($description = $__desc)
             <p class="echo-hero-discription truncate-custom truncate-3-custom" title="{{ $description }}">{!! BaseHelper::clean($description) !!}</p>
         @endif

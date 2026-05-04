@@ -62,11 +62,13 @@
         {!! Theme::partial('home.coverage-bar', ['post' => $post, 'compact' => true]) !!}
 
         {{-- Meta --}}
-        <div class="article-card__meta">
+        <div class="article-card__meta d-flex justify-content-between align-items-center gap-2 flex-wrap">
             {!! Theme::partial('post-meta', [
                 'post' => $post,
                 'wrapperClass' => 'mb-0'
             ]) !!}
+            {{-- S340: reading-time chip on every card variant. --}}
+            {!! Theme::partial('reading-time', ['post' => $post]) !!}
         </div>
     </div>
 </article>
