@@ -690,10 +690,13 @@
 
             <aside class="col-lg-4 col-12">
                 <div class="position-sticky" style="top: 90px;">
-                    @include(Theme::getThemeNamespace('partials.story.coverage-details'), [
-                        'clusterPosts' => $__gnClusterPosts,
-                        'clusterId'    => $post->story_cluster_id,
-                    ])
+                    {{-- S341: dropped story.coverage-details — its data
+                          (total source count, L/C/R counts, last-updated)
+                          is already shown in the article-list header
+                          (":count articles"), the bias-distribution bar
+                          below, and the timeline panel further down. The
+                          panel was a textual restatement of what the
+                          visual bar conveys. --}}
                     @include(Theme::getThemeNamespace('partials.story.bias-distribution'), [
                         'clusterPosts' => $__gnClusterPosts,
                         'sourceMeta'   => $__gnSourceMeta,
