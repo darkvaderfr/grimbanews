@@ -35,13 +35,16 @@
             <div class="small opacity-75 d-flex align-items-center gap-2">
                 {{-- Theme as icon-only toggle — label moved to tooltip --}}
                 <div class="grimba-theme-switch" role="radiogroup" aria-label="{{ __('Choix du thème') }}">
-                    <button type="button" data-grimba-theme="light" aria-pressed="false" title="{{ __('Thème clair') }}">
+                    <button type="button" data-grimba-theme="light" aria-pressed="false"
+                            aria-label="{{ __('Thème clair') }}" title="{{ __('Thème clair') }}">
                         <span aria-hidden="true">☀</span>
                     </button>
-                    <button type="button" data-grimba-theme="dark"  aria-pressed="false" title="{{ __('Thème sombre') }}">
+                    <button type="button" data-grimba-theme="dark" aria-pressed="false"
+                            aria-label="{{ __('Thème sombre') }}" title="{{ __('Thème sombre') }}">
                         <span aria-hidden="true">☾</span>
                     </button>
-                    <button type="button" data-grimba-theme="auto"  aria-pressed="true"  title="{{ __('Thème auto (suit le système)') }}">
+                    <button type="button" data-grimba-theme="auto" aria-pressed="true"
+                            aria-label="{{ __('Thème auto (suit le système)') }}" title="{{ __('Thème auto (suit le système)') }}">
                         <span aria-hidden="true">◐</span>
                     </button>
                 </div>

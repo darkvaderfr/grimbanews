@@ -3,9 +3,15 @@
     if (! in_array($currentLang, ['fr', 'en'], true)) $currentLang = 'fr';
 @endphp
 
-<div class="grimba-theme-switch grimba-lang-switch" role="radiogroup" aria-label="Language">
-    <button type="button" data-grimba-lang="fr" aria-pressed="{{ $currentLang === 'fr' ? 'true' : 'false' }}" title="Français">FR</button>
-    <button type="button" data-grimba-lang="en" aria-pressed="{{ $currentLang === 'en' ? 'true' : 'false' }}" title="English">EN</button>
+<div class="grimba-theme-switch grimba-lang-switch" role="radiogroup" aria-label="{{ __('Choix de la langue') }}">
+    <button type="button" data-grimba-lang="fr"
+            aria-pressed="{{ $currentLang === 'fr' ? 'true' : 'false' }}"
+            aria-label="{{ __('Lire en français') }}"
+            title="Français">FR</button>
+    <button type="button" data-grimba-lang="en"
+            aria-pressed="{{ $currentLang === 'en' ? 'true' : 'false' }}"
+            aria-label="{{ __('Read in English') }}"
+            title="English">EN</button>
 </div>
 
 <script>
