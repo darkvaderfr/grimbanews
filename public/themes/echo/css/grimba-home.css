@@ -2342,13 +2342,17 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-mobile-nav__item.is-active {
     background: var(--gn-paper);
     color: #1a1713;
 }
+/* S333 — same literal-cream pattern as S332 solid CTAs. The
+   dark-tokenized --gn-paper resolves to near-black, which made the
+   FAB blend invisibly into the dark canvas. */
 html.grimba-home-html[data-bs-theme="dark"] .grimba-vault-fab {
-    background: var(--gn-paper);
+    background: #f6f1e8;
     color: #1a1713 !important;
+    border-color: rgba(246, 241, 232, 0.28);
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-vault-fab strong {
     background: #1a1713;
-    color: var(--gn-paper);
+    color: #f6f1e8;
 }
 html.grimba-home-html[data-bs-theme="dark"] .btn-grimba:focus-visible,
 html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn:focus-visible,
