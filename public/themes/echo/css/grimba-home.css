@@ -175,11 +175,20 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-latest__kicker {
     color: var(--gn-ink-soft);
 }
 
-/* Button overrides for dark mode */
+/* Button overrides for dark mode.
+   S332 — solid CTAs were rendering with --gn-paper-warm (dark token in
+   dark mode), which made them near-invisible against modal panels and
+   dark glass backgrounds. Use literal cream/ink values so the solid
+   button always inverts against its context (dark on light, light on
+   dark). */
 html.grimba-home-html[data-bs-theme="dark"] .btn-grimba--solid {
-    background: var(--gn-paper-warm);
-    color: var(--gn-ink) !important;
-    border-color: rgba(255,255,255,0.12);
+    background: #f6f1e8;
+    color: #1a1713 !important;
+    border-color: rgba(246, 241, 232, 0.0);
+}
+html.grimba-home-html[data-bs-theme="dark"] .btn-grimba--solid:hover {
+    background: #ffffff;
+    color: #1a1713 !important;
 }
 html.grimba-home-html[data-bs-theme="dark"] .btn-grimba--ghost {
     color: var(--gn-ink);
