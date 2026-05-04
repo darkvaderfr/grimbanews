@@ -210,8 +210,13 @@
                     // editorial placeholder route. The cards below each
                     // carry their own image too.
                     $__gnHero = $post->image ?: $__gnClusterPosts->pluck('image')->filter()->first();
-                    $__gnHeroUrl = $__gnHero
-                        ? \Botble\Media\Facades\RvMedia::getImageUrl($__gnHero)
+                    // S329 — pre-resolve and skip RvMedia's 1920×1080
+                    // generic placeholder so SSR ships our editorial
+                    // /og/placeholder/{id}.svg instead of a dimension box.
+                    $__gnHeroResolved = $__gnHero ? \Botble\Media\Facades\RvMedia::getImageUrl($__gnHero) : null;
+                    $__gnHeroDefault  = \Botble\Media\Facades\RvMedia::getDefaultImage();
+                    $__gnHeroUrl = ($__gnHeroResolved && $__gnHeroResolved !== $__gnHeroDefault)
+                        ? $__gnHeroResolved
                         : route('public.og.placeholder', $post->id);
                 @endphp
 

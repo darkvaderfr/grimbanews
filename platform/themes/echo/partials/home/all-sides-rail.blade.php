@@ -119,9 +119,19 @@
                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 28px rgba(0,0,0,0.10)';"
                onmouseout="this.style.transform=''; this.style.boxShadow='';">
 
-                @if($card['image'])
+                {{-- S329 — match post-hero-img.blade.php's safety: skip
+                      RvMedia's 1920×1080 generic placeholder fallback by
+                      pre-resolving and comparing against the default URL. --}}
+                @php
+                    $__rsResolved = $card['image']
+                        ? \Botble\Media\Facades\RvMedia::getImageUrl($card['image'])
+                        : null;
+                    $__rsDefault = \Botble\Media\Facades\RvMedia::getDefaultImage();
+                    $__rsUsable = $__rsResolved !== null && $__rsResolved !== $__rsDefault;
+                @endphp
+                @if($__rsUsable)
                     <div class="ratio ratio-16x9" style="background:rgba(0,0,0,0.04);">
-                        <img src="{{ \Botble\Media\Facades\RvMedia::getImageUrl($card['image']) }}"
+                        <img src="{{ $__rsResolved }}"
                              alt="{{ $title }}"
                              loading="lazy"
                              decoding="async"

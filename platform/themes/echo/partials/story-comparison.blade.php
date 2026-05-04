@@ -29,9 +29,20 @@
                         ]) !!}
                     </div>
 
-                    @if($clusterPost->image)
+                    {{-- S329 — pre-resolve to skip RvMedia's 1920×1080 fallback. --}}
+                    @php
+                        $__cpImg = $clusterPost->image
+                            ? \Botble\Media\Facades\RvMedia::getImageUrl($clusterPost->image, 'medium')
+                            : null;
+                        $__cpDefault = \Botble\Media\Facades\RvMedia::getDefaultImage(false, 'medium');
+                        $__cpUsable = $__cpImg && $__cpImg !== $__cpDefault;
+                    @endphp
+                    @if($__cpUsable)
                         <a href="{{ $clusterPost->url ?? '#' }}" class="d-block mb-3">
-                            {{ RvMedia::image($clusterPost->image, $clusterPost->name, 'medium') }}
+                            <img src="{{ $__cpImg }}" alt="{{ $clusterPost->name }}"
+                                 loading="lazy" decoding="async"
+                                 data-grimba-post-id="{{ $clusterPost->id }}"
+                                 style="display:block; width:100%; height:auto; border-radius:8px;">
                         </a>
                     @endif
 
