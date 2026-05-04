@@ -19,6 +19,18 @@
     } elseif ($posts instanceof \Illuminate\Support\Collection) {
         $posts = $sortForLanguage($posts);
     }
+
+    // S330 — bulk-warm cluster counts for every card on this page. One
+    // SQL query instead of N (one per card). The coverage-bar partial
+    // reads from CoverageCounts::get() which is now O(1) here.
+    \App\Ground\CoverageCounts::warm(
+        ($posts instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator
+            ? $posts->getCollection()
+            : collect($posts))
+            ->pluck('story_cluster_id')
+            ->filter()
+            ->all()
+    );
 @endphp
 
 <section @class([

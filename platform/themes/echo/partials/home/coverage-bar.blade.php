@@ -9,29 +9,42 @@
      * @var \Botble\Blog\Models\Post $post
      * @var bool $compact
      * @var bool $onDark
+     * @var ?array $clusterCounts  S330 — pre-computed counts keyed by
+     *                            story_cluster_id, shape:
+     *                            [cluster_id => ['left'=>n,'center'=>n,'right'=>n]]
+     *                            When provided, skip the per-card cluster fetch.
      */
 
     use Botble\Blog\Models\Post;
 
     $compact = $compact ?? false;
     $onDark  = $onDark ?? false;
+    $clusterCounts = $clusterCounts ?? null;
 
     $counts = ['left'=>0,'center'=>0,'right'=>0];
     $total  = 0;
 
     if ($post->story_cluster_id) {
-        $cluster = Post::query()
-            ->where('story_cluster_id', $post->story_cluster_id)
-            ->where('status', 'published')
-            ->get();
-
-        foreach ($cluster as $cp) {
-            $r = $cp->bias_rating ?? 'unknown';
-            if (isset($counts[$r])) {
-                $counts[$r]++;
-            }
+        // S330 — three-tier resolution:
+        // 1. Caller-supplied $clusterCounts map (explicit pre-warm path)
+        // 2. App\Ground\CoverageCounts process-local memoization
+        //    (auto: first call triggers a single bulk query on each
+        //    cluster id that's been touched in this request)
+        // 3. Legacy per-card query (unreachable in practice now, but
+        //    kept as a safety net for callers we haven't audited yet).
+        if (is_array($clusterCounts) && isset($clusterCounts[$post->story_cluster_id])) {
+            $cached = $clusterCounts[$post->story_cluster_id];
+            $counts['left']   = (int) ($cached['left']   ?? 0);
+            $counts['center'] = (int) ($cached['center'] ?? 0);
+            $counts['right']  = (int) ($cached['right']  ?? 0);
+            $total = array_sum($counts);
+        } else {
+            $resolved = \App\Ground\CoverageCounts::get((int) $post->story_cluster_id);
+            $counts['left']   = (int) ($resolved['left']   ?? 0);
+            $counts['center'] = (int) ($resolved['center'] ?? 0);
+            $counts['right']  = (int) ($resolved['right']  ?? 0);
+            $total = array_sum($counts);
         }
-        $total = array_sum($counts);
     }
 
     $sides = array_filter($counts, fn ($c) => $c > 0);
