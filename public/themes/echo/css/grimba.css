@@ -89,6 +89,21 @@
     font-size: 1.125rem; font-weight: 600;
     margin-bottom: 0.75rem; line-height: 1.4;
 }
+/* S342 — hover reveals an accent underline beneath the headline anchor.
+   Subtle cinematic touch; respects prefers-reduced-motion. */
+.article-card__title a {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0 1.5px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.28s cubic-bezier(.2,.8,.2,1);
+}
+.article-card:hover .article-card__title a {
+    background-size: 100% 1.5px;
+}
+@media (prefers-reduced-motion: reduce) {
+    .article-card__title a { transition: none; }
+}
 .article-card__meta {
     display: flex; align-items: center; gap: 0.75rem;
     margin-top: auto; padding-top: 0.75rem;
