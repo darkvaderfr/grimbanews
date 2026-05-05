@@ -2368,7 +2368,9 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-mobile-nav__item {
     color: var(--gn-ink-soft);
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-mobile-nav__item.is-active {
-    background: var(--gn-paper);
+    /* S348 — literal cream, not --gn-paper (which dark-mode-resolves
+       to near-black, making the active state invisible). */
+    background: #f6f1e8;
     color: #1a1713;
 }
 /* S333 — same literal-cream pattern as S332 solid CTAs. The
