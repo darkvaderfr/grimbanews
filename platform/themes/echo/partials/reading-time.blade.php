@@ -23,12 +23,15 @@
 
 @if($minutes > 0)
     @if($variant === 'inline')
-        <span class="grimba-reading-time" title="Estimation à 200 mots/minute">
-            ⏱ {{ $minutes }} min
+        <span class="grimba-reading-time" title="{{ __('Estimation à 200 mots/minute') }}">
+            ⏱ ≈{{ $minutes }} min
         </span>
     @else
+        {{-- S351 — added ≈ prefix so readers see this is an estimate, not
+              a hard count. The aria-label spells it out for screen readers. --}}
         <span class="grimba-reading-time"
-              title="{{ $words }} mots · estimation 200 mots/minute"
+              title="{{ trans_choice(':count mot · estimation 200 mots/minute|:count mots · estimation 200 mots/minute', $words, ['count' => $words]) }}"
+              aria-label="{{ trans_choice('Temps de lecture estimé : :count minute|Temps de lecture estimé : :count minutes', $minutes, ['count' => $minutes]) }}"
               style="
                   display:inline-flex; align-items:center; gap:4px;
                   padding:2px 8px; border-radius:9999px;
@@ -38,7 +41,7 @@
                   font-family:'Public Sans',system-ui,sans-serif;
               ">
             <span aria-hidden="true">⏱</span>
-            <span>{{ $minutes }} min</span>
+            <span aria-hidden="true">≈{{ $minutes }} min</span>
         </span>
     @endif
 @endif

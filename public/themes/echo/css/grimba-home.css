@@ -1861,6 +1861,13 @@ html.grimba-home-html[data-bs-theme="dark"] .glass-panel {
     color: var(--gn-ink);
 }
 
+/* S351 — reading-time chip dark variant. Inline-styled bg
+   rgba(26,23,19,0.06) is invisible on dark canvas. */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-reading-time {
+    background: rgba(246, 241, 232, 0.08) !important;
+    color: var(--gn-ink-muted) !important;
+}
+
 /* S320 — site-wide dark-mode contrast fix for headings and body text
    in our public surfaces. Bootstrap utility classes (h1-h6, .h1-.h6,
    .lead) and bare <h*> elements were inheriting the body ink color
