@@ -15,13 +15,20 @@ class PwaShellTest extends TestCase
             ->assertSee('apple-mobile-web-app-title');
     }
 
-    public function test_edition_picker_is_solid_and_only_exposes_canonical_public_editions(): void
+    public function test_edition_picker_is_solid_and_exposes_4_canonical_regions(): void
     {
+        // Fleet K (2026-05-05) — picker now exposes 4 regions:
+        // Africa / Europe / Americas / International. Legacy values
+        // (france/uk/us/canada) are migration-only and not surfaced.
         $this->get('/')
             ->assertOk()
             ->assertSee('data-grimba-edition="africa"', false)
+            ->assertSee('data-grimba-edition="europe"', false)
+            ->assertSee('data-grimba-edition="americas"', false)
             ->assertSee('data-grimba-edition="international"', false)
             ->assertSee('Afrique')
+            ->assertSee('Europe')
+            ->assertSee('Amériques')
             ->assertSee('International')
             ->assertDontSee('data-grimba-edition="france"', false)
             ->assertDontSee('data-grimba-edition="uk"', false)
@@ -33,7 +40,12 @@ class PwaShellTest extends TestCase
 
     public function test_region_choice_suppresses_onboarding_overlay_across_editions(): void
     {
-        foreach (['africa' => 'Afrique', 'international' => 'International'] as $region => $label) {
+        foreach ([
+            'africa'        => 'Afrique',
+            'europe'        => 'Europe',
+            'americas'      => 'Amériques',
+            'international' => 'International',
+        ] as $region => $label) {
             $this->withUnencryptedCookies(['grimba_region' => $region])
                 ->get('/')
                 ->assertOk()
@@ -104,13 +116,17 @@ class PwaShellTest extends TestCase
         $this->assertStringNotContainsString("window.localStorage.setItem('themeMode', 'light');", $html);
     }
 
-    public function test_legacy_edition_cookie_maps_to_international_without_stock_overlays(): void
+    public function test_legacy_edition_cookie_maps_to_4region_canonical_without_stock_overlays(): void
     {
+        // Fleet K (2026-05-05): legacy cookies now fold into 4 canonical
+        // regions instead of forcing everything to International.
+        // uk / france → europe; us / canada → americas; afrique → africa;
+        // monde / unknown → international.
         $this->withUnencryptedCookies(['grimba_region' => 'uk'])
             ->get('/')
             ->assertOk()
-            ->assertSee('International')
-            ->assertSee('data-grimba-edition="international"', false)
+            ->assertSee('Europe')
+            ->assertSee('data-grimba-edition="europe"', false)
             ->assertDontSee('Édition UK')
             ->assertDontSee('grimba-newsletter-modal is-open', false)
             ->assertDontSee('grimba-onboard-modal is-open', false)
