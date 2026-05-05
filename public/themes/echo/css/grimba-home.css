@@ -18,6 +18,26 @@
     --gn-center: #a8a8a8;
     --gn-right:  #e84c3d;
     --gn-blind:  #8a2be2;
+}
+
+/* S344 — edition-aware bias color flip. The default (above) is the
+   francophone convention: blue=left, red=right, used everywhere on
+   GrimbaNews regardless of edition.
+
+   Optional opt-in: a reader (or an editor wanting to test) can land
+   on any page with `?fr_convention=0` to swap to the US/anglo
+   convention (red=left, blue=right). The toggle persists in localStorage
+   so subsequent navigation stays consistent for that visitor.
+
+   Triggered by `html[data-bias-convention="us"]` — set by the boot
+   script in grimba-home / grimba-chrome layouts.
+
+   Documented in the bias-bar explainer page. */
+html[data-bias-convention="us"] {
+    --gn-left:  #e84c3d;
+    --gn-right: #3b82f6;
+}
+:root {
 
     /* Editorial accent — the masthead red from the S83 landing.
        Warmer than --gn-right (which reads as political-right colour);

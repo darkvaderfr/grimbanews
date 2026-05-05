@@ -41,6 +41,23 @@
         }
         document.documentElement.setAttribute('data-bs-theme', effective);
         document.documentElement.setAttribute('data-grimba-theme-pref', pref);
+
+        // S344 — edition-aware bias color flip (mirrors grimba-home).
+        try {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('fr_convention')) {
+                const v = params.get('fr_convention');
+                if (v === '0' || v === 'us' || v === 'no') {
+                    window.localStorage.setItem('grimba_bias_convention', 'us');
+                } else if (v === '1' || v === 'fr' || v === 'yes') {
+                    window.localStorage.removeItem('grimba_bias_convention');
+                }
+            }
+            const conv = window.localStorage.getItem('grimba_bias_convention');
+            if (conv === 'us') {
+                document.documentElement.setAttribute('data-bias-convention', 'us');
+            }
+        } catch (_) {}
     })();
 </script>
 <head>

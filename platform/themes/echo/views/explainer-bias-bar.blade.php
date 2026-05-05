@@ -65,9 +65,23 @@
             <p class="mb-3">
                 {{ __("Nous gardons la couleur bleue pour la gauche et la couleur rouge pour la droite, sur toutes les éditions (Afrique, International). Cette convention est l'inverse de celle d'autres lecteurs internationaux comme Ground.news, qui inverse les couleurs aux États-Unis pour suivre la convention partisane américaine. Notre choix : un seul code couleur stable pour l'ensemble du site, francophone par défaut, indiqué clairement.") }}
             </p>
-            <p class="opacity-75 small mb-0">
+            <p class="opacity-75 small mb-3">
                 {{ __("Si vous lisez en anglais ou si vous arrivez d'un pays où la convention est inversée, le label sous chaque segment (« Gauche / Centre / Droite ») désambigüise.") }}
             </p>
+
+            {{-- S344 — opt-in toggle for the US/anglo convention. --}}
+            <div class="d-flex gap-2 flex-wrap align-items-center" style="border-top: 1px dashed rgba(0,0,0,0.10); padding-top: 12px; margin-top: 6px;">
+                <span class="small opacity-75">{{ __('Vous préférez la convention US (rouge=gauche, bleu=droite) ?') }}</span>
+                <a href="?fr_convention=0" class="btn-grimba btn-grimba--ghost btn-grimba--sm" data-grimba-flip="us">
+                    {{ __('Adopter la convention US') }}
+                </a>
+                <a href="?fr_convention=1" class="btn-grimba btn-grimba--ghost btn-grimba--sm" data-grimba-flip="fr">
+                    {{ __('Revenir à la convention FR') }}
+                </a>
+                <span class="small opacity-55" style="font-size: 11.5px;">
+                    {{ __('Le choix est stocké dans votre navigateur — aucun compte requis.') }}
+                </span>
+            </div>
         </article>
 
         <article class="glass-panel p-4 p-md-5 mb-4">
