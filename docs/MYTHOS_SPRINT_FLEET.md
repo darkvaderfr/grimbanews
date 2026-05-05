@@ -43,7 +43,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **E** | NobuAI Integration | E1–E7 | 4/7 done |
 | **F** | Performance & SEO | F1–F8 | 8/8 done |
 | **G** | A11y & I18n | G1–G6 | 4/6 done |
-| **H** | Testing & QA | H1–H7 | 0/7 |
+| **H** | Testing & QA | H1–H7 | 1/7 done |
 | **I** | Marketing & Growth | I1–I8 | 0/8 |
 | **J** | Admin & Editorial Tooling | J1–J6 | 0/6 |
 | **K** | 4-region editorial split | K1–K8 | 8/8 done — K8 closed 2026-05-05 |
@@ -224,7 +224,7 @@ sprint risks regression.
 
 | ID | Sprint | Acceptance |
 |----|--------|------------|
-| **H1** | **PHPUnit: vault routes** — 6 tests covering /coffre empty, /coffre with cookie, /coffre/export.csv empty, /coffre/export.csv with cookie, header badge, save-button toggle endpoint | `vendor/bin/phpunit tests/Feature/VaultTest.php` green |
+| ✅ **H1** | **PHPUnit: vault routes** — `/coffre` empty/saved states, `/coffre/export.csv` empty/saved CSVs, header badge, parser hygiene, and the cookie-only save-button toggle endpoint are covered. | `vendor/bin/phpunit tests/Feature/VaultTest.php` green |
 | **H2** | **PHPUnit: cluster page** — 4 tests: cluster size 1 (legacy fallback), cluster size 2+ (story page), one-sided cluster (callout fires), multi-bias cluster (no callout) | Tests green |
 | **H3** | **PHPUnit: extractive synthesis** — given a cluster, asserts each bullet attributes to a unique source, dedupe works, max 5 bullets | Tests green |
 | **H4** | **Playwright: golden-path smoke** — record a 5-step flow: home → topic-chip → story page → save → /coffre → unsave. Run in CI nightly | Playwright report green |

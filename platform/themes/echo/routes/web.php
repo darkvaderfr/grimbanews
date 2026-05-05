@@ -1104,6 +1104,64 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ])->render();
         })->name('public.coffre');
 
+        Route::post('coffre/toggle', function (Request $request) {
+            $validator = Validator::make($request->all(), [
+                'post_id' => ['required', 'integer', 'min:1'],
+                'action' => ['nullable', 'string', 'in:toggle,save,unsave'],
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => __('Requête de coffre invalide.'),
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            $postId = (int) $request->input('post_id');
+            $exists = Post::query()
+                ->whereKey($postId)
+                ->where('status', 'published')
+                ->exists();
+
+            if (! $exists) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => __('Article introuvable.'),
+                ], 404);
+            }
+
+            $ids = GrimbaVault::parseIds((string) $request->cookie(GrimbaVault::COOKIE, ''));
+            $action = (string) $request->input('action', 'toggle');
+            $wasSaved = in_array($postId, $ids, true);
+
+            if ($action === 'toggle') {
+                $action = $wasSaved ? 'unsave' : 'save';
+            }
+
+            $ids = array_values(array_filter(
+                $ids,
+                static fn (int $id): bool => $id !== $postId
+            ));
+
+            $saved = $action === 'save';
+            if ($saved) {
+                array_unshift($ids, $postId);
+            }
+
+            $ids = GrimbaVault::parseIds(implode(',', $ids));
+            $value = GrimbaVault::serializeIds($ids);
+
+            return response()
+                ->json([
+                    'ok' => true,
+                    'saved' => $saved,
+                    'ids' => $ids,
+                    'count' => count($ids),
+                ])
+                ->cookie(GrimbaVault::COOKIE, $value, 60 * 24 * 365, '/', null, false, false, false, 'Lax');
+        })->name('public.coffre.toggle');
+
         Route::get('coffre/partager', function (Request $request) {
             $ids = GrimbaVault::parseIds((string) $request->cookie(GrimbaVault::COOKIE, ''));
             $shareUrl = url('/coffre/depuis-lien') . '#ids=' . GrimbaVault::serializeIds($ids);

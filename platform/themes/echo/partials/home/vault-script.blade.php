@@ -2,6 +2,8 @@
     (function () {
         const COOKIE = 'grimba_vault';
         const MAX = 50;
+        const TOGGLE_URL = @json(route('public.coffre.toggle'));
+        const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
         function ids() {
             const m = document.cookie.match(/(?:^|; )grimba_vault=([^;]+)/);
@@ -62,12 +64,30 @@
                 if (! Number.isFinite(id)) return;
                 const list = ids();
                 const i = list.indexOf(id);
+                const saved = i < 0;
                 if (i >= 0) list.splice(i, 1);
                 else list.unshift(id);
                 write(list);
                 paint(btn, list.includes(id));
                 paintCount();
                 broadcast(list);
+                fetch(TOGGLE_URL, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': CSRF,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ post_id: id, action: saved ? 'save' : 'unsave' })
+                })
+                    .then(response => response.ok ? response.json() : null)
+                    .then(payload => {
+                        if (! payload || ! payload.ok || ! Array.isArray(payload.ids)) return;
+                        write(payload.ids);
+                        syncAll();
+                    })
+                    .catch(() => {});
                 return;
             }
 

@@ -97,6 +97,36 @@ class VaultTest extends TestCase
         );
     }
 
+    public function test_save_button_toggle_endpoint_updates_cookie_only_vault(): void
+    {
+        $post = $this->publishedPost();
+
+        $save = $this->withUnencryptedCookies($this->readerCookies())
+            ->postJson('/coffre/toggle', ['post_id' => $post->id])
+            ->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('saved', true)
+            ->assertJsonPath('count', 1)
+            ->assertPlainCookie(GrimbaVault::COOKIE, (string) $post->id);
+
+        $this->assertSame([(int) $post->id], $save->json('ids'));
+
+        $unsave = $this->call(
+            'POST',
+            '/coffre/toggle',
+            ['post_id' => $post->id],
+            [GrimbaVault::COOKIE => (string) $post->id],
+            [],
+            ['HTTP_ACCEPT' => 'application/json']
+        )
+            ->assertOk()
+            ->assertJsonPath('ok', true)
+            ->assertJsonPath('saved', false)
+            ->assertJsonPath('count', 0);
+
+        $this->assertSame([], $unsave->json('ids'));
+    }
+
     public function test_vault_cookie_parser_caps_and_deduplicates_ids(): void
     {
         $raw = implode(',', array_merge([5, 4, 4, 0, -1, 'bad'], range(1, 80)));
