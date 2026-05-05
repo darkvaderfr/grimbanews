@@ -35,9 +35,9 @@ class GrimbaPlaceholderController
             'source_name', 'source_id', 'bias_rating',
         ]);
 
-        $source = $post->source_name ?? 'GrimbaNews';
-        $title  = trim((string) ($post->translated_name ?: $post->name ?? 'Article'));
-        $bias   = $post->bias_rating ?? 'unknown';
+        $source = $post?->source_name ?? 'GrimbaNews';
+        $title  = trim((string) (($post?->translated_name ?: $post?->name) ?? 'Article'));
+        $bias   = $post?->bias_rating ?? 'unknown';
 
         // S102 — pull country tag for the kicker line if the post is
         // backed by a registered news_source row.

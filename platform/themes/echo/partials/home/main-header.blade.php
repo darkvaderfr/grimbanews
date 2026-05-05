@@ -57,7 +57,7 @@
                     {{ trans_choice(':count dossier actif|:count dossiers actifs', $pulse['clusters'], ['count' => $pulse['clusters']]) }}
                 </span>
             </div>
-            <div class="small opacity-75 d-flex align-items-center gap-2">
+            <div class="small d-flex align-items-center gap-2 grimba-header__tools">
                 <span class="d-none d-md-inline">{{ ucfirst($topDate) }}</span>
                 <span class="opacity-25 d-none d-md-inline">·</span>
                 <a href="{{ url('/pour-vous') }}" class="text-decoration-none" title="{{ __('Pour vous') }}">

@@ -216,25 +216,41 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ->where('surface', 'local|coffre')
             ->name('public.og.surface.alt');
 
-        // S213 — constrained image proxy for outlet logos. Keeps
-        // reader cards off third-party logo hosts and lets Laravel/CDN
-        // cache long-tail source icons. Deliberately limited to the two
-        // logo providers used by the source-logo partial, so it cannot
-        // become a general-purpose open proxy.
+        // S213 / B-IMG-01 — constrained image proxy for outlet logos
+        // and allowlisted publisher hero images. Keeps reader cards off
+        // third-party image hosts without becoming a general-purpose
+        // open proxy.
         Route::get('img-proxy', function (Request $request) {
             $url = (string) $request->query('u', '');
             $sourceId = (int) $request->query('sid', 0);
             $provider = (string) $request->query('provider', '');
+            $postId = max(0, (int) $request->query('pid', 0));
             $parts = parse_url($url);
             $host = strtolower((string) ($parts['host'] ?? ''));
+            $theme = (string) $request->query('theme', $request->cookie('grimba_theme', 'auto'));
+            if (! in_array($theme, ['light', 'dark', 'auto'], true)) {
+                $theme = 'auto';
+            }
+
+            $allowedHosts = match ($provider) {
+                'clearbit' => ['logo.clearbit.com'],
+                'favicon' => ['www.google.com'],
+                'article-hero' => array_map(
+                    static fn (string $host): string => strtolower($host),
+                    config('grimba_image_proxy.article_hero_hosts', [])
+                ),
+                default => [],
+            };
+            $isArticleHero = $provider === 'article-hero';
 
             abort_unless(
                 in_array($parts['scheme'] ?? '', ['http', 'https'], true)
-                && in_array($host, ['logo.clearbit.com', 'www.google.com'], true),
+                && in_array($host, $allowedHosts, true),
                 404
             );
 
-            $cachePath = storage_path('app/public/img-proxy/' . sha1($url) . '.bin');
+            $cacheKey = sha1($provider . '|' . $url . ($isArticleHero ? '|pid:' . $postId . '|theme:' . $theme : ''));
+            $cachePath = storage_path('app/public/img-proxy/' . $cacheKey . '.bin');
             $metaPath = $cachePath . '.type';
 
             if (! \Illuminate\Support\Facades\File::exists($cachePath)) {
@@ -249,23 +265,39 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     $type = strtolower((string) $res->header('Content-Type', 'image/png'));
                     abort_unless(str_starts_with($type, 'image/'), 404);
 
+                    $body = $res->body();
+                    abort_if(strlen($body) > (int) config('grimba_image_proxy.max_bytes', 8 * 1024 * 1024), 404);
+
                     \Illuminate\Support\Facades\File::ensureDirectoryExists(dirname($cachePath));
-                    \Illuminate\Support\Facades\File::put($cachePath, $res->body());
+                    \Illuminate\Support\Facades\File::put($cachePath, $body);
                     \Illuminate\Support\Facades\File::put($metaPath, strtok($type, ';') ?: 'image/png');
                     grimba_record_source_logo_probe($sourceId, $provider, true, $url);
                 } catch (\Throwable) {
-                    grimba_record_source_logo_probe($sourceId, $provider, false, $url);
-                    abort(404);
+                    if (! $isArticleHero) {
+                        grimba_record_source_logo_probe($sourceId, $provider, false, $url);
+                        abort(404);
+                    }
+
+                    $fallback = app(\App\Http\Controllers\GrimbaPlaceholderController::class)
+                        ->show($postId, $request);
+                    $type = (string) ($fallback->headers->get('Content-Type') ?: 'image/svg+xml; charset=UTF-8');
+
+                    \Illuminate\Support\Facades\File::ensureDirectoryExists(dirname($cachePath));
+                    \Illuminate\Support\Facades\File::put($cachePath, $fallback->getContent());
+                    \Illuminate\Support\Facades\File::put($metaPath, $type);
                 }
             }
 
             $type = \Illuminate\Support\Facades\File::exists($metaPath)
                 ? trim((string) \Illuminate\Support\Facades\File::get($metaPath))
                 : 'image/png';
+            $maxAge = $isArticleHero
+                ? (int) config('grimba_image_proxy.article_hero_cache_seconds', 2592000)
+                : (int) config('grimba_image_proxy.logo_cache_seconds', 604800);
 
             return response(\Illuminate\Support\Facades\File::get($cachePath), 200, [
                 'Content-Type' => $type ?: 'image/png',
-                'Cache-Control' => 'public, max-age=604800, s-maxage=604800',
+                'Cache-Control' => 'public, max-age=' . $maxAge . ', s-maxage=' . $maxAge,
             ]);
         })->name('public.img-proxy');
 

@@ -118,13 +118,13 @@
     }
 
     html[data-bs-theme="dark"] .grimba-edition-toggle {
-        background: rgba(246, 241, 232, 0.08);
-        border-color: rgba(246, 241, 232, 0.18);
+        background: rgba(246, 241, 232, 0.14);
+        border-color: rgba(246, 241, 232, 0.30);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
     }
 
     html[data-bs-theme="dark"] .grimba-edition-toggle__option {
-        color: #f8f1e6;
+        color: #fffaf0;
     }
 
     html[data-bs-theme="dark"] .grimba-edition-toggle__option:hover,
@@ -134,8 +134,13 @@
     }
 
     html[data-bs-theme="dark"] .grimba-edition-toggle__option.is-active {
-        background: #f8f1e6;
+        background: #fffaf0;
         color: #15130f;
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.32);
+    }
+
+    html[data-bs-theme="dark"] .grimba-edition-toggle__count {
+        opacity: .86;
     }
 </style>
 

@@ -12,8 +12,19 @@
         : null;
     $__defaultUrl = \Botble\Media\Facades\RvMedia::getDefaultImage(false, $__size);
     $__hasUsableImg = $__resolved !== null && $__resolved !== $__defaultUrl;
+    $__isExternal = $__hasUsableImg && is_string($__resolved) && preg_match('#^https?://#i', $__resolved);
+    $__theme = request()?->cookie('grimba_theme', 'auto') ?: 'auto';
 @endphp
-@if($__hasUsableImg)
+@if($__isExternal)
+    <img
+        src="{{ route('public.img-proxy', ['provider' => 'article-hero', 'pid' => $post->id, 'theme' => $__theme, 'u' => $__resolved]) }}"
+        alt="{{ $__alt }}"
+        loading="{{ $__eager ? 'eager' : 'lazy' }}"
+        decoding="{{ $__eager ? 'sync' : 'async' }}"
+        width="1200" height="630"
+        data-grimba-post-id="{{ $post->id }}"
+    />
+@elseif($__hasUsableImg)
     {!! \Botble\Media\Facades\RvMedia::image($post->image, $__alt, $__size, attributes: [
         'loading' => $__eager ? 'eager' : 'lazy',
         'decoding' => $__eager ? 'sync' : 'async',

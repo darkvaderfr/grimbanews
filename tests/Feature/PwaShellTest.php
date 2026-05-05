@@ -35,7 +35,22 @@ class PwaShellTest extends TestCase
             ->assertDontSee('data-grimba-edition="us"', false)
             ->assertDontSee('data-grimba-edition="canada"', false)
             ->assertSee('.grimba-edition-toggle', false)
-            ->assertSee('background: #1a1713;', false);
+            ->assertSee('background: #1a1713;', false)
+            ->assertSee('grimba-header__tools', false)
+            ->assertSee('html[data-bs-theme="dark"] .grimba-edition-toggle__option', false)
+            ->assertSee('color: #fffaf0;', false)
+            ->assertSee('html[data-bs-theme="dark"] .grimba-edition-toggle__count', false);
+    }
+
+    public function test_header_tool_css_does_not_override_edition_toggle_links(): void
+    {
+        $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+
+        $this->assertStringContainsString('max-height: 96px;', $css);
+        $this->assertStringContainsString('.grimba-header__tools > a', $css);
+        $this->assertStringContainsString('.grimba-header__tools .grimba-edition-toggle', $css);
+        $this->assertStringContainsString(':not([class*="grimba-edition-toggle__option"])', $css);
+        $this->assertStringNotContainsString('.grimba-header__tools a {', $css);
     }
 
     public function test_region_choice_suppresses_onboarding_overlay_across_editions(): void
@@ -150,8 +165,8 @@ class PwaShellTest extends TestCase
     {
         $this->postJson('/region/set', ['region' => 'uk'])
             ->assertOk()
-            ->assertJsonPath('region', 'international')
-            ->assertPlainCookie('grimba_region', 'international')
+            ->assertJsonPath('region', 'europe')
+            ->assertPlainCookie('grimba_region', 'europe')
             ->assertPlainCookie('grimba_onboarded', '1');
     }
 

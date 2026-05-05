@@ -152,6 +152,12 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-nav a:hover,
 html.grimba-home-html[data-bs-theme="dark"] .grimba-nav a.active { color: var(--gn-ink); border-color: var(--gn-ink); }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-wordmark { color: var(--gn-ink); }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-wordmark__tag { color: var(--gn-ink-soft); }
+html.grimba-home-html[data-bs-theme="dark"] .grimba-header__tools {
+    color: rgba(255, 250, 240, 0.92);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-header__tools > a {
+    color: rgba(255, 250, 240, 0.92);
+}
 
 html.grimba-home-html[data-bs-theme="dark"] .grimba-search input {
     background: rgba(255, 255, 255, 0.06);
@@ -588,7 +594,7 @@ body.grimba-home .grimba-section__title {
     letter-spacing: -0.01em;
 }
 
-body.grimba-home a:not([class*="btn-grimba"]):not([class*="grimba-urgency__cta"]) { color: inherit; }
+body.grimba-home a:not([class*="btn-grimba"]):not([class*="grimba-urgency__cta"]):not([class*="grimba-edition-toggle__option"]) { color: inherit; }
 
 /* Kill stock newsletter popup + announcement on the new homepage */
 body.grimba-home .newsletter-popup-wrap,
@@ -655,7 +661,28 @@ a.grimba-urgency__cta,
     /* S353 — collapse the meta strip when the page has scrolled. */
     transition: max-height 0.22s ease, opacity 0.18s ease, padding 0.22s ease;
     overflow: hidden;
-    max-height: 56px;
+    max-height: 96px;
+}
+.grimba-utility-bar {
+    gap: 0.45rem 1rem;
+}
+.grimba-header-pulse {
+    white-space: nowrap;
+}
+.grimba-header__tools {
+    color: rgba(26, 23, 19, 0.74);
+    flex-wrap: nowrap;
+    margin-left: auto;
+}
+.grimba-header__tools > a {
+    color: rgba(26, 23, 19, 0.74);
+}
+.grimba-header__tools > a:hover,
+.grimba-header__tools > a:focus-visible {
+    color: var(--gn-ink);
+}
+.grimba-header__tools .grimba-edition-toggle {
+    flex: 0 0 auto;
 }
 .grimba-header__main {
     background: rgba(246, 241, 232, 0.85);
@@ -685,6 +712,13 @@ html.grimba-header-shrunk .grimba-header__main .py-3 {
 }
 @media (prefers-reduced-motion: reduce) {
     .grimba-header__meta, .grimba-header__main { transition: none; }
+}
+@media (max-width: 1500px) {
+    .grimba-header-pulse { display: none !important; }
+}
+@media (max-width: 1199.98px) {
+    .grimba-edition-toggle__count { display: none; }
+    .grimba-edition-toggle__option { padding-left: 10px; padding-right: 10px; }
 }
 
 /* S83 masthead — editorial serif, mixed case, accent-red "News".
