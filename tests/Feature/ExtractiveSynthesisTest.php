@@ -50,6 +50,7 @@ class ExtractiveSynthesisTest extends TestCase
                 ->where('id', $id)
                 ->update([
                     'story_cluster_id' => $clusterId,
+                    'source_id' => null,
                     'source_name' => $rows[$index]['source'],
                     'description' => $rows[$index]['description'],
                     'bias_rating' => $rows[$index]['bias'] ?? 'center',
