@@ -36,6 +36,9 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
         Route::get('rss-feeds', function (Request $request) {
             $q = trim((string) $request->input('q', ''));
+            $staleBefore = now()
+                ->subHours(GrimbaRssFeedHealth::STALE_HOURS)
+                ->toDateTimeString();
 
             $query = DB::table('rss_feeds')
                 ->leftJoin('news_sources', 'news_sources.id', '=', 'rss_feeds.source_id')
@@ -52,13 +55,23 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 });
             }
 
-            $feeds = $query->orderBy('news_sources.name')->paginate(30)->withQueryString();
+            $feeds = $query
+                ->orderByRaw(
+                    'CASE WHEN rss_feeds.is_active = 1 AND (rss_feeds.last_success_at IS NULL OR rss_feeds.last_success_at <= ?) THEN 0 ELSE 1 END',
+                    [$staleBefore]
+                )
+                ->orderByDesc('rss_feeds.consecutive_failures')
+                ->orderBy('news_sources.name')
+                ->paginate(30)
+                ->withQueryString();
             $feeds->getCollection()->transform(function ($feed) {
                 $feed->health_score = GrimbaRssFeedHealth::score($feed);
                 $feed->health_label = GrimbaRssFeedHealth::label($feed);
                 $feed->health_color = GrimbaRssFeedHealth::color($feed);
                 $feed->is_stale = GrimbaRssFeedHealth::isStale($feed);
                 $feed->stale_reason = GrimbaRssFeedHealth::staleReason($feed);
+                $feed->health_row = $feed->is_stale ? 'stale' : 'ok';
+                $feed->row_class = $feed->is_stale ? 'grimba-rss-feed-row--stale' : '';
 
                 return $feed;
             });

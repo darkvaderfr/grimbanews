@@ -396,6 +396,16 @@ body .grimba-admin-table-responsive {
 body .grimba-admin-table td[data-label]::before {
     display: none;
 }
+body .grimba-rss-feed-row--stale > * {
+    background: rgba(232, 76, 61, 0.1) !important;
+    border-bottom-color: rgba(232, 76, 61, 0.24) !important;
+}
+body .grimba-rss-feed-row--stale > td:first-child {
+    box-shadow: inset 4px 0 0 #e84c3d;
+}
+body .grimba-rss-feed-row--stale:hover > * {
+    background: rgba(232, 76, 61, 0.14) !important;
+}
 
 /* ------------------------------------------------------------
    Forms
@@ -1198,6 +1208,11 @@ body pre.bg-light {
         background: rgba(255, 255, 255, 0.72);
         box-shadow: 0 14px 34px rgba(26, 23, 19, 0.07);
     }
+    body .grimba-admin-table-responsive .grimba-admin-table tbody tr.grimba-rss-feed-row--stale {
+        background: linear-gradient(90deg, rgba(232, 76, 61, 0.16), rgba(255, 255, 255, 0.74));
+        border-color: rgba(232, 76, 61, 0.34);
+        box-shadow: inset 4px 0 0 #e84c3d, 0 14px 34px rgba(26, 23, 19, 0.08);
+    }
     body .grimba-admin-table-responsive .grimba-admin-table td[data-label] {
         display: grid;
         grid-template-columns: minmax(7rem, 42%) 1fr;
@@ -1361,6 +1376,11 @@ body[data-bs-theme="dark"] .table > :not(caption) > * > * {
     color: var(--gn-ink);
     border-color: rgba(246, 241, 232, 0.1);
 }
+html[data-bs-theme="dark"] body .grimba-rss-feed-row--stale > *,
+body[data-bs-theme="dark"] .grimba-rss-feed-row--stale > * {
+    background: rgba(232, 76, 61, 0.16) !important;
+    border-color: rgba(232, 76, 61, 0.32) !important;
+}
 
 html[data-bs-theme="dark"] body .list-group,
 html[data-bs-theme="dark"] body .list-group-item,
@@ -1389,6 +1409,12 @@ body[data-bs-theme="dark"] .pagination .page-item.active .page-link {
         background: rgba(36, 32, 22, 0.84);
         border-color: rgba(246, 241, 232, 0.14);
         box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+    }
+    html[data-bs-theme="dark"] body .grimba-admin-table-responsive .grimba-admin-table tbody tr.grimba-rss-feed-row--stale,
+    body[data-bs-theme="dark"] .grimba-admin-table-responsive .grimba-admin-table tbody tr.grimba-rss-feed-row--stale {
+        background: linear-gradient(90deg, rgba(232, 76, 61, 0.22), rgba(36, 32, 22, 0.84));
+        border-color: rgba(232, 76, 61, 0.38);
+        box-shadow: inset 4px 0 0 #ff8b82, 0 14px 34px rgba(0, 0, 0, 0.3);
     }
 }
 html[data-bs-theme="dark"] body .table a,

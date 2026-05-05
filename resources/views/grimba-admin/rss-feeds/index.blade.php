@@ -9,10 +9,10 @@
 
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
-                <span class="grimba-admin-kicker">Tour de contrôle RSS</span>
+                <span class="grimba-admin-kicker">Moniteur santé sources</span>
                 <h1 class="grimba-admin-title">Flux RSS</h1>
                 <p class="grimba-admin-copy">
-                    Pilotez les sources syndiquées, repérez les flux malades, et déclenchez les polls sans quitter le cockpit éditorial.
+                    Pilotez les sources syndiquées, repérez les flux sans fraîcheur sur 24 h, et déclenchez les polls sans quitter le cockpit éditorial.
                 </p>
             </div>
             <div class="d-flex gap-2 flex-wrap justify-content-end">
@@ -100,7 +100,7 @@
                                 <th>État</th>
                                 <th>Santé</th>
                                 <th class="text-end">Ingestés</th>
-                                <th>Dernier poll</th>
+                                <th>Dernier fetch</th>
                                 <th class="text-end" style="min-width: 290px;">Actions</th>
                             </tr>
                         </thead>
@@ -110,7 +110,7 @@
                                     $badgeColor = $f->health_color;
                                     $badgeText  = $f->health_label;
                                 @endphp
-                                <tr>
+                                <tr class="{{ $f->row_class }}" data-health-row="{{ $f->health_row }}">
                                     <td data-label="Source">
                                         <strong>{{ $f->source_name ?? '—' }}</strong>
                                         @if($f->notes)
@@ -154,7 +154,7 @@
                                         </div>
                                     </td>
                                     <td data-label="Ingestés" class="text-end">{{ $f->items_ingested }}</td>
-                                    <td data-label="Dernier poll" class="small text-muted">
+                                    <td data-label="Dernier fetch" class="small text-muted">
                                         @if($f->last_polled_at)
                                             <div>poll {{ \Carbon\Carbon::parse($f->last_polled_at)->diffForHumans() }}</div>
                                         @else

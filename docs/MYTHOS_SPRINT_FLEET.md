@@ -45,7 +45,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **G** | A11y & I18n | G1–G6 | 4/6 done |
 | **H** | Testing & QA | H1–H7 | 4/7 done |
 | **I** | Marketing & Growth | I1–I8 | 0/8 |
-| **J** | Admin & Editorial Tooling | J1–J6 | 1/6 done |
+| **J** | Admin & Editorial Tooling | J1–J6 | 2/6 done |
 | **K** | 4-region editorial split | K1–K8 | 8/8 done — K8 closed 2026-05-05 |
 
 ---
@@ -264,7 +264,7 @@ editorial review of bias / cluster / source classification cheap.
 | **J3** | **"Coverage map" admin** — heatmap of which clusters have only L vs only R coverage (auto-derived from S181) so editorial knows where to seek out the missing side | Renders a visualization |
 | **J4** | **Bulk re-classify** — given a category id, re-run `GrimbaCategoryClassifier::classify` on every post and report changes | CLI command + admin button |
 | **J5** | **Vault-events analytics dashboard** (depends on C8) — most-saved posts per week, conversion funnel from save → return visit | Renders for one week of data |
-| **J6** | **Source health monitor** — last fetch timestamp + last error per RSS feed; red row when no fresh items in 24h | Renders, identifies broken feeds |
+| ✅ **J6** | **Source health monitor** — `/admin/grimba/rss-feeds` now sorts stale active feeds first, shows last fetch/success/error per RSS feed, and paints 24h-stale rows red in desktop and mobile layouts. | `SourceHealthMonitorTest` verifies the stale row and broken-feed ordering |
 
 ---
 

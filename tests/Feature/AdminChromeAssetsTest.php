@@ -36,6 +36,7 @@ class AdminChromeAssetsTest extends TestCase
         $this->assertStringContainsString('body .grimba-admin-empty__actions', $css);
         $this->assertStringContainsString('body .grimba-admin-table-responsive', $css);
         $this->assertStringContainsString('body .grimba-admin-table td[data-label]::before', $css);
+        $this->assertStringContainsString('body .grimba-rss-feed-row--stale > *', $css);
         $this->assertStringContainsString('body .grimba-admin-form-section', $css);
         $this->assertStringContainsString('body .grimba-admin-form-section__hint', $css);
         $this->assertStringContainsString('body .grimba-admin-form-actions', $css);
@@ -264,6 +265,7 @@ class AdminChromeAssetsTest extends TestCase
             'Command center',
             'RSS command lane',
             'RSS control tower',
+            'Source health monitor',
             'Ingest engine',
             'Audience command',
             'Source intelligence',
