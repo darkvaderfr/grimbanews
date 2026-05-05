@@ -1529,7 +1529,10 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-most-read__rank {
     color: var(--gn-paper);
     margin-top: 3rem;
 }
-.grimba-footer a { color: rgba(246, 241, 232, 0.75); text-decoration: none; }
+/* S352 — bumped from 0.75 → 0.88 for clearer contrast against the
+   dark footer surface (was reading dim at a glance). Hover stays full
+   white so the affordance is unmistakable. */
+.grimba-footer a { color: rgba(246, 241, 232, 0.88); text-decoration: none; transition: color 0.15s ease; }
 .grimba-footer a:hover { color: #fff; }
 .grimba-footer__heading {
     font-family: var(--gn-font-body);
