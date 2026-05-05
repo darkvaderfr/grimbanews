@@ -1,58 +1,69 @@
 @php
     /*
-     * Africa / International edition toggle.
-     *
-     * The cookie name stays `grimba_region` for compatibility with the
-     * existing GrimbaRegionScope, but the public product language is now
-     * "edition". Legacy six-region values are folded into International.
+     * Fleet K3 — 4-region edition toggle. Cookie name stays
+     * `grimba_region` for back-compat with the scope. Country lists +
+     * label / migration helpers live in App\Ground\Regions.
      */
-    $currentRegion = (string) (request()->cookie('grimba_region') ?? 'international');
-    $migrationMap = [
-        'monde' => 'international',
-        'europe' => 'international',
-        'afrique' => 'africa',
-        'france' => 'international',
-        'uk' => 'international',
-        'us' => 'international',
-        'canada' => 'international',
-    ];
-    $currentRegion = $migrationMap[$currentRegion] ?? $currentRegion;
-    if (! in_array($currentRegion, ['africa', 'international'], true)) {
-        $currentRegion = 'international';
-    }
+    use App\Ground\Regions;
+
+    $currentRegion = Regions::migrate((string) (request()->cookie('grimba_region') ?? 'international'));
 
     $editions = [
         'africa' => [
-            'label' => 'Afrique',
-            'href' => route('public.edition.africa'),
-            'count_key' => 'africa',
+            'label' => Regions::label('africa'),
+            'href'  => route('public.edition.africa'),
+        ],
+        'europe' => [
+            'label' => Regions::label('europe'),
+            'href'  => route('public.edition.europe'),
+        ],
+        'americas' => [
+            'label' => Regions::label('americas'),
+            'href'  => route('public.edition.americas'),
         ],
         'international' => [
-            'label' => 'International',
-            'href' => route('public.edition.international'),
-            'count_key' => 'international',
+            'label' => Regions::label('international'),
+            'href'  => route('public.edition.international'),
         ],
     ];
 
-    $africaCountries = [
-        'DZ','AO','BJ','BW','BF','BI','CV','CM','CF','TD','KM','CG','CD','DJ',
-        'EG','GQ','ER','SZ','ET','GA','GM','GH','GN','GW','CI','KE','LS','LR',
-        'LY','MG','MW','ML','MR','MU','MA','MZ','NA','NE','NG','RW','ST','SN',
-        'SC','SL','SO','ZA','SS','SD','TZ','TG','TN','UG','ZM','ZW',
-    ];
+    $editionCounts = \Illuminate\Support\Facades\Cache::remember('grimba_edition_counts_v2', 60, function () {
+        $excluded = Regions::otherNamedCodes();
 
-    $editionCounts = \Illuminate\Support\Facades\Cache::remember('grimba_edition_counts_v1', 60, function () use ($africaCountries) {
-        return [
-            'international' => \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
-                ->where('status', 'published')
-                ->count(),
-            'africa' => \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
-                ->where('status', 'published')
-                ->whereIn('source_id', function ($q) use ($africaCountries): void {
-                    $q->select('id')->from('news_sources')->whereIn('country', $africaCountries);
-                })
-                ->count(),
+        $counts = [
+            'africa'   => 0,
+            'europe'   => 0,
+            'americas' => 0,
+            'international' => 0,
         ];
+
+        foreach (['africa', 'europe', 'americas'] as $region) {
+            $codes = Regions::countries($region);
+            if (! $codes) continue;
+            $counts[$region] = \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
+                ->where('status', 'published')
+                ->whereIn('source_id', function ($q) use ($codes): void {
+                    $q->select('id')->from('news_sources')->whereIn('country', $codes);
+                })
+                ->count();
+        }
+
+        // International: posts whose source country is NOT in any of
+        // the three named regions, OR has no country tag, OR has no
+        // source at all. Mirrors the GrimbaRegionScope negative filter.
+        $counts['international'] = \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
+            ->where('status', 'published')
+            ->where(function ($q) use ($excluded): void {
+                $q->whereIn('source_id', function ($sub) use ($excluded): void {
+                    $sub->select('id')->from('news_sources')
+                        ->where(function ($w) use ($excluded): void {
+                            $w->whereNull('country')->orWhereNotIn('country', $excluded);
+                        });
+                })->orWhereNull('source_id');
+            })
+            ->count();
+
+        return $counts;
     });
 @endphp
 
@@ -131,7 +142,7 @@
 <div class="grimba-edition-toggle" role="group" aria-label="{{ __('Choisir une édition') }}" data-grimba-edition-root>
     @foreach($editions as $key => $edition)
         @php
-            $count = (int) ($editionCounts[$edition['count_key']] ?? 0);
+            $count = (int) ($editionCounts[$key] ?? 0);
             $isActive = $key === $currentRegion;
         @endphp
         <a href="{{ $edition['href'] }}"

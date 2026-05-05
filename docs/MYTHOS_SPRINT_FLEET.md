@@ -46,6 +46,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **H** | Testing & QA | H1–H7 | 0/7 |
 | **I** | Marketing & Growth | I1–I8 | 0/8 |
 | **J** | Admin & Editorial Tooling | J1–J6 | 0/6 |
+| **K** | 4-region editorial split | K1–K8 | OPEN — Vader directive 2026-05-05 |
 
 ---
 
@@ -264,6 +265,50 @@ editorial review of bias / cluster / source classification cheap.
 | **J4** | **Bulk re-classify** — given a category id, re-run `GrimbaCategoryClassifier::classify` on every post and report changes | CLI command + admin button |
 | **J5** | **Vault-events analytics dashboard** (depends on C8) — most-saved posts per week, conversion funnel from save → return visit | Renders for one week of data |
 | **J6** | **Source health monitor** — last fetch timestamp + last error per RSS feed; red row when no fresh items in 24h | Renders, identifies broken feeds |
+
+---
+
+## Fleet K — 4-Region Editorial Split
+
+**Vader directive (2026-05-05):** simplify the editorial cuts to four regions.
+Africa, Europe, Americas, **International**. International must NOT be
+"everything" — it must be ONLY items not covered in any of the other three
+regional editions, so it's a true "rest-of-world / cross-regional" surface,
+not a duplicate of the other three.
+
+**Drafted by:** Mythos planning system (this doc)  
+**Iterated by:** Steve Jobs (CPO design call), Liam Smith (PM scope), Alex Morgan (UI/UX), Nina Patel (Lead FE), Lisa Nguyen (data shape)
+
+**Why this is non-trivial:**
+- The current system has Africa + International, where International = "no
+  filter". After this change, International becomes a NEGATIVE filter:
+  exclude posts whose source is in Africa OR Europe OR Americas. Posts from
+  Asia, Oceania, Middle East, the Pacific, OR sources without a country
+  end up in International.
+- The migration map for legacy `grimba_region` cookies needs to fold:
+  `france` / `uk` / `europe` → `europe`; `us` / `canada` → `americas`;
+  `monde` → `international`; `afrique` → `africa`.
+- The region picker, the home edition badge, and the topic chips all need
+  to surface 4 options instead of 2.
+- Edition routes (`/afrique`, `/international`) need siblings: `/europe`,
+  `/amerique`.
+- Bias bar / coverage breakdown stay region-scoped (the `withoutGlobalScope`
+  use-cases keep working — we only change the SCOPE, not the bypasses).
+
+| ID | Sprint | Acceptance |
+|----|--------|------------|
+| **K1** | **Region map consolidation** — extract the 54-country Africa list out of `GrimbaRegionScope` and add Europe (~50 codes) + Americas (~35 codes) lists. Single source of truth | `App\Ground\Regions::AFRICA` etc. defined and exported |
+| **K2** | **GrimbaRegionScope rework** — switch to 4-region map; International becomes `whereNotIn` against the union of the three named regions. Legacy cookie migration extends to cover EU + AM legacy values | `?cookie=international` returns posts NOT in any named region |
+| **K3** | **Region picker UI** — `partials/home/region-dropdown.blade.php` shows 4 options (Afrique / Europe / Amériques / International) with per-region post counts. Edition badge updates accordingly | Mobile + desktop render 4 chips |
+| **K4** | **Edition redirect routes** — `/europe` and `/amerique` mirror `/afrique` and `/international` (set the cookie + redirect to `/`). All 4 are linkable from the picker, footer, and command palette | All 4 redirects 200, set cookie, redirect to / |
+| **K5** | **Topic chips + all-sides-rail respect region scope** — these surfaces use `Post::withoutGlobalScope('grimba_region')` today; they need to either keep that or apply the new region as appropriate per Liam's product call | Each surface either documented as cross-region or scoped |
+| **K6** | **Tests + edge cases** — unit test for `Regions::resolve()`, integration test for the negative-filter International, smoke test for legacy cookie migrations | New tests pass; legacy cookies don't 500 |
+| **K7** | **Memory + announcement** — update `project_grimbanews_next_prompt.md` with the 4-region model + write a SOK-style internal note for the editorial team explaining the new International definition | Memory + announcement land |
+| **K8** | **Backfill country tags on news_sources** — many seeded sources still have `country = NULL`. Audit + bulk-classify (by domain TLD or admin-set field) so the new International filter doesn't silently swallow legitimate-region content | At least 80% of active sources have a `country` value |
+
+K1-K6 are the front-end-shippable core. K7 is the close-out. K8 is a backend
+follow-up that would land in a parallel session once the editorial committee
+has signed off on the country mappings.
 
 ---
 

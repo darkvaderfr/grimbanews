@@ -528,27 +528,17 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         };
 
         Route::get('afrique', fn () => $editionRedirect('africa'))->name('public.edition.africa');
+        Route::get('europe', fn () => $editionRedirect('europe'))->name('public.edition.europe');
+        Route::get('amerique', fn () => $editionRedirect('americas'))->name('public.edition.americas');
         Route::get('international', fn () => $editionRedirect('international'))->name('public.edition.international');
 
         Route::post('region/set', function (Request $request) {
-            // Africa / International editorial editions. The cookie name
-            // remains grimba_region so the existing query scope and old
-            // clients continue to work.
-            $region = (string) $request->input('region', 'international');
-            $legacy = [
-                'monde' => 'international',
-                'europe' => 'international',
-                'afrique' => 'africa',
-                'france' => 'international',
-                'uk' => 'international',
-                'us' => 'international',
-                'canada' => 'international',
-            ];
-            $region = $legacy[$region] ?? $region;
-            $allowed = ['africa', 'international'];
-            if (! in_array($region, $allowed, true)) {
-                $region = 'international';
-            }
+            // Fleet K — 4-region split. Cookie name remains
+            // grimba_region for back-compat. App\Ground\Regions::migrate
+            // is the single source of truth for legacy → canonical
+            // mapping (covers monde / europe / afrique / france / uk /
+            // us / canada / amerique → 4 canonical keys).
+            $region = \App\Ground\Regions::migrate((string) $request->input('region', 'international'));
 
             return response()
                 ->json(['ok' => true, 'region' => $region])
