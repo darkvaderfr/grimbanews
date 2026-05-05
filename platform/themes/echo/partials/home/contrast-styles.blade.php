@@ -4,6 +4,10 @@
         background: #111;
     }
 
+    /* S349 — softer hero overlay. Was sized for vivid news photos
+       with crops at the bottom, but crushed clear / well-lit hero
+       images. Pulled overlay opacities back ~30% on average — text-
+       shadow on titles still keeps headlines readable. */
     .grimba-hero__media::after,
     .grimba-section__hero::after,
     .grimba-blind-card::after {
@@ -13,16 +17,16 @@
         z-index: 1;
         pointer-events: none;
         background:
-            radial-gradient(circle at 20% 54%, rgba(0, 0, 0, .78), transparent 48%),
-            linear-gradient(90deg, rgba(0, 0, 0, .86) 0%, rgba(0, 0, 0, .58) 48%, rgba(0, 0, 0, .24) 100%),
-            linear-gradient(0deg, rgba(0, 0, 0, .82) 0%, rgba(0, 0, 0, .18) 52%);
+            radial-gradient(circle at 20% 56%, rgba(0, 0, 0, .54), transparent 52%),
+            linear-gradient(90deg, rgba(0, 0, 0, .60) 0%, rgba(0, 0, 0, .38) 52%, rgba(0, 0, 0, .14) 100%),
+            linear-gradient(0deg, rgba(0, 0, 0, .58) 0%, rgba(0, 0, 0, .10) 56%);
     }
 
     .grimba-hero__gradient {
         z-index: 1;
         background:
-            linear-gradient(180deg, rgba(0, 0, 0, .12) 0%, rgba(0, 0, 0, .88) 100%),
-            linear-gradient(90deg, rgba(0, 0, 0, .86) 0%, rgba(0, 0, 0, .34) 72%);
+            linear-gradient(180deg, rgba(0, 0, 0, .06) 0%, rgba(0, 0, 0, .64) 100%),
+            linear-gradient(90deg, rgba(0, 0, 0, .60) 0%, rgba(0, 0, 0, .20) 76%);
     }
 
     .grimba-hero__text,
