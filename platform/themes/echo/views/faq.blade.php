@@ -1,5 +1,10 @@
 @php
     Theme::layout('grimba-chrome');
+    // S350 — page-specific OG image.
+    Theme::set('grimba_og_image', url('/og/page?' . http_build_query([
+        'kicker' => 'Foire aux questions',
+        'title'  => 'Comment marche GrimbaNews ?',
+    ])));
 
     $sections = [
         [

@@ -1,5 +1,10 @@
 @php
     Theme::layout('grimba-chrome');
+    // S350 — page-specific OG image so social shares don't show the home OG.
+    Theme::set('grimba_og_image', url('/og/page?' . http_build_query([
+        'kicker' => 'Comprendre',
+        'title'  => 'Le baromètre de couverture, segment par segment',
+    ])));
 @endphp
 
 <section class="grimba-bias-bar-explainer py-5">

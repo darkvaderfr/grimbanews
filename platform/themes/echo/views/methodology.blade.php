@@ -1,5 +1,10 @@
 @php
     Theme::layout('grimba-chrome');
+    // S350 — page-specific OG image.
+    Theme::set('grimba_og_image', url('/og/page?' . http_build_query([
+        'kicker' => 'Méthodologie',
+        'title'  => 'Comment GrimbaNews classe l\'information',
+    ])));
 @endphp
 
 <section class="grimba-methodology py-5">

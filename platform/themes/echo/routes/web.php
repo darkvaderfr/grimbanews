@@ -809,6 +809,10 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             return Theme::scope('faq', [])->render();
         })->name('public.faq');
 
+        // S350 — per-page OG image generator for static editorial pages.
+        Route::get('og/page', [\App\Http\Controllers\GrimbaPageOgController::class, 'show'])
+            ->name('public.og.page');
+
         // S312 — Bias-bar explainer page. Standalone "how to read the bar"
         // surface (the methodology page covers everything; this one drills
         // into just the coverage bar with edge cases + edition convention).
