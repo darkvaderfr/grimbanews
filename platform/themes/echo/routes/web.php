@@ -2,6 +2,7 @@
 
 use App\Support\GrimbaTranslationPresenter as GnTr;
 use App\Support\GrimbaVault;
+use App\Support\GrimbaVaultEvents;
 use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
@@ -1151,6 +1152,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             $ids = GrimbaVault::parseIds(implode(',', $ids));
             $value = GrimbaVault::serializeIds($ids);
+            GrimbaVaultEvents::record($request, $saved ? 'save' : 'unsave', $postId);
 
             return response()
                 ->json([

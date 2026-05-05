@@ -130,3 +130,12 @@ Schedule::command('grimba:enrich-drafts')
     ->onOneServer()
     ->withoutOverlapping(60)
     ->runInBackground();
+
+// GrimbaNews — privacy-preserving vault analytics archive. The live
+// endpoint stores only event/post/timestamp/salted IP hash; this weekly
+// job rewrites the current month's rollup for editorial trend review.
+grimba_schedule_command('vault_events_archive', 'grimba:archive-vault-events')
+    ->weeklyOn(1, '04:25')
+    ->onOneServer()
+    ->withoutOverlapping(30)
+    ->runInBackground();
