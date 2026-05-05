@@ -25,9 +25,14 @@
                     GrimbaNews — Sources à classer
                     <small class="text-muted">{{ $rows->count() }}</small>
                 </x-core::card.title>
-                <a href="{{ route('grimba.news-sources.index') }}" class="btn btn-outline-secondary btn-sm">
-                    ← Toutes les sources
-                </a>
+                <div class="grimba-admin-actions">
+                    <a href="{{ route('grimba.news-sources.classification') }}" class="btn btn-outline-primary btn-sm">
+                        Classification
+                    </a>
+                    <a href="{{ route('grimba.news-sources.index') }}" class="btn btn-outline-secondary btn-sm">
+                        ← Toutes les sources
+                    </a>
+                </div>
             </x-core::card.header>
 
             <x-core::card.body>

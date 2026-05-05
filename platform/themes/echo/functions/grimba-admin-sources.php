@@ -40,6 +40,52 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             return view('grimba-admin.news-sources.index', compact('sources', 'q', 'unknownCount'));
         })->name('news-sources.index');
 
+        Route::get('news-sources/classification', function (Request $request) {
+            $q = trim((string) $request->input('q', ''));
+
+            $query = DB::table('news_sources');
+            if ($q !== '') {
+                $query->where(function ($w) use ($q): void {
+                    $w->where('name', 'like', "%{$q}%")
+                        ->orWhere('website', 'like', "%{$q}%")
+                        ->orWhere('owner_name', 'like', "%{$q}%")
+                        ->orWhere('country', 'like', "%{$q}%");
+                });
+            }
+
+            $sources = $query
+                ->orderByRaw('CASE WHEN credibility_score IS NULL THEN 0 ELSE 1 END')
+                ->orderBy('credibility_score')
+                ->orderBy('name')
+                ->paginate(40)
+                ->withQueryString();
+
+            $sourceIds = collect($sources->items())->pluck('id')->map(fn ($id) => (int) $id)->all();
+            $articleCounts = empty($sourceIds)
+                ? collect()
+                : DB::table('posts')
+                    ->whereIn('source_id', $sourceIds)
+                    ->select('source_id', DB::raw('COUNT(*) as c'))
+                    ->groupBy('source_id')
+                    ->pluck('c', 'source_id');
+
+            $stats = [
+                'total' => DB::table('news_sources')->count(),
+                'unknown_bias' => DB::table('news_sources')->where('bias_rating', 'unknown')->count(),
+                'missing_credibility' => DB::table('news_sources')->whereNull('credibility_score')->count(),
+                'missing_country' => DB::table('news_sources')->where(function ($w): void {
+                    $w->whereNull('country')->orWhere('country', '');
+                })->count(),
+            ];
+
+            return view('grimba-admin.news-sources.classification', [
+                'sources' => $sources,
+                'q' => $q,
+                'articleCounts' => $articleCounts,
+                'stats' => $stats,
+            ]);
+        })->name('news-sources.classification');
+
         // S133 — unknown-bias triage queue. NewsAPI auto-creates
         // source rows for outlets not in its catalog (BFMTV,
         // Lalibre.be, etc.); they land here marked unknown for
@@ -289,6 +335,15 @@ app()->booted(function (): void {
                     ->name('Sources à classer')
                     ->icon('ti ti-adjustments')
                     ->route('grimba.news-sources.triage')
+            )
+            ->registerItem(
+                DashboardMenuItem::make()
+                    ->id('grimba-news-sources-classification')
+                    ->priority(12)
+                    ->parentId('grimba-root')
+                    ->name('Classification sources')
+                    ->icon('ti ti-list-check')
+                    ->route('grimba.news-sources.classification')
             );
     });
 });

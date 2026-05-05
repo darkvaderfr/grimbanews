@@ -32,6 +32,9 @@
                             <span class="badge text-bg-danger ms-1">{{ $unknownCount }}</span>
                         @endif
                     </a>
+                    <a href="{{ route('grimba.news-sources.classification') }}" class="btn btn-outline-primary btn-sm">
+                        Classification
+                    </a>
                     <a href="{{ route('grimba.news-sources.create') }}" class="btn btn-primary btn-sm">
                         + Nouvelle source
                     </a>
