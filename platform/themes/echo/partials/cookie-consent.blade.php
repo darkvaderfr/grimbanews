@@ -136,9 +136,15 @@
     .grimba-cookie-consent--hidden { display: none; }
     @media (max-width: 540px) {
         .grimba-cookie-consent {
-            right: 12px; left: 12px; bottom: 12px;
+            right: 12px; left: 12px; bottom: calc(92px + env(safe-area-inset-bottom));
             max-width: none; width: auto;
+            max-height: calc(100vh - 126px - env(safe-area-inset-bottom));
+            overflow-y: auto;
+            z-index: 1047;
         }
+        .grimba-cookie-consent__inner { padding: 16px; }
+        .grimba-cookie-consent__title { font-size: 20px; }
+        .grimba-cookie-consent__body { font-size: 13px; }
         .grimba-cookie-consent__more { margin-left: 0; }
     }
 </style>

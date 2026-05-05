@@ -96,7 +96,7 @@
                 </button>
             </form>
 
-            <div class="d-flex align-items-center gap-2">
+            <div class="grimba-header__actions d-flex align-items-center gap-2">
                 <button type="button" data-grimba-newsletter-open class="btn-grimba btn-grimba--solid">{{ __('S\'abonner') }}</button>
                 <a href="{{ url('/login') }}" class="btn-grimba btn-grimba--ghost">{{ __('Se connecter') }}</a>
             </div>

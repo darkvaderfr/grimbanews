@@ -53,6 +53,30 @@ class PwaShellTest extends TestCase
         $this->assertStringNotContainsString('.grimba-header__tools a {', $css);
     }
 
+    public function test_mobile_shell_css_guards_against_logged_in_overflow(): void
+    {
+        $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+        $cookieConsent = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/cookie-consent.blade.php');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('grimba-header__actions', false)
+            ->assertSee('grimba-mobile-nav__icon', false);
+
+        $this->assertStringContainsString('body.show-admin-bar', $css);
+        $this->assertStringContainsString('#admin_bar', $css);
+        $this->assertStringContainsString('min-width: 0 !important;', $css);
+        $this->assertStringContainsString('grid-template-columns: minmax(0, 1fr) auto;', $css);
+        $this->assertStringContainsString('.grimba-header__actions', $css);
+        $this->assertStringContainsString('.grimba-translation-note .gn-nobuai-chip', $css);
+        $this->assertStringContainsString('.grimba-mobile-nav__item.is-active .grimba-mobile-nav__icon', $css);
+        $this->assertStringContainsString('.phpdebugbar-openhandler', $css);
+        $this->assertStringContainsString('body.grimba-home .site-notice.js-site-notice', $css);
+        $this->assertStringContainsString('body.grimba-home a.grimba-briefing__headline', $css);
+        $this->assertStringContainsString('color: #fffaf0;', $css);
+        $this->assertStringContainsString('bottom: calc(92px + env(safe-area-inset-bottom));', $cookieConsent);
+    }
+
     public function test_region_choice_suppresses_onboarding_overlay_across_editions(): void
     {
         foreach ([

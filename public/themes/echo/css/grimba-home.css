@@ -591,10 +591,28 @@ body.grimba-home .grimba-hero__title,
 body.grimba-home .grimba-section__title {
     font-family: var(--gn-font-display);
     font-optical-sizing: auto;
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
 }
 
 body.grimba-home a:not([class*="btn-grimba"]):not([class*="grimba-urgency__cta"]):not([class*="grimba-edition-toggle__option"]) { color: inherit; }
+
+body.grimba-home a.grimba-briefing__headline,
+body.grimba-home a.grimba-topnews__headline,
+body.grimba-home a.grimba-latest__headline {
+    color: var(--gn-ink);
+}
+body.grimba-home .grimba-briefing__body .small.opacity-75 {
+    color: var(--gn-ink-soft);
+    opacity: 1 !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home a.grimba-briefing__headline,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home a.grimba-topnews__headline,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home a.grimba-latest__headline {
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-briefing__body .small.opacity-75 {
+    color: #d8cfb8;
+}
 
 /* Kill stock newsletter popup + announcement on the new homepage */
 body.grimba-home .newsletter-popup-wrap,
@@ -732,7 +750,7 @@ html.grimba-header-shrunk .grimba-header__main .py-3 {
     color: var(--gn-ink);
     font-family: var(--gn-font-display);
     font-weight: 700;
-    letter-spacing: -0.015em;
+    letter-spacing: 0;
     line-height: 1;
 }
 .grimba-wordmark__mark {
@@ -746,7 +764,7 @@ html.grimba-header-shrunk .grimba-header__main .py-3 {
     font-size: 1.5rem;
     font-style: normal;
     color: var(--gn-accent);
-    letter-spacing: -0.015em;
+    letter-spacing: 0;
 }
 .grimba-wordmark--light { color: var(--gn-paper); }
 .grimba-wordmark--light .grimba-wordmark__tag { color: var(--gn-accent); }
@@ -813,6 +831,11 @@ html.grimba-home-html[data-bs-theme="dark"] {
     flex: 0 0 auto;
 }
 .grimba-search button svg { pointer-events: none; width: 18px; height: 18px; }
+
+.grimba-header__actions {
+    flex: 0 0 auto;
+    min-width: 0;
+}
 
 .btn-grimba {
     display: inline-flex;
@@ -1889,12 +1912,111 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-most-read__rank {
     .grimba-briefing { border-right: 0; padding-right: 0; border-bottom: 1px solid var(--gn-rule); padding-bottom: 1.5rem; }
     .grimba-nav { display: none !important; }
     .grimba-header__meta { display: none; }
+    .grimba-header__main .container-xxl { gap: 1rem !important; }
     .grimba-search { max-width: none; margin: 0; }
     .grimba-hero__title { font-size: 1.5rem; }
     .grimba-section__title { font-size: 1.4rem; }
 }
 @media (max-width: 575px) {
-    .grimba-header__main .btn-grimba { padding: 0.4rem 0.7rem; font-size: 0.8rem; }
+    html.grimba-home-html,
+    body.grimba-home {
+        overflow-x: hidden;
+    }
+    body.show-admin-bar {
+        margin-top: 40px !important;
+    }
+    #admin_bar {
+        min-width: 0 !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    #admin_bar::-webkit-scrollbar {
+        display: none;
+    }
+    #admin_bar .admin-bar-container {
+        display: flex !important;
+        align-items: center;
+        gap: 18px;
+        width: max-content !important;
+        min-width: 100% !important;
+        padding: 0 12px !important;
+    }
+    #admin_bar .admin-bar-logo {
+        display: none !important;
+    }
+    #admin_bar .admin-navbar-nav,
+    #admin_bar .admin-navbar-nav-right {
+        display: inline-flex !important;
+        align-items: center;
+        float: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        white-space: nowrap;
+    }
+    #admin_bar .admin-navbar-nav > li {
+        float: none !important;
+        flex: 0 0 auto;
+        margin: 0 0 0 14px !important;
+    }
+    #admin_bar .admin-navbar-nav > li:first-child {
+        margin-left: 0 !important;
+    }
+    .grimba-header__main .container-xxl {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.75rem !important;
+        padding: 0.9rem 1rem !important;
+    }
+    .grimba-wordmark {
+        min-width: 0;
+        max-width: 100%;
+        gap: 0.24rem;
+    }
+    .grimba-wordmark__mark {
+        font-size: 1.55rem;
+    }
+    .grimba-wordmark__tag {
+        font-size: 1.32rem;
+    }
+    .grimba-search {
+        justify-self: end;
+        flex: 0 0 48px;
+        width: 48px;
+        max-width: 48px;
+        height: 48px;
+    }
+    .grimba-search input {
+        position: absolute;
+        inset: 0;
+        padding: 0;
+        opacity: 0;
+        pointer-events: none;
+    }
+    .grimba-search button {
+        position: static;
+        transform: none;
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        max-width: 48px;
+        border: 1px solid var(--gn-rule);
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--gn-ink);
+    }
+    html.grimba-home-html[data-bs-theme="dark"] .grimba-search button {
+        background: rgba(246, 241, 232, 0.09);
+        border-color: rgba(246, 241, 232, 0.16);
+        color: #fffaf0;
+    }
+    .grimba-header__actions {
+        display: none !important;
+    }
     .grimba-hero__text { left: 1rem; right: 1rem; bottom: 3.5rem; width: auto; padding: 12px; border-radius: 18px; }
     .grimba-hero__coverage { left: 1rem; right: 1rem; }
     .grimba-latest__thumb, .grimba-topnews__thumb { display: none; }
@@ -2202,6 +2324,11 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-cookie-consent {
     border-color: rgba(246, 241, 232, 0.12) !important;
 }
 
+body.grimba-home .site-notice.js-site-notice,
+body.grimba-subpage .site-notice.js-site-notice {
+    display: none !important;
+}
+
 /* Bias-mix bars — keep colour vivid; just ensure label text reads */
 html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
     color: var(--gn-ink);
@@ -2242,13 +2369,16 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
     position: fixed;
     left: 12px;
     right: 12px;
-    bottom: 12px;
-    z-index: 1035;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    z-index: 1046;
     display: none;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 3px;
-    padding: 6px;
-    border-radius: 24px;
+    min-height: 68px;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 7px;
+    border-radius: 22px;
     background: rgba(246, 241, 232, 0.92);
     border: 1px solid rgba(26, 23, 19, 0.10);
     box-shadow: 0 18px 60px rgba(26, 23, 19, 0.16);
@@ -2260,19 +2390,46 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    min-height: 48px;
-    border-radius: 18px;
+    gap: 3px;
+    min-width: 0;
+    min-height: 52px;
+    padding: 5px 2px;
+    border-radius: 16px;
     color: var(--gn-ink-soft);
     text-decoration: none;
     font-size: 10.5px;
     font-weight: 700;
+    line-height: 1.1;
+    overflow: hidden;
 }
 .grimba-mobile-nav__icon {
-    font-size: 16px;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     line-height: 1;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.grimba-mobile-nav__icon svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+}
+.grimba-mobile-nav__item > span:last-child {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .grimba-mobile-nav__item.is-active {
+    background: rgba(26, 23, 19, 0.07);
+    color: var(--gn-ink);
+    box-shadow: inset 0 0 0 1px rgba(26, 23, 19, 0.06);
+}
+.grimba-mobile-nav__item.is-active .grimba-mobile-nav__icon {
     background: var(--gn-ink);
     color: var(--gn-paper);
 }
@@ -2374,6 +2531,14 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
     font-family: var(--gn-font-body);
     font-size: 12px;
 }
+.grimba-translation-note .gn-nobuai-chip {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+.grimba-translation-note > span:not(.gn-nobuai-chip) {
+    min-width: 0;
+    line-height: 1.45;
+}
 /* S334 — dark variant. The light rule's rgba(26,23,19,0.045) is
    essentially invisible against a dark canvas — flip to a faint
    cream tint that reads as "informational chip" without competing
@@ -2382,6 +2547,14 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-translation-note {
     background: rgba(246, 241, 232, 0.06);
     border-color: rgba(246, 241, 232, 0.14);
     color: var(--gn-ink-muted);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-translation-note .gn-nobuai-chip {
+    background: rgba(246, 241, 232, 0.08) !important;
+    border-color: rgba(246, 241, 232, 0.18) !important;
+    color: #fffaf0 !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-translation-note .gn-nobuai-chip span[aria-hidden="true"] {
+    background: linear-gradient(135deg, #fffaf0, #a8a29a) !important;
 }
 .grimba-header-pulse {
     font-family: var(--gn-font-mono);
@@ -2406,7 +2579,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-translation-note {
 
 @media (max-width: 767.98px) {
     body.grimba-home {
-        padding-bottom: 86px;
+        padding-bottom: calc(96px + env(safe-area-inset-bottom));
     }
     .grimba-most-read {
         padding: 0.85rem;
@@ -2425,6 +2598,24 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-translation-note {
     }
     .grimba-vault-fab {
         display: inline-flex;
+        bottom: calc(92px + env(safe-area-inset-bottom));
+    }
+    .phpdebugbar,
+    .phpdebugbar-openhandler,
+    #phpdebugbar {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+    .grimba-translation-note {
+        display: flex;
+        width: 100%;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.8rem 0.9rem;
+        border-radius: 22px;
+        font-size: 0.9rem;
+        line-height: 1.45;
     }
 }
 
@@ -2436,8 +2627,11 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-mobile-nav__item {
     color: var(--gn-ink-soft);
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-mobile-nav__item.is-active {
-    /* S348 — literal cream, not --gn-paper (which dark-mode-resolves
-       to near-black, making the active state invisible). */
+    background: rgba(246, 241, 232, 0.10);
+    color: #fffaf0;
+    box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.10);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-mobile-nav__item.is-active .grimba-mobile-nav__icon {
     background: #f6f1e8;
     color: #1a1713;
 }
