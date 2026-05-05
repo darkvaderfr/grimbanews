@@ -52,6 +52,7 @@ class ClusterPageTest extends TestCase
                 ->where('id', $id)
                 ->update([
                     'story_cluster_id' => $clusterId,
+                    'source_id' => null,
                     'bias_rating' => $biases[$index] ?? 'unknown',
                     'summary_nobuai' => null,
                     'summary_generated_at' => null,
