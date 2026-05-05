@@ -487,18 +487,25 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->joinSub($recentCategoryActivity, 'activity', function ($join): void {
                     $join->on('activity.category_id', '=', 'categories.id');
                 })
+                ->leftJoin('slugs', function ($join): void {
+                    $join->on('slugs.reference_id', '=', 'categories.id')
+                        ->where('slugs.reference_type', Category::class)
+                        ->where('slugs.prefix', 'blog');
+                })
                 ->where('categories.status', 'published')
                 ->orderByDesc('activity.article_count')
                 ->orderBy('categories.name')
                 ->limit(24)
-                ->get(['categories.id', 'categories.name', 'categories.description', 'activity.article_count'])
+                ->get(['categories.id', 'categories.name', 'categories.description', 'activity.article_count', 'slugs.key as slug'])
                 ->map(fn ($category): array => [
                     'type' => 'category',
                     'label' => __('Sujet'),
                     'title' => (string) $category->name,
                     'subtitle' => (string) ($category->description ?: __('Rubrique active')),
                     'meta' => trans_choice(':count article récent|:count articles récents', (int) $category->article_count, ['count' => (int) $category->article_count]),
-                    'url' => url('/search?categorie=' . $category->id),
+                    'url' => $category->slug
+                        ? url('/blog/' . $category->slug)
+                        : url('/search?q=' . rawurlencode((string) $category->name)),
                 ]);
 
             $items = collect()

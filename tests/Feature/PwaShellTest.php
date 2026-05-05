@@ -77,6 +77,37 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('bottom: calc(92px + env(safe-area-inset-bottom));', $cookieConsent);
     }
 
+    public function test_command_palette_shell_and_index_are_available(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('id="grimba-command-palette"', false)
+            ->assertSee('data-grimba-command-form', false)
+            ->assertSee('command-palette.json', false)
+            ->assertSee('grimba_command_palette_index_v1', false)
+            ->assertSee("key === 'k'", false)
+            ->assertSee('event.metaKey || event.ctrlKey', false);
+
+        $this->get('/sources')
+            ->assertOk()
+            ->assertSee('id="grimba-command-palette"', false);
+
+        $response = $this->get('/command-palette.json')
+            ->assertOk()
+            ->assertHeader('Cache-Control', 'max-age=300, public, s-maxage=300')
+            ->assertJsonPath('ttl_seconds', 300);
+
+        $items = $response->json('items');
+        $this->assertNotEmpty($items);
+        $this->assertContains('nav', array_column($items, 'type'));
+        $this->assertContains('story', array_column($items, 'type'));
+        $this->assertArrayHasKey('url', $items[0]);
+
+        foreach ($items as $item) {
+            $this->assertStringNotContainsString('categorie=', (string) ($item['url'] ?? ''));
+        }
+    }
+
     public function test_region_choice_suppresses_onboarding_overlay_across_editions(): void
     {
         foreach ([

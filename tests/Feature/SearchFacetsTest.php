@@ -39,12 +39,13 @@ class SearchFacetsTest extends TestCase
             now()->subDays(14)
         );
 
-        $this->get('/search?' . http_build_query([
-            'q' => 'facetneedle',
-            'owner' => 'Facet Owner Alpha ' . $suffix,
-            'from_date' => now()->subDays(5)->toDateString(),
-            'to_date' => now()->toDateString(),
-        ]))
+        $this->withUnencryptedCookies(['grimba_region' => 'europe'])
+            ->get('/search?' . http_build_query([
+                'q' => 'facetneedle',
+                'owner' => 'Facet Owner Alpha ' . $suffix,
+                'from_date' => now()->subDays(5)->toDateString(),
+                'to_date' => now()->toDateString(),
+            ]))
             ->assertOk()
             ->assertSee((string) DB::table('posts')->where('id', $matchId)->value('name'))
             ->assertDontSee((string) DB::table('posts')->where('id', $otherOwnerId)->value('name'))

@@ -129,6 +129,7 @@
 
     @include(Theme::getThemeNamespace('partials.home.vault-fab'))
     @include(Theme::getThemeNamespace('partials.home.mobile-bottom-nav'))
+    @include(Theme::getThemeNamespace('partials.command-palette'))
 
     @include(Theme::getThemeNamespace('partials.home.footer-dark'))
 

@@ -39,7 +39,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **A** | Push & Deploy Gate | A1–A5 | OPEN — pushing blocked |
 | **B** | Story Page Completion | B1–B10 | 10/10 done |
 | **C** | Vault Maturity | C1–C8 | 4/8 done |
-| **D** | Discovery & Navigation | D1–D8 | 6/8 done |
+| **D** | Discovery & Navigation | D1–D8 | 7/8 done |
 | **E** | NobuAI Integration | E1–E7 | 4/7 done |
 | **F** | Performance & SEO | F1–F8 | 8/8 done |
 | **G** | A11y & I18n | G1–G6 | 4/6 done |
@@ -161,7 +161,7 @@ need to feel as cinematic as the story pages.
 | ✅ **D5** | **Search facets** — `/search?q=...` supports `source`, `bias`, `owner`, `from_date`, and `to_date`. `search.blade.php` exposes all facet controls. | `SearchFacetsTest` verifies owner + date range narrowing |
 | ✅ S207 | Topic-chip strip persistence | Uncommitted worktree |
 | **D7** | **Saved-search alerts (member-only)** — let logged-in readers save a search query + facet combo. New `saved_searches` table; weekly cron emails new matches | One member can save & receive a digest |
-| **D8** | **Site-wide command palette (⌘K)** — fuzzy search across categories, sources, recent stories. Lazy-loaded JS, cookie-cached search index | ⌘K opens; typing 2 chars surfaces matches |
+| ✅ **D8** | **Site-wide command palette (⌘K)** — shared modal on Grimba shells, fuzzy search across navigation, recent stories, sources, and active categories. Header search opens it with `/search` fallback; index is lazy-fetched and cached in localStorage with a freshness cookie. | `PwaShellTest` covers shell + JSON index; Playwright verified desktop and mobile dark palette with no horizontal overflow |
 
 ---
 

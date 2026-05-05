@@ -89,8 +89,8 @@
                 <a href="{{ url('/sources') }}">{{ __('Sources') }}</a>
             </nav>
 
-            <form action="{{ url('/search') }}" method="get" class="grimba-search flex-grow-1" role="search">
-                <input type="search" name="q" placeholder="{{ __('Rechercher une histoire, un sujet, une source…') }}" aria-label="{{ __('Recherche') }}">
+            <form action="{{ url('/search') }}" method="get" class="grimba-search flex-grow-1" role="search" data-grimba-command-form>
+                <input type="search" name="q" placeholder="{{ __('Rechercher une histoire, un sujet, une source…') }}" aria-label="{{ __('Recherche') }}" data-grimba-command-source>
                 <button type="submit" aria-label="{{ __('Lancer la recherche') }}">
                     <x-core::icon name="ti ti-search" />
                 </button>

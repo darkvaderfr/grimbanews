@@ -120,6 +120,7 @@
 
     @include(Theme::getThemeNamespace('partials.home.vault-fab'))
     @include(Theme::getThemeNamespace('partials.home.mobile-bottom-nav'))
+    @include(Theme::getThemeNamespace('partials.command-palette'))
 
     {{-- S173/S185 — shared vault toggle handler for all layouts. --}}
     @include(Theme::getThemeNamespace('partials.home.vault-script'))
