@@ -652,6 +652,10 @@ a.grimba-urgency__cta,
     -webkit-backdrop-filter: blur(8px);
     font-family: var(--gn-font-body);
     font-size: 0.85rem;
+    /* S353 — collapse the meta strip when the page has scrolled. */
+    transition: max-height 0.22s ease, opacity 0.18s ease, padding 0.22s ease;
+    overflow: hidden;
+    max-height: 56px;
 }
 .grimba-header__main {
     background: rgba(246, 241, 232, 0.85);
@@ -661,6 +665,26 @@ a.grimba-urgency__cta,
     box-shadow: 0 6px 20px rgba(26, 23, 19, 0.06);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
+    /* S353 — slight shrink + lift on scroll. */
+    transition: padding 0.22s ease, box-shadow 0.18s ease;
+}
+/* S353 — shrunk state set by JS observer on the html element. */
+html.grimba-header-shrunk .grimba-header__meta {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom-width: 0;
+}
+html.grimba-header-shrunk .grimba-header__main {
+    box-shadow: 0 10px 28px rgba(26, 23, 19, 0.10);
+}
+html.grimba-header-shrunk .grimba-header__main .py-3 {
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .grimba-header__meta, .grimba-header__main { transition: none; }
 }
 
 /* S83 masthead — editorial serif, mixed case, accent-red "News".

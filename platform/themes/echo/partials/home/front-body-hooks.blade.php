@@ -151,4 +151,31 @@
             init();
         }
     })();
+
+    /* S353 — sticky desktop nav shrink on scroll. Add a sentinel
+       element above the sticky header; an IntersectionObserver flips
+       html.grimba-header-shrunk on/off when it leaves/enters the
+       viewport. CSS rules in grimba-home.css collapse the meta strip
+       and tighten the main header padding when the class is set. */
+    (function () {
+        if (typeof IntersectionObserver !== 'function') return;
+
+        const sentinel = document.createElement('div');
+        sentinel.id = 'grimba-header-sentinel';
+        sentinel.setAttribute('aria-hidden', 'true');
+        sentinel.style.cssText = 'position:absolute; top:0; left:0; width:1px; height:1px; pointer-events:none;';
+        document.body.insertBefore(sentinel, document.body.firstChild);
+
+        const root = document.documentElement;
+        const obs = new IntersectionObserver((entries) => {
+            for (const e of entries) {
+                if (e.isIntersecting) {
+                    root.classList.remove('grimba-header-shrunk');
+                } else {
+                    root.classList.add('grimba-header-shrunk');
+                }
+            }
+        }, { threshold: 0 });
+        obs.observe(sentinel);
+    })();
 </script>
