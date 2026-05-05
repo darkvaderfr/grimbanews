@@ -87,6 +87,45 @@ class NewsApiCategorySweepTest extends TestCase
         Http::assertSentCount(1);
     }
 
+    public function test_newsapi_fetcher_infers_country_for_auto_created_sources(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+        DB::table('grimba_newsapi_runs')->delete();
+
+        $sourceName = 'K8 Auto Country ' . Str::random(8);
+        $articleUrl = 'https://www.telerama.fr/k8-' . Str::random(10);
+
+        $this->setting('grimba_newsapi_key', 'test-newsapi-key-' . Str::random(8));
+        $this->setting('grimba_newsapi_countries', 'fr');
+        $this->setting('grimba_newsapi_categories', 'general');
+        $this->setting('grimba_newsapi_queries', '');
+        $this->setting('grimba_newsapi_daily_request_budget', '900');
+        $this->setting('grimba_newsapi_max_calls_per_run', '40');
+
+        Http::fake([
+            'newsapi.org/v2/top-headlines*' => Http::response([
+                'status' => 'ok',
+                'totalResults' => 1,
+                'articles' => [[
+                    'source' => ['id' => null, 'name' => $sourceName],
+                    'author' => null,
+                    'title' => 'K8 country inference headline',
+                    'description' => 'A test article for source country inference.',
+                    'url' => $articleUrl,
+                    'urlToImage' => 'https://www.telerama.fr/image.jpg',
+                    'publishedAt' => now()->toIso8601String(),
+                    'content' => 'Country inference fixture content.',
+                ]],
+            ], 200),
+        ]);
+
+        $summary = app(GrimbaNewsApiFetcher::class)->fetchAll();
+
+        $this->assertSame('ok', $summary[0]['status']);
+        $this->assertSame(1, $summary[0]['ingested']);
+        $this->assertSame('FR', DB::table('news_sources')->where('name', $sourceName)->value('country'));
+    }
+
     private function setting(string $key, string $value): void
     {
         $store = app(SettingStore::class);

@@ -46,7 +46,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **H** | Testing & QA | H1–H7 | 0/7 |
 | **I** | Marketing & Growth | I1–I8 | 0/8 |
 | **J** | Admin & Editorial Tooling | J1–J6 | 0/6 |
-| **K** | 4-region editorial split | K1–K8 | OPEN — Vader directive 2026-05-05 |
+| **K** | 4-region editorial split | K1–K8 | 8/8 done — K8 closed 2026-05-05 |
 
 ---
 
@@ -304,11 +304,11 @@ not a duplicate of the other three.
 | **K5** | **Topic chips + all-sides-rail respect region scope** — these surfaces use `Post::withoutGlobalScope('grimba_region')` today; they need to either keep that or apply the new region as appropriate per Liam's product call | Each surface either documented as cross-region or scoped |
 | **K6** | **Tests + edge cases** — unit test for `Regions::resolve()`, integration test for the negative-filter International, smoke test for legacy cookie migrations | New tests pass; legacy cookies don't 500 |
 | **K7** | **Memory + announcement** — update `project_grimbanews_next_prompt.md` with the 4-region model + write a SOK-style internal note for the editorial team explaining the new International definition | Memory + announcement land |
-| **K8** | **Backfill country tags on news_sources** — many seeded sources still have `country = NULL`. Audit + bulk-classify (by domain TLD or admin-set field) so the new International filter doesn't silently swallow legitimate-region content | At least 80% of active sources have a `country` value |
+| **K8** | **Backfill country tags on news_sources** — `grimba:backfill-source-countries` audits active sources, infers only high-confidence ISO2 tags from exact domains, country TLDs, source names, RSS URLs, and NewsAPI article URLs, and dry-runs by default. NewsAPI auto-created sources now reuse the same inference path. Local apply on 2026-05-05 tagged 289/298 active sources (97%); 9 ambiguous sources remain for editor review. | At least 80% of active sources have a `country` value |
 
-K1-K6 are the front-end-shippable core. K7 is the close-out. K8 is a backend
-follow-up that would land in a parallel session once the editorial committee
-has signed off on the country mappings.
+K1-K6 are the front-end-shippable core. K7 is the close-out. K8 is now shipped;
+remaining untagged active sources are intentionally ambiguous and should be
+classified by an editor rather than guessed.
 
 ---
 

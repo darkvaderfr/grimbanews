@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\GrimbaSourceCountryBackfill;
 use Botble\Blog\Models\Post;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Models\Slug;
@@ -308,7 +309,7 @@ class GrimbaNewsApiFetcher
 
         // Resolve to our news_sources row. If absent, auto-create a
         // placeholder marked unknown bias for editor review.
-        $sourceId = $this->resolveSourceId($apiSourceId, $sourceName);
+        $sourceId = $this->resolveSourceId($apiSourceId, $sourceName, $url);
 
         $title = trim((string) ($article['title'] ?? ''));
         if ($title === '') {
@@ -447,24 +448,46 @@ class GrimbaNewsApiFetcher
         ]);
     }
 
-    private function resolveSourceId(string $apiId, string $name): ?int
+    private function resolveSourceId(string $apiId, string $name, string $articleUrl = ''): ?int
     {
         if ($apiId !== '') {
-            $byApi = DB::table('news_sources')->where('api_id', $apiId)->value('id');
+            $byApi = DB::table('news_sources')->where('api_id', $apiId)->first(['id', 'name', 'website', 'country']);
             if ($byApi) {
-                return (int) $byApi;
+                if (trim((string) ($byApi->country ?? '')) === '') {
+                    $this->backfillSourceCountryIfMissing(
+                        (int) $byApi->id,
+                        (string) ($byApi->name ?: $name),
+                        $byApi->website,
+                        $apiId,
+                        $articleUrl
+                    );
+                }
+
+                return (int) $byApi->id;
             }
         }
 
         if ($name !== '') {
-            $byName = DB::table('news_sources')->where('name', $name)->value('id');
+            $byName = DB::table('news_sources')->where('name', $name)->first(['id', 'website', 'country']);
             if ($byName) {
                 // Backfill api_id on the existing row so future calls
                 // hit the indexed lookup above.
+                $updates = [];
                 if ($apiId !== '') {
-                    DB::table('news_sources')->where('id', $byName)->update(['api_id' => $apiId]);
+                    $updates['api_id'] = $apiId;
                 }
-                return (int) $byName;
+
+                $country = $this->inferredSourceCountry($name, $byName->website, $apiId, $articleUrl);
+                if (trim((string) ($byName->country ?? '')) === '' && $country !== null) {
+                    $updates['country'] = $country;
+                }
+
+                if ($updates !== []) {
+                    $updates['updated_at'] = now();
+                    DB::table('news_sources')->where('id', $byName->id)->update($updates);
+                }
+
+                return (int) $byName->id;
             }
         }
 
@@ -487,6 +510,8 @@ class GrimbaNewsApiFetcher
             $i++;
         }
 
+        $country = $this->inferredSourceCountry($name, null, $apiId, $articleUrl);
+
         $insertId = DB::table('news_sources')->insertGetId([
             'name'             => Str::limit($name, 180, ''),
             'slug'             => $slug,
@@ -495,7 +520,7 @@ class GrimbaNewsApiFetcher
             'bias_rating'      => 'unknown',
             'ownership_type'   => null,
             'credibility_score'=> null,
-            'country'          => null,
+            'country'          => $country,
             'language'         => null,
             'description'      => 'Source créée automatiquement par l\'ingest NewsAPI. À enrichir.',
             'notes'            => 'auto-created by GrimbaNewsApiFetcher',
@@ -504,6 +529,35 @@ class GrimbaNewsApiFetcher
         ]);
 
         return (int) $insertId;
+    }
+
+    private function backfillSourceCountryIfMissing(int $sourceId, string $name, ?string $website, string $apiId, string $articleUrl): void
+    {
+        if (DB::table('news_sources')
+            ->where('id', $sourceId)
+            ->whereNotNull('country')
+            ->where('country', '!=', '')
+            ->exists()) {
+            return;
+        }
+
+        $country = $this->inferredSourceCountry($name, $website, $apiId, $articleUrl);
+        if ($country === null) {
+            return;
+        }
+
+        DB::table('news_sources')->where('id', $sourceId)->update([
+            'country' => $country,
+            'updated_at' => now(),
+        ]);
+    }
+
+    private function inferredSourceCountry(string $name, ?string $website, string $apiId, string $articleUrl): ?string
+    {
+        $evidence = $website ?: $articleUrl ?: $name;
+        $inferred = GrimbaSourceCountryBackfill::infer($name, $evidence, $apiId);
+
+        return $inferred && $inferred['confidence'] >= 80 ? $inferred['country'] : null;
     }
 
     private function createDraftPost(array $a): ?int
