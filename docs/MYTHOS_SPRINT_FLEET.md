@@ -43,7 +43,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **E** | NobuAI Integration | E1–E7 | 4/7 done |
 | **F** | Performance & SEO | F1–F8 | 8/8 done |
 | **G** | A11y & I18n | G1–G6 | 4/6 done |
-| **H** | Testing & QA | H1–H7 | 3/7 done |
+| **H** | Testing & QA | H1–H7 | 4/7 done |
 | **I** | Marketing & Growth | I1–I8 | 0/8 |
 | **J** | Admin & Editorial Tooling | J1–J6 | 0/6 |
 | **K** | 4-region editorial split | K1–K8 | 8/8 done — K8 closed 2026-05-05 |
@@ -227,7 +227,7 @@ sprint risks regression.
 | ✅ **H1** | **PHPUnit: vault routes** — `/coffre` empty/saved states, `/coffre/export.csv` empty/saved CSVs, header badge, parser hygiene, and the cookie-only save-button toggle endpoint are covered. | `vendor/bin/phpunit tests/Feature/VaultTest.php` green |
 | ✅ **H2** | **PHPUnit: cluster page** — region-safe fixtures cover cluster size 1 legacy fallback, cluster size 2+ story page, one-sided callout, and multi-bias no-callout behavior; existing NobuAI/full-article story cases stay green. | `vendor/bin/phpunit tests/Feature/ClusterPageTest.php` green |
 | ✅ **H3** | **PHPUnit: extractive synthesis** — region-safe fixtures assert each bullet attributes to a unique source, near-identical leads dedupe, and output caps at 5 bullets. | `vendor/bin/phpunit tests/Feature/ExtractiveSynthesisTest.php` green |
-| **H4** | **Playwright: golden-path smoke** — record a 5-step flow: home → topic-chip → story page → save → /coffre → unsave. Run in CI nightly | Playwright report green |
+| ✅ **H4** | **Playwright: golden-path smoke** — `tests/e2e/grimbanews-golden-path-smoke.cjs` exercises home → topic chip → story → save → `/coffre` → unsave against a local server, with a dark mobile viewport. | `npm run test:e2e:golden-path` green on 2026-05-05 |
 | **H5** | **CSP enforcement** — currently report-only? Audit the report-uri logs, fix violations, flip to enforce | Browser console clean on every route |
 | **H6** | **Backup / restore drill** — confirm DB + media are nightly-snapshotted to S3 (or equivalent), restore one snapshot to staging | Restored snapshot's homepage renders |
 | **H7** | **Load test** — k6 script hammering /coffre, /, /sources at 50 RPS for 5 min. Document p95, p99, error rate | Report committed at `docs/loadtest-YYYY-MM-DD.md` |
