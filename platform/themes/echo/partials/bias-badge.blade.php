@@ -16,25 +16,25 @@
     // Bias configuration
     $biasConfig = [
         'left' => [
-            'label' => 'Gauche',
+            'label' => __('Gauche'),
             'color' => '#3b82f6',      // Blue
             'bg' => 'rgba(59, 130, 246, 0.15)',
             'icon' => 'ti ti-arrow-left'
         ],
         'center' => [
-            'label' => 'Centre',
+            'label' => __('Centre'),
             'color' => '#a8a8a8',      // Neutral grey
             'bg' => 'rgba(168, 168, 168, 0.15)',
             'icon' => 'ti ti-minus'
         ],
         'right' => [
-            'label' => 'Droite',
+            'label' => __('Droite'),
             'color' => '#ef4444',      // Red
             'bg' => 'rgba(239, 68, 68, 0.15)',
             'icon' => 'ti ti-arrow-right'
         ],
         'unknown' => [
-            'label' => 'Non évalué',
+            'label' => __('Non évalué'),
             'color' => '#9ca3af',      // Gray
             'bg' => 'rgba(156, 161, 169, 0.15)',
             'icon' => 'ti ti-question-mark'
@@ -65,7 +65,7 @@
             transition: all 0.2s ease;
         "
         data-bias="{{ $bias }}"
-        title="Biais éditorial: {{ $config['label'] }}"
+        title="{{ __('Biais éditorial: :label', ['label' => $config['label']]) }}"
     >
         <x-core::icon name="{{ $config['icon'] }}" style="width: 14px; height: 14px;" />
         @if($showLabel)

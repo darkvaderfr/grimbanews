@@ -49,9 +49,9 @@
     ];
 
     $biasMeta = [
-        'left'   => ['label' => 'Gauche', 'color' => '#3b82f6'],
-        'center' => ['label' => 'Centre', 'color' => '#a8a8a8'],
-        'right'  => ['label' => 'Droite', 'color' => '#e84c3d'],
+        'left'   => ['label' => __('Gauche'), 'color' => '#3b82f6'],
+        'center' => ['label' => __('Centre'), 'color' => '#a8a8a8'],
+        'right'  => ['label' => __('Droite'), 'color' => '#e84c3d'],
     ];
 @endphp
 
@@ -61,10 +61,10 @@
 @else
     <aside class="grimba-story-distribution glass-panel p-3 mb-3">
         <h2 class="h6 mb-2" style="font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; font-size:13px; opacity:0.75;">
-            Distribution des biais
+            {{ __('Distribution des biais') }}
         </h2>
         <p class="small opacity-75 mb-2">
-            {{ $known }} {{ $known === 1 ? 'source classée' : 'sources classées' }}
+            {{ trans_choice(':count source classée|:count sources classées', $known, ['count' => $known]) }}
             @php
                 $dominant = array_keys($pct, max($pct))[0] ?? null;
                 $dominantPct = $dominant ? $pct[$dominant] : 0;
@@ -103,9 +103,9 @@
         </div>
 
         <div class="d-flex justify-content-between small mb-3">
-            <span style="color:#3b82f6;font-weight:600;">L {{ $pct['left'] }}%</span>
-            <span style="color:#a8a8a8;font-weight:600;">C {{ $pct['center'] }}%</span>
-            <span style="color:#e84c3d;font-weight:600;">D {{ $pct['right'] }}%</span>
+            <span style="color:#3b82f6;font-weight:600;">{{ $biasMeta['left']['label'] }} {{ $pct['left'] }}%</span>
+            <span style="color:#a8a8a8;font-weight:600;">{{ $biasMeta['center']['label'] }} {{ $pct['center'] }}%</span>
+            <span style="color:#e84c3d;font-weight:600;">{{ $biasMeta['right']['label'] }} {{ $pct['right'] }}%</span>
         </div>
 
         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
@@ -134,8 +134,8 @@
 
         @if(! empty($sourcesByBias['unknown']))
             <div class="mt-3 pt-2 small opacity-60" style="border-top:1px dashed rgba(0,0,0,0.08);">
-                Biais non classé : {{ count($sourcesByBias['unknown']) }}
-                {{ count($sourcesByBias['unknown']) === 1 ? 'source' : 'sources' }}
+                {{ __('Biais non classé') }} :
+                {{ trans_choice(':count source|:count sources', count($sourcesByBias['unknown']), ['count' => count($sourcesByBias['unknown'])]) }}
             </div>
         @endif
     </aside>

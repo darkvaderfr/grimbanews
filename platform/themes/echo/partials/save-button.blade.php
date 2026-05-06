@@ -12,6 +12,8 @@
      */
     $variant = $variant ?? 'icon';
     $postId = (int) ($post->id ?? 0);
+    $saveLabel = __('Sauvegarder');
+    $saveForLaterLabel = __('Sauvegarder pour plus tard');
 @endphp
 
 @if($variant === 'pill')
@@ -30,15 +32,15 @@
                 transition:background .15s ease, color .15s ease;
             ">
         <span class="grimba-save-btn__icon" aria-hidden="true" style="font-size:14px;">☆</span>
-        <span class="grimba-save-btn__label">Sauvegarder</span>
+        <span class="grimba-save-btn__label">{{ $saveLabel }}</span>
     </button>
 @else
     <button type="button"
             class="grimba-save-btn grimba-save-btn--icon"
             data-grimba-save="{{ $postId }}"
             aria-pressed="false"
-            aria-label="Sauvegarder pour plus tard"
-            title="Sauvegarder pour plus tard"
+            aria-label="{{ $saveForLaterLabel }}"
+            title="{{ $saveForLaterLabel }}"
             style="
                 display:inline-flex; align-items:center; justify-content:center;
                 width:30px; height:30px; border-radius:50%;

@@ -92,7 +92,7 @@
                     @if($selectedSource || $selectedBias || $selectedOwner || $fromDate || $toDate)
                         <a href="{{ url('/search?q=' . urlencode($query)) }}"
                            class="small text-decoration-underline opacity-65"
-                           style="color: var(--gn-ink-muted);">{{ __('Réinitialiser') }}</a>
+                           style="color: var(--gn-ink-muted);">{{ __('Réinitialiser les filtres') }}</a>
                     @endif
                 </div>
             </div>

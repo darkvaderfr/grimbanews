@@ -10,7 +10,33 @@
     Theme::layout('grimba-chrome');
     Theme::set('pageTitle', __('Local'));
 
-    $hasLocation = $city !== '' || $country !== '';
+    $countryNames = app()->getLocale() === 'en'
+        ? [
+            'FR' => 'France', 'BE' => 'Belgium', 'CH' => 'Switzerland', 'CA' => 'Canada',
+            'US' => 'United States', 'GB' => 'United Kingdom', 'UK' => 'United Kingdom',
+            'DE' => 'Germany', 'ES' => 'Spain', 'IT' => 'Italy', 'PT' => 'Portugal',
+            'MA' => 'Morocco', 'DZ' => 'Algeria', 'TN' => 'Tunisia', 'SN' => 'Senegal',
+            'CI' => 'Ivory Coast', 'CM' => 'Cameroon', 'NG' => 'Nigeria',
+            'ZA' => 'South Africa', 'KE' => 'Kenya', 'EG' => 'Egypt',
+            'JP' => 'Japan', 'CN' => 'China', 'IN' => 'India', 'BR' => 'Brazil',
+            'MX' => 'Mexico', 'AU' => 'Australia', 'NZ' => 'New Zealand',
+        ]
+        : [
+            'FR' => 'France', 'BE' => 'Belgique', 'CH' => 'Suisse', 'CA' => 'Canada',
+            'US' => 'États-Unis', 'GB' => 'Royaume-Uni', 'UK' => 'Royaume-Uni',
+            'DE' => 'Allemagne', 'ES' => 'Espagne', 'IT' => 'Italie', 'PT' => 'Portugal',
+            'MA' => 'Maroc', 'DZ' => 'Algérie', 'TN' => 'Tunisie', 'SN' => 'Sénégal',
+            'CI' => "Côte d'Ivoire", 'CM' => 'Cameroun', 'NG' => 'Nigeria',
+            'ZA' => 'Afrique du Sud', 'KE' => 'Kenya', 'EG' => 'Égypte',
+            'JP' => 'Japon', 'CN' => 'Chine', 'IN' => 'Inde', 'BR' => 'Brésil',
+            'MX' => 'Mexique', 'AU' => 'Australie', 'NZ' => 'Nouvelle-Zélande',
+        ];
+    $countryCode = mb_strtoupper($cc);
+    $displayCountry = $countryCode !== '' && isset($countryNames[$countryCode])
+        ? $countryNames[$countryCode]
+        : $country;
+
+    $hasLocation = $city !== '' || $displayCountry !== '';
 @endphp
 
 <section class="grimba-local py-4 py-md-5">
@@ -22,17 +48,17 @@
             @if($hasLocation)
                 <h1 class="grimba-methodology__title mt-2 mb-2" style="font-size: clamp(28px, 3.6vw, 42px); letter-spacing:-0.4px;">
                     @if($city)
-                        {{ $city }}@if($country), <span class="opacity-65">{{ $country }}</span>@endif
+                        {{ $city }}@if($displayCountry), <span class="opacity-65">{{ $displayCountry }}</span>@endif
                     @else
-                        {{ $country }}
+                        {{ $displayCountry }}
                     @endif
                 </h1>
                 <p class="opacity-85 mb-3" style="font-size:16px; line-height:1.5;">
                     {{ $posts->count() }} {{ $posts->count() === 1 ? __('histoire récente') : __('histoires récentes') }}
                     @if($city)
                         {{ __('couvrant') }} {{ $city }}
-                    @elseif($country)
-                        {{ __('provenant de') }} {{ $country }}
+                    @elseif($displayCountry)
+                        {{ __('provenant de') }} {{ $displayCountry }}
                     @endif
                     — {{ __('sources croisées') }}.
                 </p>
@@ -70,7 +96,7 @@
                            autocomplete="country"
                            style="width:100%; padding:10px 14px; border-radius:9999px; border:1px solid rgba(26,23,19,0.18); background:rgba(255,255,255,0.7); font-size:14px; color:var(--gn-ink,#1a1713); text-transform:uppercase;">
                 </div>
-                <input type="hidden" name="country" id="grimba-local-country" value="{{ $country }}">
+                <input type="hidden" name="country" id="grimba-local-country" value="{{ $displayCountry }}">
                 <button type="submit" class="btn-grimba btn-grimba--solid"
                         style="padding:10px 22px; border-radius:9999px; background:var(--gn-ink,#1a1713); color:var(--gn-paper,#f6f1e8); font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; font-size:13px; border:none; cursor:pointer;">
                     {{ __('Mettre à jour') }}
@@ -82,7 +108,7 @@
             <div class="glass-panel p-4 text-center">
                 <p class="mb-1">
                     {{ __('Aucune histoire récente pour') }}
-                    <strong>{{ $city ?: $country }}</strong>
+                    <strong>{{ $city ?: $displayCountry }}</strong>
                     {{ __('dans notre archive.') }}
                 </p>
                 <p class="small opacity-75 mb-0">
@@ -108,16 +134,7 @@
         const ccInput = document.getElementById('grimba-local-cc');
         const cnInput = document.getElementById('grimba-local-country');
         if (! ccInput || ! cnInput) return;
-        const map = {
-            FR: 'France', BE: 'Belgique', CH: 'Suisse', CA: 'Canada',
-            US: 'États-Unis', GB: 'Royaume-Uni', UK: 'Royaume-Uni',
-            DE: 'Allemagne', ES: 'Espagne', IT: 'Italie', PT: 'Portugal',
-            MA: 'Maroc', DZ: 'Algérie', TN: 'Tunisie', SN: 'Sénégal',
-            CI: "Côte d'Ivoire", CM: 'Cameroun', NG: 'Nigeria',
-            ZA: 'Afrique du Sud', KE: 'Kenya', EG: 'Égypte',
-            JP: 'Japon', CN: 'Chine', IN: 'Inde', BR: 'Brésil',
-            MX: 'Mexique', AU: 'Australie', NZ: 'Nouvelle-Zélande',
-        };
+        const map = @json($countryNames);
         ccInput.addEventListener('change', () => {
             const cc = ccInput.value.trim().toUpperCase();
             ccInput.value = cc;

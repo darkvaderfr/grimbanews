@@ -83,7 +83,7 @@
     @include(Theme::getThemeNamespace('partials.pwa-head'))
     @include(Theme::getThemeNamespace('partials.home.ad-styles'))
 
-    <link rel="alternate" type="application/rss+xml" title="GrimbaNews — Flux RSS" href="{{ url('/feed.xml') }}">
+    <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Flux RSS') }}" href="{{ url('/feed.xml') }}">
     <meta property="og:image" content="{{ url('/og/home.png') }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -94,7 +94,7 @@
 </head>
 <body class="grimba-home" {!! Theme::bodyAttributes() !!}>
     @include(Theme::getThemeNamespace('partials.home.front-body-hooks'))
-    <a class="grimba-skip-link" href="#grimba-main-content">Aller au contenu principal</a>
+    <a class="grimba-skip-link" href="#grimba-main-content">{{ __('Aller au contenu principal') }}</a>
     @include(Theme::getThemeNamespace('partials.focus-manager'))
 
     @include(Theme::getThemeNamespace('partials.home.urgency-banner'))

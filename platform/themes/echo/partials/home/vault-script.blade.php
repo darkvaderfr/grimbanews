@@ -4,6 +4,10 @@
         const MAX = 50;
         const TOGGLE_URL = @json(route('public.coffre.toggle'));
         const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        const LABEL_SAVE = @json(__('Sauvegarder'));
+        const LABEL_SAVED = @json(__('Sauvegardé'));
+        const LABEL_COPIED = @json(__('Lien copié'));
+        const LABEL_COPY_UNAVAILABLE = @json(__('Copie indisponible'));
 
         function ids() {
             const m = document.cookie.match(/(?:^|; )grimba_vault=([^;]+)/);
@@ -21,7 +25,7 @@
             if (icon) icon.textContent = saved ? '★' : '☆';
             if (btn.classList.contains('grimba-save-btn--pill')) {
                 const label = btn.querySelector('.grimba-save-btn__label');
-                if (label) label.textContent = saved ? 'Sauvegardé' : 'Sauvegarder';
+                if (label) label.textContent = saved ? LABEL_SAVED : LABEL_SAVE;
                 btn.style.background = saved ? 'var(--gn-ink, #1a1713)' : 'rgba(255,255,255,0.6)';
                 btn.style.color = saved ? 'var(--gn-paper, #f6f1e8)' : 'var(--gn-ink, #1a1713)';
             } else {
@@ -97,10 +101,10 @@
             const value = copy.dataset.grimbaCopyLink || window.location.href;
             const original = copy.textContent;
             navigator.clipboard?.writeText(value).then(() => {
-                copy.textContent = 'Lien copié';
+                copy.textContent = LABEL_COPIED;
                 setTimeout(() => { copy.textContent = original; }, 1600);
             }).catch(() => {
-                copy.textContent = 'Copie indisponible';
+                copy.textContent = LABEL_COPY_UNAVAILABLE;
                 setTimeout(() => { copy.textContent = original; }, 1600);
             });
         });

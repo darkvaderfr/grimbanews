@@ -70,17 +70,32 @@
             : ($post->bias_rating ?? null);
     }
 
+    $sideLabels = [
+        'left'   => __('Gauche'),
+        'center' => __('Centre'),
+        'right'  => __('Droite'),
+    ];
+
     $tooltipBar = $showBar
-        ? sprintf('Gauche %d · Centre %d · Droite %d (%d sources)', $counts['left'], $counts['center'], $counts['right'], $total)
+        ? sprintf(
+            '%s %d · %s %d · %s %d (%s)',
+            $sideLabels['left'],
+            $counts['left'],
+            $sideLabels['center'],
+            $counts['center'],
+            $sideLabels['right'],
+            $counts['right'],
+            trans_choice(':count source|:count sources', $total, ['count' => $total])
+        )
         : null;
-    $tooltipSingle = $showSingleBar ? sprintf('Couverture observée d\'une seule perspective : %s', match ($singleSide) {
-        'left' => 'Gauche', 'center' => 'Centre', 'right' => 'Droite', default => '—',
-    }) : null;
+    $tooltipSingle = $showSingleBar
+        ? __('Couverture observée d\'une seule perspective : :side', ['side' => $sideLabels[$singleSide] ?? '—'])
+        : null;
 
     $fallbackLabel = match ($post->bias_rating ?? null) {
-        'left'   => 'Gauche',
-        'center' => 'Centre',
-        'right'  => 'Droite',
+        'left'   => $sideLabels['left'],
+        'center' => $sideLabels['center'],
+        'right'  => $sideLabels['right'],
         default  => null,
     };
     $source = $post->source_name ?? null;
@@ -99,10 +114,10 @@
         </div>
         @unless($compact)
             <div class="grimba-coverage__legend">
-                <span class="grimba-coverage__chip grimba-coverage__chip--l">Gauche {{ $pct['left'] }}%</span>
-                <span class="grimba-coverage__chip grimba-coverage__chip--c">Centre {{ $pct['center'] }}%</span>
-                <span class="grimba-coverage__chip grimba-coverage__chip--r">Droite {{ $pct['right'] }}%</span>
-                <span class="grimba-coverage__sources">{{ $total }} sources</span>
+                <span class="grimba-coverage__chip grimba-coverage__chip--l">{{ $sideLabels['left'] }} {{ $pct['left'] }}%</span>
+                <span class="grimba-coverage__chip grimba-coverage__chip--c">{{ $sideLabels['center'] }} {{ $pct['center'] }}%</span>
+                <span class="grimba-coverage__chip grimba-coverage__chip--r">{{ $sideLabels['right'] }} {{ $pct['right'] }}%</span>
+                <span class="grimba-coverage__sources">{{ trans_choice(':count source|:count sources', $total, ['count' => $total]) }}</span>
             </div>
         @endunless
     </div>
@@ -119,12 +134,10 @@
         @unless($compact)
             <div class="grimba-coverage__legend">
                 <span class="grimba-coverage__chip grimba-coverage__chip--{{ substr($singleSide, 0, 1) }}">
-                    @if($singleSide === 'left') Gauche
-                    @elseif($singleSide === 'center') Centre
-                    @else Droite
-                    @endif
+                    {{ $sideLabels[$singleSide] ?? '—' }}
                 </span>
-                <span class="grimba-coverage__sources">{{ $total > 0 ? $total : 1 }} source{{ $total > 1 ? 's' : '' }}</span>
+                @php($sourceTotal = $total > 0 ? $total : 1)
+                <span class="grimba-coverage__sources">{{ trans_choice(':count source|:count sources', $sourceTotal, ['count' => $sourceTotal]) }}</span>
             </div>
         @endunless
     </div>

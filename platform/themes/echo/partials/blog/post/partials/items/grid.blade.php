@@ -25,7 +25,7 @@
 
         @if($post->is_blindspot ?? false)
             <div class="position-absolute top-0 start-0 p-2">
-                <span class="blindspot-badge">Angle mort</span>
+                <span class="blindspot-badge">{{ __('Angle mort') }}</span>
             </div>
         @endif
     </div>
