@@ -16,7 +16,8 @@
         "hot": "mix watch --hot",
         "prod": "npm run production",
         "production": "mix --production",
-        "test:e2e:golden-path": "node tests/e2e/grimbanews-golden-path-smoke.cjs"
+        "test:e2e:golden-path": "node tests/e2e/grimbanews-golden-path-smoke.cjs",
+        "test:e2e:keyboard": "node tests/e2e/grimbanews-keyboard-navigation.cjs"
     },
     "devDependencies": {
         "@fullhuman/postcss-purgecss": "^7.0.2",

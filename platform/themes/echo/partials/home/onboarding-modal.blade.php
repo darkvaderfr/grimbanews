@@ -98,24 +98,22 @@
             const closeBtns = modal.querySelectorAll('[data-grimba-onboard-close], [data-grimba-onboard-skip]');
             const submit    = modal.querySelector('[data-grimba-onboard-submit]');
             const csrf      = document.querySelector('meta[name="csrf-token"]')?.content || '';
-            const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
             const selected = new Set();
             const emptyLabel = @json(__('Explorer sans suivre'));
             const readyLabel = @json(__("C'est parti"));
 
             if (! modal) return;
 
-            function focusables() {
-                return Array.from(modal.querySelectorAll(focusableSelector)).filter(el => el.offsetParent !== null);
-            }
+            const trap = window.GrimbaFocus?.trap(modal, {
+                initialFocus: '.grimba-onboard-topic, [data-grimba-onboard-submit]',
+                onEscape: () => closeBtns[0]?.click()
+            });
 
-            function open() {
+            function open(trigger) {
                 modal.classList.add('is-open');
                 modal.setAttribute('aria-hidden', 'false');
                 document.body.style.overflow = 'hidden';
-                requestAnimationFrame(() => {
-                    (topics[0] || submit || modal.querySelector(focusableSelector))?.focus();
-                });
+                trap?.activate(trigger);
             }
 
             function refresh() {
@@ -137,6 +135,7 @@
                 modal.classList.remove('is-open');
                 modal.setAttribute('aria-hidden', 'true');
                 document.body.style.overflow = '';
+                trap?.deactivate();
             }
 
             closeBtns.forEach(b => b.addEventListener('click', async () => {
@@ -168,31 +167,11 @@
                 }
             });
 
-            document.addEventListener('keydown', (e) => {
-                if (! document.body.contains(modal) || ! modal.classList.contains('is-open')) return;
-                if (e.key === 'Escape') {
-                    e.preventDefault();
-                    closeBtns[0]?.click();
-                    return;
-                }
-                if (e.key !== 'Tab') return;
-
-                const nodes = focusables();
-                if (! nodes.length) return;
-                const first = nodes[0];
-                const last = nodes[nodes.length - 1];
-
-                if (e.shiftKey && document.activeElement === first) {
-                    e.preventDefault();
-                    last.focus();
-                } else if (! e.shiftKey && document.activeElement === last) {
-                    e.preventDefault();
-                    first.focus();
-                }
-            });
-
-            document.querySelectorAll('[data-grimba-onboard-open]').forEach(button => {
-                button.addEventListener('click', open);
+            document.addEventListener('click', (event) => {
+                const opener = event.target?.closest?.('[data-grimba-onboard-open]');
+                if (!opener) return;
+                event.preventDefault();
+                open(opener);
             });
 
             if (modal.classList.contains('is-open')) {

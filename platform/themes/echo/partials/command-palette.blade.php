@@ -68,6 +68,10 @@
         let activeIndex = 0;
         let loadPromise = null;
         let lastFocus = null;
+        const trap = window.GrimbaFocus?.trap(palette, {
+            initialFocus: input,
+            onEscape: close
+        });
 
         const typeRank = { nav: 0, story: 1, source: 2, category: 3 };
 
@@ -230,7 +234,7 @@
             palette.setAttribute('aria-hidden', 'false');
             document.body.classList.add('grimba-command-open');
             input.value = seed || '';
-            input.focus({ preventScroll: true });
+            trap?.activate(lastFocus);
             await loadIndex();
             render();
         }
@@ -241,6 +245,7 @@
             document.body.classList.remove('grimba-command-open');
             input.removeAttribute('aria-activedescendant');
             input.setAttribute('aria-expanded', 'false');
+            trap?.deactivate(false);
             if (lastFocus && document.contains(lastFocus)) {
                 lastFocus.focus({ preventScroll: true });
             }

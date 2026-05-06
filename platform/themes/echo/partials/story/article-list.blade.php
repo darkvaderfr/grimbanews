@@ -414,6 +414,10 @@
         const READ_FULL_LABEL = @json(__("Lire l'article complet"));
         let selected = [];
         let lastFocus = null;
+        const trap = window.GrimbaFocus?.trap(modal, {
+            initialFocus: '[data-grimba-compare-close]',
+            onEscape: closeModal
+        });
 
         function refreshToolbar() {
             const n = selected.length;
@@ -515,7 +519,7 @@
             modal.classList.add('is-open');
             modal.setAttribute('aria-hidden', 'false');
             document.body.style.overflow = 'hidden';
-            modal.querySelector('[data-grimba-compare-close]')?.focus();
+            trap?.activate(lastFocus);
         }
 
         function closeModal() {
@@ -523,6 +527,7 @@
             modal.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
             grid.replaceChildren();
+            trap?.deactivate(false);
             if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
         }
 
@@ -536,36 +541,5 @@
         openBtn?.addEventListener('click', openModal);
         modal.querySelectorAll('[data-grimba-compare-close]').forEach((b) => b.addEventListener('click', closeModal));
 
-        // S331 — focus trap. Tab cycles within the modal's focusable
-        // descendants while the modal is open. Mirrors the pattern in
-        // newsletter-modal.blade.php so we have one a11y idiom across
-        // overlays.
-        const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-        const focusables = () => Array.from(modal.querySelectorAll(FOCUSABLE_SELECTOR)).filter(el => el.offsetParent !== null);
-
-        document.addEventListener('keydown', (e) => {
-            if (! modal.classList.contains('is-open')) return;
-
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                closeModal();
-                return;
-            }
-
-            if (e.key !== 'Tab') return;
-
-            const nodes = focusables();
-            if (! nodes.length) return;
-            const first = nodes[0];
-            const last = nodes[nodes.length - 1];
-
-            if (e.shiftKey && document.activeElement === first) {
-                e.preventDefault();
-                last.focus();
-            } else if (! e.shiftKey && document.activeElement === last) {
-                e.preventDefault();
-                first.focus();
-            }
-        });
     })();
 </script>

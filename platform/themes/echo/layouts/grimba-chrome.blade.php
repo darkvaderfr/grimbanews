@@ -94,6 +94,7 @@
 <body class="grimba-home grimba-subpage" {!! Theme::bodyAttributes() !!}>
     @include(Theme::getThemeNamespace('partials.home.front-body-hooks'))
     <a class="grimba-skip-link" href="#grimba-main-content">Aller au contenu principal</a>
+    @include(Theme::getThemeNamespace('partials.focus-manager'))
 
     @include(Theme::getThemeNamespace('partials.home.urgency-banner'))
     @include(Theme::getThemeNamespace('partials.home.main-header'))

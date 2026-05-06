@@ -40,56 +40,33 @@
 <script>
     (function () {
         const modal = document.getElementById('grimba-newsletter-modal');
-        const openers = document.querySelectorAll('[data-grimba-newsletter-open]');
         const closers = modal.querySelectorAll('[data-grimba-newsletter-close]');
-        const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-        let lastFocus = null;
-
-        function focusables() {
-            return Array.from(modal.querySelectorAll(focusableSelector)).filter(el => el.offsetParent !== null);
-        }
+        const trap = window.GrimbaFocus?.trap(modal, {
+            initialFocus: 'input[name="email"]',
+            onEscape: close
+        });
 
         function open(trigger) {
-            lastFocus = trigger || document.activeElement;
             modal.classList.add('is-open');
             modal.setAttribute('aria-hidden', 'false');
             document.body.style.overflow = 'hidden';
-            requestAnimationFrame(() => {
-                (modal.querySelector('input[name="email"]') || focusables()[0])?.focus();
-            });
+            trap?.activate(trigger);
         }
 
         function close() {
             modal.classList.remove('is-open');
             modal.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
-            if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+            trap?.deactivate();
         }
 
-        openers.forEach(b => b.addEventListener('click', (e) => { e.preventDefault(); open(b); }));
-        closers.forEach(b => b.addEventListener('click', close));
-        document.addEventListener('keydown', (e) => {
-            if (! modal.classList.contains('is-open')) return;
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                close();
-                return;
-            }
-            if (e.key !== 'Tab') return;
-
-            const nodes = focusables();
-            if (! nodes.length) return;
-            const first = nodes[0];
-            const last = nodes[nodes.length - 1];
-
-            if (e.shiftKey && document.activeElement === first) {
-                e.preventDefault();
-                last.focus();
-            } else if (! e.shiftKey && document.activeElement === last) {
-                e.preventDefault();
-                first.focus();
-            }
+        document.addEventListener('click', (e) => {
+            const opener = e.target?.closest?.('[data-grimba-newsletter-open]');
+            if (!opener) return;
+            e.preventDefault();
+            open(opener);
         });
+        closers.forEach(b => b.addEventListener('click', close));
 
         @if($flash)
             open();
