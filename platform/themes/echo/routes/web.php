@@ -868,12 +868,34 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             if (! $user) {
                 return redirect(route('public.member.login'));
             }
+            $vaultIds = GrimbaVault::parseIds((string) request()->cookie(GrimbaVault::COOKIE, ''));
+
             SeoHelper::setTitle(__('Mon compte') . ' — GrimbaNews');
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Mon compte'), url('/account'));
-            return Theme::scope('account', compact('user'))->render();
+
+            return Theme::scope('account', compact('user', 'vaultIds'))->render();
         })->name('public.account');
+
+        Route::post('account/vault-digest', function (Request $request) {
+            $user = auth('member')->user();
+            if (! $user) {
+                return redirect(route('public.member.login'));
+            }
+
+            $enabled = $request->boolean('weekly_vault_digest');
+            $ids = GrimbaVault::parseIds((string) $request->cookie(GrimbaVault::COOKIE, ''));
+
+            GrimbaVault::syncMemberDigestSnapshot($user, $ids, $enabled);
+
+            return redirect(url('/account'))->with(
+                'status',
+                $enabled
+                    ? __('Digest coffre hebdomadaire activé.')
+                    : __('Digest coffre hebdomadaire désactivé.')
+            );
+        })->middleware('member')->name('public.account.vault-digest');
 
         // S167 — Local news. Reads grimba_local_city + _country
         // cookies, falls back to IP geolocation via GrimbaGeoLocator
@@ -1157,6 +1179,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $ids = GrimbaVault::parseIds(implode(',', $ids));
             $value = GrimbaVault::serializeIds($ids);
             GrimbaVaultEvents::record($request, $saved ? 'save' : 'unsave', $postId);
+            GrimbaVault::syncMemberDigestSnapshot(auth('member')->user(), $ids);
 
             return response()
                 ->json([

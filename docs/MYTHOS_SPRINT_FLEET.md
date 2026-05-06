@@ -38,7 +38,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 |-------|-------|---------|--------|
 | **A** | Push & Deploy Gate | A1–A5 | OPEN — pushing blocked |
 | **B** | Story Page Completion | B1–B10 | 10/10 done |
-| **C** | Vault Maturity | C1–C8 | 5/8 done |
+| **C** | Vault Maturity | C1–C8 | 8/8 done — C7 closed 2026-05-06 |
 | **D** | Discovery & Navigation | D1–D8 | 7/8 done |
 | **E** | NobuAI Integration | E1–E7 | 4/7 done |
 | **F** | Performance & SEO | F1–F8 | 8/8 done |
@@ -141,7 +141,7 @@ missing the polish that makes saved-articles habitual.
 | ✅ S194 | Vault-share link | Uncommitted worktree |
 | ✅ S195 | Stale-id pruning | Uncommitted worktree |
 | ✅ S196 | "Marquer comme lu" | Uncommitted worktree |
-| **C7** | **Save → email alert (member-only)** — `auth('member')` users get an option to email themselves the saved article digest weekly. Stores opt-in on `members.weekly_vault_digest` boolean column | New migration + scheduled command + opt-in toggle on /account |
+| ✅ **C7** | **Save → email alert (member-only)** — `auth('member')` users can enable a weekly saved-article email from `/account`. Opt-in lives on `members.weekly_vault_digest`; the current cookie vault is synced to `vault_digest_post_ids` so the scheduler has a concrete digest list. | `grimba:vault-digests` runs weekly Monday 04:40; `VaultDigestTest` covers account opt-in/out, logged-in save sync, mail send, and schedule wiring |
 | ✅ **C8** | **Vault analytics** — save/unsave toggles log to `vault_events` with only event, post id, timestamp, and salted IP hash; no account id, raw IP, or user-agent is stored. | `grimba:archive-vault-events` weekly archives to `storage/exports/vault_events_YYYY-MM.csv`; `VaultAnalyticsTest` covers logging, CSV export, and schedule wiring |
 
 ---

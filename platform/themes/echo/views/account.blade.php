@@ -15,6 +15,10 @@
 
     $user = $user ?? auth('member')->user();
     $firstName = $user?->first_name ?? trim(explode(' ', (string) ($user?->name ?? ''))[0] ?? '');
+    $vaultIds = $vaultIds ?? \App\Support\GrimbaVault::parseIds((string) request()->cookie(\App\Support\GrimbaVault::COOKIE, ''));
+    $vaultCount = count($vaultIds);
+    $digestEnabled = \App\Support\GrimbaVault::memberDigestEnabled($user);
+    $digestSnapshotCount = count(\App\Support\GrimbaVault::memberDigestIds($user));
 @endphp
 
 <section class="grimba-account py-5">
@@ -29,6 +33,12 @@
                 {{ __('Votre vue panoramique sur l\'actualité.') }}
             </p>
         </header>
+
+        @if(session('status'))
+            <div class="grimba-account-alert mb-4">
+                {{ session('status') }}
+            </div>
+        @endif
 
         {{-- Reading bias mix — borrows the /pour-vous full widget --}}
         <div class="glass-panel p-4 p-md-5 mb-4">
@@ -84,6 +94,42 @@
                 <p class="small opacity-75 m-0">{{ __('Articles sauvegardés pour plus tard.') }}</p>
             </a>
         </div>
+
+        <form method="POST" action="{{ route('public.account.vault-digest') }}" class="glass-panel grimba-account-digest p-4 mt-4">
+            @csrf
+            <input type="hidden" name="weekly_vault_digest" value="{{ $digestEnabled ? '0' : '1' }}">
+
+            <div class="grimba-account-digest__header">
+                <div>
+                    <span class="grimba-account-digest__kicker">{{ __('Digest coffre') }}</span>
+                    <h2>{{ __('Alerte email hebdomadaire') }}</h2>
+                </div>
+                <span class="grimba-account-digest__status {{ $digestEnabled ? 'is-on' : '' }}">
+                    {{ $digestEnabled ? __('Activé') : __('Inactif') }}
+                </span>
+            </div>
+
+            <p class="grimba-account-digest__body">
+                @if($digestEnabled)
+                    {{ __('Chaque lundi, GrimbaNews vous envoie les articles synchronisés depuis votre coffre.') }}
+                @else
+                    {{ __('Recevez une fois par semaine les articles que vous sauvegardez dans votre coffre.') }}
+                @endif
+            </p>
+
+            <div class="grimba-account-digest__footer">
+                <span>
+                    @if($digestEnabled)
+                        {{ trans_choice(':count article synchronisé|:count articles synchronisés', $digestSnapshotCount, ['count' => $digestSnapshotCount]) }}
+                    @else
+                        {{ trans_choice(':count article dans ce navigateur|:count articles dans ce navigateur', $vaultCount, ['count' => $vaultCount]) }}
+                    @endif
+                </span>
+                <button type="submit" class="btn-grimba {{ $digestEnabled ? 'btn-grimba--ghost' : 'btn-grimba--solid' }} btn-grimba--sm">
+                    {{ $digestEnabled ? __('Désactiver') : __('Activer le digest') }}
+                </button>
+            </div>
+        </form>
 
         {{-- Account meta + logout --}}
         <div class="text-center mt-4">

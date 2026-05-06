@@ -59,6 +59,11 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:fetch-newsapi',
                 'expected_minutes' => 288,
             ],
+            'vault_digest_weekly' => [
+                'label' => 'Vault email digest',
+                'command' => 'grimba:vault-digests',
+                'expected_minutes' => 10080,
+            ],
         ];
     }
 

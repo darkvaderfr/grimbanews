@@ -2772,6 +2772,96 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
 .grimba-coffre-card > *:first-child {
     flex: 1;
 }
+.grimba-account-alert {
+    border: 1px solid rgba(26, 23, 19, 0.12);
+    border-radius: 8px;
+    background: rgba(26, 23, 19, 0.05);
+    color: var(--gn-ink);
+    font-weight: 700;
+    padding: 12px 14px;
+}
+.grimba-account-digest {
+    color: var(--gn-ink);
+}
+.grimba-account-digest__header,
+.grimba-account-digest__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+.grimba-account-digest__header {
+    margin-bottom: 14px;
+}
+.grimba-account-digest__kicker {
+    display: block;
+    margin-bottom: 5px;
+    color: #8d3025;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.grimba-account-digest h2 {
+    margin: 0;
+    color: var(--gn-ink);
+    font-family: var(--gn-font-title);
+    font-size: 22px;
+    line-height: 1.15;
+}
+.grimba-account-digest__status {
+    flex: 0 0 auto;
+    border: 1px solid rgba(26, 23, 19, 0.14);
+    border-radius: 999px;
+    background: rgba(26, 23, 19, 0.05);
+    color: var(--gn-ink-muted);
+    font-size: 12px;
+    font-weight: 800;
+    padding: 6px 10px;
+}
+.grimba-account-digest__status.is-on {
+    border-color: rgba(141, 48, 37, 0.25);
+    background: rgba(141, 48, 37, 0.10);
+    color: #8d3025;
+}
+.grimba-account-digest__body {
+    margin: 0 0 16px;
+    color: var(--gn-ink-muted);
+    font-size: 15px;
+    line-height: 1.55;
+}
+.grimba-account-digest__footer > span {
+    color: var(--gn-ink-soft);
+    font-size: 13px;
+    font-weight: 700;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-account-alert {
+    border-color: rgba(246, 241, 232, 0.12);
+    background: rgba(246, 241, 232, 0.08);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-account-digest__kicker,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-account-digest__status.is-on {
+    color: #f2b8aa;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-account-digest__status {
+    border-color: rgba(246, 241, 232, 0.14);
+    background: rgba(246, 241, 232, 0.07);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-account-digest__status.is-on {
+    border-color: rgba(242, 184, 170, 0.28);
+    background: rgba(242, 184, 170, 0.12);
+}
+@media (max-width: 575.98px) {
+    .grimba-account-digest__header,
+    .grimba-account-digest__footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .grimba-account-digest__footer .btn-grimba {
+        justify-content: center;
+        width: 100%;
+    }
+}
 .btn-grimba:focus-visible,
 .grimba-save-btn:focus-visible,
 .grimba-mobile-nav__item:focus-visible,

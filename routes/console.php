@@ -139,3 +139,12 @@ grimba_schedule_command('vault_events_archive', 'grimba:archive-vault-events')
     ->onOneServer()
     ->withoutOverlapping(30)
     ->runInBackground();
+
+// GrimbaNews — member-only weekly saved-article digest. The public
+// vault stays cookie-first; opted-in members sync their current vault
+// IDs so the scheduler can email the saved article list once a week.
+grimba_schedule_command('vault_digest_weekly', 'grimba:vault-digests')
+    ->weeklyOn(1, '04:40')
+    ->onOneServer()
+    ->withoutOverlapping(30)
+    ->runInBackground();
