@@ -130,6 +130,7 @@ class AdminChromeAssetsTest extends TestCase
             '/resources/views/grimba-admin/news-sources/index.blade.php',
             '/resources/views/grimba-admin/news-sources/classification.blade.php',
             '/resources/views/grimba-admin/news-sources/triage.blade.php',
+            '/resources/views/grimba-admin/cluster-review/index.blade.php',
             '/resources/views/grimba-admin/coverage-map/index.blade.php',
             '/resources/views/grimba-admin/story-clusters/index.blade.php',
         ];
@@ -153,6 +154,7 @@ class AdminChromeAssetsTest extends TestCase
             '/resources/views/grimba-admin/news-sources/index.blade.php',
             '/resources/views/grimba-admin/news-sources/classification.blade.php',
             '/resources/views/grimba-admin/news-sources/triage.blade.php',
+            '/resources/views/grimba-admin/cluster-review/index.blade.php',
             '/resources/views/grimba-admin/coverage-map/index.blade.php',
             '/resources/views/grimba-admin/story-clusters/index.blade.php',
         ];
@@ -254,6 +256,7 @@ class AdminChromeAssetsTest extends TestCase
             '/resources/views/grimba-admin/vault-analytics/index.blade.php',
             '/resources/views/grimba-admin/rss-drafts/index.blade.php',
             '/resources/views/grimba-admin/story-clusters/index.blade.php',
+            '/resources/views/grimba-admin/cluster-review/index.blade.php',
             '/resources/views/grimba-admin/subscribers/index.blade.php',
             '/resources/views/grimba-admin/news-sources/classification.blade.php',
             '/resources/views/grimba-admin/news-sources/triage.blade.php',

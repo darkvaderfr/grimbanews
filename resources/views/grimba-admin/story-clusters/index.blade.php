@@ -19,6 +19,7 @@
                 <div class="grimba-admin-actions justify-content-end">
                     <span class="grimba-admin-status">{{ $coverageStats['one_sided'] ?? 0 }} unilatéraux</span>
                     <span class="grimba-admin-status">{{ $coverageStats['partial'] ?? 0 }} partiels</span>
+                    <a href="{{ route('grimba.cluster-review.index') }}" class="btn btn-outline-primary btn-sm">Revue dossiers</a>
                     <a href="{{ route('grimba.coverage-map.index') }}" class="btn btn-outline-primary btn-sm">Carte couverture</a>
                     <a href="{{ route('grimba.story-clusters.create') }}" class="btn btn-primary btn-sm">+ Nouveau dossier</a>
                 </div>

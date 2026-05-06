@@ -72,6 +72,107 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             return view('grimba-admin.story-clusters.index', compact('clusters', 'coverageStats'));
         })->name('story-clusters.index');
 
+        Route::get('cluster-review', function () {
+            $hasReviewFields = Schema::hasColumn('story_clusters', 'review_action')
+                && Schema::hasColumn('story_clusters', 'reviewed_at');
+
+            $select = [
+                'clusters.id',
+                'clusters.topic',
+                'clusters.description',
+                'clusters.updated_at',
+            ];
+
+            if ($hasReviewFields) {
+                $select[] = 'clusters.review_action';
+                $select[] = 'clusters.reviewed_at';
+            }
+
+            $rows = DB::table('story_clusters as clusters')
+                ->leftJoin('posts', function ($join): void {
+                    $join->on('posts.story_cluster_id', '=', 'clusters.id')
+                        ->where('posts.status', '=', 'published');
+                })
+                ->select($select)
+                ->selectRaw('COUNT(posts.id) as total')
+                ->selectRaw("SUM(CASE WHEN posts.bias_rating = 'left' THEN 1 ELSE 0 END) as left_count")
+                ->selectRaw("SUM(CASE WHEN posts.bias_rating = 'center' THEN 1 ELSE 0 END) as center_count")
+                ->selectRaw("SUM(CASE WHEN posts.bias_rating = 'right' THEN 1 ELSE 0 END) as right_count")
+                ->selectRaw("SUM(CASE WHEN posts.id IS NOT NULL AND (posts.bias_rating IS NULL OR posts.bias_rating NOT IN ('left', 'center', 'right')) THEN 1 ELSE 0 END) as unknown_count")
+                ->selectRaw('MAX(posts.updated_at) as latest_article_at')
+                ->groupBy($select)
+                ->orderByDesc('latest_article_at')
+                ->orderByDesc('clusters.id')
+                ->get()
+                ->map(function ($row) use ($hasReviewFields) {
+                    $row->left_count = (int) $row->left_count;
+                    $row->center_count = (int) $row->center_count;
+                    $row->right_count = (int) $row->right_count;
+                    $row->unknown_count = (int) $row->unknown_count;
+                    $row->total = (int) $row->total;
+                    $row->active_sides = count(array_filter([
+                        $row->left_count,
+                        $row->center_count,
+                        $row->right_count,
+                    ]));
+                    $row->signal = null;
+                    $row->signal_kind = null;
+                    $row->priority_score = 0;
+                    $row->review_action = $hasReviewFields ? $row->review_action : null;
+                    $row->reviewed_at = $hasReviewFields ? $row->reviewed_at : null;
+
+                    if ($row->active_sides === 1 && $row->total > 5) {
+                        $row->signal = 'Unilatéral dense';
+                        $row->signal_kind = 'merge';
+                        $row->priority_score = 300 + min(99, $row->total);
+                    } elseif ($row->active_sides >= 3 && $row->left_count < 2 && $row->center_count < 2 && $row->right_count < 2) {
+                        $row->signal = 'Tripartite trop mince';
+                        $row->signal_kind = 'split';
+                        $row->priority_score = 200 + min(99, $row->total);
+                    }
+
+                    return $row;
+                })
+                ->filter(fn ($row): bool => $row->signal !== null)
+                ->sortByDesc('priority_score')
+                ->values();
+
+            $stats = [
+                'total' => $rows->count(),
+                'one_sided' => $rows->where('signal_kind', 'merge')->count(),
+                'thin_split' => $rows->where('signal_kind', 'split')->count(),
+                'acted' => $rows->filter(fn ($row) => ! empty($row->review_action))->count(),
+            ];
+
+            return view('grimba-admin.cluster-review.index', compact('rows', 'stats', 'hasReviewFields'));
+        })->name('cluster-review.index');
+
+        Route::post('cluster-review/{id}/action', function (Request $request, int $id) {
+            abort_unless(Schema::hasColumn('story_clusters', 'review_action')
+                && Schema::hasColumn('story_clusters', 'reviewed_at'), 500);
+            abort_unless(DB::table('story_clusters')->where('id', $id)->exists(), 404);
+
+            $data = Validator::make($request->all(), [
+                'action' => ['required', 'in:merge,split,approve'],
+            ])->validate();
+
+            DB::table('story_clusters')->where('id', $id)->update([
+                'review_action' => $data['action'],
+                'reviewed_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $label = match ($data['action']) {
+                'merge' => 'fusion demandée',
+                'split' => 'scission demandée',
+                default => 'approuvé',
+            };
+
+            return redirect()
+                ->route('grimba.cluster-review.index')
+                ->with('success_msg', "Décision enregistrée: {$label}.");
+        })->name('cluster-review.action');
+
         Route::get('coverage-map', function (Request $request) {
             $filter = $request->query('filter', 'gaps');
             $allowedFilters = ['all', 'gaps', 'one-sided', 'missing-left', 'missing-center', 'missing-right', 'empty'];
@@ -369,6 +470,16 @@ app()->booted(function (): void {
                 ->name('Carte couverture')
                 ->icon('ti ti-radar')
                 ->route('grimba.coverage-map.index')
+        );
+
+        DashboardMenu::make()->registerItem(
+            DashboardMenuItem::make()
+                ->id('grimba-cluster-review')
+                ->priority(22)
+                ->parentId('grimba-root')
+                ->name('Revue dossiers')
+                ->icon('ti ti-git-merge')
+                ->route('grimba.cluster-review.index')
         );
     });
 });

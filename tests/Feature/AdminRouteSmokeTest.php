@@ -33,6 +33,7 @@ class AdminRouteSmokeTest extends TestCase
             '/admin/grimba/news-sources/classification' => 'grimba-admin-table-responsive',
             '/admin/grimba/news-sources/triage' => 'grimba-admin-table-responsive',
             '/admin/grimba/story-clusters' => 'grimba-admin-table-responsive',
+            '/admin/grimba/cluster-review' => 'grimba-admin-table-responsive',
             '/admin/grimba/coverage-map' => 'grimba-admin-table-responsive',
             '/admin/grimba/subscribers' => 'grimba-admin-table-responsive',
             '/admin/grimba/cookies' => 'grimba-admin-form-section',

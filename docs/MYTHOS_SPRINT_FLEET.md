@@ -45,7 +45,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **G** | A11y & I18n | G1–G6 | 4/6 done |
 | **H** | Testing & QA | H1–H7 | 4/7 done |
 | **I** | Marketing & Growth | I1–I8 | 0/8 |
-| **J** | Admin & Editorial Tooling | J1–J6 | 5/6 done |
+| **J** | Admin & Editorial Tooling | J1–J6 | 6/6 done |
 | **K** | 4-region editorial split | K1–K8 | 8/8 done — K8 closed 2026-05-05 |
 
 ---
@@ -259,7 +259,7 @@ editorial review of bias / cluster / source classification cheap.
 
 | ID | Sprint | Acceptance |
 |----|--------|------------|
-| **J1** | **"Cluster review" admin queue** — list of clusters with conflicting bias signals (one-sided + > 5 posts, or 3+ sides + < 2 posts each). Each row is a 1-click "merge" / "split" / "approve" action | Action persists on the cluster |
+| ✅ **J1** | **"Cluster review" admin queue** — `/admin/grimba/cluster-review` lists dense one-sided clusters and thin tripartite clusters, then records one-click `merge`, `split`, or `approve` decisions on `story_clusters.review_action`. | `ClusterReviewQueueTest` verifies render + persisted decision |
 | ✅ **J2** | **Source-classification dashboard** — `/admin/grimba/news-sources/classification` ranks all sources by missing/low credibility first and exposes inline edits for bias, ownership, owner, credibility, country, and language. | `SourceClassificationDashboardTest` verifies render + inline update |
 | ✅ **J3** | **"Coverage map" admin** — `/admin/grimba/coverage-map` visualizes cluster balance across left/center/right coverage, filters gaps such as `missing-right`, and links editors back into the cluster editor. | `CoverageMapAdminTest` verifies a missing-side visualization |
 | ✅ **J4** | **Bulk re-classify** — `grimba:classify-categories --category={id}` re-runs `GrimbaCategoryClassifier::classify` for current members of one category, replaces stale pivots, and reports before/after changes. The cockpit runbook has a category-id reclassify button. | `CategoryReclassifyCommandTest` covers CLI and admin trigger |
