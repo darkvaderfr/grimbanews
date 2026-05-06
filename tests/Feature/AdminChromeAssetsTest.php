@@ -124,6 +124,7 @@ class AdminChromeAssetsTest extends TestCase
         $root = dirname(__DIR__, 2);
         $views = [
             '/resources/views/grimba-admin/rss-drafts/index.blade.php',
+            '/resources/views/grimba-admin/vault-analytics/index.blade.php',
             '/resources/views/grimba-admin/newsapi/index.blade.php',
             '/resources/views/grimba-admin/subscribers/index.blade.php',
             '/resources/views/grimba-admin/news-sources/index.blade.php',
@@ -250,6 +251,7 @@ class AdminChromeAssetsTest extends TestCase
             '/resources/views/grimba-admin/cookies/index.blade.php',
             '/resources/views/grimba-admin/cockpit.blade.php',
             '/resources/views/grimba-admin/rss-feeds/index.blade.php',
+            '/resources/views/grimba-admin/vault-analytics/index.blade.php',
             '/resources/views/grimba-admin/rss-drafts/index.blade.php',
             '/resources/views/grimba-admin/story-clusters/index.blade.php',
             '/resources/views/grimba-admin/subscribers/index.blade.php',
@@ -266,6 +268,7 @@ class AdminChromeAssetsTest extends TestCase
             'RSS command lane',
             'RSS control tower',
             'Source health monitor',
+            'Vault analytics',
             'Ingest engine',
             'Audience command',
             'Source intelligence',

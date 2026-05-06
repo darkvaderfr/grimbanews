@@ -1077,6 +1077,10 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         // capped at 50 by client JS) and renders the saved articles.
         Route::get('coffre', function (Request $request) {
             $ids = GrimbaVault::parseIds((string) $request->cookie(GrimbaVault::COOKIE, ''));
+            if ($ids !== []) {
+                GrimbaVaultEvents::recordReturnVisit($request);
+            }
+
             $posts = GrimbaVault::resolvePosts($ids);
             $staleIds = GrimbaVault::staleIds($ids, $posts);
 
