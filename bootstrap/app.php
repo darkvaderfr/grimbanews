@@ -45,6 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\GrimbaLocale::class,
             \App\Http\Middleware\GrimbaPublicCache::class,
+            \App\Http\Middleware\GrimbaSecurityHeaders::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
