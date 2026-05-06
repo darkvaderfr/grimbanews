@@ -1,6 +1,7 @@
 <?php
 
 use App\Support\GrimbaTranslationPresenter as GnTr;
+use App\Support\GrimbaSavedSearches;
 use App\Support\GrimbaVault;
 use App\Support\GrimbaVaultEvents;
 use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
@@ -339,6 +340,24 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 $toDate = '';
             }
 
+            $savedSearchCriteria = GrimbaSavedSearches::normalize([
+                'q' => $q,
+                'source' => $sourceId,
+                'bias' => $bias,
+                'owner' => $owner,
+                'from_date' => $fromDate,
+                'to_date' => $toDate,
+            ]);
+            $savedSearchActive = false;
+            $savedSearchLimitReached = false;
+            $savedSearchCount = 0;
+
+            if ($q !== '' && ($member = auth('member')->user())) {
+                $savedSearchActive = GrimbaSavedSearches::existsForMember($member, $savedSearchCriteria);
+                $savedSearchCount = GrimbaSavedSearches::countForMember($member);
+                $savedSearchLimitReached = ! $savedSearchActive && $savedSearchCount >= GrimbaSavedSearches::MAX_PER_MEMBER;
+            }
+
             $posts = collect();
 
             if ($q !== '') {
@@ -422,10 +441,43 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 'selectedOwner'    => $owner,
                 'fromDate'         => $fromDate,
                 'toDate'           => $toDate,
+                'savedSearchCriteria' => $savedSearchCriteria,
+                'savedSearchActive' => $savedSearchActive,
+                'savedSearchLimitReached' => $savedSearchLimitReached,
+                'savedSearchCount' => $savedSearchCount,
             ])->render();
         };
 
         Route::get('search', $searchHandler)->name('public.grimba-search');
+
+        Route::post('search/alerts', function (Request $request) {
+            $user = auth('member')->user();
+            if (! $user) {
+                return redirect(route('public.member.login'));
+            }
+
+            $criteria = GrimbaSavedSearches::normalize($request->only([
+                'q',
+                'source',
+                'bias',
+                'owner',
+                'from_date',
+                'to_date',
+            ]));
+
+            if ($criteria['search_query'] === '') {
+                return redirect(url('/search'))->with('status', __('Entrez une recherche avant de créer une alerte.'));
+            }
+
+            $saved = GrimbaSavedSearches::upsertForMember($user, $criteria);
+
+            return redirect(GrimbaSavedSearches::searchUrl($criteria))->with(
+                'status',
+                $saved
+                    ? __('Alerte recherche activée.')
+                    : __('Limite atteinte : supprimez une alerte depuis Mon compte.')
+            );
+        })->middleware('member')->name('public.saved-searches.store');
 
         Route::get('article/{slug}', function (string $slug) {
             return app(\Botble\Theme\Http\Controllers\PublicController::class)->getView($slug, 'blog');
@@ -869,13 +921,14 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 return redirect(route('public.member.login'));
             }
             $vaultIds = GrimbaVault::parseIds((string) request()->cookie(GrimbaVault::COOKIE, ''));
+            $savedSearches = GrimbaSavedSearches::forMember($user);
 
             SeoHelper::setTitle(__('Mon compte') . ' — GrimbaNews');
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Mon compte'), url('/account'));
 
-            return Theme::scope('account', compact('user', 'vaultIds'))->render();
+            return Theme::scope('account', compact('user', 'vaultIds', 'savedSearches'))->render();
         })->name('public.account');
 
         Route::post('account/vault-digest', function (Request $request) {
@@ -896,6 +949,17 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     : __('Digest coffre hebdomadaire désactivé.')
             );
         })->middleware('member')->name('public.account.vault-digest');
+
+        Route::delete('account/saved-searches/{id}', function (int $id) {
+            $user = auth('member')->user();
+            if (! $user) {
+                return redirect(route('public.member.login'));
+            }
+
+            GrimbaSavedSearches::deleteForMember($user, $id);
+
+            return redirect(url('/account'))->with('status', __('Alerte recherche supprimée.'));
+        })->middleware('member')->where('id', '[0-9]+')->name('public.saved-searches.destroy');
 
         // S167 — Local news. Reads grimba_local_city + _country
         // cookies, falls back to IP geolocation via GrimbaGeoLocator

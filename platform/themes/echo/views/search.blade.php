@@ -12,6 +12,10 @@
     $selectedOwner    = $selectedOwner    ?? '';
     $fromDate         = $fromDate         ?? '';
     $toDate           = $toDate           ?? '';
+    $savedSearchCriteria = $savedSearchCriteria ?? \App\Support\GrimbaSavedSearches::normalize(request()->query());
+    $savedSearchActive = (bool) ($savedSearchActive ?? false);
+    $savedSearchLimitReached = (bool) ($savedSearchLimitReached ?? false);
+    $savedSearchCount = (int) ($savedSearchCount ?? 0);
     $biasChoices      = [
         ''        => __('Tous biais'),
         'left'    => __('Gauche'),
@@ -93,6 +97,61 @@
                 </div>
             </div>
         </form>
+
+        @if(session('status'))
+            <div class="grimba-search-alert mt-3">
+                {{ session('status') }}
+            </div>
+        @endif
+
+        @if($query !== '')
+            <div class="grimba-saved-search mt-3">
+                @auth('member')
+                    <form method="POST" action="{{ route('public.saved-searches.store') }}" class="grimba-saved-search__inner">
+                        @csrf
+                        <input type="hidden" name="q" value="{{ $savedSearchCriteria['search_query'] }}">
+                        <input type="hidden" name="source" value="{{ $savedSearchCriteria['source_id'] }}">
+                        <input type="hidden" name="bias" value="{{ $savedSearchCriteria['bias'] }}">
+                        <input type="hidden" name="owner" value="{{ $savedSearchCriteria['owner'] }}">
+                        <input type="hidden" name="from_date" value="{{ $savedSearchCriteria['from_date'] }}">
+                        <input type="hidden" name="to_date" value="{{ $savedSearchCriteria['to_date'] }}">
+
+                        <div class="grimba-saved-search__copy">
+                            <strong>{{ $savedSearchActive ? __('Recherche suivie') : __('Suivre cette recherche') }}</strong>
+                            <span>
+                                @if($savedSearchActive)
+                                    {{ __('Les nouveaux articles arriveront dans votre alerte hebdomadaire.') }}
+                                @elseif($savedSearchLimitReached)
+                                    {{ trans_choice(':count alerte active|:count alertes actives', $savedSearchCount, ['count' => $savedSearchCount]) }}
+                                @else
+                                    {{ __('Recevez les nouveaux articles qui correspondent à ces filtres.') }}
+                                @endif
+                            </span>
+                        </div>
+
+                        @if($savedSearchActive || $savedSearchLimitReached)
+                            <a href="{{ url('/account') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">
+                                {{ __('Gérer') }}
+                            </a>
+                        @else
+                            <button type="submit" class="btn-grimba btn-grimba--solid btn-grimba--sm">
+                                {{ __('Activer') }}
+                            </button>
+                        @endif
+                    </form>
+                @else
+                    <div class="grimba-saved-search__inner">
+                        <div class="grimba-saved-search__copy">
+                            <strong>{{ __('Suivre cette recherche') }}</strong>
+                            <span>{{ __('Connectez-vous pour recevoir les nouveaux articles chaque semaine.') }}</span>
+                        </div>
+                        <a href="{{ route('public.member.login') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">
+                            {{ __('Connexion') }}
+                        </a>
+                    </div>
+                @endauth
+            </div>
+        @endif
     </header>
 
     @if ($posts->isNotEmpty())

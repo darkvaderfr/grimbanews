@@ -19,6 +19,8 @@
     $vaultCount = count($vaultIds);
     $digestEnabled = \App\Support\GrimbaVault::memberDigestEnabled($user);
     $digestSnapshotCount = count(\App\Support\GrimbaVault::memberDigestIds($user));
+    $savedSearches = $savedSearches ?? \App\Support\GrimbaSavedSearches::forMember($user);
+    $savedSearchCount = $savedSearches->count();
 @endphp
 
 <section class="grimba-account py-5">
@@ -130,6 +132,56 @@
                 </button>
             </div>
         </form>
+
+        <div class="glass-panel grimba-account-searches p-4 mt-4">
+            <div class="grimba-account-searches__header">
+                <div>
+                    <span class="grimba-account-digest__kicker">{{ __('Alertes recherche') }}</span>
+                    <h2>{{ __('Recherches suivies') }}</h2>
+                </div>
+                <span class="grimba-account-digest__status {{ $savedSearchCount ? 'is-on' : '' }}">
+                    {{ trans_choice(':count active|:count actives', $savedSearchCount, ['count' => $savedSearchCount]) }}
+                </span>
+            </div>
+
+            @if($savedSearches->isEmpty())
+                <p class="grimba-account-searches__empty">
+                    {{ __('Aucune alerte active pour le moment.') }}
+                </p>
+                <a href="{{ url('/search') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">
+                    {{ __('Créer une alerte') }}
+                </a>
+            @else
+                <div class="grimba-account-searches__list">
+                    @foreach($savedSearches as $savedSearch)
+                        <div class="grimba-account-searches__row">
+                            <div class="grimba-account-searches__meta">
+                                <a href="{{ \App\Support\GrimbaSavedSearches::searchUrl($savedSearch) }}">
+                                    {{ \App\Support\GrimbaSavedSearches::label($savedSearch) }}
+                                </a>
+                                <span>
+                                    @if($savedSearch->last_sent_at)
+                                        {{ __('Dernier envoi : :date', ['date' => \Carbon\Carbon::parse($savedSearch->last_sent_at)->format('d/m/Y')]) }}
+                                    @elseif($savedSearch->last_checked_at)
+                                        {{ __('Dernière vérification : :date', ['date' => \Carbon\Carbon::parse($savedSearch->last_checked_at)->format('d/m/Y')]) }}
+                                    @else
+                                        {{ __('En attente du prochain digest hebdomadaire.') }}
+                                    @endif
+                                </span>
+                            </div>
+
+                            <form method="POST" action="{{ route('public.saved-searches.destroy', $savedSearch->id) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn-grimba btn-grimba--ghost btn-grimba--sm">
+                                    {{ __('Retirer') }}
+                                </button>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
 
         {{-- Account meta + logout --}}
         <div class="text-center mt-4">

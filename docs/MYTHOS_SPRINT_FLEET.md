@@ -39,7 +39,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **A** | Push & Deploy Gate | A1–A5 | OPEN — pushing blocked |
 | **B** | Story Page Completion | B1–B10 | 10/10 done |
 | **C** | Vault Maturity | C1–C8 | 8/8 done — C7 closed 2026-05-06 |
-| **D** | Discovery & Navigation | D1–D8 | 7/8 done |
+| **D** | Discovery & Navigation | D1–D8 | 8/8 done — D7 closed 2026-05-06 |
 | **E** | NobuAI Integration | E1–E7 | 4/7 done |
 | **F** | Performance & SEO | F1–F8 | 8/8 done |
 | **G** | A11y & I18n | G1–G6 | 4/6 done |
@@ -160,7 +160,7 @@ need to feel as cinematic as the story pages.
 | ✅ S199 | Mobile floating bottom nav | Uncommitted worktree |
 | ✅ **D5** | **Search facets** — `/search?q=...` supports `source`, `bias`, `owner`, `from_date`, and `to_date`. `search.blade.php` exposes all facet controls. | `SearchFacetsTest` verifies owner + date range narrowing |
 | ✅ S207 | Topic-chip strip persistence | Uncommitted worktree |
-| **D7** | **Saved-search alerts (member-only)** — let logged-in readers save a search query + facet combo. New `saved_searches` table; weekly cron emails new matches | One member can save & receive a digest |
+| ✅ **D7** | **Saved-search alerts (member-only)** — logged-in readers can save a `/search` query + facet combo from the search page, review/remove alerts from `/account`, and receive weekly email digests of newly matching articles. | `saved_searches` table + `grimba:saved-search-digests` Monday 04:55; `SavedSearchAlertsTest` covers save/remove, mail send, and schedule wiring |
 | ✅ **D8** | **Site-wide command palette (⌘K)** — shared modal on Grimba shells, fuzzy search across navigation, recent stories, sources, and active categories. Header search opens it with `/search` fallback; index is lazy-fetched and cached in localStorage with a freshness cookie. | `PwaShellTest` covers shell + JSON index; Playwright verified desktop and mobile dark palette with no horizontal overflow |
 
 ---

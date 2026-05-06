@@ -148,3 +148,12 @@ grimba_schedule_command('vault_digest_weekly', 'grimba:vault-digests')
     ->onOneServer()
     ->withoutOverlapping(30)
     ->runInBackground();
+
+// GrimbaNews — member-only saved-search alerts. Readers can follow
+// a query/facet combo from /search; this weekly digest sends only
+// articles published after the search was saved or last emailed.
+grimba_schedule_command('saved_search_digest_weekly', 'grimba:saved-search-digests')
+    ->weeklyOn(1, '04:55')
+    ->onOneServer()
+    ->withoutOverlapping(30)
+    ->runInBackground();

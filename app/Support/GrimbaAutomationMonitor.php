@@ -64,6 +64,11 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:vault-digests',
                 'expected_minutes' => 10080,
             ],
+            'saved_search_digest_weekly' => [
+                'label' => 'Saved-search alerts',
+                'command' => 'grimba:saved-search-digests',
+                'expected_minutes' => 10080,
+            ],
         ];
     }
 
