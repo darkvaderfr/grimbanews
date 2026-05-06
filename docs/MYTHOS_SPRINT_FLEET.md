@@ -45,7 +45,7 @@ worked end-to-end. Inside a fleet, items are ordered by dependency.
 | **G** | A11y & I18n | G1–G6 | 4/6 done |
 | **H** | Testing & QA | H1–H7 | 4/7 done |
 | **I** | Marketing & Growth | I1–I8 | 0/8 |
-| **J** | Admin & Editorial Tooling | J1–J6 | 3/6 done |
+| **J** | Admin & Editorial Tooling | J1–J6 | 4/6 done |
 | **K** | 4-region editorial split | K1–K8 | 8/8 done — K8 closed 2026-05-05 |
 
 ---
@@ -262,7 +262,7 @@ editorial review of bias / cluster / source classification cheap.
 | **J1** | **"Cluster review" admin queue** — list of clusters with conflicting bias signals (one-sided + > 5 posts, or 3+ sides + < 2 posts each). Each row is a 1-click "merge" / "split" / "approve" action | Action persists on the cluster |
 | ✅ **J2** | **Source-classification dashboard** — `/admin/grimba/news-sources/classification` ranks all sources by missing/low credibility first and exposes inline edits for bias, ownership, owner, credibility, country, and language. | `SourceClassificationDashboardTest` verifies render + inline update |
 | ✅ **J3** | **"Coverage map" admin** — `/admin/grimba/coverage-map` visualizes cluster balance across left/center/right coverage, filters gaps such as `missing-right`, and links editors back into the cluster editor. | `CoverageMapAdminTest` verifies a missing-side visualization |
-| **J4** | **Bulk re-classify** — given a category id, re-run `GrimbaCategoryClassifier::classify` on every post and report changes | CLI command + admin button |
+| ✅ **J4** | **Bulk re-classify** — `grimba:classify-categories --category={id}` re-runs `GrimbaCategoryClassifier::classify` for current members of one category, replaces stale pivots, and reports before/after changes. The cockpit runbook has a category-id reclassify button. | `CategoryReclassifyCommandTest` covers CLI and admin trigger |
 | **J5** | **Vault-events analytics dashboard** (depends on C8) — most-saved posts per week, conversion funnel from save → return visit | Renders for one week of data |
 | ✅ **J6** | **Source health monitor** — `/admin/grimba/rss-feeds` now sorts stale active feeds first, shows last fetch/success/error per RSS feed, and paints 24h-stale rows red in desktop and mobile layouts. | `SourceHealthMonitorTest` verifies the stale row and broken-feed ordering |
 

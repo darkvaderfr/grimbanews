@@ -88,6 +88,12 @@
                     <input type="hidden" name="action" value="nobuai_health">
                     <button type="submit" class="btn btn-sm btn-outline-primary">NobuAI health</button>
                 </form>
+                <form method="POST" action="{{ route('grimba.cockpit.runbook') }}" class="d-flex gap-1 align-items-center">
+                    @csrf
+                    <input type="hidden" name="action" value="category_reclassify">
+                    <input name="category_id" type="number" min="1" class="form-control form-control-sm" placeholder="Cat. ID" style="width: 92px;">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Reclasser catégorie</button>
+                </form>
                 <form method="POST" action="{{ route('grimba.cockpit.runbook') }}">
                     @csrf
                     <input type="hidden" name="action" value="translate_fr">

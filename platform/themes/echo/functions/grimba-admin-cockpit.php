@@ -355,6 +355,11 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                     'command' => 'grimba:fetch-newsapi',
                     'args' => [],
                 ],
+                'category_reclassify' => [
+                    'label' => 'Category reclassify',
+                    'command' => 'grimba:classify-categories',
+                    'args' => [],
+                ],
             ];
 
             if (! isset($actions[$action])) {
@@ -380,6 +385,17 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 }
 
                 $selected['args'] = ['--feed' => (int) $feedId];
+            }
+
+            if ($action === 'category_reclassify') {
+                $categoryId = (int) $request->input('category_id');
+                if ($categoryId < 1) {
+                    return redirect()
+                        ->route('grimba.cockpit')
+                        ->with('error_msg', 'Category reclassify: category_id manquant.');
+                }
+
+                $selected['args'] = ['--category' => $categoryId];
             }
 
             $exitCode = Artisan::call($selected['command'], $selected['args']);

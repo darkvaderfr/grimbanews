@@ -55,7 +55,7 @@ Command registration is handled by Laravel command discovery in this project lay
 | `grimba:enrich-drafts` | `--limit=`, `--feed=`, `--dry-run`, `--force` |
 | `grimba:dedupe-posts` | `--apply`, `--limit=` |
 | `grimba:recluster` | `--dry-run`, `--threshold=`, `--lookback=` |
-| `grimba:classify-categories` | `--force`, `--limit=` |
+| `grimba:classify-categories` | `--force`, `--category=`, `--limit=` |
 | `grimba:cleanup-slugs` | `--dry-run` |
 
 ## Scheduled Grimba Entries
@@ -106,7 +106,7 @@ These are registered in `routes/console.php`.
 | `grimba:publish-guardrail-categories` | None. | Creates/updates categories, category pivots, publishes drafts unless `--dry-run`. |
 | `grimba:dedupe-posts --apply` | None. | Repoints ledgers, deletes pivots/slugs/duplicate posts. |
 | `grimba:recluster` | None. | Updates `story_cluster_id`, may create clusters through helper unless `--dry-run`. |
-| `grimba:classify-categories` | None. | Writes category pivots; `--force` replaces existing pivots. |
+| `grimba:classify-categories` | None. | Writes category pivots; `--force` replaces existing pivots; `--category=` scopes to current members of one category and reports before/after changes. |
 | `grimba:cleanup-slugs` | None. | Deletes orphan slugs unless `--dry-run`. |
 
 ## Findings And Follow-Ups
