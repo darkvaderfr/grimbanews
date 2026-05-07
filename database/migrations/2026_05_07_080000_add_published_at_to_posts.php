@@ -27,13 +27,6 @@ return new class extends Migration
                     'published_at' => DB::raw('created_at'),
                 ]);
 
-            DB::table('posts')
-                ->where('status', 'published')
-                ->whereColumn('updated_at', '>', 'created_at')
-                ->where('updated_at', '>=', now()->subDays(2))
-                ->update([
-                    'published_at' => DB::raw('updated_at'),
-                ]);
         }
     }
 
