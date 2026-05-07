@@ -2724,6 +2724,57 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
 }
 
 /* S185-S188 — vault polish, mobile nav, and a11y focus states */
+.grimba-save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(26, 23, 19, 0.16);
+    background: rgba(255, 255, 255, 0.62);
+    color: var(--gn-ink);
+    cursor: pointer;
+    line-height: 1;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.grimba-save-btn:hover {
+    background: rgba(255, 255, 255, 0.86);
+    border-color: rgba(26, 23, 19, 0.28);
+}
+.grimba-save-btn[aria-pressed="true"] {
+    background: var(--gn-ink);
+    border-color: var(--gn-ink);
+    color: var(--gn-paper);
+}
+.grimba-save-btn--pill {
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-family: 'Public Sans', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+}
+.grimba-save-btn--icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 15px;
+}
+.grimba-save-btn__icon {
+    font-size: 14px;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn {
+    background: rgba(246, 241, 232, 0.09) !important;
+    border-color: rgba(246, 241, 232, 0.18) !important;
+    color: #fffaf0 !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn:hover {
+    background: rgba(246, 241, 232, 0.14) !important;
+    border-color: rgba(246, 241, 232, 0.30) !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn[aria-pressed="true"] {
+    background: #fffaf0 !important;
+    border-color: #fffaf0 !important;
+    color: #15130f !important;
+}
 .grimba-vault-fab {
     position: fixed;
     right: 18px;

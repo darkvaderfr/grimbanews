@@ -76,7 +76,20 @@ function contrast(foreground, background) {
     return (light + 0.05) / (dark + 0.05);
 }
 
-async function inspectHome(page, width, theme) {
+async function firstVisible(locator, label) {
+    const count = await locator.count();
+
+    for (let index = 0; index < count; index += 1) {
+        const item = locator.nth(index);
+        if (await item.isVisible()) {
+            return item;
+        }
+    }
+
+    throw new Error(`No visible ${label} found.`);
+}
+
+async function inspectHome(page, width) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/', { waitUntil: 'networkidle' });
 
@@ -153,7 +166,7 @@ async function inspectHome(page, width, theme) {
         const snapshots = [];
 
         for (const width of [320, 390]) {
-            const snapshot = await inspectHome(page, width, 'dark');
+            const snapshot = await inspectHome(page, width);
             snapshots.push(snapshot);
 
             assert.equal(snapshot.theme, 'dark', `dark theme is active at ${width}px`);
@@ -178,7 +191,56 @@ async function inspectHome(page, width, theme) {
             );
         }
 
-        console.log(JSON.stringify({ ok: true, baseUrl, snapshots: snapshots.map(({ width, selectionChip }) => ({ width, selectionChip })) }));
+        const storyLink = await firstVisible(page.locator([
+            '.grimba-briefing__headline',
+            '.grimba-hero__media',
+            '.grimba-topnews__headline',
+            '.grimba-latest__headline',
+            '.grimba-most-read__headline',
+            'a[href*="/article/"]',
+        ].join(', ')).filter({ hasText: /.+/ }), 'story link');
+        await Promise.all([
+            page.waitForLoadState('domcontentloaded'),
+            storyLink.click(),
+        ]);
+
+        const saveButton = await firstVisible(page.locator('.grimba-save-btn'), 'save button');
+        const saveButtonStyle = await saveButton.evaluate(button => {
+            const style = getComputedStyle(button);
+            const rootStyle = getComputedStyle(document.documentElement);
+
+            return {
+                color: style.color,
+                backgroundColor: style.backgroundColor,
+                borderColor: style.borderColor,
+                paper: rootStyle.getPropertyValue('--gn-paper').trim(),
+            };
+        });
+        const saveButtonContrast = contrast(
+            parseRgb(saveButtonStyle.color),
+            blend(parseRgb(saveButtonStyle.backgroundColor), parseHex(saveButtonStyle.paper))
+        );
+        assert.ok(saveButtonContrast >= 7, 'dark save button contrast is AAA-sized before interaction');
+
+        await saveButton.click();
+        await page.waitForTimeout(200);
+        const pressedButtonStyle = await saveButton.evaluate(button => {
+            const style = getComputedStyle(button);
+            return {
+                pressed: button.getAttribute('aria-pressed'),
+                color: style.color,
+                backgroundColor: style.backgroundColor,
+            };
+        });
+        assert.equal(pressedButtonStyle.pressed, 'true', 'save button becomes pressed');
+        assert.match(pressedButtonStyle.backgroundColor, /rgb\(255, 250, 240\)/, 'pressed save button uses explicit cream background');
+
+        console.log(JSON.stringify({
+            ok: true,
+            baseUrl,
+            snapshots: snapshots.map(({ width, selectionChip }) => ({ width, selectionChip })),
+            saveButton: { contrast: Number(saveButtonContrast.toFixed(2)), pressedButtonStyle },
+        }));
     } finally {
         await browser.close();
     }

@@ -21,16 +21,13 @@
 
         function paint(btn, saved) {
             btn.setAttribute('aria-pressed', String(saved));
+            btn.style.removeProperty('background');
+            btn.style.removeProperty('color');
             const icon = btn.querySelector('.grimba-save-btn__icon, span[aria-hidden]');
             if (icon) icon.textContent = saved ? '★' : '☆';
             if (btn.classList.contains('grimba-save-btn--pill')) {
                 const label = btn.querySelector('.grimba-save-btn__label');
                 if (label) label.textContent = saved ? LABEL_SAVED : LABEL_SAVE;
-                btn.style.background = saved ? 'var(--gn-ink, #1a1713)' : 'rgba(255,255,255,0.6)';
-                btn.style.color = saved ? 'var(--gn-paper, #f6f1e8)' : 'var(--gn-ink, #1a1713)';
-            } else {
-                btn.style.background = saved ? 'var(--gn-ink, #1a1713)' : 'rgba(255,255,255,0.6)';
-                btn.style.color = saved ? 'var(--gn-paper, #f6f1e8)' : 'var(--gn-ink, #1a1713)';
             }
         }
 

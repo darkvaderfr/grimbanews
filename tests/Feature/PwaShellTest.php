@@ -99,6 +99,20 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('class="grimba-owner-source-card"', $ownersView);
     }
 
+    public function test_vault_save_buttons_are_css_driven_in_dark_mode(): void
+    {
+        $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+        $saveButton = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/save-button.blade.php');
+        $vaultScript = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/home/vault-script.blade.php');
+
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn[aria-pressed="true"]', $css);
+        $this->assertStringContainsString('btn.style.removeProperty(\'background\');', $vaultScript);
+        $this->assertStringContainsString('btn.style.removeProperty(\'color\');', $vaultScript);
+        $this->assertStringNotContainsString('background:rgba(255,255,255,0.6)', $saveButton);
+        $this->assertStringNotContainsString('btn.style.background = saved', $vaultScript);
+    }
+
     public function test_command_palette_shell_and_index_are_available(): void
     {
         $this->get('/')
