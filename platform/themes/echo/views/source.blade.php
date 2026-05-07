@@ -194,16 +194,7 @@
                         @endphp
                         <div class="col-12 col-md-6 col-lg-4">
                             <a href="{{ url('/sources/' . $sim->slug) }}"
-                               class="grimba-similar-source"
-                               style="
-                                   display:block; padding:14px 16px;
-                                   border:1px solid rgba(26,23,19,0.10);
-                                   border-radius:12px;
-                                   background:rgba(255,255,255,0.55);
-                                   color:var(--gn-ink,#1a1713);
-                                   text-decoration:none;
-                                   transition: transform 0.15s ease, box-shadow 0.15s ease;
-                               ">
+                               class="grimba-similar-source">
                                 <div class="d-flex align-items-center gap-2 mb-2">
                                     {!! Theme::partial('source-logo', [
                                         'source_id' => $sim->id,

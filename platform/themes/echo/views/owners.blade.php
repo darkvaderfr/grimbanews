@@ -74,15 +74,9 @@
                             @foreach($owner['sources'] as $s)
                                 @php $b = $s->bias_rating ?? 'unknown'; $meta = $biasMeta[$b]; @endphp
                                 <a href="{{ url('/sources/' . ($s->slug ?? '')) }}"
+                                   class="grimba-owner-source-card"
                                    style="
-                                       display:flex; align-items:center; gap:12px;
-                                       padding:10px 14px;
-                                       border:1px solid rgba(26,23,19,0.10);
                                        border-left:4px solid {{ $meta['color'] }};
-                                       border-radius:10px;
-                                       background:rgba(255,255,255,0.55);
-                                       color:var(--gn-ink,#1a1713);
-                                       text-decoration:none;
                                    ">
                                     {!! Theme::partial('source-logo', [
                                         'source_id' => $s->id,

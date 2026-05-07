@@ -116,15 +116,7 @@
                     @endphp
                     <div class="col-12 col-md-6 col-lg-3">
                         <a href="{{ url('/sources/' . $ts->slug) }}"
-                           class="d-block"
-                           style="
-                               padding:10px 12px;
-                               border:1px solid rgba(26,23,19,0.10);
-                               border-radius:10px;
-                               background:rgba(255,255,255,0.55);
-                               color:var(--gn-ink,#1a1713);
-                               text-decoration:none;
-                           ">
+                           class="grimba-topic-source-card">
                             <strong style="font-size:13.5px; font-family:'Public Sans',system-ui,sans-serif;">{{ $ts->name }}</strong>
                             <div class="small opacity-65 mt-1">
                                 {{ trans_choice(':count article|:count articles', (int) $ts->article_count, ['count' => (int) $ts->article_count]) }}

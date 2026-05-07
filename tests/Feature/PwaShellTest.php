@@ -77,6 +77,28 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('bottom: calc(92px + env(safe-area-inset-bottom));', $cookieConsent);
     }
 
+    public function test_dark_mode_editorial_selection_surfaces_have_explicit_contrast(): void
+    {
+        $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+        $categoryView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/category.blade.php');
+        $sourceView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/source.blade.php');
+        $ownersView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/owners.blade.php');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('grimba-similar__chip', false);
+
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-similar__chip', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-topic-source-card', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-similar-source', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card', $css);
+        $this->assertStringContainsString('background: rgba(246, 241, 232, 0.08) !important;', $css);
+        $this->assertStringContainsString('color: #fffaf0 !important;', $css);
+        $this->assertStringContainsString('class="grimba-topic-source-card"', $categoryView);
+        $this->assertStringContainsString('class="grimba-similar-source"', $sourceView);
+        $this->assertStringContainsString('class="grimba-owner-source-card"', $ownersView);
+    }
+
     public function test_command_palette_shell_and_index_are_available(): void
     {
         $this->get('/')
