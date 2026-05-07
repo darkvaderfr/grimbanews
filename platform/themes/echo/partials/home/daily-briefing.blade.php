@@ -12,6 +12,7 @@
      * That filter rules out one-side-only blindspots (which have their
      * own surface) and tiny-cluster noise.
      */
+    use App\Support\GrimbaPostRecency as GnRecency;
     use App\Support\GrimbaTranslationPresenter as GnTr;
     use Botble\Blog\Models\Post;
     use Illuminate\Support\Facades\Cache;
@@ -22,7 +23,7 @@
             return DB::table('posts')
                 ->where('status', 'published')
                 ->whereNotNull('story_cluster_id')
-                ->when($since, fn ($q) => $q->where('created_at', '>=', $since))
+                ->when($since, fn ($q) => GnRecency::wherePublishedSince($q, $since))
                 ->select('story_cluster_id', 'bias_rating', DB::raw('count(*) as c'))
                 ->groupBy('story_cluster_id', 'bias_rating')
                 ->get();
@@ -64,7 +65,7 @@
         $lead = Post::query()
             ->where('story_cluster_id', $clusterId)
             ->where('status', 'published')
-            ->orderByDesc('created_at')
+            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
             ->first();
 
         return $lead ? [
@@ -92,7 +93,7 @@
     $__desc        = GnTr::description($__post);
     $__readMin     = max(1, (int) ceil(str_word_count(strip_tags((string) $__desc)) / 200));
     $__sourceLabel = $__post->source_name ?? '';
-    $__date        = optional($__post->created_at)->locale('fr')->isoFormat('D MMMM');
+    $__date        = optional(GnTr::publishedAt($__post))->locale('fr')->isoFormat('D MMMM');
 @endphp
 
 <section class="grimba-daily-briefing mb-4" aria-labelledby="grimba-daily-briefing-title">

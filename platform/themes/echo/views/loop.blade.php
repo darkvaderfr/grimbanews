@@ -9,7 +9,7 @@
         return collect($items)
             ->sortBy([
                 fn ($post) => GnTr::rankForTargetLocale($post),
-                fn ($post) => - (int) optional($post->created_at)->getTimestamp(),
+                fn ($post) => - (int) optional(GnTr::publishedAt($post))->getTimestamp(),
             ])
             ->values();
     };

@@ -8,6 +8,7 @@
     $__gnSeoDesc = GnTr::description($post);
     $__gnTarget = GnTr::targetLocale();
     $__gnHasTr = GnTr::isTranslated($post, $__gnTarget);
+    $__gnPublishedAt = GnTr::publishedAt($post);
     SeoHelper::setTitle($__gnSeoTitle);
     if ($__gnSeoDesc) {
         SeoHelper::setDescription(strip_tags((string) $__gnSeoDesc));
@@ -47,8 +48,8 @@
             '@type' => 'WebPage',
             '@id' => $__gnClusterUrl,
         ],
-        'datePublished' => optional($post->created_at)->toAtomString(),
-        'dateModified' => optional($post->updated_at ?: $post->created_at)->toAtomString(),
+        'datePublished' => optional($__gnPublishedAt)->toAtomString(),
+        'dateModified' => optional($post->updated_at ?: $__gnPublishedAt)->toAtomString(),
         'author' => [
             '@type' => 'Organization',
             'name' => $post->source_name ?: 'GrimbaNews',
@@ -772,7 +773,7 @@
                                         <span class="opacity-75">{{ __('Lu chez :source', ['source' => $post->source_name]) }}</span>
                                     @endif
                                     <span class="opacity-50">·</span>
-                                    <span class="opacity-75">{{ optional($post->created_at)->locale($__gnTarget)->diffForHumans() }}</span>
+                                    <span class="opacity-75">{{ optional($__gnPublishedAt)->locale($__gnTarget)->diffForHumans() }}</span>
                                     {!! Theme::partial('reading-time', ['post' => $post]) !!}
                                 </div>
 

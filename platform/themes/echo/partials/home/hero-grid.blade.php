@@ -87,6 +87,7 @@
                     @php
                         $title = GnTr::title($p);
                         $isTranslated = GnTr::isTranslated($p);
+                        $publishedAt = GnTr::publishedAt($p);
                     @endphp
                     <li class="grimba-briefing__item">
                         <a href="{{ $p->url }}" class="grimba-briefing__thumb">
@@ -97,8 +98,8 @@
                             @if($isTranslated)
                                 {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
                             @endif
-                            @if($p->created_at)
-                                <span class="small opacity-75">{{ $p->created_at->locale('fr')->diffForHumans(['short' => false]) }}</span>
+                            @if($publishedAt)
+                                <span class="small opacity-75">{{ $publishedAt->locale('fr')->diffForHumans(['short' => false]) }}</span>
                             @endif
                             {!! Theme::partial('home.coverage-bar', ['post' => $p, 'compact' => true]) !!}
                         </div>

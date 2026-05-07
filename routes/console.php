@@ -80,6 +80,14 @@ grimba_schedule_command('publish_guardrails', 'grimba:publish-guardrail-categori
     ->withoutOverlapping(15)
     ->runInBackground();
 
+// GrimbaNews — freshness watchdog. If the public feed ever drops
+// below the daily publication floor, promote trusted recent drafts
+// immediately and fail loudly when there is no healthy intake to use.
+grimba_schedule_command('freshness_watchdog', 'grimba:ensure-daily-publish --min=12 --window-hours=24')
+    ->cron('11,41 * * * *')
+    ->onOneServer()
+    ->withoutOverlapping(15);
+
 // GrimbaNews — full article extraction for subscriber/member reading.
 // Runs shortly after trusted auto-publish so newly public RSS/NewsAPI
 // posts get a readable body without waiting for an editor.

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\GrimbaPostPublisher;
 use Botble\Blog\Models\Category;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Models\Slug;
@@ -94,12 +95,7 @@ class GrimbaPublishGuardrailCategories extends Command
                     }
                 }
 
-                DB::table('posts')
-                    ->whereIn('id', $ids)
-                    ->update([
-                        'status' => 'published',
-                        'updated_at' => now(),
-                    ]);
+                GrimbaPostPublisher::publishDrafts($ids);
             });
 
             $total += count($ids);

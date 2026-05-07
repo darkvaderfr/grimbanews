@@ -191,12 +191,12 @@ class GrimbaSavedSearches
         self::applyCriteria($query, $criteria);
 
         if ($since) {
-            $query->where('posts.created_at', '>', $since->toDateTimeString());
+            GrimbaPostRecency::wherePublishedSince($query, $since, inclusive: false);
         }
 
         return $query
             ->with('categories')
-            ->orderByDesc('posts.created_at')
+            ->tap(fn ($q) => GrimbaPostRecency::orderByPublished($q))
             ->limit($limit)
             ->get();
     }
@@ -286,10 +286,10 @@ class GrimbaSavedSearches
             });
         }
         if ($criteria['from_date']) {
-            $query->whereDate('posts.created_at', '>=', $criteria['from_date']);
+            GrimbaPostRecency::wherePublishedDateFrom($query, $criteria['from_date']);
         }
         if ($criteria['to_date']) {
-            $query->whereDate('posts.created_at', '<=', $criteria['to_date']);
+            GrimbaPostRecency::wherePublishedDateTo($query, $criteria['to_date']);
         }
     }
 

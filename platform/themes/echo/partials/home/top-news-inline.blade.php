@@ -46,6 +46,7 @@
             @php
                 $title = GnTr::title($p);
                 $isTranslated = GnTr::isTranslated($p);
+                $publishedAt = GnTr::publishedAt($p);
             @endphp
             <li class="grimba-topnews__item">
                 <div class="grimba-topnews__body">
@@ -56,8 +57,8 @@
                         @if($p->source_name)
                             <span class="opacity-50">·</span> {{ $p->source_name }}
                         @endif
-                        @if($p->created_at)
-                            <span class="opacity-50">·</span> {{ $p->created_at->locale('fr')->diffForHumans(['short' => false]) }}
+                        @if($publishedAt)
+                            <span class="opacity-50">·</span> {{ $publishedAt->locale('fr')->diffForHumans(['short' => false]) }}
                         @endif
                     </span>
                     <a href="{{ $p->url }}" class="grimba-topnews__headline">{{ $title }}</a>

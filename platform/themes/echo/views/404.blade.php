@@ -6,7 +6,7 @@
     use App\Support\GrimbaTranslationPresenter as GnTr;
     $__recentPosts = \Botble\Blog\Models\Post::query()
         ->where('status', 'published')
-        ->orderByDesc('created_at')
+        ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
         ->limit(4)
         ->get(['id', 'name', 'translated_name', 'translated_to', 'image', 'source_name', 'bias_rating', 'created_at']);
 @endphp

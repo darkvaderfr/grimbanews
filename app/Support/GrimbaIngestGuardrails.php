@@ -83,7 +83,7 @@ class GrimbaIngestGuardrails
         $reasons = [];
 
         foreach ($ids as $id) {
-            $query = Post::query()
+            $query = Post::withoutGlobalScope('grimba_region')
                 ->where('id', (int) $id)
                 ->where('status', 'draft');
 
@@ -106,9 +106,7 @@ class GrimbaIngestGuardrails
                 continue;
             }
 
-            $post->status = 'published';
-            $post->save();
-            $published++;
+            $published += GrimbaPostPublisher::publishDrafts([(int) $post->id]);
         }
 
         return [

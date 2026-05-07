@@ -11,6 +11,8 @@ class GuardrailCategoryPublishCommandTest extends TestCase
 {
     public function test_guardrail_drafts_publish_into_review_categories(): void
     {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
         $suffix = Str::lower(Str::random(8));
         $now = now();
         $author = User::query()->find(1);
@@ -57,6 +59,8 @@ class GuardrailCategoryPublishCommandTest extends TestCase
 
         $this->assertSame('published', DB::table('posts')->where('id', $lowCredPostId)->value('status'));
         $this->assertSame('published', DB::table('posts')->where('id', $unknownBiasPostId)->value('status'));
+        $this->assertNotNull(DB::table('posts')->where('id', $lowCredPostId)->value('published_at'));
+        $this->assertNotNull(DB::table('posts')->where('id', $unknownBiasPostId)->value('published_at'));
         $this->assertTrue(DB::table('post_categories')->where('post_id', $lowCredPostId)->where('category_id', $trustedCategoryId)->exists());
         $this->assertTrue(DB::table('post_categories')->where('post_id', $unknownBiasPostId)->where('category_id', $unclassifiedCategoryId)->exists());
     }

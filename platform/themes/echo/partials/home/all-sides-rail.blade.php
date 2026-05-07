@@ -14,6 +14,7 @@
      */
 
     use App\Support\GrimbaTranslationPresenter as GnTr;
+    use App\Support\GrimbaPostRecency as GnRecency;
     use Botble\Blog\Models\Post;
 
     // Cluster ids with ≥2 bias sides + post-counts (recency-weighted).
@@ -25,7 +26,7 @@
             'story_cluster_id',
             \Illuminate\Support\Facades\DB::raw('COUNT(DISTINCT bias_rating) as sides'),
             \Illuminate\Support\Facades\DB::raw('COUNT(*) as articles'),
-            \Illuminate\Support\Facades\DB::raw('MAX(created_at) as latest')
+            \Illuminate\Support\Facades\DB::raw('MAX(' . GnRecency::expression() . ') as latest')
         )
         ->groupBy('story_cluster_id')
         ->havingRaw('COUNT(DISTINCT bias_rating) >= 2')

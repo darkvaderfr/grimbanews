@@ -16,7 +16,8 @@
     @foreach($posts as $post)
         @php
             $url   = $post->url;
-            $pub   = ($post->created_at ?? now())->toRssString();
+            $pubAt = \App\Support\GrimbaPostRecency::value($post) ?: now();
+            $pub   = $pubAt->toRssString();
             $desc  = strip_tags((string) ($post->description ?? ''));
             $bias  = $post->bias_rating ?? 'unknown';
         @endphp

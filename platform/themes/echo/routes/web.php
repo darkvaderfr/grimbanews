@@ -1,6 +1,7 @@
 <?php
 
 use App\Support\GrimbaTranslationPresenter as GnTr;
+use App\Support\GrimbaPostRecency;
 use App\Support\GrimbaSavedSearches;
 use App\Support\GrimbaVault;
 use App\Support\GrimbaVaultEvents;
@@ -58,7 +59,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $aggregateRows = DB::table('posts')
                 ->where('status', 'published')
                 ->whereNotNull('story_cluster_id')
-                ->select('story_cluster_id', 'bias_rating', DB::raw('count(*) as c'), DB::raw('max(created_at) as latest_at'))
+                ->select('story_cluster_id', 'bias_rating', DB::raw('count(*) as c'), DB::raw('max(' . GrimbaPostRecency::expression() . ') as latest_at'))
                 ->groupBy('story_cluster_id', 'bias_rating')
                 ->get();
 
@@ -395,10 +396,10 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                         });
                     }
                     if ($fromDate !== '') {
-                        $query->whereDate('posts.created_at', '>=', $fromDate);
+                        GrimbaPostRecency::wherePublishedDateFrom($query, $fromDate);
                     }
                     if ($toDate !== '') {
-                        $query->whereDate('posts.created_at', '<=', $toDate);
+                        GrimbaPostRecency::wherePublishedDateTo($query, $toDate);
                     }
 
                     // Preserve the BM25 ordering from the FTS result after locale priority.
@@ -491,7 +492,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                         ->where('slugs.prefix', 'blog');
                 })
                 ->where('posts.status', 'published')
-                ->orderByDesc('posts.created_at')
+                ->tap(fn ($query) => GrimbaPostRecency::orderByPublished($query, 'posts'))
                 ->limit(30)
                 ->get([
                     'posts.id',
@@ -532,7 +533,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $recentCategoryActivity = DB::table('post_categories')
                 ->join('posts', 'posts.id', '=', 'post_categories.post_id')
                 ->where('posts.status', 'published')
-                ->where('posts.created_at', '>=', now()->subDays(30))
+                ->tap(fn ($q) => GrimbaPostRecency::wherePublishedSince($q, now()->subDays(30)))
                 ->selectRaw('post_categories.category_id, COUNT(*) as article_count')
                 ->groupBy('post_categories.category_id');
 
@@ -701,7 +702,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     ->join('posts', 'posts.id', '=', 'post_categories.post_id')
                     ->whereIn('posts.id', $readIds)
                     ->where('posts.status', 'published')
-                    ->where('posts.created_at', '>=', now()->subDays(14))
+                    ->tap(fn ($q) => GrimbaPostRecency::wherePublishedSince($q, now()->subDays(14)))
                     ->pluck('post_categories.category_id')
                     ->unique()
                     ->values()
@@ -715,7 +716,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                             ->from('post_categories')
                             ->join('posts', 'posts.id', '=', 'post_categories.post_id')
                             ->where('posts.status', 'published')
-                            ->where('posts.created_at', '>=', now()->subDays(14));
+                            ->tap(fn ($q) => GrimbaPostRecency::wherePublishedSince($q, now()->subDays(14)));
                     })
                     ->orderBy('name')
                     ->limit(6)
@@ -748,10 +749,15 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $rows = collect();
             if (! empty($ids)) {
                 // Preserve cookie order (most-recent first).
+                $postColumns = ['id', 'name', 'bias_rating', 'source_name', 'created_at'];
+                if (Schema::hasColumn('posts', 'published_at')) {
+                    $postColumns[] = 'published_at';
+                }
+
                 $byId = Post::query()
                     ->whereIn('id', $ids)
                     ->where('status', 'published')
-                    ->get(['id', 'name', 'bias_rating', 'source_name', 'created_at'])
+                    ->get($postColumns)
                     ->keyBy('id');
 
                 foreach ($ids as $i => $id) {
@@ -763,7 +769,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                         'title'       => (string) $p->name,
                         'source'      => (string) ($p->source_name ?? ''),
                         'bias'        => (string) ($p->bias_rating ?? 'unknown'),
-                        'published_at'=> optional($p->created_at)->toDateString() ?? '',
+                        'published_at'=> optional(GrimbaPostRecency::value($p))->toDateString() ?? '',
                     ]);
                 }
             }
@@ -1073,9 +1079,10 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         })->name('public.owners');
 
         Route::get('sources', function () {
+            $publishedExpr = GrimbaPostRecency::expression();
             $activity = DB::table('posts')
-                ->selectRaw('source_id, COUNT(*) as article_count, COUNT(DISTINCT story_cluster_id) as cluster_count, MAX(created_at) as last_published_at')
-                ->selectRaw("COUNT(DISTINCT CASE WHEN created_at >= ? THEN story_cluster_id END) as recent_cluster_count", [now()->subDays(30)])
+                ->selectRaw('source_id, COUNT(*) as article_count, COUNT(DISTINCT story_cluster_id) as cluster_count, MAX(' . $publishedExpr . ') as last_published_at')
+                ->selectRaw("COUNT(DISTINCT CASE WHEN {$publishedExpr} >= ? THEN story_cluster_id END) as recent_cluster_count", [now()->subDays(30)])
                 ->where('status', 'published')
                 ->whereNotNull('source_id')
                 ->groupBy('source_id');
@@ -1299,10 +1306,15 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             $rows = collect();
             if (! empty($ids)) {
+                $postColumns = ['id', 'name', 'bias_rating', 'source_name', 'created_at'];
+                if (Schema::hasColumn('posts', 'published_at')) {
+                    $postColumns[] = 'published_at';
+                }
+
                 $byId = Post::query()
                     ->whereIn('id', $ids)
                     ->where('status', 'published')
-                    ->get(['id', 'name', 'bias_rating', 'source_name', 'created_at'])
+                    ->get($postColumns)
                     ->keyBy('id');
 
                 foreach ($ids as $i => $id) {
@@ -1314,7 +1326,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                         'title'       => (string) $p->name,
                         'source'      => (string) ($p->source_name ?? ''),
                         'bias'        => (string) ($p->bias_rating ?? 'unknown'),
-                        'published_at'=> optional($p->created_at)->toDateString() ?? '',
+                        'published_at'=> optional(GrimbaPostRecency::value($p))->toDateString() ?? '',
                     ]);
                 }
             }

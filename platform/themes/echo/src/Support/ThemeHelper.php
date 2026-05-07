@@ -2,6 +2,7 @@
 
 namespace Theme\Echo\Support;
 
+use App\Support\GrimbaPostRecency;
 use Botble\Base\Models\BaseQueryBuilder;
 use Botble\Blog\Models\Post;
 use Botble\Media\Facades\RvMedia;
@@ -40,7 +41,7 @@ class ThemeHelper
             $query = match ($type) {
                 'popular' => $query->orderByDesc('views'),
                 'featured' => $query->where('is_featured', 1),
-                default => $query->orderByDesc('created_at'),
+                default => GrimbaPostRecency::orderByPublished($query),
             };
         }
 

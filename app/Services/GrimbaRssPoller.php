@@ -409,6 +409,9 @@ class GrimbaRssPoller
                 $autoPublish = filter_var(env('GRIMBA_INGEST_AUTO_PUBLISH'), FILTER_VALIDATE_BOOLEAN);
             }
             $post->status      = $autoPublish ? 'published' : 'draft';
+            if ($autoPublish && Schema::hasColumn('posts', 'published_at')) {
+                $post->published_at = now();
+            }
             $post->author_id   = 1;
             $post->author_type = \Botble\ACL\Models\User::class;
             $post->is_featured = false;

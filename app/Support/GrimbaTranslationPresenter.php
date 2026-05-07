@@ -5,6 +5,7 @@ namespace App\Support;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Carbon\CarbonImmutable;
 use Throwable;
 
 class GrimbaTranslationPresenter
@@ -73,6 +74,11 @@ class GrimbaTranslationPresenter
         return Str::limit(strip_tags((string) self::description($post)), $limit);
     }
 
+    public static function publishedAt(object $post): ?CarbonImmutable
+    {
+        return GrimbaPostRecency::value($post);
+    }
+
     public static function orderForTargetLocale(mixed $query, ?string $target = null, bool $withRecency = true): mixed
     {
         $target = strtolower(substr($target ?: self::targetLocale(), 0, 2));
@@ -84,7 +90,7 @@ class GrimbaTranslationPresenter
 
         $query->orderByRaw($sql, $bindings);
 
-        return $withRecency ? $query->orderByDesc('posts.created_at') : $query;
+        return $withRecency ? GrimbaPostRecency::orderByPublished($query) : $query;
     }
 
     public static function rankForTargetLocale(object $post, ?string $target = null): int

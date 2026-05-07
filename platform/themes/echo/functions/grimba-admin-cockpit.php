@@ -17,6 +17,7 @@ use App\Services\GrimbaNobuAi;
 use App\Services\GrimbaTranslator;
 use App\Support\GrimbaAutomationMonitor;
 use App\Support\GrimbaIngestGuardrails;
+use App\Support\GrimbaPostRecency;
 use Botble\Blog\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -34,7 +35,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $today = now()->startOfDay();
             $todayPosts = DB::table('posts')
                 ->where('status', 'published')
-                ->where('created_at', '>=', $today)
+                ->tap(fn ($q) => GrimbaPostRecency::wherePublishedSince($q, $today))
                 ->get(['bias_rating', 'source_name', 'story_cluster_id']);
 
             $coverage = ['left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0];
@@ -78,7 +79,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $topSources = DB::table('posts')
                 ->selectRaw('source_name, COUNT(*) as n, MAX(credibility_score) as score')
                 ->where('status', 'published')
-                ->where('created_at', '>=', $weekAgo)
+                ->tap(fn ($q) => GrimbaPostRecency::wherePublishedSince($q, $weekAgo))
                 ->whereNotNull('source_name')
                 ->groupBy('source_name')
                 ->orderByDesc('n')

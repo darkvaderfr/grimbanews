@@ -10,13 +10,13 @@
     $vaultCount = count(\App\Support\GrimbaVault::parseIds($rawVault));
 
     // S206/D3 — cached editorial pulse for first paint.
-    $pulse = \Illuminate\Support\Facades\Cache::remember('grimba_header_pulse_v1', 300, function (): array {
+    $pulse = \Illuminate\Support\Facades\Cache::remember('grimba_header_pulse_v2', 300, function (): array {
         $morning = now()->setTime(6, 0);
         return [
-            'new' => \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
-                ->where('status', 'published')
-                ->where('created_at', '>=', $morning)
-                ->count(),
+            'new' => \App\Support\GrimbaPostRecency::wherePublishedSince(
+                \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')->where('status', 'published'),
+                $morning
+            )->count(),
             'blindspots' => \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
                 ->where('status', 'published')
                 ->where('is_blindspot', true)

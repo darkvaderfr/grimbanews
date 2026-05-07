@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\GrimbaPostPublisher;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -69,7 +70,8 @@ class GrimbaPublishTrusted extends Command
             ->whereIn('news_sources.bias_rating', ['left', 'center', 'right'])
             ->where('news_sources.credibility_score', '>=', $threshold)
             ->where('posts.created_at', '<=', $cutoff)
-            ->orderBy('posts.id')
+            ->orderByDesc('posts.created_at')
+            ->orderByDesc('posts.id')
             ->limit($limit)
             ->select('posts.id', 'posts.name', 'news_sources.name as source_name', 'news_sources.bias_rating', 'news_sources.credibility_score')
             ->get();
@@ -100,12 +102,7 @@ class GrimbaPublishTrusted extends Command
             // so a bias-distribution reader doesn't see half a
             // promotion mid-query.
             DB::transaction(function () use ($ids): void {
-                DB::table('posts')
-                    ->whereIn('id', $ids)
-                    ->update([
-                        'status'     => 'published',
-                        'updated_at' => now(),
-                    ]);
+                GrimbaPostPublisher::publishDrafts($ids);
             });
         }
 
