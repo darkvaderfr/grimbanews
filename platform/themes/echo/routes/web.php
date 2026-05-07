@@ -149,7 +149,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         })->name('public.comparison');
 
         $feedHandler = function () {
-            $posts = Post::query()
+            $posts = Post::withoutGlobalScope('grimba_region')
                 ->where('status', 'published')
                 ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
                 ->limit(30)
