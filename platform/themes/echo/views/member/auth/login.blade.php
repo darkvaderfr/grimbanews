@@ -52,9 +52,8 @@
             <form method="POST" action="{{ route('public.member.login.post') }}" novalidate>
                 @csrf
 
-                <label for="grimba-login-email"
-                       style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">
-                    {{ __('Adresse email') }} <span style="color:#c0392b;">*</span>
+                <label for="grimba-login-email" class="grimba-auth-label">
+                    {{ __('Adresse email') }} <span class="grimba-auth-label__required">*</span>
                 </label>
                 <input type="email"
                        id="grimba-login-email"
@@ -63,20 +62,10 @@
                        autocomplete="email"
                        required
                        placeholder="vous@exemple.fr"
-                       style="
-                           width:100%;
-                           padding:11px 14px;
-                           border-radius:9999px;
-                           border:1px solid rgba(26,23,19,0.18);
-                           background:rgba(255,255,255,0.7);
-                           font-size:15px;
-                           color:var(--gn-ink,#1a1713);
-                           margin-bottom:14px;
-                       ">
+                       class="grimba-form-pill mb-3">
 
-                <label for="grimba-login-password"
-                       style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">
-                    {{ __('Mot de passe') }} <span style="color:#c0392b;">*</span>
+                <label for="grimba-login-password" class="grimba-auth-label">
+                    {{ __('Mot de passe') }} <span class="grimba-auth-label__required">*</span>
                 </label>
                 <input type="password"
                        id="grimba-login-password"
@@ -84,48 +73,27 @@
                        autocomplete="current-password"
                        required
                        placeholder="••••••••"
-                       style="
-                           width:100%;
-                           padding:11px 14px;
-                           border-radius:9999px;
-                           border:1px solid rgba(26,23,19,0.18);
-                           background:rgba(255,255,255,0.7);
-                           font-size:15px;
-                           color:var(--gn-ink,#1a1713);
-                           margin-bottom:14px;
-                       ">
+                       class="grimba-form-pill mb-3">
 
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; opacity:0.85;">
                         <input type="checkbox" name="remember" value="1" style="margin:0;">
                         <span>{{ __('Se souvenir de moi') }}</span>
                     </label>
-                    <a href="{{ route('public.member.password.request') }}" class="small text-decoration-underline" style="color:var(--gn-ink,#1a1713); opacity:0.75;">
+                    <a href="{{ route('public.member.password.request') }}" class="small text-decoration-underline grimba-auth-link-muted">
                         {{ __('Mot de passe oublié ?') }}
                     </a>
                 </div>
 
                 <button type="submit"
-                        class="btn-grimba btn-grimba--solid"
-                        style="
-                            width:100%; padding:13px 18px;
-                            border-radius:9999px;
-                            background:var(--gn-ink,#1a1713);
-                            color:var(--gn-paper,#f6f1e8);
-                            font-family:'Public Sans',system-ui,sans-serif;
-                            font-weight:700;
-                            letter-spacing:0.4px;
-                            font-size:14px;
-                            border:none;
-                            cursor:pointer;
-                        ">
+                        class="btn-grimba btn-grimba--solid btn-grimba--block">
                     {{ __('Se connecter') }} →
                 </button>
 
                 @if(setting('member_enabled_registration', true))
                     <p class="small mt-3 mb-0 text-center" style="opacity:0.75;">
                         {{ __("Vous n'avez pas encore de compte ?") }}
-                        <a href="{{ route('public.member.register') }}" class="text-decoration-underline" style="color:#c0392b; font-weight:600;">
+                        <a href="{{ route('public.member.register') }}" class="text-decoration-underline grimba-auth-link-accent">
                             {{ __('Inscrivez-vous') }}
                         </a>
                     </p>

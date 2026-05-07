@@ -32,26 +32,25 @@
                 @csrf
                 <input type="hidden" name="token" value="{{ $token }}">
 
-                <label for="grimba-rst-email" style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">
-                    {{ __('Adresse email') }} <span style="color:#c0392b;">*</span>
+                <label for="grimba-rst-email" class="grimba-auth-label">
+                    {{ __('Adresse email') }} <span class="grimba-auth-label__required">*</span>
                 </label>
                 <input type="email" id="grimba-rst-email" name="email" required value="{{ $email }}" autocomplete="email"
-                       style="width:100%; padding:11px 14px; border-radius:9999px; border:1px solid rgba(26,23,19,0.18); background:rgba(255,255,255,0.7); font-size:15px; color:var(--gn-ink,#1a1713); margin-bottom:14px;">
+                       class="grimba-form-pill mb-3">
 
-                <label for="grimba-rst-password" style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">
-                    {{ __('Nouveau mot de passe') }} <span style="color:#c0392b;">*</span>
+                <label for="grimba-rst-password" class="grimba-auth-label">
+                    {{ __('Nouveau mot de passe') }} <span class="grimba-auth-label__required">*</span>
                 </label>
                 <input type="password" id="grimba-rst-password" name="password" required autocomplete="new-password" placeholder="••••••••"
-                       style="width:100%; padding:11px 14px; border-radius:9999px; border:1px solid rgba(26,23,19,0.18); background:rgba(255,255,255,0.7); font-size:15px; color:var(--gn-ink,#1a1713); margin-bottom:14px;">
+                       class="grimba-form-pill mb-3">
 
-                <label for="grimba-rst-pwc" style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">
-                    {{ __('Confirmer le nouveau mot de passe') }} <span style="color:#c0392b;">*</span>
+                <label for="grimba-rst-pwc" class="grimba-auth-label">
+                    {{ __('Confirmer le nouveau mot de passe') }} <span class="grimba-auth-label__required">*</span>
                 </label>
                 <input type="password" id="grimba-rst-pwc" name="password_confirmation" required autocomplete="new-password" placeholder="••••••••"
-                       style="width:100%; padding:11px 14px; border-radius:9999px; border:1px solid rgba(26,23,19,0.18); background:rgba(255,255,255,0.7); font-size:15px; color:var(--gn-ink,#1a1713); margin-bottom:18px;">
+                       class="grimba-form-pill mb-4">
 
-                <button type="submit" class="btn-grimba btn-grimba--solid"
-                        style="width:100%; padding:13px 18px; border-radius:9999px; background:var(--gn-ink,#1a1713); color:var(--gn-paper,#f6f1e8); font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; font-size:14px; border:none; cursor:pointer;">
+                <button type="submit" class="btn-grimba btn-grimba--solid btn-grimba--block">
                     {{ __('Mettre à jour mon mot de passe') }}
                 </button>
             </form>

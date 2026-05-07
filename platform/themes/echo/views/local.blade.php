@@ -80,21 +80,21 @@
             <form method="POST" action="{{ route('public.local.set') }}" class="grimba-local__form" id="grimba-local-form"
                   style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; max-width: 640px;">
                 @csrf
-                <div style="flex:1 1 200px;">
+                <div class="grimba-local__field">
                     <label for="grimba-local-city" class="small fw-semibold d-block mb-1" style="opacity:0.85;">
                         {{ __('Ville') }}
                     </label>
                     <input type="text" id="grimba-local-city" name="city" value="{{ $city }}" placeholder="Paris"
                            autocomplete="address-level2"
-                           style="width:100%; padding:10px 14px; border-radius:9999px; border:1px solid rgba(26,23,19,0.18); background:rgba(255,255,255,0.7); font-size:14px; color:var(--gn-ink,#1a1713);">
+                           class="grimba-form-pill">
                 </div>
-                <div style="flex:0 0 110px;">
+                <div class="grimba-local__field grimba-local__field--country">
                     <label for="grimba-local-cc" class="small fw-semibold d-block mb-1" style="opacity:0.85;">
                         {{ __('Pays (ISO)') }}
                     </label>
                     <input type="text" id="grimba-local-cc" name="cc" value="{{ $cc }}" maxlength="2" placeholder="FR"
                            autocomplete="country"
-                           style="width:100%; padding:10px 14px; border-radius:9999px; border:1px solid rgba(26,23,19,0.18); background:rgba(255,255,255,0.7); font-size:14px; color:var(--gn-ink,#1a1713); text-transform:uppercase;">
+                           class="grimba-form-pill grimba-local__input--country">
                 </div>
                 <input type="hidden" name="country" id="grimba-local-country" value="{{ $displayCountry }}">
                 <button type="submit" class="btn-grimba btn-grimba--solid"

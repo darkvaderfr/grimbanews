@@ -113,6 +113,23 @@ class PwaShellTest extends TestCase
         $this->assertStringNotContainsString('btn.style.background = saved', $vaultScript);
     }
 
+    public function test_auth_and_local_form_controls_use_theme_classes(): void
+    {
+        $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+        $loginView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/member/auth/login.blade.php');
+        $registerView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/member/auth/register.blade.php');
+        $localView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/local.blade.php');
+
+        $this->assertStringContainsString('.grimba-form-pill', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-form-pill', $css);
+        $this->assertStringContainsString('.grimba-auth-grid', $css);
+        $this->assertStringContainsString('.grimba-local__field--country', $css);
+        $this->assertStringContainsString('class="grimba-form-pill mb-3"', $loginView);
+        $this->assertStringContainsString('class="grimba-auth-grid"', $registerView);
+        $this->assertStringContainsString('class="grimba-form-pill grimba-local__input--country"', $localView);
+        $this->assertStringNotContainsString('background:rgba(255,255,255,0.7)', $loginView . $registerView . $localView);
+    }
+
     public function test_command_palette_shell_and_index_are_available(): void
     {
         $this->get('/')

@@ -2522,6 +2522,77 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-story-article a {
 }
 
 /* Inputs (search, forms, picker) */
+.grimba-form-pill {
+    width: 100%;
+    min-height: 44px;
+    padding: 11px 14px;
+    border-radius: 9999px;
+    border: 1px solid rgba(26, 23, 19, 0.18);
+    background: rgba(255, 255, 255, 0.70);
+    color: var(--gn-ink);
+    font-size: 15px;
+}
+.grimba-form-pill::placeholder {
+    color: var(--gn-ink-soft);
+}
+.grimba-auth-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.grimba-auth-label__required {
+    color: var(--gn-accent);
+}
+.grimba-auth-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.grimba-auth-link-muted {
+    color: var(--gn-ink);
+    opacity: 0.76;
+}
+.grimba-auth-link-accent {
+    color: var(--gn-accent);
+    font-weight: 600;
+}
+.btn-grimba--block {
+    width: 100%;
+    justify-content: center;
+    padding: 13px 18px;
+    font-size: 14px;
+}
+.grimba-local__field {
+    flex: 1 1 200px;
+}
+.grimba-local__field--country {
+    flex: 0 0 110px;
+}
+.grimba-local__input--country {
+    text-transform: uppercase;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-form-pill {
+    background: rgba(246, 241, 232, 0.08) !important;
+    border-color: rgba(246, 241, 232, 0.20) !important;
+    color: #fffaf0 !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-form-pill::placeholder {
+    color: var(--gn-ink-soft) !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-auth-link-muted {
+    color: #fffaf0 !important;
+}
+@media (max-width: 575px) {
+    .grimba-auth-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    .grimba-local__field,
+    .grimba-local__field--country {
+        flex-basis: 100%;
+    }
+}
 html.grimba-home-html[data-bs-theme="dark"] input[type="text"],
 html.grimba-home-html[data-bs-theme="dark"] input[type="email"],
 html.grimba-home-html[data-bs-theme="dark"] input[type="password"],
@@ -2541,6 +2612,14 @@ html.grimba-home-html[data-bs-theme="dark"] .form-select {
 }
 html.grimba-home-html[data-bs-theme="dark"] input::placeholder,
 html.grimba-home-html[data-bs-theme="dark"] textarea::placeholder {
+    color: var(--gn-ink-soft) !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] input.grimba-form-pill {
+    background: rgba(246, 241, 232, 0.08) !important;
+    border-color: rgba(246, 241, 232, 0.20) !important;
+    color: #fffaf0 !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] input.grimba-form-pill::placeholder {
     color: var(--gn-ink-soft) !important;
 }
 /* Native date-picker calendar icon: invert so it's visible against

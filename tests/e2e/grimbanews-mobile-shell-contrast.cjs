@@ -143,6 +143,40 @@ async function inspectHome(page, width) {
     });
 }
 
+async function inspectFormControl(page, path, selector, label) {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(path, { waitUntil: 'networkidle' });
+
+    const control = await firstVisible(page.locator(selector), label);
+    const data = await control.evaluate(element => {
+        const style = getComputedStyle(element);
+        const rootStyle = getComputedStyle(document.documentElement);
+        const bounds = element.getBoundingClientRect();
+
+        return {
+            color: style.color,
+            backgroundColor: style.backgroundColor,
+            borderColor: style.borderColor,
+            paper: rootStyle.getPropertyValue('--gn-paper').trim(),
+            theme: document.documentElement.getAttribute('data-bs-theme'),
+            rect: {
+                width: bounds.width,
+                height: bounds.height,
+            },
+        };
+    });
+    const ratio = contrast(
+        parseRgb(data.color),
+        blend(parseRgb(data.backgroundColor), parseHex(data.paper))
+    );
+
+    assert.equal(data.theme, 'dark', `${label} page keeps dark theme`);
+    assert.ok(data.rect.height >= 40, `${label} keeps a comfortable mobile input height`);
+    assert.ok(ratio >= 7, `${label} contrast is AAA-sized in dark mode`);
+
+    return { path, label, contrast: Number(ratio.toFixed(2)), color: data.color, backgroundColor: data.backgroundColor };
+}
+
 (async () => {
     const { chromium } = loadPlaywright();
     const baseUrl = (process.env.GRIMBANEWS_BASE_URL || 'http://127.0.0.1:8003').replace(/\/$/, '');
@@ -191,6 +225,12 @@ async function inspectHome(page, width) {
             );
         }
 
+        const formControls = [
+            await inspectFormControl(page, '/login', '#grimba-login-email', 'login email input'),
+            await inspectFormControl(page, '/local', '#grimba-local-city', 'local city input'),
+        ];
+
+        await page.goto('/', { waitUntil: 'networkidle' });
         const storyLink = await firstVisible(page.locator([
             '.grimba-briefing__headline',
             '.grimba-hero__media',
@@ -239,6 +279,7 @@ async function inspectHome(page, width) {
             ok: true,
             baseUrl,
             snapshots: snapshots.map(({ width, selectionChip }) => ({ width, selectionChip })),
+            formControls,
             saveButton: { contrast: Number(saveButtonContrast.toFixed(2)), pressedButtonStyle },
         }));
     } finally {

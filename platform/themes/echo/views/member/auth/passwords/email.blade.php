@@ -31,19 +31,18 @@
 
             <form method="POST" action="{{ route('public.member.password.email') }}" novalidate>
                 @csrf
-                <label for="grimba-pw-email" style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">
-                    {{ __('Adresse email') }} <span style="color:#c0392b;">*</span>
+                <label for="grimba-pw-email" class="grimba-auth-label">
+                    {{ __('Adresse email') }} <span class="grimba-auth-label__required">*</span>
                 </label>
                 <input type="email" id="grimba-pw-email" name="email" required value="{{ old('email') }}" autocomplete="email" placeholder="vous@exemple.fr"
-                       style="width:100%; padding:11px 14px; border-radius:9999px; border:1px solid rgba(26,23,19,0.18); background:rgba(255,255,255,0.7); font-size:15px; color:var(--gn-ink,#1a1713); margin-bottom:18px;">
+                       class="grimba-form-pill mb-4">
 
-                <button type="submit" class="btn-grimba btn-grimba--solid"
-                        style="width:100%; padding:13px 18px; border-radius:9999px; background:var(--gn-ink,#1a1713); color:var(--gn-paper,#f6f1e8); font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; font-size:14px; border:none; cursor:pointer;">
+                <button type="submit" class="btn-grimba btn-grimba--solid btn-grimba--block">
                     {{ __('Envoyer le lien de réinitialisation') }}
                 </button>
 
                 <p class="small mt-3 mb-0 text-center" style="opacity:0.75;">
-                    <a href="{{ route('public.member.login') }}" class="text-decoration-underline" style="color:var(--gn-ink,#1a1713);">
+                    <a href="{{ route('public.member.login') }}" class="text-decoration-underline grimba-auth-link-muted">
                         ← {{ __('Retour à la connexion') }}
                     </a>
                 </p>
