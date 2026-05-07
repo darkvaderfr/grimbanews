@@ -39,6 +39,11 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:publish-guardrail-categories',
                 'expected_minutes' => 30,
             ],
+            'freshness_watchdog' => [
+                'label' => 'Freshness watchdog',
+                'command' => 'grimba:ensure-daily-publish --min=12 --window-hours=24',
+                'expected_minutes' => 30,
+            ],
             'full_articles' => [
                 'label' => 'Full article extraction',
                 'command' => 'grimba:fetch-full-articles --limit=80',
@@ -58,6 +63,11 @@ class GrimbaAutomationMonitor
                 'label' => 'NewsAPI sweep',
                 'command' => 'grimba:fetch-newsapi',
                 'expected_minutes' => 288,
+            ],
+            'vault_events_archive' => [
+                'label' => 'Vault analytics archive',
+                'command' => 'grimba:archive-vault-events',
+                'expected_minutes' => 10080,
             ],
             'vault_digest_weekly' => [
                 'label' => 'Vault email digest',

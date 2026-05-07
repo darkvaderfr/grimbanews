@@ -26,6 +26,26 @@ class AutomationScheduleTest extends TestCase
         $this->assertStringContainsString('grimba:translate-pending --to=en --limit=50', $output);
     }
 
+    public function test_monitor_registry_covers_all_tracked_scheduled_jobs(): void
+    {
+        $console = file_get_contents(base_path('routes/console.php'));
+        $this->assertIsString($console);
+
+        preg_match_all("/grimba_schedule_command\\('([^']+)',\\s*'([^']+)'\\)/", $console, $matches, PREG_SET_ORDER);
+        $this->assertNotEmpty($matches);
+
+        $jobs = GrimbaAutomationMonitor::jobs();
+
+        foreach ($matches as $match) {
+            $jobKey = $match[1];
+            $command = $match[2];
+
+            $this->assertArrayHasKey($jobKey, $jobs, "Missing monitor registry entry for {$jobKey}.");
+            $this->assertSame($command, $jobs[$jobKey]['command'], "Monitor command drifted for {$jobKey}.");
+            $this->assertGreaterThan(0, $jobs[$jobKey]['expected_minutes'], "Monitor interval must be positive for {$jobKey}.");
+        }
+    }
+
     public function test_automation_monitor_records_success_and_failure_runs(): void
     {
         $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
