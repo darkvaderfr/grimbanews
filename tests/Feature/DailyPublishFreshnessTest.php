@@ -86,6 +86,23 @@ class DailyPublishFreshnessTest extends TestCase
         $this->assertNotNull(DB::table('posts')->where('id', $postId)->value('published_at'));
     }
 
+    public function test_ops_health_guard_fails_when_publication_floor_is_breached(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        DB::table('posts')
+            ->where('status', 'published')
+            ->update(['published_at' => now()->subDays(7)]);
+
+        $this->artisan('grimba:health', [
+            '--fail-on-risk' => true,
+            '--min-free-mb' => 0,
+            '--min-published-24h' => 999999,
+        ])
+            ->expectsOutputToContain('publication freshness below floor')
+            ->assertFailed();
+    }
+
     private function admin(): User
     {
         $author = User::query()->find(1);

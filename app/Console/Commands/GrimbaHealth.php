@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\GrimbaPostRecency;
 use App\Support\GrimbaRssFeedHealth;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -23,11 +24,19 @@ use Illuminate\Support\Facades\DB;
  */
 class GrimbaHealth extends Command
 {
-    protected $signature = 'grimba:health';
+    protected $signature = 'grimba:health
+        {--fail-on-risk : return a non-zero exit code when operating floors are breached}
+        {--min-free-mb=1024 : minimum free disk space required when failing on risk}
+        {--min-published-24h=12 : minimum published posts required in the last 24h when failing on risk}';
     protected $description = 'One-page health summary of the GrimbaNews ingest + editorial pipeline (S153).';
 
     public function handle(): int
     {
+        $failOnRisk = (bool) $this->option('fail-on-risk');
+        $minFreeMb = max(0, (int) $this->option('min-free-mb'));
+        $minPublished24h = max(0, (int) $this->option('min-published-24h'));
+        $riskWarnings = [];
+
         $this->newLine();
         $this->line(str_repeat('═', 70));
         $this->line(sprintf('  GrimbaNews — health check · %s', now()->toIso8601String()));
@@ -154,10 +163,50 @@ class GrimbaHealth extends Command
         $this->line(sprintf('   NewsAPI fetch : %d items', $api24));
         $this->line(sprintf('   Combined      : %d items', $rss24 + $api24));
 
+        if (($rss24 + $api24) === 0) {
+            $riskWarnings[] = 'no RSS or NewsAPI intake in the last 24h';
+        }
+
+        $published24 = (int) GrimbaPostRecency::wherePublishedSince(
+            DB::table('posts')->where('status', 'published'),
+            now()->subDay()
+        )->count();
+        if ($published24 < $minPublished24h) {
+            $riskWarnings[] = sprintf('publication freshness below floor: %d/%d posts in the last 24h', $published24, $minPublished24h);
+        }
+
+        $freeBytes = @disk_free_space(base_path());
+        $totalBytes = @disk_total_space(base_path());
+        $freeMb = is_int($freeBytes) || is_float($freeBytes) ? (int) floor($freeBytes / 1048576) : null;
+        $totalGb = is_int($totalBytes) || is_float($totalBytes) ? round($totalBytes / 1073741824, 1) : null;
+        if ($freeMb !== null && $freeMb < $minFreeMb) {
+            $riskWarnings[] = sprintf('disk free space below floor: %dMB/%dMB', $freeMb, $minFreeMb);
+        }
+
+        $this->newLine();
+        $this->line('9. Freshness + disk guard');
+        $this->line(sprintf('   published 24h : %d post(s) (floor %d)', $published24, $minPublished24h));
+        $this->line(sprintf(
+            '   disk free     : %s%s (floor %dMB)',
+            $freeMb === null ? 'unknown' : $freeMb . 'MB',
+            $totalGb === null ? '' : ' / ' . $totalGb . 'GB',
+            $minFreeMb
+        ));
+
+        if ($riskWarnings === []) {
+            $this->line('   ✓ operating floors are clear');
+        } else {
+            foreach ($riskWarnings as $warning) {
+                $this->warn('   ⚠ ' . $warning);
+            }
+        }
+
         $this->newLine();
         $this->line(str_repeat('═', 70));
         $this->newLine();
 
-        return self::SUCCESS;
+        return $failOnRisk && $riskWarnings !== []
+            ? self::FAILURE
+            : self::SUCCESS;
     }
 }

@@ -44,6 +44,11 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:ensure-daily-publish --min=12 --window-hours=24',
                 'expected_minutes' => 30,
             ],
+            'ops_health' => [
+                'label' => 'Ops health guard',
+                'command' => 'grimba:health --fail-on-risk',
+                'expected_minutes' => 60,
+            ],
             'full_articles' => [
                 'label' => 'Full article extraction',
                 'command' => 'grimba:fetch-full-articles --limit=80',

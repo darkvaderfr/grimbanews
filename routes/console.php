@@ -88,6 +88,14 @@ grimba_schedule_command('freshness_watchdog', 'grimba:ensure-daily-publish --min
     ->onOneServer()
     ->withoutOverlapping(15);
 
+// GrimbaNews — ops health guard. This fails into the automation
+// monitor when intake, public freshness, or disk headroom drops below
+// the operating floor, before readers have to report stale news.
+grimba_schedule_command('ops_health', 'grimba:health --fail-on-risk')
+    ->hourlyAt(27)
+    ->onOneServer()
+    ->withoutOverlapping(10);
+
 // GrimbaNews — full article extraction for subscriber/member reading.
 // Runs shortly after trusted auto-publish so newly public RSS/NewsAPI
 // posts get a readable body without waiting for an editor.
