@@ -141,6 +141,15 @@ class GrimbaHealth extends Command
         $this->line(sprintf('   ⚫ inactive   %d', $inactiveFeeds));
 
         // 7. Dedup state
+        $duplicateUrlGroupsQuery = DB::table('rss_feed_items')
+            ->join('posts', 'posts.id', '=', 'rss_feed_items.post_id')
+            ->whereNotNull('rss_feed_items.canonical_url_hash')
+            ->whereNotNull('rss_feed_items.post_id')
+            ->select('posts.source_id', 'rss_feed_items.canonical_url_hash')
+            ->groupBy('posts.source_id', 'rss_feed_items.canonical_url_hash')
+            ->havingRaw('COUNT(DISTINCT rss_feed_items.post_id) > 1');
+        $duppedUrls = (int) DB::query()->fromSub($duplicateUrlGroupsQuery, 'dupes')->count();
+
         $duppedNames = DB::table('posts')
             ->select('name', 'source_id', DB::raw('COUNT(*) as c'))
             ->groupBy('name', 'source_id')
@@ -148,10 +157,15 @@ class GrimbaHealth extends Command
             ->count();
         $this->newLine();
         $this->line('7. Dedup state');
-        if ($duppedNames === 0) {
-            $this->line('   ✓ no duplicate-name groups remaining');
+        if ($duppedUrls === 0 && $duppedNames === 0) {
+            $this->line('   ✓ no duplicate groups remaining');
         } else {
-            $this->line(sprintf('   ⚠ %d duplicate-name groups — run grimba:dedupe-posts --apply', $duppedNames));
+            if ($duppedUrls > 0) {
+                $this->line(sprintf('   ⚠ %d duplicate URL group(s) — run grimba:dedupe-posts --apply', $duppedUrls));
+            }
+            if ($duppedNames > 0) {
+                $this->line(sprintf('   ⚠ %d title-only group(s) need review before --include-title-groups', $duppedNames));
+            }
         }
 
         // 8. Last 24h ingest
