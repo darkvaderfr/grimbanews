@@ -1,14 +1,9 @@
 @php
+    use App\Support\GrimbaEditorialCategories;
     use App\Support\GrimbaTranslationPresenter as GnTr;
-    use Botble\Blog\Models\Category;
     use Botble\Blog\Models\Post;
 
-    $featuredCategories = Category::query()
-        ->where('status', 'published')
-        ->withCount(['posts' => fn ($q) => $q->where('posts.status', 'published')])
-        ->orderByDesc('posts_count')
-        ->limit(2)
-        ->get();
+    $featuredCategories = GrimbaEditorialCategories::sectionTopics(2);
 @endphp
 
 @foreach($featuredCategories as $cat)

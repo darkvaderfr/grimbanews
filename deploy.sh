@@ -111,6 +111,11 @@ sudo -u www-data php artisan db:seed \
     --class='Database\Seeders\RssFeedsSeeder' \
     --force 2>&1 | tail -5 || true
 
+echo "=== Seeding Grimba categories (idempotent) ==="
+sudo -u www-data php artisan db:seed \
+    --class='Database\Seeders\GrimbaCategoriesSeeder' \
+    --force 2>&1 | tail -5 || true
+
 echo "=== Clearing Laravel caches ==="
 sudo -u www-data php artisan view:clear  2>/dev/null || true
 sudo -u www-data php artisan config:clear 2>/dev/null || true

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Botble\Blog\Models\Category;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Slug\Models\Slug;
+use App\Support\GrimbaEditorialCategories;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -12,28 +13,16 @@ use Illuminate\Support\Str;
 /*
  * S165/S007 — canonical editorial categories.
  *
- * The public editorial taxonomy is intentionally reduced to two
- * editions: Afrique and International. Legacy topical rows are kept
- * demoted so old pivots and URLs do not break, but new classification
- * and the homepage chips use only these two categories.
- *
  * Idempotent: existing categories matching by name keep their id.
- * Slug rows are maintained so /blog/afrique and /blog/international
- * remain stable Botble category routes.
+ * Slug rows are maintained so /blog/{category} remains stable.
  */
 class GrimbaCategoriesSeeder extends Seeder
 {
     public function run(): void
     {
-        // Order: lower = earlier in the topic-chips strip.
-        $catalog = [
-            ['name' => 'Afrique', 'order' => 1, 'icon' => 'ti ti-map-pin', 'description' => 'Actualité du continent africain, de ses institutions, peuples, économies et diasporas.'],
-            ['name' => 'International', 'order' => 2, 'icon' => 'ti ti-world', 'description' => "Actualité mondiale lue depuis ses conséquences pour l'Afrique et ses publics."],
-        ];
-
         $now = now();
 
-        foreach ($catalog as $row) {
+        foreach (GrimbaEditorialCategories::rows() as $row) {
             $existing = DB::table('categories')->where('name', $row['name'])->first();
 
             if ($existing) {
@@ -83,20 +72,17 @@ class GrimbaCategoriesSeeder extends Seeder
             }
         }
 
-        // Demote legacy topical rows so they fall off public editorial
+        // Demote stock/demo rows so they fall off public editorial
         // navigation without orphaning old post pivots.
         $demote = [
-            'À la une', 'France', 'Monde', 'Politique', 'Économie',
-            'Tech & Numérique', 'Climat & Environnement', 'Santé',
-            'Sciences', 'Sports', 'Culture', 'Société', 'Justice',
-            'Géopolitique', 'Uncategorized', 'Videos', 'Podcasts',
-            'Healthy', 'Travel', 'Business', 'Entertainment',
+            'France', 'Uncategorized', 'Videos', 'Podcasts', 'Healthy',
+            'Travel', 'Business', 'Entertainment',
         ];
         DB::table('categories')->whereIn('name', $demote)->update([
             'order'      => 999,
             'updated_at' => $now,
         ]);
 
-        $this->command?->info('GrimbaCategoriesSeeder: Afrique + International ordered first, ' . count($demote) . ' legacy categories demoted to 999.');
+        $this->command?->info('GrimbaCategoriesSeeder: edition + topical news categories restored, ' . count($demote) . ' stock categories demoted to 999.');
     }
 }

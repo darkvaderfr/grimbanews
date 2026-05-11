@@ -10,8 +10,8 @@ use Illuminate\Support\Str;
 /*
  * S165/S007 — backfill post_categories pivots using GrimbaCategoryClassifier.
  *
- * Walks all posts and runs each through the Afrique / International
- * edition classifier.
+ * Walks all posts and runs each through the edition + topical news
+ * category classifier.
  * Default behaviour: only re-classify posts that have ZERO category
  * pivots (treats existing categorisation as sacred). --force re-runs
  * against everything, replacing prior category pivots.
@@ -23,7 +23,7 @@ class GrimbaClassifyCategories extends Command
         {--category= : re-classify posts currently attached to this category id}
         {--limit=0 : cap posts per run (0 = no cap)}';
 
-    protected $description = 'Classify posts into Afrique / International editorial categories.';
+    protected $description = 'Classify posts into edition + topical GrimbaNews categories.';
 
     public function handle(GrimbaCategoryClassifier $classifier): int
     {
@@ -34,8 +34,9 @@ class GrimbaClassifyCategories extends Command
         $replace = $force || $categoryId > 0;
 
         $query = DB::table('posts')
-            ->where('status', '!=', 'trash')
-            ->orderByDesc('id');
+            ->leftJoin('news_sources', 'news_sources.id', '=', 'posts.source_id')
+            ->where('posts.status', '!=', 'trash')
+            ->orderByDesc('posts.id');
 
         if ($categoryId > 0) {
             $category = DB::table('categories')->where('id', $categoryId)->first(['id', 'name']);
@@ -44,20 +45,26 @@ class GrimbaClassifyCategories extends Command
                 return self::FAILURE;
             }
 
-            $query->whereIn('id', function ($q) use ($categoryId): void {
+            $query->whereIn('posts.id', function ($q) use ($categoryId): void {
                 $q->select('post_id')
                     ->from('post_categories')
                     ->where('category_id', $categoryId);
             });
         } elseif (! $force) {
-            $query->whereNotIn('id', function ($q) {
+            $query->whereNotIn('posts.id', function ($q) {
                 $q->select('post_id')->from('post_categories');
             });
         }
 
         if ($limit > 0) $query->limit($limit);
 
-        $posts = $query->get(['id', 'name', 'description', 'source_name']);
+        $posts = $query->get([
+            'posts.id',
+            'posts.name',
+            'posts.description',
+            'posts.source_name',
+            'news_sources.country as source_country',
+        ]);
 
         if ($posts->isEmpty()) {
             $this->info('Nothing to classify.');
@@ -86,7 +93,8 @@ class GrimbaClassifyCategories extends Command
             $catIds = $classifier->classify(
                 (string) $p->name,
                 $p->description,
-                $p->source_name
+                $p->source_name,
+                $p->source_country
             );
             $catIds = $this->normalizeCategoryIds($catIds);
 

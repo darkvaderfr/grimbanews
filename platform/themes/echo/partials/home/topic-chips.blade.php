@@ -1,12 +1,7 @@
 @php
-    use Botble\Blog\Models\Category;
+    use App\Support\GrimbaEditorialCategories;
 
-    $chips = Category::query()
-        ->where('status', 'published')
-        ->whereIn('name', ['Afrique', 'International'])
-        ->orderBy('order')
-        ->limit(2)
-        ->get();
+    $chips = GrimbaEditorialCategories::homepageChips(10);
 
     $rawFollow = (string) request()->cookie('grimba_follow', '');
     $followedIds = array_filter(array_map('intval', explode(',', $rawFollow)));

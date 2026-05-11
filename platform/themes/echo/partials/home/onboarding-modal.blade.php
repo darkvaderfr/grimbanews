@@ -1,5 +1,5 @@
 @php
-    use Botble\Blog\Models\Category;
+    use App\Support\GrimbaEditorialCategories;
 
     $onboarded  = request()->cookie('grimba_onboarded') === '1';
     $hasEdition = request()->hasCookie('grimba_region');
@@ -13,12 +13,7 @@
     $skip = $onboarded || $hasEdition || ! empty($existingFollows);
     $autoOpen = ((string) request()->query('onboarding')) === '1';
 
-    $topics = Category::query()
-        ->where('status', 'published')
-        ->whereIn('name', ['Afrique', 'International'])
-        ->orderBy('order')
-        ->limit(2)
-        ->get();
+    $topics = GrimbaEditorialCategories::homepageChips(8);
 @endphp
 
 @if(! $skip)

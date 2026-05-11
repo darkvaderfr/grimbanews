@@ -1,0 +1,149 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Services\GrimbaCategoryClassifier;
+use Botble\ACL\Models\User;
+use Botble\Blog\Models\Category;
+use Botble\Blog\Models\Post;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Tests\TestCase;
+
+class EditorialCategoriesTest extends TestCase
+{
+    public function test_classifier_assigns_edition_and_topical_news_category(): void
+    {
+        $europeId = $this->category('Europe', 2);
+        $politicsId = $this->category('Politique', 11);
+        $sourceName = 'Editorial Categories Europe ' . Str::lower(Str::random(8));
+        $this->source($sourceName, 'FR');
+
+        $ids = app(GrimbaCategoryClassifier::class)->classify(
+            'Election campaign puts the French government under pressure',
+            'Parliament and ministers face a vote after a tense campaign.',
+            $sourceName
+        );
+
+        $this->assertContains($europeId, $ids);
+        $this->assertContains($politicsId, $ids);
+    }
+
+    public function test_homepage_chips_include_news_categories_for_selected_editorial_location(): void
+    {
+        $europeId = $this->category('Europe', 2);
+        $politicsId = $this->category('Politique', 11);
+        $sourceId = $this->source('Editorial Categories Homepage ' . Str::lower(Str::random(8)), 'FR');
+        $postId = $this->postId('Editorial categories election fixture ' . Str::lower(Str::random(8)), $sourceId);
+
+        DB::table('post_categories')->insertOrIgnore([
+            ['post_id' => $postId, 'category_id' => $europeId],
+            ['post_id' => $postId, 'category_id' => $politicsId],
+        ]);
+
+        $this->withUnencryptedCookies(['grimba_region' => 'europe'])
+            ->get('/')
+            ->assertOk()
+            ->assertSee('data-grimba-edition="europe"', false)
+            ->assertSee('data-category-id="' . $politicsId . '"', false)
+            ->assertSee('Politique');
+    }
+
+    private function category(string $name, int $order): int
+    {
+        $author = User::query()->find(1);
+        $this->assertNotNull($author, 'Fixture database must contain the system admin user.');
+
+        $existing = DB::table('categories')->where('name', $name)->first();
+        if ($existing) {
+            DB::table('categories')->where('id', $existing->id)->update([
+                'status' => 'published',
+                'order' => $order,
+                'updated_at' => now(),
+            ]);
+            $id = (int) $existing->id;
+        } else {
+            $id = (int) DB::table('categories')->insertGetId([
+                'name' => $name,
+                'parent_id' => 0,
+                'description' => 'Editorial category fixture.',
+                'status' => 'published',
+                'author_id' => $author->getKey(),
+                'author_type' => User::class,
+                'icon' => null,
+                'order' => $order,
+                'is_featured' => 0,
+                'is_default' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->slug($id, Category::class, Str::slug($name), 'blog');
+
+        return $id;
+    }
+
+    private function source(string $name, string $country): int
+    {
+        return (int) DB::table('news_sources')->insertGetId([
+            'name' => $name,
+            'slug' => Str::slug($name),
+            'website' => Str::slug($name) . '.test',
+            'bias_rating' => 'center',
+            'credibility_score' => 91,
+            'country' => $country,
+            'language' => 'fr',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    private function postId(string $name, int $sourceId): int
+    {
+        $author = User::query()->find(1);
+        $this->assertNotNull($author, 'Fixture database must contain the system admin user.');
+
+        $id = (int) DB::table('posts')->insertGetId([
+            'name' => $name,
+            'description' => 'Election campaign and government vote fixture.',
+            'content' => '<p>Election campaign and government vote fixture.</p>',
+            'status' => 'published',
+            'author_id' => $author->getKey(),
+            'author_type' => User::class,
+            'source_id' => $sourceId,
+            'source_name' => DB::table('news_sources')->where('id', $sourceId)->value('name'),
+            'bias_rating' => 'center',
+            'original_language' => 'fr',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->slug($id, Post::class, Str::slug($name), 'blog');
+
+        return $id;
+    }
+
+    private function slug(int $referenceId, string $referenceType, string $key, string $prefix): void
+    {
+        if ($key === '') {
+            $key = 'editorial-category-fixture-' . $referenceId;
+        }
+
+        $slug = $key;
+        $i = 2;
+        while (DB::table('slugs')
+            ->where('key', $slug)
+            ->where('reference_type', $referenceType)
+            ->where('reference_id', '!=', $referenceId)
+            ->exists()) {
+            $slug = $key . '-' . $i;
+            $i++;
+        }
+
+        DB::table('slugs')->updateOrInsert(
+            ['reference_id' => $referenceId, 'reference_type' => $referenceType],
+            ['key' => $slug, 'prefix' => $prefix, 'created_at' => now(), 'updated_at' => now()]
+        );
+    }
+}

@@ -1,6 +1,6 @@
 @php
+    use App\Support\GrimbaEditorialCategories;
     use App\Support\GrimbaTranslationPresenter as GnTr;
-    use Botble\Blog\Models\Category;
     use Botble\Blog\Models\Post;
 
     $latest = Post::query()
@@ -9,11 +9,7 @@
         ->limit(10)
         ->get();
 
-    $followChips = Category::query()
-        ->where('status', 'published')
-        ->orderBy('order')
-        ->limit(8)
-        ->get();
+    $followChips = GrimbaEditorialCategories::homepageChips(8);
 @endphp
 
 <section class="grimba-latest mt-5">
