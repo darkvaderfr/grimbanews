@@ -10,7 +10,7 @@
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
                 <span class="grimba-admin-kicker">Moniteur santé sources</span>
-                <h1 class="grimba-admin-title">Flux RSS</h1>
+                <h1 class="grimba-admin-title">Tour de contrôle RSS</h1>
                 <p class="grimba-admin-copy">
                     Pilotez les sources syndiquées, repérez les flux sans fraîcheur sur 24 h, et déclenchez les polls sans quitter le cockpit éditorial.
                 </p>

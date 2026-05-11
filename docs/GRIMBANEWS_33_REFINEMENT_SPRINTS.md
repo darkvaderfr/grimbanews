@@ -3,6 +3,17 @@
 Date: 2026-04-28
 Scope: Frontend + backend refinements after the core GroundNews-style product pass.
 
+## Reconciliation - 2026-05-11
+
+This file is the high-level refinement lane. The canonical gate ledger is `docs/GRIMBANEWS_PREPROD_1000_SPRINT_MASTER_PLAN.md`, reconciled with evidence in `docs/GRIMBANEWS_SPRINT_RECONCILIATION_2026_05_11.md`.
+
+Visible refinement progress:
+
+- Strict marked shipped rows: 13 / 33 = 39.4%.
+- Additional shipped or partially shipped work since this file was created: 22 Dedupe hardening, 26 Accessibility/contrast, 29 Observability, 30 Security/privacy, and 33 Production readiness closeout.
+- Operational estimate for this refinement lane after reconciliation: about 50-55%, with freshness, dark/mobile readability, dedupe safety, scheduler health, and deploy smoke materially advanced.
+- Remaining release blockers: production dedupe apply, disk headroom, restore drill, full visual QA, performance budgets, security/privacy audit, monetization/subscriber gates, and final rollback evidence.
+
 ## Sprint List
 
 1. [Shipped] Breakdown elegance: compact desktop/mobile comparison UI, source chips, motion safety, and backend tests for containment.

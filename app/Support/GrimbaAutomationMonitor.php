@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
@@ -85,6 +87,85 @@ class GrimbaAutomationMonitor
                 'expected_minutes' => 10080,
             ],
         ];
+    }
+
+    /**
+     * Jobs that directly protect the public "recent articles every day" SLA.
+     *
+     * @return array<int, string>
+     */
+    public static function freshnessJobKeys(): array
+    {
+        return [
+            'rss_ingest',
+            'publish_trusted',
+            'publish_guardrails',
+            'freshness_watchdog',
+            'ops_health',
+        ];
+    }
+
+    /**
+     * @param array<int, string>|null $jobKeys
+     * @return \Illuminate\Support\Collection<int, object>
+     */
+    public static function status(?array $jobKeys = null): Collection
+    {
+        if (! self::ready()) {
+            return collect();
+        }
+
+        $allowed = $jobKeys === null ? null : array_flip($jobKeys);
+
+        return collect(self::jobs())
+            ->when($allowed !== null, fn (Collection $jobs) => $jobs->filter(
+                fn (array $job, string $key): bool => isset($allowed[$key])
+            ))
+            ->map(function (array $job, string $key): object {
+                $latest = DB::table('grimba_automation_runs')
+                    ->where('job_key', $key)
+                    ->orderByDesc('id')
+                    ->first();
+
+                $success = DB::table('grimba_automation_runs')
+                    ->where('job_key', $key)
+                    ->where('status', 'success')
+                    ->whereNotNull('finished_at')
+                    ->orderByDesc('finished_at')
+                    ->orderByDesc('id')
+                    ->first();
+
+                $startedAt = $latest?->started_at ? Carbon::parse($latest->started_at) : null;
+                $lastFinished = $latest?->finished_at ? Carbon::parse($latest->finished_at) : null;
+                $lastSuccessAt = $success?->finished_at ? Carbon::parse($success->finished_at) : null;
+                $expectedMinutes = (int) $job['expected_minutes'];
+                $staleAfterMinutes = max($expectedMinutes * 2, $expectedMinutes + 15);
+                $staleCutoff = now()->subMinutes($staleAfterMinutes);
+                $isStale = ! $lastSuccessAt || $lastSuccessAt->lt($staleCutoff);
+                $isRunning = $latest?->status === 'running';
+                $isStuck = $isRunning && $startedAt && $startedAt->lt($staleCutoff);
+                $isFailed = $latest?->status === 'failed';
+
+                return (object) [
+                    'key' => $key,
+                    'label' => $job['label'],
+                    'command' => $job['command'],
+                    'expected_minutes' => $expectedMinutes,
+                    'stale_after_minutes' => $staleAfterMinutes,
+                    'status' => $latest?->status ?: 'never',
+                    'exit_code' => $latest?->exit_code,
+                    'started_at' => $startedAt,
+                    'finished_at' => $lastFinished,
+                    'last_success_at' => $lastSuccessAt,
+                    'duration_ms' => $latest?->duration_ms,
+                    'error_message' => $latest?->error_message,
+                    'is_running' => $isRunning,
+                    'is_stuck' => $isStuck,
+                    'is_stale' => $isStale,
+                    'is_failed' => $isFailed || $isStuck,
+                ];
+            })
+            ->values();
     }
 
     public static function start(string $jobKey, string $command): ?int

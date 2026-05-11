@@ -99,7 +99,9 @@
                         " aria-hidden="true"></span>
                     </div>
                     <p class="small opacity-60 mt-2 mb-0">
-                        {{ __('Score fin -2.0 à +2.0. Le badge L/C/R reste compatible avec les anciennes vues.') }}
+                        <span class="text-uppercase">{{ __('score biais') }}</span>
+                        <strong>{{ number_format($biasScore, 1) }}</strong>
+                        · {{ __('Score fin -2.0 à +2.0. Le badge L/C/R reste compatible avec les anciennes vues.') }}
                     </p>
                 </div>
             @endif

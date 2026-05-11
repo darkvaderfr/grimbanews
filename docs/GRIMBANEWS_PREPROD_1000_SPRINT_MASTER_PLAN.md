@@ -61,6 +61,20 @@ All contributors should also follow `memory.md`, `docs/GRIMBANEWS_TANDEM_WORK_PR
 | G9 Release readiness | CI, E2E, visual diff, scheduler smoke, rollback drill, and release evidence report are green. |
 | G10 Business readiness | Monetization, subscriber value, editorial workflow, analytics, support docs, and launch monitoring are complete. |
 
+## Reconciliation Snapshot
+
+**Updated:** 2026-05-11  
+**Reconciliation evidence:** `docs/GRIMBANEWS_SPRINT_RECONCILIATION_2026_05_11.md`
+
+The formal 1000-sprint ledger was behind the production-hardening work that has shipped since the first discovery wave. The evidence ledger below now records both the original inventory sprints and the later atomic outcomes that can be tied to concrete commits, tests, or smoke results.
+
+Current accounting after reconciliation and the 2026-05-11 freshness sprint:
+
+- Formal evidenced master sprints: 19 / 1000 = 1.9%.
+- Practical production-readiness estimate: about 28-30%, because core ingestion, publishing, public UX, admin cockpit, and deploy smoke paths exist, while full visual QA, dedupe cleanup, restore drill, security, performance, monetization, and business launch gates still need closure.
+- The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
+- The original "no production deployment" rule is retained as a release-gate rule. Production hotfixes and hardening work already performed must be reconciled here with evidence, risks, and follow-up gates.
+
 ## 1000-Sprint Registry
 
 Each row below contains 10 atomic sprint IDs. The row is not a single epic; the comma-delimited items are the individual sprints to execute and close with evidence.
@@ -75,6 +89,19 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S004 | `docs/GRIMBANEWS_S004_SCHEDULER_INVENTORY.md` | complete |
 | S005 | `docs/GRIMBANEWS_S005_MODEL_INVENTORY.md` | complete |
 | S006 | `docs/GRIMBANEWS_S006_MIGRATION_INVENTORY.md` | complete |
+| S102 | RSS feed health score: `d67588a`, `app/Support/GrimbaRssFeedHealth.php`, `GrimbaHealth` feed scoring | complete |
+| S109 | RSS sick-feed quarantine: `00caf83`, `database/seeders/RssFeedsSeeder.php`, `tests/Feature/RssFeedsSeederTest.php` | complete |
+| S154 | Draft guardrail tests: `6586460`, `tests/Feature/DailyPublishFreshnessTest.php`, guardrail command coverage | complete |
+| S155 | Trusted-source publish smoke: `6586460`, `grimba:publish-trusted` publication timestamp coverage | complete |
+| S162 | Schedule contract test: `6586460`, `a87c86a`, `b62eaf8`, `tests/Feature/AutomationScheduleTest.php` | complete |
+| S164 | Schedule monitor table: `06422e0`, `app/Support/GrimbaAutomationMonitor.php`, cockpit automation status | complete |
+| S166 | Missed-run alert: `app/Support/GrimbaAutomationMonitor.php`, `app/Console/Commands/GrimbaHealth.php`, `tests/Feature/DailyPublishFreshnessTest.php` | complete |
+| S171 | Article freshness SLA: `6586460`, `b62eaf8`, `grimba:ensure-daily-publish`, `grimba:health --fail-on-risk` | complete |
+| S180 | Daily automation report: `b62eaf8`, `app/Console/Commands/GrimbaHealth.php`, production health smoke | complete |
+| S203 | Source-aware duplicate policy: `fe31be0`, canonical URL dedupe safer than title-only apply | complete |
+| S210 | Dedupe regression tests: `fe31be0`, `tests/Feature/DedupePostsCommandTest.php` | complete |
+| S485 | Edition dark mode: `11238a9`, `tests/e2e/grimbanews-mobile-shell-contrast.cjs` | complete |
+| S612 | Cockpit automation board: `06422e0`, `resources/views/grimba-admin/cockpit.blade.php` | complete |
 
 | Sprint IDs | Program | Atomic sprint outcomes |
 |---|---|---|

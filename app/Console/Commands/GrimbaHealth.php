@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\GrimbaAutomationMonitor;
 use App\Support\GrimbaPostRecency;
 use App\Support\GrimbaRssFeedHealth;
 use Illuminate\Console\Command;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\DB;
  *   6. Feed health (active / sick / failed)
  *   7. Dedup state (count of duplicate-name groups remaining)
  *   8. Recent ingest rate (last 24h, RSS + NewsAPI separately)
+ *   9. Scheduler freshness for the jobs that protect daily articles
  */
 class GrimbaHealth extends Command
 {
@@ -181,6 +183,49 @@ class GrimbaHealth extends Command
             $riskWarnings[] = 'no RSS or NewsAPI intake in the last 24h';
         }
 
+        // 9. Scheduler freshness
+        $this->newLine();
+        $this->line('9. Scheduler freshness');
+        if (! GrimbaAutomationMonitor::ready()) {
+            $this->warn('   ⚠ automation monitor table is unavailable; run migrations before relying on scheduler health');
+            $riskWarnings[] = 'automation monitor table unavailable';
+        } else {
+            $automationStatus = GrimbaAutomationMonitor::status(GrimbaAutomationMonitor::freshnessJobKeys());
+
+            foreach ($automationStatus as $job) {
+                $glyph = $job->is_failed || $job->is_stale ? '⚠' : '✓';
+                $lastSuccess = $job->last_success_at
+                    ? $job->last_success_at->diffForHumans()
+                    : 'never';
+
+                $this->line(sprintf(
+                    '   %s %-22s %-8s last success %s',
+                    $glyph,
+                    $job->label,
+                    $job->status,
+                    $lastSuccess
+                ));
+
+                if ($job->is_failed || $job->is_stale) {
+                    $problems = [];
+
+                    if ($job->is_failed) {
+                        $problems[] = $job->is_stuck ? 'latest run is stuck' : 'latest run failed';
+                    }
+
+                    if ($job->is_stale) {
+                        $problems[] = 'last success ' . $lastSuccess;
+                    }
+
+                    $riskWarnings[] = sprintf(
+                        'automation job unhealthy: %s (%s)',
+                        $job->label,
+                        implode(', ', $problems)
+                    );
+                }
+            }
+        }
+
         $published24 = (int) GrimbaPostRecency::wherePublishedSince(
             DB::table('posts')->where('status', 'published'),
             now()->subDay()
@@ -198,7 +243,7 @@ class GrimbaHealth extends Command
         }
 
         $this->newLine();
-        $this->line('9. Freshness + disk guard');
+        $this->line('10. Freshness + disk guard');
         $this->line(sprintf('   published 24h : %d post(s) (floor %d)', $published24, $minPublished24h));
         $this->line(sprintf(
             '   disk free     : %s%s (floor %dMB)',

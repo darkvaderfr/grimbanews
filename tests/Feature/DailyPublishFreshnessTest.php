@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Support\GrimbaAutomationMonitor;
 use App\Support\GrimbaIngestGuardrails;
 use Botble\ACL\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -100,6 +101,65 @@ class DailyPublishFreshnessTest extends TestCase
             '--min-published-24h' => 999999,
         ])
             ->expectsOutputToContain('publication freshness below floor')
+            ->assertFailed();
+    }
+
+    public function test_ops_health_guard_fails_when_daily_freshness_scheduler_is_stale(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        $suffix = Str::lower(Str::random(8));
+        $author = $this->admin();
+        $sourceId = $this->trustedSourceId('Freshness Schedule ' . $suffix, 101);
+        $postId = $this->draftPostId('freshness schedule fixture ' . $suffix, $sourceId, $author, now()->subHour());
+
+        DB::table('posts')->where('id', $postId)->update([
+            'status' => 'published',
+            'published_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('rss_feed_items')->insert([
+            'feed_id' => 1,
+            'guid' => 'freshness-schedule-' . $suffix,
+            'link' => 'https://example.test/freshness-schedule-' . $suffix,
+            'title_snapshot' => 'Freshness schedule fixture',
+            'post_id' => $postId,
+            'seen_at' => now(),
+            'published_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        foreach (GrimbaAutomationMonitor::freshnessJobKeys() as $jobKey) {
+            $job = GrimbaAutomationMonitor::jobs()[$jobKey];
+            DB::table('grimba_automation_runs')->insert([
+                'job_key' => $jobKey,
+                'command' => $job['command'],
+                'status' => 'success',
+                'exit_code' => 0,
+                'started_at' => now()->subMinutes(5),
+                'finished_at' => now()->subMinutes(4),
+                'duration_ms' => 1000,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        DB::table('grimba_automation_runs')
+            ->where('job_key', 'freshness_watchdog')
+            ->update([
+                'started_at' => now()->subHours(2),
+                'finished_at' => now()->subHours(2),
+                'updated_at' => now(),
+            ]);
+
+        $this->artisan('grimba:health', [
+            '--fail-on-risk' => true,
+            '--min-free-mb' => 0,
+            '--min-published-24h' => 1,
+        ])
+            ->expectsOutputToContain('automation job unhealthy: Freshness watchdog')
             ->assertFailed();
     }
 

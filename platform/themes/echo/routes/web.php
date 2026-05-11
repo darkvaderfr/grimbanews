@@ -125,7 +125,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         })->name('public.comparison.index');
 
         Route::get('comparatif/{clusterId}', function (int $clusterId) {
-            $posts = Post::query()
+            $posts = Post::withoutGlobalScope('grimba_region')
                 ->where('story_cluster_id', $clusterId)
                 ->where('status', 'published')
                 ->tap(fn ($q) => GnTr::orderForTargetLocale($q, withRecency: false))
