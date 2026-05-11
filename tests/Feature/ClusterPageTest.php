@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use Botble\Blog\Models\Post;
 use Botble\Member\Models\Member;
+use Botble\Setting\Supports\SettingStore;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ClusterPageTest extends TestCase
@@ -74,6 +76,34 @@ class ClusterPageTest extends TestCase
         $this->assertNotSame('', $path);
 
         return $path;
+    }
+
+    private function createSource(string $name, string $country, string $bias = 'center'): int
+    {
+        return (int) DB::table('news_sources')->insertGetId([
+            'name' => $name,
+            'slug' => Str::slug($name) . '-' . Str::lower(Str::random(6)),
+            'website' => 'https://example.com/' . Str::slug($name),
+            'bias_rating' => $bias,
+            'bias_score' => match ($bias) {
+                'left' => -2,
+                'right' => 2,
+                default => 0,
+            },
+            'ownership_type' => 'private',
+            'credibility_score' => 85,
+            'country' => $country,
+            'language' => 'en',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    private function setting(string $key, string $value): void
+    {
+        $store = app(SettingStore::class);
+        $store->set($key, $value);
+        $store->save();
     }
 
     public function test_cluster_size_one_uses_legacy_article_layout(): void
@@ -238,12 +268,12 @@ class ClusterPageTest extends TestCase
             ->assertSee('une nouvelle couverture est arrivée après ce résumé');
     }
 
-    public function test_anonymous_reader_sees_full_article_subscriber_gate(): void
+    public function test_anonymous_reader_can_read_extracted_full_article_by_default(): void
     {
         $post = $this->assignCluster($this->publishedPostIds(2, 22), 910009, ['left', 'center']);
 
         DB::table('posts')->where('id', $post->id)->update([
-            'full_content' => '<p>Texte intégral réservé avec une enquête complète sur les données publiques.</p>',
+            'full_content' => '<p>Texte intégral visible publiquement avec une enquête complète sur les données publiques.</p>',
             'full_fetched_at' => now(),
             'full_extract_error' => null,
         ]);
@@ -251,10 +281,12 @@ class ClusterPageTest extends TestCase
         $this->withUnencryptedCookies($this->readerCookies())
             ->get($this->pathFor($post))
             ->assertOk()
-            ->assertSee('Réservé aux abonnés')
-            ->assertSee('grimba-full-article--locked', false)
-            ->assertSee('Connectez-vous pour lire le texte intégral')
-            ->assertDontSee('Texte intégral réservé avec une enquête complète');
+            ->assertSee("Lire l'article complet")
+            ->assertSee('Texte intégral')
+            ->assertSee('grimba-full-article--reader', false)
+            ->assertSee('Texte intégral visible publiquement avec une enquête complète')
+            ->assertDontSee('Réservé aux abonnés')
+            ->assertDontSee('grimba-full-article--locked', false);
     }
 
     public function test_logged_in_member_can_read_extracted_full_article(): void
@@ -280,5 +312,81 @@ class ClusterPageTest extends TestCase
             ->assertSee('Texte intégral visible par un membre connecté')
             ->assertDontSee('Réservé aux abonnés')
             ->assertDontSee('<details class="grimba-full-article', false);
+    }
+
+    public function test_full_article_gate_can_still_be_enabled_by_setting(): void
+    {
+        $this->setting('grimba_full_article_public', '');
+        $post = $this->assignCluster($this->publishedPostIds(2, 26), 910011, ['left', 'center']);
+
+        DB::table('posts')->where('id', $post->id)->update([
+            'full_content' => '<p>Texte intégral verrouillable avec les détails complets.</p>',
+            'full_fetched_at' => now(),
+            'full_extract_error' => null,
+        ]);
+
+        $this->withUnencryptedCookies($this->readerCookies())
+            ->get($this->pathFor($post))
+            ->assertOk()
+            ->assertSee('Réservé aux abonnés')
+            ->assertSee('grimba-full-article--locked', false)
+            ->assertDontSee('Texte intégral verrouillable avec les détails complets');
+
+        $this->setting('grimba_full_article_public', '1');
+    }
+
+    public function test_article_list_shows_full_cluster_across_region_scope_and_categories(): void
+    {
+        $ids = $this->publishedPostIds(2, 28);
+        $post = $this->assignCluster($ids, 910012, ['left', 'center']);
+        $sourceA = $this->createSource('Region Scoped Wire A ' . Str::random(6), 'US', 'left');
+        $sourceB = $this->createSource('Region Scoped Wire B ' . Str::random(6), 'US', 'center');
+        $categoryId = (int) DB::table('categories')->where('name', 'Monde')->value('id');
+
+        $this->assertGreaterThan(0, $categoryId, 'Fixture category must exist.');
+
+        foreach ($ids as $index => $id) {
+            DB::table('posts')->where('id', $id)->update([
+                'source_id' => $index === 0 ? $sourceA : $sourceB,
+                'source_name' => $index === 0 ? 'Region Scoped Wire A' : 'Region Scoped Wire B',
+                'bias_rating' => $index === 0 ? 'left' : 'center',
+                'description' => $index === 0
+                    ? 'Primary region-scope fixture description.'
+                    : 'Sibling region-scope fixture description.',
+            ]);
+
+            DB::table('post_categories')->insertOrIgnore([
+                'post_id' => $id,
+                'category_id' => $categoryId,
+            ]);
+        }
+
+        $this->withUnencryptedCookies($this->readerCookies(['grimba_region' => 'africa']))
+            ->get($this->pathFor($post))
+            ->assertOk()
+            ->assertSee('class="grimba-story container', false)
+            ->assertSee('<span style="opacity:0.55;">2</span>', false)
+            ->assertSee('articles')
+            ->assertSee('Region Scoped Wire A')
+            ->assertSee('Region Scoped Wire B')
+            ->assertSee('Monde')
+            ->assertSee('Sibling region-scope fixture description.');
+    }
+
+    public function test_newsapi_truncation_marker_is_scrubbed_from_article_body(): void
+    {
+        $post = $this->assignCluster($this->publishedPostIds(1, 30), 910013, ['center']);
+
+        DB::table('posts')->where('id', $post->id)->update([
+            'description' => 'Prominent Jewish American leader and Israel defender Abraham Abe Foxman has died at age 86. [+4285 chars]',
+            'content' => '<p>Prominent Jewish American leader and Israel defender Abraham Abe Foxman has died at age 86. The Anti-Defamation League confirmed his death on Sunday, calling… [+4285 chars]</p>',
+        ]);
+
+        $this->withUnencryptedCookies($this->readerCookies())
+            ->get($this->pathFor($post))
+            ->assertOk()
+            ->assertSee('Prominent Jewish American leader and Israel defender')
+            ->assertDontSee('[+4285 chars]')
+            ->assertDontSee('4285 chars');
     }
 }

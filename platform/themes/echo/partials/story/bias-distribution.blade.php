@@ -12,11 +12,7 @@
     $sourceMeta = $sourceMeta ?? null;
     if (! $sourceMeta) {
         $sourceIds = $clusterPosts->pluck('source_id')->filter()->unique()->all();
-        $sourceMeta = empty($sourceIds) ? collect() :
-            \Illuminate\Support\Facades\DB::table('news_sources')
-                ->whereIn('id', $sourceIds)
-                ->get(['id', 'name', 'website', 'logo_url', 'logo_status', 'logo_checked_at'])
-                ->keyBy('id');
+        $sourceMeta = \App\Support\GrimbaSourceMeta::forIds($sourceIds, ['id', 'name', 'website', 'logo_url', 'logo_status', 'logo_checked_at']);
     }
 
     $sourcesByBias = ['left' => [], 'center' => [], 'right' => [], 'unknown' => []];

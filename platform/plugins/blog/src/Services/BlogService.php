@@ -2,6 +2,7 @@
 
 namespace Botble\Blog\Services;
 
+use App\Support\GrimbaArticleText;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Supports\Helper;
@@ -40,21 +41,22 @@ class BlogService
                 /**
                  * @var Post $post
                  */
-                $post = Post::query()
+                $post = Post::withoutGlobalScope('grimba_region')
                     ->where($condition)
                     ->with(['categories', 'tags', 'slugable', 'categories.slugable', 'tags.slugable'])
                     ->firstOrFail();
+                $description = GrimbaArticleText::stripNewsApiTruncationMarker($post->description) ?? $post->description;
 
                 Helper::handleViewCount($post, 'viewed_post');
 
                 SeoHelper::setTitle($post->name)
-                    ->setDescription($post->description);
+                    ->setDescription($description);
 
                 $meta = new SeoOpenGraph();
                 if ($post->image) {
                     $meta->setImage(RvMedia::getImageUrl($post->image));
                 }
-                $meta->setDescription($post->description);
+                $meta->setDescription($description);
                 $meta->setUrl($post->url);
                 $meta->setTitle($post->name);
                 $meta->setType('article');

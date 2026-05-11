@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\GrimbaArticleText;
 use App\Support\GrimbaSourceCountryBackfill;
 use Botble\Blog\Models\Post;
 use Botble\Slug\Facades\SlugHelper;
@@ -320,8 +321,11 @@ class GrimbaNewsApiFetcher
         // into many headlines (" - Le Monde", " | BBC News").
         $title = preg_replace('/\s+[–\-—|]\s+[^|–\-—]+$/u', '', $title) ?: $title;
 
-        $description = (string) ($article['description'] ?? '');
-        $content     = (string) ($article['content'] ?? $description);
+        $description = GrimbaArticleText::stripNewsApiTruncationMarker((string) ($article['description'] ?? '')) ?? '';
+        $content     = GrimbaArticleText::stripNewsApiTruncationMarker((string) ($article['content'] ?? $description)) ?? '';
+        if (trim(strip_tags($content)) === '' && trim(strip_tags($description)) !== '') {
+            $content = $description;
+        }
         $publishedAt = $this->toIso((string) ($article['publishedAt'] ?? ''));
 
         // urlToImage is feed-level. Many NewsAPI sources set it; for
@@ -564,10 +568,16 @@ class GrimbaNewsApiFetcher
     {
         try {
             $post = new Post();
+            $description = GrimbaArticleText::stripNewsApiTruncationMarker((string) ($a['description'] ?? '')) ?? '';
+            $content = GrimbaArticleText::stripNewsApiTruncationMarker((string) ($a['content'] ?? '')) ?? '';
+            if (trim(strip_tags($content)) === '' && trim(strip_tags($description)) !== '') {
+                $content = $description;
+            }
+
             $post->name        = Str::limit($a['title'], 240, '');
-            $post->description = Str::limit(strip_tags($a['description']), 600, '…');
+            $post->description = Str::limit(strip_tags($description), 600, '…');
             $post->content     = '<p><a href="' . e($a['url']) . '" target="_blank" rel="noopener">Lire l’article original</a></p>'
-                . '<p>' . e(Str::limit(strip_tags($a['content']), 1200, '…')) . '</p>';
+                . '<p>' . e(Str::limit(strip_tags($content), 1200, '…')) . '</p>';
 
             $autoPublish = (bool) setting('grimba_ingest_auto_publish', false);
             if (! $autoPublish && env('GRIMBA_INGEST_AUTO_PUBLISH')) {

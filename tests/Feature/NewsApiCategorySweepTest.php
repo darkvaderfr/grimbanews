@@ -146,6 +146,53 @@ class NewsApiCategorySweepTest extends TestCase
         $this->assertSame('FR', DB::table('news_sources')->where('name', $sourceName)->value('country'));
     }
 
+    public function test_newsapi_ingest_scrubs_truncation_marker_from_persisted_article_text(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+        DB::table('grimba_newsapi_runs')->delete();
+
+        $sourceName = 'Truncation Fixture ' . Str::random(8);
+        $articleUrl = 'https://www.reuters.com/world/truncation-fixture-' . Str::random(10);
+
+        $this->setting('grimba_newsapi_key', 'test-newsapi-key-' . Str::random(8));
+        $this->setting('grimba_newsapi_countries', 'us');
+        $this->setting('grimba_newsapi_categories', 'general');
+        $this->setting('grimba_newsapi_queries', '');
+        $this->setting('grimba_newsapi_daily_request_budget', '900');
+        $this->setting('grimba_newsapi_max_calls_per_run', '40');
+
+        Http::fake([
+            'newsapi.org/v2/top-headlines*' => Http::response([
+                'status' => 'ok',
+                'totalResults' => 1,
+                'articles' => [[
+                    'source' => ['id' => null, 'name' => $sourceName],
+                    'author' => null,
+                    'title' => 'Truncation fixture headline',
+                    'description' => 'Leader profile summary from NewsAPI. [+4285 chars]',
+                    'url' => $articleUrl,
+                    'urlToImage' => 'https://www.reuters.com/image.jpg',
+                    'publishedAt' => now()->toIso8601String(),
+                    'content' => 'Prominent Jewish American leader and Israel defender Abraham Abe Foxman has died at age 86. The Anti-Defamation League confirmed his death on Sunday, calling… [+4285 chars]',
+                ]],
+            ], 200),
+        ]);
+
+        $summary = app(GrimbaNewsApiFetcher::class)->fetchAll();
+
+        $this->assertSame('ok', $summary[0]['status']);
+        $this->assertSame(1, $summary[0]['ingested']);
+
+        $postId = (int) DB::table('newsapi_items')->where('article_url', $articleUrl)->value('post_id');
+        $post = DB::table('posts')->where('id', $postId)->first(['description', 'content']);
+
+        $this->assertNotNull($post);
+        $this->assertStringContainsString('Leader profile summary from NewsAPI.', $post->description);
+        $this->assertStringContainsString('Prominent Jewish American leader and Israel defender', $post->content);
+        $this->assertStringNotContainsString('[+4285 chars]', $post->description);
+        $this->assertStringNotContainsString('[+4285 chars]', $post->content);
+    }
+
     private function setting(string $key, string $value): void
     {
         $store = app(SettingStore::class);

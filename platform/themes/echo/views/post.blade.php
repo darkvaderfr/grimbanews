@@ -147,11 +147,13 @@
         ? route('public.member.login')
         : url('/login');
     $__gnFullActive = (bool) setting('grimba_full_article_active', true);
-    $__gnRawFullBody = trim((string) ($post->full_content ?? ''));
-    $__gnFullBody = $__gnFullActive && $__gnMemberCanReadFull && $__gnRawFullBody !== ''
+    $__gnFullArticlePublic = (bool) setting('grimba_full_article_public', true);
+    $__gnCanReadFull = $__gnFullArticlePublic || $__gnMemberCanReadFull;
+    $__gnRawFullBody = trim((string) \App\Support\GrimbaArticleText::stripNewsApiTruncationMarker($post->full_content ?? ''));
+    $__gnFullBody = $__gnFullActive && $__gnCanReadFull && $__gnRawFullBody !== ''
         ? ($__gnHasTr && GnTr::hasTranslatedBody($post, $__gnTarget) ? (GnTr::body($post) ?: $__gnRawFullBody) : $__gnRawFullBody)
         : null;
-    $__gnFullArticleLocked = $__gnFullActive && ! $__gnMemberCanReadFull && $__gnRawFullBody !== '';
+    $__gnFullArticleLocked = $__gnFullActive && ! $__gnCanReadFull && $__gnRawFullBody !== '';
     $__gnUpstream = $__gnRawFullBody !== ''
         ? (\Illuminate\Support\Facades\DB::table('rss_feed_items')->where('post_id', $post->id)->value('link')
             ?? \Illuminate\Support\Facades\DB::table('newsapi_items')->where('post_id', $post->id)->value('article_url'))
@@ -170,7 +172,7 @@
     $__gnSourceMeta = collect();
     $__gnIsStoryPage = false;
     if ($post->story_cluster_id) {
-        $__gnClusterPosts = \Botble\Blog\Models\Post::query()
+        $__gnClusterPosts = \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
             ->where('story_cluster_id', $post->story_cluster_id)
             ->where('status', 'published')
             ->with('categories')
@@ -191,11 +193,7 @@
 
         if ($__gnIsStoryPage) {
             $__gnSourceIds = $__gnClusterPosts->pluck('source_id')->filter()->unique()->all();
-            $__gnSourceMeta = empty($__gnSourceIds) ? collect() :
-                \Illuminate\Support\Facades\DB::table('news_sources')
-                    ->whereIn('id', $__gnSourceIds)
-                    ->get(['id','name','website','bias_rating','bias_score','ownership_type','credibility_score','owner_name','logo_url','logo_status','logo_checked_at'])
-                    ->keyBy('id');
+            $__gnSourceMeta = \App\Support\GrimbaSourceMeta::forIds($__gnSourceIds);
         }
     }
 @endphp
@@ -860,7 +858,7 @@
                                     <details class="mt-4 mb-2 small">
                                         <summary class="text-muted" style="cursor: pointer;">Afficher le texte original ({{ strtoupper($post->original_language) }})</summary>
                                         <div class="mt-2 opacity-75" lang="{{ $post->original_language }}">
-                                            {!! BaseHelper::clean($post->content) !!}
+                                            {!! BaseHelper::clean(\App\Support\GrimbaArticleText::stripNewsApiTruncationMarker($post->content ?? '') ?: '') !!}
                                         </div>
                                     </details>
                                 @endif

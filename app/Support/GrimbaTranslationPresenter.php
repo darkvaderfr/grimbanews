@@ -46,20 +46,20 @@ class GrimbaTranslationPresenter
     {
         $record = self::translationRecord($post, self::targetLocale());
         if ($record && trim((string) ($record->translated_description ?? '')) !== '') {
-            return (string) $record->translated_description;
+            return GrimbaArticleText::stripNewsApiTruncationMarker((string) $record->translated_description);
         }
 
-        return $post->description ?? null;
+        return GrimbaArticleText::stripNewsApiTruncationMarker($post->description ?? null);
     }
 
     public static function body(object $post): ?string
     {
         $record = self::translationRecord($post, self::targetLocale());
         if ($record && trim((string) ($record->translated_content ?? '')) !== '') {
-            return (string) $record->translated_content;
+            return GrimbaArticleText::stripNewsApiTruncationMarker((string) $record->translated_content);
         }
 
-        return $post->content ?? null;
+        return GrimbaArticleText::stripNewsApiTruncationMarker($post->content ?? null);
     }
 
     public static function hasTranslatedBody(object $post, ?string $target = null): bool

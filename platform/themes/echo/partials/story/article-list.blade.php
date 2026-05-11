@@ -105,11 +105,7 @@
         $__sources = $sourceMeta ?? null;
         if (! $__sources) {
             $__sourceIds = $clusterPosts->pluck('source_id')->filter()->unique()->all();
-            $__sources = empty($__sourceIds) ? collect() :
-                \Illuminate\Support\Facades\DB::table('news_sources')
-                    ->whereIn('id', $__sourceIds)
-                    ->get(['id','name','website','bias_rating','bias_score','ownership_type','credibility_score','owner_name','logo_url','logo_status','logo_checked_at'])
-                    ->keyBy('id');
+            $__sources = \App\Support\GrimbaSourceMeta::forIds($__sourceIds);
         }
     @endphp
 
@@ -130,6 +126,7 @@
                     $title = GnTr::title($cp);
                     $description = GnTr::description($cp);
                     $isTranslated = GnTr::isTranslated($cp);
+                    $categories = $cp->relationLoaded('categories') ? $cp->categories : collect();
                 @endphp
                 <li data-bias="{{ $bucket }}"
                     id="story-article-{{ (int) $cp->id }}"
@@ -246,6 +243,32 @@
                     @if($isTranslated)
                         <div class="mb-2">
                             {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+                        </div>
+                    @endif
+
+                    @if($categories->isNotEmpty())
+                        <div class="grimba-story-article__categories d-flex align-items-center gap-1 flex-wrap mb-2">
+                            @foreach($categories->take(4) as $category)
+                                <a href="{{ $category->url }}"
+                                   class="grimba-story-article__category"
+                                   style="
+                                       display:inline-flex;
+                                       align-items:center;
+                                       min-height:24px;
+                                       padding:3px 9px;
+                                       border-radius:9999px;
+                                       border:1px solid rgba(26,23,19,0.12);
+                                       background:rgba(246,241,232,0.62);
+                                       color:var(--gn-ink,#1a1713);
+                                       font-family:'Public Sans',system-ui,sans-serif;
+                                       font-size:11.5px;
+                                       font-weight:700;
+                                       line-height:1.2;
+                                       text-decoration:none;
+                                   ">
+                                    {{ $category->name }}
+                                </a>
+                            @endforeach
                         </div>
                     @endif
 

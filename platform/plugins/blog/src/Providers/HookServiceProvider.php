@@ -2,6 +2,7 @@
 
 namespace Botble\Blog\Providers;
 
+use App\Support\GrimbaArticleText;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
@@ -142,6 +143,8 @@ class HookServiceProvider extends ServiceProvider
                         $schemaType = 'NewsArticle';
                     }
 
+                    $description = GrimbaArticleText::stripNewsApiTruncationMarker($post->description) ?? $post->description;
+
                     $schema = [
                         '@context' => 'https://schema.org',
                         '@type' => $schemaType,
@@ -150,7 +153,7 @@ class HookServiceProvider extends ServiceProvider
                             '@id' => $post->url,
                         ],
                         'headline' => BaseHelper::clean($post->name),
-                        'description' => BaseHelper::clean($post->description),
+                        'description' => BaseHelper::clean($description),
                         'image' => [
                             '@type' => 'ImageObject',
                             'url' => RvMedia::getImageUrl($post->image, null, false, RvMedia::getDefaultImage()),
