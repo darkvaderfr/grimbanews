@@ -68,9 +68,9 @@ All contributors should also follow `memory.md`, `docs/GRIMBANEWS_TANDEM_WORK_PR
 
 The formal 1000-sprint ledger was behind the production-hardening work that has shipped since the first discovery wave. The evidence ledger below now records both the original inventory sprints and the later atomic outcomes that can be tied to concrete commits, tests, or smoke results.
 
-Current accounting after reconciliation and the 2026-05-11 freshness sprint:
+Current accounting after reconciliation and the 2026-05-11 freshness/disk sprints:
 
-- Formal evidenced master sprints: 19 / 1000 = 1.9%.
+- Formal evidenced master sprints: 20 / 1000 = 2.0%.
 - Practical production-readiness estimate: about 28-30%, because core ingestion, publishing, public UX, admin cockpit, and deploy smoke paths exist, while full visual QA, dedupe cleanup, restore drill, security, performance, monetization, and business launch gates still need closure.
 - The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
 - The original "no production deployment" rule is retained as a release-gate rule. Production hotfixes and hardening work already performed must be reconciled here with evidence, risks, and follow-up gates.
@@ -102,6 +102,7 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S210 | Dedupe regression tests: `fe31be0`, `tests/Feature/DedupePostsCommandTest.php` | complete |
 | S485 | Edition dark mode: `11238a9`, `tests/e2e/grimbanews-mobile-shell-contrast.cjs` | complete |
 | S612 | Cockpit automation board: `06422e0`, `resources/views/grimba-admin/cockpit.blade.php` | complete |
+| S973 | Log retention policy: `docs/GRIMBANEWS_PROD_DISK_HEADROOM_2026_05_11.md`, `grimba:health --fail-on-risk` 2048 MB floor | complete |
 
 | Sprint IDs | Program | Atomic sprint outcomes |
 |---|---|---|

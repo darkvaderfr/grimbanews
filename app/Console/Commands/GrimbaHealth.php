@@ -28,7 +28,7 @@ class GrimbaHealth extends Command
 {
     protected $signature = 'grimba:health
         {--fail-on-risk : return a non-zero exit code when operating floors are breached}
-        {--min-free-mb=1024 : minimum free disk space required when failing on risk}
+        {--min-free-mb=2048 : minimum free disk space required when failing on risk}
         {--min-published-24h=12 : minimum published posts required in the last 24h when failing on risk}';
     protected $description = 'One-page health summary of the GrimbaNews ingest + editorial pipeline (S153).';
 
