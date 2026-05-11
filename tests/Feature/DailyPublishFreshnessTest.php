@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Services\GrimbaArticleExtractor;
 use App\Support\GrimbaAutomationMonitor;
 use App\Support\GrimbaIngestGuardrails;
 use Botble\ACL\Models\User;
@@ -245,11 +246,103 @@ class DailyPublishFreshnessTest extends TestCase
             ->assertFailed();
     }
 
+    public function test_full_article_extractor_prioritizes_never_attempted_posts_over_recent_failures(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        DB::table('posts')->where('status', 'published')->update([
+            'full_content' => '<p>' . str_repeat('Already readable seed content. ', 12) . '</p>',
+            'full_fetched_at' => now(),
+            'full_extract_error' => null,
+            'updated_at' => now(),
+        ]);
+
+        $suffix = Str::lower(Str::random(8));
+        $author = $this->admin();
+        $sourceId = $this->trustedSourceId('Full Article Queue ' . $suffix, 101);
+
+        $neverUrl = 'https://example.test/full-article-never-' . $suffix;
+        $failedUrl = 'https://example.test/full-article-failed-' . $suffix;
+        $neverId = $this->publishedPostId('full article never attempted ' . $suffix, $sourceId, $author, now()->subMinutes(10));
+        $failedId = $this->publishedPostId('full article recent failure ' . $suffix, $sourceId, $author, now());
+
+        DB::table('posts')->where('id', $failedId)->update([
+            'full_fetched_at' => now()->subHour(),
+            'full_extract_error' => 'blocked recently',
+            'updated_at' => now(),
+        ]);
+
+        $this->rssItem($neverId, $neverUrl, 'full-article-never-' . $suffix);
+        $this->rssItem($failedId, $failedUrl, 'full-article-failed-' . $suffix);
+
+        $this->mock(GrimbaArticleExtractor::class, function ($mock) use ($neverUrl): void {
+            $mock->shouldReceive('extractFromUrl')
+                ->once()
+                ->with($neverUrl)
+                ->andReturn([
+                    'ok' => true,
+                    'html' => '<p>' . str_repeat('Fresh extracted body. ', 14) . '</p>',
+                    'error' => null,
+                ]);
+        });
+
+        $this->artisan('grimba:fetch-full-articles', [
+            '--limit' => 1,
+            '--retry-after-hours' => 24,
+        ])->assertSuccessful();
+
+        $this->assertNotNull(DB::table('posts')->where('id', $neverId)->value('full_content'));
+        $this->assertNull(DB::table('posts')->where('id', $neverId)->value('full_extract_error'));
+        $this->assertNull(DB::table('posts')->where('id', $failedId)->value('full_content'));
+        $this->assertSame('blocked recently', DB::table('posts')->where('id', $failedId)->value('full_extract_error'));
+    }
+
+    public function test_ops_health_guard_can_fail_when_full_article_coverage_floor_is_breached(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        DB::table('posts')
+            ->where('status', 'published')
+            ->update(['published_at' => now()->subDays(7)]);
+
+        $suffix = Str::lower(Str::random(8));
+        $author = $this->admin();
+        $sourceId = $this->trustedSourceId('Full Coverage Health ' . $suffix, 101);
+
+        $readableId = $this->publishedPostId('full coverage readable ' . $suffix, $sourceId, $author, now()->subMinutes(12), [
+            'full_content' => '<p>' . str_repeat('Readable in-app article body. ', 12) . '</p>',
+            'full_fetched_at' => now()->subMinutes(10),
+        ]);
+        $missingId = $this->publishedPostId('full coverage missing ' . $suffix, $sourceId, $author, now()->subMinutes(8), [
+            'full_content' => null,
+            'full_fetched_at' => null,
+        ]);
+
+        $this->rssItem($readableId, 'https://example.test/full-coverage-readable-' . $suffix, 'full-coverage-readable-' . $suffix);
+        $this->rssItem($missingId, 'https://example.test/full-coverage-missing-' . $suffix, 'full-coverage-missing-' . $suffix);
+        $this->markHealthAutomationHealthy();
+
+        $this->artisan('grimba:health', [
+            '--fail-on-risk' => true,
+            '--min-free-mb' => 0,
+            '--min-published-24h' => 2,
+            '--min-full-content-coverage' => 75,
+        ])
+            ->expectsOutputToContain('readable bodies       : 1/2 (50%, floor 75%)')
+            ->expectsOutputToContain('full-article coverage below floor: 50%/75%')
+            ->assertFailed();
+    }
+
     private function markFreshnessAutomationHealthy(): void
+    {
+        $this->markHealthAutomationHealthy();
+    }
+
+    private function markHealthAutomationHealthy(): void
     {
         DB::table('grimba_automation_runs')->delete();
 
-        foreach (GrimbaAutomationMonitor::freshnessJobKeys() as $jobKey) {
+        foreach (GrimbaAutomationMonitor::healthJobKeys() as $jobKey) {
             $job = GrimbaAutomationMonitor::jobs()[$jobKey];
             DB::table('grimba_automation_runs')->insert([
                 'job_key' => $jobKey,
@@ -304,6 +397,43 @@ class DailyPublishFreshnessTest extends TestCase
             'original_language' => 'fr',
             'created_at' => $createdAt,
             'updated_at' => $createdAt,
+        ]);
+    }
+
+    private function publishedPostId(string $name, int $sourceId, User $author, mixed $publishedAt, array $overrides = []): int
+    {
+        return (int) DB::table('posts')->insertGetId(array_merge([
+            'name' => $name,
+            'description' => 'Published full article coverage fixture.',
+            'content' => '<p>Published full article coverage fixture.</p>',
+            'full_content' => null,
+            'full_fetched_at' => null,
+            'full_extract_error' => null,
+            'status' => 'published',
+            'author_id' => $author->getKey(),
+            'author_type' => User::class,
+            'source_id' => $sourceId,
+            'source_name' => DB::table('news_sources')->where('id', $sourceId)->value('name'),
+            'bias_rating' => 'center',
+            'original_language' => 'fr',
+            'published_at' => $publishedAt,
+            'created_at' => $publishedAt,
+            'updated_at' => $publishedAt,
+        ], $overrides));
+    }
+
+    private function rssItem(int $postId, string $url, string $guid): void
+    {
+        DB::table('rss_feed_items')->insert([
+            'feed_id' => 1,
+            'guid' => $guid,
+            'link' => $url,
+            'title_snapshot' => 'Full article coverage fixture',
+            'post_id' => $postId,
+            'seen_at' => now(),
+            'published_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 }

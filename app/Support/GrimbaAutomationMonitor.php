@@ -106,6 +106,19 @@ class GrimbaAutomationMonitor
     }
 
     /**
+     * Jobs that should make grimba:health fail loudly when they stop.
+     *
+     * @return array<int, string>
+     */
+    public static function healthJobKeys(): array
+    {
+        return [
+            ...self::freshnessJobKeys(),
+            'full_articles',
+        ];
+    }
+
+    /**
      * @param array<int, string>|null $jobKeys
      * @return \Illuminate\Support\Collection<int, object>
      */

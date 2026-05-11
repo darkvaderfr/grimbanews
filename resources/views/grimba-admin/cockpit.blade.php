@@ -88,6 +88,12 @@
                     <input type="hidden" name="action" value="nobuai_health">
                     <button type="submit" class="btn btn-sm btn-outline-primary">NobuAI health</button>
                 </form>
+                <form method="POST" action="{{ route('grimba.cockpit.runbook') }}">
+                    @csrf
+                    <input type="hidden" name="action" value="full_articles">
+                    <input type="hidden" name="limit" value="5">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Extract 5 articles</button>
+                </form>
                 <form method="POST" action="{{ route('grimba.cockpit.runbook') }}" class="d-flex gap-1 align-items-center">
                     @csrf
                     <input type="hidden" name="action" value="category_reclassify">
@@ -132,6 +138,20 @@
                     <strong>{{ number_format($newsApiItems24) }}</strong>
                     <small>{{ $newsApiConfigured ? 'clé présente' : 'clé absente' }} · {{ $newsApiActive ? 'actif' : 'désactivé' }} · {{ $newsApiLastFetch ? \Carbon\Carbon::parse($newsApiLastFetch)->locale('fr')->diffForHumans() : 'jamais fetché' }}</small>
                 </a>
+                <div class="grimba-ops-tile {{ $fullArticleCoverage->available && $fullArticleCoverage->missing > 0 ? 'is-warn' : '' }}">
+                    <span>Readable bodies</span>
+                    <strong>{{ $fullArticleCoverage->available ? $fullArticleCoverage->coverage_pct . '%' : 'n/a' }}</strong>
+                    <small>
+                        @if($fullArticleCoverage->available)
+                            {{ $fullArticleCoverage->readable }}/{{ $fullArticleCoverage->total }} récents ·
+                            {{ $fullArticleCoverage->never_attempted }} jamais tentés ·
+                            {{ $fullArticleCoverage->failed }} échoués ·
+                            {{ $fullArticleCoverage->retry_ready }} prêts retry
+                        @else
+                            {{ $fullArticleCoverage->reason }}
+                        @endif
+                    </small>
+                </div>
                 <a href="{{ route('grimba.rss-drafts.index') }}" class="grimba-ops-tile {{ $draftCount > 0 ? 'is-warn' : '' }}">
                     <span>Brouillons</span>
                     <strong>{{ number_format($draftCount) }}</strong>

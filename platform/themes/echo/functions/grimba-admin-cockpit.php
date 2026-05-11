@@ -16,6 +16,7 @@ use Botble\Base\Supports\DashboardMenuItem;
 use App\Services\GrimbaNobuAi;
 use App\Services\GrimbaTranslator;
 use App\Support\GrimbaAutomationMonitor;
+use App\Support\GrimbaFullArticleCoverage;
 use App\Support\GrimbaIngestGuardrails;
 use App\Support\GrimbaPublicationPipeline;
 use App\Support\GrimbaPostRecency;
@@ -115,6 +116,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $publishedToday = $todayPosts->count();
             $publicationFloor = 12;
             $publicationPipeline = GrimbaPublicationPipeline::since(now()->subDay());
+            $fullArticleCoverage = GrimbaFullArticleCoverage::recent(now()->subDay());
             $draftCount = DB::table('posts')->where('status', '!=', 'published')->count();
             $publishedTotal = DB::table('posts')->where('status', 'published')->count();
             $clusterCount = DB::table('story_clusters')->count();
@@ -251,6 +253,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'blindspotCount',
                 'publishedToday', 'draftCount',
                 'publicationFloor', 'publicationPipeline',
+                'fullArticleCoverage',
                 'publishedTotal', 'clusterCount', 'activeClusterCount',
                 'translationReady', 'translationPending',
                 'rssActive', 'rssSick', 'rssLastPoll', 'rssItems24',
@@ -329,6 +332,11 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                     'label' => 'NewsAPI fetch',
                     'command' => 'grimba:fetch-newsapi',
                     'args' => [],
+                ],
+                'full_articles' => [
+                    'label' => 'Full article extraction',
+                    'command' => 'grimba:fetch-full-articles',
+                    'args' => ['--limit' => $limit],
                 ],
                 'category_reclassify' => [
                     'label' => 'Category reclassify',

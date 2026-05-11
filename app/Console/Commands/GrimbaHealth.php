@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\GrimbaNewsApiFetcher;
 use App\Support\GrimbaAutomationMonitor;
+use App\Support\GrimbaFullArticleCoverage;
 use App\Support\GrimbaPublicationPipeline;
 use App\Support\GrimbaRssFeedHealth;
 use Illuminate\Console\Command;
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\DB;
  *   7. Dedup state (count of duplicate-name groups remaining)
  *   8. Recent ingest rate (last 24h, RSS + NewsAPI separately)
  *   9. Scheduler freshness for the jobs that protect daily articles
+ *  10. Full article extraction coverage for in-app reading
  */
 class GrimbaHealth extends Command
 {
@@ -31,7 +33,9 @@ class GrimbaHealth extends Command
         {--fail-on-risk : return a non-zero exit code when operating floors are breached}
         {--min-free-mb=2048 : minimum free disk space required when failing on risk}
         {--min-published-24h=12 : minimum published posts required in the last 24h when failing on risk}
-        {--min-ingested-published-24h= : minimum RSS/NewsAPI-backed published posts required in the last 24h; defaults to min-published-24h}';
+        {--min-ingested-published-24h= : minimum RSS/NewsAPI-backed published posts required in the last 24h; defaults to min-published-24h}
+        {--min-full-content-coverage=0 : minimum percent of recent upstream-backed posts with readable full text; 0 observes only}
+        {--full-content-retry-after-hours=24 : retry window used by full article extraction health}';
     protected $description = 'One-page health summary of the GrimbaNews ingest + editorial pipeline (S153).';
 
     public function handle(GrimbaNewsApiFetcher $newsApiFetcher): int
@@ -43,6 +47,8 @@ class GrimbaHealth extends Command
         $minIngestedPublished24h = $minIngestedPublishedOption === null || $minIngestedPublishedOption === ''
             ? $minPublished24h
             : max(0, (int) $minIngestedPublishedOption);
+        $minFullContentCoverage = min(100, max(0, (int) $this->option('min-full-content-coverage')));
+        $fullContentRetryAfterHours = max(0, (int) $this->option('full-content-retry-after-hours'));
         $riskWarnings = [];
         $last24h = now()->subDay();
 
@@ -208,7 +214,7 @@ class GrimbaHealth extends Command
             $this->warn('   ⚠ automation monitor table is unavailable; run migrations before relying on scheduler health');
             $riskWarnings[] = 'automation monitor table unavailable';
         } else {
-            $automationStatus = GrimbaAutomationMonitor::status(GrimbaAutomationMonitor::freshnessJobKeys());
+            $automationStatus = GrimbaAutomationMonitor::status(GrimbaAutomationMonitor::healthJobKeys());
 
             foreach ($automationStatus as $job) {
                 $glyph = $job->is_failed || $job->is_stale ? '⚠' : '✓';
@@ -247,6 +253,46 @@ class GrimbaHealth extends Command
             }
         }
 
+        // 10. Full article readability coverage
+        $fullArticleCoverage = GrimbaFullArticleCoverage::recent($last24h, $fullContentRetryAfterHours);
+        $this->newLine();
+        $this->line('10. Full article readability');
+        if (! $fullArticleCoverage->available) {
+            $this->line('   observed only         : ' . $fullArticleCoverage->reason);
+        } else {
+            $this->line(sprintf(
+                '   readable bodies       : %d/%d (%d%%, floor %d%%)',
+                $fullArticleCoverage->readable,
+                $fullArticleCoverage->total,
+                $fullArticleCoverage->coverage_pct,
+                $minFullContentCoverage
+            ));
+            $this->line(sprintf(
+                '   missing bodies        : %d (%d never attempted · %d failed · %d retry-ready · %d deferred)',
+                $fullArticleCoverage->missing,
+                $fullArticleCoverage->never_attempted,
+                $fullArticleCoverage->failed,
+                $fullArticleCoverage->retry_ready,
+                $fullArticleCoverage->retry_deferred
+            ));
+            $this->line(sprintf(
+                '   latest extraction     : %s',
+                $fullArticleCoverage->latest_fetched_at
+                    ? $fullArticleCoverage->latest_fetched_at->diffForHumans()
+                    : 'never'
+            ));
+
+            if ($minFullContentCoverage > 0 && $fullArticleCoverage->coverage_pct < $minFullContentCoverage) {
+                $riskWarnings[] = sprintf(
+                    'full-article coverage below floor: %d%%/%d%% (%d/%d readable recent upstream-backed posts)',
+                    $fullArticleCoverage->coverage_pct,
+                    $minFullContentCoverage,
+                    $fullArticleCoverage->readable,
+                    $fullArticleCoverage->total
+                );
+            }
+        }
+
         $publicationPipeline = GrimbaPublicationPipeline::since($last24h);
         if ($publicationPipeline->published24 < $minPublished24h) {
             $riskWarnings[] = sprintf('publication freshness below floor: %d/%d posts in the last 24h', $publicationPipeline->published24, $minPublished24h);
@@ -268,7 +314,7 @@ class GrimbaHealth extends Command
         }
 
         $this->newLine();
-        $this->line('10. Freshness + disk guard');
+        $this->line('11. Freshness + disk guard');
         $this->line(sprintf('   published 24h        : %d post(s) (floor %d)', $publicationPipeline->published24, $minPublished24h));
         $this->line(sprintf(
             '   ingest-published 24h : %d post(s) (RSS %d / NewsAPI %d / manual %d, floor %d)',
