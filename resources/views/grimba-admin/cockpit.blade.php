@@ -111,6 +111,17 @@
         </div>
         <div class="card-body">
             <div class="grimba-ops-grid">
+                <div class="grimba-ops-tile {{ $publicationPipeline->ingestedPublished24 < $publicationFloor ? 'is-warn' : '' }}">
+                    <span>Published 24h</span>
+                    <strong>{{ number_format($publicationPipeline->published24) }}</strong>
+                    <small>
+                        {{ number_format($publicationPipeline->ingestedPublished24) }} RSS/NewsAPI-backed ·
+                        RSS {{ number_format($publicationPipeline->rssPublished24) }} ·
+                        NewsAPI {{ number_format($publicationPipeline->newsApiPublished24) }} ·
+                        manual {{ number_format($publicationPipeline->manualPublished24) }} ·
+                        latest {{ $publicationPipeline->latestPublishedAt ? \Carbon\Carbon::parse($publicationPipeline->latestPublishedAt)->locale('fr')->diffForHumans() : 'jamais' }}
+                    </small>
+                </div>
                 <a href="{{ route('grimba.rss-feeds.index') }}" class="grimba-ops-tile">
                     <span>RSS 24h</span>
                     <strong>{{ number_format($rssItems24) }}</strong>

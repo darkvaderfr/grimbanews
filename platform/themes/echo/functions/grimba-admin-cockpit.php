@@ -17,6 +17,7 @@ use App\Services\GrimbaNobuAi;
 use App\Services\GrimbaTranslator;
 use App\Support\GrimbaAutomationMonitor;
 use App\Support\GrimbaIngestGuardrails;
+use App\Support\GrimbaPublicationPipeline;
 use App\Support\GrimbaPostRecency;
 use Botble\Blog\Models\Post;
 use Illuminate\Http\Request;
@@ -112,6 +113,8 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
             // Stats headers + operational pressure.
             $publishedToday = $todayPosts->count();
+            $publicationFloor = 12;
+            $publicationPipeline = GrimbaPublicationPipeline::since(now()->subDay());
             $draftCount = DB::table('posts')->where('status', '!=', 'published')->count();
             $publishedTotal = DB::table('posts')->where('status', 'published')->count();
             $clusterCount = DB::table('story_clusters')->count();
@@ -247,6 +250,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'sparkline', 'signupsTotal',
                 'blindspotCount',
                 'publishedToday', 'draftCount',
+                'publicationFloor', 'publicationPipeline',
                 'publishedTotal', 'clusterCount', 'activeClusterCount',
                 'translationReady', 'translationPending',
                 'rssActive', 'rssSick', 'rssLastPoll', 'rssItems24',

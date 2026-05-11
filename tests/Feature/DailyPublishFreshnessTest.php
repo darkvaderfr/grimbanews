@@ -104,6 +104,101 @@ class DailyPublishFreshnessTest extends TestCase
             ->assertFailed();
     }
 
+    public function test_ops_health_guard_fails_when_manual_publications_mask_empty_ingest_publication_pipeline(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        DB::table('posts')
+            ->where('status', 'published')
+            ->update(['published_at' => now()->subDays(7)]);
+
+        $suffix = Str::lower(Str::random(8));
+        $author = $this->admin();
+        $sourceId = $this->trustedSourceId('Manual Freshness Mask ' . $suffix, 101);
+
+        $firstId = $this->draftPostId('manual freshness mask one ' . $suffix, $sourceId, $author, now()->subHour());
+        $secondId = $this->draftPostId('manual freshness mask two ' . $suffix, $sourceId, $author, now()->subHour());
+
+        DB::table('posts')
+            ->whereIn('id', [$firstId, $secondId])
+            ->update([
+                'status' => 'published',
+                'published_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+        DB::table('rss_feed_items')->insert([
+            'feed_id' => 1,
+            'guid' => 'manual-freshness-mask-' . $suffix,
+            'link' => 'https://example.test/manual-freshness-mask-' . $suffix,
+            'title_snapshot' => 'Manual freshness mask fixture',
+            'post_id' => null,
+            'seen_at' => now(),
+            'published_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->markFreshnessAutomationHealthy();
+
+        $this->artisan('grimba:health', [
+            '--fail-on-risk' => true,
+            '--min-free-mb' => 0,
+            '--min-published-24h' => 2,
+        ])
+            ->expectsOutputToContain('published 24h        : 2 post(s) (floor 2)')
+            ->expectsOutputToContain('ingest-to-public freshness below floor: 0/2 RSS/NewsAPI-backed posts in the last 24h')
+            ->assertFailed();
+    }
+
+    public function test_ops_health_guard_accepts_rss_backed_publications_for_daily_floor(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        DB::table('posts')
+            ->where('status', 'published')
+            ->update(['published_at' => now()->subDays(7)]);
+
+        $suffix = Str::lower(Str::random(8));
+        $author = $this->admin();
+        $sourceId = $this->trustedSourceId('RSS Freshness Pipeline ' . $suffix, 101);
+
+        $firstId = $this->draftPostId('rss freshness pipeline one ' . $suffix, $sourceId, $author, now()->subHour());
+        $secondId = $this->draftPostId('rss freshness pipeline two ' . $suffix, $sourceId, $author, now()->subHour());
+
+        DB::table('posts')
+            ->whereIn('id', [$firstId, $secondId])
+            ->update([
+                'status' => 'published',
+                'published_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+        foreach ([$firstId, $secondId] as $postId) {
+            DB::table('rss_feed_items')->insert([
+                'feed_id' => 1,
+                'guid' => 'rss-freshness-pipeline-' . $suffix . '-' . $postId,
+                'link' => 'https://example.test/rss-freshness-pipeline-' . $suffix . '-' . $postId,
+                'title_snapshot' => 'RSS freshness pipeline fixture',
+                'post_id' => $postId,
+                'seen_at' => now(),
+                'published_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->markFreshnessAutomationHealthy();
+
+        $this->artisan('grimba:health', [
+            '--fail-on-risk' => true,
+            '--min-free-mb' => 0,
+            '--min-published-24h' => 2,
+        ])
+            ->expectsOutputToContain('ingest-published 24h : 2 post(s) (RSS 2 / NewsAPI 0 / manual 0, floor 2)')
+            ->assertSuccessful();
+    }
+
     public function test_ops_health_guard_fails_when_daily_freshness_scheduler_is_stale(): void
     {
         $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
@@ -131,20 +226,7 @@ class DailyPublishFreshnessTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        foreach (GrimbaAutomationMonitor::freshnessJobKeys() as $jobKey) {
-            $job = GrimbaAutomationMonitor::jobs()[$jobKey];
-            DB::table('grimba_automation_runs')->insert([
-                'job_key' => $jobKey,
-                'command' => $job['command'],
-                'status' => 'success',
-                'exit_code' => 0,
-                'started_at' => now()->subMinutes(5),
-                'finished_at' => now()->subMinutes(4),
-                'duration_ms' => 1000,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
+        $this->markFreshnessAutomationHealthy();
 
         DB::table('grimba_automation_runs')
             ->where('job_key', 'freshness_watchdog')
@@ -161,6 +243,26 @@ class DailyPublishFreshnessTest extends TestCase
         ])
             ->expectsOutputToContain('automation job unhealthy: Freshness watchdog')
             ->assertFailed();
+    }
+
+    private function markFreshnessAutomationHealthy(): void
+    {
+        DB::table('grimba_automation_runs')->delete();
+
+        foreach (GrimbaAutomationMonitor::freshnessJobKeys() as $jobKey) {
+            $job = GrimbaAutomationMonitor::jobs()[$jobKey];
+            DB::table('grimba_automation_runs')->insert([
+                'job_key' => $jobKey,
+                'command' => $job['command'],
+                'status' => 'success',
+                'exit_code' => 0,
+                'started_at' => now()->subMinutes(5),
+                'finished_at' => now()->subMinutes(4),
+                'duration_ms' => 1000,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 
     private function admin(): User

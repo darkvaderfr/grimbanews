@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\GrimbaNewsApiFetcher;
 use App\Support\GrimbaAutomationMonitor;
-use App\Support\GrimbaPostRecency;
+use App\Support\GrimbaPublicationPipeline;
 use App\Support\GrimbaRssFeedHealth;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +30,8 @@ class GrimbaHealth extends Command
     protected $signature = 'grimba:health
         {--fail-on-risk : return a non-zero exit code when operating floors are breached}
         {--min-free-mb=2048 : minimum free disk space required when failing on risk}
-        {--min-published-24h=12 : minimum published posts required in the last 24h when failing on risk}';
+        {--min-published-24h=12 : minimum published posts required in the last 24h when failing on risk}
+        {--min-ingested-published-24h= : minimum RSS/NewsAPI-backed published posts required in the last 24h; defaults to min-published-24h}';
     protected $description = 'One-page health summary of the GrimbaNews ingest + editorial pipeline (S153).';
 
     public function handle(GrimbaNewsApiFetcher $newsApiFetcher): int
@@ -38,7 +39,12 @@ class GrimbaHealth extends Command
         $failOnRisk = (bool) $this->option('fail-on-risk');
         $minFreeMb = max(0, (int) $this->option('min-free-mb'));
         $minPublished24h = max(0, (int) $this->option('min-published-24h'));
+        $minIngestedPublishedOption = $this->option('min-ingested-published-24h');
+        $minIngestedPublished24h = $minIngestedPublishedOption === null || $minIngestedPublishedOption === ''
+            ? $minPublished24h
+            : max(0, (int) $minIngestedPublishedOption);
         $riskWarnings = [];
+        $last24h = now()->subDay();
 
         $this->newLine();
         $this->line(str_repeat('═', 70));
@@ -172,8 +178,8 @@ class GrimbaHealth extends Command
         }
 
         // 8. Last 24h ingest
-        $rss24 = DB::table('rss_feed_items')->where('seen_at', '>=', now()->subDay())->count();
-        $api24 = DB::table('newsapi_items')->where('fetched_at', '>=', now()->subDay())->count();
+        $rss24 = DB::table('rss_feed_items')->where('seen_at', '>=', $last24h)->count();
+        $api24 = DB::table('newsapi_items')->where('fetched_at', '>=', $last24h)->count();
         $this->newLine();
         $this->line('8. Ingest last 24h');
         $this->line(sprintf('   RSS poller    : %d items', $rss24));
@@ -241,12 +247,16 @@ class GrimbaHealth extends Command
             }
         }
 
-        $published24 = (int) GrimbaPostRecency::wherePublishedSince(
-            DB::table('posts')->where('status', 'published'),
-            now()->subDay()
-        )->count();
-        if ($published24 < $minPublished24h) {
-            $riskWarnings[] = sprintf('publication freshness below floor: %d/%d posts in the last 24h', $published24, $minPublished24h);
+        $publicationPipeline = GrimbaPublicationPipeline::since($last24h);
+        if ($publicationPipeline->published24 < $minPublished24h) {
+            $riskWarnings[] = sprintf('publication freshness below floor: %d/%d posts in the last 24h', $publicationPipeline->published24, $minPublished24h);
+        }
+        if ($publicationPipeline->ingestedPublished24 < $minIngestedPublished24h) {
+            $riskWarnings[] = sprintf(
+                'ingest-to-public freshness below floor: %d/%d RSS/NewsAPI-backed posts in the last 24h',
+                $publicationPipeline->ingestedPublished24,
+                $minIngestedPublished24h
+            );
         }
 
         $freeBytes = @disk_free_space(base_path());
@@ -259,9 +269,21 @@ class GrimbaHealth extends Command
 
         $this->newLine();
         $this->line('10. Freshness + disk guard');
-        $this->line(sprintf('   published 24h : %d post(s) (floor %d)', $published24, $minPublished24h));
+        $this->line(sprintf('   published 24h        : %d post(s) (floor %d)', $publicationPipeline->published24, $minPublished24h));
         $this->line(sprintf(
-            '   disk free     : %s%s (floor %dMB)',
+            '   ingest-published 24h : %d post(s) (RSS %d / NewsAPI %d / manual %d, floor %d)',
+            $publicationPipeline->ingestedPublished24,
+            $publicationPipeline->rssPublished24,
+            $publicationPipeline->newsApiPublished24,
+            $publicationPipeline->manualPublished24,
+            $minIngestedPublished24h
+        ));
+        $this->line(sprintf(
+            '   latest public        : %s',
+            $publicationPipeline->latestPublishedAt ?: 'never'
+        ));
+        $this->line(sprintf(
+            '   disk free            : %s%s (floor %dMB)',
             $freeMb === null ? 'unknown' : $freeMb . 'MB',
             $totalGb === null ? '' : ' / ' . $totalGb . 'GB',
             $minFreeMb
