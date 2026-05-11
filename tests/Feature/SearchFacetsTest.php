@@ -9,6 +9,34 @@ use Tests\TestCase;
 
 class SearchFacetsTest extends TestCase
 {
+    public function test_anonymous_search_without_region_cookie_uses_full_public_corpus(): void
+    {
+        $suffix = Str::lower(Str::random(8));
+        $author = User::query()->find(1);
+
+        $this->assertNotNull($author, 'Fixture database must contain the system admin user.');
+
+        $europeSourceId = $this->sourceId('Default Scope Europe ' . $suffix, 'Default Scope Owner ' . $suffix, 'center', 'FR');
+        $americasSourceId = $this->sourceId('Default Scope Americas ' . $suffix, 'Default Scope Owner ' . $suffix, 'right', 'US');
+
+        $europeName = 'globaldefaultneedle europe article ' . $suffix;
+        $americasName = 'globaldefaultneedle americas article ' . $suffix;
+
+        $this->postId($europeName, $europeSourceId, $author, now());
+        $this->postId($americasName, $americasSourceId, $author, now());
+
+        $this->get('/search?q=globaldefaultneedle')
+            ->assertOk()
+            ->assertSee($europeName)
+            ->assertSee($americasName);
+
+        $this->withUnencryptedCookies(['grimba_region' => 'europe'])
+            ->get('/search?q=globaldefaultneedle')
+            ->assertOk()
+            ->assertSee($europeName)
+            ->assertDontSee($americasName);
+    }
+
     public function test_search_filters_by_owner_and_date_range(): void
     {
         $suffix = Str::lower(Str::random(8));
@@ -55,7 +83,7 @@ class SearchFacetsTest extends TestCase
             ->assertSee('name="to_date"', false);
     }
 
-    private function sourceId(string $name, string $owner, string $bias): int
+    private function sourceId(string $name, string $owner, string $bias, string $country = 'FR'): int
     {
         return (int) DB::table('news_sources')->insertGetId([
             'name' => $name,
@@ -65,7 +93,7 @@ class SearchFacetsTest extends TestCase
             'ownership_type' => 'corporate',
             'owner_name' => $owner,
             'credibility_score' => 80,
-            'country' => 'FR',
+            'country' => $country,
             'language' => 'fr',
             'created_at' => now(),
             'updated_at' => now(),

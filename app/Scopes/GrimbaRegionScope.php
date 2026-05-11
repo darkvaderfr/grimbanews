@@ -41,6 +41,9 @@ class GrimbaRegionScope implements Scope
         }
 
         $region = $this->resolveRegion($request);
+        if ($region === null) {
+            return;
+        }
 
         // International — NEGATIVE filter. Match posts whose source has
         // a country NOT in any of the three named regions, OR whose
@@ -91,8 +94,12 @@ class GrimbaRegionScope implements Scope
         return false;
     }
 
-    private function resolveRegion($request): string
+    private function resolveRegion($request): ?string
     {
+        if (! $request->hasCookie(self::COOKIE_NAME)) {
+            return null;
+        }
+
         $raw = (string) $request->cookie(self::COOKIE_NAME, 'international');
         return Regions::migrate($raw);
     }
