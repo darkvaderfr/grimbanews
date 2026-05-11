@@ -73,6 +73,32 @@ class DedupePostsCommandTest extends TestCase
         $this->assertDatabaseHas('posts', ['id' => $secondId]);
     }
 
+    public function test_same_title_same_normalized_url_is_actionable_without_title_group_flag(): void
+    {
+        $suffix = Str::lower(Str::random(8));
+        $sourceId = $this->source('Dedupe Same Url Source ' . $suffix);
+        $feedId = $this->feed($sourceId, 'https://example.test/dedupe-same-url-' . $suffix . '.xml');
+
+        $keepId = $this->createPost('Dedupe same url title ' . $suffix, $sourceId, now()->subHours(2));
+        $dropId = $this->createPost('Dedupe same url title ' . $suffix, $sourceId, now()->subHour());
+        $this->ledger($feedId, $keepId, 'same-url-a-' . $suffix, 'https://example.test/story-' . $suffix . '?utm_source=rss', 'stale-hash-a-' . $suffix);
+        $this->ledger($feedId, $dropId, 'same-url-b-' . $suffix, 'https://example.test/story-' . $suffix . '#rss-copy', 'stale-hash-b-' . $suffix);
+
+        $this->artisan('grimba:dedupe-posts', [
+            '--apply' => true,
+            '--source-id' => $sourceId,
+            '--limit' => 20,
+        ])
+            ->expectsOutputToContain('1 same-url title')
+            ->expectsOutputToContain('Deleted 1 duplicate post')
+            ->doesntExpectOutputToContain('Title-only groups are skipped')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('posts', ['id' => $keepId]);
+        $this->assertDatabaseMissing('posts', ['id' => $dropId]);
+        $this->assertSame(2, DB::table('rss_feed_items')->whereIn('guid', ['same-url-a-' . $suffix, 'same-url-b-' . $suffix])->where('post_id', $keepId)->count());
+    }
+
     private function source(string $name): int
     {
         return (int) DB::table('news_sources')->insertGetId([
