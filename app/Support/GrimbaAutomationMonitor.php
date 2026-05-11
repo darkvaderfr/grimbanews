@@ -138,10 +138,11 @@ class GrimbaAutomationMonitor
                 $startedAt = $latest?->started_at ? Carbon::parse($latest->started_at) : null;
                 $lastFinished = $latest?->finished_at ? Carbon::parse($latest->finished_at) : null;
                 $lastSuccessAt = $success?->finished_at ? Carbon::parse($success->finished_at) : null;
+                $lastObservedAt = $lastSuccessAt ?: ($lastFinished ?: $startedAt);
                 $expectedMinutes = (int) $job['expected_minutes'];
                 $staleAfterMinutes = max($expectedMinutes * 2, $expectedMinutes + 15);
                 $staleCutoff = now()->subMinutes($staleAfterMinutes);
-                $isStale = ! $lastSuccessAt || $lastSuccessAt->lt($staleCutoff);
+                $isStale = ! $lastObservedAt || $lastObservedAt->lt($staleCutoff);
                 $isRunning = $latest?->status === 'running';
                 $isStuck = $isRunning && $startedAt && $startedAt->lt($staleCutoff);
                 $isFailed = $latest?->status === 'failed';
@@ -157,6 +158,7 @@ class GrimbaAutomationMonitor
                     'started_at' => $startedAt,
                     'finished_at' => $lastFinished,
                     'last_success_at' => $lastSuccessAt,
+                    'last_observed_at' => $lastObservedAt,
                     'duration_ms' => $latest?->duration_ms,
                     'error_message' => $latest?->error_message,
                     'is_running' => $isRunning,

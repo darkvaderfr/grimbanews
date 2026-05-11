@@ -73,4 +73,27 @@ class AutomationScheduleTest extends TestCase
 
         $this->assertSame(2, DB::table('grimba_automation_runs')->count());
     }
+
+    public function test_monitor_treats_recent_background_start_as_observed_not_missed(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+        DB::table('grimba_automation_runs')->delete();
+
+        DB::table('grimba_automation_runs')->insert([
+            'job_key' => 'rss_ingest',
+            'command' => 'grimba:poll-feeds',
+            'status' => 'running',
+            'started_at' => now()->subMinutes(5),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $status = GrimbaAutomationMonitor::status(['rss_ingest'])->first();
+
+        $this->assertSame('running', $status->status);
+        $this->assertNull($status->last_success_at);
+        $this->assertNotNull($status->last_observed_at);
+        $this->assertFalse($status->is_stale);
+        $this->assertFalse($status->is_failed);
+    }
 }

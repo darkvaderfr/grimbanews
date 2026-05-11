@@ -175,7 +175,11 @@
                             <span>{{ $job->label }}</span>
                             <strong>{{ $job->status === 'never' ? 'Never run' : ucfirst($job->status) }}</strong>
                             <small>
-                                Succès {{ $job->last_success_at ? $job->last_success_at->locale('fr')->diffForHumans() : 'jamais' }}
+                                @if($job->last_success_at)
+                                    Succès {{ $job->last_success_at->locale('fr')->diffForHumans() }}
+                                @else
+                                    Observé {{ $job->last_observed_at ? $job->last_observed_at->locale('fr')->diffForHumans() : 'jamais' }}
+                                @endif
                                 · toutes les ~{{ $job->expected_minutes }}m
                                 @if($job->is_stuck)
                                     · exécution trop longue

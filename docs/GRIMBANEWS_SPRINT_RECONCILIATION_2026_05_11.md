@@ -57,7 +57,8 @@ Acceptance evidence:
 - `grimba:health --fail-on-risk` fails when critical freshness jobs have no recent successful scheduler run.
 - Admin cockpit uses the same scheduler status logic as the health command.
 - Focused tests prove stale freshness automation is release-blocking.
-- `php artisan test` passed with 150 tests and 2220 assertions.
+- Background scheduled jobs with a recent start are treated as observed rather than missed, while genuinely stale starts still fail.
+- `php artisan test` passed with 151 tests and 2226 assertions.
 
 ## Additional Regressions Closed During Verification
 

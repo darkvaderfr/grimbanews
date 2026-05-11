@@ -194,16 +194,19 @@ class GrimbaHealth extends Command
 
             foreach ($automationStatus as $job) {
                 $glyph = $job->is_failed || $job->is_stale ? '⚠' : '✓';
-                $lastSuccess = $job->last_success_at
-                    ? $job->last_success_at->diffForHumans()
+                $lastCheckpoint = $job->last_success_at ?: $job->last_observed_at;
+                $lastCheckpointLabel = $lastCheckpoint
+                    ? $lastCheckpoint->diffForHumans()
                     : 'never';
+                $checkpointKind = $job->last_success_at ? 'last success' : 'last observed';
 
                 $this->line(sprintf(
-                    '   %s %-22s %-8s last success %s',
+                    '   %s %-22s %-8s %s %s',
                     $glyph,
                     $job->label,
                     $job->status,
-                    $lastSuccess
+                    $checkpointKind,
+                    $lastCheckpointLabel
                 ));
 
                 if ($job->is_failed || $job->is_stale) {
@@ -214,7 +217,7 @@ class GrimbaHealth extends Command
                     }
 
                     if ($job->is_stale) {
-                        $problems[] = 'last success ' . $lastSuccess;
+                        $problems[] = $checkpointKind . ' ' . $lastCheckpointLabel;
                     }
 
                     $riskWarnings[] = sprintf(
