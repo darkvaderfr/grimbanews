@@ -45,7 +45,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $language  = (string) setting('grimba_newsapi_language', 'fr');
             $countries = (string) setting('grimba_newsapi_countries', 'fr,us,gb,ca');
             $categories = (string) setting('grimba_newsapi_categories', 'business,entertainment,general,health,science,sports,technology');
-            $active    = (bool) setting('grimba_newsapi_active', true);
+            $active    = (bool) setting('grimba_newsapi_active', $fetcher->isConfigured());
             $window    = (int) setting('grimba_newsapi_everything_window_hours', 48);
             $dailyBudget = $fetcher->dailyRequestBudget();
             $maxCallsPerRun = $fetcher->maxCallsPerRun();

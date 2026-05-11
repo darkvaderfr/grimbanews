@@ -11,6 +11,26 @@ use Tests\TestCase;
 
 class NewsApiCategorySweepTest extends TestCase
 {
+    public function test_newsapi_command_fails_when_key_is_missing(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        $this->app->bind(GrimbaNewsApiFetcher::class, fn () => new class extends GrimbaNewsApiFetcher {
+            public function __construct()
+            {
+            }
+
+            public function isConfigured(): bool
+            {
+                return false;
+            }
+        });
+
+        $this->artisan('grimba:fetch-newsapi')
+            ->expectsOutputToContain('NewsAPI key not set')
+            ->assertFailed();
+    }
+
     public function test_newsapi_fetcher_sweeps_configured_categories_per_country(): void
     {
         $this->artisan('migrate', ['--force' => true])->assertExitCode(0);

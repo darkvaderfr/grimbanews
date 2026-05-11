@@ -123,14 +123,18 @@ grimba_schedule_command('nobuai_stale', 'grimba:nobuai-summaries --stale --limit
 
 // GrimbaNews — NewsAPI category sweeps (S128/S257). Runs five times
 // per day and, on each sweep, fetches every configured NewsAPI
-// category for every configured country. Skips silently when the key
-// isn't set; gated on the active toggle in /admin/grimba/newsapi.
+// category for every configured country. It only runs when NewsAPI is
+// explicitly active or a key exists; active-without-key fails loudly
+// through grimba:fetch-newsapi and grimba:health.
 grimba_schedule_command('newsapi_fetch', 'grimba:fetch-newsapi')
     ->cron('15 6,10,14,18,22 * * *')
     ->onOneServer()
     ->withoutOverlapping(20)
     ->runInBackground()
-    ->when(fn () => (bool) setting('grimba_newsapi_active', true));
+    ->when(fn () => (bool) setting(
+        'grimba_newsapi_active',
+        trim((string) setting('grimba_newsapi_key', env('NEWSAPI_KEY', ''))) !== ''
+    ));
 
 // GrimbaNews — weekly image-backfill sweep (S94). Catches two cases
 // the live poller misses:

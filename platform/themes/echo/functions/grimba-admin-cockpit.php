@@ -149,8 +149,8 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ? DB::table('rss_feed_items')->where('seen_at', '>=', now()->subDay())->count()
                 : 0;
 
-            $newsApiActive = (bool) setting('grimba_newsapi_active', true);
             $newsApiConfigured = trim((string) setting('grimba_newsapi_key', env('NEWSAPI_KEY', ''))) !== '';
+            $newsApiActive = (bool) setting('grimba_newsapi_active', $newsApiConfigured);
             $newsApiItems24 = Schema::hasTable('newsapi_items')
                 ? DB::table('newsapi_items')->where('fetched_at', '>=', now()->subDay())->count()
                 : 0;

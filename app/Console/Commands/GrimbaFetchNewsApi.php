@@ -16,7 +16,8 @@ class GrimbaFetchNewsApi extends Command
     {
         if (! $fetcher->isConfigured()) {
             $this->warn('NewsAPI key not set. Configure NEWSAPI_KEY in .env or paste it at /admin/grimba/newsapi.');
-            return self::SUCCESS;
+
+            return self::FAILURE;
         }
 
         $this->info('Fetching GrimbaNews — NewsAPI…');

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\GrimbaNewsApiFetcher;
 use App\Support\GrimbaAutomationMonitor;
 use App\Support\GrimbaPostRecency;
 use App\Support\GrimbaRssFeedHealth;
@@ -32,7 +33,7 @@ class GrimbaHealth extends Command
         {--min-published-24h=12 : minimum published posts required in the last 24h when failing on risk}';
     protected $description = 'One-page health summary of the GrimbaNews ingest + editorial pipeline (S153).';
 
-    public function handle(): int
+    public function handle(GrimbaNewsApiFetcher $newsApiFetcher): int
     {
         $failOnRisk = (bool) $this->option('fail-on-risk');
         $minFreeMb = max(0, (int) $this->option('min-free-mb'));
@@ -179,8 +180,19 @@ class GrimbaHealth extends Command
         $this->line(sprintf('   NewsAPI fetch : %d items', $api24));
         $this->line(sprintf('   Combined      : %d items', $rss24 + $api24));
 
+        $newsApiConfigured = $newsApiFetcher->isConfigured();
+        $newsApiActive = (bool) setting('grimba_newsapi_active', $newsApiConfigured);
+        $this->line(sprintf(
+            '   NewsAPI state : %s / %s',
+            $newsApiActive ? 'active' : 'inactive',
+            $newsApiConfigured ? 'configured' : 'missing key'
+        ));
+
         if (($rss24 + $api24) === 0) {
             $riskWarnings[] = 'no RSS or NewsAPI intake in the last 24h';
+        }
+        if ($newsApiActive && ! $newsApiConfigured) {
+            $riskWarnings[] = 'NewsAPI is active but no key is configured';
         }
 
         // 9. Scheduler freshness
