@@ -150,7 +150,7 @@
                 <div class="grimba-ops-tile {{ $duplicateGroups > 0 ? 'is-warn' : '' }}">
                     <span>Duplicate groups</span>
                     <strong>{{ number_format($duplicateGroups) }}</strong>
-                    <small>{{ $duplicateGroups > 0 ? 'lancer grimba:dedupe-posts --apply' : 'aucun groupe détecté' }}</small>
+                    <small>{{ $duplicateGroups > 0 ? 'review: grimba:dedupe-posts --review-title-groups' : 'aucun groupe détecté' }}</small>
                 </div>
                 <div class="grimba-ops-tile {{ $ingestGuardrailStats['blocked'] > 0 ? 'is-warn' : '' }}">
                     <span>Draft blockers</span>

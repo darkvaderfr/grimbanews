@@ -173,7 +173,7 @@ class GrimbaHealth extends Command
                 $this->line(sprintf('   ⚠ %d duplicate URL group(s) — run grimba:dedupe-posts --apply', $duppedUrls));
             }
             if ($duppedNames > 0) {
-                $this->line(sprintf('   ⚠ %d title-only group(s) need review before --include-title-groups', $duppedNames));
+                $this->line(sprintf('   ⚠ %d title-only group(s) need grimba:dedupe-posts --review-title-groups before --include-title-groups', $duppedNames));
             }
         }
 

@@ -68,10 +68,10 @@ All contributors should also follow `memory.md`, `docs/GRIMBANEWS_TANDEM_WORK_PR
 
 The formal 1000-sprint ledger was behind the production-hardening work that has shipped since the first discovery wave. The evidence ledger below now records both the original inventory sprints and the later atomic outcomes that can be tied to concrete commits, tests, or smoke results.
 
-Current accounting after reconciliation and the 2026-05-11 freshness/disk/ingest-to-public sprints:
+Current accounting after reconciliation and the 2026-05-11 freshness/disk/ingest-to-public/dedupe-review sprints:
 
-- Formal evidenced master sprints: 22 / 1000 = 2.2%.
-- Practical production-readiness estimate: about 32-34%, because core ingestion, publishing, public UX, admin cockpit, production URL dedupe, disk alerting, NewsAPI config guarding, deploy smoke paths, and ingest-to-public publication health now exist, while full visual QA, title-only duplicate review, restore drill, security, performance, monetization, and business launch gates still need closure.
+- Formal evidenced master sprints: 23 / 1000 = 2.3%.
+- Practical production-readiness estimate: about 33-35%, because core ingestion, publishing, public UX, admin cockpit, production URL dedupe, title-only dedupe review tooling, disk alerting, NewsAPI config guarding, deploy smoke paths, and ingest-to-public publication health now exist, while full visual QA, title-only duplicate editorial decisions, restore drill, security, performance, monetization, and business launch gates still need closure.
 - The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
 - The original "no production deployment" rule is retained as a release-gate rule. Production hotfixes and hardening work already performed must be reconciled here with evidence, risks, and follow-up gates.
 
@@ -101,6 +101,7 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S181 | RSS-to-published smoke guard: `docs/GRIMBANEWS_INGEST_TO_PUBLIC_FRESHNESS_2026_05_11.md`, `app/Support/GrimbaPublicationPipeline.php`, `tests/Feature/DailyPublishFreshnessTest.php` | complete |
 | S113 | NewsAPI quota/config guard: `docs/GRIMBANEWS_NEWSAPI_CONFIG_GUARD_2026_05_11.md`, missing key now fails instead of silent success | complete |
 | S203 | Source-aware duplicate policy: `fe31be0`, `docs/GRIMBANEWS_PROD_DEDUPE_APPLY_2026_05_11.md`, canonical URL dedupe safer than title-only apply | complete |
+| S209 | Dedupe audit report: `docs/GRIMBANEWS_TITLE_ONLY_DEDUPE_REVIEW_2026_05_11.md`, `grimba:dedupe-posts --review-title-groups`, `tests/Feature/DedupePostsCommandTest.php` | complete |
 | S210 | Dedupe regression tests: `fe31be0`, `tests/Feature/DedupePostsCommandTest.php`, post-apply dry-run shows 0 URL duplicate groups | complete |
 | S485 | Edition dark mode: `11238a9`, `tests/e2e/grimbanews-mobile-shell-contrast.cjs` | complete |
 | S612 | Cockpit automation board: `06422e0`, `resources/views/grimba-admin/cockpit.blade.php` | complete |

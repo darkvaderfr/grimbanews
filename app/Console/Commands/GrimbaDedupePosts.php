@@ -6,6 +6,8 @@ use App\Services\GrimbaUrlCanonicalizer;
 use Botble\Blog\Models\Post;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 /*
  * S151b — merge duplicate posts.
@@ -32,6 +34,7 @@ class GrimbaDedupePosts extends Command
         {--apply : actually delete duplicates (otherwise dry-run)}
         {--limit=2000 : cap groups processed in one run}
         {--source-id= : restrict duplicate scan to one news_sources.id}
+        {--review-title-groups : print a non-destructive review report for same-title/same-source groups}
         {--include-title-groups : also process same-title/same-source groups without matching canonical URLs}';
 
     protected $description = 'Merge duplicate posts that the RSS dedup ledger missed (S151b).';
@@ -41,6 +44,7 @@ class GrimbaDedupePosts extends Command
         $apply = (bool) $this->option('apply');
         $limit = (int) $this->option('limit');
         $sourceId = $this->option('source-id') !== null ? (int) $this->option('source-id') : null;
+        $reviewTitleGroups = (bool) $this->option('review-title-groups');
         $includeTitleGroups = (bool) $this->option('include-title-groups');
 
         // Build duplicate groups: source_id + canonical_url_hash → post_ids.
@@ -67,7 +71,14 @@ class GrimbaDedupePosts extends Command
         // posts). Catch those by name+source_id grouping.
         $byName = DB::table('posts')
             ->when($sourceId, fn ($query) => $query->where('source_id', $sourceId))
-            ->select('name', 'source_id', DB::raw('GROUP_CONCAT(id ORDER BY id ASC) as post_ids'), DB::raw('COUNT(*) as c'))
+            ->select(
+                'name',
+                'source_id',
+                DB::raw('GROUP_CONCAT(id ORDER BY id ASC) as post_ids'),
+                DB::raw('MIN(id) as first_post_id'),
+                DB::raw('MAX(id) as latest_post_id'),
+                DB::raw('COUNT(*) as c')
+            )
             ->groupBy('name', 'source_id')
             ->having('c', '>', 1)
             ->orderByDesc('c')
@@ -83,8 +94,14 @@ class GrimbaDedupePosts extends Command
         if ($sourceId) {
             $this->line(sprintf('Scope: source_id=%d', $sourceId));
         }
+        if ($reviewTitleGroups) {
+            $this->renderTitleGroupReview($byName);
+
+            return self::SUCCESS;
+        }
         if ($byName->isNotEmpty() && ! $includeTitleGroups) {
-            $this->warn('Title-only groups are skipped. Pass --include-title-groups only after reviewing canonical URLs.');
+            $this->warn('Title-only groups are skipped.');
+            $this->line('Review first: grimba:dedupe-posts --review-title-groups');
         }
 
         $totalDeleted = 0;
@@ -149,5 +166,110 @@ class GrimbaDedupePosts extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    private function renderTitleGroupReview(\Illuminate\Support\Collection $groups): void
+    {
+        $this->newLine();
+        $this->info(sprintf('Title-only duplicate review: %d group(s) [DRY REVIEW]', $groups->count()));
+
+        if ($groups->isEmpty()) {
+            $this->line('No title-only duplicate groups found.');
+
+            return;
+        }
+
+        $rows = $groups->map(function (object $group): array {
+            $ids = DB::table('posts')
+                ->where('name', $group->name)
+                ->when(
+                    $group->source_id,
+                    fn ($query) => $query->where('source_id', $group->source_id),
+                    fn ($query) => $query->whereNull('source_id')
+                )
+                ->orderBy('id')
+                ->pluck('id')
+                ->map(fn ($id): int => (int) $id)
+                ->all();
+            foreach ([(int) ($group->first_post_id ?? 0), (int) ($group->latest_post_id ?? 0)] as $fallbackId) {
+                if ($fallbackId > 0 && ! in_array($fallbackId, $ids, true)) {
+                    $ids[] = $fallbackId;
+                }
+            }
+            sort($ids);
+            $sourceName = $group->source_id
+                ? (string) (DB::table('news_sources')->where('id', $group->source_id)->value('name') ?: 'source #' . $group->source_id)
+                : '(no source)';
+
+            return [
+                'source_id' => $group->source_id ?: '-',
+                'source' => Str::limit($sourceName, 28),
+                'count' => (int) $group->c,
+                'title' => Str::limit((string) $group->name, 54),
+                'post_ids' => implode(',', $ids),
+                'sample_urls' => Str::limit($this->sampleUrlsForPosts($ids)->implode(' | '), 120),
+            ];
+        })->all();
+
+        $this->table(['source_id', 'source', 'count', 'title', 'post_ids', 'sample_urls'], $rows);
+        foreach ($groups as $group) {
+            $reviewIds = array_values(array_unique(array_filter([
+                (int) ($group->first_post_id ?? 0),
+                (int) ($group->latest_post_id ?? 0),
+            ])));
+            if (! empty($group->first_post_id)) {
+                $this->line('review_post_id ' . (int) $group->first_post_id);
+            }
+            if (! empty($group->latest_post_id) && (int) $group->latest_post_id !== (int) $group->first_post_id) {
+                $this->line('review_post_id ' . (int) $group->latest_post_id);
+            }
+            foreach ($this->sampleUrlsForPosts($reviewIds) as $url) {
+                $this->line('review_url ' . $url);
+            }
+        }
+        foreach ($rows as $row) {
+            $this->line(sprintf(
+                'review_group source_id=%s count=%d post_ids=%s sample_urls=%s',
+                $row['source_id'],
+                $row['count'],
+                $row['post_ids'],
+                $row['sample_urls'] ?: '-'
+            ));
+        }
+        $this->warn('Review only. No posts were deleted. Use --include-title-groups only after confirming the URLs are true duplicates.');
+    }
+
+    /**
+     * @param array<int, int> $postIds
+     * @return \Illuminate\Support\Collection<int, string>
+     */
+    private function sampleUrlsForPosts(array $postIds): \Illuminate\Support\Collection
+    {
+        $urls = collect();
+
+        if (Schema::hasTable('rss_feed_items')) {
+            $urls = $urls->merge(
+                DB::table('rss_feed_items')
+                    ->whereIn('post_id', $postIds)
+                    ->whereNotNull('link')
+                    ->pluck('link')
+            );
+        }
+
+        if (Schema::hasTable('newsapi_items')) {
+            $urls = $urls->merge(
+                DB::table('newsapi_items')
+                    ->whereIn('post_id', $postIds)
+                    ->whereNotNull('article_url')
+                    ->pluck('article_url')
+            );
+        }
+
+        return $urls
+            ->map(fn ($url): string => (string) $url)
+            ->filter()
+            ->unique()
+            ->take(3)
+            ->values();
     }
 }

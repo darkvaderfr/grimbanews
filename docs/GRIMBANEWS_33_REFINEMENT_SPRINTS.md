@@ -11,8 +11,8 @@ Visible refinement progress:
 
 - Strict marked shipped rows: 13 / 33 = 39.4%.
 - Additional shipped or partially shipped work since this file was created: 22 Dedupe hardening, 26 Accessibility/contrast, 29 Observability, 30 Security/privacy, and 33 Production readiness closeout.
-- Operational estimate for this refinement lane after reconciliation: about 57-60%, with freshness, ingest-to-public publication health, dark/mobile readability, production URL dedupe, scheduler health, NewsAPI config guarding, deploy smoke, and disk alerting materially advanced.
-- Remaining release blockers: NewsAPI key configuration/live fetch, title-only duplicate review, deeper host headroom, restore drill, full visual QA, performance budgets, security/privacy audit, monetization/subscriber gates, and final rollback evidence.
+- Operational estimate for this refinement lane after reconciliation: about 58-61%, with freshness, ingest-to-public publication health, dark/mobile readability, production URL dedupe, title-only dedupe review tooling, scheduler health, NewsAPI config guarding, deploy smoke, and disk alerting materially advanced.
+- Remaining release blockers: NewsAPI key configuration/live fetch, title-only duplicate editorial decisions, deeper host headroom, restore drill, full visual QA, performance budgets, security/privacy audit, monetization/subscriber gates, and final rollback evidence.
 
 ## Sprint List
 

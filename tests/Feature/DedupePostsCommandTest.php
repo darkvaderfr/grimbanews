@@ -32,6 +32,7 @@ class DedupePostsCommandTest extends TestCase
             '--limit' => 20,
         ])
             ->expectsOutputToContain('Title-only groups are skipped')
+            ->expectsOutputToContain('grimba:dedupe-posts --review-title-groups')
             ->expectsOutputToContain('Deleted 1 duplicate post')
             ->assertSuccessful();
 
@@ -41,6 +42,35 @@ class DedupePostsCommandTest extends TestCase
 
         $this->assertDatabaseHas('posts', ['id' => $titleOnlyOne]);
         $this->assertDatabaseHas('posts', ['id' => $titleOnlyTwo]);
+    }
+
+    public function test_title_only_review_mode_lists_urls_without_deleting_posts(): void
+    {
+        $suffix = Str::lower(Str::random(8));
+        $sourceId = $this->source('Dedupe Review Source ' . $suffix);
+        $feedId = $this->feed($sourceId, 'https://example.test/dedupe-review-' . $suffix . '.xml');
+
+        $firstId = $this->createPost('Dedupe review title ' . $suffix, $sourceId, now()->subHours(2));
+        $secondId = $this->createPost('Dedupe review title ' . $suffix, $sourceId, now()->subHour());
+        $this->ledger($feedId, $firstId, 'review-a-' . $suffix, 'https://example.test/review-one-' . $suffix, 'review-hash-a-' . $suffix);
+        $this->ledger($feedId, $secondId, 'review-b-' . $suffix, 'https://example.test/review-two-' . $suffix, 'review-hash-b-' . $suffix);
+
+        $this->artisan('grimba:dedupe-posts', [
+            '--review-title-groups' => true,
+            '--source-id' => $sourceId,
+            '--limit' => 20,
+        ])
+            ->expectsOutputToContain('Title-only duplicate review: 1 group(s) [DRY REVIEW]')
+            ->expectsOutputToContain('Dedupe review title ' . $suffix)
+            ->expectsOutputToContain((string) $firstId)
+            ->expectsOutputToContain((string) $secondId)
+            ->expectsOutputToContain('https://example.test/review-one-' . $suffix)
+            ->expectsOutputToContain('https://example.test/review-two-' . $suffix)
+            ->expectsOutputToContain('No posts were deleted')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('posts', ['id' => $firstId]);
+        $this->assertDatabaseHas('posts', ['id' => $secondId]);
     }
 
     private function source(string $name): int
