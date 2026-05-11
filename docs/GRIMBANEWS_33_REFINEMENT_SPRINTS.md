@@ -11,8 +11,8 @@ Visible refinement progress:
 
 - Strict marked shipped rows: 13 / 33 = 39.4%.
 - Additional shipped or partially shipped work since this file was created: 22 Dedupe hardening, 26 Accessibility/contrast, 29 Observability, 30 Security/privacy, and 33 Production readiness closeout.
-- Operational estimate for this refinement lane after reconciliation: about 52-56%, with freshness, dark/mobile readability, dedupe safety, scheduler health, deploy smoke, and disk alerting materially advanced.
-- Remaining release blockers: production dedupe apply, deeper host headroom, restore drill, full visual QA, performance budgets, security/privacy audit, monetization/subscriber gates, and final rollback evidence.
+- Operational estimate for this refinement lane after reconciliation: about 54-58%, with freshness, dark/mobile readability, production URL dedupe, scheduler health, deploy smoke, and disk alerting materially advanced.
+- Remaining release blockers: title-only duplicate review, deeper host headroom, restore drill, full visual QA, performance budgets, security/privacy audit, monetization/subscriber gates, and final rollback evidence.
 
 ## Sprint List
 
@@ -37,7 +37,7 @@ Visible refinement progress:
 19. Newsletter product: bias-mix digest, blindspot digest, source-follow digest, and unsubscribe/audit flows.
 20. Blindspots polish: improve one-sided story detection, public explanation copy, and edge-case empty states.
 21. Clustering quality: improve orphan matching, cluster split/merge admin tooling, and stale insight invalidation.
-22. Dedupe hardening: catch copied wire stories, duplicate RSS entries, slug collisions, and image duplicates.
+22. [Shipped] Dedupe hardening: source+URL duplicate cleanup applied in production; title-only duplicate groups remain editorial review only.
 23. Image pipeline: improve og:image extraction, placeholder quality, cache strategy, and publisher hotlink safety.
 24. Local/Canada edition: source coverage, native-language ranking, topic mix, and empty-state protection for Canada.
 25. Search UX: fast facets, source/owner/factuality filters, translated/native indicators, and no legacy blog language.

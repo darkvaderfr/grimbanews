@@ -71,7 +71,7 @@ The formal 1000-sprint ledger was behind the production-hardening work that has 
 Current accounting after reconciliation and the 2026-05-11 freshness/disk sprints:
 
 - Formal evidenced master sprints: 20 / 1000 = 2.0%.
-- Practical production-readiness estimate: about 28-30%, because core ingestion, publishing, public UX, admin cockpit, and deploy smoke paths exist, while full visual QA, dedupe cleanup, restore drill, security, performance, monetization, and business launch gates still need closure.
+- Practical production-readiness estimate: about 30-32%, because core ingestion, publishing, public UX, admin cockpit, production URL dedupe, disk alerting, and deploy smoke paths exist, while full visual QA, title-only duplicate review, restore drill, security, performance, monetization, and business launch gates still need closure.
 - The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
 - The original "no production deployment" rule is retained as a release-gate rule. Production hotfixes and hardening work already performed must be reconciled here with evidence, risks, and follow-up gates.
 
@@ -98,8 +98,8 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S166 | Missed-run alert: `app/Support/GrimbaAutomationMonitor.php`, `app/Console/Commands/GrimbaHealth.php`, `tests/Feature/DailyPublishFreshnessTest.php` | complete |
 | S171 | Article freshness SLA: `6586460`, `b62eaf8`, `grimba:ensure-daily-publish`, `grimba:health --fail-on-risk` | complete |
 | S180 | Daily automation report: `b62eaf8`, `app/Console/Commands/GrimbaHealth.php`, production health smoke | complete |
-| S203 | Source-aware duplicate policy: `fe31be0`, canonical URL dedupe safer than title-only apply | complete |
-| S210 | Dedupe regression tests: `fe31be0`, `tests/Feature/DedupePostsCommandTest.php` | complete |
+| S203 | Source-aware duplicate policy: `fe31be0`, `docs/GRIMBANEWS_PROD_DEDUPE_APPLY_2026_05_11.md`, canonical URL dedupe safer than title-only apply | complete |
+| S210 | Dedupe regression tests: `fe31be0`, `tests/Feature/DedupePostsCommandTest.php`, post-apply dry-run shows 0 URL duplicate groups | complete |
 | S485 | Edition dark mode: `11238a9`, `tests/e2e/grimbanews-mobile-shell-contrast.cjs` | complete |
 | S612 | Cockpit automation board: `06422e0`, `resources/views/grimba-admin/cockpit.blade.php` | complete |
 | S973 | Log retention policy: `docs/GRIMBANEWS_PROD_DISK_HEADROOM_2026_05_11.md`, `grimba:health --fail-on-risk` 2048 MB floor | complete |
