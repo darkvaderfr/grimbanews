@@ -22,6 +22,9 @@ class RssFeedsSeeder extends Seeder
 {
     public function run(): void
     {
+        $allAfricaQuarantineNote = '2026-05-10: quarantined after repeated production cURL connection failures. '
+            . 'Official URL retained inactive until a working replacement is verified.';
+
         // feedsByName: source_name => [url, is_active, notes] or
         // source_name => [[url, is_active, notes], ...]. Multiple feeds per
         // publisher are expected; rss_feeds is unique by source_id + url.
@@ -42,14 +45,14 @@ class RssFeedsSeeder extends Seeder
             'The Guardian'      => ['url' => 'https://www.theguardian.com/world/rss',                            'active' => true,  'notes' => null],
             'Reuters'           => ['url' => 'https://feeds.reuters.com/reuters/topNews',                        'active' => false, 'notes' => '2026-04-24: feeds.reuters.com DNS gone after their paywall migration. No replacement without API access.'],
             'All Africa'        => [
-                ['url' => 'https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf',        'active' => true, 'notes' => 'Pan-African English wire service.'],
-                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/latest/headlines.rdf',     'active' => true, 'notes' => 'French latest headlines feed.'],
-                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf', 'active' => true, 'notes' => 'French West Africa headlines.'],
-                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/centralafrica/headlines.rdf','active' => true,'notes' => 'French Central Africa headlines.'],
-                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/business/headlines.rdf',   'active' => true, 'notes' => 'French business headlines.'],
-                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/health/headlines.rdf',     'active' => true, 'notes' => 'French health headlines.'],
-                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/conflict/headlines.rdf',   'active' => true, 'notes' => 'French conflict and security headlines.'],
-                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/environment/headlines.rdf','active' => true, 'notes' => 'French environment headlines.'],
+                ['url' => 'https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf',        'active' => false, 'notes' => $allAfricaQuarantineNote],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/latest/headlines.rdf',     'active' => false, 'notes' => $allAfricaQuarantineNote],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/westafrica/headlines.rdf', 'active' => false, 'notes' => $allAfricaQuarantineNote],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/centralafrica/headlines.rdf','active' => false,'notes' => $allAfricaQuarantineNote],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/business/headlines.rdf',   'active' => false, 'notes' => $allAfricaQuarantineNote],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/health/headlines.rdf',     'active' => false, 'notes' => $allAfricaQuarantineNote],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/conflict/headlines.rdf',   'active' => false, 'notes' => $allAfricaQuarantineNote],
+                ['url' => 'https://fr.allafrica.com/tools/headlines/rdf/environment/headlines.rdf','active' => false, 'notes' => $allAfricaQuarantineNote],
             ],
             'Global News'       => [
                 ['url' => 'https://globalnews.ca/canada/feed/',      'active' => true, 'notes' => 'Official Canada section feed.'],
