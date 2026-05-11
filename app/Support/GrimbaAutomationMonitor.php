@@ -48,7 +48,7 @@ class GrimbaAutomationMonitor
             ],
             'ops_health' => [
                 'label' => 'Ops health guard',
-                'command' => 'grimba:health --fail-on-risk',
+                'command' => 'grimba:health --fail-on-risk --min-full-content-coverage=70',
                 'expected_minutes' => 60,
             ],
             'full_articles' => [

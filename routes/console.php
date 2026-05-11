@@ -91,7 +91,7 @@ grimba_schedule_command('freshness_watchdog', 'grimba:ensure-daily-publish --min
 // GrimbaNews — ops health guard. This fails into the automation
 // monitor when intake, public freshness, or disk headroom drops below
 // the operating floor, before readers have to report stale news.
-grimba_schedule_command('ops_health', 'grimba:health --fail-on-risk')
+grimba_schedule_command('ops_health', 'grimba:health --fail-on-risk --min-full-content-coverage=70')
     ->hourlyAt(27)
     ->onOneServer()
     ->withoutOverlapping(10);
