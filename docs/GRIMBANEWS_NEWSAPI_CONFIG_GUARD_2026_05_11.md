@@ -40,6 +40,14 @@ Full result:
 - 152 tests passed.
 - 2229 assertions.
 
+Production after deploy:
+
+- Home route: passed.
+- Feed route: passed.
+- `grimba:health --fail-on-risk`: passed.
+- Health reports `NewsAPI state : inactive / missing key`.
+- Manual `grimba:fetch-newsapi` reports the missing key and exits with code 1.
+
 ## Residual Risk
 
 - Production still needs a real NewsAPI key before NewsAPI can contribute fresh articles.
