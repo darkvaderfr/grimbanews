@@ -6,7 +6,7 @@
 
 The 1000-sprint ledger previously marked only S001-S006 complete, which made formal completion 0.6%. That was accurate for the written evidence ledger but undercounted real production-hardening work already shipped and deployed.
 
-After reconciliation and the current freshness/disk/ingest-to-public/dedupe-review/article-reader sprint, the master ledger has 25 evidenced completed sprints:
+After reconciliation and the 2026-05-12 public taxonomy and article-sanitization sprints, the master ledger has 27 evidenced completed sprints:
 
 - S001-S006 current-state inventories.
 - S102 and S109 RSS health/quarantine.
@@ -14,15 +14,17 @@ After reconciliation and the current freshness/disk/ingest-to-public/dedupe-revi
 - S181 ingest-to-public freshness guard.
 - S113 NewsAPI configuration guard.
 - S203, S209, and S210 safer dedupe policy, review reporting, and regression tests.
+- S481 public taxonomy clarity for public category chips, article pages, and internal review bucket suppression.
 - S485 public edition dark-mode readability.
 - S531 single-article readable body display for extracted and fallback article text.
+- S532 full article sanitization for reader bodies, comparison snippets, and Echo shortcode post teasers.
 - S543 article canonical URL normalization from legacy `/blog/{slug}` to `/article/{slug}`.
 - S612 cockpit automation board.
 - S973 production log-retention/disk floor.
 
-Formal master-ledger completion is now 25 / 1000 = 2.5%.
+Formal master-ledger completion is now 27 / 1000 = 2.7%.
 
-Practical production-readiness is about 36-38%. The product is live enough to require operational discipline, but release gates are not fully green.
+Practical production-readiness is about 37-39%. The product is live enough to require operational discipline, but release gates are not fully green.
 
 ## Shipped Evidence Crosswalk
 
@@ -35,8 +37,10 @@ Practical production-readiness is about 36-38%. The product is live enough to re
 | RSS health and feed quarantine | `d67588a`, `00caf83`, `app/Support/GrimbaRssFeedHealth.php`, `database/seeders/RssFeedsSeeder.php`, `tests/Feature/RssFeedsSeederTest.php` | S102, S109 |
 | NewsAPI configuration guard | `docs/GRIMBANEWS_NEWSAPI_CONFIG_GUARD_2026_05_11.md`, `app/Console/Commands/GrimbaFetchNewsApi.php`, `app/Console/Commands/GrimbaHealth.php` | S113 |
 | Public dark/mobile readability | `11238a9`, `5476a6f`, `59da49b`, `public/themes/echo/css/grimba-home.css`, `tests/e2e/grimbanews-mobile-shell-contrast.cjs` | S485 plus broader G4 risk reduction |
+| Public taxonomy clarity | `032ac5b`, `5ade5d6`, `app/Support/GrimbaEditorialCategories.php`, `platform/themes/echo/partials/category-badge.blade.php`, `platform/themes/echo/views/post.blade.php`, `tests/Feature/EditorialCategoriesTest.php` | S481 |
 | Article canonical URLs | `94ab234`, `AppServiceProvider::canonicalizeArticleUrls()`, `platform/themes/echo/routes/web.php`, `tests/Feature/StoryBreakdownTest.php`, production `/blog/...` 301 smoke | S543 |
 | Full article reader fallback | `82b197c`, `app/Support/GrimbaArticleText.php`, `platform/themes/echo/views/post.blade.php`, `tests/Feature/StoryBreakdownTest.php`, production full-content health 94% | S531 |
+| Full article sanitization | `d726356`, `app/Support/GrimbaArticleText.php`, `platform/themes/echo/partials/story-comparison.blade.php`, Echo shortcode post teaser partials, `tests/Unit/GrimbaArticleTextTest.php`, `tests/Feature/StoryBreakdownTest.php` | S532 |
 | Dedupe safety | `fe31be0`, `app/Console/Commands/GrimbaDedupePosts.php`, `tests/Feature/DedupePostsCommandTest.php` | S203, S210 |
 | Dedupe audit report | `docs/GRIMBANEWS_TITLE_ONLY_DEDUPE_REVIEW_2026_05_11.md`, `app/Console/Commands/GrimbaDedupePosts.php`, `tests/Feature/DedupePostsCommandTest.php` | S209 |
 | Security/header hardening | `1e5af1f`, `app/Http/Middleware/GrimbaSecurityHeaders.php`, `tests/Feature/SecurityHeadersTest.php`, `tests/e2e/grimbanews-csp-smoke.cjs` | G7 risk reduction; not yet enough to close a G7 sprint row |
@@ -86,6 +90,8 @@ Latest continuation sprints:
 
 - **S543 article canonical URL normalization** shipped in `94ab234`: public post URLs now canonicalize to `/article/{slug}`, legacy `/blog/{slug}` post URLs redirect 301, category `/blog/{category}` remains intact, article pages avoid dead sidebars and mobile overflow, and visual probes passed for desktop/mobile/dark mode.
 - **S531 full article reader fallback** shipped in `82b197c`: orphan article pages now render extracted full text and readable feed/description fallback in the same reader block used by story pages, suppress duplicate raw upstream-link snippets, and keep article-body width constrained. Production full-content health after the manual extractor run is 497/527 readable recent upstream articles (94%, floor 70%).
+- **S481 public taxonomy clarity** shipped in `032ac5b` and `5ade5d6`: article pages now list the full public category set, story/article cards keep public topic and edition chips, and internal review buckets such as `Trusted Source Credibility` are suppressed from public breadcrumbs, chips, JSON-LD, and story lists.
+- **S532 full article sanitization** shipped in `d726356`: encoded NewsAPI truncation markers are stripped, comparison-card snippets and Echo shortcode post teasers use the sanitized presenter, the full suite passed with 197 tests, production smoke passed, and live page grep returned `marker-clear`.
 
 ## Additional Regressions Closed During Verification
 

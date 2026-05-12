@@ -63,15 +63,15 @@ All contributors should also follow `memory.md`, `docs/GRIMBANEWS_TANDEM_WORK_PR
 
 ## Reconciliation Snapshot
 
-**Updated:** 2026-05-11  
+**Updated:** 2026-05-12
 **Reconciliation evidence:** `docs/GRIMBANEWS_SPRINT_RECONCILIATION_2026_05_11.md`
 
 The formal 1000-sprint ledger was behind the production-hardening work that has shipped since the first discovery wave. The evidence ledger below now records both the original inventory sprints and the later atomic outcomes that can be tied to concrete commits, tests, or smoke results.
 
-Current accounting after reconciliation and the 2026-05-12 article canonicalization/full-reader fallback sprints:
+Current accounting after reconciliation and the 2026-05-12 article canonicalization, full-reader fallback, public taxonomy, and snippet-sanitization sprints:
 
-- Formal evidenced master sprints: 25 / 1000 = 2.5%.
-- Practical production-readiness estimate: about 36-38%, because core ingestion, publishing, article URL canonicalization, full-article readability coverage, public UX, admin cockpit, production URL dedupe, title-only dedupe review tooling, disk alerting, NewsAPI config guarding, deploy smoke paths, and ingest-to-public publication health now exist, while full visual QA, title-only duplicate editorial decisions, restore drill, security, performance, monetization, and business launch gates still need closure.
+- Formal evidenced master sprints: 27 / 1000 = 2.7%.
+- Practical production-readiness estimate: about 37-39%, because core ingestion, publishing, article URL canonicalization, full-article readability coverage, public taxonomy cleanup, public snippet sanitization, admin cockpit, production URL dedupe, title-only dedupe review tooling, disk alerting, NewsAPI config guarding, deploy smoke paths, and ingest-to-public publication health now exist, while full visual QA, title-only duplicate editorial decisions, restore drill, security, performance, monetization, and business launch gates still need closure.
 - The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
 - The original "no production deployment" rule is retained as a release-gate rule. Production hotfixes and hardening work already performed must be reconciled here with evidence, risks, and follow-up gates.
 
@@ -103,8 +103,10 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S203 | Source-aware duplicate policy: `fe31be0`, `docs/GRIMBANEWS_PROD_DEDUPE_APPLY_2026_05_11.md`, canonical URL dedupe safer than title-only apply | complete |
 | S209 | Dedupe audit report: `docs/GRIMBANEWS_TITLE_ONLY_DEDUPE_REVIEW_2026_05_11.md`, `grimba:dedupe-posts --review-title-groups`, `tests/Feature/DedupePostsCommandTest.php` | complete |
 | S210 | Dedupe regression tests: `fe31be0`, `tests/Feature/DedupePostsCommandTest.php`, post-apply dry-run shows 0 URL duplicate groups | complete |
+| S481 | Public taxonomy clarity: `032ac5b`, `5ade5d6`, article pages and story lists show the full public category set while suppressing internal review buckets | complete |
 | S485 | Edition dark mode: `11238a9`, `tests/e2e/grimbanews-mobile-shell-contrast.cjs` | complete |
 | S531 | Full article extraction display: `82b197c`, orphan article pages render extracted text plus readable feed/description fallback in the reader block | complete |
+| S532 | Full article sanitization: `d726356`, encoded NewsAPI truncation markers are stripped from reader bodies, comparison snippets, and Echo shortcode post teasers | complete |
 | S543 | Story/article canonical URL: `94ab234`, post URLs canonicalize to `/article/{slug}` and legacy `/blog/{slug}` redirects preserve category routes | complete |
 | S612 | Cockpit automation board: `06422e0`, `resources/views/grimba-admin/cockpit.blade.php` | complete |
 | S973 | Log retention policy: `docs/GRIMBANEWS_PROD_DISK_HEADROOM_2026_05_11.md`, `grimba:health --fail-on-risk` 2048 MB floor | complete |
