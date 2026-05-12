@@ -23,6 +23,7 @@ This explained the `NewsAPI fetch : 0 items` line in production health. RSS was 
 - `grimba:fetch-newsapi` now exits with failure when no NewsAPI key is configured.
 - `grimba:health` reports NewsAPI state as active/inactive plus configured/missing key.
 - `grimba:health --fail-on-risk` flags active-without-key as an operating risk.
+- `grimba:newsapi-readiness` gives a direct pass/fail readiness check for key state, active state, planned sweep size, daily budget, latest run, and optional recent-success requirements.
 - Admin and scheduler defaults now treat NewsAPI as active by default only when a key exists.
 - If an operator explicitly enables NewsAPI without a key, the command and health guard fail loudly.
 
@@ -47,6 +48,7 @@ Production after deploy:
 - `grimba:health --fail-on-risk`: passed.
 - Health reports `NewsAPI state : inactive / missing key`.
 - Manual `grimba:fetch-newsapi` reports the missing key and exits with code 1.
+- `grimba:newsapi-readiness --allow-inactive` reports the missing-key blocker without failing.
 
 ## Residual Risk
 

@@ -12,7 +12,7 @@ S003 inventories custom Artisan commands and scheduled command entry points. Thi
 
 | Scope | Count |
 |---|---:|
-| Custom Grimba command classes | 23 |
+| Custom Grimba command classes | 24 |
 | Scheduled Grimba command entries | 19 |
 | Commands called from admin routes | 6 |
 | Commands with network/provider calls | 10 |
@@ -32,6 +32,7 @@ Command registration is handled by Laravel command discovery in this project lay
 | `grimba:nobuai-health` | `app/Console/Commands/GrimbaNobuAiHealth.php` | read/report unless `--live` | NobuAI wrapper and provider configuration health check. |
 | `grimba:poll-feeds` | `app/Console/Commands/GrimbaPollFeeds.php` | writes drafts | Poll RSS/Atom feeds, dedupe items, create draft posts, retro-cluster, flag unhealthy/stale feeds. |
 | `grimba:fetch-newsapi` | `app/Console/Commands/GrimbaFetchNewsApi.php` | writes drafts | Fetch NewsAPI top-headlines/everything articles and ingest drafts. |
+| `grimba:newsapi-readiness` | `app/Console/Commands/GrimbaNewsApiReadiness.php` | read/report | Report whether NewsAPI is configured, active, budgeted, and recently successful. |
 | `grimba:translate-pending` | `app/Console/Commands/GrimbaTranslatePending.php` | writes translations | Translate pending posts through configured provider chain. |
 | `grimba:nobuai-summaries` | `app/Console/Commands/GrimbaGenerateNobuAiSummaries.php` | writes summaries | Generate cluster-level NobuAI story summaries. |
 | `grimba:publish-trusted` | `app/Console/Commands/GrimbaPublishTrusted.php` | publishes drafts | Auto-publish trusted classified-source drafts. |
@@ -60,6 +61,7 @@ Command registration is handled by Laravel command discovery in this project lay
 | `grimba:nobuai-health` | `--live`, `--prompt=` |
 | `grimba:poll-feeds` | `--feed=` |
 | `grimba:fetch-newsapi` | none |
+| `grimba:newsapi-readiness` | `--recent-hours=`, `--allow-inactive` |
 | `grimba:translate-pending` | `--limit=`, `--to=`, `--force`, `--failed-only`, `--dry-run` |
 | `grimba:nobuai-summaries` | `--limit=`, `--cluster=`, `--force`, `--stale`, `--dry-run` |
 | `grimba:publish-trusted` | `--threshold=`, `--age-hours=`, `--limit=`, `--dry-run` |
