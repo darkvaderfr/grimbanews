@@ -26,6 +26,7 @@ Command registration is handled by Laravel command discovery in this project lay
 |---|---|---|---|
 | `grimba:health` | `app/Console/Commands/GrimbaHealth.php` | read/report | One-page ingest/editorial health summary. |
 | `grimba:verify-backups` | `app/Console/Commands/GrimbaVerifyBackups.php` | read/temp restore smoke | Opens SQLite backup artifacts and runs `PRAGMA quick_check`. |
+| `grimba:prune-img-proxy-cache` | `app/Console/Commands/GrimbaPruneImageProxyCache.php` | deletes expired cache files unless `--dry-run` | Prune old publisher/logo image proxy cache files and report footprint. |
 | `grimba:nobuai-health` | `app/Console/Commands/GrimbaNobuAiHealth.php` | read/report unless `--live` | NobuAI wrapper and provider configuration health check. |
 | `grimba:poll-feeds` | `app/Console/Commands/GrimbaPollFeeds.php` | writes drafts | Poll RSS/Atom feeds, dedupe items, create draft posts, retro-cluster, flag unhealthy/stale feeds. |
 | `grimba:fetch-newsapi` | `app/Console/Commands/GrimbaFetchNewsApi.php` | writes drafts | Fetch NewsAPI top-headlines/everything articles and ingest drafts. |
@@ -46,6 +47,7 @@ Command registration is handled by Laravel command discovery in this project lay
 |---|---|
 | `grimba:health` | `--fail-on-risk`, `--min-free-mb=`, `--min-published-24h=`, `--min-ingested-published-24h=`, `--min-full-content-coverage=`, `--full-content-retry-after-hours=`, `--backup-dir=` |
 | `grimba:verify-backups` | `--backup-dir=`, `--min=`, `--all` |
+| `grimba:prune-img-proxy-cache` | `--days=`, `--cache-dir=`, `--dry-run` |
 | `grimba:nobuai-health` | `--live`, `--prompt=` |
 | `grimba:poll-feeds` | `--feed=` |
 | `grimba:fetch-newsapi` | none |
@@ -68,6 +70,7 @@ These are registered in `routes/console.php`.
 |---|---|---|---|
 | Daily `03:05` | `grimba:verify-backups --min=1` | yes | Restore smoke before destructive cleanup; uses `onOneServer` and `withoutOverlapping(20)`. |
 | Daily `03:15` | `grimba:cleanup-slugs` | no | Deletes orphan slugs; uses `onOneServer` and `withoutOverlapping`. |
+| Daily `03:25` | `grimba:prune-img-proxy-cache --days=60` | yes | Prunes old image proxy cache files; uses `onOneServer` and `withoutOverlapping(20)`. |
 | Every 30 minutes | `grimba:poll-feeds` | yes | RSS ingest; `runInBackground`, `onOneServer`, `withoutOverlapping(20)`. |
 | `15,45 * * * *` | `grimba:translate-pending --to=fr --limit=50` | yes | FR translation cadence. |
 | `20,50 * * * *` | `grimba:translate-pending --to=en --limit=50` | yes | EN translation cadence. |

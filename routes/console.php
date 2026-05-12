@@ -42,6 +42,13 @@ Schedule::command('grimba:cleanup-slugs')
     ->onOneServer()
     ->withoutOverlapping();
 
+// GrimbaNews — image proxy cache GC. Keeps publisher hero/logo cache
+// from becoming another silent disk-pressure source on the shared VPS.
+grimba_schedule_command('img_proxy_prune', 'grimba:prune-img-proxy-cache --days=60')
+    ->dailyAt('03:25')
+    ->onOneServer()
+    ->withoutOverlapping(20);
+
 // GrimbaNews — RSS ingest. 30-minute cadence strikes the usual
 // francophone publishing rhythm without hammering upstream feeds.
 // withoutOverlapping protects against a slow run overlapping the

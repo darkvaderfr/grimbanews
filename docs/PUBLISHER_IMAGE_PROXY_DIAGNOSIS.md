@@ -76,6 +76,8 @@ When the RSS poller / NewsAPI fetcher (`app/Services/GrimbaRssPoller.php`, `app/
 
 The proxy cache lives at `storage/app/public/img-proxy/`. We should add a daily artisan command that prunes files older than 60 days and reports total cache size to admin. Otherwise the disk fills up silently.
 
+Status 2026-05-12: implemented as `grimba:prune-img-proxy-cache --days=60`, scheduled daily at 03:25 and wrapped by the automation monitor. It supports `--dry-run` and `--cache-dir=` for maintenance/test runs.
+
 ---
 
 ## Why this is a backend sprint (and why we deferred it from Session 10)

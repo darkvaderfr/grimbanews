@@ -56,6 +56,11 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:verify-backups --min=1',
                 'expected_minutes' => 1440,
             ],
+            'img_proxy_prune' => [
+                'label' => 'Image proxy cache prune',
+                'command' => 'grimba:prune-img-proxy-cache --days=60',
+                'expected_minutes' => 1440,
+            ],
             'full_articles' => [
                 'label' => 'Full article extraction',
                 'command' => 'grimba:fetch-full-articles --limit=80',
