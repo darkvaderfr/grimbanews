@@ -32,6 +32,8 @@
                 ->get();
             $categoryBlindspots = $categoryBlindspots->concat($filler);
         }
+
+        GnTr::warm(collect([$latest])->filter()->concat($categoryBlindspots));
     @endphp
 
     <section class="grimba-section mt-5">

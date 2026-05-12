@@ -9,6 +9,9 @@
         ->limit(10)
         ->get();
 
+    GnTr::warm($latest);
+    $latest->loadMissing('categories');
+
     $followChips = GrimbaEditorialCategories::homepageChips(8);
 @endphp
 

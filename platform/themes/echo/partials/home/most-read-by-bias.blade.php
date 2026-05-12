@@ -31,7 +31,10 @@
                 ->get(),
         ]);
 
-    $hasStories = $topByBias->flatten(1)->isNotEmpty();
+    $topStories = $topByBias->flatten(1);
+    GnTr::warm($topStories);
+
+    $hasStories = $topStories->isNotEmpty();
 @endphp
 
 @if($hasStories)

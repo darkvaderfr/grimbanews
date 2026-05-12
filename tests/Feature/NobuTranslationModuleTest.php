@@ -209,6 +209,95 @@ class NobuTranslationModuleTest extends TestCase
         $this->assertSame([$nativeId, $translatedId, $unknownId, $untranslatedId], $orderedIds);
     }
 
+    public function test_translation_presenter_warm_primes_records_for_list_rendering(): void
+    {
+        $originalLocale = app()->getLocale();
+        $now = now();
+        $suffix = Str::lower(Str::random(8));
+
+        $firstId = $this->translationFixturePostId(
+            'warm french fixture one ' . $suffix,
+            'fr',
+            $now->copy()->subMinutes(3)
+        );
+        $secondId = $this->translationFixturePostId(
+            'warm french fixture two ' . $suffix,
+            'fr',
+            $now->copy()->subMinutes(2)
+        );
+        $rawId = $this->translationFixturePostId(
+            'warm untranslated fixture ' . $suffix,
+            'fr',
+            $now->copy()->subMinute()
+        );
+
+        DB::table('grimba_post_translations')->insert([
+            [
+                'post_id' => $firstId,
+                'locale' => 'en',
+                'translated_name' => 'English warm title one ' . $suffix,
+                'translated_description' => 'English warm description one.',
+                'translated_content' => '<p>English warm content one.</p>',
+                'translation_driver' => 'nobuai:test',
+                'translated_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'post_id' => $secondId,
+                'locale' => 'en',
+                'translated_name' => 'English warm title two ' . $suffix,
+                'translated_description' => 'English warm description two.',
+                'translated_content' => '<p>English warm content two.</p>',
+                'translation_driver' => 'nobuai:test',
+                'translated_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ]);
+
+        $posts = DB::table('posts')
+            ->whereIn('id', [$firstId, $secondId, $rawId])
+            ->orderBy('id')
+            ->get();
+
+        $countTranslationSelects = static function (): int {
+            return collect(DB::getQueryLog())
+                ->filter(fn (array $query) => Str::contains($query['query'], [
+                    'from "grimba_post_translations"',
+                    'from `grimba_post_translations`',
+                    'from grimba_post_translations',
+                ]))
+                ->count();
+        };
+
+        GrimbaTranslationPresenter::flushCache();
+        app()->setLocale('en');
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        GrimbaTranslationPresenter::warm($posts);
+        $this->assertSame(1, $countTranslationSelects());
+
+        DB::flushQueryLog();
+
+        $this->assertSame([
+            'English warm title one ' . $suffix,
+            'English warm title two ' . $suffix,
+            'warm untranslated fixture ' . $suffix,
+        ], $posts->map(fn ($post) => GrimbaTranslationPresenter::title($post))->all());
+
+        $this->assertSame(
+            [true, true, false],
+            $posts->map(fn ($post) => GrimbaTranslationPresenter::isTranslated($post, 'en'))->all()
+        );
+        $this->assertSame(0, $countTranslationSelects());
+
+        DB::disableQueryLog();
+        GrimbaTranslationPresenter::flushCache();
+        app()->setLocale($originalLocale);
+    }
+
     public function test_failed_pending_translations_are_recorded_and_retryable_in_admin(): void
     {
         $this->artisan('migrate', ['--force' => true])->assertExitCode(0);

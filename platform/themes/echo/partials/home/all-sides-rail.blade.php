@@ -39,12 +39,14 @@
 
     // Hydrate the most-recent post + bias breakdown per cluster.
     $clusterIds = $multiBiasClusters->pluck('story_cluster_id')->all();
-    $picks = Post::query()
+    $pickPosts = Post::query()
         ->whereIn('story_cluster_id', $clusterIds)
         ->where('status', 'published')
         ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-        ->get(['id', 'name', 'translated_name', 'translated_description', 'translated_to', 'original_language', 'story_cluster_id', 'bias_rating', 'image', 'source_name'])
-        ->groupBy('story_cluster_id');
+        ->get(['id', 'name', 'translated_name', 'translated_description', 'translated_to', 'original_language', 'story_cluster_id', 'bias_rating', 'image', 'source_name']);
+
+    GnTr::warm($pickPosts);
+    $picks = $pickPosts->groupBy('story_cluster_id');
 
     $cards = [];
     foreach ($multiBiasClusters as $c) {

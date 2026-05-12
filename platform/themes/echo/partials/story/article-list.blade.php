@@ -11,6 +11,8 @@
     use App\Support\GrimbaStoryInsights;
     use Illuminate\Support\Str;
 
+    GnTr::warm($clusterPosts);
+
     $byBias = ['left' => [], 'center' => [], 'right' => [], 'unknown' => []];
     foreach ($clusterPosts as $cp) {
         $b = $cp->bias_rating ?? 'unknown';

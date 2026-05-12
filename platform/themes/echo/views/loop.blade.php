@@ -5,6 +5,12 @@
     $enableSidebar = theme_option('blog_sidebar_enabled', true);
     $postStyle = request()->input('style', theme_option('post_style', 'grid')) ;
 
+    $postCollection = $posts instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator
+        ? $posts->getCollection()
+        : collect($posts);
+
+    GnTr::warm($postCollection);
+
     $sortForLanguage = static function ($items) {
         return collect($items)
             ->sortBy([

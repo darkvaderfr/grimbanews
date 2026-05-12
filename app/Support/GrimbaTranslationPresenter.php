@@ -13,11 +13,104 @@ class GrimbaTranslationPresenter
     /** @var array<string, object|null> */
     protected static array $records = [];
 
+    protected static ?bool $hasTranslationsTable = null;
+
+    public static function flushCache(): void
+    {
+        self::$records = [];
+        self::$hasTranslationsTable = null;
+    }
+
     public static function targetLocale(): string
     {
         $lang = (string) (request()?->cookie('grimba_lang') ?: app()->getLocale() ?: 'fr');
 
         return in_array($lang, ['fr', 'en'], true) ? $lang : 'fr';
+    }
+
+    /**
+     * @param iterable<int, object>|object|null $posts
+     */
+    public static function warm(iterable|object|null $posts, ?string $target = null): void
+    {
+        $target = strtolower(substr($target ?: self::targetLocale(), 0, 8));
+        if (! in_array(substr($target, 0, 2), ['fr', 'en'], true)) {
+            return;
+        }
+
+        $collection = is_iterable($posts) ? collect($posts) : collect([$posts]);
+        $ids = [];
+
+        foreach ($collection as $post) {
+            if (! is_object($post)) {
+                continue;
+            }
+
+            $postId = (int) ($post->id ?? 0);
+            if ($postId <= 0) {
+                continue;
+            }
+
+            $key = $postId . ':' . $target;
+            $source = strtolower(substr((string) ($post->original_language ?? ''), 0, 2));
+            if ($source !== '' && $source === substr($target, 0, 2)) {
+                self::$records[$key] = null;
+                continue;
+            }
+
+            if (strtolower((string) ($post->translated_to ?? '')) === $target
+                && trim((string) ($post->translated_name ?? '')) !== '') {
+                self::$records[$key] = (object) [
+                    'translated_name' => $post->translated_name,
+                    'translated_description' => $post->translated_description ?? null,
+                    'translated_content' => $post->translated_content ?? null,
+                    'translation_driver' => $post->translation_driver ?? null,
+                    'translated_at' => $post->translated_at ?? null,
+                ];
+                continue;
+            }
+
+            if (! array_key_exists($key, self::$records)) {
+                $ids[] = $postId;
+            }
+        }
+
+        $ids = array_values(array_unique($ids));
+        if ($ids === []) {
+            return;
+        }
+
+        if (! self::hasTranslationsTable()) {
+            foreach ($ids as $id) {
+                self::$records[$id . ':' . $target] = null;
+            }
+
+            return;
+        }
+
+        try {
+            $rows = DB::table('grimba_post_translations')
+                ->whereIn('post_id', $ids)
+                ->where('locale', $target)
+                ->whereNotNull('translated_name')
+                ->get([
+                    'post_id',
+                    'translated_name',
+                    'translated_description',
+                    'translated_content',
+                    'translation_driver',
+                    'translated_at',
+                ])
+                ->keyBy(fn ($row) => (int) $row->post_id);
+
+            foreach ($ids as $id) {
+                self::$records[$id . ':' . $target] = $rows->get($id) ?: null;
+            }
+        } catch (Throwable) {
+            foreach ($ids as $id) {
+                self::$records[$id . ':' . $target] = null;
+            }
+        }
     }
 
     public static function isTranslated(object $post, ?string $target = null): bool
@@ -119,7 +212,7 @@ class GrimbaTranslationPresenter
     protected static function languagePrioritySql(string $target): array
     {
         $existsSql = '';
-        if (Schema::hasTable('grimba_post_translations')) {
+        if (self::hasTranslationsTable()) {
             $existsSql = " OR EXISTS (
                 SELECT 1
                 FROM grimba_post_translations gpt
@@ -180,7 +273,7 @@ class GrimbaTranslationPresenter
         }
 
         try {
-            if (! Schema::hasTable('grimba_post_translations')) {
+            if (! self::hasTranslationsTable()) {
                 return self::$records[$key] = null;
             }
 
@@ -199,6 +292,19 @@ class GrimbaTranslationPresenter
             return self::$records[$key] = $record ?: null;
         } catch (Throwable) {
             return self::$records[$key] = null;
+        }
+    }
+
+    protected static function hasTranslationsTable(): bool
+    {
+        if (self::$hasTranslationsTable !== null) {
+            return self::$hasTranslationsTable;
+        }
+
+        try {
+            return self::$hasTranslationsTable = Schema::hasTable('grimba_post_translations');
+        } catch (Throwable) {
+            return self::$hasTranslationsTable = false;
         }
     }
 }

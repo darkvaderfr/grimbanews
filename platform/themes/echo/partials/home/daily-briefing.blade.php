@@ -82,6 +82,8 @@
     $__count = $__brief['count'];
     $__sides = $__brief['sides'];
 
+    GnTr::warm($__post);
+
     $__total = max(1, array_sum($__sides));
     $__pct = [
         'left'   => (int) round(($__sides['left']   ?? 0) * 100 / $__total),

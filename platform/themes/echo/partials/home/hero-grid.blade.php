@@ -64,6 +64,8 @@
     // Counter values — full published recent set, not just what we render.
     $briefingStats = Post::query()->where('status', 'published')->tap(fn ($q) => GnTr::orderForTargetLocale($q))->limit(9)->get();
 
+    GnTr::warm(collect([$hero])->filter()->concat($briefing)->concat($blindspots)->concat($briefingStats));
+
     $totalArticles = $briefingStats->sum(fn ($p) => max(1, $p->views ?? 1));
     $readMinutes   = max(1, (int) round($briefingStats->count() * 1.2));
 @endphp

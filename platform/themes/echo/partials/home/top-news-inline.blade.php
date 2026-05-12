@@ -35,6 +35,11 @@
     } else {
         $topNews = $clustered;
     }
+
+    GnTr::warm($topNews);
+    if ($topNews->isNotEmpty()) {
+        (new \Illuminate\Database\Eloquent\Collection($topNews->all()))->loadMissing('categories');
+    }
 @endphp
 
 <section class="grimba-topnews mt-4">

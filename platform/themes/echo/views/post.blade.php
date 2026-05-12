@@ -4,6 +4,8 @@
     Theme::layout('grimba-chrome');
     Theme::set('isDetailPage', true);
 
+    GnTr::warm($post);
+
     $__gnSeoTitle = GnTr::title($post);
     $__gnSeoDesc = GnTr::description($post);
     $__gnTarget = GnTr::targetLocale();
@@ -189,6 +191,7 @@
                 'translated_name', 'translated_description',
                 'translated_to', 'original_language',
             ]);
+        GnTr::warm($__gnClusterPosts);
         $__gnIsStoryPage = $__gnClusterPosts->count() >= 2;
 
         if ($__gnIsStoryPage) {
