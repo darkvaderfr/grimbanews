@@ -20,6 +20,7 @@ class GrimbaReleaseSmoke extends Command
         {--min-full-content-coverage=70 : minimum full article coverage passed to grimba:health}
         {--evidence : write a markdown release evidence report under storage/app/grimba-release-evidence}
         {--evidence-path= : explicit markdown release evidence output path}
+        {--skip-security-headers : skip homepage security header assertions}
         {--skip-health : skip grimba:health}
         {--skip-backups : skip grimba:verify-backups}
         {--skip-cache : skip image proxy cache dry-run}';
@@ -144,6 +145,46 @@ class GrimbaReleaseSmoke extends Command
 
         $this->recordCheck($label, 'http', 'passed', sprintf('HTTP %d in %dms, budget %dms', $status, $elapsedMs, $budgetMs));
         $this->info(sprintf('✓ %s HTTP %d in %dms (budget %dms)', $label, $status, $elapsedMs, $budgetMs));
+
+        if ($label === 'homepage' && ! (bool) $this->option('skip-security-headers')) {
+            return $this->runSecurityHeaderCheck($response);
+        }
+
+        return false;
+    }
+
+    private function runSecurityHeaderCheck(\Illuminate\Http\Client\Response $response): bool
+    {
+        $requirements = [
+            ['Content-Security-Policy', "default-src 'self'"],
+            ['Content-Security-Policy', "frame-ancestors 'self'"],
+            ['X-Content-Type-Options', 'nosniff'],
+            ['X-Frame-Options', 'SAMEORIGIN'],
+            ['Referrer-Policy', 'strict-origin-when-cross-origin'],
+        ];
+
+        $failures = [];
+        foreach ($requirements as [$header, $expected]) {
+            $value = (string) $response->header($header, '');
+            if ($value === '' || ! Str::contains($value, $expected)) {
+                $failures[] = $header . ' missing ' . $expected;
+            }
+        }
+
+        if ((string) $response->header('Content-Security-Policy-Report-Only', '') !== '') {
+            $failures[] = 'Content-Security-Policy-Report-Only must not be present';
+        }
+
+        if ($failures !== []) {
+            $detail = implode('; ', $failures);
+            $this->recordCheck('homepage security headers', 'headers', 'failed', $detail);
+            $this->error('✗ homepage security headers failed: ' . $detail);
+
+            return true;
+        }
+
+        $this->recordCheck('homepage security headers', 'headers', 'passed', 'CSP enforced with frame/content/referrer protections');
+        $this->info('✓ homepage security headers passed');
 
         return false;
     }

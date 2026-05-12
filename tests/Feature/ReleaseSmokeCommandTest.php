@@ -14,7 +14,7 @@ class ReleaseSmokeCommandTest extends TestCase
         File::delete($evidencePath);
 
         Http::fake([
-            'http://grimbanews.test/' => Http::response('<html>ok</html>', 200),
+            'http://grimbanews.test/' => Http::response('<html>ok</html>', 200, $this->securityHeaders()),
             'http://grimbanews.test/up' => Http::response('ok', 200),
             'http://grimbanews.test/feed.xml' => Http::response('<rss></rss>', 200),
         ]);
@@ -28,6 +28,7 @@ class ReleaseSmokeCommandTest extends TestCase
             '--skip-cache' => true,
         ])
             ->expectsOutputToContain('homepage HTTP 200')
+            ->expectsOutputToContain('homepage security headers passed')
             ->expectsOutputToContain('health endpoint HTTP 200')
             ->expectsOutputToContain('public feed HTTP 200')
             ->expectsOutputToContain('release evidence written')
@@ -41,6 +42,7 @@ class ReleaseSmokeCommandTest extends TestCase
         $this->assertStringContainsString('Result: passed', $report);
         $this->assertStringContainsString('Host header: grimbanews.test', $report);
         $this->assertStringContainsString('| homepage | http | passed | HTTP 200', $report);
+        $this->assertStringContainsString('| homepage security headers | headers | passed | CSP enforced', $report);
     }
 
     public function test_release_smoke_fails_on_bad_public_status(): void
@@ -70,5 +72,37 @@ class ReleaseSmokeCommandTest extends TestCase
         $report = (string) File::get($evidencePath);
         $this->assertStringContainsString('Result: failed', $report);
         $this->assertStringContainsString('| homepage | http | failed | HTTP 500', $report);
+    }
+
+    public function test_release_smoke_fails_when_homepage_security_headers_are_missing(): void
+    {
+        Http::fake([
+            'http://grimbanews.test/' => Http::response('<html>ok</html>', 200),
+            'http://grimbanews.test/up' => Http::response('ok', 200),
+            'http://grimbanews.test/feed.xml' => Http::response('<rss></rss>', 200),
+        ]);
+
+        $this->artisan('grimba:release-smoke', [
+            '--base-url' => 'http://grimbanews.test',
+            '--skip-health' => true,
+            '--skip-backups' => true,
+            '--skip-cache' => true,
+        ])
+            ->expectsOutputToContain('homepage security headers failed: Content-Security-Policy')
+            ->expectsOutputToContain('Release smoke failed')
+            ->assertFailed();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function securityHeaders(): array
+    {
+        return [
+            'Content-Security-Policy' => "default-src 'self'; frame-ancestors 'self'; object-src 'none'",
+            'X-Content-Type-Options' => 'nosniff',
+            'X-Frame-Options' => 'SAMEORIGIN',
+            'Referrer-Policy' => 'strict-origin-when-cross-origin',
+        ];
     }
 }

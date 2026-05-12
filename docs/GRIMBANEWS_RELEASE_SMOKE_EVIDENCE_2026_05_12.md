@@ -8,6 +8,7 @@
 - Evidence defaults to `storage/app/grimba-release-evidence/`.
 - `--evidence-path=` writes to an explicit Markdown file path for CI, local tests, or a release packet.
 - The report records the commit, environment, base URL, Host header, disk floor, full-content floor, and every Artisan/HTTP smoke check result.
+- The homepage smoke now fails when enforced CSP or companion security headers disappear.
 - Failed smoke runs still write evidence before returning failure, so the release packet captures the reason for the block.
 - `deploy.sh` writes the deployed short SHA to `REVISION` after extracting the tarball, so production evidence reports can identify the exact release even though `.git` is not deployed.
 
@@ -26,6 +27,7 @@ php artisan grimba:release-smoke --base-url=http://209.74.88.135 --host-header=g
 ## Verification
 
 - `php artisan test tests/Feature/ReleaseSmokeCommandTest.php`
+- `php artisan test tests/Feature/SecurityHeadersTest.php tests/Feature/ReleaseSmokeCommandTest.php`
 - `php artisan test tests/Feature/AutomationScheduleTest.php tests/Feature/DailyPublishFreshnessTest.php tests/Feature/ReleaseSmokeCommandTest.php`
 - `php artisan test`
 - `bash -n deploy.sh`

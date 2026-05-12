@@ -54,7 +54,7 @@ For IP-based smoke before DNS or TLS is trusted:
 php artisan grimba:release-smoke --base-url=http://209.74.88.135 --host-header=grimbanews.com --evidence
 ```
 
-Evidence files are written to `storage/app/grimba-release-evidence/` by default and include the commit, environment, base URL, Host header, disk/full-content floors, and every smoke check result.
+Evidence files are written to `storage/app/grimba-release-evidence/` by default and include the commit, environment, base URL, Host header, disk/full-content floors, homepage security-header status, and every smoke check result.
 The standard `deploy.sh` flow writes the deployed short SHA to `REVISION` so tarball-based production deploys still produce commit-specific evidence.
 
 ## Rollback
