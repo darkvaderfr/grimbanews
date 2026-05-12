@@ -83,7 +83,7 @@ if [ -f database/grimbanews.sqlite ]; then
     fi
     gzip -9f "$BACKUP_FILE" 2>/dev/null || true
     find database/backups -maxdepth 1 -type f -name 'grimbanews.*.sqlite' -exec gzip -9f {} \; 2>/dev/null || true
-    find database/backups -maxdepth 1 -type f \( -name 'grimbanews.*.sqlite.gz' -o -name 'grimbanews.*.sqlite' \) -size -1M -delete 2>/dev/null || true
+    find database/backups -maxdepth 1 -type f \( -name 'grimbanews.*.sqlite.gz' -o -name 'grimbanews.*.sqlite' \) -size -1024k -delete 2>/dev/null || true
     find database/backups -maxdepth 1 -type f \( -name 'grimbanews.*.sqlite.gz' -o -name 'grimbanews.*.sqlite' \) \
         -printf '%T@ %p\n' 2>/dev/null | sort -rn | tail -n +6 | cut -d' ' -f2- | xargs -r rm -f
     du -sh database/backups 2>/dev/null | awk '{print "  Backup store:", $1}'
