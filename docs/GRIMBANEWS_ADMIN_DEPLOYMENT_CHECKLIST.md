@@ -43,6 +43,7 @@ php artisan view:cache
 
 - `php artisan grimba:release-smoke --base-url=https://grimbanews.com --evidence`
 - `php artisan grimba:health`
+- `php artisan grimba:storage-footprint --fail-on-risk --min-free-mb=2048`
 - `php artisan grimba:verify-backups --min=1`
 - `php artisan grimba:nobuai-health`
 - `php artisan route:list --path=admin/grimba`

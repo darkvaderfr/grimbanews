@@ -67,6 +67,12 @@ The deploy script also prunes sub-1 MB backup artifacts using a `-1024k` predica
 
 This is not a full restore drill into production. It proves the backup opens as SQLite and passes SQLite's quick consistency check, which is the right automated floor for the hourly/daily operating guard.
 
+## Follow-Up - 2026-05-12 Storage Footprint Report
+
+`grimba:storage-footprint --fail-on-risk --min-free-mb=2048` now provides a read-only breakdown of disk headroom and tracked app paths: database, backups, logs, image proxy cache, release evidence, framework cache, compiled views, public storage, `vendor`, and `node_modules`.
+
+This is the operator command to run when `grimba:health` reports tight disk headroom but the next action depends on knowing which Grimba-owned paths are growing.
+
 ## Residual Risk
 
 - Root disk is still tight at 92% used.

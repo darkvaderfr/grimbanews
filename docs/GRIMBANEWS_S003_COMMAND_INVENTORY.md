@@ -12,7 +12,7 @@ S003 inventories custom Artisan commands and scheduled command entry points. Thi
 
 | Scope | Count |
 |---|---:|
-| Custom Grimba command classes | 24 |
+| Custom Grimba command classes | 25 |
 | Scheduled Grimba command entries | 19 |
 | Commands called from admin routes | 6 |
 | Commands with network/provider calls | 10 |
@@ -25,6 +25,7 @@ Command registration is handled by Laravel command discovery in this project lay
 | Command | File | Default mode | Purpose |
 |---|---|---|---|
 | `grimba:health` | `app/Console/Commands/GrimbaHealth.php` | read/report | One-page ingest/editorial health summary. |
+| `grimba:storage-footprint` | `app/Console/Commands/GrimbaStorageFootprint.php` | read/report | Disk headroom and application storage footprint report. |
 | `grimba:release-smoke` | `app/Console/Commands/GrimbaReleaseSmoke.php` | read/report | Post-deploy release smoke for health, backup restore, cache dry-run, and public URL budgets. |
 | `grimba:verify-backups` | `app/Console/Commands/GrimbaVerifyBackups.php` | read/temp restore smoke | Opens SQLite backup artifacts and runs `PRAGMA quick_check`. |
 | `grimba:prune-img-proxy-cache` | `app/Console/Commands/GrimbaPruneImageProxyCache.php` | deletes expired cache files unless `--dry-run` | Prune old publisher/logo image proxy cache files and report footprint. |
@@ -54,6 +55,7 @@ Command registration is handled by Laravel command discovery in this project lay
 | Command | Options |
 |---|---|
 | `grimba:health` | `--fail-on-risk`, `--min-free-mb=`, `--min-published-24h=`, `--min-ingested-published-24h=`, `--min-full-content-coverage=`, `--full-content-retry-after-hours=`, `--backup-dir=` |
+| `grimba:storage-footprint` | `--base-dir=`, `--min-free-mb=`, `--fail-on-risk` |
 | `grimba:release-smoke` | `--base-url=`, `--host-header=`, `--max-home-ms=`, `--max-up-ms=`, `--max-feed-ms=`, `--min-free-mb=`, `--min-full-content-coverage=`, `--evidence`, `--evidence-path=`, `--require-newsapi`, `--newsapi-recent-hours=`, `--skip-security-headers`, `--skip-health`, `--skip-backups`, `--skip-cache` |
 | `grimba:verify-backups` | `--backup-dir=`, `--min=`, `--all` |
 | `grimba:prune-img-proxy-cache` | `--days=`, `--cache-dir=`, `--dry-run` |
@@ -128,6 +130,7 @@ These are registered in `routes/console.php`.
 | `grimba:nobuai-health --live` | Makes one LLM call. | No app data writes. |
 | `grimba:fetch-full-articles` | Fetches upstream article pages. | Updates `full_content`, `full_fetched_at`, and extraction errors. |
 | `grimba:enrich-drafts` | Fetches feeds and article pages. | Updates `posts.image` unless `--dry-run`. |
+| `grimba:storage-footprint` | None. | Read-only report for disk headroom and tracked application paths. |
 | `grimba:prune-release-evidence` | None. | Deletes old Markdown evidence reports unless `--dry-run`. |
 | `grimba:ensure-daily-publish` | None. | Publishes trusted recent drafts unless `--dry-run`. |
 | `grimba:archive-vault-events` | None. | Writes monthly privacy-preserving CSV archive. |
@@ -154,7 +157,7 @@ These are registered in `routes/console.php`.
 Sprint: S003  
 Outcome: command inventory complete  
 Files: `docs/GRIMBANEWS_S003_COMMAND_INVENTORY.md`, `docs/GRIMBANEWS_PREPROD_1000_SPRINT_MASTER_PLAN.md`  
-Verification: `php artisan schedule:list`; command help probes for `grimba:health`, `grimba:poll-feeds`, `grimba:translate-pending`, `grimba:nobuai-summaries`, `grimba:dedupe-posts`, `grimba:fetch-full-articles`, `grimba:enrich-drafts`; source reads for all 14 command classes  
+Verification: `php artisan schedule:list`; command help probes for `grimba:health`, `grimba:storage-footprint`, `grimba:poll-feeds`, `grimba:translate-pending`, `grimba:nobuai-summaries`, `grimba:dedupe-posts`, `grimba:fetch-full-articles`, `grimba:enrich-drafts`; source reads for all custom command classes  
 Risks: monitored vs direct schedules need review, daily cleanup is destructive, provider-cost commands need budget gates, route/admin manual command triggers need timeout QA  
 Next: S004 scheduler inventory  
 Commit: recorded in sprint handoff after push
