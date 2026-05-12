@@ -54,7 +54,7 @@ Command registration is handled by Laravel command discovery in this project lay
 | Command | Options |
 |---|---|
 | `grimba:health` | `--fail-on-risk`, `--min-free-mb=`, `--min-published-24h=`, `--min-ingested-published-24h=`, `--min-full-content-coverage=`, `--full-content-retry-after-hours=`, `--backup-dir=` |
-| `grimba:release-smoke` | `--base-url=`, `--host-header=`, `--max-home-ms=`, `--max-up-ms=`, `--max-feed-ms=`, `--min-free-mb=`, `--min-full-content-coverage=`, `--evidence`, `--evidence-path=`, `--skip-security-headers`, `--skip-health`, `--skip-backups`, `--skip-cache` |
+| `grimba:release-smoke` | `--base-url=`, `--host-header=`, `--max-home-ms=`, `--max-up-ms=`, `--max-feed-ms=`, `--min-free-mb=`, `--min-full-content-coverage=`, `--evidence`, `--evidence-path=`, `--require-newsapi`, `--newsapi-recent-hours=`, `--skip-security-headers`, `--skip-health`, `--skip-backups`, `--skip-cache` |
 | `grimba:verify-backups` | `--backup-dir=`, `--min=`, `--all` |
 | `grimba:prune-img-proxy-cache` | `--days=`, `--cache-dir=`, `--dry-run` |
 | `grimba:prune-release-evidence` | `--days=`, `--keep=`, `--evidence-dir=`, `--dry-run` |

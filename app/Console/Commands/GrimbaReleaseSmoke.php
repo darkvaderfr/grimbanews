@@ -20,6 +20,8 @@ class GrimbaReleaseSmoke extends Command
         {--min-full-content-coverage=70 : minimum full article coverage passed to grimba:health}
         {--evidence : write a markdown release evidence report under storage/app/grimba-release-evidence}
         {--evidence-path= : explicit markdown release evidence output path}
+        {--require-newsapi : fail unless NewsAPI readiness passes}
+        {--newsapi-recent-hours=0 : require a successful NewsAPI run within this many hours when --require-newsapi is used}
         {--skip-security-headers : skip homepage security header assertions}
         {--skip-health : skip grimba:health}
         {--skip-backups : skip grimba:verify-backups}
@@ -54,6 +56,12 @@ class GrimbaReleaseSmoke extends Command
             $failed = $this->runArtisanCheck('image proxy cache dry-run', 'grimba:prune-img-proxy-cache', [
                 '--days' => 60,
                 '--dry-run' => true,
+            ]) || $failed;
+        }
+
+        if ((bool) $this->option('require-newsapi')) {
+            $failed = $this->runArtisanCheck('NewsAPI readiness', 'grimba:newsapi-readiness', [
+                '--recent-hours' => (int) $this->option('newsapi-recent-hours'),
             ]) || $failed;
         }
 

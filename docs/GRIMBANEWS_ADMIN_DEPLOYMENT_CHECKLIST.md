@@ -57,6 +57,7 @@ php artisan grimba:release-smoke --base-url=http://209.74.88.135 --host-header=g
 Evidence files are written to `storage/app/grimba-release-evidence/` by default and include the commit, environment, base URL, Host header, disk/full-content floors, homepage security-header status, and every smoke check result.
 The standard `deploy.sh` flow writes the deployed short SHA to `REVISION` so tarball-based production deploys still produce commit-specific evidence.
 Release evidence retention is handled by `php artisan grimba:prune-release-evidence --days=30 --keep=30`; the scheduler runs it daily at `03:35`.
+After a production NewsAPI key is configured, use `--require-newsapi --newsapi-recent-hours=24` on release smoke to make NewsAPI freshness a hard launch gate.
 
 ## Rollback
 

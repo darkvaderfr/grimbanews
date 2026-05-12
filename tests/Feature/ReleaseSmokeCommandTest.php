@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Services\GrimbaNewsApiFetcher;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -89,6 +90,38 @@ class ReleaseSmokeCommandTest extends TestCase
             '--skip-cache' => true,
         ])
             ->expectsOutputToContain('homepage security headers failed: Content-Security-Policy')
+            ->expectsOutputToContain('Release smoke failed')
+            ->assertFailed();
+    }
+
+    public function test_release_smoke_can_require_newsapi_readiness(): void
+    {
+        $this->app->bind(GrimbaNewsApiFetcher::class, fn () => new class extends GrimbaNewsApiFetcher {
+            public function __construct()
+            {
+            }
+
+            public function isConfigured(): bool
+            {
+                return false;
+            }
+        });
+
+        Http::fake([
+            'http://grimbanews.test/' => Http::response('<html>ok</html>', 200, $this->securityHeaders()),
+            'http://grimbanews.test/up' => Http::response('ok', 200),
+            'http://grimbanews.test/feed.xml' => Http::response('<rss></rss>', 200),
+        ]);
+
+        $this->artisan('grimba:release-smoke', [
+            '--base-url' => 'http://grimbanews.test',
+            '--require-newsapi' => true,
+            '--newsapi-recent-hours' => 24,
+            '--skip-health' => true,
+            '--skip-backups' => true,
+            '--skip-cache' => true,
+        ])
+            ->expectsOutputToContain('NewsAPI readiness failed: grimba:newsapi-readiness')
             ->expectsOutputToContain('Release smoke failed')
             ->assertFailed();
     }
