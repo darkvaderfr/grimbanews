@@ -1,3 +1,9 @@
+@php
+    use App\Support\GrimbaTranslationPresenter as GnTr;
+
+    GnTr::warm($posts);
+@endphp
+
 @if ($posts->isNotEmpty())
     <div
         class="tab-pane fade active show"
@@ -31,7 +37,7 @@
                             <div class="echo-popular-left-jt-heading">
                                 <a href="{{ $post->url }}" title="{{ $name = $post->name }}" class="title-hover truncate-3-custom truncate-custom">{{ $name }}</a>
 
-                                @if ($description = $post->description)
+                                @if ($description = GnTr::description($post))
                                     <p class="truncate-custom truncate-3-custom desc">{!! BaseHelper::clean($description) !!}</p>
                                 @endif
                             </div>
@@ -75,7 +81,7 @@
                                     <a href="{{ $post->url }}" title="{{ $name = $post->name }}" class="title-hover truncate-2-custom truncate-custom">
                                         {{ $name }}
                                     </a>
-                                    @if ($description = $post->description)
+                                    @if ($description = GnTr::description($post))
                                         <p class="text-center truncate-custom truncate-2-custom desc">
                                             {!! BaseHelper::clean($description) !!}
                                         </p>

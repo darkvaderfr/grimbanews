@@ -1,4 +1,7 @@
 @php
+    use App\Support\GrimbaTranslationPresenter as GnTr;
+
+    GnTr::warm($posts);
     $firstPost = $posts->shift();
 @endphp
 
@@ -23,7 +26,7 @@
                                     </div>
                                     <a href="{{ $firstPost->url }}" class="title-hover truncate-custom truncate-2-custom echo-hero-title text-capitalize font-weight-bold" title="{{ $firstPost->name }}">{{ $firstPost->name }}</a>
                                     <hr>
-                                    @if ($description = $firstPost->description)
+                                    @if ($description = GnTr::description($firstPost))
                                         <p class="echo-hero-discription desc">{!! BaseHelper::clean(Str::limit($description, 200)) !!}</p>
                                     @endif
 

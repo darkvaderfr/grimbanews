@@ -1,3 +1,9 @@
+@php
+    use App\Support\GrimbaTranslationPresenter as GnTr;
+
+    GnTr::warm($posts);
+@endphp
+
 <section @class(['echo-hm2-video-area', 'echo-feature-area' => $sidebar]) @style($variableStyles)>
     <div class="echo-hm2-video-area-content">
         <div @class(['echo-container' => ! $sidebar, 'container' => $sidebar])>
@@ -47,7 +53,7 @@
                                                         <h1 class="text-capitalize text-center truncate-custom truncate-2-custom"><a href="{{ $post->url }}" title="{{ $post->name }}" class="title-hover">{{ $post->name }}</a></h1>
                                                     </div>
 
-                                                    @if ($description = $post->description)
+                                                    @if ($description = GnTr::description($post))
                                                         <div class="echo-hm2-video-discription">
                                                             <p class="truncate-custom truncate-2-custom desc" title="{{ $description }}">{!! BaseHelper::clean($description) !!}</p>
                                                         </div>

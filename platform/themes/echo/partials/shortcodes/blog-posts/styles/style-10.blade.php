@@ -1,3 +1,9 @@
+@php
+    use App\Support\GrimbaTranslationPresenter as GnTr;
+
+    GnTr::warm($posts);
+@endphp
+
 <section @class(['echo-cl-blocks-area', 'echo-feature-area' => $sidebar])
     @style($variableStyles)
 >
@@ -48,7 +54,7 @@
                                         <div class="echo-cl-blocks-title">
                                             <a href="{{ $post->url }}" class="title-hover truncate-custom truncate-2-custom">{{ $post->name }}</a>
 
-                                            @if ($description = $post->description)
+                                            @if ($description = GnTr::description($post))
                                                 <p class="desc">{!! BaseHelper::clean($description) !!}</p>
                                             @endif
                                         </div>

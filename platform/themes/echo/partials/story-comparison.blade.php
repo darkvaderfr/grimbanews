@@ -1,4 +1,7 @@
 @php
+    use App\Support\GrimbaTranslationPresenter as GnTr;
+    use Illuminate\Support\Str;
+
     /**
      * Story Comparison Partial — GroundNews-inspired side-by-side.
      *
@@ -6,6 +9,7 @@
      * @var string|null $storyTitle
      */
 
+    GnTr::warm($posts);
     $storyTitle = $storyTitle ?? ($posts->first()->name ?? 'Comparaison');
 @endphp
 
@@ -52,9 +56,9 @@
                         </a>
                     </h3>
 
-                    @if($clusterPost->description)
+                    @if($__clusterDescription = GnTr::description($clusterPost))
                         <p class="small opacity-85 mb-3">
-                            {!! BaseHelper::clean(\Illuminate\Support\Str::limit(strip_tags($clusterPost->description), 180)) !!}
+                            {!! BaseHelper::clean(Str::limit(strip_tags($__clusterDescription), 180)) !!}
                         </p>
                     @endif
 

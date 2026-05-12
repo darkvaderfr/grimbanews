@@ -13,7 +13,13 @@ class GrimbaArticleText
         }
 
         $clean = (string) $value;
-        $pattern = '/(?:\s|&nbsp;)*(?:…|&hellip;|&#8230;|&#x2026;|\.{3})?(?:\s|&nbsp;)*\[\+\d+\s+chars?\](?:\s|&nbsp;)*(?=(?:<\/[^>]+>\s*)*$)/iu';
+        $openBracket = '(?:\[|&#91;|&#x5b;|&lbrack;)';
+        $closeBracket = '(?:\]|&#93;|&#x5d;|&rbrack;)';
+        $pattern = '/(?:\s|&nbsp;)*(?:…|&hellip;|&#8230;|&#x2026;|\.{3})?(?:\s|&nbsp;)*'
+            . $openBracket
+            . '\s*\+\s*\d+\s+chars?\s*'
+            . $closeBracket
+            . '(?:\s|&nbsp;)*(?=(?:<\/[^>]+>\s*)*$)/iu';
 
         do {
             $previous = $clean;

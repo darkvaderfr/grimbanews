@@ -1,4 +1,7 @@
 @php
+    use App\Support\GrimbaTranslationPresenter as GnTr;
+
+    GnTr::warm($posts);
     $firstPost = $posts->shift();
     Theme::set('headerAbsolute', true);
 @endphp
@@ -23,7 +26,7 @@
                                         <div class="contents">
                                             <a href="{{ $firstPost->url }}" class="truncate-custom truncate-3-custom title-hover text-heading capitalize" title="{{ $name = $firstPost->name }}">{{ $name }}</a>
 
-                                            @if ($description = $firstPost->description)
+                                            @if ($description = GnTr::description($firstPost))
                                                 <div class="desc">
                                                     <p class="truncate-custom truncate-2-custom">{!! BaseHelper::clean($description) !!}</p>
                                                 </div>

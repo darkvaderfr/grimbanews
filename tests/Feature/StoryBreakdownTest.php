@@ -95,6 +95,40 @@ class StoryBreakdownTest extends TestCase
             ->assertSee('Private equity', false);
     }
 
+    public function test_comparison_page_sanitizes_newsapi_truncation_markers_in_snippets(): void
+    {
+        $clusterId = 7654322;
+        $now = now();
+
+        foreach (['left', 'center'] as $index => $bias) {
+            DB::table('posts')->insert([
+                'name' => 'Sanitized comparison fixture ' . $bias,
+                'description' => 'Prominent Jewish American leader and Israel defender Abraham Abe Foxman has died at age 86. [+4285 chars]',
+                'content' => '<p>Prominent Jewish American leader and Israel defender Abraham Abe Foxman has died at age 86. The Anti-Defamation League confirmed his death on Sunday, calling… [+4285 chars]</p>',
+                'status' => 'published',
+                'author_id' => 1,
+                'author_type' => User::class,
+                'is_featured' => 0,
+                'image' => null,
+                'views' => 0,
+                'source_name' => 'Sanitized Fixture Source ' . $bias,
+                'bias_rating' => $bias,
+                'is_blindspot' => 0,
+                'credibility_score' => 80,
+                'ownership_type' => 'fixture',
+                'story_cluster_id' => $clusterId,
+                'created_at' => $now->copy()->addMinutes($index),
+                'updated_at' => $now->copy()->addMinutes($index),
+            ]);
+        }
+
+        $this->get('/comparatif/' . $clusterId)
+            ->assertOk()
+            ->assertSee('Prominent Jewish American leader and Israel defender')
+            ->assertDontSee('[+4285 chars]')
+            ->assertDontSee('4285 chars');
+    }
+
     public function test_command_palette_uses_news_language_urls_not_blog_index_urls(): void
     {
         $now = now();
