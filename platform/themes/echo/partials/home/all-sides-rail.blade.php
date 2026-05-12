@@ -83,7 +83,7 @@
     <header class="d-flex align-items-end justify-content-between flex-wrap gap-2 mb-3">
         <div>
             <span class="grimba-methodology__kicker">{{ __('Couvert par tous les côtés') }}</span>
-            <h2 class="grimba-methodology__title m-0 mt-1" style="font-size:clamp(22px, 2.6vw, 32px); letter-spacing:-0.3px;">
+            <h2 class="grimba-methodology__title m-0 mt-1" style="font-size:clamp(22px, 2.6vw, 32px); letter-spacing:-0.3px; color:var(--gn-ink,#1a1713); -webkit-text-fill-color:var(--gn-ink,#1a1713);">
                 {{ __('Histoires que gauche, centre et droite couvrent en même temps') }}
             </h2>
         </div>
@@ -179,6 +179,8 @@
                         font-size:18px;
                         line-height:1.25;
                         letter-spacing:-0.2px;
+                        color:var(--gn-ink,#1a1713);
+                        -webkit-text-fill-color:var(--gn-ink,#1a1713);
                         margin:0;
                         flex:1;
                     ">

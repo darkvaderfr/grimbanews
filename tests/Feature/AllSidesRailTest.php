@@ -38,6 +38,13 @@ class AllSidesRailTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('grimba-all-sides__card', false)
-            ->assertSee('/comparatif/' . $clusterId, false);
+            ->assertSee('/comparatif/' . $clusterId, false)
+            ->assertSee('-webkit-text-fill-color:var(--gn-ink,#1a1713);', false);
+
+        $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__card', $css);
+        $this->assertStringContainsString('-webkit-text-fill-color: #fffaf0 !important;', $css);
+        $this->assertStringContainsString('scroll-snap-type: x proximity;', $css);
+        $this->assertStringContainsString('grid-auto-columns: minmax(270px, 84vw) !important;', $css);
     }
 }

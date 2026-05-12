@@ -74,7 +74,24 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('body.grimba-home .site-notice.js-site-notice', $css);
         $this->assertStringContainsString('body.grimba-home a.grimba-briefing__headline', $css);
         $this->assertStringContainsString('color: #fffaf0;', $css);
+        $this->assertStringContainsString('.grimba-urgency .container-xxl', $css);
+        $this->assertStringContainsString('min-height: 32px;', $css);
+        $this->assertStringContainsString('.grimba-translation-note-wrap', $css);
+        $this->assertStringContainsString('-webkit-line-clamp: 2;', $css);
         $this->assertStringContainsString('bottom: calc(92px + env(safe-area-inset-bottom));', $cookieConsent);
+        $this->assertStringContainsString('max-height: min(420px, calc(100vh - 150px - env(safe-area-inset-bottom)));', $cookieConsent);
+        $this->assertStringContainsString('max-height: 8.5rem;', $cookieConsent);
+        $this->assertStringContainsString('grid-template-columns: 1fr;', $cookieConsent);
+    }
+
+    public function test_cookie_banner_respects_existing_consent_cookie_values(): void
+    {
+        foreach (['accepted', 'rejected', 'necessary', 'essential'] as $value) {
+            $this->withUnencryptedCookies(['grimba_cookie_consent' => $value])
+                ->get('/')
+                ->assertOk()
+                ->assertDontSee('id="grimba-cookie-consent"', false);
+        }
     }
 
     public function test_dark_mode_editorial_selection_surfaces_have_explicit_contrast(): void
@@ -124,9 +141,12 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-form-pill', $css);
         $this->assertStringContainsString('.grimba-auth-grid', $css);
         $this->assertStringContainsString('.grimba-local__field--country', $css);
+        $this->assertStringContainsString('.grimba-local__submit', $css);
+        $this->assertStringContainsString('padding-bottom: calc(7rem + env(safe-area-inset-bottom)) !important;', $css);
         $this->assertStringContainsString('class="grimba-form-pill mb-3"', $loginView);
         $this->assertStringContainsString('class="grimba-auth-grid"', $registerView);
         $this->assertStringContainsString('class="grimba-form-pill grimba-local__input--country"', $localView);
+        $this->assertStringContainsString('grimba-local__panel', $localView);
         $this->assertStringNotContainsString('background:rgba(255,255,255,0.7)', $loginView . $registerView . $localView);
     }
 

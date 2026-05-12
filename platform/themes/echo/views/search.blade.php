@@ -26,7 +26,7 @@
 @endphp
 
 <section class="grimba-search-page container py-5">
-    <header class="glass-panel p-4 p-md-5 mb-4">
+    <header class="grimba-search-page__panel glass-panel p-4 p-md-5 mb-4">
         <span class="grimba-methodology__kicker">{{ __('Recherche') }}</span>
         <h1 class="grimba-methodology__title mt-2 mb-2">
             @if($query === '')
@@ -36,7 +36,7 @@
                 <span class="opacity-75">{{ __('pour « :query »', ['query' => $query]) }}</span>
             @endif
         </h1>
-        <form method="GET" action="{{ url('/search') }}" class="mt-3" role="search">
+        <form method="GET" action="{{ url('/search') }}" class="grimba-search-page__form mt-3" role="search">
             {{-- S339 — refactored to Bootstrap form-control / form-select
                   so the S322 dark-mode rules apply. Inline white-bg styles
                   dropped — they were overriding dark-mode tints. --}}
@@ -66,7 +66,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-6 col-md-4 col-lg-auto">
+                <div class="col-12 col-md-4 col-lg-auto">
                     <select name="owner" aria-label="{{ __('Filtrer par propriétaire') }}"
                             class="form-select form-select-lg" style="border-radius: 9999px;">
                         <option value="">{{ __('Tous propriétaires') }}</option>
@@ -87,7 +87,7 @@
                            aria-label="{{ __('Date de fin') }}"
                            class="form-control form-control-lg" style="border-radius: 9999px;">
                 </div>
-                <div class="col-12 col-lg-auto d-flex align-items-center gap-2">
+                <div class="grimba-search-page__actions col-12 col-lg-auto d-flex align-items-center gap-2">
                     <button type="submit" class="btn-grimba btn-grimba--solid">{{ __('Chercher') }}</button>
                     @if($selectedSource || $selectedBias || $selectedOwner || $fromDate || $toDate)
                         <a href="{{ url('/search?q=' . urlencode($query)) }}"

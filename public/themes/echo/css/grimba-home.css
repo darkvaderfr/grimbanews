@@ -1179,6 +1179,18 @@ button.btn-grimba--solid,
     opacity: 0.85;
 }
 
+.grimba-all-sides {
+    overflow-x: clip;
+    color: var(--gn-ink);
+}
+.grimba-all-sides__rail {
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+}
+.grimba-all-sides__card {
+    scroll-snap-align: start;
+}
+
 .grimba-coverage--label {
     display: inline-flex;
     align-items: center;
@@ -2356,6 +2368,26 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     body.grimba-home {
         overflow-x: hidden;
     }
+    .grimba-urgency .container-xxl {
+        flex-wrap: nowrap !important;
+        justify-content: space-between !important;
+        gap: 0.55rem !important;
+        padding: 0.45rem 1rem !important;
+    }
+    .grimba-urgency__text {
+        min-width: 0;
+        overflow: hidden;
+        font-size: 0.82rem;
+        line-height: 1.2;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .grimba-urgency__cta {
+        flex: 0 0 auto;
+        min-height: 32px;
+        padding: 0.36rem 0.68rem;
+        font-size: 0.78rem;
+    }
     body.show-admin-bar {
         margin-top: 40px !important;
     }
@@ -2404,7 +2436,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
         grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
         gap: 0.75rem !important;
-        padding: 0.9rem 1rem !important;
+        padding: 0.72rem 0.9rem !important;
     }
     .grimba-wordmark {
         min-width: 0;
@@ -2412,17 +2444,17 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
         gap: 0.24rem;
     }
     .grimba-wordmark__mark {
-        font-size: 1.55rem;
+        font-size: 1.45rem;
     }
     .grimba-wordmark__tag {
-        font-size: 1.32rem;
+        font-size: 1.22rem;
     }
     .grimba-search {
         justify-self: end;
-        flex: 0 0 48px;
-        width: 48px;
-        max-width: 48px;
-        height: 48px;
+        flex: 0 0 44px;
+        width: 44px;
+        max-width: 44px;
+        height: 44px;
     }
     .grimba-search input {
         position: absolute;
@@ -2434,10 +2466,10 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     .grimba-search button {
         position: static;
         transform: none;
-        width: 48px;
-        height: 48px;
-        min-width: 48px;
-        max-width: 48px;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        max-width: 44px;
         border: 1px solid var(--gn-rule);
         border-radius: 9999px;
         background: rgba(255, 255, 255, 0.72);
@@ -2454,6 +2486,59 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     .grimba-chips__row {
         flex-wrap: nowrap;
         overflow-x: auto;
+        gap: 0.4rem;
+        padding: 0.45rem 0;
+    }
+    .grimba-chip {
+        padding: 0.34rem 0.78rem;
+        font-size: 0.88rem;
+    }
+    .grimba-translation-note-wrap {
+        margin-top: 0.35rem !important;
+    }
+    .grimba-translation-note {
+        width: 100%;
+        max-width: 100%;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.58rem 0.7rem;
+        border-radius: 18px;
+        font-size: 0.78rem;
+        line-height: 1.35;
+    }
+    .grimba-translation-note .gn-nobuai-chip {
+        max-width: 46%;
+        overflow: hidden;
+        gap: 5px !important;
+        padding: 2px 7px !important;
+        font-size: 10px !important;
+        text-overflow: ellipsis;
+    }
+    .grimba-translation-note > span:not(.gn-nobuai-chip) {
+        display: -webkit-box;
+        overflow: hidden;
+        line-height: 1.35;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+    .grimba-all-sides {
+        padding-top: 1.35rem !important;
+        padding-bottom: 0.8rem !important;
+    }
+    .grimba-all-sides > header {
+        margin-bottom: 0.75rem !important;
+    }
+    .grimba-all-sides .grimba-methodology__title {
+        font-size: clamp(1.35rem, 6.5vw, 1.75rem) !important;
+        line-height: 1.1;
+    }
+    .grimba-all-sides__rail {
+        grid-auto-columns: minmax(270px, 84vw) !important;
+        gap: 0.75rem !important;
+        padding-bottom: 0.3rem !important;
+    }
+    .grimba-sub-main > .container-xxl.py-4 {
+        padding-top: 0.8rem !important;
     }
     body.grimba-home .grimba-sub-main > .container-xxl {
         padding-left: 0.85rem;
@@ -2561,6 +2646,22 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-methodology__kicker {
     opacity: 0.95;
     color: var(--gn-ink-muted);
 }
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides .grimba-methodology__title,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__card h3 {
+    color: #fffaf0 !important;
+    -webkit-text-fill-color: #fffaf0 !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides .opacity-65,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__card .opacity-65 {
+    color: rgba(255, 250, 240, 0.74) !important;
+    opacity: 1 !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__card {
+    background: rgba(246, 241, 232, 0.06) !important;
+    border-color: rgba(246, 241, 232, 0.14) !important;
+    color: #fffaf0 !important;
+}
 
 /* Compare modal panel + onboard modal panel: they're position:fixed
    above the body so they don't inherit the body.grimba-home rule. */
@@ -2640,6 +2741,23 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-story-article a {
 .grimba-local__field {
     flex: 1 1 200px;
 }
+.grimba-local__title {
+    font-size: clamp(26px, 3.4vw, 42px);
+    letter-spacing: -0.3px;
+}
+.grimba-local__lede {
+    max-width: 60ch;
+    font-size: 16px;
+    line-height: 1.5;
+}
+.grimba-local__submit {
+    padding: 10px 22px;
+    border-radius: 9999px;
+    font-family: 'Public Sans', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+}
 .grimba-local__field--country {
     flex: 0 0 110px;
 }
@@ -2665,6 +2783,35 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-auth-link-muted {
     .grimba-local__field,
     .grimba-local__field--country {
         flex-basis: 100%;
+    }
+    .grimba-local {
+        padding-top: 1rem !important;
+        padding-bottom: calc(7rem + env(safe-area-inset-bottom)) !important;
+    }
+    .grimba-local__panel {
+        padding: 1.1rem !important;
+        border-radius: 22px;
+    }
+    .grimba-local__title {
+        font-size: clamp(1.75rem, 8.6vw, 2.25rem) !important;
+        line-height: 1.05;
+    }
+    .grimba-local__lede {
+        font-size: 0.95rem !important;
+        line-height: 1.45 !important;
+    }
+    .grimba-local__form {
+        gap: 0.6rem !important;
+    }
+    .grimba-local__form .grimba-form-pill {
+        min-height: 46px;
+        padding: 0.55rem 1rem;
+        font-size: 1rem;
+    }
+    .grimba-local__submit {
+        justify-content: center;
+        min-height: 44px;
+        width: 100%;
     }
 }
 html.grimba-home-html[data-bs-theme="dark"] input[type="text"],
@@ -3058,6 +3205,13 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn[aria-pressed="true"
     font-weight: 700;
     padding: 12px 14px;
 }
+.grimba-search-page__form .form-control,
+.grimba-search-page__form .form-select {
+    min-width: 0;
+}
+.grimba-search-page__actions {
+    min-width: 0;
+}
 .grimba-saved-search {
     border-top: 1px solid rgba(26, 23, 19, 0.10);
     padding-top: 14px;
@@ -3222,6 +3376,45 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-account-searches__row {
     border-top-color: rgba(246, 241, 232, 0.12);
 }
 @media (max-width: 575.98px) {
+    .grimba-search-page {
+        padding-top: 1rem !important;
+        padding-bottom: calc(7rem + env(safe-area-inset-bottom)) !important;
+    }
+    .grimba-search-page__panel {
+        padding: 1.1rem !important;
+        border-radius: 22px;
+    }
+    .grimba-search-page .grimba-methodology__title {
+        font-size: clamp(1.75rem, 8.6vw, 2.25rem);
+        line-height: 1.05;
+    }
+    .grimba-search-page__form .row {
+        --bs-gutter-x: 0.55rem;
+        --bs-gutter-y: 0.65rem;
+    }
+    .grimba-search-page__form .form-control-lg,
+    .grimba-search-page__form .form-select-lg {
+        min-height: 46px;
+        padding: 0.55rem 1rem;
+        font-size: 1rem;
+        line-height: 1.25;
+    }
+    .grimba-search-page__form input[type="date"] {
+        padding-right: 0.65rem;
+    }
+    .grimba-search-page__actions {
+        align-items: stretch !important;
+        flex-direction: column;
+        margin-top: 0.1rem;
+    }
+    .grimba-search-page__actions .btn-grimba {
+        justify-content: center;
+        min-height: 44px;
+        width: 100%;
+    }
+    .grimba-search-page__actions a {
+        align-self: center;
+    }
     .grimba-account-digest__header,
     .grimba-account-digest__footer,
     .grimba-account-searches__header,

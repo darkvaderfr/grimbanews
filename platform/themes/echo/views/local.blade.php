@@ -42,18 +42,18 @@
 <section class="grimba-local py-4 py-md-5">
     <div class="container">
 
-        <header class="glass-panel p-4 p-md-5 mb-4">
+        <header class="grimba-local__panel glass-panel p-4 p-md-5 mb-4">
             <span class="grimba-methodology__kicker">{{ __('Local') }}</span>
 
             @if($hasLocation)
-                <h1 class="grimba-methodology__title mt-2 mb-2" style="font-size: clamp(28px, 3.6vw, 42px); letter-spacing:-0.4px;">
+                <h1 class="grimba-methodology__title grimba-local__title mt-2 mb-2">
                     @if($city)
                         {{ $city }}@if($displayCountry), <span class="opacity-65">{{ $displayCountry }}</span>@endif
                     @else
                         {{ $displayCountry }}
                     @endif
                 </h1>
-                <p class="opacity-85 mb-3" style="font-size:16px; line-height:1.5;">
+                <p class="grimba-local__lede opacity-85 mb-3">
                     {{ $posts->count() }} {{ $posts->count() === 1 ? __('histoire récente') : __('histoires récentes') }}
                     @if($city)
                         {{ __('couvrant') }} {{ $city }}
@@ -64,15 +64,15 @@
                 </p>
                 @if($detected)
                     <p class="small opacity-65 mb-3">
-                        🌍 {{ __('Localisation détectée automatiquement à partir de votre IP.') }}
+                        {{ __('Localisation détectée automatiquement à partir de votre IP.') }}
                         {{ __('Pas la bonne ? Changez-la ci-dessous.') }}
                     </p>
                 @endif
             @else
-                <h1 class="grimba-methodology__title mt-2 mb-2" style="font-size: clamp(26px, 3.2vw, 36px); letter-spacing:-0.3px;">
+                <h1 class="grimba-methodology__title grimba-local__title mt-2 mb-2">
                     {{ __('Choisissez votre ville') }}
                 </h1>
-                <p class="opacity-85 mb-3" style="font-size:16px; line-height:1.5; max-width: 60ch;">
+                <p class="grimba-local__lede opacity-85 mb-3">
                     {{ __("Indiquez où vous êtes pour obtenir l'actualité locale et les sources françaises ou internationales pertinentes pour vous.") }}
                 </p>
             @endif
@@ -97,8 +97,7 @@
                            class="grimba-form-pill grimba-local__input--country">
                 </div>
                 <input type="hidden" name="country" id="grimba-local-country" value="{{ $displayCountry }}">
-                <button type="submit" class="btn-grimba btn-grimba--solid"
-                        style="padding:10px 22px; border-radius:9999px; background:var(--gn-ink,#1a1713); color:var(--gn-paper,#f6f1e8); font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; font-size:13px; border:none; cursor:pointer;">
+                <button type="submit" class="btn-grimba btn-grimba--solid grimba-local__submit">
                     {{ __('Mettre à jour') }}
                 </button>
             </form>

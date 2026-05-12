@@ -80,7 +80,15 @@ class SearchFacetsTest extends TestCase
             ->assertDontSee((string) DB::table('posts')->where('id', $oldId)->value('name'))
             ->assertSee('name="owner"', false)
             ->assertSee('name="from_date"', false)
-            ->assertSee('name="to_date"', false);
+            ->assertSee('name="to_date"', false)
+            ->assertSee('grimba-search-page__panel', false)
+            ->assertSee('grimba-search-page__form', false)
+            ->assertSee('grimba-search-page__actions', false);
+
+        $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+        $this->assertStringContainsString('.grimba-search-page__form .form-control-lg', $css);
+        $this->assertStringContainsString('font-size: 1rem;', $css);
+        $this->assertStringContainsString('padding-bottom: calc(7rem + env(safe-area-inset-bottom)) !important;', $css);
     }
 
     private function sourceId(string $name, string $owner, string $bias, string $country = 'FR'): int

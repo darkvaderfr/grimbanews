@@ -28,7 +28,7 @@
     if (! $active) return;
 
     $existing = (string) request()->cookie('grimba_cookie_consent', '');
-    if (in_array($existing, ['accepted', 'rejected'], true)) {
+    if (in_array($existing, ['accepted', 'rejected', 'necessary', 'essential'], true)) {
         return;
     }
 
@@ -138,13 +138,41 @@
         .grimba-cookie-consent {
             right: 12px; left: 12px; bottom: calc(92px + env(safe-area-inset-bottom));
             max-width: none; width: auto;
-            max-height: calc(100vh - 126px - env(safe-area-inset-bottom));
-            overflow-y: auto;
+            max-height: min(420px, calc(100vh - 150px - env(safe-area-inset-bottom)));
+            display: flex;
+            overflow: hidden;
             z-index: 1047;
         }
-        .grimba-cookie-consent__inner { padding: 16px; }
-        .grimba-cookie-consent__title { font-size: 20px; }
-        .grimba-cookie-consent__body { font-size: 13px; }
+        .grimba-cookie-consent__inner {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            min-height: 0;
+            padding: 14px;
+        }
+        .grimba-cookie-consent__title {
+            flex: 0 0 auto;
+            font-size: 19px;
+            margin-bottom: 7px;
+        }
+        .grimba-cookie-consent__body {
+            flex: 1 1 auto;
+            max-height: 8.5rem;
+            overflow-y: auto;
+            padding-right: 4px;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+        .grimba-cookie-consent__actions {
+            display: grid;
+            flex: 0 0 auto;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .grimba-cookie-consent__btn {
+            min-height: 44px;
+            width: 100%;
+        }
         .grimba-cookie-consent__more { margin-left: 0; }
     }
 </style>

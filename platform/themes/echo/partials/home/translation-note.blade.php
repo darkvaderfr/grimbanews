@@ -8,7 +8,7 @@
 @endphp
 
 @if($copy)
-    <div class="container-xxl mt-2">
+    <div class="container-xxl mt-2 grimba-translation-note-wrap">
         <div class="grimba-translation-note" role="note">
             {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
             <span>{{ $copy }}</span>
