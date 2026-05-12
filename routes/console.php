@@ -27,6 +27,14 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
+// GrimbaNews — daily backup restore smoke. Runs before the destructive
+// slug cleanup so the scheduler has recent evidence that at least one
+// SQLite backup opens and passes PRAGMA quick_check.
+grimba_schedule_command('backup_verify', 'grimba:verify-backups --min=1')
+    ->dailyAt('03:05')
+    ->onOneServer()
+    ->withoutOverlapping(20);
+
 // GrimbaNews — nightly orphan-slug sweep so a post that got deleted
 // (or a seed re-run) never leaves /blog/{slug} → 404 behind.
 Schedule::command('grimba:cleanup-slugs')

@@ -51,6 +51,11 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:health --fail-on-risk --min-full-content-coverage=70',
                 'expected_minutes' => 60,
             ],
+            'backup_verify' => [
+                'label' => 'Backup restore smoke',
+                'command' => 'grimba:verify-backups --min=1',
+                'expected_minutes' => 1440,
+            ],
             'full_articles' => [
                 'label' => 'Full article extraction',
                 'command' => 'grimba:fetch-full-articles --limit=80',

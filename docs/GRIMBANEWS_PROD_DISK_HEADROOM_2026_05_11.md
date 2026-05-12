@@ -61,6 +61,12 @@ This preserves restore evidence while reducing the backup directory footprint on
 
 The deploy script also prunes sub-1 MB backup artifacts using a `-1024k` predicate, which catches byte-sized failed backup shells correctly.
 
+## Follow-Up - 2026-05-12 Restore Smoke
+
+`grimba:verify-backups --min=1` now performs a restore smoke against the newest valid-looking backup artifact. For compressed `*.sqlite.gz` backups it inflates the artifact into a temporary file, opens it with PDO SQLite, and runs `PRAGMA quick_check`. The scheduler runs this daily at 03:05, before the destructive slug cleanup at 03:15.
+
+This is not a full restore drill into production. It proves the backup opens as SQLite and passes SQLite's quick consistency check, which is the right automated floor for the hourly/daily operating guard.
+
 ## Residual Risk
 
 - Root disk is still tight at 92% used.
@@ -72,5 +78,6 @@ The deploy script also prunes sub-1 MB backup artifacts using a `-1024k` predica
 
 - Keep `grimba:health --fail-on-risk` green under the 2048 MB floor.
 - Keep deploy backups compressed and let `grimba:health --fail-on-risk` fail on tiny or unreadable `*.sqlite.gz` artifacts.
-- Verify restore documentation against `*.sqlite.gz` artifacts.
+- Run `grimba:verify-backups --min=1 --all` before destructive production maintenance or manual dedupe apply.
+- Verify full restore documentation against `*.sqlite.gz` artifacts.
 - Plan broader host maintenance separately for Docker image/volume cleanup.

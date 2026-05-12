@@ -25,6 +25,7 @@ Command registration is handled by Laravel command discovery in this project lay
 | Command | File | Default mode | Purpose |
 |---|---|---|---|
 | `grimba:health` | `app/Console/Commands/GrimbaHealth.php` | read/report | One-page ingest/editorial health summary. |
+| `grimba:verify-backups` | `app/Console/Commands/GrimbaVerifyBackups.php` | read/temp restore smoke | Opens SQLite backup artifacts and runs `PRAGMA quick_check`. |
 | `grimba:nobuai-health` | `app/Console/Commands/GrimbaNobuAiHealth.php` | read/report unless `--live` | NobuAI wrapper and provider configuration health check. |
 | `grimba:poll-feeds` | `app/Console/Commands/GrimbaPollFeeds.php` | writes drafts | Poll RSS/Atom feeds, dedupe items, create draft posts, retro-cluster, flag unhealthy/stale feeds. |
 | `grimba:fetch-newsapi` | `app/Console/Commands/GrimbaFetchNewsApi.php` | writes drafts | Fetch NewsAPI top-headlines/everything articles and ingest drafts. |
@@ -43,7 +44,8 @@ Command registration is handled by Laravel command discovery in this project lay
 
 | Command | Options |
 |---|---|
-| `grimba:health` | none |
+| `grimba:health` | `--fail-on-risk`, `--min-free-mb=`, `--min-published-24h=`, `--min-ingested-published-24h=`, `--min-full-content-coverage=`, `--full-content-retry-after-hours=`, `--backup-dir=` |
+| `grimba:verify-backups` | `--backup-dir=`, `--min=`, `--all` |
 | `grimba:nobuai-health` | `--live`, `--prompt=` |
 | `grimba:poll-feeds` | `--feed=` |
 | `grimba:fetch-newsapi` | none |
@@ -64,6 +66,7 @@ These are registered in `routes/console.php`.
 
 | Schedule | Command | Monitor wrapper | Notes |
 |---|---|---|---|
+| Daily `03:05` | `grimba:verify-backups --min=1` | yes | Restore smoke before destructive cleanup; uses `onOneServer` and `withoutOverlapping(20)`. |
 | Daily `03:15` | `grimba:cleanup-slugs` | no | Deletes orphan slugs; uses `onOneServer` and `withoutOverlapping`. |
 | Every 30 minutes | `grimba:poll-feeds` | yes | RSS ingest; `runInBackground`, `onOneServer`, `withoutOverlapping(20)`. |
 | `15,45 * * * *` | `grimba:translate-pending --to=fr --limit=50` | yes | FR translation cadence. |
