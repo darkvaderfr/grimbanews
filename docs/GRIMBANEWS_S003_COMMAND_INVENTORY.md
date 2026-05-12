@@ -12,11 +12,11 @@ S003 inventories custom Artisan commands and scheduled command entry points. Thi
 
 | Scope | Count |
 |---|---:|
-| Custom Grimba command classes | 14 |
-| Scheduled Grimba command entries | 11 |
+| Custom Grimba command classes | 23 |
+| Scheduled Grimba command entries | 19 |
 | Commands called from admin routes | 6 |
-| Commands with network/provider calls | 7 |
-| Commands with data writes | 12 |
+| Commands with network/provider calls | 10 |
+| Commands with app data/file writes | 20 |
 
 Command registration is handled by Laravel command discovery in this project layout. There is no `app/Console/Kernel.php`; schedules live in `routes/console.php`.
 
@@ -28,6 +28,7 @@ Command registration is handled by Laravel command discovery in this project lay
 | `grimba:release-smoke` | `app/Console/Commands/GrimbaReleaseSmoke.php` | read/report | Post-deploy release smoke for health, backup restore, cache dry-run, and public URL budgets. |
 | `grimba:verify-backups` | `app/Console/Commands/GrimbaVerifyBackups.php` | read/temp restore smoke | Opens SQLite backup artifacts and runs `PRAGMA quick_check`. |
 | `grimba:prune-img-proxy-cache` | `app/Console/Commands/GrimbaPruneImageProxyCache.php` | deletes expired cache files unless `--dry-run` | Prune old publisher/logo image proxy cache files and report footprint. |
+| `grimba:prune-release-evidence` | `app/Console/Commands/GrimbaPruneReleaseEvidence.php` | deletes expired evidence files unless `--dry-run` | Prune old post-deploy release evidence reports and report footprint. |
 | `grimba:nobuai-health` | `app/Console/Commands/GrimbaNobuAiHealth.php` | read/report unless `--live` | NobuAI wrapper and provider configuration health check. |
 | `grimba:poll-feeds` | `app/Console/Commands/GrimbaPollFeeds.php` | writes drafts | Poll RSS/Atom feeds, dedupe items, create draft posts, retro-cluster, flag unhealthy/stale feeds. |
 | `grimba:fetch-newsapi` | `app/Console/Commands/GrimbaFetchNewsApi.php` | writes drafts | Fetch NewsAPI top-headlines/everything articles and ingest drafts. |
@@ -35,12 +36,17 @@ Command registration is handled by Laravel command discovery in this project lay
 | `grimba:nobuai-summaries` | `app/Console/Commands/GrimbaGenerateNobuAiSummaries.php` | writes summaries | Generate cluster-level NobuAI story summaries. |
 | `grimba:publish-trusted` | `app/Console/Commands/GrimbaPublishTrusted.php` | publishes drafts | Auto-publish trusted classified-source drafts. |
 | `grimba:publish-guardrail-categories` | `app/Console/Commands/GrimbaPublishGuardrailCategories.php` | publishes drafts | Publish low-credibility/unclassified drafts into explicit review categories. |
+| `grimba:ensure-daily-publish` | `app/Console/Commands/GrimbaEnsureDailyPublish.php` | publishes drafts unless `--dry-run` | Freshness watchdog that promotes trusted recent drafts when public freshness drops below floor. |
 | `grimba:fetch-full-articles` | `app/Console/Commands/GrimbaFetchFullArticles.php` | writes extracted content | Fetch and extract full article bodies for member/subscriber reading. |
 | `grimba:enrich-drafts` | `app/Console/Commands/GrimbaEnrichDrafts.php` | writes images | Backfill hero images for RSS-backed posts. |
 | `grimba:dedupe-posts` | `app/Console/Commands/GrimbaDedupePosts.php` | dry-run unless `--apply` | Merge/delete duplicate posts missed by RSS/NewsAPI dedupe. |
 | `grimba:recluster` | `app/Console/Commands/GrimbaRecluster.php` | writes clusters unless `--dry-run` | Attach unclustered draft/published posts to likely story clusters. |
 | `grimba:classify-categories` | `app/Console/Commands/GrimbaClassifyCategories.php` | writes category pivots | Classify posts into news categories using keyword/source heuristics. |
+| `grimba:backfill-source-countries` | `app/Console/Commands/GrimbaBackfillSourceCountries.php` | dry-run unless `--apply` | Audit and safely backfill missing source country tags. |
 | `grimba:cleanup-slugs` | `app/Console/Commands/GrimbaCleanupSlugs.php` | deletes orphan slugs unless `--dry-run` | Remove slug rows whose model reference no longer exists. |
+| `grimba:archive-vault-events` | `app/Console/Commands/GrimbaArchiveVaultEvents.php` | writes monthly CSV export | Archive privacy-preserving vault save/unsave events. |
+| `grimba:vault-digests` | `app/Console/Commands/GrimbaSendVaultDigests.php` | sends mail unless `--dry-run` | Send weekly saved-article digests to opted-in members. |
+| `grimba:saved-search-digests` | `app/Console/Commands/GrimbaSendSavedSearchDigests.php` | sends mail unless `--dry-run` | Send weekly saved-search alerts to opted-in members. |
 
 ## Options Inventory
 
@@ -50,6 +56,7 @@ Command registration is handled by Laravel command discovery in this project lay
 | `grimba:release-smoke` | `--base-url=`, `--host-header=`, `--max-home-ms=`, `--max-up-ms=`, `--max-feed-ms=`, `--min-free-mb=`, `--min-full-content-coverage=`, `--evidence`, `--evidence-path=`, `--skip-security-headers`, `--skip-health`, `--skip-backups`, `--skip-cache` |
 | `grimba:verify-backups` | `--backup-dir=`, `--min=`, `--all` |
 | `grimba:prune-img-proxy-cache` | `--days=`, `--cache-dir=`, `--dry-run` |
+| `grimba:prune-release-evidence` | `--days=`, `--keep=`, `--evidence-dir=`, `--dry-run` |
 | `grimba:nobuai-health` | `--live`, `--prompt=` |
 | `grimba:poll-feeds` | `--feed=` |
 | `grimba:fetch-newsapi` | none |
@@ -57,12 +64,17 @@ Command registration is handled by Laravel command discovery in this project lay
 | `grimba:nobuai-summaries` | `--limit=`, `--cluster=`, `--force`, `--stale`, `--dry-run` |
 | `grimba:publish-trusted` | `--threshold=`, `--age-hours=`, `--limit=`, `--dry-run` |
 | `grimba:publish-guardrail-categories` | `--threshold=`, `--limit=`, `--dry-run` |
+| `grimba:ensure-daily-publish` | `--min=`, `--window-hours=`, `--lookback-hours=`, `--threshold=`, `--min-age-minutes=`, `--max-publish=`, `--dry-run` |
 | `grimba:fetch-full-articles` | `--limit=`, `--force`, `--post=` |
 | `grimba:enrich-drafts` | `--limit=`, `--feed=`, `--dry-run`, `--force` |
 | `grimba:dedupe-posts` | `--apply`, `--limit=` |
 | `grimba:recluster` | `--dry-run`, `--threshold=`, `--lookback=` |
 | `grimba:classify-categories` | `--force`, `--category=`, `--limit=` |
+| `grimba:backfill-source-countries` | `--apply`, `--limit=`, `--min-confidence=` |
 | `grimba:cleanup-slugs` | `--dry-run` |
+| `grimba:archive-vault-events` | `--month=`, `--path=` |
+| `grimba:vault-digests` | `--member=`, `--force`, `--dry-run` |
+| `grimba:saved-search-digests` | `--member=`, `--force`, `--dry-run` |
 
 ## Scheduled Grimba Entries
 
@@ -73,6 +85,7 @@ These are registered in `routes/console.php`.
 | Daily `03:05` | `grimba:verify-backups --min=1` | yes | Restore smoke before destructive cleanup; uses `onOneServer` and `withoutOverlapping(20)`. |
 | Daily `03:15` | `grimba:cleanup-slugs` | no | Deletes orphan slugs; uses `onOneServer` and `withoutOverlapping`. |
 | Daily `03:25` | `grimba:prune-img-proxy-cache --days=60` | yes | Prunes old image proxy cache files; uses `onOneServer` and `withoutOverlapping(20)`. |
+| Daily `03:35` | `grimba:prune-release-evidence --days=30 --keep=30` | yes | Prunes old post-deploy evidence reports; uses `onOneServer` and `withoutOverlapping(20)`. |
 | Every 30 minutes | `grimba:poll-feeds` | yes | RSS ingest; `runInBackground`, `onOneServer`, `withoutOverlapping(20)`. |
 | `15,45 * * * *` | `grimba:translate-pending --to=fr --limit=50` | yes | FR translation cadence. |
 | `20,50 * * * *` | `grimba:translate-pending --to=en --limit=50` | yes | EN translation cadence. |
@@ -83,6 +96,9 @@ These are registered in `routes/console.php`.
 | `25,55 * * * *` | `grimba:nobuai-summaries --stale --limit=25` | yes | Stale insight refresh. |
 | `15 6,10,14,18,22 * * *` | `grimba:fetch-newsapi` | yes | Five-times-daily NewsAPI sweep, conditional on `grimba_newsapi_active`. |
 | Monday `04:10` | `grimba:enrich-drafts` | no | Weekly image backfill; `runInBackground`, `onOneServer`, `withoutOverlapping(60)`. |
+| Monday `04:25` | `grimba:archive-vault-events` | yes | Weekly vault analytics CSV archive; `runInBackground`, `onOneServer`, `withoutOverlapping(30)`. |
+| Monday `04:40` | `grimba:vault-digests` | yes | Weekly saved-article member digest; `runInBackground`, `onOneServer`, `withoutOverlapping(30)`. |
+| Monday `04:55` | `grimba:saved-search-digests` | yes | Weekly saved-search member alerts; `runInBackground`, `onOneServer`, `withoutOverlapping(30)`. |
 
 `php artisan schedule:list` also shows core Botble/CMS schedules; this inventory only tracks Grimba-owned entries.
 
@@ -110,6 +126,11 @@ These are registered in `routes/console.php`.
 | `grimba:nobuai-health --live` | Makes one LLM call. | No app data writes. |
 | `grimba:fetch-full-articles` | Fetches upstream article pages. | Updates `full_content`, `full_fetched_at`, and extraction errors. |
 | `grimba:enrich-drafts` | Fetches feeds and article pages. | Updates `posts.image` unless `--dry-run`. |
+| `grimba:prune-release-evidence` | None. | Deletes old Markdown evidence reports unless `--dry-run`. |
+| `grimba:ensure-daily-publish` | None. | Publishes trusted recent drafts unless `--dry-run`. |
+| `grimba:archive-vault-events` | None. | Writes monthly privacy-preserving CSV archive. |
+| `grimba:vault-digests` | Mail transport. | Sends weekly saved-article digest unless `--dry-run`. |
+| `grimba:saved-search-digests` | Mail transport. | Sends weekly saved-search alert unless `--dry-run`. |
 | `grimba:publish-trusted` | None. | Publishes drafts unless `--dry-run`. |
 | `grimba:publish-guardrail-categories` | None. | Creates/updates categories, category pivots, publishes drafts unless `--dry-run`. |
 | `grimba:dedupe-posts --apply` | None. | Repoints ledgers, deletes pivots/slugs/duplicate posts. |

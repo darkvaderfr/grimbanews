@@ -49,6 +49,13 @@ grimba_schedule_command('img_proxy_prune', 'grimba:prune-img-proxy-cache --days=
     ->onOneServer()
     ->withoutOverlapping(20);
 
+// GrimbaNews — release evidence retention. Keeps the post-deploy proof
+// trail durable without allowing tiny Markdown reports to grow forever.
+grimba_schedule_command('release_evidence_prune', 'grimba:prune-release-evidence --days=30 --keep=30')
+    ->dailyAt('03:35')
+    ->onOneServer()
+    ->withoutOverlapping(20);
+
 // GrimbaNews — RSS ingest. 30-minute cadence strikes the usual
 // francophone publishing rhythm without hammering upstream feeds.
 // withoutOverlapping protects against a slow run overlapping the

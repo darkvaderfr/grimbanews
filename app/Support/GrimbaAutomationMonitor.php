@@ -61,6 +61,11 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:prune-img-proxy-cache --days=60',
                 'expected_minutes' => 1440,
             ],
+            'release_evidence_prune' => [
+                'label' => 'Release evidence prune',
+                'command' => 'grimba:prune-release-evidence --days=30 --keep=30',
+                'expected_minutes' => 1440,
+            ],
             'full_articles' => [
                 'label' => 'Full article extraction',
                 'command' => 'grimba:fetch-full-articles --limit=80',
