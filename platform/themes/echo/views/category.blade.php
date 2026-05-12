@@ -11,6 +11,7 @@
     // topic is being covered overall — when one side dominates, the
     // bar surfaces it before the reader even scrolls.
     use App\Support\GrimbaPostRecency;
+    use App\Support\GrimbaRegionQuery;
     use App\Support\GrimbaTranslationPresenter as GnTr;
     use Botble\Blog\Models\Post;
     $catBias = Post::query()
@@ -89,12 +90,16 @@
           before reading any individual story. Pulls top 8 sources by
           article count in this category, last 90 days. --}}
     @php
-        $__topSources = \Illuminate\Support\Facades\DB::table('news_sources as s')
+        $__topSourcesQuery = \Illuminate\Support\Facades\DB::table('news_sources as s')
             ->join('posts as p', 'p.source_id', '=', 's.id')
             ->join('post_categories as pc', 'pc.post_id', '=', 'p.id')
             ->where('pc.category_id', $category->id)
             ->where('p.status', 'published')
-            ->whereRaw(GrimbaPostRecency::expression('p') . ' >= ?', [now()->subDays(90)->toDateTimeString()])
+            ->whereRaw(GrimbaPostRecency::expression('p') . ' >= ?', [now()->subDays(90)->toDateTimeString()]);
+
+        GrimbaRegionQuery::applyToSourceCountry($__topSourcesQuery, 's.country');
+
+        $__topSources = $__topSourcesQuery
             ->groupBy('s.id', 's.name', 's.slug', 's.bias_rating', 's.bias_score', 's.credibility_score', 's.ownership_type', 's.owner_name', 's.country')
             ->select('s.id', 's.name', 's.slug', 's.bias_rating', 's.bias_score', 's.credibility_score', 's.ownership_type', 's.owner_name', 's.country',
                 \Illuminate\Support\Facades\DB::raw('COUNT(p.id) as article_count'))

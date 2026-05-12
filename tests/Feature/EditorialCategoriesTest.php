@@ -72,6 +72,32 @@ class EditorialCategoriesTest extends TestCase
             ->assertSee('Europe');
     }
 
+    public function test_category_top_sources_respect_selected_editorial_location(): void
+    {
+        $africaId = $this->category('Afrique', 1);
+        $europeId = $this->category('Europe', 2);
+        $politicsId = $this->category('Politique', 11);
+        $suffix = Str::lower(Str::random(8));
+        $europeSource = 'Editorial Top Sources Europe ' . $suffix;
+        $africaSource = 'Editorial Top Sources Africa ' . $suffix;
+
+        $europePostId = $this->postId('Editorial top source Europe politics ' . $suffix, $this->source($europeSource, 'FR'));
+        $africaPostId = $this->postId('Editorial top source Africa politics ' . $suffix, $this->source($africaSource, 'ZA'));
+
+        DB::table('post_categories')->insertOrIgnore([
+            ['post_id' => $europePostId, 'category_id' => $europeId],
+            ['post_id' => $europePostId, 'category_id' => $politicsId],
+            ['post_id' => $africaPostId, 'category_id' => $africaId],
+            ['post_id' => $africaPostId, 'category_id' => $politicsId],
+        ]);
+
+        $this->withUnencryptedCookies(['grimba_region' => 'europe'])
+            ->get('/blog/politique')
+            ->assertOk()
+            ->assertSee($europeSource)
+            ->assertDontSee($africaSource);
+    }
+
     private function category(string $name, int $order): int
     {
         $author = User::query()->find(1);
