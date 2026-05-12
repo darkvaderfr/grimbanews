@@ -3,6 +3,7 @@
 namespace Botble\Blog\Services;
 
 use App\Support\GrimbaArticleText;
+use App\Support\GrimbaEditorialCategories;
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\AdminHelper;
 use Botble\Base\Supports\Helper;
@@ -79,7 +80,10 @@ class BlogService
                     shortcode()->getCompiler()->setEditLink(route('posts.edit', $post->id), 'posts.edit');
                 }
 
-                $category = $post->categories->sortByDesc('id')->first();
+                $category = $post->categories
+                    ->reject(fn (Category $category): bool => in_array($category->name, GrimbaEditorialCategories::internalReviewNames(), true))
+                    ->sortByDesc('id')
+                    ->first();
                 if ($category) {
                     if ($category->parents->isNotEmpty()) {
                         foreach ($category->parents as $parentCategory) {

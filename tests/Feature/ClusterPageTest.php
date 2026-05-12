@@ -365,8 +365,24 @@ class ClusterPageTest extends TestCase
         $sourceA = $this->createSource('Region Scoped Wire A ' . Str::random(6), 'US', 'left');
         $sourceB = $this->createSource('Region Scoped Wire B ' . Str::random(6), 'US', 'center');
         $categoryId = (int) DB::table('categories')->where('name', 'Monde')->value('id');
+        $internalCategoryId = (int) DB::table('categories')->where('name', 'Trusted Source Credibility')->value('id');
 
         $this->assertGreaterThan(0, $categoryId, 'Fixture category must exist.');
+        if ($internalCategoryId <= 0) {
+            $internalCategoryId = (int) DB::table('categories')->insertGetId([
+                'name' => 'Trusted Source Credibility',
+                'parent_id' => 0,
+                'description' => 'Internal review bucket fixture.',
+                'status' => 'published',
+                'author_id' => 1,
+                'author_type' => \Botble\ACL\Models\User::class,
+                'order' => 16,
+                'is_featured' => 0,
+                'is_default' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
         foreach ($ids as $index => $id) {
             DB::table('posts')->where('id', $id)->update([
@@ -383,8 +399,8 @@ class ClusterPageTest extends TestCase
             ]);
 
             DB::table('post_categories')->insertOrIgnore([
-                'post_id' => $id,
-                'category_id' => $categoryId,
+                ['post_id' => $id, 'category_id' => $categoryId],
+                ['post_id' => $id, 'category_id' => $internalCategoryId],
             ]);
         }
 
@@ -397,6 +413,7 @@ class ClusterPageTest extends TestCase
             ->assertSee('Region Scoped Wire A')
             ->assertSee('Region Scoped Wire B')
             ->assertSee('Monde')
+            ->assertDontSee('Trusted Source Credibility')
             ->assertSee('Sibling region-scope fixture description.');
     }
 

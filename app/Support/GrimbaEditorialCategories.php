@@ -101,6 +101,17 @@ class GrimbaEditorialCategories
     }
 
     /**
+     * @return array<int, string>
+     */
+    public static function internalReviewNames(): array
+    {
+        return [
+            'Trusted Source Credibility',
+            'Unclassified Source Bias',
+        ];
+    }
+
+    /**
      * @return \Illuminate\Support\Collection<int, \Botble\Blog\Models\Category>
      */
     public static function homepageChips(int $limit = 10): Collection

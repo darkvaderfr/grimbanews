@@ -104,6 +104,7 @@ class EditorialCategoriesTest extends TestCase
         $politicsId = $this->category('Politique', 11);
         $economyId = $this->category('Économie', 12);
         $worldId = $this->category('Monde', 13);
+        $internalGuardrailId = $this->category('Trusted Source Credibility', 16);
         $sourceId = $this->source('Editorial Categories Article ' . Str::lower(Str::random(8)), 'FR');
         $title = 'Editorial category article badges ' . Str::lower(Str::random(8));
         $postId = $this->postId($title, $sourceId);
@@ -113,6 +114,7 @@ class EditorialCategoriesTest extends TestCase
             ['post_id' => $postId, 'category_id' => $politicsId],
             ['post_id' => $postId, 'category_id' => $economyId],
             ['post_id' => $postId, 'category_id' => $worldId],
+            ['post_id' => $postId, 'category_id' => $internalGuardrailId],
         ]);
 
         $path = parse_url(Post::query()->findOrFail($postId)->url, PHP_URL_PATH);
@@ -126,7 +128,8 @@ class EditorialCategoriesTest extends TestCase
             ->assertSee('Politique')
             ->assertSee('Économie')
             ->assertSee('Monde')
-            ->assertSee('Europe');
+            ->assertSee('Europe')
+            ->assertDontSee('Trusted Source Credibility');
     }
 
     private function category(string $name, int $order): int

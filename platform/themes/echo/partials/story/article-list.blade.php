@@ -129,6 +129,9 @@
                     $description = GnTr::description($cp);
                     $isTranslated = GnTr::isTranslated($cp);
                     $categories = $cp->relationLoaded('categories') ? $cp->categories : collect();
+                    $categories = $categories
+                        ->reject(fn ($category): bool => in_array($category->name, \App\Support\GrimbaEditorialCategories::internalReviewNames(), true))
+                        ->values();
                 @endphp
                 <li data-bias="{{ $bucket }}"
                     id="story-article-{{ (int) $cp->id }}"

@@ -5,13 +5,16 @@
     $limit = max(1, (int) ($limit ?? 2));
     $editionNames = GrimbaEditorialCategories::editionNames();
     $topicNames = GrimbaEditorialCategories::topicNames();
+    $internalReviewNames = GrimbaEditorialCategories::internalReviewNames();
 
     $category = $category ?? ($post ? $post->firstCategory : null);
     $categories = collect();
 
     if ($post) {
         $post->loadMissing('categories');
-        $postCategories = $post->categories;
+        $postCategories = $post->categories
+            ->reject(fn ($item): bool => in_array($item->name, $internalReviewNames, true))
+            ->values();
 
         $topic = $postCategories
             ->filter(fn ($item): bool => in_array($item->name, $topicNames, true))
@@ -31,7 +34,7 @@
             ->unique('id')
             ->take($limit)
             ->values();
-    } elseif ($category) {
+    } elseif ($category && ! in_array($category->name, $internalReviewNames, true)) {
         $categories = collect([$category]);
     }
 @endphp

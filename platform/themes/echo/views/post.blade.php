@@ -1,10 +1,20 @@
 @php
     use App\Support\GrimbaTranslationPresenter as GnTr;
+    use App\Support\GrimbaEditorialCategories as GnCats;
 
     Theme::layout('grimba-chrome');
     Theme::set('isDetailPage', true);
 
     GnTr::warm($post);
+    if (method_exists($post, 'categories')) {
+        $post->loadMissing('categories');
+        $post->setRelation(
+            'categories',
+            $post->categories
+                ->reject(fn ($category): bool => in_array($category->name, GnCats::internalReviewNames(), true))
+                ->values()
+        );
+    }
 
     $__gnSeoTitle = GnTr::title($post);
     $__gnSeoDesc = GnTr::description($post);
