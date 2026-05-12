@@ -214,7 +214,11 @@ class GrimbaHealth extends Command
             $this->warn('   ⚠ automation monitor table is unavailable; run migrations before relying on scheduler health');
             $riskWarnings[] = 'automation monitor table unavailable';
         } else {
-            $automationStatus = GrimbaAutomationMonitor::status(GrimbaAutomationMonitor::healthJobKeys());
+            $healthJobKeys = array_values(array_filter(
+                GrimbaAutomationMonitor::healthJobKeys(),
+                fn (string $jobKey): bool => $jobKey !== 'ops_health'
+            ));
+            $automationStatus = GrimbaAutomationMonitor::status($healthJobKeys);
 
             foreach ($automationStatus as $job) {
                 $glyph = $job->is_failed || $job->is_stale ? '⚠' : '✓';

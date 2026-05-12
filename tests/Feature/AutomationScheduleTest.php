@@ -50,6 +50,7 @@ class AutomationScheduleTest extends TestCase
     public function test_automation_monitor_records_success_and_failure_runs(): void
     {
         $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+        DB::table('grimba_automation_runs')->delete();
 
         $successId = GrimbaAutomationMonitor::start('rss_ingest', 'grimba:poll-feeds');
         GrimbaAutomationMonitor::finish($successId, 'success', 0);

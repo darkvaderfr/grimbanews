@@ -246,6 +246,45 @@ class DailyPublishFreshnessTest extends TestCase
             ->assertFailed();
     }
 
+    public function test_ops_health_guard_does_not_fail_on_its_own_previous_failure(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        DB::table('posts')
+            ->where('status', 'published')
+            ->update(['published_at' => now()->subDays(7)]);
+
+        $suffix = Str::lower(Str::random(8));
+        $author = $this->admin();
+        $sourceId = $this->trustedSourceId('Self Health Guard ' . $suffix, 101);
+        $postId = $this->publishedPostId('self health guard fixture ' . $suffix, $sourceId, $author, now());
+
+        $this->rssItem($postId, 'https://example.test/self-health-guard-' . $suffix, 'self-health-guard-' . $suffix);
+        $this->markHealthAutomationHealthy();
+
+        DB::table('grimba_automation_runs')->insert([
+            'job_key' => 'ops_health',
+            'command' => 'grimba:health --fail-on-risk --min-full-content-coverage=70',
+            'status' => 'failed',
+            'exit_code' => 1,
+            'started_at' => now()->subMinutes(2),
+            'finished_at' => now()->subMinute(),
+            'duration_ms' => 1000,
+            'error_message' => 'previous disk floor failure',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->artisan('grimba:health', [
+            '--fail-on-risk' => true,
+            '--min-free-mb' => 0,
+            '--min-published-24h' => 1,
+            '--min-full-content-coverage' => 0,
+        ])
+            ->doesntExpectOutputToContain('automation job unhealthy: Ops health guard')
+            ->assertSuccessful();
+    }
+
     public function test_full_article_extractor_prioritizes_never_attempted_posts_over_recent_failures(): void
     {
         $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
