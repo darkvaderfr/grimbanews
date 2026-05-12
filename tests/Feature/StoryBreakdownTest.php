@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Botble\ACL\Models\User;
+use Botble\Blog\Models\Post;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -129,5 +130,50 @@ class StoryBreakdownTest extends TestCase
             ->assertOk()
             ->assertJsonFragment(['url' => url('/article/command-palette-fixture')])
             ->assertDontSee('/blog/command-palette-fixture', false);
+    }
+
+    public function test_article_urls_are_canonicalized_away_from_blog_prefix(): void
+    {
+        $now = now();
+        $postId = DB::table('posts')->insertGetId([
+            'name' => 'Canonical article fixture',
+            'description' => 'Canonical article URL fixture.',
+            'content' => '<p>Canonical article URL fixture.</p>',
+            'status' => 'published',
+            'author_id' => 1,
+            'author_type' => User::class,
+            'is_featured' => 0,
+            'image' => null,
+            'views' => 0,
+            'bias_rating' => 'center',
+            'is_blindspot' => 0,
+            'credibility_score' => 80,
+            'ownership_type' => 'fixture',
+            'story_cluster_id' => null,
+            'source_name' => 'Fixture Source',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        DB::table('slugs')->insert([
+            'key' => 'canonical-article-fixture',
+            'reference_id' => $postId,
+            'reference_type' => Post::class,
+            'prefix' => 'blog',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $post = Post::query()->with('slugable')->findOrFail($postId);
+
+        $this->assertSame('/article/canonical-article-fixture', parse_url($post->url, PHP_URL_PATH));
+
+        $this->get('/blog/canonical-article-fixture?utm=legacy')
+            ->assertRedirect('/article/canonical-article-fixture?utm=legacy');
+
+        $this->get('/article/canonical-article-fixture')
+            ->assertOk()
+            ->assertSee('grimba-article-shell', false)
+            ->assertSee('Canonical article fixture');
     }
 }

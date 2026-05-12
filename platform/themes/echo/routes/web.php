@@ -9,6 +9,7 @@ use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
 use Botble\Blog\Models\Category;
 use Botble\Blog\Models\Post;
 use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Slug\Models\Slug;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
@@ -481,8 +482,34 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         })->middleware('member')->name('public.saved-searches.store');
 
         Route::get('article/{slug}', function (string $slug) {
-            return app(\Botble\Theme\Http\Controllers\PublicController::class)->getView($slug, 'blog');
+            $prefix = Slug::query()
+                ->where('key', $slug)
+                ->where('reference_type', Post::class)
+                ->whereIn('prefix', ['article', 'blog'])
+                ->orderByRaw("CASE prefix WHEN 'article' THEN 0 ELSE 1 END")
+                ->value('prefix');
+
+            abort_unless($prefix, 404);
+
+            return app(\Botble\Theme\Http\Controllers\PublicController::class)->getView($slug, (string) $prefix);
         })->where('slug', '[A-Za-z0-9\-_]+')->name('public.grimba-article');
+
+        Route::get('blog/{slug}', function (Request $request, string $slug) {
+            $isPostSlug = Slug::query()
+                ->where('key', $slug)
+                ->where('prefix', 'blog')
+                ->where('reference_type', Post::class)
+                ->exists();
+
+            if ($isPostSlug) {
+                $target = route('public.grimba-article', $slug);
+                $query = $request->getQueryString();
+
+                return redirect()->to($query ? $target . '?' . $query : $target, 301);
+            }
+
+            return app(\Botble\Theme\Http\Controllers\PublicController::class)->getView($slug, 'blog');
+        })->where('slug', '[A-Za-z0-9\-_]+')->name('public.grimba-blog-legacy');
 
         Route::get('command-palette.json', function () {
             $stories = DB::table('posts')

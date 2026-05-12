@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Scopes\GrimbaRegionScope;
 use Botble\Blog\Models\Post;
+use Botble\Slug\Models\Slug;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->disableDebugbarOnAdmin();
+        $this->canonicalizeArticleUrls();
 
         // Flip the app locale from the grimba_lang cookie right before
         // any view renders. This wins over Botble's Language plugin
@@ -44,6 +46,57 @@ class AppServiceProvider extends ServiceProvider
         // resolves dots as nested-path separators, so 'grimba.region'
         // would be invisible to hasGlobalScope/getGlobalScope.
         Post::addGlobalScope('grimba_region', new GrimbaRegionScope());
+    }
+
+    private function canonicalizeArticleUrls(): void
+    {
+        if (! function_exists('add_filter')) {
+            return;
+        }
+
+        add_filter('slug_filter_url', function (string $url): string {
+            static $postSlugCache = [];
+
+            $parts = parse_url($url);
+            $path = (string) ($parts['path'] ?? '');
+
+            if (! preg_match('~/blog/([^/?#]+)$~', $path, $matches)) {
+                return $url;
+            }
+
+            $slug = rawurldecode($matches[1]);
+            $isPost = $postSlugCache[$slug] ??= Slug::query()
+                ->where('key', $slug)
+                ->where('prefix', 'blog')
+                ->where('reference_type', Post::class)
+                ->exists();
+
+            if (! $isPost) {
+                return $url;
+            }
+
+            $parts['path'] = preg_replace('~/blog/([^/?#]+)$~', '/article/' . rawurlencode($slug), $path) ?: $path;
+
+            return $this->buildUrlFromParts($parts);
+        }, 99);
+    }
+
+    /**
+     * @param array{scheme?: string, host?: string, port?: int, user?: string, pass?: string, path?: string, query?: string, fragment?: string} $parts
+     */
+    private function buildUrlFromParts(array $parts): string
+    {
+        $auth = isset($parts['user'])
+            ? $parts['user'] . (isset($parts['pass']) ? ':' . $parts['pass'] : '') . '@'
+            : '';
+
+        return (isset($parts['scheme']) ? $parts['scheme'] . '://' : '')
+            . $auth
+            . ($parts['host'] ?? '')
+            . (isset($parts['port']) ? ':' . $parts['port'] : '')
+            . ($parts['path'] ?? '')
+            . (isset($parts['query']) ? '?' . $parts['query'] : '')
+            . (isset($parts['fragment']) ? '#' . $parts['fragment'] : '');
     }
 
     private function disableDebugbarOnAdmin(): void

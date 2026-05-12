@@ -132,6 +132,8 @@ class PwaShellTest extends TestCase
 
     public function test_command_palette_shell_and_index_are_available(): void
     {
+        $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+
         $this->get('/')
             ->assertOk()
             ->assertSee('id="grimba-command-palette"', false)
@@ -159,6 +161,30 @@ class PwaShellTest extends TestCase
         foreach ($items as $item) {
             $this->assertStringNotContainsString('categorie=', (string) ($item['url'] ?? ''));
         }
+
+        $this->assertStringContainsString('.grimba-command-palette.is-open', $css);
+        $this->assertStringContainsString('display: flex;', $css);
+        $this->assertStringContainsString('justify-content: center;', $css);
+    }
+
+    public function test_article_shell_css_guards_against_dead_sidebar_and_overflow(): void
+    {
+        $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+        $view = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/post.blade.php');
+
+        $this->assertStringContainsString('grimba-article-shell', $view);
+        $this->assertStringContainsString('grimba-article-primary', $view);
+        $this->assertStringContainsString('$__gnHasPrimarySidebar', $view);
+        $this->assertStringContainsString('mx-auto', $view);
+        $this->assertStringContainsString('body.grimba-home .grimba-article-shell', $css);
+        $this->assertStringContainsString('overflow-x: clip;', $css);
+        $this->assertStringContainsString('overflow-wrap: anywhere;', $css);
+        $this->assertStringContainsString('body.grimba-home .grimba-article-shell .container', $css);
+        $this->assertStringContainsString('body.grimba-home .grimba-sub-main > .container-xxl', $css);
+        $this->assertStringContainsString('flex-wrap: wrap;', $css);
+        $this->assertStringContainsString('overflow-x: visible;', $css);
+        $this->assertStringContainsString('body.grimba-home[id^="post-"] .grimba-mobile-nav', $css);
+        $this->assertStringContainsString('display: none !important;', $css);
     }
 
     public function test_region_choice_suppresses_onboarding_overlay_across_editions(): void

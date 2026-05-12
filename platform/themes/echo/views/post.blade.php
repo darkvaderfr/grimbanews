@@ -732,14 +732,23 @@
 @if(! $__gnIsStoryPage)
 {{-- S172 — dropped Bootstrap bg-white that forced light bg in dark
      mode. body chrome's grimba paper bg now shines through correctly. --}}
-<section class="echo-hero-section inner inner-post echo-feature-area blog-post-details-content">
+<section class="echo-hero-section inner inner-post echo-feature-area blog-post-details-content grimba-article-shell">
     <div class="echo-hero">
         <div class="container">
             {{-- S170 — translation feature dropped. The legacy single-
                  post layout had a translate-picker here; gone. --}}
             <div class="echo-full-hero-content">
+                @php
+                    $__gnPrimarySidebarHtml = trim((string) dynamic_sidebar('primary_sidebar'));
+                    $__gnBlogBottomSidebarHtml = trim((string) dynamic_sidebar('blog_bottom_sidebar'));
+                    $__gnHasPrimarySidebar = $__gnPrimarySidebarHtml !== '';
+                @endphp
                 <div class="row gx-5 sticky-coloum-wrap">
-                    <div class="col-xl-8 col-lg-8">
+                    <div @class([
+                        'grimba-article-primary',
+                        'col-xl-8 col-lg-8' => $__gnHasPrimarySidebar,
+                        'col-xl-9 col-lg-10 mx-auto' => ! $__gnHasPrimarySidebar,
+                    ])>
                         {{-- S200 — orphan-post parity. Single-source posts now
                              use the same glass-language hero as clustered
                              stories instead of the stock Echo Bootstrap block. --}}
@@ -1016,19 +1025,23 @@
 
                         {!! apply_filters(BASE_FILTER_PUBLIC_COMMENT_AREA, null, $post) !!}
 
-                        <div class="mt-5">
-                            {!! dynamic_sidebar('blog_bottom_sidebar') !!}
-                        </div>
+                        @if($__gnBlogBottomSidebarHtml !== '')
+                            <div class="mt-5">
+                                {!! $__gnBlogBottomSidebarHtml !!}
+                            </div>
+                        @endif
                     </div>
-                    <div class="col-xl-4 col-lg-4 sticky-coloum-item">
-                        <div class="echo-right-ct-1">
-                            {!! apply_filters('ads_render', null, 'primary_sidebar_before', ['class' => 'my-2 text-center']) !!}
+                    @if($__gnHasPrimarySidebar)
+                        <div class="col-xl-4 col-lg-4 sticky-coloum-item">
+                            <div class="echo-right-ct-1">
+                                {!! apply_filters('ads_render', null, 'primary_sidebar_before', ['class' => 'my-2 text-center']) !!}
 
-                            {!! dynamic_sidebar('primary_sidebar') !!}
+                                {!! $__gnPrimarySidebarHtml !!}
 
-                            {!! apply_filters('ads_render', null, 'primary_sidebar_after', ['class' => 'my-2 text-center']) !!}
+                                {!! apply_filters('ads_render', null, 'primary_sidebar_after', ['class' => 'my-2 text-center']) !!}
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>
