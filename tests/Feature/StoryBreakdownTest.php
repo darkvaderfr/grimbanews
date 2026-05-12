@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Botble\ACL\Models\User;
 use Botble\Blog\Models\Post;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class StoryBreakdownTest extends TestCase
@@ -175,5 +176,112 @@ class StoryBreakdownTest extends TestCase
             ->assertOk()
             ->assertSee('grimba-article-shell', false)
             ->assertSee('Canonical article fixture');
+    }
+
+    public function test_orphan_article_page_renders_readable_feed_fallback_in_reader_block(): void
+    {
+        $now = now();
+        $slug = 'orphan-feed-fallback-' . Str::lower(Str::random(8));
+        $fallback = 'Readable orphan fallback body starts here with enough context for the reader. '
+            . str_repeat('This fallback sentence keeps useful article context inside GrimbaNews. ', 5);
+
+        $postId = DB::table('posts')->insertGetId([
+            'name' => 'Orphan feed fallback fixture',
+            'description' => 'Orphan feed fallback description.',
+            'content' => '<p><a href="https://example.test/orphan-fallback" target="_blank" rel="noopener">Lire l’article original</a></p><p>' . $fallback . '</p>',
+            'status' => 'published',
+            'author_id' => 1,
+            'author_type' => User::class,
+            'is_featured' => 0,
+            'image' => null,
+            'views' => 0,
+            'bias_rating' => 'center',
+            'is_blindspot' => 0,
+            'credibility_score' => 80,
+            'ownership_type' => 'fixture',
+            'story_cluster_id' => null,
+            'source_name' => 'Fixture Source',
+            'full_content' => null,
+            'full_fetched_at' => $now,
+            'full_extract_error' => 'http 403',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        DB::table('slugs')->insert([
+            'key' => $slug,
+            'reference_id' => $postId,
+            'reference_type' => Post::class,
+            'prefix' => 'blog',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $html = $this->get('/article/' . $slug)
+            ->assertOk()
+            ->assertSee('grimba-full-article--reader', false)
+            ->assertSee('Extrait disponible')
+            ->assertSee("Lire l'extrait disponible")
+            ->assertSee('Readable orphan fallback body starts here')
+            ->getContent();
+
+        $this->assertSame(1, substr_count($html, 'Readable orphan fallback body starts here'));
+        $this->assertStringNotContainsString('Lire l’article original</a></p><p>Readable orphan fallback body starts here', $html);
+    }
+
+    public function test_orphan_article_reader_prefers_extracted_body_over_short_translated_ingest_body(): void
+    {
+        $now = now();
+        $slug = 'orphan-full-content-' . Str::lower(Str::random(8));
+        $full = 'Extracted original article body remains visible inside the reader. '
+            . str_repeat('This extracted paragraph is the durable in-app article body for readers. ', 5);
+
+        $postId = DB::table('posts')->insertGetId([
+            'name' => 'Original English title',
+            'description' => 'Original short description.',
+            'content' => '<p>Original short ingest body.</p>',
+            'status' => 'published',
+            'author_id' => 1,
+            'author_type' => User::class,
+            'is_featured' => 0,
+            'image' => null,
+            'views' => 0,
+            'bias_rating' => 'center',
+            'is_blindspot' => 0,
+            'credibility_score' => 80,
+            'ownership_type' => 'fixture',
+            'story_cluster_id' => null,
+            'source_name' => 'Fixture Source',
+            'original_language' => 'en',
+            'translated_to' => 'fr',
+            'translated_name' => 'Titre français',
+            'translated_description' => 'Description française.',
+            'translated_content' => '<p>Résumé traduit trop court.</p>',
+            'full_content' => '<p>' . $full . '</p>',
+            'full_fetched_at' => $now,
+            'full_extract_error' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        DB::table('slugs')->insert([
+            'key' => $slug,
+            'reference_id' => $postId,
+            'reference_type' => Post::class,
+            'prefix' => 'blog',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $this->withUnencryptedCookies([
+            'grimba_lang' => 'fr',
+            'grimba_onboarded' => '1',
+        ])
+            ->get('/article/' . $slug)
+            ->assertOk()
+            ->assertSee('Texte intégral')
+            ->assertSee("Lire l'article complet")
+            ->assertSee('Extracted original article body remains visible')
+            ->assertDontSee('Résumé traduit trop court.');
     }
 }

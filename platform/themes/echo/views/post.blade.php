@@ -154,10 +154,16 @@
     $__gnReadableBody = \App\Support\GrimbaArticleText::readableBody($post);
     $__gnRawFullBody = trim((string) ($__gnReadableBody->html ?? ''));
     $__gnFullBodySource = $__gnReadableBody->source ?? null;
+    $__gnTranslatedBody = GnTr::body($post);
+    $__gnTranslatedBodyClean = \App\Support\GrimbaArticleText::cleanIngestBody($__gnTranslatedBody);
+    $__gnTranslatedBodyReadable = $__gnHasTr
+        && $__gnTranslatedBodyClean
+        && \App\Support\GrimbaArticleText::textLength($__gnTranslatedBodyClean) >= \App\Support\GrimbaArticleText::MIN_READABLE_CHARS;
     $__gnFullBody = $__gnFullActive && $__gnCanReadFull && $__gnReadableBody
-        ? ($__gnHasTr && GnTr::hasTranslatedBody($post, $__gnTarget) ? (GnTr::body($post) ?: $__gnRawFullBody) : $__gnRawFullBody)
+        ? ($__gnFullBodySource !== 'full' && $__gnTranslatedBodyReadable ? $__gnTranslatedBodyClean : $__gnRawFullBody)
         : null;
     $__gnFullArticleLocked = $__gnFullActive && ! $__gnCanReadFull && $__gnReadableBody !== null;
+    $__gnShowsReaderBody = $__gnFullBody !== null || $__gnFullArticleLocked;
     $__gnUpstream = $__gnReadableBody
         ? (\Illuminate\Support\Facades\DB::table('rss_feed_items')->where('post_id', $post->id)->value('link')
             ?? \Illuminate\Support\Facades\DB::table('newsapi_items')->where('post_id', $post->id)->value('article_url')
@@ -857,7 +863,7 @@
                         @endif
 
                         @php
-                            $__gnBody = GnTr::body($post);
+                            $__gnBody = $__gnShowsReaderBody ? null : $__gnTranslatedBody;
                             $__gnShowOrig = $__gnHasTr && GnTr::hasTranslatedBody($post, $__gnTarget);
                         @endphp
                         @if ($content = $__gnBody)
@@ -883,7 +889,7 @@
                             </div>
                         @endif
 
-                        @if($__gnFullBodySource === 'full')
+                        @if($__gnShowsReaderBody)
                             @include(Theme::getThemeNamespace('partials.story.full-article'), [
                                 'post' => $post,
                                 'body' => $__gnFullBody,

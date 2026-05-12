@@ -94,6 +94,15 @@ class GrimbaArticleText
             ];
         }
 
+        $description = self::stripNewsApiTruncationMarker($post->description ?? null);
+        if (self::textLength($description) >= $minChars) {
+            return (object) [
+                'html' => '<p>' . e(strip_tags((string) $description)) . '</p>',
+                'source' => 'description',
+                'is_full' => false,
+            ];
+        }
+
         return null;
     }
 }
