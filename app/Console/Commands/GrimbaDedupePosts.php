@@ -340,6 +340,22 @@ class GrimbaDedupePosts extends Command
                 });
         }
 
+        DB::table('posts')
+            ->whereIn('id', $postIds)
+            ->whereNotNull('content')
+            ->get(['id', 'content'])
+            ->each(function (object $row) use (&$hashes, $canon): void {
+                $url = $this->firstSourceUrlFromHtml((string) $row->content);
+                if (! $url) {
+                    return;
+                }
+
+                $hash = $canon->hash($url);
+                if ($hash) {
+                    $hashes[(int) $row->id][$hash] = true;
+                }
+            });
+
         return $hashes;
     }
 
@@ -369,11 +385,47 @@ class GrimbaDedupePosts extends Command
             );
         }
 
+        $urls = $urls->merge(
+            DB::table('posts')
+                ->whereIn('id', $postIds)
+                ->whereNotNull('content')
+                ->pluck('content')
+                ->map(fn ($content): ?string => $this->firstSourceUrlFromHtml((string) $content))
+                ->filter()
+        );
+
         return $urls
             ->map(fn ($url): string => (string) $url)
             ->filter()
             ->unique()
             ->take(3)
             ->values();
+    }
+
+    private function firstSourceUrlFromHtml(string $html): ?string
+    {
+        $html = trim($html);
+        if ($html === '') {
+            return null;
+        }
+
+        $previous = libxml_use_internal_errors(true);
+        $dom = new \DOMDocument();
+        $loaded = $dom->loadHTML('<?xml encoding="utf-8"><div>' . $html . '</div>', LIBXML_NOERROR | LIBXML_NOWARNING);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        if (! $loaded) {
+            return null;
+        }
+
+        foreach ($dom->getElementsByTagName('a') as $anchor) {
+            $href = trim((string) $anchor->getAttribute('href'));
+            if (str_starts_with($href, 'http://') || str_starts_with($href, 'https://')) {
+                return html_entity_decode($href, ENT_QUOTES, 'UTF-8');
+            }
+        }
+
+        return null;
     }
 }

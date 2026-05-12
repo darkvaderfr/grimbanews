@@ -51,6 +51,7 @@ class GrimbaUrlCanonicalizer
             if ($path !== '/' && str_ends_with($path, '/')) {
                 $path = rtrim($path, '/');
             }
+            $path = $this->canonicalPublisherPath(mb_strtolower($parts['host']), $path);
             $clean .= $path;
         }
 
@@ -68,5 +69,22 @@ class GrimbaUrlCanonicalizer
         // Fragment intentionally dropped.
 
         return $clean;
+    }
+
+    private function canonicalPublisherPath(string $host, string $path): string
+    {
+        if (str_ends_with($host, 'lemonde.fr') && preg_match('/_(\d{6,})_\d+\.html$/', $path, $matches)) {
+            return '/article/' . $matches[1];
+        }
+
+        if (str_ends_with($host, 'jeuneafrique.com') && preg_match('#^/(\d{4,})(?:/|$)#', $path, $matches)) {
+            return '/article/' . $matches[1];
+        }
+
+        if (str_ends_with($host, 'valeursactuelles.com') && str_starts_with($path, '/clubvaleurs/')) {
+            return substr($path, strlen('/clubvaleurs'));
+        }
+
+        return $path;
     }
 }

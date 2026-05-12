@@ -99,6 +99,75 @@ class DedupePostsCommandTest extends TestCase
         $this->assertSame(2, DB::table('rss_feed_items')->whereIn('guid', ['same-url-a-' . $suffix, 'same-url-b-' . $suffix])->where('post_id', $keepId)->count());
     }
 
+    public function test_publisher_url_aliases_are_actionable_without_title_group_flag(): void
+    {
+        $suffix = Str::lower(Str::random(8));
+        $sourceId = $this->source('Dedupe Publisher Alias Source ' . $suffix);
+        $feedId = $this->feed($sourceId, 'https://example.test/dedupe-publisher-alias-' . $suffix . '.xml');
+
+        $keepId = $this->createPost('Dedupe publisher alias title ' . $suffix, $sourceId, now()->subHours(2));
+        $dropId = $this->createPost('Dedupe publisher alias title ' . $suffix, $sourceId, now()->subHour());
+        $this->ledger(
+            $feedId,
+            $keepId,
+            'publisher-alias-a-' . $suffix,
+            'https://www.lemonde.fr/international/article/2026/04/26/story-one_6683458_3210.html',
+            'legacy-hash-a-' . $suffix
+        );
+        $this->ledger(
+            $feedId,
+            $dropId,
+            'publisher-alias-b-' . $suffix,
+            'https://www.lemonde.fr/international/article/2026/04/26/story-two_6683458_3211.html',
+            'legacy-hash-b-' . $suffix
+        );
+
+        $this->artisan('grimba:dedupe-posts', [
+            '--apply' => true,
+            '--source-id' => $sourceId,
+            '--limit' => 20,
+        ])
+            ->expectsOutputToContain('1 same-url title')
+            ->expectsOutputToContain('Deleted 1 duplicate post')
+            ->doesntExpectOutputToContain('Title-only groups are skipped')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('posts', ['id' => $keepId]);
+        $this->assertDatabaseMissing('posts', ['id' => $dropId]);
+        $this->assertSame(2, DB::table('rss_feed_items')->whereIn('guid', ['publisher-alias-a-' . $suffix, 'publisher-alias-b-' . $suffix])->where('post_id', $keepId)->count());
+    }
+
+    public function test_title_group_uses_embedded_original_links_when_ledger_is_missing(): void
+    {
+        $suffix = Str::lower(Str::random(8));
+        $sourceId = $this->source('Dedupe Embedded Link Source ' . $suffix);
+        $feedId = $this->feed($sourceId, 'https://example.test/dedupe-embedded-link-' . $suffix . '.xml');
+        $url = 'https://allafrica.com/stories/202604240206-' . $suffix . '.html';
+
+        $keepId = $this->createPost(
+            'Dedupe embedded link title ' . $suffix,
+            $sourceId,
+            now()->subHours(2),
+            '<p><a href="' . $url . '" target="_blank" rel="noopener">Lire l’article original</a></p><p>Fixture body.</p>'
+        );
+        $dropId = $this->createPost('Dedupe embedded link title ' . $suffix, $sourceId, now()->subHour());
+        $this->ledger($feedId, $dropId, 'embedded-link-b-' . $suffix, $url, 'embedded-link-hash-b-' . $suffix);
+
+        $this->artisan('grimba:dedupe-posts', [
+            '--apply' => true,
+            '--source-id' => $sourceId,
+            '--limit' => 20,
+        ])
+            ->expectsOutputToContain('1 same-url title')
+            ->expectsOutputToContain('Deleted 1 duplicate post')
+            ->doesntExpectOutputToContain('Title-only groups are skipped')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('posts', ['id' => $keepId]);
+        $this->assertDatabaseMissing('posts', ['id' => $dropId]);
+        $this->assertSame(1, DB::table('rss_feed_items')->where('guid', 'embedded-link-b-' . $suffix)->where('post_id', $keepId)->count());
+    }
+
     private function source(string $name): int
     {
         return (int) DB::table('news_sources')->insertGetId([
@@ -127,7 +196,7 @@ class DedupePostsCommandTest extends TestCase
         ]);
     }
 
-    private function createPost(string $name, int $sourceId, mixed $createdAt): int
+    private function createPost(string $name, int $sourceId, mixed $createdAt, ?string $content = null): int
     {
         $authorId = User::query()->value('id');
         $this->assertNotNull($authorId, 'Fixture database must contain a CMS user.');
@@ -135,7 +204,7 @@ class DedupePostsCommandTest extends TestCase
         $row = [
             'name' => $name,
             'description' => 'Dedupe fixture article.',
-            'content' => '<p>Dedupe fixture article.</p>',
+            'content' => $content ?? '<p>Dedupe fixture article.</p>',
             'status' => 'published',
             'author_id' => $authorId,
             'author_type' => User::class,
