@@ -58,7 +58,7 @@ scp -q -o StrictHostKeyChecking=no "$TARBALL" "${VPS_USER}@${VPS_HOST}:${REMOTE_
 
 echo ""
 echo "=== Running remote deploy ==="
-ssh -o StrictHostKeyChecking=no "${VPS_USER}@${VPS_HOST}" bash -s << 'REMOTE_SCRIPT'
+ssh -o StrictHostKeyChecking=no "${VPS_USER}@${VPS_HOST}" "DEPLOY_SHA='${SHA}' bash -s" << 'REMOTE_SCRIPT'
 set -euo pipefail
 
 APP_PATH="/var/www/grimbanews/current"
@@ -94,6 +94,9 @@ echo "=== Extracting release (preserves .env, storage/, vendor/, database/*.sqli
 # are safe. tar overwrites by default.
 tar --no-overwrite-dir -xzf "$TARBALL"
 rm -f "$TARBALL"
+printf '%s\n' "$DEPLOY_SHA" > REVISION
+chown www-data:www-data REVISION 2>/dev/null || true
+chmod 664 REVISION 2>/dev/null || true
 
 echo "=== Ensuring storage + cache dirs exist ==="
 mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs bootstrap/cache storage/app/public/og

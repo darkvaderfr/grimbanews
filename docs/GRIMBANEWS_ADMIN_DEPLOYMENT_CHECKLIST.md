@@ -41,7 +41,7 @@ php artisan view:cache
 
 ## Post-Deploy Smoke
 
-- `php artisan grimba:release-smoke --base-url=https://grimbanews.com`
+- `php artisan grimba:release-smoke --base-url=https://grimbanews.com --evidence`
 - `php artisan grimba:health`
 - `php artisan grimba:verify-backups --min=1`
 - `php artisan grimba:nobuai-health`
@@ -51,8 +51,11 @@ php artisan view:cache
 For IP-based smoke before DNS or TLS is trusted:
 
 ```sh
-php artisan grimba:release-smoke --base-url=http://209.74.88.135 --host-header=grimbanews.com
+php artisan grimba:release-smoke --base-url=http://209.74.88.135 --host-header=grimbanews.com --evidence
 ```
+
+Evidence files are written to `storage/app/grimba-release-evidence/` by default and include the commit, environment, base URL, Host header, disk/full-content floors, and every smoke check result.
+The standard `deploy.sh` flow writes the deployed short SHA to `REVISION` so tarball-based production deploys still produce commit-specific evidence.
 
 ## Rollback
 
