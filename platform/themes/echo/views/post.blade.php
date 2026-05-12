@@ -798,7 +798,7 @@
                                 </div>
 
                                 <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
-                                    @include(Theme::getThemeNamespace('partials.category-badge'), ['post' => $post])
+                                    @include(Theme::getThemeNamespace('partials.category-badge'), ['post' => $post, 'limit' => 8])
                                     @include(Theme::getThemeNamespace('partials.bias-badge'), ['bias' => $post->bias_rating ?? 'unknown', 'size' => 'sm'])
                                 </div>
 

@@ -98,6 +98,37 @@ class EditorialCategoriesTest extends TestCase
             ->assertDontSee($africaSource);
     }
 
+    public function test_article_page_lists_full_category_set_not_just_primary_pair(): void
+    {
+        $europeId = $this->category('Europe', 2);
+        $politicsId = $this->category('Politique', 11);
+        $economyId = $this->category('Économie', 12);
+        $worldId = $this->category('Monde', 13);
+        $sourceId = $this->source('Editorial Categories Article ' . Str::lower(Str::random(8)), 'FR');
+        $title = 'Editorial category article badges ' . Str::lower(Str::random(8));
+        $postId = $this->postId($title, $sourceId);
+
+        DB::table('post_categories')->insertOrIgnore([
+            ['post_id' => $postId, 'category_id' => $europeId],
+            ['post_id' => $postId, 'category_id' => $politicsId],
+            ['post_id' => $postId, 'category_id' => $economyId],
+            ['post_id' => $postId, 'category_id' => $worldId],
+        ]);
+
+        $path = parse_url(Post::query()->findOrFail($postId)->url, PHP_URL_PATH);
+        $this->assertSame('/article/' . Str::slug($title), $path);
+
+        $this->get($path)
+            ->assertOk()
+            ->assertSee($title)
+            ->assertSee('data-grimba-category-role="topic"', false)
+            ->assertSee('data-grimba-category-role="edition"', false)
+            ->assertSee('Politique')
+            ->assertSee('Économie')
+            ->assertSee('Monde')
+            ->assertSee('Europe');
+    }
+
     private function category(string $name, int $order): int
     {
         $author = User::query()->find(1);
