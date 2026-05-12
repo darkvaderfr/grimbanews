@@ -35,7 +35,8 @@ class GrimbaHealth extends Command
         {--min-published-24h=12 : minimum published posts required in the last 24h when failing on risk}
         {--min-ingested-published-24h= : minimum RSS/NewsAPI-backed published posts required in the last 24h; defaults to min-published-24h}
         {--min-full-content-coverage=0 : minimum percent of recent upstream-backed posts with readable full text; 0 observes only}
-        {--full-content-retry-after-hours=24 : retry window used by full article extraction health}';
+        {--full-content-retry-after-hours=24 : retry window used by full article extraction health}
+        {--backup-dir= : database backup directory to inspect; defaults to database/backups}';
     protected $description = 'One-page health summary of the GrimbaNews ingest + editorial pipeline (S153).';
 
     public function handle(GrimbaNewsApiFetcher $newsApiFetcher): int
@@ -49,6 +50,7 @@ class GrimbaHealth extends Command
             : max(0, (int) $minIngestedPublishedOption);
         $minFullContentCoverage = min(100, max(0, (int) $this->option('min-full-content-coverage')));
         $fullContentRetryAfterHours = max(0, (int) $this->option('full-content-retry-after-hours'));
+        $backupDir = (string) ($this->option('backup-dir') ?: base_path('database/backups'));
         $riskWarnings = [];
         $last24h = now()->subDay();
 
@@ -323,8 +325,13 @@ class GrimbaHealth extends Command
             $riskWarnings[] = sprintf('disk free space below floor: %dMB/%dMB', $freeMb, $minFreeMb);
         }
 
+        $backupHealth = $this->backupHealth($backupDir);
+        if ($backupHealth['available'] && $backupHealth['invalid'] !== []) {
+            $riskWarnings[] = 'invalid database backup artifacts: ' . implode(', ', $backupHealth['invalid']);
+        }
+
         $this->newLine();
-        $this->line('11. Freshness + disk guard');
+        $this->line('11. Freshness + disk + backup guard');
         $this->line(sprintf('   published 24h        : %d post(s) (floor %d)', $publicationPipeline->published24, $minPublished24h));
         $this->line(sprintf(
             '   ingest-published 24h : %d post(s) (RSS %d / NewsAPI %d / manual %d, floor %d)',
@@ -344,6 +351,20 @@ class GrimbaHealth extends Command
             $totalGb === null ? '' : ' / ' . $totalGb . 'GB',
             $minFreeMb
         ));
+        if (! $backupHealth['available']) {
+            $this->line(sprintf('   backups              : not found (%s)', $backupHealth['dir']));
+        } else {
+            $latestBackup = $backupHealth['latest_at'] !== null
+                ? \Illuminate\Support\Carbon::createFromTimestamp($backupHealth['latest_at'])->diffForHumans()
+                : 'none';
+            $this->line(sprintf(
+                '   backups              : %d valid / %d invalid · %s · latest %s',
+                $backupHealth['valid'],
+                count($backupHealth['invalid']),
+                $this->formatBytes($backupHealth['size_bytes']),
+                $latestBackup
+            ));
+        }
 
         if ($riskWarnings === []) {
             $this->line('   ✓ operating floors are clear');
@@ -360,5 +381,108 @@ class GrimbaHealth extends Command
         return $failOnRisk && $riskWarnings !== []
             ? self::FAILURE
             : self::SUCCESS;
+    }
+
+    /**
+     * @return array{
+     *     available: bool,
+     *     dir: string,
+     *     valid: int,
+     *     invalid: list<string>,
+     *     size_bytes: int,
+     *     latest_at: int|null
+     * }
+     */
+    private function backupHealth(string $backupDir): array
+    {
+        $backupDir = rtrim($backupDir, DIRECTORY_SEPARATOR);
+
+        if (! is_dir($backupDir)) {
+            return [
+                'available' => false,
+                'dir' => $backupDir,
+                'valid' => 0,
+                'invalid' => [],
+                'size_bytes' => 0,
+                'latest_at' => null,
+            ];
+        }
+
+        $files = array_values(array_filter(array_merge(
+            glob($backupDir . DIRECTORY_SEPARATOR . 'grimbanews.*.sqlite') ?: [],
+            glob($backupDir . DIRECTORY_SEPARATOR . 'grimbanews.*.sqlite.gz') ?: []
+        ), 'is_file'));
+        $valid = 0;
+        $invalid = [];
+        $sizeBytes = 0;
+        $latestAt = null;
+
+        foreach ($files as $file) {
+            $size = (int) (@filesize($file) ?: 0);
+            $mtime = @filemtime($file) ?: null;
+            $sizeBytes += $size;
+            $latestAt = $mtime !== null ? max($latestAt ?? $mtime, $mtime) : $latestAt;
+
+            if ($size < 1024 * 1024) {
+                $invalid[] = basename($file) . ' (' . $this->formatBytes($size) . ')';
+                continue;
+            }
+
+            if (! $this->looksLikeSqliteBackup($file)) {
+                $invalid[] = basename($file) . ' (not readable SQLite)';
+                continue;
+            }
+
+            $valid++;
+        }
+
+        return [
+            'available' => true,
+            'dir' => $backupDir,
+            'valid' => $valid,
+            'invalid' => $invalid,
+            'size_bytes' => $sizeBytes,
+            'latest_at' => $latestAt,
+        ];
+    }
+
+    private function looksLikeSqliteBackup(string $file): bool
+    {
+        if (str_ends_with($file, '.gz')) {
+            if (! function_exists('gzopen')) {
+                return false;
+            }
+
+            $handle = @gzopen($file, 'rb');
+            if (! $handle) {
+                return false;
+            }
+
+            $header = @gzread($handle, 16);
+            @gzclose($handle);
+
+            return is_string($header) && str_starts_with($header, 'SQLite format 3');
+        }
+
+        $header = @file_get_contents($file, false, null, 0, 16);
+
+        return is_string($header) && str_starts_with($header, 'SQLite format 3');
+    }
+
+    private function formatBytes(int $bytes): string
+    {
+        if ($bytes >= 1073741824) {
+            return round($bytes / 1073741824, 1) . 'GB';
+        }
+
+        if ($bytes >= 1048576) {
+            return round($bytes / 1048576, 1) . 'MB';
+        }
+
+        if ($bytes >= 1024) {
+            return round($bytes / 1024, 1) . 'KB';
+        }
+
+        return $bytes . 'B';
     }
 }

@@ -7,6 +7,7 @@ use App\Support\GrimbaAutomationMonitor;
 use App\Support\GrimbaIngestGuardrails;
 use Botble\ACL\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -283,6 +284,47 @@ class DailyPublishFreshnessTest extends TestCase
         ])
             ->doesntExpectOutputToContain('automation job unhealthy: Ops health guard')
             ->assertSuccessful();
+    }
+
+    public function test_ops_health_guard_fails_when_database_backup_artifact_is_invalid(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        DB::table('posts')
+            ->where('status', 'published')
+            ->update(['published_at' => now()->subDays(7)]);
+
+        $suffix = Str::lower(Str::random(8));
+        $author = $this->admin();
+        $sourceId = $this->trustedSourceId('Backup Health Guard ' . $suffix, 101);
+        $postId = $this->publishedPostId('backup health guard fixture ' . $suffix, $sourceId, $author, now());
+
+        $this->rssItem($postId, 'https://example.test/backup-health-guard-' . $suffix, 'backup-health-guard-' . $suffix);
+        $this->markHealthAutomationHealthy();
+
+        $backupDir = storage_path('framework/testing/grimba-backups-' . $suffix);
+        File::ensureDirectoryExists($backupDir);
+
+        try {
+            file_put_contents(
+                $backupDir . '/grimbanews.20260512111507.sqlite.gz',
+                gzencode("SQLite format 3\0" . random_bytes(1048576 + 4096), 9)
+            );
+            file_put_contents($backupDir . '/grimbanews.20260512110502.sqlite.gz', 'x');
+
+            $this->artisan('grimba:health', [
+                '--fail-on-risk' => true,
+                '--min-free-mb' => 0,
+                '--min-published-24h' => 1,
+                '--min-full-content-coverage' => 0,
+                '--backup-dir' => $backupDir,
+            ])
+                ->expectsOutputToContain('backups              : 1 valid / 1 invalid')
+                ->expectsOutputToContain('invalid database backup artifacts: grimbanews.20260512110502.sqlite.gz (1B)')
+                ->assertFailed();
+        } finally {
+            File::deleteDirectory($backupDir);
+        }
     }
 
     public function test_full_article_extractor_prioritizes_never_attempted_posts_over_recent_failures(): void

@@ -55,6 +55,12 @@ Deploy-time SQLite backups now use `sqlite3 .backup` when available and are comp
 
 This preserves restore evidence while reducing the backup directory footprint on the shared root disk.
 
+## Follow-Up - 2026-05-12 Backup Integrity Guard
+
+`grimba:health --fail-on-risk` now inspects `database/backups` when the directory exists. It reports the valid/invalid backup count, total backup footprint, and newest artifact age alongside disk free space. Tiny artifacts below 1 MB and files that do not read as SQLite backups are release-blocking risks.
+
+The deploy script also prunes sub-1 MB backup artifacts using a `-1024k` predicate, which catches byte-sized failed backup shells correctly.
+
 ## Residual Risk
 
 - Root disk is still tight at 92% used.
@@ -65,5 +71,6 @@ This preserves restore evidence while reducing the backup directory footprint on
 ## Next
 
 - Keep `grimba:health --fail-on-risk` green under the 2048 MB floor.
-- Keep deploy backups compressed and verify restore documentation against `*.sqlite.gz` artifacts.
+- Keep deploy backups compressed and let `grimba:health --fail-on-risk` fail on tiny or unreadable `*.sqlite.gz` artifacts.
+- Verify restore documentation against `*.sqlite.gz` artifacts.
 - Plan broader host maintenance separately for Docker image/volume cleanup.
