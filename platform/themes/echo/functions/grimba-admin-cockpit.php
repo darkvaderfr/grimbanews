@@ -15,7 +15,9 @@ use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Supports\DashboardMenuItem;
 use App\Services\GrimbaNobuAi;
 use App\Services\GrimbaTranslator;
+use App\Services\GrimbaUrlCanonicalizer;
 use App\Support\GrimbaAutomationMonitor;
+use App\Support\GrimbaDedupeReview;
 use App\Support\GrimbaFullArticleCoverage;
 use App\Support\GrimbaIngestGuardrails;
 use App\Support\GrimbaPublicationPipeline;
@@ -163,12 +165,11 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ? DB::table('newsapi_items')->whereNotNull('fetched_at')->max('fetched_at')
                 : null;
 
-            $duplicateGroups = DB::table('posts')
-                ->whereNotNull('name')
-                ->select('name', 'source_id', DB::raw('COUNT(*) as c'))
-                ->groupBy('name', 'source_id')
-                ->having('c', '>', 1)
-                ->count();
+            $dedupeTitlePartitions = GrimbaDedupeReview::partitionTitleGroups(
+                GrimbaDedupeReview::titleGroups(),
+                app(GrimbaUrlCanonicalizer::class)
+            );
+            $duplicateGroups = $dedupeTitlePartitions['unresolved']->count();
 
             $englishTranslationPending = 0;
             if (Schema::hasTable('grimba_post_translations')) {

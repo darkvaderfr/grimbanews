@@ -168,6 +168,68 @@ class DedupePostsCommandTest extends TestCase
         $this->assertSame(1, DB::table('rss_feed_items')->where('guid', 'embedded-link-b-' . $suffix)->where('post_id', $keepId)->count());
     }
 
+    public function test_bbc_sounds_live_title_groups_are_ignored_as_known_recurring_media(): void
+    {
+        DB::table('posts')->where('name', 'like', 'Dedupe %')->delete();
+
+        $suffix = Str::lower(Str::random(8));
+        $sourceId = (int) DB::table('news_sources')->where('name', 'BBC')->value('id');
+        if ($sourceId === 0) {
+            $sourceId = (int) DB::table('news_sources')->insertGetId([
+                'name' => 'BBC',
+                'slug' => 'bbc-' . $suffix,
+                'website' => 'bbc.co.uk',
+                'bias_rating' => 'center',
+                'ownership_type' => 'public',
+                'credibility_score' => 90,
+                'country' => 'GB',
+                'language' => 'en',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+        $feedId = $this->feed($sourceId, 'https://www.bbc.co.uk/sounds/rss.xml');
+
+        $episodeId = $this->createPost('BBC sounds recurring title ' . $suffix, $sourceId, now()->subHours(2));
+        $liveId = $this->createPost('BBC sounds recurring title ' . $suffix, $sourceId, now()->subHour());
+        $this->ledger(
+            $feedId,
+            $episodeId,
+            'bbc-sounds-episode-' . $suffix,
+            'https://www.bbc.co.uk/sounds/play/w3ct8lz1?at_medium=RSS&at_campaign=rss',
+            'bbc-sounds-episode-hash-' . $suffix
+        );
+        $this->ledger(
+            $feedId,
+            $liveId,
+            'bbc-sounds-live-' . $suffix,
+            'https://www.bbc.co.uk/sounds/play/live:bbc_world_service_americas?at_medium=RSS&at_campaign=rss',
+            'bbc-sounds-live-hash-' . $suffix
+        );
+
+        $this->artisan('grimba:dedupe-posts', [
+            '--review-title-groups' => true,
+            '--source-id' => $sourceId,
+            '--limit' => 20,
+        ])
+            ->expectsOutputToContain('0 title-only review group(s) + 1 known recurring media group(s)')
+            ->expectsOutputToContain('1 known recurring media title group(s) ignored')
+            ->expectsOutputToContain('No title-only duplicate groups found')
+            ->assertSuccessful();
+
+        $this->artisan('grimba:health', [
+            '--min-free-mb' => 0,
+            '--min-published-24h' => 0,
+            '--min-ingested-published-24h' => 0,
+            '--min-full-content-coverage' => 0,
+        ])
+            ->expectsOutputToContain('known recurring media title group(s) ignored')
+            ->assertSuccessful();
+
+        $this->assertDatabaseHas('posts', ['id' => $episodeId]);
+        $this->assertDatabaseHas('posts', ['id' => $liveId]);
+    }
+
     private function source(string $name): int
     {
         return (int) DB::table('news_sources')->insertGetId([

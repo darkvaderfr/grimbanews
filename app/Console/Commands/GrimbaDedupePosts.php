@@ -3,10 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Services\GrimbaUrlCanonicalizer;
+use App\Support\GrimbaDedupeReview;
 use Botble\Blog\Models\Post;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /*
@@ -69,39 +69,26 @@ class GrimbaDedupePosts extends Command
 
         // Some duplicates lack ledger rows entirely (RSS-seeded
         // posts). Catch those by name+source_id grouping.
-        $byName = DB::table('posts')
-            ->when($sourceId, fn ($query) => $query->where('source_id', $sourceId))
-            ->select(
-                'name',
-                'source_id',
-                DB::raw('GROUP_CONCAT(id ORDER BY id ASC) as post_ids'),
-                DB::raw('MIN(id) as first_post_id'),
-                DB::raw('MAX(id) as latest_post_id'),
-                DB::raw('COUNT(*) as c')
-            )
-            ->groupBy('name', 'source_id')
-            ->having('c', '>', 1)
-            ->orderByDesc('c')
-            ->limit($limit)
-            ->get();
-
-        [$sameUrlTitleGroups, $reviewTitleGroupsOnly] = $byName->partition(
-            fn (object $group): bool => $this->titleGroupHasSingleCanonicalUrl($group, $canon)
-        );
+        $byName = GrimbaDedupeReview::titleGroups($sourceId, $limit);
+        $titleGroupPartitions = GrimbaDedupeReview::partitionTitleGroups($byName, $canon);
+        $sameUrlTitleGroups = $titleGroupPartitions['same_url'];
+        $ignoredTitleGroups = $titleGroupPartitions['ignored'];
+        $reviewTitleGroupsOnly = $titleGroupPartitions['unresolved'];
 
         $this->info(sprintf(
-            'Duplicate groups: %d actionable (%d by source+URL hash + %d same-url title) + %d title-only review group(s) %s',
+            'Duplicate groups: %d actionable (%d by source+URL hash + %d same-url title) + %d title-only review group(s) + %d known recurring media group(s) %s',
             $groups->count() + $sameUrlTitleGroups->count(),
             $groups->count(),
             $sameUrlTitleGroups->count(),
             $reviewTitleGroupsOnly->count(),
+            $ignoredTitleGroups->count(),
             $apply ? '[APPLY]' : '[DRY RUN]'
         ));
         if ($sourceId) {
             $this->line(sprintf('Scope: source_id=%d', $sourceId));
         }
         if ($reviewTitleGroups) {
-            $this->renderTitleGroupReview($reviewTitleGroupsOnly, $sameUrlTitleGroups);
+            $this->renderTitleGroupReview($reviewTitleGroupsOnly, $sameUrlTitleGroups, $ignoredTitleGroups);
 
             return self::SUCCESS;
         }
@@ -174,7 +161,11 @@ class GrimbaDedupePosts extends Command
         return self::SUCCESS;
     }
 
-    private function renderTitleGroupReview(\Illuminate\Support\Collection $groups, \Illuminate\Support\Collection $sameUrlGroups): void
+    private function renderTitleGroupReview(
+        \Illuminate\Support\Collection $groups,
+        \Illuminate\Support\Collection $sameUrlGroups,
+        \Illuminate\Support\Collection $ignoredGroups
+    ): void
     {
         $this->newLine();
         $this->info(sprintf('Title-only duplicate review: %d group(s) [DRY REVIEW]', $groups->count()));
@@ -182,6 +173,12 @@ class GrimbaDedupePosts extends Command
             $this->line(sprintf(
                 '%d same-title group(s) have one normalized upstream URL and are safe in the default dedupe path.',
                 $sameUrlGroups->count()
+            ));
+        }
+        if ($ignoredGroups->isNotEmpty()) {
+            $this->line(sprintf(
+                '%d known recurring media title group(s) ignored: BBC Sounds live/episode URLs are not article duplicates.',
+                $ignoredGroups->count()
             ));
         }
 
@@ -192,23 +189,7 @@ class GrimbaDedupePosts extends Command
         }
 
         $rows = $groups->map(function (object $group): array {
-            $ids = DB::table('posts')
-                ->where('name', $group->name)
-                ->when(
-                    $group->source_id,
-                    fn ($query) => $query->where('source_id', $group->source_id),
-                    fn ($query) => $query->whereNull('source_id')
-                )
-                ->orderBy('id')
-                ->pluck('id')
-                ->map(fn ($id): int => (int) $id)
-                ->all();
-            foreach ([(int) ($group->first_post_id ?? 0), (int) ($group->latest_post_id ?? 0)] as $fallbackId) {
-                if ($fallbackId > 0 && ! in_array($fallbackId, $ids, true)) {
-                    $ids[] = $fallbackId;
-                }
-            }
-            sort($ids);
+            $ids = GrimbaDedupeReview::idsForTitleGroup($group);
             $sourceName = $group->source_id
                 ? (string) (DB::table('news_sources')->where('id', $group->source_id)->value('name') ?: 'source #' . $group->source_id)
                 : '(no source)';
@@ -219,7 +200,7 @@ class GrimbaDedupePosts extends Command
                 'count' => (int) $group->c,
                 'title' => Str::limit((string) $group->name, 54),
                 'post_ids' => implode(',', $ids),
-                'sample_urls' => Str::limit($this->sampleUrlsForPosts($ids)->implode(' | '), 120),
+                'sample_urls' => Str::limit(GrimbaDedupeReview::sampleUrlsForPosts($ids)->implode(' | '), 120),
             ];
         })->all();
 
@@ -235,7 +216,7 @@ class GrimbaDedupePosts extends Command
             if (! empty($group->latest_post_id) && (int) $group->latest_post_id !== (int) $group->first_post_id) {
                 $this->line('review_post_id ' . (int) $group->latest_post_id);
             }
-            foreach ($this->sampleUrlsForPosts($reviewIds) as $url) {
+            foreach (GrimbaDedupeReview::sampleUrlsForPosts($reviewIds) as $url) {
                 $this->line('review_url ' . $url);
             }
         }
@@ -249,156 +230,5 @@ class GrimbaDedupePosts extends Command
             ));
         }
         $this->warn('Review only. No posts were deleted. Use --include-title-groups only after confirming the URLs are true duplicates.');
-    }
-
-    private function titleGroupHasSingleCanonicalUrl(object $group, GrimbaUrlCanonicalizer $canon): bool
-    {
-        $ids = $this->idsForTitleGroup($group);
-        if (count($ids) < 2) {
-            return false;
-        }
-
-        $hashesByPost = $this->canonicalHashesByPost($ids, $canon);
-        $allHashes = [];
-
-        foreach ($ids as $id) {
-            if (empty($hashesByPost[$id])) {
-                return false;
-            }
-
-            foreach (array_keys($hashesByPost[$id]) as $hash) {
-                $allHashes[$hash] = true;
-            }
-        }
-
-        return count($allHashes) === 1;
-    }
-
-    /**
-     * @return array<int, int>
-     */
-    private function idsForTitleGroup(object $group): array
-    {
-        $ids = DB::table('posts')
-            ->where('name', $group->name)
-            ->when(
-                $group->source_id,
-                fn ($query) => $query->where('source_id', $group->source_id),
-                fn ($query) => $query->whereNull('source_id')
-            )
-            ->orderBy('id')
-            ->pluck('id')
-            ->map(fn ($id): int => (int) $id)
-            ->all();
-
-        foreach ([(int) ($group->first_post_id ?? 0), (int) ($group->latest_post_id ?? 0)] as $fallbackId) {
-            if ($fallbackId > 0 && ! in_array($fallbackId, $ids, true)) {
-                $ids[] = $fallbackId;
-            }
-        }
-
-        sort($ids);
-
-        return $ids;
-    }
-
-    /**
-     * @param array<int, int> $postIds
-     * @return array<int, array<string, bool>>
-     */
-    private function canonicalHashesByPost(array $postIds, GrimbaUrlCanonicalizer $canon): array
-    {
-        $hashes = [];
-
-        foreach ($postIds as $postId) {
-            $hashes[(int) $postId] = [];
-        }
-
-        if (Schema::hasTable('rss_feed_items')) {
-            DB::table('rss_feed_items')
-                ->whereIn('post_id', $postIds)
-                ->whereNotNull('link')
-                ->get(['post_id', 'link'])
-                ->each(function (object $row) use (&$hashes, $canon): void {
-                    $hash = $canon->hash((string) $row->link);
-                    if ($hash) {
-                        $hashes[(int) $row->post_id][$hash] = true;
-                    }
-                });
-        }
-
-        if (Schema::hasTable('newsapi_items')) {
-            DB::table('newsapi_items')
-                ->whereIn('post_id', $postIds)
-                ->whereNotNull('article_url')
-                ->get(['post_id', 'article_url'])
-                ->each(function (object $row) use (&$hashes, $canon): void {
-                    $hash = $canon->hash((string) $row->article_url);
-                    if ($hash) {
-                        $hashes[(int) $row->post_id][$hash] = true;
-                    }
-                });
-        }
-
-        DB::table('posts')
-            ->whereIn('id', $postIds)
-            ->whereNotNull('content')
-            ->get(['id', 'content'])
-            ->each(function (object $row) use (&$hashes, $canon): void {
-                $url = \App\Support\GrimbaArticleText::firstHttpUrlFromHtml((string) $row->content);
-                if (! $url) {
-                    return;
-                }
-
-                $hash = $canon->hash($url);
-                if ($hash) {
-                    $hashes[(int) $row->id][$hash] = true;
-                }
-            });
-
-        return $hashes;
-    }
-
-    /**
-     * @param array<int, int> $postIds
-     * @return \Illuminate\Support\Collection<int, string>
-     */
-    private function sampleUrlsForPosts(array $postIds): \Illuminate\Support\Collection
-    {
-        $urls = collect();
-
-        if (Schema::hasTable('rss_feed_items')) {
-            $urls = $urls->merge(
-                DB::table('rss_feed_items')
-                    ->whereIn('post_id', $postIds)
-                    ->whereNotNull('link')
-                    ->pluck('link')
-            );
-        }
-
-        if (Schema::hasTable('newsapi_items')) {
-            $urls = $urls->merge(
-                DB::table('newsapi_items')
-                    ->whereIn('post_id', $postIds)
-                    ->whereNotNull('article_url')
-                    ->pluck('article_url')
-            );
-        }
-
-        $urls = $urls->merge(
-            DB::table('posts')
-                ->whereIn('id', $postIds)
-                ->whereNotNull('content')
-                ->pluck('content')
-                ->map(fn ($content): ?string => \App\Support\GrimbaArticleText::firstHttpUrlFromHtml((string) $content))
-                ->filter()
-        );
-
-        return $urls
-            ->map(fn ($url): string => (string) $url)
-            ->filter()
-            ->unique()
-            ->take(3)
-            ->values();
     }
 }

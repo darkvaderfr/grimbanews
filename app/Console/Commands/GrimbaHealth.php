@@ -3,8 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Services\GrimbaNewsApiFetcher;
+use App\Services\GrimbaUrlCanonicalizer;
 use App\Support\GrimbaAutomationMonitor;
 use App\Support\GrimbaDatabaseBackups;
+use App\Support\GrimbaDedupeReview;
 use App\Support\GrimbaFullArticleCoverage;
 use App\Support\GrimbaPublicationPipeline;
 use App\Support\GrimbaRssFeedHealth;
@@ -40,7 +42,7 @@ class GrimbaHealth extends Command
         {--backup-dir= : database backup directory to inspect; defaults to database/backups}';
     protected $description = 'One-page health summary of the GrimbaNews ingest + editorial pipeline (S153).';
 
-    public function handle(GrimbaNewsApiFetcher $newsApiFetcher): int
+    public function handle(GrimbaNewsApiFetcher $newsApiFetcher, GrimbaUrlCanonicalizer $canon): int
     {
         $failOnRisk = (bool) $this->option('fail-on-risk');
         $minFreeMb = max(0, (int) $this->option('min-free-mb'));
@@ -168,11 +170,12 @@ class GrimbaHealth extends Command
             ->havingRaw('COUNT(DISTINCT rss_feed_items.post_id) > 1');
         $duppedUrls = (int) DB::query()->fromSub($duplicateUrlGroupsQuery, 'dupes')->count();
 
-        $duppedNames = DB::table('posts')
-            ->select('name', 'source_id', DB::raw('COUNT(*) as c'))
-            ->groupBy('name', 'source_id')
-            ->having('c', '>', 1)
-            ->count();
+        $titleGroupPartitions = GrimbaDedupeReview::partitionTitleGroups(
+            GrimbaDedupeReview::titleGroups(),
+            $canon
+        );
+        $duppedNames = $titleGroupPartitions['unresolved']->count();
+        $ignoredTitleGroups = $titleGroupPartitions['ignored']->count();
         $this->newLine();
         $this->line('7. Dedup state');
         if ($duppedUrls === 0 && $duppedNames === 0) {
@@ -184,6 +187,12 @@ class GrimbaHealth extends Command
             if ($duppedNames > 0) {
                 $this->line(sprintf('   ⚠ %d title-only group(s) need grimba:dedupe-posts --review-title-groups before --include-title-groups', $duppedNames));
             }
+        }
+        if ($ignoredTitleGroups > 0) {
+            $this->line(sprintf(
+                '   ✓ %d known recurring media title group(s) ignored',
+                $ignoredTitleGroups
+            ));
         }
 
         // 8. Last 24h ingest
