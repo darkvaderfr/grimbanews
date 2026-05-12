@@ -267,6 +267,12 @@ class GrimbaHealth extends Command
                 $fullArticleCoverage->coverage_pct,
                 $minFullContentCoverage
             ));
+            if (($fullArticleCoverage->ingest_fallback_readable ?? 0) > 0) {
+                $this->line(sprintf(
+                    '   feed body fallback    : %d readable post(s)',
+                    $fullArticleCoverage->ingest_fallback_readable
+                ));
+            }
             $this->line(sprintf(
                 '   missing bodies        : %d (%d never attempted · %d failed · %d retry-ready · %d deferred)',
                 $fullArticleCoverage->missing,

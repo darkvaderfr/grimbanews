@@ -273,7 +273,7 @@ class ClusterPageTest extends TestCase
         $post = $this->assignCluster($this->publishedPostIds(2, 22), 910009, ['left', 'center']);
 
         DB::table('posts')->where('id', $post->id)->update([
-            'full_content' => '<p>Texte intégral visible publiquement avec une enquête complète sur les données publiques.</p>',
+            'full_content' => '<p>Texte intégral visible publiquement avec une enquête complète sur les données publiques. ' . str_repeat('Le lecteur peut rester dans GrimbaNews pour lire les détails vérifiés. ', 4) . '</p>',
             'full_fetched_at' => now(),
             'full_extract_error' => null,
         ]);
@@ -289,15 +289,38 @@ class ClusterPageTest extends TestCase
             ->assertDontSee('grimba-full-article--locked', false);
     }
 
-    public function test_logged_in_member_can_read_extracted_full_article(): void
+    public function test_story_page_shows_readable_feed_body_when_full_extraction_is_blocked(): void
     {
         $post = $this->assignCluster($this->publishedPostIds(2, 24), 910010, ['left', 'center']);
+        $fallbackText = 'Extrait RSS lisible affiché dans le dossier quand l’éditeur bloque l’extraction. '
+            . str_repeat('Cette phrase donne au lecteur un contexte utile sans quitter GrimbaNews. ', 4);
+
+        DB::table('posts')->where('id', $post->id)->update([
+            'content' => '<p><a href="https://example.test/fallback-story">Lire l’article original</a></p><p>' . $fallbackText . '</p>',
+            'full_content' => null,
+            'full_fetched_at' => now(),
+            'full_extract_error' => 'http 403',
+        ]);
+
+        $this->withUnencryptedCookies($this->readerCookies())
+            ->get($this->pathFor($post))
+            ->assertOk()
+            ->assertSee('Extrait disponible')
+            ->assertSee("Lire l'extrait disponible")
+            ->assertSee('grimba-full-article--reader', false)
+            ->assertSee('Extrait RSS lisible affiché dans le dossier')
+            ->assertDontSee('Lire l’article original</a></p><p>Extrait RSS', false);
+    }
+
+    public function test_logged_in_member_can_read_extracted_full_article(): void
+    {
+        $post = $this->assignCluster($this->publishedPostIds(2, 26), 910011, ['left', 'center']);
         $member = Member::query()->first();
 
         $this->assertNotNull($member, 'Fixture database must contain at least one member account.');
 
         DB::table('posts')->where('id', $post->id)->update([
-            'full_content' => '<p>Texte intégral visible par un membre connecté avec les détails complets.</p>',
+            'full_content' => '<p>Texte intégral visible par un membre connecté avec les détails complets. ' . str_repeat('La version membre conserve le texte extrait dans l’interface de lecture. ', 4) . '</p>',
             'full_fetched_at' => now(),
             'full_extract_error' => null,
         ]);
@@ -317,10 +340,10 @@ class ClusterPageTest extends TestCase
     public function test_full_article_gate_can_still_be_enabled_by_setting(): void
     {
         $this->setting('grimba_full_article_public', '');
-        $post = $this->assignCluster($this->publishedPostIds(2, 26), 910011, ['left', 'center']);
+        $post = $this->assignCluster($this->publishedPostIds(2, 28), 910012, ['left', 'center']);
 
         DB::table('posts')->where('id', $post->id)->update([
-            'full_content' => '<p>Texte intégral verrouillable avec les détails complets.</p>',
+            'full_content' => '<p>Texte intégral verrouillable avec les détails complets. ' . str_repeat('La barrière d’accès ne doit pas exposer le contenu aux lecteurs anonymes. ', 4) . '</p>',
             'full_fetched_at' => now(),
             'full_extract_error' => null,
         ]);
@@ -337,8 +360,8 @@ class ClusterPageTest extends TestCase
 
     public function test_article_list_shows_full_cluster_across_region_scope_and_categories(): void
     {
-        $ids = $this->publishedPostIds(2, 28);
-        $post = $this->assignCluster($ids, 910012, ['left', 'center']);
+        $ids = $this->publishedPostIds(2, 30);
+        $post = $this->assignCluster($ids, 910013, ['left', 'center']);
         $sourceA = $this->createSource('Region Scoped Wire A ' . Str::random(6), 'US', 'left');
         $sourceB = $this->createSource('Region Scoped Wire B ' . Str::random(6), 'US', 'center');
         $categoryId = (int) DB::table('categories')->where('name', 'Monde')->value('id');
@@ -353,6 +376,10 @@ class ClusterPageTest extends TestCase
                 'description' => $index === 0
                     ? 'Primary region-scope fixture description.'
                     : 'Sibling region-scope fixture description.',
+                'original_language' => 'fr',
+                'translated_to' => null,
+                'translated_name' => null,
+                'translated_description' => null,
             ]);
 
             DB::table('post_categories')->insertOrIgnore([
@@ -375,7 +402,7 @@ class ClusterPageTest extends TestCase
 
     public function test_newsapi_truncation_marker_is_scrubbed_from_article_body(): void
     {
-        $post = $this->assignCluster($this->publishedPostIds(1, 30), 910013, ['center']);
+        $post = $this->assignCluster($this->publishedPostIds(1, 32), 910014, ['center']);
 
         DB::table('posts')->where('id', $post->id)->update([
             'description' => 'Prominent Jewish American leader and Israel defender Abraham Abe Foxman has died at age 86. [+4285 chars]',

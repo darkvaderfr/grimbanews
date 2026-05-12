@@ -333,6 +333,44 @@ class DailyPublishFreshnessTest extends TestCase
             ->assertFailed();
     }
 
+    public function test_ops_health_counts_readable_feed_body_when_extraction_is_blocked(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        DB::table('posts')
+            ->where('status', 'published')
+            ->update(['published_at' => now()->subDays(7)]);
+
+        $suffix = Str::lower(Str::random(8));
+        $author = $this->admin();
+        $sourceId = $this->trustedSourceId('Full Coverage Fallback ' . $suffix, 101);
+
+        $fullId = $this->publishedPostId('full coverage extracted ' . $suffix, $sourceId, $author, now()->subMinutes(12), [
+            'full_content' => '<p>' . str_repeat('Readable extracted article body. ', 12) . '</p>',
+            'full_fetched_at' => now()->subMinutes(10),
+        ]);
+        $fallbackId = $this->publishedPostId('full coverage feed fallback ' . $suffix, $sourceId, $author, now()->subMinutes(8), [
+            'content' => '<p><a href="https://example.test/feed-fallback-' . $suffix . '">Lire l’article original</a></p><p>' . str_repeat('Readable feed body fallback text. ', 12) . '</p>',
+            'full_content' => null,
+            'full_fetched_at' => now()->subMinutes(5),
+            'full_extract_error' => 'http 403',
+        ]);
+
+        $this->rssItem($fullId, 'https://example.test/full-coverage-extracted-' . $suffix, 'full-coverage-extracted-' . $suffix);
+        $this->rssItem($fallbackId, 'https://example.test/feed-fallback-' . $suffix, 'full-coverage-feed-fallback-' . $suffix);
+        $this->markHealthAutomationHealthy();
+
+        $this->artisan('grimba:health', [
+            '--fail-on-risk' => true,
+            '--min-free-mb' => 0,
+            '--min-published-24h' => 2,
+            '--min-full-content-coverage' => 100,
+        ])
+            ->expectsOutputToContain('readable bodies       : 2/2 (100%, floor 100%)')
+            ->expectsOutputToContain('feed body fallback    : 1 readable post(s)')
+            ->assertSuccessful();
+    }
+
     private function markFreshnessAutomationHealthy(): void
     {
         $this->markHealthAutomationHealthy();

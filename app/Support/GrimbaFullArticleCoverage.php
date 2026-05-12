@@ -10,8 +10,6 @@ use Throwable;
 
 class GrimbaFullArticleCoverage
 {
-    private const MIN_READABLE_CHARS = 200;
-
     public static function recent(mixed $since, int $retryAfterHours = 24): object
     {
         if (! Schema::hasTable('posts') || ! Schema::hasColumn('posts', 'full_content')) {
@@ -27,10 +25,11 @@ class GrimbaFullArticleCoverage
 
         $rows = DB::table('posts')
             ->whereIn('id', $postIds->all())
-            ->get(['id', 'name', 'full_content', 'full_fetched_at', 'full_extract_error']);
+            ->get(['id', 'name', 'content', 'full_content', 'full_fetched_at', 'full_extract_error']);
 
         $retryCutoff = now()->subHours(max(0, $retryAfterHours));
         $readable = 0;
+        $ingestFallbackReadable = 0;
         $missing = 0;
         $neverAttempted = 0;
         $failed = 0;
@@ -40,11 +39,12 @@ class GrimbaFullArticleCoverage
         $missingSamples = [];
 
         foreach ($rows as $row) {
-            $body = GrimbaArticleText::stripNewsApiTruncationMarker((string) ($row->full_content ?? ''));
-            $textLength = mb_strlen(trim(html_entity_decode(strip_tags($body), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
-
-            if ($textLength >= self::MIN_READABLE_CHARS) {
+            $body = GrimbaArticleText::readableBody($row);
+            if ($body) {
                 $readable++;
+                if ($body->source !== 'full') {
+                    $ingestFallbackReadable++;
+                }
                 continue;
             }
 
@@ -82,6 +82,7 @@ class GrimbaFullArticleCoverage
             'window_since' => $since,
             'total' => $total,
             'readable' => $readable,
+            'ingest_fallback_readable' => $ingestFallbackReadable,
             'missing' => $missing,
             'coverage_pct' => (int) round($readable * 100 / max(1, $total)),
             'never_attempted' => $neverAttempted,
@@ -90,7 +91,7 @@ class GrimbaFullArticleCoverage
             'retry_ready' => $retryReady,
             'latest_fetched_at' => $latestFetchedAt,
             'missing_samples' => array_slice($missingSamples, 0, 3),
-            'min_readable_chars' => self::MIN_READABLE_CHARS,
+            'min_readable_chars' => GrimbaArticleText::MIN_READABLE_CHARS,
             'retry_after_hours' => $retryAfterHours,
         ];
     }
@@ -102,6 +103,7 @@ class GrimbaFullArticleCoverage
             'reason' => $reason,
             'total' => 0,
             'readable' => 0,
+            'ingest_fallback_readable' => 0,
             'missing' => 0,
             'coverage_pct' => null,
             'never_attempted' => 0,
@@ -110,7 +112,7 @@ class GrimbaFullArticleCoverage
             'retry_ready' => 0,
             'latest_fetched_at' => null,
             'missing_samples' => [],
-            'min_readable_chars' => self::MIN_READABLE_CHARS,
+            'min_readable_chars' => GrimbaArticleText::MIN_READABLE_CHARS,
             'retry_after_hours' => 0,
         ];
     }

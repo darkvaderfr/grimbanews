@@ -151,14 +151,17 @@
     $__gnFullActive = (bool) setting('grimba_full_article_active', true);
     $__gnFullArticlePublic = (bool) setting('grimba_full_article_public', true);
     $__gnCanReadFull = $__gnFullArticlePublic || $__gnMemberCanReadFull;
-    $__gnRawFullBody = trim((string) \App\Support\GrimbaArticleText::stripNewsApiTruncationMarker($post->full_content ?? ''));
-    $__gnFullBody = $__gnFullActive && $__gnCanReadFull && $__gnRawFullBody !== ''
+    $__gnReadableBody = \App\Support\GrimbaArticleText::readableBody($post);
+    $__gnRawFullBody = trim((string) ($__gnReadableBody->html ?? ''));
+    $__gnFullBodySource = $__gnReadableBody->source ?? null;
+    $__gnFullBody = $__gnFullActive && $__gnCanReadFull && $__gnReadableBody
         ? ($__gnHasTr && GnTr::hasTranslatedBody($post, $__gnTarget) ? (GnTr::body($post) ?: $__gnRawFullBody) : $__gnRawFullBody)
         : null;
-    $__gnFullArticleLocked = $__gnFullActive && ! $__gnCanReadFull && $__gnRawFullBody !== '';
-    $__gnUpstream = $__gnRawFullBody !== ''
+    $__gnFullArticleLocked = $__gnFullActive && ! $__gnCanReadFull && $__gnReadableBody !== null;
+    $__gnUpstream = $__gnReadableBody
         ? (\Illuminate\Support\Facades\DB::table('rss_feed_items')->where('post_id', $post->id)->value('link')
-            ?? \Illuminate\Support\Facades\DB::table('newsapi_items')->where('post_id', $post->id)->value('article_url'))
+            ?? \Illuminate\Support\Facades\DB::table('newsapi_items')->where('post_id', $post->id)->value('article_url')
+            ?? \App\Support\GrimbaArticleText::firstHttpUrlFromHtml($post->content ?? null))
         : null;
 
     Theme::set('breadcrumb_background_image', $post->getMetaData('breadcrumb_background_image', true));
@@ -676,6 +679,7 @@
                     'locked' => $__gnFullArticleLocked,
                     'loginUrl' => $__gnMemberLoginUrl,
                     'upstream' => $__gnUpstream,
+                    'source' => $__gnFullBodySource,
                 ])
 
                 @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
@@ -870,13 +874,16 @@
                             </div>
                         @endif
 
-                        @include(Theme::getThemeNamespace('partials.story.full-article'), [
-                            'post' => $post,
-                            'body' => $__gnFullBody,
-                            'locked' => $__gnFullArticleLocked,
-                            'loginUrl' => $__gnMemberLoginUrl,
-                            'upstream' => $__gnUpstream,
-                        ])
+                        @if($__gnFullBodySource === 'full')
+                            @include(Theme::getThemeNamespace('partials.story.full-article'), [
+                                'post' => $post,
+                                'body' => $__gnFullBody,
+                                'locked' => $__gnFullArticleLocked,
+                                'loginUrl' => $__gnMemberLoginUrl,
+                                'upstream' => $__gnUpstream,
+                                'source' => $__gnFullBodySource,
+                            ])
+                        @endif
 
                         {{-- GrimbaNews other angles (sibling cluster posts) --}}
                         @include(Theme::getThemeNamespace('partials.blog.post.partials.other-angles'), ['post' => $post])
