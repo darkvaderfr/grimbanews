@@ -72,11 +72,20 @@ fi
 
 cd "$APP_PATH"
 
-echo "=== Backing up SQLite DB (best effort, keeps last 5) ==="
+echo "=== Backing up SQLite DB (best effort, gzipped, keeps last 5) ==="
 if [ -f database/grimbanews.sqlite ]; then
     mkdir -p database/backups
-    cp database/grimbanews.sqlite "database/backups/grimbanews.$(date -u '+%Y%m%d%H%M%S').sqlite"
-    ls -1t database/backups/grimbanews.*.sqlite 2>/dev/null | tail -n +6 | xargs -r rm
+    BACKUP_FILE="database/backups/grimbanews.$(date -u '+%Y%m%d%H%M%S').sqlite"
+    if command -v sqlite3 >/dev/null 2>&1; then
+        sqlite3 database/grimbanews.sqlite ".timeout 5000" ".backup '$BACKUP_FILE'" || cp database/grimbanews.sqlite "$BACKUP_FILE"
+    else
+        cp database/grimbanews.sqlite "$BACKUP_FILE"
+    fi
+    gzip -9f "$BACKUP_FILE" 2>/dev/null || true
+    find database/backups -maxdepth 1 -type f -name 'grimbanews.*.sqlite' -exec gzip -9f {} \; 2>/dev/null || true
+    find database/backups -maxdepth 1 -type f \( -name 'grimbanews.*.sqlite.gz' -o -name 'grimbanews.*.sqlite' \) \
+        -printf '%T@ %p\n' 2>/dev/null | sort -rn | tail -n +6 | cut -d' ' -f2- | xargs -r rm -f
+    du -sh database/backups 2>/dev/null | awk '{print "  Backup store:", $1}'
 fi
 
 echo "=== Extracting release (preserves .env, storage/, vendor/, database/*.sqlite) ==="

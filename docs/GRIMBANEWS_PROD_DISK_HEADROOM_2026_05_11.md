@@ -49,15 +49,21 @@ Result:
 
 `grimba:health --fail-on-risk` now defaults to a 2048 MB free-space floor instead of 1024 MB. This makes the hourly ops health job fail earlier when disk headroom drops below 2 GB.
 
+## Follow-Up - 2026-05-12
+
+Deploy-time SQLite backups now use `sqlite3 .backup` when available and are compressed as `*.sqlite.gz`. The deploy script also compresses any older raw `database/backups/grimbanews.*.sqlite` snapshots and keeps the five newest backup artifacts across compressed and raw files.
+
+This preserves restore evidence while reducing the backup directory footprint on the shared root disk.
+
 ## Residual Risk
 
 - Root disk is still tight at 92% used.
 - Docker images and volumes still dominate host storage. Those containers belong to multiple services, so broad `docker system prune` is not a Grimba-only operation.
 - Existing long-running containers may need recreation/restart to fully inherit daemon log rotation behavior.
-- Production duplicate posts still need an apply pass after backup evidence.
+- Production duplicate posts were safely applied for URL-backed groups; only ambiguous BBC title-only groups remain in review.
 
 ## Next
 
 - Keep `grimba:health --fail-on-risk` green under the 2048 MB floor.
-- Do a controlled dedupe apply against source+URL duplicate groups only.
+- Keep deploy backups compressed and verify restore documentation against `*.sqlite.gz` artifacts.
 - Plan broader host maintenance separately for Docker image/volume cleanup.
