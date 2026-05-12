@@ -31,6 +31,9 @@
 	                                        </a>
 	                                    </div>
 	                                    <div class="echo-popular-cat-title">
+                                            <div class="mb-2">
+                                                {!! Theme::partial('category-badge', ['post' => $post]) !!}
+                                            </div>
 	                                        <h5 class="text-capitalize">
 	                                            <a href="{{ $post->url }}" title="{{ $__title }}" class="title-hover truncate-custom truncate-2-custom">{{ $__title }}</a>
 	                                        </h5>

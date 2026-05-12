@@ -15,6 +15,9 @@
         </div>
     </div>
     <div class="echo-banner-texting">
+        <div class="mb-2">
+            {!! Theme::partial('category-badge', ['post' => $post]) !!}
+        </div>
         <h3 class="echo-hero-title text-capitalize font-weight-bold"><a href="{{ $post->url }}" title="{{ $__title }}" class="title-hover truncate-custom truncate-2-custom">{{ $__title }}</a></h3>
         @if($__isTr)
             <div class="mb-2">{!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}</div>

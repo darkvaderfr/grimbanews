@@ -3723,6 +3723,84 @@ p.h5  {
     }
 }
 
+.grimba-category-badges {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.grimba-category-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    max-width: 100%;
+    padding: 0.28rem 0.55rem;
+    border: 1px solid rgba(31, 26, 19, 0.12);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.78);
+    color: #2b251d;
+    font-family: 'Public Sans', system-ui, sans-serif;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-decoration: none;
+
+    &:hover {
+        color: #14110e;
+        border-color: rgba(31, 26, 19, 0.22);
+        text-decoration: none;
+    }
+
+    .content-catagory-tag {
+        padding: 0 !important;
+        background: transparent !important;
+        color: inherit !important;
+        line-height: inherit;
+        overflow-wrap: anywhere;
+    }
+}
+
+.grimba-category-badge--topic {
+    background: #fff4ef;
+    border-color: rgba(192, 57, 43, 0.20);
+    color: #8f2d22;
+}
+
+.grimba-category-badge--edition {
+    background: #f4ead3;
+    border-color: rgba(104, 81, 35, 0.18);
+    color: #5f5130;
+}
+
+[data-bs-theme="dark"],
+html[data-theme="dark"] {
+    .grimba-category-badge {
+        background: rgba(255, 255, 255, 0.10);
+        border-color: rgba(255, 255, 255, 0.16);
+        color: rgba(255, 255, 255, 0.92);
+
+        &:hover {
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.28);
+        }
+    }
+
+    .grimba-category-badge--topic {
+        background: rgba(232, 76, 61, 0.18);
+        border-color: rgba(232, 76, 61, 0.34);
+        color: #ffd8d2;
+    }
+
+    .grimba-category-badge--edition {
+        background: rgba(217, 185, 112, 0.18);
+        border-color: rgba(217, 185, 112, 0.34);
+        color: #f7e5bd;
+    }
+}
+
 /* Blindspot Indicator */
 .blindspot-badge {
     background: rgba(138, 43, 226, 0.15);

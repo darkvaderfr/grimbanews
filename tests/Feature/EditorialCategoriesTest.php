@@ -49,6 +49,29 @@ class EditorialCategoriesTest extends TestCase
             ->assertSee('Politique');
     }
 
+    public function test_article_cards_show_topic_and_editorial_location_badges(): void
+    {
+        $europeId = $this->category('Europe', 2);
+        $politicsId = $this->category('Politique', 11);
+        $sourceId = $this->source('Editorial Categories Cards ' . Str::lower(Str::random(8)), 'FR');
+        $title = 'Editorial category card badges ' . Str::lower(Str::random(8));
+        $postId = $this->postId($title, $sourceId);
+
+        DB::table('post_categories')->insertOrIgnore([
+            ['post_id' => $postId, 'category_id' => $europeId],
+            ['post_id' => $postId, 'category_id' => $politicsId],
+        ]);
+
+        $this->withUnencryptedCookies(['grimba_region' => 'europe'])
+            ->get('/blog/politique?style=grid')
+            ->assertOk()
+            ->assertSee($title)
+            ->assertSee('data-grimba-category-role="topic"', false)
+            ->assertSee('data-grimba-category-role="edition"', false)
+            ->assertSee('Politique')
+            ->assertSee('Europe');
+    }
+
     private function category(string $name, int $order): int
     {
         $author = User::query()->find(1);
