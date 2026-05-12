@@ -25,6 +25,7 @@ Command registration is handled by Laravel command discovery in this project lay
 | Command | File | Default mode | Purpose |
 |---|---|---|---|
 | `grimba:health` | `app/Console/Commands/GrimbaHealth.php` | read/report | One-page ingest/editorial health summary. |
+| `grimba:release-smoke` | `app/Console/Commands/GrimbaReleaseSmoke.php` | read/report | Post-deploy release smoke for health, backup restore, cache dry-run, and public URL budgets. |
 | `grimba:verify-backups` | `app/Console/Commands/GrimbaVerifyBackups.php` | read/temp restore smoke | Opens SQLite backup artifacts and runs `PRAGMA quick_check`. |
 | `grimba:prune-img-proxy-cache` | `app/Console/Commands/GrimbaPruneImageProxyCache.php` | deletes expired cache files unless `--dry-run` | Prune old publisher/logo image proxy cache files and report footprint. |
 | `grimba:nobuai-health` | `app/Console/Commands/GrimbaNobuAiHealth.php` | read/report unless `--live` | NobuAI wrapper and provider configuration health check. |
@@ -46,6 +47,7 @@ Command registration is handled by Laravel command discovery in this project lay
 | Command | Options |
 |---|---|
 | `grimba:health` | `--fail-on-risk`, `--min-free-mb=`, `--min-published-24h=`, `--min-ingested-published-24h=`, `--min-full-content-coverage=`, `--full-content-retry-after-hours=`, `--backup-dir=` |
+| `grimba:release-smoke` | `--base-url=`, `--host-header=`, `--max-home-ms=`, `--max-up-ms=`, `--max-feed-ms=`, `--min-free-mb=`, `--min-full-content-coverage=`, `--skip-health`, `--skip-backups`, `--skip-cache` |
 | `grimba:verify-backups` | `--backup-dir=`, `--min=`, `--all` |
 | `grimba:prune-img-proxy-cache` | `--days=`, `--cache-dir=`, `--dry-run` |
 | `grimba:nobuai-health` | `--live`, `--prompt=` |

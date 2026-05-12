@@ -41,10 +41,18 @@ php artisan view:cache
 
 ## Post-Deploy Smoke
 
+- `php artisan grimba:release-smoke --base-url=https://grimbanews.com`
 - `php artisan grimba:health`
+- `php artisan grimba:verify-backups --min=1`
 - `php artisan grimba:nobuai-health`
 - `php artisan route:list --path=admin/grimba`
 - Browser check: dark mode switch, sidebar readability, top dropdown opacity, provider vault readability, cockpit quick actions.
+
+For IP-based smoke before DNS or TLS is trusted:
+
+```sh
+php artisan grimba:release-smoke --base-url=http://209.74.88.135 --host-header=grimbanews.com
+```
 
 ## Rollback
 
