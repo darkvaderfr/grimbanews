@@ -1500,6 +1500,11 @@ button.btn-grimba--solid,
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
+.grimba-foryou__lede {
+    max-width: 58ch;
+    color: var(--gn-ink-muted);
+    line-height: 1.6;
+}
 
 /* ------------------------------------------------------------
    9. Top News inline stack
@@ -3390,7 +3395,22 @@ body.grimba-subpage .site-notice.js-site-notice {
 
 /* Bias-mix bars — keep colour vivid; just ensure label text reads */
 html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile {
-    color: var(--gn-ink);
+    background: rgba(28, 24, 17, 0.66);
+    border-color: rgba(246, 241, 232, 0.14);
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile h4 {
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile .opacity-75 {
+    color: rgba(255, 250, 240, 0.82) !important;
+    opacity: 1 !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile a:not(.btn-grimba) {
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-foryou__lede {
+    color: rgba(255, 250, 240, 0.80);
 }
 
 /* S185-S188 — vault polish, mobile nav, and a11y focus states */
@@ -3577,7 +3597,8 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn[aria-pressed="true"
 .grimba-search-page__query {
     color: var(--gn-ink-muted);
 }
-.grimba-search-page .pagination {
+.grimba-search-page .pagination,
+.grimba-foryou .pagination {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -3587,12 +3608,14 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn[aria-pressed="true"
     margin: 1.35rem 0 0;
     list-style: none;
 }
-.grimba-search-page .pagination .page-item {
+.grimba-search-page .pagination .page-item,
+.grimba-foryou .pagination .page-item {
     flex: 0 0 auto;
     margin: 0;
     min-width: 0;
 }
-.grimba-search-page .pagination .page-link {
+.grimba-search-page .pagination .page-link,
+.grimba-foryou .pagination .page-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3609,18 +3632,22 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn[aria-pressed="true"
     text-decoration: none;
     box-shadow: 0 8px 18px rgba(26, 23, 19, 0.06);
 }
-.grimba-search-page .pagination .page-link:hover {
+.grimba-search-page .pagination .page-link:hover,
+.grimba-foryou .pagination .page-link:hover {
     border-color: rgba(26, 23, 19, 0.28);
     background: rgba(255, 255, 255, 0.95);
     color: var(--gn-ink);
 }
-.grimba-search-page .pagination .active .page-link {
+.grimba-search-page .pagination .active .page-link,
+.grimba-foryou .pagination .active .page-link {
     border-color: var(--gn-ink);
     background: var(--gn-ink);
     color: var(--gn-paper);
 }
 .grimba-search-page .pagination .disabled .page-link,
-.grimba-search-page .pagination .page-link[aria-disabled="true"] {
+.grimba-search-page .pagination .page-link[aria-disabled="true"],
+.grimba-foryou .pagination .disabled .page-link,
+.grimba-foryou .pagination .page-link[aria-disabled="true"] {
     border-color: rgba(26, 23, 19, 0.08);
     background: rgba(26, 23, 19, 0.04);
     color: var(--gn-ink-muted);
@@ -3777,24 +3804,29 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page__query {
     opacity: 1 !important;
     color: rgba(255, 250, 240, 0.80) !important;
 }
-html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .page-link {
+html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .page-link,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-foryou .pagination .page-link {
     border-color: rgba(246, 241, 232, 0.16);
     background: rgba(246, 241, 232, 0.09);
     color: var(--gn-ink);
     box-shadow: none;
 }
-html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .page-link:hover {
+html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .page-link:hover,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-foryou .pagination .page-link:hover {
     border-color: rgba(246, 241, 232, 0.30);
     background: rgba(246, 241, 232, 0.14);
     color: var(--gn-ink);
 }
-html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .active .page-link {
+html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .active .page-link,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-foryou .pagination .active .page-link {
     border-color: var(--gn-ink);
     background: var(--gn-ink);
     color: var(--gn-paper);
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .disabled .page-link,
-html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .page-link[aria-disabled="true"] {
+html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .page-link[aria-disabled="true"],
+html.grimba-home-html[data-bs-theme="dark"] .grimba-foryou .pagination .disabled .page-link,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-foryou .pagination .page-link[aria-disabled="true"] {
     border-color: rgba(246, 241, 232, 0.10);
     background: rgba(246, 241, 232, 0.05);
     color: var(--gn-ink-muted);
@@ -3863,12 +3895,22 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-account-searches__row {
     .grimba-search-page__actions a {
         align-self: center;
     }
-    .grimba-search-page .pagination {
+    .grimba-search-page .pagination,
+    .grimba-foryou .pagination {
         justify-content: flex-start;
         gap: 0.34rem;
         margin-top: 1rem;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
     }
-    .grimba-search-page .pagination .page-link {
+    .grimba-search-page .pagination::-webkit-scrollbar,
+    .grimba-foryou .pagination::-webkit-scrollbar {
+        display: none;
+    }
+    .grimba-search-page .pagination .page-link,
+    .grimba-foryou .pagination .page-link {
         min-width: 2.2rem;
         min-height: 2.2rem;
         padding: 0.42rem 0.68rem;

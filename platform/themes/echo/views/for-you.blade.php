@@ -21,7 +21,7 @@
                     {{ __('Votre fil') }} — {{ $followed->count() }} {{ $followed->count() === 1 ? __('sujet suivi') : __('sujets suivis') }}
                 @endif
             </h1>
-            <p class="mb-3 opacity-85">
+            <p class="grimba-foryou__lede mb-3">
                 @if($followed->isEmpty())
                     {!! __('Cliquez sur le <strong>+</strong> à côté d\'un sujet pour l\'ajouter à votre fil.') !!}
                     {{ __('Votre sélection reste locale à votre navigateur — aucun compte requis.') }}

@@ -270,7 +270,37 @@ async function inspectSubpagePolish(page) {
         };
     });
 
-    return { search, local: { ...local, ledeContrast: Number(localLedeContrast.toFixed(2)) }, vault };
+    await page.goto('/pour-vous', { waitUntil: 'networkidle' });
+    const forYou = await page.evaluate(() => {
+        const lede = document.querySelector('.grimba-foryou__lede');
+        const profile = document.querySelector('.grimba-bias-profile');
+        const muted = document.querySelector('.grimba-bias-profile .opacity-75');
+        const rootStyle = getComputedStyle(document.documentElement);
+        const ledeStyle = lede ? getComputedStyle(lede) : null;
+        const profileStyle = profile ? getComputedStyle(profile) : null;
+        const mutedStyle = muted ? getComputedStyle(muted) : null;
+
+        return {
+            scrollWidth: document.documentElement.scrollWidth,
+            bodyScrollWidth: document.body.scrollWidth,
+            viewportWidth: window.innerWidth,
+            ledeColor: ledeStyle?.color || '',
+            ledeOpacity: ledeStyle?.opacity || '',
+            paper: rootStyle.getPropertyValue('--gn-paper').trim(),
+            profileBackground: profileStyle?.backgroundColor || '',
+            profileColor: profileStyle?.color || '',
+            mutedOpacity: mutedStyle ? Number.parseFloat(mutedStyle.opacity) : 0,
+            mutedColor: mutedStyle?.color || '',
+        };
+    });
+    const forYouLedeContrast = contrast(blend(parseRgb(forYou.ledeColor), parseHex(forYou.paper)), parseHex(forYou.paper));
+
+    return {
+        search,
+        local: { ...local, ledeContrast: Number(localLedeContrast.toFixed(2)) },
+        vault,
+        forYou: { ...forYou, ledeContrast: Number(forYouLedeContrast.toFixed(2)) },
+    };
 }
 
 async function inspectDesktopHeaderSearch(page) {
@@ -373,6 +403,12 @@ async function inspectDesktopHeaderSearch(page) {
         assert.ok(subpagePolish.vault.titleFontSize <= 28, 'mobile vault empty-state title uses contained type scale');
         assert.ok(subpagePolish.vault.titleHeight <= 126, 'mobile vault empty-state title avoids an oversized headline block');
         assert.ok(subpagePolish.vault.iconFontSize <= 40, 'mobile vault empty-state icon avoids oversized decoration');
+        assert.ok(subpagePolish.forYou.scrollWidth <= subpagePolish.forYou.viewportWidth + 1, 'mobile for-you document width stays contained');
+        assert.ok(subpagePolish.forYou.bodyScrollWidth <= subpagePolish.forYou.viewportWidth + 1, 'mobile for-you body width stays contained');
+        assert.ok(subpagePolish.forYou.ledeContrast >= 7, 'mobile for-you helper copy keeps AAA-sized dark contrast');
+        assert.equal(subpagePolish.forYou.ledeOpacity, '1', 'mobile for-you helper copy avoids opacity stacking');
+        assert.match(subpagePolish.forYou.profileBackground, /rgba?\(28,\s*24,\s*17/, 'dark for-you bias profile uses a dark surface');
+        assert.ok(subpagePolish.forYou.mutedOpacity >= 1, 'dark for-you bias profile secondary copy is not over-muted');
 
         const desktopHeaderSearch = await inspectDesktopHeaderSearch(page);
         assert.notEqual(desktopHeaderSearch.display, 'none', 'desktop header search remains visible');
