@@ -108,6 +108,7 @@ async function inspectHome(page, width) {
         };
 
         const nav = document.querySelector('.grimba-mobile-nav');
+        const navStyle = nav ? getComputedStyle(nav) : null;
         const navItems = [...document.querySelectorAll('.grimba-mobile-nav__item')].map(item => {
             const label = item.querySelector('span:last-child');
             return {
@@ -134,6 +135,7 @@ async function inspectHome(page, width) {
             bodyScrollWidth: document.body.scrollWidth,
             navRect: nav ? rect(nav) : null,
             navDisplay: nav ? getComputedStyle(nav).display : null,
+            navBackgroundColor: navStyle?.backgroundColor || '',
             navItems,
             wordmarkRect: wordmark ? rect(wordmark) : null,
             searchRect: search ? rect(search) : null,
@@ -426,6 +428,7 @@ async function inspectDesktopHeaderSearch(page) {
             assert.ok(snapshot.navRect, `mobile nav rect exists at ${width}px`);
             assert.ok(snapshot.navRect.bottom <= 844, `mobile nav stays inside viewport at ${width}px`);
             assert.ok(snapshot.navRect.height >= 44, `mobile nav is tappable at ${width}px`);
+            assert.ok(parseRgb(snapshot.navBackgroundColor).a >= 0.98, `mobile nav is opaque enough to mask content underneath at ${width}px`);
 
             for (const item of snapshot.navItems) {
                 assert.ok(item.itemRect.height >= 44, `${item.text} keeps a 44px tap target at ${width}px`);

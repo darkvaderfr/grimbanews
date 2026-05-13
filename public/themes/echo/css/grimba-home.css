@@ -2755,6 +2755,49 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
     }
+    .grimba-foryou,
+    .grimba-sources,
+    .grimba-comparison-index,
+    .blindspot-page,
+    .grimba-owners,
+    .grimba-methodology {
+        padding-top: 1.35rem !important;
+        padding-bottom: calc(7.25rem + env(safe-area-inset-bottom)) !important;
+    }
+    .grimba-foryou > .container > header.glass-panel,
+    .grimba-sources > .container > header.glass-panel,
+    .grimba-comparison-index > .container > header.glass-panel,
+    .blindspot-page > .container > header.glass-panel,
+    .grimba-owners > .container > header.glass-panel,
+    .grimba-methodology__hero {
+        padding: 1.15rem !important;
+        margin-bottom: 1rem !important;
+        border-radius: 22px;
+    }
+    .grimba-foryou .grimba-methodology__title,
+    .grimba-sources .grimba-methodology__title,
+    .grimba-comparison-index .grimba-methodology__title,
+    .grimba-owners .grimba-methodology__title,
+    .grimba-methodology .grimba-methodology__title,
+    .blindspot-page h1 {
+        font-size: clamp(1.72rem, 8vw, 2.12rem) !important;
+        line-height: 1.08;
+    }
+    .grimba-foryou__lede,
+    .grimba-sources__lede,
+    .grimba-comparison-index__lede,
+    .blindspot-page__lede,
+    .grimba-owners__lede,
+    .grimba-methodology__lede {
+        font-size: 1rem !important;
+        line-height: 1.48 !important;
+        opacity: 1 !important;
+    }
+    .grimba-owners header .small.opacity-65 {
+        color: var(--gn-ink-muted);
+        line-height: 1.48;
+        opacity: 1 !important;
+    }
     .grimba-all-sides {
         padding-top: 1.35rem !important;
         padding-bottom: calc(5.25rem + env(safe-area-inset-bottom)) !important;
@@ -3586,7 +3629,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn[aria-pressed="true"
     margin: 0 auto;
     padding: 7px;
     border-radius: 22px;
-    background: rgba(246, 241, 232, 0.92);
+    background: rgba(246, 241, 232, 0.98);
     border: 1px solid rgba(26, 23, 19, 0.10);
     box-shadow: 0 18px 60px rgba(26, 23, 19, 0.16);
     backdrop-filter: blur(18px);
@@ -4230,8 +4273,9 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-translation-note .gn-nobuai-
 }
 
 html.grimba-home-html[data-bs-theme="dark"] .grimba-mobile-nav {
-    background: rgba(28, 24, 17, 0.92);
-    border-color: rgba(246, 241, 232, 0.12);
+    background: #17140f;
+    border-color: rgba(246, 241, 232, 0.16);
+    box-shadow: 0 -14px 36px rgba(12, 10, 7, 0.78), 0 18px 60px rgba(0, 0, 0, 0.42);
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-mobile-nav__item {
     color: var(--gn-ink-soft);

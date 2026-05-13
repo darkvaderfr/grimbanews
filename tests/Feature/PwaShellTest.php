@@ -87,10 +87,18 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('body.grimba-home .site-notice.js-site-notice', $css);
         $this->assertStringContainsString('body.grimba-home a.grimba-briefing__headline', $css);
         $this->assertStringContainsString('color: #fffaf0;', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-mobile-nav', $css);
+        $this->assertStringContainsString('background: #17140f;', $css);
+        $this->assertStringContainsString('0 -14px 36px rgba(12, 10, 7, 0.78)', $css);
         $this->assertStringContainsString('.grimba-urgency .container-xxl', $css);
         $this->assertStringContainsString('min-height: 32px;', $css);
         $this->assertStringContainsString('.grimba-translation-note-wrap', $css);
         $this->assertStringContainsString('-webkit-line-clamp: 2;', $css);
+        $this->assertStringContainsString('.grimba-sources > .container > header.glass-panel', $css);
+        $this->assertStringContainsString('.grimba-methodology__hero', $css);
+        $this->assertStringContainsString('padding-top: 1.35rem !important;', $css);
+        $this->assertStringContainsString('padding-bottom: calc(7.25rem + env(safe-area-inset-bottom)) !important;', $css);
+        $this->assertStringContainsString('font-size: clamp(1.72rem, 8vw, 2.12rem) !important;', $css);
         $this->assertStringContainsString('bottom: calc(92px + env(safe-area-inset-bottom));', $cookieConsent);
         $this->assertStringContainsString('max-height: min(420px, calc(100vh - 150px - env(safe-area-inset-bottom)));', $cookieConsent);
         $this->assertStringContainsString('max-height: 8.5rem;', $cookieConsent);
