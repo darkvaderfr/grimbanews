@@ -89,8 +89,14 @@
                 <a href="{{ url('/sources') }}">{{ __('Sources') }}</a>
             </nav>
 
+            @php
+                $__gnHeaderLang = (string) (request()->cookie('grimba_lang') ?? app()->getLocale() ?? 'fr');
+                $__gnHeaderSearchPlaceholder = $__gnHeaderLang === 'en'
+                    ? 'Topic, source, story…'
+                    : 'Sujet, source, histoire…';
+            @endphp
             <form action="{{ url('/search') }}" method="get" class="grimba-search flex-grow-1" role="search" data-grimba-command-form>
-                <input type="search" name="q" placeholder="{{ __('Rechercher une histoire, un sujet, une source…') }}" aria-label="{{ __('Recherche') }}" data-grimba-command-source>
+                <input type="search" name="q" placeholder="{{ $__gnHeaderSearchPlaceholder }}" aria-label="{{ __('Recherche') }}" data-grimba-command-source>
                 <button type="submit" aria-label="{{ __('Lancer la recherche') }}">
                     <x-core::icon name="ti ti-search" />
                 </button>

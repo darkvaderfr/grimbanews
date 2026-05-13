@@ -243,6 +243,25 @@ async function inspectSubpagePolish(page) {
     return { search, local: { ...local, ledeContrast: Number(localLedeContrast.toFixed(2)) } };
 }
 
+async function inspectDesktopHeaderSearch(page) {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    return page.evaluate(() => {
+        const search = document.querySelector('.grimba-search');
+        const input = search?.querySelector('input[type="search"]') || null;
+        const style = input ? getComputedStyle(input) : null;
+        const bounds = search?.getBoundingClientRect();
+
+        return {
+            display: search ? getComputedStyle(search).display : null,
+            placeholder: input?.getAttribute('placeholder') || '',
+            inputFontSize: style ? Number.parseFloat(style.fontSize) : 0,
+            width: bounds ? Math.round(bounds.width) : 0,
+        };
+    });
+}
+
 (async () => {
     const { chromium } = loadPlaywright();
     const baseUrl = (process.env.GRIMBANEWS_BASE_URL || 'http://127.0.0.1:8003').replace(/\/$/, '');
@@ -320,6 +339,12 @@ async function inspectSubpagePolish(page) {
         assert.ok(subpagePolish.local.inputBorderRadius >= 18, 'mobile local inputs keep softened corners');
         assert.ok(subpagePolish.local.titleFontSize <= 32, 'mobile local title uses contained type scale');
 
+        const desktopHeaderSearch = await inspectDesktopHeaderSearch(page);
+        assert.notEqual(desktopHeaderSearch.display, 'none', 'desktop header search remains visible');
+        assert.ok(desktopHeaderSearch.width >= 320, 'desktop header search keeps its expected width');
+        assert.ok(desktopHeaderSearch.placeholder.length <= 24, 'desktop header search placeholder is concise enough to fit');
+        assert.match(desktopHeaderSearch.placeholder, /source/i, 'desktop header search placeholder still names sources');
+
         for (const width of [320, 390]) {
             const searchWidth = await inspectPageWidth(page, '/search?q=afrique', width);
             assert.ok(searchWidth.scrollWidth <= width + 1, `search document width stays contained at ${width}px`);
@@ -393,6 +418,7 @@ async function inspectSubpagePolish(page) {
             snapshots: snapshots.map(({ width, selectionChip }) => ({ width, selectionChip })),
             formControls,
             subpagePolish,
+            desktopHeaderSearch,
             saveButton: { contrast: Number(saveButtonContrast.toFixed(2)), pressedButtonStyle },
         }));
     } finally {

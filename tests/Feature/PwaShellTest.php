@@ -59,6 +59,7 @@ class PwaShellTest extends TestCase
         $cookieConsent = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/cookie-consent.blade.php');
         $translationNote = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/home/translation-note.blade.php');
         $searchView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/search.blade.php');
+        $mainHeader = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/home/main-header.blade.php');
 
         $this->get('/')
             ->assertOk()
@@ -96,6 +97,8 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('.grimba-search-page__query', $css);
         $this->assertStringContainsString('font-size: clamp(1.58rem, 7.2vw, 2rem);', $css);
         $this->assertStringContainsString('border-radius: 18px !important;', $css);
+        $this->assertStringContainsString('Topic, source, story…', $mainHeader);
+        $this->assertStringContainsString('Sujet, source, histoire…', $mainHeader);
     }
 
     public function test_cookie_banner_respects_existing_consent_cookie_values(): void
