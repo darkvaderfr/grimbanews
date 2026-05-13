@@ -23,7 +23,7 @@
             <h1 class="grimba-methodology__title mt-2 mb-3">
                 {{ __('Qui possède quoi') }}
             </h1>
-            <p class="mb-2 opacity-85" style="font-size:17px; line-height:1.5; max-width: 65ch;">
+            <p class="grimba-owners__lede mb-2" style="font-size:17px; line-height:1.5; max-width: 65ch;">
                 {{ __(':owners propriétaires identifiés contrôlent :sources des sources que GrimbaNews suit.', ['owners' => $totalOwners, 'sources' => $totalSources]) }}
                 {{ __("La concentration éditoriale n'est pas un détail — quand un même groupe possède des outlets de différents biais, la diversité apparente du paysage médiatique cache une convergence d'intérêts au sommet.") }}
             </p>

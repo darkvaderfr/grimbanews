@@ -1503,7 +1503,9 @@ button.btn-grimba--solid,
 .grimba-foryou__lede,
 .grimba-sources__lede,
 .grimba-comparison-index__lede,
-.blindspot-page__lede {
+.blindspot-page__lede,
+.grimba-owners__lede,
+.grimba-auth__lede {
     max-width: 58ch;
     color: var(--gn-ink-muted);
     line-height: 1.6;
@@ -3049,6 +3051,27 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-story-timeline div[aria-hidd
     font-size: 13px;
     font-weight: 600;
 }
+.grimba-auth__brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gn-ink);
+    text-decoration: none;
+}
+.grimba-auth__wordmark {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.08em;
+    color: var(--gn-ink);
+    font-family: var(--gn-font-display);
+    font-size: 1.65rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0;
+}
+.grimba-auth__wordmark span:last-child {
+    color: var(--gn-accent);
+}
 .grimba-auth-label__required {
     color: var(--gn-accent);
 }
@@ -3108,7 +3131,27 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-form-pill::placeholder {
 html.grimba-home-html[data-bs-theme="dark"] .grimba-auth-link-muted {
     color: #fffaf0 !important;
 }
+html.grimba-home-html[data-bs-theme="dark"] .grimba-auth__wordmark {
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-auth__wordmark span:last-child {
+    color: #ef5546;
+}
 @media (max-width: 575px) {
+    .grimba-auth {
+        padding-top: 1.1rem !important;
+        padding-bottom: calc(7rem + env(safe-area-inset-bottom)) !important;
+    }
+    .grimba-auth header.text-center {
+        margin-bottom: 1rem !important;
+    }
+    .grimba-auth .glass-panel {
+        padding: 1.25rem !important;
+        border-radius: 22px;
+    }
+    .grimba-auth__lede {
+        margin-bottom: 1rem !important;
+    }
     .grimba-auth-grid {
         grid-template-columns: 1fr;
         gap: 0;
@@ -3415,7 +3458,9 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile a:not(.btn-grim
 html.grimba-home-html[data-bs-theme="dark"] .grimba-foryou__lede,
 html.grimba-home-html[data-bs-theme="dark"] .grimba-sources__lede,
 html.grimba-home-html[data-bs-theme="dark"] .grimba-comparison-index__lede,
-html.grimba-home-html[data-bs-theme="dark"] .blindspot-page__lede {
+html.grimba-home-html[data-bs-theme="dark"] .blindspot-page__lede,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-owners__lede,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-auth__lede {
     color: rgba(255, 250, 240, 0.80);
 }
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-sources__lede a:not([class*="btn-grimba"]),

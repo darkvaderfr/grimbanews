@@ -151,11 +151,13 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-topic-source-card', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-similar-source', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-owners__lede', $css);
         $this->assertStringContainsString('background: rgba(246, 241, 232, 0.08) !important;', $css);
         $this->assertStringContainsString('color: #fffaf0 !important;', $css);
         $this->assertStringContainsString('class="grimba-topic-source-card"', $categoryView);
         $this->assertStringContainsString('class="grimba-similar-source"', $sourceView);
         $this->assertStringContainsString('class="grimba-owner-source-card"', $ownersView);
+        $this->assertStringContainsString('grimba-owners__lede', $ownersView);
     }
 
     public function test_vault_save_buttons_are_css_driven_in_dark_mode(): void
@@ -198,15 +200,25 @@ class PwaShellTest extends TestCase
         $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
         $loginView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/member/auth/login.blade.php');
         $registerView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/member/auth/register.blade.php');
+        $resetEmailView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/member/auth/passwords/email.blade.php');
+        $resetView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/member/auth/passwords/reset.blade.php');
+        $authWordmark = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/auth-wordmark.blade.php');
         $localView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/local.blade.php');
 
         $this->assertStringContainsString('.grimba-form-pill', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-form-pill', $css);
         $this->assertStringContainsString('.grimba-auth-grid', $css);
+        $this->assertStringContainsString('.grimba-auth__wordmark', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-auth__wordmark', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-auth__lede', $css);
+        $this->assertStringContainsString('.grimba-auth .glass-panel', $css);
         $this->assertStringContainsString('.grimba-local__field--country', $css);
         $this->assertStringContainsString('.grimba-local__submit', $css);
         $this->assertStringContainsString('padding-bottom: calc(7rem + env(safe-area-inset-bottom)) !important;', $css);
         $this->assertStringContainsString('class="grimba-form-pill mb-3"', $loginView);
+        $this->assertStringContainsString('grimba-auth__lede', $loginView . $registerView . $resetEmailView . $resetView);
+        $this->assertStringContainsString('auth-wordmark', $loginView . $registerView . $resetEmailView . $resetView);
+        $this->assertStringContainsString('grimba-auth__wordmark', $authWordmark);
         $this->assertStringContainsString('class="grimba-auth-grid"', $registerView);
         $this->assertStringContainsString('class="grimba-form-pill grimba-local__input--country"', $localView);
         $this->assertStringContainsString('grimba-local__panel', $localView);

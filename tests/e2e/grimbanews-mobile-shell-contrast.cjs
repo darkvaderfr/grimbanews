@@ -327,6 +327,25 @@ async function inspectSubpagePolish(page) {
     const sources = await inspectGlassLede('/sources', '.grimba-sources__lede');
     const comparison = await inspectGlassLede('/comparatif', '.grimba-comparison-index__lede');
     const blindspot = await inspectGlassLede('/angles-morts', '.blindspot-page__lede');
+    const owners = await inspectGlassLede('/proprietaires', '.grimba-owners__lede');
+    const auth = await inspectGlassLede('/login', '.grimba-auth__lede');
+    const authShell = await page.evaluate(() => {
+        const wordmark = document.querySelector('.grimba-auth__wordmark');
+        const accent = document.querySelector('.grimba-auth__wordmark span:last-child');
+        const submit = document.querySelector('.grimba-auth button[type="submit"]');
+        const nav = document.querySelector('.grimba-mobile-nav');
+        const wordmarkStyle = wordmark ? getComputedStyle(wordmark) : null;
+        const accentStyle = accent ? getComputedStyle(accent) : null;
+        const submitRect = submit?.getBoundingClientRect();
+        const navRect = nav?.getBoundingClientRect();
+
+        return {
+            wordmarkColor: wordmarkStyle?.color || '',
+            accentColor: accentStyle?.color || '',
+            submitBottom: submitRect ? Math.round(submitRect.bottom) : 0,
+            navTop: navRect ? Math.round(navRect.top) : window.innerHeight,
+        };
+    });
 
     return {
         search,
@@ -336,6 +355,8 @@ async function inspectSubpagePolish(page) {
         sources,
         comparison,
         blindspot,
+        owners,
+        auth: { ...auth, ...authShell },
     };
 }
 
@@ -457,6 +478,15 @@ async function inspectDesktopHeaderSearch(page) {
             assert.equal(subpagePolish[key].ledeOpacity, '1', `mobile ${label} hero copy avoids opacity stacking`);
         }
         assert.match(subpagePolish.comparison.linkColor, /255,\s*250,\s*240/, 'mobile comparison methodology link stays readable in dark mode');
+        for (const [key, label] of [['owners', 'owners'], ['auth', 'auth']]) {
+            assert.ok(subpagePolish[key].scrollWidth <= subpagePolish[key].viewportWidth + 1, `mobile ${label} document width stays contained`);
+            assert.ok(subpagePolish[key].bodyScrollWidth <= subpagePolish[key].viewportWidth + 1, `mobile ${label} body width stays contained`);
+            assert.ok(subpagePolish[key].ledeContrast >= 7, `mobile ${label} lead copy keeps AAA-sized dark contrast`);
+            assert.equal(subpagePolish[key].ledeOpacity, '1', `mobile ${label} lead copy avoids opacity stacking`);
+        }
+        assert.match(subpagePolish.auth.wordmarkColor, /255,\s*250,\s*240/, 'mobile auth wordmark stays readable in dark mode');
+        assert.match(subpagePolish.auth.accentColor, /239,\s*85,\s*70/, 'mobile auth wordmark keeps a visible red accent');
+        assert.ok(subpagePolish.auth.submitBottom < subpagePolish.auth.navTop - 4, 'mobile auth primary action stays above bottom nav at rest');
 
         const desktopHeaderSearch = await inspectDesktopHeaderSearch(page);
         assert.notEqual(desktopHeaderSearch.display, 'none', 'desktop header search remains visible');

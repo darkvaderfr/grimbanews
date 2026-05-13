@@ -7,16 +7,14 @@
 <section class="grimba-auth py-5">
     <div class="container" style="max-width: 460px;">
         <header class="text-center mb-4">
-            <a href="{{ url('/') }}" aria-label="GrimbaNews">
-                <img src="{{ asset('storage/main/general/grimba-logo.svg') }}" alt="GrimbaNews" loading="eager" decoding="async" width="190" height="38" style="height:38px; width:auto;">
-            </a>
+            {!! Theme::partial('auth-wordmark') !!}
         </header>
 
         <div class="glass-panel p-4 p-md-5">
             <h1 class="grimba-methodology__title m-0 mb-2" style="font-size: clamp(24px, 2.8vw, 30px); letter-spacing:-0.3px;">
                 {{ __('Mot de passe oublié') }}
             </h1>
-            <p class="opacity-75 mb-4" style="font-size:15px; line-height:1.5;">
+            <p class="grimba-auth__lede mb-4" style="font-size:15px; line-height:1.5;">
                 {{ __("Entrez l'email associé à votre compte. Nous vous enverrons un lien pour le réinitialiser.") }}
             </p>
 
