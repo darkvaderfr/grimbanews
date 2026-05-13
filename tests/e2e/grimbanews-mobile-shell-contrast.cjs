@@ -444,6 +444,50 @@ async function inspectDesktopHeaderSearch(page) {
         assert.equal(pressedButtonStyle.pressed, 'true', 'save button becomes pressed');
         assert.match(pressedButtonStyle.backgroundColor, /rgb\(255, 250, 240\)/, 'pressed save button uses explicit cream background');
 
+        await page.setViewportSize({ width: 1440, height: 1000 });
+        await page.reload({ waitUntil: 'networkidle' });
+        const desktopArticlePolish = await page.evaluate(() => {
+            const actions = document.querySelector('.grimba-story-page__actions');
+            const compare = document.querySelector('.grimba-story-page__compare');
+            const save = document.querySelector('.grimba-story-page__actions .grimba-save-btn');
+            const compareShort = document.querySelector('.grimba-story-page__compare-label--short');
+            const compareFull = document.querySelector('.grimba-story-page__compare-label--full');
+            const sidebarCopy = document.querySelector('.grimba-story-distribution .opacity-75, .grimba-story-timeline .opacity-75');
+            const bounds = node => {
+                const rect = node.getBoundingClientRect();
+
+                return {
+                    top: Math.round(rect.top),
+                    width: Math.round(rect.width),
+                    height: Math.round(rect.height),
+                };
+            };
+            const sidebarStyle = sidebarCopy ? getComputedStyle(sidebarCopy) : null;
+
+            return {
+                actionsDisplay: actions ? getComputedStyle(actions).display : '',
+                compare: compare ? bounds(compare) : null,
+                save: save ? bounds(save) : null,
+                shortDisplay: compareShort ? getComputedStyle(compareShort).display : '',
+                fullDisplay: compareFull ? getComputedStyle(compareFull).display : '',
+                sidebarCopy: sidebarStyle ? {
+                    color: sidebarStyle.color,
+                    opacity: Number.parseFloat(sidebarStyle.opacity),
+                } : null,
+            };
+        });
+        assert.equal(desktopArticlePolish.actionsDisplay, 'flex', 'desktop article actions use one compact row');
+        assert.ok(desktopArticlePolish.compare.width < 260, 'desktop compare action avoids full-width stretching');
+        assert.ok(desktopArticlePolish.save.width < 180, 'desktop save action avoids full-width stretching');
+        assert.ok(desktopArticlePolish.compare.height >= 36, 'desktop compare action remains comfortably tappable');
+        assert.ok(desktopArticlePolish.save.height >= 36, 'desktop save action remains comfortably tappable');
+        assert.notEqual(desktopArticlePolish.fullDisplay, 'none', 'desktop article compare action keeps the full label');
+        assert.equal(desktopArticlePolish.shortDisplay, 'none', 'desktop article compare action hides the short label');
+        if (desktopArticlePolish.sidebarCopy) {
+            assert.ok(desktopArticlePolish.sidebarCopy.opacity >= 0.8, 'dark desktop article sidebar copy is not over-muted');
+            assert.match(desktopArticlePolish.sidebarCopy.color, /255,\s*250,\s*240/, 'dark desktop article sidebar copy uses readable cream text');
+        }
+
         console.log(JSON.stringify({
             ok: true,
             baseUrl,
@@ -451,6 +495,7 @@ async function inspectDesktopHeaderSearch(page) {
             formControls,
             subpagePolish,
             desktopHeaderSearch,
+            desktopArticlePolish,
             saveButton: { contrast: Number(saveButtonContrast.toFixed(2)), pressedButtonStyle },
         }));
     } finally {

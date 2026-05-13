@@ -410,6 +410,25 @@ body.grimba-home .grimba-story-page__compare {
 body.grimba-home .grimba-story-page__compare-label--short {
     display: none;
 }
+@media (min-width: 576px) {
+    body.grimba-home .grimba-story-page__actions {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+    }
+    body.grimba-home .grimba-story-page__actions .grimba-story-page__compare,
+    body.grimba-home .grimba-story-page__actions .grimba-save-btn {
+        flex: 0 0 auto;
+        width: auto !important;
+        min-height: 36px;
+    }
+    body.grimba-home .grimba-story-page__compare-label--full {
+        display: inline;
+    }
+    body.grimba-home .grimba-story-page__compare-label--short {
+        display: none;
+    }
+}
 @media (max-width: 991.98px) {
     body.grimba-home .grimba-story-page__title {
         font-size: 2.35rem;
@@ -2985,6 +3004,21 @@ html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page_
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__compare {
     background: rgba(246, 241, 232, 0.08);
     border-color: rgba(246, 241, 232, 0.18);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-story-distribution,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-story-timeline {
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-story-distribution .opacity-75,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-story-timeline .opacity-75 {
+    color: #fffaf0 !important;
+    opacity: 0.82 !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-story-timeline strong {
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-story-timeline div[aria-hidden="true"] {
+    background: rgba(255, 250, 240, 0.16) !important;
 }
 
 /* Inputs (search, forms, picker) */
