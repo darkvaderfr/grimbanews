@@ -3149,15 +3149,27 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-auth-link-muted {
         border-radius: 22px;
     }
     .grimba-coffre .grimba-methodology__title {
-        font-size: clamp(1.58rem, 7.2vw, 2rem) !important;
-        line-height: 1.08;
+        font-size: clamp(1.44rem, 6.2vw, 1.72rem) !important;
+        line-height: 1.09;
     }
     .grimba-coffre__lede,
     .grimba-coffre__empty-copy {
         opacity: 1 !important;
     }
+    .grimba-coffre__lede {
+        font-size: 1rem;
+        line-height: 1.5;
+    }
     .grimba-coffre .glass-panel.text-center {
         margin-bottom: 1.25rem;
+    }
+    .grimba-coffre__empty-icon {
+        margin-bottom: 0.55rem;
+        font-size: 40px;
+    }
+    .grimba-coffre__empty-copy {
+        font-size: 1rem;
+        line-height: 1.42;
     }
     .grimba-coffre .glass-panel.text-center .btn-grimba {
         justify-content: center;

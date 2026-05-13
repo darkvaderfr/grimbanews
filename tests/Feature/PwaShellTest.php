@@ -172,6 +172,8 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-coffre__lede', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-coffre__empty-copy', $css);
         $this->assertStringContainsString('color: rgba(255, 250, 240, 0.78) !important;', $css);
+        $this->assertStringContainsString('font-size: clamp(1.44rem, 6.2vw, 1.72rem) !important;', $css);
+        $this->assertStringContainsString('font-size: 40px;', $css);
         $this->assertStringContainsString('padding-bottom: calc(5.25rem + env(safe-area-inset-bottom)) !important;', $css);
         $this->assertStringNotContainsString('class="mb-0 opacity-85"', $vaultView);
         $this->assertStringNotContainsString('style="font-size:48px; line-height:1; margin-bottom:14px; opacity:0.4;"', $vaultView);

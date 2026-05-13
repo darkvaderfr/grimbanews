@@ -251,7 +251,26 @@ async function inspectSubpagePolish(page) {
 
     const localLedeContrast = contrast(blend(parseRgb(local.ledeColor), parseHex(local.paper)), parseHex(local.paper));
 
-    return { search, local: { ...local, ledeContrast: Number(localLedeContrast.toFixed(2)) } };
+    await page.goto('/coffre', { waitUntil: 'networkidle' });
+    const vault = await page.evaluate(() => {
+        const title = document.querySelector('.grimba-coffre .grimba-methodology__title');
+        const icon = document.querySelector('.grimba-coffre__empty-icon');
+        const copy = document.querySelector('.grimba-coffre__empty-copy');
+        const titleStyle = title ? getComputedStyle(title) : null;
+        const iconStyle = icon ? getComputedStyle(icon) : null;
+        const copyStyle = copy ? getComputedStyle(copy) : null;
+        const titleBounds = title?.getBoundingClientRect();
+
+        return {
+            titleFontSize: titleStyle ? Number.parseFloat(titleStyle.fontSize) : 0,
+            titleLineHeight: titleStyle ? Number.parseFloat(titleStyle.lineHeight) : 0,
+            titleHeight: titleBounds ? Math.round(titleBounds.height) : 0,
+            iconFontSize: iconStyle ? Number.parseFloat(iconStyle.fontSize) : 0,
+            copyFontSize: copyStyle ? Number.parseFloat(copyStyle.fontSize) : 0,
+        };
+    });
+
+    return { search, local: { ...local, ledeContrast: Number(localLedeContrast.toFixed(2)) }, vault };
 }
 
 async function inspectDesktopHeaderSearch(page) {
@@ -351,6 +370,9 @@ async function inspectDesktopHeaderSearch(page) {
         assert.equal(subpagePolish.local.ledeOpacity, '1', 'mobile local helper copy avoids opacity stacking');
         assert.ok(subpagePolish.local.inputBorderRadius >= 18, 'mobile local inputs keep softened corners');
         assert.ok(subpagePolish.local.titleFontSize <= 32, 'mobile local title uses contained type scale');
+        assert.ok(subpagePolish.vault.titleFontSize <= 28, 'mobile vault empty-state title uses contained type scale');
+        assert.ok(subpagePolish.vault.titleHeight <= 126, 'mobile vault empty-state title avoids an oversized headline block');
+        assert.ok(subpagePolish.vault.iconFontSize <= 40, 'mobile vault empty-state icon avoids oversized decoration');
 
         const desktopHeaderSearch = await inspectDesktopHeaderSearch(page);
         assert.notEqual(desktopHeaderSearch.display, 'none', 'desktop header search remains visible');
