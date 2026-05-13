@@ -341,6 +341,80 @@ body.grimba-home .grimba-methodology__title {
     overflow-wrap: anywhere;
     text-wrap: balance;
 }
+body.grimba-home .grimba-story-page__title {
+    color: var(--gn-ink);
+    font-size: 2.85rem;
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: 0;
+    hyphens: auto;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+}
+body.grimba-home .grimba-story-page__title--orphan {
+    font-size: 3.2rem;
+    line-height: 1.05;
+}
+body.grimba-home .grimba-story-page__meta {
+    color: var(--gn-ink-muted);
+    line-height: 1.35;
+}
+body.grimba-home .grimba-story-page__meta .grimba-methodology__kicker {
+    color: var(--gn-ink);
+}
+body.grimba-home .grimba-story-page__actions {
+    min-width: 0;
+}
+body.grimba-home .grimba-story-page__tablist {
+    display: flex;
+    max-width: 100%;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.05);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+}
+body.grimba-home .grimba-story-page__tablist::-webkit-scrollbar {
+    display: none;
+}
+body.grimba-home .grimba-story-page__tab,
+body.grimba-home .grimba-story-page__compare {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 0;
+    color: var(--gn-ink);
+    background: transparent;
+    font-family: var(--gn-font-body);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.1;
+    white-space: nowrap;
+    cursor: pointer;
+}
+body.grimba-home .grimba-story-page__tab[aria-selected="true"] {
+    background: var(--gn-ink);
+    color: var(--gn-paper);
+}
+body.grimba-home .grimba-story-page__compare {
+    margin-left: auto;
+    border: 1px solid rgba(26, 23, 19, 0.18);
+    background: rgba(255, 255, 255, 0.6);
+}
+@media (max-width: 991.98px) {
+    body.grimba-home .grimba-story-page__title {
+        font-size: 2.35rem;
+    }
+    body.grimba-home .grimba-story-page__title--orphan {
+        font-size: 2.45rem;
+    }
+}
 body.grimba-home .grimba-article-shell .ck-content,
 body.grimba-home .grimba-article-shell .grimba-full-article,
 body.grimba-home .grimba-article-shell .echo-financial-area,
@@ -2657,6 +2731,37 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     body.grimba-home .grimba-article-shell .echo-more-news-area {
         padding: 1rem;
     }
+    body.grimba-home .grimba-story-page {
+        padding-top: 1.25rem !important;
+        padding-right: 0.85rem;
+        padding-left: 0.85rem;
+    }
+    body.grimba-home .grimba-story-page__header {
+        border-radius: 22px;
+    }
+    body.grimba-home .grimba-story-page__title,
+    body.grimba-home .grimba-story-page__title--orphan {
+        font-size: 2rem;
+        line-height: 1.08;
+    }
+    body.grimba-home .grimba-story-page__meta {
+        gap: 0.35rem 0.5rem !important;
+    }
+    body.grimba-home .grimba-story-page__actions {
+        align-items: stretch !important;
+    }
+    body.grimba-home .grimba-story-page__tablist {
+        width: 100%;
+    }
+    body.grimba-home .grimba-story-page__tab {
+        flex: 1 0 auto;
+    }
+    body.grimba-home .grimba-story-page__compare,
+    body.grimba-home .grimba-story-page__actions .grimba-save-btn {
+        justify-content: center;
+        width: 100%;
+        margin-left: 0;
+    }
     body.grimba-home .grimba-article-shell .details-share,
     body.grimba-home .grimba-article-shell .details-tag {
         align-items: flex-start;
@@ -2808,6 +2913,29 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-story-article--current {
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-story-article a {
     color: var(--gn-ink) !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__title,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__meta .grimba-methodology__kicker {
+    color: #fffaf0 !important;
+    -webkit-text-fill-color: #fffaf0 !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__meta {
+    color: rgba(255, 250, 240, 0.74) !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__tablist {
+    background: rgba(246, 241, 232, 0.07);
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__tab,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__compare {
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__tab[aria-selected="true"] {
+    background: #fffaf0;
+    color: #15130f;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__compare {
+    background: rgba(246, 241, 232, 0.08);
+    border-color: rgba(246, 241, 232, 0.18);
 }
 
 /* Inputs (search, forms, picker) */

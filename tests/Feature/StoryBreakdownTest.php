@@ -209,7 +209,18 @@ class StoryBreakdownTest extends TestCase
         $this->get('/article/canonical-article-fixture')
             ->assertOk()
             ->assertSee('grimba-article-shell', false)
+            ->assertSee('grimba-story-page__title--orphan', false)
             ->assertSee('Canonical article fixture');
+
+        $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+        $view = file_get_contents(base_path('platform/themes/echo/views/post.blade.php'));
+
+        $this->assertStringContainsString('.grimba-story-page__title', $css);
+        $this->assertStringContainsString('.grimba-story-page__compare', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__title', $css);
+        $this->assertStringContainsString('body.grimba-home .grimba-story-page__compare,', $css);
+        $this->assertStringNotContainsString('font-size:clamp(30px, 4vw, 52px);', $view);
+        $this->assertStringNotContainsString('font-size:clamp(28px, 3.6vw, 44px);', $view);
     }
 
     public function test_orphan_article_page_renders_readable_feed_fallback_in_reader_block(): void

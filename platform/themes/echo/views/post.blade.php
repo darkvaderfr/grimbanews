@@ -221,7 +221,7 @@
 @endphp
 
 @if($__gnIsStoryPage)
-    <section class="grimba-story container py-4 py-md-5">
+    <section class="grimba-story container grimba-story-page py-4 py-md-5">
         <div class="row gx-4 gx-lg-5">
             <div class="col-lg-8 col-12 mb-4">
 
@@ -266,8 +266,8 @@
                         $__gnByBias[$b]++;
                     }
                 @endphp
-                <header class="glass-panel p-3 p-md-4 mb-3">
-                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2 small">
+                <header class="grimba-story-page__header glass-panel p-3 p-md-4 mb-3">
+                    <div class="grimba-story-page__meta d-flex align-items-center gap-2 flex-wrap mb-2 small">
                         <span class="grimba-methodology__kicker">{{ __('Histoire') }}</span>
                         @if($post->source_name)
                             <span class="opacity-50">·</span>
@@ -285,8 +285,7 @@
                         {!! Theme::partial('reading-time', ['post' => $post]) !!}
                     </div>
 
-                    <h1 class="grimba-methodology__title m-0 mb-3"
-                        style="font-size:clamp(28px, 3.6vw, 44px); line-height:1.1; letter-spacing:-0.5px;">
+                    <h1 class="grimba-methodology__title grimba-story-page__title m-0 mb-3">
                         {{ $__gnTitle }}
                     </h1>
                     @if($__gnHasTr)
@@ -337,21 +336,14 @@
                          GroundNews-style. Tabs use the same data attribute
                          as the article-list section below; clicking filters
                          in place via the existing JS handler. --}}
-                    <div class="d-flex align-items-center gap-2 flex-wrap mb-3" data-grimba-cluster-tabs>
-                        @php
-                            $__pillBg = 'background:rgba(0,0,0,0.05); padding:4px;';
-                            $__activeBtn = 'background:var(--gn-ink,#1a1713); color:var(--gn-paper,#f6f1e8);';
-                            $__inactiveBtn = 'background:transparent; color:var(--gn-ink,#1a1713);';
-                        @endphp
-                        <div role="tablist" style="display:flex; gap:4px; border-radius:9999px; {{ $__pillBg }}">
-                            <button type="button" data-bias-tab="all" role="tab" aria-selected="true"
-                                    style="padding:6px 14px; border-radius:9999px; border:none; font-weight:700; font-size:13px; {{ $__activeBtn }}">
+                    <div class="grimba-story-page__actions d-flex align-items-center gap-2 flex-wrap mb-3" data-grimba-cluster-tabs>
+                        <div class="grimba-story-page__tablist" role="tablist">
+                            <button type="button" class="grimba-story-page__tab" data-bias-tab="all" role="tab" aria-selected="true">
                                 {{ __('Tous') }}
                             </button>
                             @foreach(['left' => [__('Gauche'),'#3b82f6'], 'center' => [__('Centre'),'#a8a8a8'], 'right' => [__('Droite'),'#e84c3d']] as $b => [$lbl,$col])
                                 @if($__gnByBias[$b] > 0)
-                                    <button type="button" data-bias-tab="{{ $b }}" role="tab" aria-selected="false"
-                                            style="padding:6px 14px; border-radius:9999px; border:none; font-weight:600; font-size:13px; {{ $__inactiveBtn }}">
+                                    <button type="button" class="grimba-story-page__tab" data-bias-tab="{{ $b }}" role="tab" aria-selected="false">
                                         <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:{{ $col }}; margin-right:5px; vertical-align:1px;"></span>
                                         {{ $lbl }}
                                     </button>
@@ -360,8 +352,8 @@
                         </div>
 
                         <button type="button"
+                                class="grimba-story-page__compare"
                                 onclick="document.querySelector('.grimba-story-distribution')?.scrollIntoView({behavior:'smooth', block:'start'});"
-                                style="margin-left:auto; padding:6px 14px; border-radius:9999px; border:1px solid rgba(26,23,19,0.18); background:rgba(255,255,255,0.6); color:var(--gn-ink,#1a1713); font-weight:600; font-size:13px; cursor:pointer;"
                                 title="{{ __('Voir la distribution des biais') }}">
                             ⚖️ {{ __('Comparaison des biais') }}
                         </button>
@@ -768,7 +760,7 @@
                         {{-- S200 — orphan-post parity. Single-source posts now
                              use the same glass-language hero as clustered
                              stories instead of the stock Echo Bootstrap block. --}}
-                        <header class="grimba-orphan-hero glass-panel p-0 mb-4" style="overflow:hidden;">
+                        <header class="grimba-orphan-hero grimba-story-page__header glass-panel p-0 mb-4" style="overflow:hidden;">
                             @if (defined('GALLERY_MODULE_SCREEN_NAME') && ! empty($galleries = gallery_meta_data($post)))
                                 <div class="grimba-orphan-hero__media">
                                     {!! render_object_gallery($galleries) !!}
@@ -796,7 +788,7 @@
                             @endif
 
                             <div class="p-3 p-md-4">
-                                <div class="d-flex align-items-center gap-2 flex-wrap mb-2 small">
+                                <div class="grimba-story-page__meta d-flex align-items-center gap-2 flex-wrap mb-2 small">
                                     <span class="grimba-methodology__kicker">{{ __('Article') }}</span>
                                     @if($post->source_name)
                                         <span class="opacity-50">·</span>
@@ -812,8 +804,7 @@
                                     @include(Theme::getThemeNamespace('partials.bias-badge'), ['bias' => $post->bias_rating ?? 'unknown', 'size' => 'sm'])
                                 </div>
 
-                                <h1 class="grimba-methodology__title m-0 mb-3"
-                                    style="font-size:clamp(30px, 4vw, 52px); line-height:1.04; letter-spacing:-0.7px;">
+                                <h1 class="grimba-methodology__title grimba-story-page__title grimba-story-page__title--orphan m-0 mb-3">
                                     {{ $__gnTitle }}
                                 </h1>
                                 @if($__gnHasTr)
