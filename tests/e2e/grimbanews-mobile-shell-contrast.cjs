@@ -208,14 +208,25 @@ async function inspectSubpagePolish(page) {
     const search = await page.evaluate(() => {
         const title = document.querySelector('.grimba-search-page .grimba-methodology__title');
         const query = document.querySelector('.grimba-search-page__query');
+        const savedSearch = document.querySelector('.grimba-search-page .grimba-saved-search__inner');
+        const savedSearchButton = savedSearch?.querySelector('.btn-grimba') || null;
+        const mobileNav = document.querySelector('.grimba-mobile-nav');
         const titleStyle = title ? getComputedStyle(title) : null;
         const queryStyle = query ? getComputedStyle(query) : null;
+        const savedSearchStyle = savedSearch ? getComputedStyle(savedSearch) : null;
+        const buttonRect = savedSearchButton?.getBoundingClientRect() || null;
+        const navRect = mobileNav?.getBoundingClientRect() || null;
 
         return {
             titleFontSize: titleStyle ? Number.parseFloat(titleStyle.fontSize) : 0,
             queryFontSize: queryStyle ? Number.parseFloat(queryStyle.fontSize) : 0,
             queryDisplay: queryStyle?.display || null,
             queryText: query?.textContent?.trim() || '',
+            savedSearch: savedSearch ? {
+                flexDirection: savedSearchStyle?.flexDirection || '',
+                buttonBottom: buttonRect ? Math.round(buttonRect.bottom) : 0,
+                navTop: navRect ? Math.round(navRect.top) : window.innerHeight,
+            } : null,
         };
     });
 
@@ -334,6 +345,8 @@ async function inspectDesktopHeaderSearch(page) {
         assert.equal(subpagePolish.search.queryDisplay, 'block', 'mobile search query wraps onto its own line');
         assert.match(subpagePolish.search.queryText, /afrique/i, 'mobile search query remains visible');
         assert.ok(subpagePolish.search.queryFontSize < subpagePolish.search.titleFontSize, 'mobile search query is subordinate to result count');
+        assert.equal(subpagePolish.search.savedSearch.flexDirection, 'row', 'mobile search saved-search CTA stays compact');
+        assert.ok(subpagePolish.search.savedSearch.buttonBottom < subpagePolish.search.savedSearch.navTop - 4, 'mobile search saved-search CTA stays above bottom nav');
         assert.ok(subpagePolish.local.ledeContrast >= 7, 'mobile local helper copy keeps AAA-sized dark contrast');
         assert.equal(subpagePolish.local.ledeOpacity, '1', 'mobile local helper copy avoids opacity stacking');
         assert.ok(subpagePolish.local.inputBorderRadius >= 18, 'mobile local inputs keep softened corners');

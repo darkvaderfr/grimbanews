@@ -3876,6 +3876,26 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-account-searches__row {
         justify-content: center;
         width: 100%;
     }
+    .grimba-search-page .grimba-saved-search__inner {
+        align-items: center;
+        flex-direction: row;
+        gap: 0.75rem;
+    }
+    .grimba-search-page .grimba-saved-search__copy {
+        flex: 1 1 auto;
+    }
+    .grimba-search-page .grimba-saved-search__copy span {
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+    .grimba-search-page .grimba-saved-search__inner .btn-grimba {
+        flex: 0 0 auto;
+        min-height: 40px;
+        width: auto;
+        padding-inline: 1rem;
+    }
     .grimba-account-searches__row form {
         width: 100%;
     }

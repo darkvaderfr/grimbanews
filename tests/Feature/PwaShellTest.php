@@ -107,6 +107,9 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('width: auto !important;', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-story-timeline .opacity-75', $css);
         $this->assertStringContainsString('opacity: 0.82 !important;', $css);
+        $this->assertStringContainsString('.grimba-search-page .grimba-saved-search__inner', $css);
+        $this->assertStringContainsString('-webkit-line-clamp: 2;', $css);
+        $this->assertStringContainsString('min-height: 40px;', $css);
     }
 
     public function test_cookie_banner_respects_existing_consent_cookie_values(): void
