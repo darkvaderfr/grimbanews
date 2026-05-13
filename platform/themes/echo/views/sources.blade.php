@@ -37,7 +37,7 @@
             <h1 class="grimba-methodology__title mt-2 mb-2">
                 {{ trans_choice(':count média sous notre grille d’analyse|:count médias sous notre grille d’analyse', $total, ['count' => $total]) }}
             </h1>
-            <p class="mb-3 opacity-85">
+            <p class="grimba-sources__lede mb-3">
                 {{ __('Biais éditorial, type de propriété, score de crédibilité, pays d’origine et langue. Classements ouverts et révisables — voir la') }}
                 <a href="{{ url('/methodologie') }}" class="text-decoration-underline">{{ __('méthodologie') }}</a>.
             </p>

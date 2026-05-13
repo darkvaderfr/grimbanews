@@ -295,11 +295,37 @@ async function inspectSubpagePolish(page) {
     });
     const forYouLedeContrast = contrast(blend(parseRgb(forYou.ledeColor), parseHex(forYou.paper)), parseHex(forYou.paper));
 
+    await page.goto('/sources', { waitUntil: 'networkidle' });
+    const sources = await page.evaluate(() => {
+        const lede = document.querySelector('.grimba-sources__lede');
+        const link = document.querySelector('.grimba-sources__lede a');
+        const panel = lede?.closest('.glass-panel');
+        const rootStyle = getComputedStyle(document.documentElement);
+        const ledeStyle = lede ? getComputedStyle(lede) : null;
+        const linkStyle = link ? getComputedStyle(link) : null;
+        const panelStyle = panel ? getComputedStyle(panel) : null;
+
+        return {
+            scrollWidth: document.documentElement.scrollWidth,
+            bodyScrollWidth: document.body.scrollWidth,
+            viewportWidth: window.innerWidth,
+            ledeColor: ledeStyle?.color || '',
+            ledeOpacity: ledeStyle?.opacity || '',
+            linkColor: linkStyle?.color || '',
+            linkDecorationColor: linkStyle?.textDecorationColor || '',
+            panelBackground: panelStyle?.backgroundColor || '',
+            paper: rootStyle.getPropertyValue('--gn-paper').trim(),
+        };
+    });
+    const sourcesPanelBackground = blend(parseRgb(sources.panelBackground), parseHex(sources.paper));
+    const sourcesLedeContrast = contrast(blend(parseRgb(sources.ledeColor), sourcesPanelBackground), sourcesPanelBackground);
+
     return {
         search,
         local: { ...local, ledeContrast: Number(localLedeContrast.toFixed(2)) },
         vault,
         forYou: { ...forYou, ledeContrast: Number(forYouLedeContrast.toFixed(2)) },
+        sources: { ...sources, ledeContrast: Number(sourcesLedeContrast.toFixed(2)) },
     };
 }
 
@@ -409,6 +435,11 @@ async function inspectDesktopHeaderSearch(page) {
         assert.equal(subpagePolish.forYou.ledeOpacity, '1', 'mobile for-you helper copy avoids opacity stacking');
         assert.match(subpagePolish.forYou.profileBackground, /rgba?\(28,\s*24,\s*17/, 'dark for-you bias profile uses a dark surface');
         assert.ok(subpagePolish.forYou.mutedOpacity >= 1, 'dark for-you bias profile secondary copy is not over-muted');
+        assert.ok(subpagePolish.sources.scrollWidth <= subpagePolish.sources.viewportWidth + 1, 'mobile sources document width stays contained');
+        assert.ok(subpagePolish.sources.bodyScrollWidth <= subpagePolish.sources.viewportWidth + 1, 'mobile sources body width stays contained');
+        assert.ok(subpagePolish.sources.ledeContrast >= 7, 'mobile sources hero copy keeps AAA-sized dark contrast');
+        assert.equal(subpagePolish.sources.ledeOpacity, '1', 'mobile sources hero copy avoids opacity stacking');
+        assert.match(subpagePolish.sources.linkColor, /255,\s*250,\s*240/, 'mobile sources methodology link stays readable in dark mode');
 
         const desktopHeaderSearch = await inspectDesktopHeaderSearch(page);
         assert.notEqual(desktopHeaderSearch.display, 'none', 'desktop header search remains visible');

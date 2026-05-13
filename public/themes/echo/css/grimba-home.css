@@ -1500,7 +1500,8 @@ button.btn-grimba--solid,
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
-.grimba-foryou__lede {
+.grimba-foryou__lede,
+.grimba-sources__lede {
     max-width: 58ch;
     color: var(--gn-ink-muted);
     line-height: 1.6;
@@ -3409,8 +3410,13 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile .opacity-75 {
 html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile a:not(.btn-grimba) {
     color: #fffaf0;
 }
-html.grimba-home-html[data-bs-theme="dark"] .grimba-foryou__lede {
+html.grimba-home-html[data-bs-theme="dark"] .grimba-foryou__lede,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-sources__lede {
     color: rgba(255, 250, 240, 0.80);
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-sources__lede a:not([class*="btn-grimba"]) {
+    color: #fffaf0;
+    text-decoration-color: rgba(255, 250, 240, 0.48);
 }
 
 /* S185-S188 — vault polish, mobile nav, and a11y focus states */
