@@ -5,13 +5,19 @@
         'fr' => 'Les articles non francophones sont affichés en français quand une traduction NobuAI est disponible.',
         default => null,
     };
+    $shortCopy = match ($lang) {
+        'en' => 'French articles show in English when available.',
+        'fr' => 'Articles traduits en français quand disponible.',
+        default => null,
+    };
 @endphp
 
 @if($copy)
     <div class="container-xxl mt-2 grimba-translation-note-wrap">
         <div class="grimba-translation-note" role="note">
             {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
-            <span>{{ $copy }}</span>
+            <span class="grimba-translation-note__copy grimba-translation-note__copy--full">{{ $copy }}</span>
+            <span class="grimba-translation-note__copy grimba-translation-note__copy--short">{{ $shortCopy }}</span>
         </div>
     </div>
 @endif

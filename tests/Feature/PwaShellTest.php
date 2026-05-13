@@ -57,6 +57,7 @@ class PwaShellTest extends TestCase
     {
         $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
         $cookieConsent = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/cookie-consent.blade.php');
+        $translationNote = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/home/translation-note.blade.php');
 
         $this->get('/')
             ->assertOk()
@@ -87,6 +88,9 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('max-height: min(420px, calc(100vh - 150px - env(safe-area-inset-bottom)));', $cookieConsent);
         $this->assertStringContainsString('max-height: 8.5rem;', $cookieConsent);
         $this->assertStringContainsString('grid-template-columns: 1fr;', $cookieConsent);
+        $this->assertStringContainsString('grimba-translation-note__copy--short', $translationNote);
+        $this->assertStringContainsString('.grimba-translation-note > span.grimba-translation-note__copy--short', $css);
+        $this->assertStringContainsString('font-size: clamp(1.68rem, 7.4vw, 1.92rem);', $css);
     }
 
     public function test_cookie_banner_respects_existing_consent_cookie_values(): void

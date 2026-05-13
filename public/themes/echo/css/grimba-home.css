@@ -2772,10 +2772,11 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     }
     body.grimba-home .grimba-story-page__title,
     body.grimba-home .grimba-story-page__title--orphan {
-        font-size: 2rem;
-        line-height: 1.08;
+        font-size: clamp(1.68rem, 7.4vw, 1.92rem);
+        line-height: 1.09;
     }
     body.grimba-home .grimba-story-page__meta {
+        font-size: 0.82rem;
         gap: 0.35rem 0.5rem !important;
     }
     body.grimba-home .grimba-story-page__actions {
@@ -3902,6 +3903,9 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-account-searches__row {
     flex: 0 0 auto;
     white-space: nowrap;
 }
+.grimba-translation-note__copy--short {
+    display: none;
+}
 .grimba-translation-note > span:not(.gn-nobuai-chip) {
     min-width: 0;
     line-height: 1.45;
@@ -3992,6 +3996,14 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-translation-note .gn-nobuai-
         border-radius: 22px;
         font-size: 0.9rem;
         line-height: 1.45;
+    }
+    .grimba-translation-note > span.grimba-translation-note__copy--full {
+        display: none;
+    }
+    .grimba-translation-note > span.grimba-translation-note__copy--short {
+        display: block;
+        overflow: visible;
+        -webkit-line-clamp: unset;
     }
 }
 

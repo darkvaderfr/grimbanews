@@ -122,6 +122,9 @@ async function inspectHome(page, width) {
         const search = document.querySelector('.grimba-search');
         const selectionChip = document.querySelector('.grimba-similar__chip');
         const selectionChipStyle = selectionChip ? getComputedStyle(selectionChip) : null;
+        const translationNote = document.querySelector('.grimba-translation-note');
+        const translationNoteShort = translationNote?.querySelector('.grimba-translation-note__copy--short') || null;
+        const translationNoteFull = translationNote?.querySelector('.grimba-translation-note__copy--full') || null;
         const rootStyle = getComputedStyle(document.documentElement);
 
         return {
@@ -140,6 +143,13 @@ async function inspectHome(page, width) {
                 backgroundColor: selectionChipStyle.backgroundColor,
                 borderColor: selectionChipStyle.borderColor,
                 paper: rootStyle.getPropertyValue('--gn-paper').trim(),
+            } : null,
+            translationNote: translationNote ? {
+                clientWidth: translationNote.clientWidth,
+                scrollWidth: translationNote.scrollWidth,
+                shortText: translationNoteShort?.textContent?.trim() || '',
+                shortDisplay: translationNoteShort ? getComputedStyle(translationNoteShort).display : null,
+                fullDisplay: translationNoteFull ? getComputedStyle(translationNoteFull).display : null,
             } : null,
         };
     });
@@ -240,6 +250,11 @@ async function inspectFormControl(page, path, selector, label) {
 
             assert.ok(snapshot.wordmarkRect.right < snapshot.searchRect.x, `wordmark and search do not collide at ${width}px`);
             assert.ok(snapshot.selectionChip, `topic selection chip exists at ${width}px`);
+            assert.ok(snapshot.translationNote, `translation note exists at ${width}px`);
+            assert.ok(snapshot.translationNote.scrollWidth <= snapshot.translationNote.clientWidth + 1, `translation note stays contained at ${width}px`);
+            assert.notEqual(snapshot.translationNote.shortDisplay, 'none', `mobile translation note uses compact copy at ${width}px`);
+            assert.equal(snapshot.translationNote.fullDisplay, 'none', `mobile translation note hides long copy at ${width}px`);
+            assert.match(snapshot.translationNote.shortText, /available|disponible/i, `translation note compact copy remains meaningful at ${width}px`);
 
             const textColor = parseRgb(snapshot.selectionChip.color);
             const chipBackground = blend(parseRgb(snapshot.selectionChip.backgroundColor), parseHex(snapshot.selectionChip.paper));
@@ -273,6 +288,22 @@ async function inspectFormControl(page, path, selector, label) {
             page.waitForLoadState('domcontentloaded'),
             storyLink.click(),
         ]);
+
+        const storyTitle = await firstVisible(page.locator('.grimba-story-page__title'), 'article story title');
+        const storyTitleMetrics = await storyTitle.evaluate(element => {
+            const style = getComputedStyle(element);
+            const bounds = element.getBoundingClientRect();
+
+            return {
+                fontSize: Number.parseFloat(style.fontSize),
+                lineHeight: Number.parseFloat(style.lineHeight),
+                right: bounds.right,
+                viewportWidth: window.innerWidth,
+            };
+        });
+        assert.ok(storyTitleMetrics.fontSize <= 31.5, 'mobile article title uses contained type scale');
+        assert.ok(storyTitleMetrics.lineHeight <= storyTitleMetrics.fontSize * 1.12, 'mobile article title keeps a tight readable line-height');
+        assert.ok(storyTitleMetrics.right <= storyTitleMetrics.viewportWidth + 1, 'mobile article title stays inside the viewport');
 
         const saveButton = await firstVisible(page.locator('.grimba-save-btn'), 'save button');
         const saveButtonStyle = await saveButton.evaluate(button => {
