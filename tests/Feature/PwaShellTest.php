@@ -60,6 +60,7 @@ class PwaShellTest extends TestCase
         $translationNote = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/home/translation-note.blade.php');
         $searchView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/search.blade.php');
         $mainHeader = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/home/main-header.blade.php');
+        $postView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/post.blade.php');
 
         $this->get('/')
             ->assertOk()
@@ -99,6 +100,9 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('border-radius: 18px !important;', $css);
         $this->assertStringContainsString('Topic, source, story…', $mainHeader);
         $this->assertStringContainsString('Sujet, source, histoire…', $mainHeader);
+        $this->assertStringContainsString('grimba-story-page__compare-label--short', $postView);
+        $this->assertStringContainsString('grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);', $css);
+        $this->assertStringContainsString('min-height: 44px;', $css);
     }
 
     public function test_cookie_banner_respects_existing_consent_cookie_values(): void

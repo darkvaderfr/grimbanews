@@ -381,6 +381,38 @@ async function inspectDesktopHeaderSearch(page) {
         assert.ok(storyTitleMetrics.lineHeight <= storyTitleMetrics.fontSize * 1.12, 'mobile article title keeps a tight readable line-height');
         assert.ok(storyTitleMetrics.right <= storyTitleMetrics.viewportWidth + 1, 'mobile article title stays inside the viewport');
 
+        const articleActionMetrics = await page.evaluate(() => {
+            const actions = document.querySelector('.grimba-story-page__actions');
+            const compare = document.querySelector('.grimba-story-page__compare');
+            const save = document.querySelector('.grimba-story-page__actions .grimba-save-btn');
+            const compareShort = document.querySelector('.grimba-story-page__compare-label--short');
+            const compareFull = document.querySelector('.grimba-story-page__compare-label--full');
+            const bounds = node => {
+                const rect = node.getBoundingClientRect();
+
+                return {
+                    top: Math.round(rect.top),
+                    width: Math.round(rect.width),
+                    height: Math.round(rect.height),
+                    bottom: Math.round(rect.bottom),
+                };
+            };
+
+            return {
+                actionsDisplay: actions ? getComputedStyle(actions).display : '',
+                compare: compare ? bounds(compare) : null,
+                save: save ? bounds(save) : null,
+                shortDisplay: compareShort ? getComputedStyle(compareShort).display : '',
+                fullDisplay: compareFull ? getComputedStyle(compareFull).display : '',
+            };
+        });
+        assert.equal(articleActionMetrics.actionsDisplay, 'grid', 'mobile article actions use a compact grid');
+        assert.ok(articleActionMetrics.compare.height >= 44, 'mobile compare action keeps a 44px tap target');
+        assert.ok(articleActionMetrics.save.height >= 44, 'mobile save action keeps a 44px tap target');
+        assert.ok(Math.abs(articleActionMetrics.compare.top - articleActionMetrics.save.top) <= 1, 'mobile compare and save actions sit on one row');
+        assert.notEqual(articleActionMetrics.shortDisplay, 'none', 'mobile article compare action uses the concise label');
+        assert.equal(articleActionMetrics.fullDisplay, 'none', 'mobile article compare action hides the long label');
+
         const saveButton = await firstVisible(page.locator('.grimba-save-btn'), 'save button');
         const saveButtonStyle = await saveButton.evaluate(button => {
             const style = getComputedStyle(button);

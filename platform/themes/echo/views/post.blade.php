@@ -355,7 +355,9 @@
                                 class="grimba-story-page__compare"
                                 onclick="document.querySelector('.grimba-story-distribution')?.scrollIntoView({behavior:'smooth', block:'start'});"
                                 title="{{ __('Voir la distribution des biais') }}">
-                            ⚖️ {{ __('Comparaison des biais') }}
+                            <span aria-hidden="true">⚖️</span>
+                            <span class="grimba-story-page__compare-label grimba-story-page__compare-label--full">{{ __('Comparaison des biais') }}</span>
+                            <span class="grimba-story-page__compare-label grimba-story-page__compare-label--short">{{ __('Comparer') }}</span>
                         </button>
 
                         {{-- S173 — save-for-later pill. Cookie-only (no auth).

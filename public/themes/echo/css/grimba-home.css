@@ -407,6 +407,9 @@ body.grimba-home .grimba-story-page__compare {
     border: 1px solid rgba(26, 23, 19, 0.18);
     background: rgba(255, 255, 255, 0.6);
 }
+body.grimba-home .grimba-story-page__compare-label--short {
+    display: none;
+}
 @media (max-width: 991.98px) {
     body.grimba-home .grimba-story-page__title {
         font-size: 2.35rem;
@@ -2780,19 +2783,33 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
         gap: 0.35rem 0.5rem !important;
     }
     body.grimba-home .grimba-story-page__actions {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         align-items: stretch !important;
+        gap: 0.5rem !important;
     }
     body.grimba-home .grimba-story-page__tablist {
+        grid-column: 1 / -1;
         width: 100%;
+        min-height: 44px;
     }
     body.grimba-home .grimba-story-page__tab {
         flex: 1 0 auto;
+        min-height: 34px;
     }
     body.grimba-home .grimba-story-page__compare,
     body.grimba-home .grimba-story-page__actions .grimba-save-btn {
         justify-content: center;
         width: 100%;
+        min-height: 44px;
         margin-left: 0;
+        padding-inline: 0.75rem;
+    }
+    body.grimba-home .grimba-story-page__compare-label--full {
+        display: none;
+    }
+    body.grimba-home .grimba-story-page__compare-label--short {
+        display: inline;
     }
     body.grimba-home .grimba-article-shell .details-share,
     body.grimba-home .grimba-article-shell .details-tag {
