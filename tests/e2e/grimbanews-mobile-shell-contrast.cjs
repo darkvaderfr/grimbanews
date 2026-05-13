@@ -201,6 +201,48 @@ async function inspectFormControl(page, path, selector, label) {
     return { path, label, contrast: Number(ratio.toFixed(2)), color: data.color, backgroundColor: data.backgroundColor };
 }
 
+async function inspectSubpagePolish(page) {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/search?q=afrique', { waitUntil: 'networkidle' });
+
+    const search = await page.evaluate(() => {
+        const title = document.querySelector('.grimba-search-page .grimba-methodology__title');
+        const query = document.querySelector('.grimba-search-page__query');
+        const titleStyle = title ? getComputedStyle(title) : null;
+        const queryStyle = query ? getComputedStyle(query) : null;
+
+        return {
+            titleFontSize: titleStyle ? Number.parseFloat(titleStyle.fontSize) : 0,
+            queryFontSize: queryStyle ? Number.parseFloat(queryStyle.fontSize) : 0,
+            queryDisplay: queryStyle?.display || null,
+            queryText: query?.textContent?.trim() || '',
+        };
+    });
+
+    await page.goto('/local', { waitUntil: 'networkidle' });
+    const local = await page.evaluate(() => {
+        const lede = document.querySelector('.grimba-local__lede');
+        const input = document.querySelector('#grimba-local-city');
+        const title = document.querySelector('.grimba-local__title');
+        const rootStyle = getComputedStyle(document.documentElement);
+        const ledeStyle = lede ? getComputedStyle(lede) : null;
+        const inputStyle = input ? getComputedStyle(input) : null;
+        const titleStyle = title ? getComputedStyle(title) : null;
+
+        return {
+            ledeColor: ledeStyle?.color || '',
+            ledeOpacity: ledeStyle?.opacity || '',
+            paper: rootStyle.getPropertyValue('--gn-paper').trim(),
+            inputBorderRadius: inputStyle ? Number.parseFloat(inputStyle.borderRadius) : 0,
+            titleFontSize: titleStyle ? Number.parseFloat(titleStyle.fontSize) : 0,
+        };
+    });
+
+    const localLedeContrast = contrast(blend(parseRgb(local.ledeColor), parseHex(local.paper)), parseHex(local.paper));
+
+    return { search, local: { ...local, ledeContrast: Number(localLedeContrast.toFixed(2)) } };
+}
+
 (async () => {
     const { chromium } = loadPlaywright();
     const baseUrl = (process.env.GRIMBANEWS_BASE_URL || 'http://127.0.0.1:8003').replace(/\/$/, '');
@@ -268,6 +310,15 @@ async function inspectFormControl(page, path, selector, label) {
             await inspectFormControl(page, '/login', '#grimba-login-email', 'login email input'),
             await inspectFormControl(page, '/local', '#grimba-local-city', 'local city input'),
         ];
+
+        const subpagePolish = await inspectSubpagePolish(page);
+        assert.equal(subpagePolish.search.queryDisplay, 'block', 'mobile search query wraps onto its own line');
+        assert.match(subpagePolish.search.queryText, /afrique/i, 'mobile search query remains visible');
+        assert.ok(subpagePolish.search.queryFontSize < subpagePolish.search.titleFontSize, 'mobile search query is subordinate to result count');
+        assert.ok(subpagePolish.local.ledeContrast >= 7, 'mobile local helper copy keeps AAA-sized dark contrast');
+        assert.equal(subpagePolish.local.ledeOpacity, '1', 'mobile local helper copy avoids opacity stacking');
+        assert.ok(subpagePolish.local.inputBorderRadius >= 18, 'mobile local inputs keep softened corners');
+        assert.ok(subpagePolish.local.titleFontSize <= 32, 'mobile local title uses contained type scale');
 
         for (const width of [320, 390]) {
             const searchWidth = await inspectPageWidth(page, '/search?q=afrique', width);
@@ -341,6 +392,7 @@ async function inspectFormControl(page, path, selector, label) {
             baseUrl,
             snapshots: snapshots.map(({ width, selectionChip }) => ({ width, selectionChip })),
             formControls,
+            subpagePolish,
             saveButton: { contrast: Number(saveButtonContrast.toFixed(2)), pressedButtonStyle },
         }));
     } finally {

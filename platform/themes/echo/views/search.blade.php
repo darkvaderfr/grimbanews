@@ -33,7 +33,7 @@
                 {{ __('Que cherchez-vous ?') }}
             @else
                 {{ trans_choice(':count résultat|:count résultats', $total, ['count' => $total]) }}
-                <span class="opacity-75">{{ __('pour « :query »', ['query' => $query]) }}</span>
+                <span class="grimba-search-page__query">{{ __('pour « :query »', ['query' => $query]) }}</span>
             @endif
         </h1>
         <form method="GET" action="{{ url('/search') }}" class="grimba-search-page__form mt-3" role="search">

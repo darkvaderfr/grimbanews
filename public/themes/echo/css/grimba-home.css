@@ -3067,10 +3067,11 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-auth-link-muted {
         border-radius: 22px;
     }
     .grimba-local__title {
-        font-size: clamp(1.75rem, 8.6vw, 2.25rem) !important;
-        line-height: 1.05;
+        font-size: clamp(1.58rem, 7.2vw, 2rem) !important;
+        line-height: 1.08;
     }
     .grimba-local__lede {
+        opacity: 1 !important;
         font-size: 0.95rem !important;
         line-height: 1.45 !important;
     }
@@ -3080,6 +3081,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-auth-link-muted {
     .grimba-local__form .grimba-form-pill {
         min-height: 46px;
         padding: 0.55rem 1rem;
+        border-radius: 18px !important;
         font-size: 1rem;
     }
     .grimba-local__submit {
@@ -3096,8 +3098,12 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-auth-link-muted {
         border-radius: 22px;
     }
     .grimba-coffre .grimba-methodology__title {
-        font-size: clamp(1.75rem, 8.6vw, 2.25rem) !important;
-        line-height: 1.05;
+        font-size: clamp(1.58rem, 7.2vw, 2rem) !important;
+        line-height: 1.08;
+    }
+    .grimba-coffre__lede,
+    .grimba-coffre__empty-copy {
+        opacity: 1 !important;
     }
     .grimba-coffre .glass-panel.text-center {
         margin-bottom: 1.25rem;
@@ -3505,6 +3511,9 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn[aria-pressed="true"
 .grimba-search-page__actions {
     min-width: 0;
 }
+.grimba-search-page__query {
+    color: var(--gn-ink-muted);
+}
 .grimba-search-page .pagination {
     display: flex;
     flex-wrap: wrap;
@@ -3700,6 +3709,11 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-search-alert {
     border-color: rgba(246, 241, 232, 0.12);
     background: rgba(246, 241, 232, 0.08);
 }
+html.grimba-home-html[data-bs-theme="dark"] .grimba-local__lede,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page__query {
+    opacity: 1 !important;
+    color: rgba(255, 250, 240, 0.80) !important;
+}
 html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .page-link {
     border-color: rgba(246, 241, 232, 0.16);
     background: rgba(246, 241, 232, 0.09);
@@ -3750,8 +3764,14 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-account-searches__row {
         border-radius: 22px;
     }
     .grimba-search-page .grimba-methodology__title {
-        font-size: clamp(1.75rem, 8.6vw, 2.25rem);
-        line-height: 1.05;
+        font-size: clamp(1.58rem, 7.2vw, 2rem);
+        line-height: 1.08;
+    }
+    .grimba-search-page__query {
+        display: block;
+        margin-top: 0.2rem;
+        font-size: 0.82em;
+        line-height: 1.12;
     }
     .grimba-search-page__form .row {
         --bs-gutter-x: 0.55rem;
