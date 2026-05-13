@@ -105,7 +105,8 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('grid-template-columns: 1fr;', $cookieConsent);
         $this->assertStringContainsString('grimba-translation-note__copy--short', $translationNote);
         $this->assertStringContainsString('.grimba-translation-note > span.grimba-translation-note__copy--short', $css);
-        $this->assertStringContainsString('font-size: clamp(1.68rem, 7.4vw, 1.92rem);', $css);
+        $this->assertStringContainsString('hyphens: none;', $css);
+        $this->assertStringContainsString('font-size: clamp(1.6rem, 6.9vw, 1.82rem);', $css);
         $this->assertStringContainsString('grimba-search-page__query', $searchView);
         $this->assertStringContainsString('.grimba-search-page__query', $css);
         $this->assertStringContainsString('font-size: clamp(1.58rem, 7.2vw, 2rem);', $css);

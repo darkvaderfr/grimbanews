@@ -347,7 +347,7 @@ body.grimba-home .grimba-story-page__title {
     font-weight: 800;
     line-height: 1.08;
     letter-spacing: 0;
-    hyphens: auto;
+    hyphens: none;
     overflow-wrap: break-word;
     text-wrap: balance;
 }
@@ -2847,7 +2847,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     }
     body.grimba-home .grimba-story-page__title,
     body.grimba-home .grimba-story-page__title--orphan {
-        font-size: clamp(1.68rem, 7.4vw, 1.92rem);
+        font-size: clamp(1.6rem, 6.9vw, 1.82rem);
         line-height: 1.09;
     }
     body.grimba-home .grimba-story-page__meta {
