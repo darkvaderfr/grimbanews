@@ -69,6 +69,11 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('grid-template-columns: minmax(0, 1fr) auto;', $css);
         $this->assertStringContainsString('.grimba-header__actions', $css);
         $this->assertStringContainsString('.grimba-translation-note .gn-nobuai-chip', $css);
+        $this->assertStringContainsString('.grimba-chips .container-xxl', $css);
+        $this->assertStringContainsString('contain: layout paint;', $css);
+        $this->assertStringContainsString('max-width: min(78vw, 18rem);', $css);
+        $this->assertStringContainsString('.grimba-search-page .pagination', $css);
+        $this->assertStringContainsString('flex-wrap: wrap;', $css);
         $this->assertStringContainsString('.grimba-mobile-nav__item.is-active .grimba-mobile-nav__icon', $css);
         $this->assertStringContainsString('.phpdebugbar-openhandler', $css);
         $this->assertStringContainsString('body.grimba-home .site-notice.js-site-notice', $css);

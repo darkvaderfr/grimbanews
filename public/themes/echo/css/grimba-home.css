@@ -995,6 +995,7 @@ button.btn-grimba--solid,
     border-bottom: 1px solid var(--gn-rule);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    overflow-x: clip;
     /* S146 — backdrop-filter creates a new stacking context. Without
        an explicit z-index, this strip paints later in DOM order than
        the sticky header (z:50) and ends up COVERING the region/translate
@@ -1003,11 +1004,19 @@ button.btn-grimba--solid,
     position: relative;
     z-index: 1;
 }
+.grimba-chips .container-xxl {
+    max-width: 100%;
+    overflow-x: clip;
+}
 .grimba-chips__row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
     overflow-x: visible;
+    overscroll-behavior-x: contain;
     padding: 0.6rem 0;
     scrollbar-width: none;
 }
@@ -1017,6 +1026,8 @@ button.btn-grimba--solid,
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    max-width: 100%;
+    min-width: 0;
     padding: 0.4rem 1rem;
     border-radius: 9999px;
     background: rgba(255, 255, 255, 0.55);
@@ -1034,7 +1045,13 @@ button.btn-grimba--solid,
     border-color: var(--gn-ink);
     transform: translateY(-1px);
 }
-.grimba-chip__label { color: inherit; text-decoration: none; }
+.grimba-chip__label {
+    min-width: 0;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    text-overflow: ellipsis;
+}
 .grimba-chip__follow {
     display: inline-flex;
     align-items: center;
@@ -2654,15 +2671,29 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     .grimba-header__actions {
         display: none !important;
     }
+    .grimba-chips,
+    .grimba-chips .container-xxl {
+        overflow-x: clip;
+    }
     .grimba-chips__row {
         flex-wrap: nowrap;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
         overflow-x: auto;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+        contain: layout paint;
         gap: 0.4rem;
         padding: 0.45rem 0;
     }
     .grimba-chip {
+        max-width: min(78vw, 18rem);
         padding: 0.34rem 0.78rem;
         font-size: 0.88rem;
+    }
+    .grimba-chip__label {
+        white-space: nowrap;
     }
     .grimba-translation-note-wrap {
         margin-top: 0.35rem !important;
@@ -3473,6 +3504,56 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn[aria-pressed="true"
 .grimba-search-page__actions {
     min-width: 0;
 }
+.grimba-search-page .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+    max-width: 100%;
+    padding-left: 0;
+    margin: 1.35rem 0 0;
+    list-style: none;
+}
+.grimba-search-page .pagination .page-item {
+    flex: 0 0 auto;
+    margin: 0;
+    min-width: 0;
+}
+.grimba-search-page .pagination .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.35rem;
+    min-height: 2.35rem;
+    border: 1px solid rgba(26, 23, 19, 0.12);
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.74);
+    color: var(--gn-ink);
+    font-size: 0.92rem;
+    font-weight: 800;
+    line-height: 1;
+    padding: 0.45rem 0.78rem;
+    text-decoration: none;
+    box-shadow: 0 8px 18px rgba(26, 23, 19, 0.06);
+}
+.grimba-search-page .pagination .page-link:hover {
+    border-color: rgba(26, 23, 19, 0.28);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--gn-ink);
+}
+.grimba-search-page .pagination .active .page-link {
+    border-color: var(--gn-ink);
+    background: var(--gn-ink);
+    color: var(--gn-paper);
+}
+.grimba-search-page .pagination .disabled .page-link,
+.grimba-search-page .pagination .page-link[aria-disabled="true"] {
+    border-color: rgba(26, 23, 19, 0.08);
+    background: rgba(26, 23, 19, 0.04);
+    color: var(--gn-ink-muted);
+    box-shadow: none;
+    pointer-events: none;
+}
 .grimba-saved-search {
     border-top: 1px solid rgba(26, 23, 19, 0.10);
     padding-top: 14px;
@@ -3618,6 +3699,28 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-search-alert {
     border-color: rgba(246, 241, 232, 0.12);
     background: rgba(246, 241, 232, 0.08);
 }
+html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .page-link {
+    border-color: rgba(246, 241, 232, 0.16);
+    background: rgba(246, 241, 232, 0.09);
+    color: var(--gn-ink);
+    box-shadow: none;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .page-link:hover {
+    border-color: rgba(246, 241, 232, 0.30);
+    background: rgba(246, 241, 232, 0.14);
+    color: var(--gn-ink);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .active .page-link {
+    border-color: var(--gn-ink);
+    background: var(--gn-ink);
+    color: var(--gn-paper);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .disabled .page-link,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-search-page .pagination .page-link[aria-disabled="true"] {
+    border-color: rgba(246, 241, 232, 0.10);
+    background: rgba(246, 241, 232, 0.05);
+    color: var(--gn-ink-muted);
+}
 html.grimba-home-html[data-bs-theme="dark"] .grimba-saved-search {
     border-top-color: rgba(246, 241, 232, 0.12);
 }
@@ -3675,6 +3778,17 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-account-searches__row {
     }
     .grimba-search-page__actions a {
         align-self: center;
+    }
+    .grimba-search-page .pagination {
+        justify-content: flex-start;
+        gap: 0.34rem;
+        margin-top: 1rem;
+    }
+    .grimba-search-page .pagination .page-link {
+        min-width: 2.2rem;
+        min-height: 2.2rem;
+        padding: 0.42rem 0.68rem;
+        font-size: 0.86rem;
     }
     .grimba-account-digest__header,
     .grimba-account-digest__footer,

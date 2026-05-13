@@ -127,6 +127,8 @@ async function inspectHome(page, width) {
         return {
             theme: document.documentElement.getAttribute('data-bs-theme'),
             width: window.innerWidth,
+            scrollWidth: document.documentElement.scrollWidth,
+            bodyScrollWidth: document.body.scrollWidth,
             navRect: nav ? rect(nav) : null,
             navDisplay: nav ? getComputedStyle(nav).display : null,
             navItems,
@@ -141,6 +143,18 @@ async function inspectHome(page, width) {
             } : null,
         };
     });
+}
+
+async function inspectPageWidth(page, path, width) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto(path, { waitUntil: 'networkidle' });
+
+    return page.evaluate(() => ({
+        path: window.location.pathname + window.location.search,
+        width: window.innerWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        bodyScrollWidth: document.body.scrollWidth,
+    }));
 }
 
 async function inspectFormControl(page, path, selector, label) {
@@ -180,7 +194,15 @@ async function inspectFormControl(page, path, selector, label) {
 (async () => {
     const { chromium } = loadPlaywright();
     const baseUrl = (process.env.GRIMBANEWS_BASE_URL || 'http://127.0.0.1:8003').replace(/\/$/, '');
-    const browser = await chromium.launch({ headless: process.env.PLAYWRIGHT_HEADLESS !== '0' });
+    const launchOptions = {
+        headless: process.env.PLAYWRIGHT_HEADLESS !== '0',
+    };
+
+    if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE) {
+        launchOptions.executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
+    }
+
+    const browser = await chromium.launch(launchOptions);
     const context = await browser.newContext({
         baseURL: baseUrl,
         isMobile: true,
@@ -204,6 +226,8 @@ async function inspectFormControl(page, path, selector, label) {
             snapshots.push(snapshot);
 
             assert.equal(snapshot.theme, 'dark', `dark theme is active at ${width}px`);
+            assert.ok(snapshot.scrollWidth <= width + 1, `home document width stays contained at ${width}px`);
+            assert.ok(snapshot.bodyScrollWidth <= width + 1, `home body width stays contained at ${width}px`);
             assert.equal(snapshot.navDisplay, 'grid', `mobile nav is visible at ${width}px`);
             assert.ok(snapshot.navRect, `mobile nav rect exists at ${width}px`);
             assert.ok(snapshot.navRect.bottom <= 844, `mobile nav stays inside viewport at ${width}px`);
@@ -229,6 +253,12 @@ async function inspectFormControl(page, path, selector, label) {
             await inspectFormControl(page, '/login', '#grimba-login-email', 'login email input'),
             await inspectFormControl(page, '/local', '#grimba-local-city', 'local city input'),
         ];
+
+        for (const width of [320, 390]) {
+            const searchWidth = await inspectPageWidth(page, '/search?q=afrique', width);
+            assert.ok(searchWidth.scrollWidth <= width + 1, `search document width stays contained at ${width}px`);
+            assert.ok(searchWidth.bodyScrollWidth <= width + 1, `search body width stays contained at ${width}px`);
+        }
 
         await page.goto('/', { waitUntil: 'networkidle' });
         const storyLink = await firstVisible(page.locator([
