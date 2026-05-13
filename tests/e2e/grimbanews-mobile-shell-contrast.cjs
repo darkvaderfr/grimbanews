@@ -333,16 +333,22 @@ async function inspectSubpagePolish(page) {
         const wordmark = document.querySelector('.grimba-auth__wordmark');
         const accent = document.querySelector('.grimba-auth__wordmark span:last-child');
         const submit = document.querySelector('.grimba-auth button[type="submit"]');
+        const switchPrompt = document.querySelector('.grimba-auth__switch');
         const nav = document.querySelector('.grimba-mobile-nav');
         const wordmarkStyle = wordmark ? getComputedStyle(wordmark) : null;
         const accentStyle = accent ? getComputedStyle(accent) : null;
+        const switchStyle = switchPrompt ? getComputedStyle(switchPrompt) : null;
         const submitRect = submit?.getBoundingClientRect();
+        const switchRect = switchPrompt?.getBoundingClientRect();
         const navRect = nav?.getBoundingClientRect();
 
         return {
             wordmarkColor: wordmarkStyle?.color || '',
             accentColor: accentStyle?.color || '',
             submitBottom: submitRect ? Math.round(submitRect.bottom) : 0,
+            switchColor: switchStyle?.color || '',
+            switchOpacity: switchStyle?.opacity || '',
+            switchBottom: switchRect ? Math.round(switchRect.bottom) : 0,
             navTop: navRect ? Math.round(navRect.top) : window.innerHeight,
         };
     });
@@ -487,6 +493,9 @@ async function inspectDesktopHeaderSearch(page) {
         assert.match(subpagePolish.auth.wordmarkColor, /255,\s*250,\s*240/, 'mobile auth wordmark stays readable in dark mode');
         assert.match(subpagePolish.auth.accentColor, /239,\s*85,\s*70/, 'mobile auth wordmark keeps a visible red accent');
         assert.ok(subpagePolish.auth.submitBottom < subpagePolish.auth.navTop - 4, 'mobile auth primary action stays above bottom nav at rest');
+        assert.match(subpagePolish.auth.switchColor, /255,\s*250,\s*240/, 'mobile auth secondary prompt stays readable in dark mode');
+        assert.equal(subpagePolish.auth.switchOpacity, '1', 'mobile auth secondary prompt avoids opacity stacking');
+        assert.ok(subpagePolish.auth.switchBottom < subpagePolish.auth.navTop - 4, 'mobile auth secondary prompt stays above bottom nav at rest');
 
         const desktopHeaderSearch = await inspectDesktopHeaderSearch(page);
         assert.notEqual(desktopHeaderSearch.display, 'none', 'desktop header search remains visible');

@@ -88,7 +88,7 @@
                 </button>
 
                 @if(setting('member_enabled_registration', true))
-                    <p class="small mt-3 mb-0 text-center" style="opacity:0.75;">
+                    <p class="grimba-auth__switch small mt-3 mb-0 text-center">
                         {{ __("Vous n'avez pas encore de compte ?") }}
                         <a href="{{ route('public.member.register') }}" class="text-decoration-underline grimba-auth-link-accent">
                             {{ __('Inscrivez-vous') }}

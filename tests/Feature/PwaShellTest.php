@@ -211,11 +211,14 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('.grimba-auth__wordmark', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-auth__wordmark', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-auth__lede', $css);
+        $this->assertStringContainsString('.grimba-auth__switch', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-auth__switch', $css);
         $this->assertStringContainsString('.grimba-auth .glass-panel', $css);
         $this->assertStringContainsString('.grimba-local__field--country', $css);
         $this->assertStringContainsString('.grimba-local__submit', $css);
         $this->assertStringContainsString('padding-bottom: calc(7rem + env(safe-area-inset-bottom)) !important;', $css);
         $this->assertStringContainsString('class="grimba-form-pill mb-3"', $loginView);
+        $this->assertStringContainsString('grimba-auth__switch', $loginView);
         $this->assertStringContainsString('grimba-auth__lede', $loginView . $registerView . $resetEmailView . $resetView);
         $this->assertStringContainsString('auth-wordmark', $loginView . $registerView . $resetEmailView . $resetView);
         $this->assertStringContainsString('grimba-auth__wordmark', $authWordmark);
