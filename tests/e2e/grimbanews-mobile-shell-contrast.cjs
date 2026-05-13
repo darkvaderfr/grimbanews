@@ -574,6 +574,37 @@ async function inspectDesktopHeaderSearch(page) {
         assert.notEqual(articleActionMetrics.shortDisplay, 'none', 'mobile article compare action uses the concise label');
         assert.equal(articleActionMetrics.fullDisplay, 'none', 'mobile article compare action hides the long label');
 
+        const articleLowerMetrics = await page.evaluate(() => {
+            const share = document.querySelector('.grimba-article-shell .details-share');
+            const shareLink = share?.querySelector('a');
+            const footer = document.querySelector('.grimba-footer');
+            const footerCopy = footer?.querySelector('p, .opacity-75');
+            const shareStyle = share ? getComputedStyle(share) : null;
+            const shareLinkStyle = shareLink ? getComputedStyle(shareLink) : null;
+            const footerStyle = footer ? getComputedStyle(footer) : null;
+            const footerCopyStyle = footerCopy ? getComputedStyle(footerCopy) : null;
+
+            return {
+                hasShare: Boolean(share),
+                shareDirection: shareStyle?.flexDirection || '',
+                shareWrap: shareStyle?.flexWrap || '',
+                shareLinkWidth: shareLink ? Math.round(shareLink.getBoundingClientRect().width) : 0,
+                shareLinkColor: shareLinkStyle?.color || '',
+                footerColor: footerStyle?.color || '',
+                footerCopyColor: footerCopyStyle?.color || '',
+                footerCopyOpacity: footerCopyStyle?.opacity || '',
+            };
+        });
+        if (articleLowerMetrics.hasShare) {
+            assert.equal(articleLowerMetrics.shareDirection, 'row', 'mobile article share icons stay in a horizontal row');
+            assert.equal(articleLowerMetrics.shareWrap, 'wrap', 'mobile article share icons can wrap without stacking one per line');
+            assert.ok(articleLowerMetrics.shareLinkWidth >= 32, 'mobile article share icons keep a tappable visual target');
+            assert.match(articleLowerMetrics.shareLinkColor, /255,\s*250,\s*240/, 'dark article share icons remain readable');
+        }
+        assert.match(articleLowerMetrics.footerColor, /246,\s*241,\s*232/, 'dark footer inherits readable cream text');
+        assert.match(articleLowerMetrics.footerCopyColor, /246,\s*241,\s*232/, 'dark footer secondary copy remains readable');
+        assert.equal(articleLowerMetrics.footerCopyOpacity, '1', 'dark footer avoids opacity stacking');
+
         const saveButton = await firstVisible(page.locator('.grimba-save-btn'), 'save button');
         const saveButtonStyle = await saveButton.evaluate(button => {
             const style = getComputedStyle(button);

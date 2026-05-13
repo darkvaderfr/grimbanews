@@ -566,6 +566,19 @@ body.grimba-home .echo-more-news-area {
     padding: 1.5rem 0;
     margin: 2rem 0;
 }
+body.grimba-home .grimba-article-shell .echo-more-news-area .echo-top-story {
+    height: 100%;
+    padding: 0.9rem;
+    border: 1px solid rgba(26, 23, 19, 0.08);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.52);
+}
+body.grimba-home .grimba-article-shell .echo-more-news-area .echo-story-picture:empty {
+    display: none;
+}
+body.grimba-home .grimba-article-shell .echo-more-news-area .echo-story-text {
+    padding: 0;
+}
 body.grimba-home .echo-top-story h6,
 body.grimba-home .echo-top-story h6 a {
     font-family: var(--gn-font-display);
@@ -1940,7 +1953,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card .opacity-6
    ------------------------------------------------------------ */
 .grimba-footer {
     background: #0f0d0a;
-    color: var(--gn-paper);
+    color: #f6f1e8;
     margin-top: 3rem;
 }
 /* S352 — bumped from 0.75 → 0.88 for clearer contrast against the
@@ -1948,13 +1961,18 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card .opacity-6
    white so the affordance is unmistakable. */
 .grimba-footer a { color: rgba(246, 241, 232, 0.88); text-decoration: none; transition: color 0.15s ease; }
 .grimba-footer a:hover { color: #fff; }
+.grimba-footer p,
+.grimba-footer .opacity-75 {
+    color: rgba(246, 241, 232, 0.76) !important;
+    opacity: 1 !important;
+}
 .grimba-footer__heading {
     font-family: var(--gn-font-body);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.75rem;
     font-weight: 700;
-    color: rgba(246, 241, 232, 0.6);
+    color: rgba(246, 241, 232, 0.72);
     margin: 0 0 0.75rem;
 }
 .grimba-footer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem; }
@@ -2883,10 +2901,30 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     body.grimba-home .grimba-story-page__compare-label--short {
         display: inline;
     }
-    body.grimba-home .grimba-article-shell .details-share,
     body.grimba-home .grimba-article-shell .details-tag {
         align-items: flex-start;
         flex-direction: column;
+    }
+    body.grimba-home .grimba-article-shell .details-share {
+        align-items: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start !important;
+        gap: 0.55rem 0.65rem;
+    }
+    body.grimba-home .grimba-article-shell .details-share h6 {
+        flex: 0 0 100%;
+        margin: 0 0 0.1rem;
+    }
+    body.grimba-home .grimba-article-shell .details-share a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: 1px solid rgba(26, 23, 19, 0.12);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.44);
     }
     .grimba-hero__text { left: 1rem; right: 1rem; bottom: 3.5rem; width: auto; padding: 12px; border-radius: 18px; }
     .grimba-hero__coverage { left: 1rem; right: 1rem; }
@@ -3357,9 +3395,18 @@ html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-article-she
     background: rgba(28, 24, 17, 0.55);
     border-color: rgba(246, 241, 232, 0.10);
 }
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-article-shell .echo-more-news-area .echo-top-story {
+    background: rgba(246, 241, 232, 0.07);
+    border-color: rgba(246, 241, 232, 0.14);
+}
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-article-shell .echo-story-text a,
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-article-shell .echo-story-text h6 a {
     color: var(--gn-ink) !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-article-shell .details-share a {
+    background: rgba(246, 241, 232, 0.08);
+    border-color: rgba(246, 241, 232, 0.16);
+    color: #fffaf0;
 }
 
 /* Insights / NobuAI block — dark variant of the gradient pill */

@@ -292,6 +292,13 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('overflow-x: visible;', $css);
         $this->assertStringContainsString('body.grimba-home[id^="post-"] .grimba-mobile-nav', $css);
         $this->assertStringContainsString('display: none !important;', $css);
+        $this->assertStringContainsString('body.grimba-home .grimba-article-shell .details-share', $css);
+        $this->assertStringContainsString('flex-direction: row;', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-article-shell .details-share a', $css);
+        $this->assertStringContainsString('body.grimba-home .grimba-article-shell .echo-more-news-area .echo-top-story', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-article-shell .echo-more-news-area .echo-top-story', $css);
+        $this->assertStringContainsString('color: #f6f1e8;', $css);
+        $this->assertStringContainsString('.grimba-footer p', $css);
     }
 
     public function test_region_choice_suppresses_onboarding_overlay_across_editions(): void
