@@ -17,7 +17,7 @@
         <header class="glass-panel p-4 mb-4">
             <span class="blindspot-badge mb-2">{{ __('Angle mort') }}</span>
             <h1 class="h2 mt-2 mb-2">{{ __("Les histoires qu'un seul camp couvre") }}</h1>
-            <p class="mb-3 opacity-85">
+            <p class="blindspot-page__lede mb-3">
                 {{ __("Un angle mort est une histoire importante rapportée presque exclusivement par un côté du spectre politique. GrimbaNews les signale pour que vous sachiez ce qu'on ne vous raconte pas.") }}
             </p>
 

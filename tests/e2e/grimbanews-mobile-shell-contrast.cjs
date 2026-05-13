@@ -295,37 +295,47 @@ async function inspectSubpagePolish(page) {
     });
     const forYouLedeContrast = contrast(blend(parseRgb(forYou.ledeColor), parseHex(forYou.paper)), parseHex(forYou.paper));
 
-    await page.goto('/sources', { waitUntil: 'networkidle' });
-    const sources = await page.evaluate(() => {
-        const lede = document.querySelector('.grimba-sources__lede');
-        const link = document.querySelector('.grimba-sources__lede a');
-        const panel = lede?.closest('.glass-panel');
-        const rootStyle = getComputedStyle(document.documentElement);
-        const ledeStyle = lede ? getComputedStyle(lede) : null;
-        const linkStyle = link ? getComputedStyle(link) : null;
-        const panelStyle = panel ? getComputedStyle(panel) : null;
+    const inspectGlassLede = async (pathName, selector) => {
+        await page.goto(pathName, { waitUntil: 'networkidle' });
+        const metrics = await page.evaluate((ledeSelector) => {
+            const lede = document.querySelector(ledeSelector);
+            const link = lede?.querySelector('a') || null;
+            const panel = lede?.closest('.glass-panel');
+            const rootStyle = getComputedStyle(document.documentElement);
+            const ledeStyle = lede ? getComputedStyle(lede) : null;
+            const linkStyle = link ? getComputedStyle(link) : null;
+            const panelStyle = panel ? getComputedStyle(panel) : null;
 
-        return {
-            scrollWidth: document.documentElement.scrollWidth,
-            bodyScrollWidth: document.body.scrollWidth,
-            viewportWidth: window.innerWidth,
-            ledeColor: ledeStyle?.color || '',
-            ledeOpacity: ledeStyle?.opacity || '',
-            linkColor: linkStyle?.color || '',
-            linkDecorationColor: linkStyle?.textDecorationColor || '',
-            panelBackground: panelStyle?.backgroundColor || '',
-            paper: rootStyle.getPropertyValue('--gn-paper').trim(),
-        };
-    });
-    const sourcesPanelBackground = blend(parseRgb(sources.panelBackground), parseHex(sources.paper));
-    const sourcesLedeContrast = contrast(blend(parseRgb(sources.ledeColor), sourcesPanelBackground), sourcesPanelBackground);
+            return {
+                scrollWidth: document.documentElement.scrollWidth,
+                bodyScrollWidth: document.body.scrollWidth,
+                viewportWidth: window.innerWidth,
+                ledeColor: ledeStyle?.color || '',
+                ledeOpacity: ledeStyle?.opacity || '',
+                linkColor: linkStyle?.color || '',
+                linkDecorationColor: linkStyle?.textDecorationColor || '',
+                panelBackground: panelStyle?.backgroundColor || '',
+                paper: rootStyle.getPropertyValue('--gn-paper').trim(),
+            };
+        }, selector);
+        const panelBackground = blend(parseRgb(metrics.panelBackground), parseHex(metrics.paper));
+        const ledeContrast = contrast(blend(parseRgb(metrics.ledeColor), panelBackground), panelBackground);
+
+        return { ...metrics, ledeContrast: Number(ledeContrast.toFixed(2)) };
+    };
+
+    const sources = await inspectGlassLede('/sources', '.grimba-sources__lede');
+    const comparison = await inspectGlassLede('/comparatif', '.grimba-comparison-index__lede');
+    const blindspot = await inspectGlassLede('/angles-morts', '.blindspot-page__lede');
 
     return {
         search,
         local: { ...local, ledeContrast: Number(localLedeContrast.toFixed(2)) },
         vault,
         forYou: { ...forYou, ledeContrast: Number(forYouLedeContrast.toFixed(2)) },
-        sources: { ...sources, ledeContrast: Number(sourcesLedeContrast.toFixed(2)) },
+        sources,
+        comparison,
+        blindspot,
     };
 }
 
@@ -440,6 +450,13 @@ async function inspectDesktopHeaderSearch(page) {
         assert.ok(subpagePolish.sources.ledeContrast >= 7, 'mobile sources hero copy keeps AAA-sized dark contrast');
         assert.equal(subpagePolish.sources.ledeOpacity, '1', 'mobile sources hero copy avoids opacity stacking');
         assert.match(subpagePolish.sources.linkColor, /255,\s*250,\s*240/, 'mobile sources methodology link stays readable in dark mode');
+        for (const [key, label] of [['comparison', 'comparison'], ['blindspot', 'blindspot']]) {
+            assert.ok(subpagePolish[key].scrollWidth <= subpagePolish[key].viewportWidth + 1, `mobile ${label} document width stays contained`);
+            assert.ok(subpagePolish[key].bodyScrollWidth <= subpagePolish[key].viewportWidth + 1, `mobile ${label} body width stays contained`);
+            assert.ok(subpagePolish[key].ledeContrast >= 7, `mobile ${label} hero copy keeps AAA-sized dark contrast`);
+            assert.equal(subpagePolish[key].ledeOpacity, '1', `mobile ${label} hero copy avoids opacity stacking`);
+        }
+        assert.match(subpagePolish.comparison.linkColor, /255,\s*250,\s*240/, 'mobile comparison methodology link stays readable in dark mode');
 
         const desktopHeaderSearch = await inspectDesktopHeaderSearch(page);
         assert.notEqual(desktopHeaderSearch.display, 'none', 'desktop header search remains visible');

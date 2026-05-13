@@ -63,6 +63,8 @@ class PwaShellTest extends TestCase
         $postView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/post.blade.php');
         $forYouView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/for-you.blade.php');
         $sourcesView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/sources.blade.php');
+        $comparisonView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/comparison-index.blade.php');
+        $blindspotView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/blindspot.blade.php');
 
         $this->get('/')
             ->assertOk()
@@ -104,9 +106,13 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('Sujet, source, histoire…', $mainHeader);
         $this->assertStringContainsString('grimba-foryou__lede', $forYouView);
         $this->assertStringContainsString('grimba-sources__lede', $sourcesView);
+        $this->assertStringContainsString('grimba-comparison-index__lede', $comparisonView);
+        $this->assertStringContainsString('blindspot-page__lede', $blindspotView);
         $this->assertStringContainsString('.grimba-foryou .pagination', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-foryou__lede', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-sources__lede', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-comparison-index__lede', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .blindspot-page__lede', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile .opacity-75', $css);
         $this->assertStringContainsString('grimba-story-page__compare-label--short', $postView);
         $this->assertStringContainsString('grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);', $css);

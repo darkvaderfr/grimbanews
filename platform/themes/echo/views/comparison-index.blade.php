@@ -37,7 +37,7 @@
             <h1 class="grimba-methodology__title mt-2 mb-2">
                 {{ $pagination->totalCount }} {{ $pagination->totalCount === 1 ? __('dossier ouvert') : __('dossiers ouverts') }}
             </h1>
-            <p class="mb-3 opacity-85">
+            <p class="grimba-comparison-index__lede mb-3">
                 {{ __('Chaque dossier regroupe la même histoire couverte par plusieurs médias. Ouvrez-en un pour voir les angles côte à côte — et') }}
                 <a href="{{ url('/methodologie') }}" class="text-decoration-underline">{{ __('comment nous les classons') }}</a>.
             </p>

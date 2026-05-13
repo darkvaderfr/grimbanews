@@ -1501,7 +1501,9 @@ button.btn-grimba--solid,
     -webkit-backdrop-filter: blur(10px);
 }
 .grimba-foryou__lede,
-.grimba-sources__lede {
+.grimba-sources__lede,
+.grimba-comparison-index__lede,
+.blindspot-page__lede {
     max-width: 58ch;
     color: var(--gn-ink-muted);
     line-height: 1.6;
@@ -3411,10 +3413,13 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-bias-profile a:not(.btn-grim
     color: #fffaf0;
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-foryou__lede,
-html.grimba-home-html[data-bs-theme="dark"] .grimba-sources__lede {
+html.grimba-home-html[data-bs-theme="dark"] .grimba-sources__lede,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-comparison-index__lede,
+html.grimba-home-html[data-bs-theme="dark"] .blindspot-page__lede {
     color: rgba(255, 250, 240, 0.80);
 }
-html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-sources__lede a:not([class*="btn-grimba"]) {
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-sources__lede a:not([class*="btn-grimba"]),
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-comparison-index__lede a:not([class*="btn-grimba"]) {
     color: #fffaf0;
     text-decoration-color: rgba(255, 250, 240, 0.48);
 }
