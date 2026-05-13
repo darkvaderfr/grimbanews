@@ -1183,12 +1183,109 @@ button.btn-grimba--solid,
     overflow-x: clip;
     color: var(--gn-ink);
 }
+.grimba-all-sides__title {
+    color: var(--gn-ink);
+    -webkit-text-fill-color: currentColor;
+    font-size: clamp(22px, 2.6vw, 32px);
+    line-height: 1.08;
+    letter-spacing: 0;
+    text-wrap: balance;
+}
+.grimba-all-sides__count,
+.grimba-all-sides__source-count {
+    color: var(--gn-ink-soft);
+    opacity: 1;
+}
 .grimba-all-sides__rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(280px, 1fr);
+    gap: 16px;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
     overscroll-behavior-x: contain;
     scroll-snap-type: x proximity;
 }
 .grimba-all-sides__card {
+    display: flex;
+    flex-direction: column;
     scroll-snap-align: start;
+    min-width: 0;
+    border: 1px solid rgba(26, 23, 19, 0.10);
+    border-radius: 8px;
+    background: var(--gn-paper);
+    color: var(--gn-ink);
+    -webkit-text-fill-color: currentColor;
+    text-decoration: none;
+    overflow: hidden;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+}
+.grimba-all-sides__card:hover,
+.grimba-all-sides__card:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(26, 23, 19, 0.18);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.10);
+    color: var(--gn-ink);
+}
+.grimba-all-sides__media,
+.grimba-all-sides__image--standalone {
+    background: rgba(0,0,0,0.04);
+}
+.grimba-all-sides__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.grimba-all-sides__image--standalone {
+    aspect-ratio: 16/9;
+    display: block;
+}
+.grimba-all-sides__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 14px 16px 16px;
+}
+.grimba-all-sides__source-count {
+    font-size: 12px;
+}
+.grimba-all-sides__headline {
+    flex: 1;
+    margin: 0;
+    color: var(--gn-ink);
+    -webkit-text-fill-color: currentColor;
+    font-family: var(--gn-font-display);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.24;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+}
+.grimba-coffre__lede {
+    max-width: 68ch;
+    color: var(--gn-ink-muted);
+    font-size: clamp(1rem, 1.3vw, 1.08rem);
+    line-height: 1.65;
+}
+.grimba-coffre__empty {
+    color: var(--gn-ink);
+}
+.grimba-coffre__empty-icon {
+    margin-bottom: 14px;
+    color: var(--gn-ink-soft);
+    font-size: 48px;
+    line-height: 1;
+}
+.grimba-coffre__empty-copy {
+    max-width: 36ch;
+    margin-right: auto;
+    margin-left: auto;
+    color: var(--gn-ink-muted);
+    font-size: 16px;
+    line-height: 1.55;
 }
 
 .grimba-coverage--label {
@@ -2523,7 +2620,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     }
     .grimba-all-sides {
         padding-top: 1.35rem !important;
-        padding-bottom: 0.8rem !important;
+        padding-bottom: calc(5.25rem + env(safe-area-inset-bottom)) !important;
     }
     .grimba-all-sides > header {
         margin-bottom: 0.75rem !important;
@@ -2648,19 +2745,36 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-methodology__kicker {
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides,
 html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides .grimba-methodology__title,
-html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__card h3 {
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__card,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__headline {
     color: #fffaf0 !important;
     -webkit-text-fill-color: #fffaf0 !important;
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides .opacity-65,
-html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__card .opacity-65 {
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__card .opacity-65,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__count,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__source-count {
     color: rgba(255, 250, 240, 0.74) !important;
     opacity: 1 !important;
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__card {
-    background: rgba(246, 241, 232, 0.06) !important;
+    background: rgba(246, 241, 232, 0.075) !important;
     border-color: rgba(246, 241, 232, 0.14) !important;
     color: #fffaf0 !important;
+    box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.02);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__card:hover,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__card:focus-visible {
+    background: rgba(246, 241, 232, 0.11) !important;
+    border-color: rgba(246, 241, 232, 0.26) !important;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-coffre__lede,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-coffre__empty-copy {
+    color: rgba(255, 250, 240, 0.78) !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-coffre__empty-icon {
+    color: rgba(255, 250, 240, 0.58) !important;
 }
 
 /* Compare modal panel + onboard modal panel: they're position:fixed
@@ -2811,6 +2925,25 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-auth-link-muted {
     .grimba-local__submit {
         justify-content: center;
         min-height: 44px;
+        width: 100%;
+    }
+    .grimba-coffre {
+        padding-top: 1rem !important;
+        padding-bottom: calc(7rem + env(safe-area-inset-bottom)) !important;
+    }
+    .grimba-coffre .glass-panel {
+        padding: 1.1rem !important;
+        border-radius: 22px;
+    }
+    .grimba-coffre .grimba-methodology__title {
+        font-size: clamp(1.75rem, 8.6vw, 2.25rem) !important;
+        line-height: 1.05;
+    }
+    .grimba-coffre .glass-panel.text-center {
+        margin-bottom: 1.25rem;
+    }
+    .grimba-coffre .glass-panel.text-center .btn-grimba {
+        justify-content: center;
         width: 100%;
     }
 }

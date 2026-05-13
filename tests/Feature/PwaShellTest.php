@@ -130,6 +130,25 @@ class PwaShellTest extends TestCase
         $this->assertStringNotContainsString('btn.style.background = saved', $vaultScript);
     }
 
+    public function test_vault_empty_state_uses_explicit_dark_mode_contrast_classes(): void
+    {
+        $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+        $vaultView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/coffre.blade.php');
+
+        $this->get('/coffre')
+            ->assertOk()
+            ->assertSee('grimba-coffre__lede', false)
+            ->assertSee('grimba-coffre__empty-copy', false);
+
+        $this->assertStringContainsString('.grimba-coffre__lede', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-coffre__lede', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-coffre__empty-copy', $css);
+        $this->assertStringContainsString('color: rgba(255, 250, 240, 0.78) !important;', $css);
+        $this->assertStringContainsString('padding-bottom: calc(5.25rem + env(safe-area-inset-bottom)) !important;', $css);
+        $this->assertStringNotContainsString('class="mb-0 opacity-85"', $vaultView);
+        $this->assertStringNotContainsString('style="font-size:48px; line-height:1; margin-bottom:14px; opacity:0.4;"', $vaultView);
+    }
+
     public function test_auth_and_local_form_controls_use_theme_classes(): void
     {
         $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));

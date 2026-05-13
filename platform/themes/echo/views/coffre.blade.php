@@ -32,7 +32,7 @@
                     {{ $count === 1 ? __(':count article sauvegardé', ['count' => $count]) : __(':count articles sauvegardés', ['count' => $count]) }}
                 @endif
             </h1>
-            <p class="mb-0 opacity-85">
+            <p class="grimba-coffre__lede mb-0">
                 @if($count === 0)
                     {{ __("Cliquez sur l'étoile") }} <span aria-hidden="true">☆</span> {{ __("dans n'importe quel article pour l'ajouter ici.") }}
                     {{ __('Votre coffre reste local à votre navigateur — aucun compte requis, capacité 50 articles.') }}
@@ -48,9 +48,9 @@
         </header>
 
         @if($count === 0)
-            <div class="glass-panel p-4 p-md-5 text-center">
-                <div style="font-size:48px; line-height:1; margin-bottom:14px; opacity:0.4;">☆</div>
-                <p class="mb-3 opacity-85" style="font-size:16px;">
+            <div class="grimba-coffre__empty glass-panel p-4 p-md-5 text-center">
+                <div class="grimba-coffre__empty-icon" aria-hidden="true">☆</div>
+                <p class="grimba-coffre__empty-copy mb-3">
                     {{ __("Trouvez d'abord quelque chose à lire plus tard.") }}
                 </p>
                 <a href="{{ url('/') }}" class="btn-grimba btn-grimba--solid">

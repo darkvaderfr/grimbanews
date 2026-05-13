@@ -83,22 +83,14 @@
     <header class="d-flex align-items-end justify-content-between flex-wrap gap-2 mb-3">
         <div>
             <span class="grimba-methodology__kicker">{{ __('Couvert par tous les côtés') }}</span>
-            <h2 class="grimba-methodology__title m-0 mt-1" style="font-size:clamp(22px, 2.6vw, 32px); letter-spacing:-0.3px; color:var(--gn-ink,#1a1713); -webkit-text-fill-color:var(--gn-ink,#1a1713);">
+            <h2 class="grimba-methodology__title grimba-all-sides__title m-0 mt-1">
                 {{ __('Histoires que gauche, centre et droite couvrent en même temps') }}
             </h2>
         </div>
-        <span class="small opacity-65">{{ trans_choice(':count histoire ce moment|:count histoires ce moment', count($cards), ['count' => count($cards)]) }}</span>
+        <span class="small grimba-all-sides__count">{{ trans_choice(':count histoire ce moment|:count histoires ce moment', count($cards), ['count' => count($cards)]) }}</span>
     </header>
 
-    <div class="grimba-all-sides__rail" style="
-        display: grid;
-        grid-auto-flow: column;
-        grid-auto-columns: minmax(280px, 1fr);
-        gap: 16px;
-        overflow-x: auto;
-        padding-bottom: 8px;
-        scrollbar-width: thin;
-    ">
+    <div class="grimba-all-sides__rail">
         @foreach($cards as $card)
             @php
                 $head = $card['head'];
@@ -107,20 +99,7 @@
                 $isTranslated = GnTr::isTranslated($head);
             @endphp
             <a href="{{ $url }}"
-               class="grimba-all-sides__card"
-               style="
-                   display: flex;
-                   flex-direction: column;
-                   border: 1px solid rgba(26, 23, 19, 0.10);
-                   border-radius: 14px;
-                   background: var(--gn-paper, #f6f1e8);
-                   color: var(--gn-ink, #1a1713);
-                   text-decoration: none;
-                   overflow: hidden;
-                   transition: transform .15s ease, box-shadow .15s ease;
-               "
-               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 28px rgba(0,0,0,0.10)';"
-               onmouseout="this.style.transform=''; this.style.boxShadow='';">
+               class="grimba-all-sides__card">
 
                 {{-- S329 — match post-hero-img.blade.php's safety: skip
                       RvMedia's 1920×1080 generic placeholder fallback by
@@ -133,7 +112,7 @@
                     $__rsUsable = $__rsResolved !== null && $__rsResolved !== $__rsDefault;
                 @endphp
                 @if($__rsUsable)
-                    <div class="ratio ratio-16x9" style="background:rgba(0,0,0,0.04);">
+                    <div class="ratio ratio-16x9 grimba-all-sides__media">
                         <img src="{{ $__rsResolved }}"
                              alt="{{ $title }}"
                              loading="lazy"
@@ -141,7 +120,7 @@
                              width="640"
                              height="360"
                              data-grimba-post-id="{{ $head->id }}"
-                             style="object-fit:cover; width:100%; height:100%;">
+                             class="grimba-all-sides__image">
                     </div>
                 @else
                     <img src="{{ url('/og/placeholder/' . $head->id . '.svg') }}"
@@ -151,10 +130,10 @@
                          width="640"
                          height="360"
                          data-grimba-post-id="{{ $head->id }}"
-                         style="width:100%; aspect-ratio:16/9; object-fit:cover; background:rgba(0,0,0,0.04);">
+                         class="grimba-all-sides__image grimba-all-sides__image--standalone">
                 @endif
 
-                <div style="padding: 14px 16px 16px; display:flex; flex-direction:column; flex:1;">
+                <div class="grimba-all-sides__body">
                     <div class="d-flex align-items-center gap-2 mb-2 small">
                         @foreach(['left','center','right'] as $b)
                             @if($card['counts'][$b] > 0)
@@ -169,21 +148,11 @@
                                 </span>
                             @endif
                         @endforeach
-                        <span class="ms-auto opacity-65" style="font-size:12px;">
+                        <span class="ms-auto grimba-all-sides__source-count">
                             {{ trans_choice(':count source|:count sources', $card['articles'], ['count' => $card['articles']]) }}
                         </span>
                     </div>
-                    <h3 style="
-                        font-family:'Fraunces','Playfair Display',Georgia,serif;
-                        font-weight:600;
-                        font-size:18px;
-                        line-height:1.25;
-                        letter-spacing:-0.2px;
-                        color:var(--gn-ink,#1a1713);
-                        -webkit-text-fill-color:var(--gn-ink,#1a1713);
-                        margin:0;
-                        flex:1;
-                    ">
+                    <h3 class="grimba-all-sides__headline">
                         {{ \Illuminate\Support\Str::limit($title, 110) }}
                     </h3>
                     @if($isTranslated)
