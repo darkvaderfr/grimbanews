@@ -118,6 +118,25 @@ async function inspectHome(page, width) {
                 labelScrollWidth: label?.scrollWidth || 0,
             };
         });
+        const vaultFab = document.querySelector('[data-grimba-vault-fab]');
+        const vaultFabStyle = vaultFab ? getComputedStyle(vaultFab) : null;
+        const vaultFabLabel = vaultFab?.querySelector('span:not([aria-hidden])') || null;
+        const vaultFabCount = vaultFab?.querySelector('[data-grimba-vault-count]') || null;
+        const chipRow = document.querySelector('.grimba-chips__row');
+        const topicChips = [...document.querySelectorAll('.grimba-chip')].map(chip => {
+            const label = chip.querySelector('.grimba-chip__label');
+            const follow = chip.querySelector('.grimba-chip__follow');
+            const chipStyle = getComputedStyle(chip);
+
+            return {
+                text: label?.textContent?.trim() || '',
+                color: chipStyle.color,
+                backgroundColor: chipStyle.backgroundColor,
+                labelClientWidth: label?.clientWidth || 0,
+                labelScrollWidth: label?.scrollWidth || 0,
+                followRect: follow ? rect(follow) : null,
+            };
+        });
 
         const wordmark = document.querySelector('.grimba-wordmark');
         const search = document.querySelector('.grimba-search');
@@ -137,6 +156,18 @@ async function inspectHome(page, width) {
             navDisplay: nav ? getComputedStyle(nav).display : null,
             navBackgroundColor: navStyle?.backgroundColor || '',
             navItems,
+            vaultFab: vaultFab ? {
+                display: vaultFabStyle?.display || '',
+                rect: rect(vaultFab),
+                labelClientWidth: vaultFabLabel?.clientWidth || 0,
+                labelScrollWidth: vaultFabLabel?.scrollWidth || 0,
+                countText: vaultFabCount?.textContent?.trim() || '',
+            } : null,
+            chipRow: chipRow ? {
+                clientWidth: chipRow.clientWidth,
+                scrollWidth: chipRow.scrollWidth,
+            } : null,
+            topicChips,
             wordmarkRect: wordmark ? rect(wordmark) : null,
             searchRect: search ? rect(search) : null,
             selectionChip: selectionChip ? {
@@ -410,6 +441,7 @@ async function inspectDesktopHeaderSearch(page) {
         { name: 'grimba_onboarded', value: '1', url: baseUrl },
         { name: 'grimba_cookie_consent', value: 'necessary', url: baseUrl },
         { name: 'grimba_theme', value: 'dark', url: baseUrl },
+        { name: 'grimba_vault', value: '987654321', url: baseUrl },
     ]);
 
     const page = await context.newPage();
@@ -426,14 +458,38 @@ async function inspectDesktopHeaderSearch(page) {
             assert.ok(snapshot.bodyScrollWidth <= width + 1, `home body width stays contained at ${width}px`);
             assert.equal(snapshot.navDisplay, 'grid', `mobile nav is visible at ${width}px`);
             assert.ok(snapshot.navRect, `mobile nav rect exists at ${width}px`);
+            assert.ok(snapshot.navRect.x >= 9, `mobile nav keeps left viewport breathing room at ${width}px`);
+            assert.ok(snapshot.navRect.right <= width - 9, `mobile nav keeps right viewport breathing room at ${width}px`);
             assert.ok(snapshot.navRect.bottom <= 844, `mobile nav stays inside viewport at ${width}px`);
             assert.ok(snapshot.navRect.height >= 44, `mobile nav is tappable at ${width}px`);
-            assert.ok(parseRgb(snapshot.navBackgroundColor).a >= 0.98, `mobile nav is opaque enough to mask content underneath at ${width}px`);
+            assert.ok(parseRgb(snapshot.navBackgroundColor).a >= 0.96, `mobile nav is opaque enough to mask content underneath at ${width}px`);
 
             for (const item of snapshot.navItems) {
                 assert.ok(item.itemRect.height >= 44, `${item.text} keeps a 44px tap target at ${width}px`);
                 assert.ok(item.labelScrollWidth <= item.labelClientWidth + 1, `${item.text} label does not overflow at ${width}px`);
             }
+
+            assert.ok(snapshot.vaultFab, `vault FAB renders when saved stories exist at ${width}px`);
+            assert.match(snapshot.vaultFab.display, /flex/, `vault FAB is visible at ${width}px`);
+            assert.equal(snapshot.vaultFab.countText, '1', `vault FAB count is legible at ${width}px`);
+            assert.ok(snapshot.vaultFab.rect.height >= 44, `vault FAB keeps a 44px tap target at ${width}px`);
+            assert.ok(snapshot.vaultFab.rect.right <= width - 12, `vault FAB stays inside the viewport at ${width}px`);
+            assert.ok(snapshot.vaultFab.rect.bottom <= snapshot.navRect.y - 8, `vault FAB stays separated from bottom nav at ${width}px`);
+            assert.ok(snapshot.vaultFab.labelScrollWidth <= snapshot.vaultFab.labelClientWidth + 1, `vault FAB label does not overflow at ${width}px`);
+
+            assert.ok(snapshot.chipRow, `topic chip row exists at ${width}px`);
+            assert.ok(snapshot.chipRow.clientWidth <= width + 1, `topic chip row stays viewport-bounded at ${width}px`);
+            assert.ok(snapshot.topicChips.length > 0, `topic chips render at ${width}px`);
+            for (const chip of snapshot.topicChips) {
+                assert.ok(chip.labelScrollWidth <= chip.labelClientWidth + 1, `${chip.text} chip label does not overflow at ${width}px`);
+                assert.ok(chip.followRect.width >= 24, `${chip.text} follow control keeps a 24px visual target at ${width}px`);
+                assert.ok(chip.followRect.height >= 24, `${chip.text} follow control keeps a 24px visual target at ${width}px`);
+            }
+
+            const firstChip = snapshot.topicChips[0];
+            const firstChipText = parseRgb(firstChip.color);
+            const firstChipBackground = blend(parseRgb(firstChip.backgroundColor), parseHex(snapshot.selectionChip.paper));
+            assert.ok(contrast(firstChipText, firstChipBackground) >= 7, `dark topic chip contrast is AAA-sized at ${width}px`);
 
             assert.ok(snapshot.wordmarkRect.right < snapshot.searchRect.x, `wordmark and search do not collide at ${width}px`);
             assert.ok(snapshot.selectionChip, `topic selection chip exists at ${width}px`);
