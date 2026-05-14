@@ -19,7 +19,8 @@
         "test:e2e:csp": "node tests/e2e/grimbanews-csp-smoke.cjs",
         "test:e2e:golden-path": "node tests/e2e/grimbanews-golden-path-smoke.cjs",
         "test:e2e:keyboard": "node tests/e2e/grimbanews-keyboard-navigation.cjs",
-        "test:e2e:mobile-shell": "node tests/e2e/grimbanews-mobile-shell-contrast.cjs"
+        "test:e2e:mobile-shell": "node tests/e2e/grimbanews-mobile-shell-contrast.cjs",
+        "test:e2e:story-controls": "node tests/e2e/grimbanews-story-controls.cjs"
     },
     "devDependencies": {
         "@fullhuman/postcss-purgecss": "^7.0.2",
