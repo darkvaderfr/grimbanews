@@ -15,7 +15,12 @@ class GrimbaSourceBreakdown
         $total = max(1, $sources->count());
         $biasBuckets = self::biasBuckets($sources);
         $knownBiasBuckets = $biasBuckets->filter(fn ($bucket) => in_array($bucket->key, ['left', 'center', 'right'], true));
+        $knownBiasTotal = (int) $knownBiasBuckets->sum('count');
         $weakestBias = $knownBiasBuckets->sortBy('count')->first();
+        $dominantBias = $knownBiasBuckets->sortByDesc('count')->first();
+        $biasCounts = $knownBiasBuckets->pluck('count')->map(fn ($count) => (int) $count)->values();
+        $biasMax = max(1, (int) $biasCounts->max());
+        $biasMin = $knownBiasTotal > 0 ? (int) $biasCounts->min() : 0;
         $ownershipBuckets = self::ownershipBuckets($sources);
         $topOwner = $ownershipBuckets->first();
         $originBuckets = self::originBuckets($sources);
@@ -26,8 +31,13 @@ class GrimbaSourceBreakdown
             'total' => $total,
             'biasBuckets' => $biasBuckets,
             'knownBiasBuckets' => $knownBiasBuckets,
+            'knownBiasTotal' => $knownBiasTotal,
+            'knownBiasPct' => (int) round($knownBiasTotal * 100 / $total),
             'weakestBias' => $weakestBias,
             'weakestPct' => $weakestBias ? (int) round($weakestBias->count * 100 / $total) : 0,
+            'dominantBias' => $dominantBias,
+            'dominantBiasPct' => $dominantBias && $knownBiasTotal > 0 ? (int) round($dominantBias->count * 100 / $knownBiasTotal) : 0,
+            'biasBalanceScore' => $knownBiasTotal > 0 ? (int) round($biasMin * 100 / $biasMax) : 0,
             'factBuckets' => self::factBuckets($sources),
             'ownershipBuckets' => $ownershipBuckets,
             'donutGradient' => self::donutGradient($ownershipBuckets, $total),

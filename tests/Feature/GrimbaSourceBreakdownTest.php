@@ -43,6 +43,10 @@ class GrimbaSourceBreakdownTest extends TestCase
         $breakdown = GrimbaSourceBreakdown::fromPosts($posts);
 
         $this->assertSame(3, $breakdown['total']);
+        $this->assertSame(3, $breakdown['knownBiasTotal']);
+        $this->assertSame(100, $breakdown['knownBiasPct']);
+        $this->assertSame(33, $breakdown['dominantBiasPct']);
+        $this->assertSame(100, $breakdown['biasBalanceScore']);
         $this->assertSame(1, $breakdown['biasBuckets']->firstWhere('key', 'left')->count);
         $this->assertSame(1, $breakdown['factBuckets']['very-high']->items->count());
         $this->assertSame(1, $breakdown['factBuckets']['low']->items->count());

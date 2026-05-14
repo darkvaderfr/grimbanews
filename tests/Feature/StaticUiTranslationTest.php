@@ -51,6 +51,7 @@ class StaticUiTranslationTest extends TestCase
             base_path('platform/themes/echo/partials/home/vault-script.blade.php'),
             base_path('platform/themes/echo/partials/home/coverage-bar.blade.php'),
             base_path('platform/themes/echo/partials/story/bias-distribution.blade.php'),
+            base_path('platform/themes/echo/partials/story-breakdown.blade.php'),
         ];
 
         $keys = [];

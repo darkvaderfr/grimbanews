@@ -15,8 +15,13 @@
     $total = $breakdown['total'];
     $biasBuckets = $breakdown['biasBuckets'];
     $knownBiasBuckets = $breakdown['knownBiasBuckets'];
+    $knownBiasTotal = $breakdown['knownBiasTotal'];
+    $knownBiasPct = $breakdown['knownBiasPct'];
     $weakestBias = $breakdown['weakestBias'];
     $weakestPct = $breakdown['weakestPct'];
+    $dominantBias = $breakdown['dominantBias'];
+    $dominantBiasPct = $breakdown['dominantBiasPct'];
+    $biasBalanceScore = $breakdown['biasBalanceScore'];
     $factBuckets = $breakdown['factBuckets'];
     $ownershipBuckets = $breakdown['ownershipBuckets'];
     $donutGradient = $breakdown['donutGradient'];
@@ -125,7 +130,7 @@
         #{{ $uid }} .grimba-breakdown__title {
             margin: 0;
             font: 700 clamp(18px, 1.6vw, 22px)/1.05 "Fraunces", Georgia, serif;
-            letter-spacing: -.02em;
+            letter-spacing: 0;
         }
 
         #{{ $uid }} .grimba-breakdown__tabs {
@@ -272,6 +277,114 @@
             color: #15130f;
         }
 
+        #{{ $uid }} .grimba-breakdown__bias-intelligence {
+            display: grid;
+            grid-template-columns: minmax(0, 1.18fr) minmax(210px, .82fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-console,
+        #{{ $uid }} .grimba-breakdown__bias-stat {
+            min-width: 0;
+            border: 1px solid var(--gbd-line);
+            border-radius: 14px;
+            background:
+                linear-gradient(135deg, rgba(59, 130, 246, .08), transparent 38%),
+                linear-gradient(180deg, var(--gbd-card), var(--gbd-surface));
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10), var(--gbd-shadow);
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-console {
+            padding: 12px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-console-head,
+        #{{ $uid }} .grimba-breakdown__bias-stat span,
+        #{{ $uid }} .grimba-breakdown__owner-summary span {
+            color: var(--gbd-muted);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .35px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-console-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-console-head strong {
+            color: var(--gbd-ink);
+            font: 800 22px/1 "Fraunces", Georgia, serif;
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-spectrum {
+            display: flex;
+            min-height: 18px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: var(--gbd-track);
+            box-shadow: inset 0 0 0 1px var(--gbd-line), 0 14px 28px rgba(0, 0, 0, .08);
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-spectrum span {
+            width: var(--w);
+            min-width: 4px;
+            background:
+                linear-gradient(90deg, color-mix(in srgb, var(--dot) 72%, #fff), var(--dot));
+            transform-origin: left;
+            animation: gbd-fill .72s cubic-bezier(.2,.8,.2,1) both;
+            animation-delay: var(--delay, 0ms);
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-spectrum-labels {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+            color: var(--gbd-muted);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-spectrum-labels span:nth-child(2) {
+            text-align: center;
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-spectrum-labels span:nth-child(3) {
+            text-align: right;
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-stats {
+            display: grid;
+            gap: 8px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-stat {
+            padding: 10px 12px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-stat strong {
+            display: block;
+            margin-top: 4px;
+            color: var(--gbd-ink);
+            font: 800 clamp(19px, 2.4vw, 26px)/1.02 "Fraunces", Georgia, serif;
+            overflow-wrap: anywhere;
+        }
+
+        #{{ $uid }} .grimba-breakdown__bias-stat em {
+            display: block;
+            margin-top: 3px;
+            color: var(--gbd-muted);
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 700;
+        }
+
         #{{ $uid }} .grimba-breakdown__bias-lanes {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -320,6 +433,29 @@
             gap: 4px;
             align-items: center;
             min-height: 24px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__lane-foot {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            min-height: 20px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-pill {
+            display: inline-flex;
+            max-width: 100%;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid var(--gbd-line);
+            border-radius: 999px;
+            padding: 3px 7px;
+            background: color-mix(in srgb, var(--lane-color) 9%, var(--gbd-paper));
+            color: var(--gbd-muted);
+            font-size: 10px;
+            font-weight: 800;
+            line-height: 1.1;
+            overflow-wrap: anywhere;
         }
 
         #{{ $uid }} .grimba-breakdown__logo-pop {
@@ -432,7 +568,7 @@
         }
 
         #{{ $uid }} .grimba-breakdown__donut {
-            width: min(180px, 100%);
+            width: clamp(136px, 15vw, 188px);
             aspect-ratio: 1;
             margin: 0 auto;
             border-radius: 50%;
@@ -453,7 +589,7 @@
         #{{ $uid }} .grimba-breakdown__donut::after {
             content: "";
             position: absolute;
-            inset: 31%;
+            inset: 34%;
             border-radius: 50%;
             background: var(--gbd-paper);
             box-shadow: 0 0 0 1px var(--gbd-line);
@@ -461,7 +597,7 @@
 
         #{{ $uid }} .grimba-breakdown__donut-center {
             position: absolute;
-            inset: 34%;
+            inset: 38%;
             z-index: 1;
             display: flex;
             flex-direction: column;
@@ -474,15 +610,145 @@
 
         #{{ $uid }} .grimba-breakdown__donut-center strong {
             display: block;
-            font-size: clamp(20px, 3.4vw, 30px);
+            font-size: clamp(18px, 2.2vw, 25px);
             line-height: 1;
+        }
+
+        #{{ $uid }} .grimba-breakdown__donut-center span {
+            display: block;
+            margin-top: 3px;
+            max-width: 58px;
+            color: var(--gbd-muted);
+            font-size: 8px;
+            font-weight: 900;
+            line-height: 1;
+            text-transform: uppercase;
+            letter-spacing: .35px;
         }
 
         #{{ $uid }} .grimba-breakdown__owner-grid {
             display: grid;
-            grid-template-columns: minmax(220px, 320px) 1fr;
-            gap: 24px;
+            grid-template-columns: minmax(180px, 270px) minmax(0, 1fr);
+            gap: 14px;
+            align-items: stretch;
+            min-width: 0;
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-summary-card {
+            min-width: 0;
+            display: grid;
+            place-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid var(--gbd-line);
+            border-radius: 16px;
+            background:
+                linear-gradient(135deg, rgba(160, 106, 0, .10), transparent 42%),
+                linear-gradient(180deg, var(--gbd-card), var(--gbd-surface));
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10), var(--gbd-shadow);
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-summary {
+            min-width: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-summary strong {
+            display: block;
+            margin-top: 4px;
+            color: var(--gbd-ink);
+            font: 800 clamp(19px, 2.3vw, 27px)/1.05 "Fraunces", Georgia, serif;
+            overflow-wrap: anywhere;
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-summary em {
+            display: block;
+            margin-top: 4px;
+            color: var(--gbd-muted);
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 750;
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-rows {
+            display: grid;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-row {
+            display: grid;
+            grid-template-columns: minmax(150px, 1fr) minmax(110px, .7fr) auto minmax(76px, 150px);
+            gap: 10px;
             align-items: center;
+            min-width: 0;
+            padding: 9px 10px;
+            border: 1px solid var(--gbd-line);
+            border-radius: 14px;
+            background: color-mix(in srgb, var(--dot) 7%, var(--gbd-paper));
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-label-text {
+            display: grid;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-label-text strong {
+            color: var(--gbd-ink);
+            font-weight: 850;
+            line-height: 1.1;
+            overflow-wrap: anywhere;
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-label-text small {
+            color: var(--gbd-muted);
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-track {
+            min-width: 0;
+            height: 10px;
+            border-radius: 999px;
+            background: var(--gbd-track);
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px var(--gbd-line);
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-fill {
+            display: block;
+            width: var(--w);
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, color-mix(in srgb, var(--dot) 64%, #fff), var(--dot));
+            transform-origin: left;
+            animation: gbd-fill .72s cubic-bezier(.2,.8,.2,1) both;
+            animation-delay: var(--delay, 0ms);
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-percent {
+            min-width: 38px;
+            color: var(--gbd-ink);
+            font: 850 17px/1 "Fraunces", Georgia, serif;
+            text-align: right;
+        }
+
+        #{{ $uid }} .grimba-breakdown__owner-logos {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 5px;
+            max-width: 150px;
+            min-width: 0;
         }
 
         #{{ $uid }} .grimba-breakdown__insight-grid {
@@ -671,6 +937,10 @@
                 flex-direction: column;
             }
 
+            #{{ $uid }} .grimba-breakdown__bias-intelligence {
+                grid-template-columns: 1fr;
+            }
+
             #{{ $uid }} .grimba-breakdown__bias-lanes {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -680,7 +950,7 @@
             }
 
             #{{ $uid }} .grimba-breakdown__donut {
-                width: min(320px, 100%);
+                width: min(112px, 31vw);
             }
 
             #{{ $uid }} .grimba-breakdown__row,
@@ -690,6 +960,37 @@
 
             #{{ $uid }} .grimba-breakdown__owner-grid {
                 grid-template-columns: 1fr;
+            }
+
+            #{{ $uid }} .grimba-breakdown__owner-summary-card {
+                grid-template-columns: minmax(104px, 116px) minmax(0, 1fr);
+                column-gap: 10px;
+                place-items: center stretch;
+                text-align: left;
+            }
+
+            #{{ $uid }} .grimba-breakdown__owner-summary {
+                text-align: left;
+                overflow: hidden;
+            }
+
+            #{{ $uid }} .grimba-breakdown__owner-summary strong {
+                font-size: clamp(17px, 5vw, 21px);
+                line-height: 1.08;
+            }
+
+            #{{ $uid }} .grimba-breakdown__owner-row {
+                grid-template-columns: minmax(0, 1fr) auto;
+            }
+
+            #{{ $uid }} .grimba-breakdown__owner-track,
+            #{{ $uid }} .grimba-breakdown__owner-logos {
+                grid-column: 1 / -1;
+            }
+
+            #{{ $uid }} .grimba-breakdown__owner-logos {
+                justify-content: flex-start;
+                max-width: 100%;
             }
 
             #{{ $uid }} .grimba-breakdown__logos {
@@ -743,6 +1044,11 @@
 
     <div class="grimba-breakdown__panels">
         <div class="grimba-breakdown__panel" data-panel="bias">
+            @php
+                $biasRailBuckets = $knownBiasBuckets->filter(fn ($bucket) => $bucket->count > 0);
+                $knownBiasDenominator = max(1, $knownBiasTotal);
+            @endphp
+
             <div class="grimba-breakdown__callout">
                 <span class="grimba-breakdown__icon">◎</span>
                 <span>
@@ -752,12 +1058,61 @@
                 </span>
             </div>
 
+            <div class="grimba-breakdown__bias-intelligence">
+                <article class="grimba-breakdown__bias-console" aria-label="{{ __('Cartographie des biais') }}">
+                    <div class="grimba-breakdown__bias-console-head">
+                        <span>{{ __('Signal de couverture') }}</span>
+                        <strong>{{ $biasBalanceScore }}/100</strong>
+                    </div>
+                    <div class="grimba-breakdown__bias-spectrum">
+                        @forelse($biasRailBuckets as $bucket)
+                            @php
+                                $pct = (int) round($bucket->count * 100 / $knownBiasDenominator);
+                            @endphp
+                            <span title="{{ $bucket->label }} · {{ $pct }}%" style="--dot: {{ $bucket->color }}; --w: {{ $pct }}%; --delay: {{ $loop->index * 70 }}ms;"></span>
+                        @empty
+                            <span title="{{ __('Non classé') }}" style="--dot: #6b7280; --w: 100%;"></span>
+                        @endforelse
+                    </div>
+                    <div class="grimba-breakdown__bias-spectrum-labels">
+                        @foreach(['left', 'center', 'right'] as $biasKey)
+                            @php
+                                $bucket = $knownBiasBuckets->firstWhere('key', $biasKey);
+                                $pct = $bucket ? (int) round($bucket->count * 100 / $knownBiasDenominator) : 0;
+                            @endphp
+                            <span>{{ $bucket?->label ?? __('Non classé') }} {{ $pct }}%</span>
+                        @endforeach
+                    </div>
+                </article>
+
+                <div class="grimba-breakdown__bias-stats">
+                    <article class="grimba-breakdown__bias-stat">
+                        <span>{{ __('Camp dominant') }}</span>
+                        <strong>{{ $dominantBias?->label ?? __('Non classé') }}</strong>
+                        <em>{{ $dominantBiasPct }}% {{ __('des sources classées') }}</em>
+                    </article>
+                    <article class="grimba-breakdown__bias-stat">
+                        <span>{{ __('Couverture connue') }}</span>
+                        <strong>{{ $knownBiasPct }}%</strong>
+                        <em>{{ trans_choice(':count source classée|:count sources classées', $knownBiasTotal, ['count' => $knownBiasTotal]) }}</em>
+                    </article>
+                </div>
+            </div>
+
             <div class="grimba-breakdown__bias-lanes">
                 @foreach($biasBuckets as $bucket)
+                    @php
+                        $lanePct = (int) round($bucket->count * 100 / $total);
+                        $laneOrigins = $bucket->items
+                            ->pluck('country_label')
+                            ->filter()
+                            ->unique()
+                            ->take(3);
+                    @endphp
                     <div class="grimba-breakdown__lane" style="--lane-color: {{ $bucket->color }};">
                         <div class="grimba-breakdown__lane-head">
                             <span>{{ $bucket->label }}</span>
-                            <strong>{{ (int) round($bucket->count * 100 / $total) }}%</strong>
+                            <strong>{{ $lanePct }}%</strong>
                         </div>
                         <div class="grimba-breakdown__lane-sources">
                             @foreach($bucket->items->take(4) as $source)
@@ -780,18 +1135,26 @@
                                 <span class="small opacity-65">{{ __('Aucune') }}</span>
                             @endif
                         </div>
+                        <div class="grimba-breakdown__lane-foot">
+                            @forelse($laneOrigins as $originLabel)
+                                <span class="grimba-breakdown__origin-pill">{{ $originLabel }}</span>
+                            @empty
+                                <span class="small opacity-65">{{ __('Origine inconnue') }}</span>
+                            @endforelse
+                        </div>
                     </div>
                 @endforeach
             </div>
 
-            {{-- S323: removed the redundant __insight-grid stat block — it
-                  repeated the same percentages already shown in the 4 lane
-                  cards above and the stacked bar below, tripling the
-                  vertical footprint without adding information. --}}
-            <div class="grimba-breakdown__bias-bar">
-                <span style="--w: {{ max(1, (int) round(($biasBuckets->firstWhere('key', 'left')?->count ?? 0) * 100 / $total)) }}%; --delay: 60ms; background:#3b82f6;">L {{ (int) round(($biasBuckets->firstWhere('key', 'left')?->count ?? 0) * 100 / $total) }}%</span>
-                <span style="--w: {{ max(1, (int) round(($biasBuckets->firstWhere('key', 'center')?->count ?? 0) * 100 / $total)) }}%; --delay: 140ms; background:#9ca3af;">C {{ (int) round(($biasBuckets->firstWhere('key', 'center')?->count ?? 0) * 100 / $total) }}%</span>
-                <span style="--w: {{ max(1, (int) round(($biasBuckets->firstWhere('key', 'right')?->count ?? 0) * 100 / $total)) }}%; --delay: 220ms; background:#ef4444;">R {{ (int) round(($biasBuckets->firstWhere('key', 'right')?->count ?? 0) * 100 / $total) }}%</span>
+            <div class="grimba-breakdown__bias-bar" aria-label="{{ __('Distribution des biais') }}">
+                @forelse($biasBuckets->filter(fn ($bucket) => $bucket->count > 0) as $bucket)
+                    @php
+                        $pct = (int) round($bucket->count * 100 / $total);
+                    @endphp
+                    <span title="{{ $bucket->label }} · {{ $pct }}%" style="--w: {{ $pct }}%; --delay: {{ 60 + ($loop->index * 80) }}ms; background: {{ $bucket->color }};">{{ mb_substr($bucket->label, 0, 1) }} {{ $pct }}%</span>
+                @empty
+                    <span style="--w: 100%; background:#6b7280;">{{ __('N/A') }}</span>
+                @endforelse
             </div>
         </div>
 
@@ -809,13 +1172,17 @@
                     <h3>{{ __('Pays d’origine des sources') }}</h3>
                     <div class="grimba-breakdown__origin-bar" aria-label="{{ __('Répartition géographique des sources') }}">
                         @foreach($originBuckets->filter(fn ($bucket) => $bucket->count > 0) as $bucket)
-                            @php($pct = (int) round($bucket->count * 100 / $total))
+                            @php
+                                $pct = (int) round($bucket->count * 100 / $total);
+                            @endphp
                             <span title="{{ $bucket->label }} · {{ $pct }}%" style="--dot: {{ $bucket->color }}; --w: {{ max(1, $pct) }}%; --delay: {{ $loop->index * 70 }}ms;"></span>
                         @endforeach
                     </div>
 
                     @foreach($originBuckets->filter(fn ($bucket) => $bucket->count > 0) as $bucket)
-                        @php($pct = (int) round($bucket->count * 100 / $total))
+                        @php
+                            $pct = (int) round($bucket->count * 100 / $total);
+                        @endphp
                         <div class="grimba-breakdown__origin-row" style="--dot: {{ $bucket->color }};">
                             <div class="grimba-breakdown__legend">
                                 <span class="grimba-breakdown__dot" style="--dot: {{ $bucket->color }};"></span>
@@ -849,13 +1216,17 @@
                                 </div>
                                 <div class="grimba-breakdown__origin-triptych" aria-label="{{ __('Répartition des biais pour :origin', ['origin' => $bucket->label]) }}">
                                     @foreach(['left', 'center', 'right'] as $biasKey)
-                                        @php($bias = $bucket->bias[$biasKey])
+                                        @php
+                                            $bias = $bucket->bias[$biasKey];
+                                        @endphp
                                         <span title="{{ $bias->label }} · {{ $bias->pct }}%" style="--dot: {{ $bias->color }}; --w: {{ max(1, $bias->pct) }}%;"></span>
                                     @endforeach
                                 </div>
                                 <div class="d-flex justify-content-between small" style="color: var(--gbd-muted); font-weight:800;">
                                     @foreach(['left', 'center', 'right'] as $biasKey)
-                                        @php($bias = $bucket->bias[$biasKey])
+                                        @php
+                                            $bias = $bucket->bias[$biasKey];
+                                        @endphp
                                         <span>{{ mb_substr($bias->label, 0, 1) }} {{ $bias->pct }}%</span>
                                     @endforeach
                                 </div>
@@ -874,7 +1245,9 @@
 
             <div class="grimba-breakdown__rows">
                 @foreach($factBuckets as $bucket)
-                    @php($pct = (int) round($bucket->items->count() * 100 / $total))
+                    @php
+                        $pct = (int) round($bucket->items->count() * 100 / $total);
+                    @endphp
                     <div class="grimba-breakdown__row" style="--dot: {{ $bucket->color }};">
                         <div class="grimba-breakdown__legend">
                             <span class="grimba-breakdown__dot" style="--dot: {{ $bucket->color }};"></span>
@@ -908,42 +1281,54 @@
 
         <div class="grimba-breakdown__panel" data-panel="owner">
             <div class="grimba-breakdown__owner-grid">
-                <div class="grimba-breakdown__donut" aria-label="{{ __('Répartition par type de propriété') }}">
-                    <div class="grimba-breakdown__donut-center">
-                        <strong>{{ $topOwnerPct }}%</strong>
-                        <span>{{ $topOwner?->label ?? __('Non classé') }}</span>
+                <div class="grimba-breakdown__owner-summary-card">
+                    <div class="grimba-breakdown__donut" aria-label="{{ __('Répartition par type de propriété') }}">
+                        <div class="grimba-breakdown__donut-center">
+                            <strong>{{ $topOwnerPct }}%</strong>
+                            <span>{{ __('Dominant') }}</span>
+                        </div>
+                    </div>
+                    <div class="grimba-breakdown__owner-summary">
+                        <span>{{ __('Type dominant') }}</span>
+                        <strong>{{ $topOwner?->label ?? __('Non classé') }}</strong>
+                        <em>
+                            {{ __(':count sur :total sources', ['count' => $topOwner?->count ?? 0, 'total' => $total]) }}
+                        </em>
                     </div>
                 </div>
 
-                <div class="grimba-breakdown__rows">
+                <div class="grimba-breakdown__owner-rows">
                     @foreach($ownershipBuckets as $bucket)
-                        @php($pct = (int) round($bucket->count * 100 / $total))
-                        <div class="grimba-breakdown__row" style="--dot: {{ $bucket->color }};">
-                            <div class="grimba-breakdown__legend">
+                        @php
+                            $pct = (int) round($bucket->count * 100 / $total);
+                        @endphp
+                        <article class="grimba-breakdown__owner-row" style="--dot: {{ $bucket->color }};">
+                            <div class="grimba-breakdown__owner-label">
                                 <span class="grimba-breakdown__dot" style="--dot: {{ $bucket->color }};"></span>
-                                <span>{{ $bucket->label }}</span>
+                                <span class="grimba-breakdown__owner-label-text">
+                                    <strong>{{ $bucket->label }}</strong>
+                                    <small>{{ trans_choice(':count source|:count sources', $bucket->count, ['count' => $bucket->count]) }}</small>
+                                </span>
                             </div>
-                            <div class="grimba-breakdown__metric">
-                                <div class="grimba-breakdown__mini-track">
-                                    <span class="grimba-breakdown__mini-fill" style="--dot: {{ $bucket->color }}; --w: {{ $pct }}%; --delay: {{ $loop->index * 70 }}ms;"></span>
-                                </div>
-                                <strong>{{ $pct }}%</strong>
-                                <div class="grimba-breakdown__logos">
-                                    @foreach($bucket->items->take(6) as $source)
-                                        {!! Theme::partial('source-logo', [
-                                            'source_id' => $source->key,
-                                            'name' => $source->name,
-                                            'website' => $source->website,
-                                            'logo_url' => $source->logo_url ?? null,
-                                            'logo_status' => $source->logo_status ?? 'unknown',
-                                            'logo_checked_at' => $source->logo_checked_at ?? null,
-                                            'size' => 22,
-                                            'color' => $bucket->color,
-                                        ]) !!}
-                                    @endforeach
-                                </div>
+                            <div class="grimba-breakdown__owner-track">
+                                <span class="grimba-breakdown__owner-fill" style="--dot: {{ $bucket->color }}; --w: {{ $pct }}%; --delay: {{ $loop->index * 70 }}ms;"></span>
                             </div>
-                        </div>
+                            <strong class="grimba-breakdown__owner-percent">{{ $pct }}%</strong>
+                            <div class="grimba-breakdown__owner-logos">
+                                @foreach($bucket->items->take(6) as $source)
+                                    {!! Theme::partial('source-logo', [
+                                        'source_id' => $source->key,
+                                        'name' => $source->name,
+                                        'website' => $source->website,
+                                        'logo_url' => $source->logo_url ?? null,
+                                        'logo_status' => $source->logo_status ?? 'unknown',
+                                        'logo_checked_at' => $source->logo_checked_at ?? null,
+                                        'size' => 22,
+                                        'color' => $bucket->color,
+                                    ]) !!}
+                                @endforeach
+                            </div>
+                        </article>
                     @endforeach
                 </div>
             </div>
