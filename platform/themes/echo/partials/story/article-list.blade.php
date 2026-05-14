@@ -45,8 +45,8 @@
 @endphp
 
 <section class="grimba-story-articles">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-        <h2 class="m-0" style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:24px; letter-spacing:0;">
+    <div class="grimba-story-articles__head">
+        <h2 class="grimba-story-articles__title">
             <span style="opacity:0.55;">{{ $totalCount }}</span>
             {{ trans_choice('article|articles', $totalCount) }}
         </h2>
@@ -67,24 +67,24 @@
         </div>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mb-3">
+    <div class="grimba-story-articles__tools">
         @if(count($jumpList) >= 2)
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <span class="small opacity-60">{{ __('Lu chez') }}</span>
+            <div class="grimba-story-jump">
+                <span class="grimba-story-jump__label">{{ __('Lu chez') }}</span>
                 @foreach($jumpList as $jump)
                     @php $color = $biasMeta[$jump['bias']]['color'] ?? 'rgba(26,23,19,0.45)'; @endphp
                     <a href="#story-article-{{ $jump['id'] }}"
-                       class="btn-grimba btn-grimba--ghost btn-grimba--sm"
-                       style="border-color:{{ $color }}33; color:var(--gn-ink,#1a1713);">
-                        <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:{{ $color }}; margin-right:6px;"></span>
+                       class="grimba-story-jump__chip"
+                       style="--story-jump-color: {{ $color }};">
+                        <span class="grimba-story-jump__dot" aria-hidden="true"></span>
                         {{ $jump['label'] }}
                     </a>
                 @endforeach
             </div>
         @endif
 
-        <div class="d-flex align-items-center gap-2 ms-auto" data-grimba-cluster-sort>
-            <span class="small opacity-60">{{ __('Trier') }}</span>
+        <div class="grimba-story-sort" data-grimba-cluster-sort>
+            <span class="grimba-story-sort__label">{{ __('Trier') }}</span>
             <button type="button"
                     class="btn-grimba btn-grimba--sm {{ $sortMode === 'bias' ? 'btn-grimba--solid' : 'btn-grimba--ghost' }}"
                     data-sort-mode="bias"
@@ -145,28 +145,18 @@
                     data-compare-desc="{{ $description ? Str::limit(strip_tags($description), 280) : '' }}"
                     data-compare-url="{{ $cp->url ?? '' }}"
                     class="grimba-story-article {{ $isCurrent ? 'grimba-story-article--current' : '' }}"
-                    style="
-                        padding: 16px 18px;
-                        border: 1px solid {{ $isCurrent ? $meta['color'] . '55' : 'rgba(26,23,19,0.08)' }};
-                        border-left: 4px solid {{ $meta['color'] }};
-                        border-radius: 12px;
-                        margin-bottom: 14px;
-                        background: {{ $isCurrent ? $meta['color'] . '0d' : 'rgba(255,255,255,0.55)' }};
-                    ">
+                    style="--story-side-color: {{ $meta['color'] }}; --story-side-line: {{ $isCurrent ? $meta['color'] . '55' : 'rgba(26,23,19,0.08)' }}; --story-card-bg: {{ $isCurrent ? $meta['color'] . '0d' : 'rgba(255,255,255,0.55)' }};">
 
                     {{-- Source row: logo + name + ownership/credibility chips + lean badge --}}
-                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                    <div class="grimba-story-article__source-row">
                         {{-- S307 — compare checkbox. Sits left of the logo, only
                               activates after the reader checks one. --}}
-                        <label class="grimba-compare-toggle" title="{{ __('Sélectionner pour comparer côte à côte') }}"
-                               style="display:inline-flex; align-items:center; cursor:pointer; padding:0; margin:0;">
-                            <input type="checkbox" data-grimba-compare-toggle aria-label="{{ __('Comparer cette source') }}"
-                                   style="
-                                       width: 17px; height: 17px;
-                                       accent-color: {{ $meta['color'] }};
-                                       margin-right: 6px;
-                                       cursor: pointer;
-                                   ">
+                        <label class="grimba-compare-toggle" title="{{ __('Sélectionner pour comparer côte à côte') }}">
+                            <input type="checkbox"
+                                   class="grimba-compare-toggle__input"
+                                   data-grimba-compare-toggle
+                                   aria-label="{{ __('Comparer cette source') }}">
+                            <span class="grimba-compare-toggle__control" aria-hidden="true"></span>
                         </label>
                         {!! Theme::partial('source-logo', [
                             'source_id' => $src->id ?? 0,
@@ -178,7 +168,7 @@
                             'size'    => 28,
                             'color'   => $meta['color'],
                         ]) !!}
-                        <strong style="font-family:'Public Sans',system-ui,sans-serif; font-size:14px;">
+                        <strong class="grimba-story-article__source-name">
                             {{ $cp->source_name ?? '—' }}
                         </strong>
 
@@ -210,7 +200,7 @@
                             ]) !!}
                         @endif
 
-                        <span class="ms-auto">
+                        <span class="grimba-story-article__bias">
                             {!! Theme::partial('bias-chip', [
                                 'tier' => $__biasTier,
                                 'size' => 'sm',
@@ -223,22 +213,18 @@
                         ])
 
                         @if($isCurrent)
-                            <span style="
-                                padding:3px 10px; border-radius:9999px;
-                                background:var(--gn-ink,#1a1713); color:var(--gn-paper,#f6f1e8);
-                                font-size:11px; font-weight:700; letter-spacing:0; text-transform:uppercase;
-                            ">{{ __('Vous lisez') }}</span>
+                            <span class="grimba-story-article__current">{{ __('Vous lisez') }}</span>
                         @endif
 
                         {{-- S173 — save-for-later icon. Cookie-only, no auth. --}}
                         {!! Theme::partial('save-button', ['post' => $cp, 'variant' => 'icon']) !!}
                     </div>
 
-                    <h3 style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; line-height:1.3; letter-spacing:0; margin:0 0 6px;">
+                    <h3 class="grimba-story-article__headline">
                         @if($isCurrent)
                             {{ $title }}
                         @else
-                            <a href="{{ $cp->url ?? '#' }}" style="color:var(--gn-ink,#1a1713); text-decoration:none;">
+                            <a href="{{ $cp->url ?? '#' }}" class="grimba-story-article__headline-link">
                                 {{ $title }}
                             </a>
                         @endif
@@ -251,25 +237,10 @@
                     @endif
 
                     @if($categories->isNotEmpty())
-                        <div class="grimba-story-article__categories d-flex align-items-center gap-1 flex-wrap mb-2">
+                        <div class="grimba-story-article__categories">
                             @foreach($categories->take(4) as $category)
                                 <a href="{{ $category->url }}"
-                                   class="grimba-story-article__category"
-                                   style="
-                                       display:inline-flex;
-                                       align-items:center;
-                                       min-height:24px;
-                                       padding:3px 9px;
-                                       border-radius:9999px;
-                                       border:1px solid rgba(26,23,19,0.12);
-                                       background:rgba(246,241,232,0.62);
-                                       color:var(--gn-ink,#1a1713);
-                                       font-family:'Public Sans',system-ui,sans-serif;
-                                       font-size:11.5px;
-                                       font-weight:700;
-                                       line-height:1.2;
-                                       text-decoration:none;
-                                   ">
+                                   class="grimba-story-article__category">
                                     {{ $category->name }}
                                 </a>
                             @endforeach
@@ -277,17 +248,17 @@
                     @endif
 
                     @if($description)
-                        <p class="small mb-2" style="line-height:1.5; color:var(--gn-ink,#1a1713); opacity:0.85;">
+                        <p class="grimba-story-article__excerpt">
                             {{ Str::limit(strip_tags($description), 200) }}
                         </p>
                     @endif
 
-                    <div class="d-flex justify-content-between align-items-center small">
-                        <span class="opacity-60">
+                    <div class="grimba-story-article__meta">
+                        <span class="grimba-story-article__time">
                             {{ $cp->created_at ? $cp->created_at->locale('fr')->diffForHumans() : '' }}
                         </span>
                         @if(! $isCurrent)
-                            <a href="{{ $cp->url ?? '#' }}" target="_blank" rel="noopener" style="color:#c0392b; text-decoration:none; font-weight:700; font-size:13px;">
+                            <a href="{{ $cp->url ?? '#' }}" target="_blank" rel="noopener" class="grimba-story-article__read">
                                 {{ __("Lire l'article complet") }} ↗
                             </a>
                         @endif
@@ -300,41 +271,25 @@
     <div id="grimba-compare-toolbar"
          role="region"
          aria-label="{{ __('Outil de comparaison') }}"
-         hidden
-         style="
-            position: sticky;
-            bottom: 16px;
-            z-index: 30;
-            margin-top: 16px;
-            padding: 10px 14px;
-            background: var(--gn-ink, #1a1713);
-            color: var(--gn-paper, #f6f1e8);
-            border-radius: 14px;
-            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18);
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-         ">
-        <span style="font-weight:700; font-size:13.5px;">
+         class="grimba-compare-toolbar"
+         hidden>
+        <span class="grimba-compare-toolbar__count">
             <span data-grimba-compare-count>0</span>
-            <span style="opacity:0.75;">{{ __('sources sélectionnées') }}</span>
+            <span>{{ __('sources sélectionnées') }}</span>
         </span>
-        <span class="opacity-65" style="font-size:12.5px;">
+        <span class="grimba-compare-toolbar__hint">
             {{ __('Sélectionnez 2 ou 3 sources pour les comparer côte à côte.') }}
         </span>
-        <div class="ms-auto d-flex align-items-center gap-2">
+        <div class="grimba-compare-toolbar__actions">
             <button type="button"
                     data-grimba-compare-clear
-                    class="btn-grimba btn-grimba--ghost btn-grimba--sm"
-                    style="border-color: rgba(246,241,232,0.35); color:#f6f1e8;">
+                    class="btn-grimba btn-grimba--ghost btn-grimba--sm grimba-compare-toolbar__clear">
                 {{ __('Effacer') }}
             </button>
             <button type="button"
                     data-grimba-compare-open
-                    class="btn-grimba btn-grimba--solid btn-grimba--sm"
-                    disabled
-                    style="background:#f6f1e8; color:#1a1713; font-weight:700;">
+                    class="btn-grimba btn-grimba--solid btn-grimba--sm grimba-compare-toolbar__open"
+                    disabled>
                 {{ __('Comparer côte à côte') }}
             </button>
         </div>

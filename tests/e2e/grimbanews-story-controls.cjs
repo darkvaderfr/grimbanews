@@ -250,6 +250,16 @@ function assertModal(metrics, scenarioKey) {
         const activeContrast = contrast(parseRgb(articleTabs.activeColor), parseRgb(articleTabs.activeBackground));
         assert(activeContrast >= 4.5, `${scenario.key} active tab contrast ${activeContrast.toFixed(2)}`);
 
+        await page.locator('.grimba-story-article').first().scrollIntoViewIfNeeded();
+        const articleCard = await collectComponent(page, '.grimba-story-article');
+        const sourceRow = await collectComponent(page, '.grimba-story-article__source-row');
+        const compareToggle = await collectComponent(page, '.grimba-compare-toggle');
+        assertComponent(articleCard, scenario.key);
+        assertComponent(sourceRow, scenario.key);
+        assertComponent(compareToggle, scenario.key);
+        assert(articleCard.text.length > 80, `${scenario.key} article card has readable text`);
+        assert(compareToggle.rect.width >= 34, `${scenario.key} compare target width ${compareToggle.rect.width}`);
+
         await page.evaluate(() => {
             document.querySelectorAll('[data-grimba-compare-toggle]').forEach((input, index) => {
                 if (index < 2) {
@@ -259,6 +269,11 @@ function assertModal(metrics, scenarioKey) {
             });
         });
 
+        await page.locator('.grimba-compare-toolbar').scrollIntoViewIfNeeded();
+        const toolbar = await collectComponent(page, '.grimba-compare-toolbar');
+        assertComponent(toolbar, scenario.key);
+        assert(/2/.test(toolbar.text), `${scenario.key} compare toolbar count`);
+
         await page.locator('[data-grimba-compare-open]').click();
         await page.waitForSelector('#grimba-compare-modal.is-open');
         const modal = await collectModal(page);
@@ -267,6 +282,9 @@ function assertModal(metrics, scenarioKey) {
         results[scenario.key] = {
             heroTabs: heroTabs.rect,
             articleTabs: articleTabs.rect,
+            articleCard: articleCard.rect,
+            compareToggle: compareToggle.rect,
+            toolbar: toolbar.rect,
             activeContrast: Number(activeContrast.toFixed(2)),
             modal: modal.panel,
         };

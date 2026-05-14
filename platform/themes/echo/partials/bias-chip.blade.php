@@ -44,7 +44,7 @@
         color: {{ $color }};
         border: 1px solid {{ $color }}66;
         font-weight: 700;
-        letter-spacing: 0.4px;
+        letter-spacing: 0;
         text-transform: none;
         text-decoration: none;
         white-space: nowrap;

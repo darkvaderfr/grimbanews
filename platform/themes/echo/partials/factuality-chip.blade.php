@@ -36,7 +36,7 @@
         color: {{ $color }};
         border: 1px solid {{ $color }}66;
         font-weight: 700;
-        letter-spacing: 0.3px;
+        letter-spacing: 0;
         text-decoration: none;
         white-space: nowrap;
         {{ $sizeStyle }}
