@@ -49,9 +49,11 @@
             color: var(--gbd-ink);
             position: relative;
             overflow: hidden;
+            width: 100%;
             max-width: 1120px;
             margin-inline: auto;
             padding: 14px 16px !important;
+            box-sizing: border-box;
         }
 
         [data-bs-theme="dark"] #{{ $uid }} {
@@ -72,16 +74,20 @@
             inset: 0;
             pointer-events: none;
             background:
-                radial-gradient(circle at 18% 8%, rgba(59, 130, 246, .12), transparent 28%),
-                radial-gradient(circle at 84% 18%, rgba(209, 40, 84, .10), transparent 32%),
+                linear-gradient(90deg, rgba(59, 130, 246, .10), transparent 26%, transparent 74%, rgba(209, 40, 84, .08)),
+                repeating-linear-gradient(90deg, rgba(23, 23, 23, .035) 0 1px, transparent 1px 74px),
+                repeating-linear-gradient(180deg, rgba(23, 23, 23, .026) 0 1px, transparent 1px 54px),
                 linear-gradient(135deg, rgba(255, 255, 255, .18), transparent 42%);
+            opacity: .88;
         }
 
         [data-bs-theme="dark"] #{{ $uid }}::before {
             background:
-                radial-gradient(circle at 18% 8%, rgba(70, 126, 255, .16), transparent 30%),
-                radial-gradient(circle at 84% 18%, rgba(239, 68, 68, .13), transparent 32%),
+                linear-gradient(90deg, rgba(70, 126, 255, .16), transparent 26%, transparent 74%, rgba(239, 68, 68, .12)),
+                repeating-linear-gradient(90deg, rgba(248, 243, 234, .045) 0 1px, transparent 1px 74px),
+                repeating-linear-gradient(180deg, rgba(248, 243, 234, .032) 0 1px, transparent 1px 54px),
                 linear-gradient(135deg, rgba(255, 255, 255, .05), transparent 46%);
+            opacity: .78;
         }
 
         #{{ $uid }} > * {
@@ -129,7 +135,7 @@
 
         #{{ $uid }} .grimba-breakdown__title {
             margin: 0;
-            font: 700 clamp(18px, 1.6vw, 22px)/1.05 "Fraunces", Georgia, serif;
+            font: 700 22px/1.05 "Fraunces", Georgia, serif;
             letter-spacing: 0;
         }
 
@@ -251,7 +257,7 @@
             gap: 10px;
             margin-bottom: 10px;
             color: var(--gbd-muted);
-            font-size: clamp(13px, 1.2vw, 15px);
+            font-size: 15px;
             line-height: 1.3;
         }
 
@@ -372,7 +378,7 @@
             display: block;
             margin-top: 4px;
             color: var(--gbd-ink);
-            font: 800 clamp(19px, 2.4vw, 26px)/1.02 "Fraunces", Georgia, serif;
+            font: 800 25px/1.02 "Fraunces", Georgia, serif;
             overflow-wrap: anywhere;
         }
 
@@ -419,7 +425,7 @@
             font-weight: 800;
             line-height: 1.1;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0;
         }
 
         #{{ $uid }} .grimba-breakdown__lane-head strong {
@@ -568,7 +574,8 @@
         }
 
         #{{ $uid }} .grimba-breakdown__donut {
-            width: clamp(136px, 15vw, 188px);
+            width: 172px;
+            max-width: 100%;
             aspect-ratio: 1;
             margin: 0 auto;
             border-radius: 50%;
@@ -610,7 +617,7 @@
 
         #{{ $uid }} .grimba-breakdown__donut-center strong {
             display: block;
-            font-size: clamp(18px, 2.2vw, 25px);
+            font-size: 24px;
             line-height: 1;
         }
 
@@ -628,7 +635,7 @@
 
         #{{ $uid }} .grimba-breakdown__owner-grid {
             display: grid;
-            grid-template-columns: minmax(180px, 270px) minmax(0, 1fr);
+            grid-template-columns: minmax(200px, 260px) minmax(0, 1fr);
             gap: 14px;
             align-items: stretch;
             min-width: 0;
@@ -658,7 +665,7 @@
             display: block;
             margin-top: 4px;
             color: var(--gbd-ink);
-            font: 800 clamp(19px, 2.3vw, 27px)/1.05 "Fraunces", Georgia, serif;
+            font: 800 26px/1.05 "Fraunces", Georgia, serif;
             overflow-wrap: anywhere;
         }
 
@@ -679,10 +686,11 @@
 
         #{{ $uid }} .grimba-breakdown__owner-row {
             display: grid;
-            grid-template-columns: minmax(150px, 1fr) minmax(110px, .7fr) auto minmax(76px, 150px);
+            grid-template-columns: minmax(0, .95fr) minmax(110px, .55fr) minmax(42px, auto) minmax(0, 136px);
             gap: 10px;
             align-items: center;
             min-width: 0;
+            overflow: hidden;
             padding: 9px 10px;
             border: 1px solid var(--gbd-line);
             border-radius: 14px;
@@ -717,6 +725,7 @@
 
         #{{ $uid }} .grimba-breakdown__owner-track {
             min-width: 0;
+            width: 100%;
             height: 10px;
             border-radius: 999px;
             background: var(--gbd-track);
@@ -747,8 +756,9 @@
             flex-wrap: wrap;
             justify-content: flex-end;
             gap: 5px;
-            max-width: 150px;
+            max-width: min(100%, 136px);
             min-width: 0;
+            overflow: hidden;
         }
 
         #{{ $uid }} .grimba-breakdown__insight-grid {
@@ -778,7 +788,7 @@
 
         #{{ $uid }} .grimba-breakdown__origin-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.04fr) minmax(260px, .96fr);
+            grid-template-columns: minmax(0, 1.04fr) minmax(240px, .96fr);
             gap: 12px;
             align-items: stretch;
         }
@@ -931,10 +941,58 @@
             font-weight: 700;
         }
 
+        @media (max-width: 900px) {
+            #{{ $uid }} .grimba-breakdown__owner-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #{{ $uid }} .grimba-breakdown__owner-summary-card {
+                grid-template-columns: minmax(132px, 172px) minmax(0, 1fr);
+                column-gap: 12px;
+                place-items: center stretch;
+                text-align: left;
+            }
+
+            #{{ $uid }} .grimba-breakdown__owner-summary {
+                text-align: left;
+                overflow: hidden;
+            }
+
+            #{{ $uid }} .grimba-breakdown__owner-row {
+                grid-template-columns: minmax(0, 1fr) minmax(42px, auto);
+            }
+
+            #{{ $uid }} .grimba-breakdown__owner-track,
+            #{{ $uid }} .grimba-breakdown__owner-logos {
+                grid-column: 1 / -1;
+            }
+
+            #{{ $uid }} .grimba-breakdown__owner-logos {
+                justify-content: flex-start;
+                max-width: 100%;
+            }
+
+            #{{ $uid }} .grimba-breakdown__origin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 640px) {
+            #{{ $uid }} {
+                padding: 12px !important;
+            }
+
             #{{ $uid }} .grimba-breakdown__top {
                 align-items: flex-start;
                 flex-direction: column;
+            }
+
+            #{{ $uid }} .grimba-breakdown__title {
+                font-size: 20px;
+            }
+
+            #{{ $uid }} .grimba-breakdown__callout {
+                font-size: 13px;
             }
 
             #{{ $uid }} .grimba-breakdown__bias-intelligence {
@@ -946,11 +1004,16 @@
             }
 
             #{{ $uid }} .grimba-breakdown__lane {
-            min-height: 0;
+                min-height: 0;
             }
 
             #{{ $uid }} .grimba-breakdown__donut {
-                width: min(112px, 31vw);
+                width: 112px;
+                max-width: 100%;
+            }
+
+            #{{ $uid }} .grimba-breakdown__donut-center strong {
+                font-size: 20px;
             }
 
             #{{ $uid }} .grimba-breakdown__row,
@@ -958,39 +1021,14 @@
                 grid-template-columns: 1fr;
             }
 
-            #{{ $uid }} .grimba-breakdown__owner-grid {
-                grid-template-columns: 1fr;
-            }
-
             #{{ $uid }} .grimba-breakdown__owner-summary-card {
                 grid-template-columns: minmax(104px, 116px) minmax(0, 1fr);
                 column-gap: 10px;
-                place-items: center stretch;
-                text-align: left;
-            }
-
-            #{{ $uid }} .grimba-breakdown__owner-summary {
-                text-align: left;
-                overflow: hidden;
             }
 
             #{{ $uid }} .grimba-breakdown__owner-summary strong {
-                font-size: clamp(17px, 5vw, 21px);
+                font-size: 20px;
                 line-height: 1.08;
-            }
-
-            #{{ $uid }} .grimba-breakdown__owner-row {
-                grid-template-columns: minmax(0, 1fr) auto;
-            }
-
-            #{{ $uid }} .grimba-breakdown__owner-track,
-            #{{ $uid }} .grimba-breakdown__owner-logos {
-                grid-column: 1 / -1;
-            }
-
-            #{{ $uid }} .grimba-breakdown__owner-logos {
-                justify-content: flex-start;
-                max-width: 100%;
             }
 
             #{{ $uid }} .grimba-breakdown__logos {
@@ -1008,10 +1046,6 @@
             #{{ $uid }} .grimba-breakdown__tab {
                 padding-inline: 6px;
                 font-size: 11px;
-            }
-
-            #{{ $uid }} .grimba-breakdown__origin-grid {
-                grid-template-columns: 1fr;
             }
 
             #{{ $uid }} .grimba-breakdown__country-chip {
