@@ -306,7 +306,7 @@
             font-size: 11px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: .35px;
+            letter-spacing: 0;
         }
 
         #{{ $uid }} .grimba-breakdown__bias-console-head {
@@ -623,7 +623,7 @@
             font-weight: 900;
             line-height: 1;
             text-transform: uppercase;
-            letter-spacing: .35px;
+            letter-spacing: 0;
         }
 
         #{{ $uid }} .grimba-breakdown__owner-grid {
@@ -797,7 +797,7 @@
             margin: 0 0 10px;
             font: 800 12px/1.1 "Public Sans", system-ui, sans-serif;
             text-transform: uppercase;
-            letter-spacing: .4px;
+            letter-spacing: 0;
             color: var(--gbd-muted);
         }
 
@@ -879,7 +879,7 @@
             font-size: 11px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: .35px;
+            letter-spacing: 0;
         }
 
         #{{ $uid }} .grimba-breakdown__origin-bias-head strong {

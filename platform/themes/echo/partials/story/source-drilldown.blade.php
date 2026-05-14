@@ -23,6 +23,8 @@
             $bias = isset($biasMeta[$post->bias_rating ?? '']) ? $post->bias_rating : 'unknown';
             $source = $post->source_id && isset($sources[$post->source_id]) ? $sources[$post->source_id] : null;
             $excerpt = trim(strip_tags((string) (GnTr::description($post) ?: $post->description ?: $post->name)));
+            $country = $source->country ?? $post->country ?? null;
+            $originKey = \App\Support\GrimbaSourceBreakdown::originKeyForCountry($country);
 
             return [
                 'id' => (int) $post->id,
@@ -32,6 +34,9 @@
                 'excerpt' => Str::limit($excerpt, 145),
                 'owner' => $source->owner_name ?? null,
                 'credibility' => $source->credibility_score ?? null,
+                'country' => \App\Support\GrimbaSourceBreakdown::countryLabel($country),
+                'origin' => \App\Support\GrimbaSourceBreakdown::originLabel($originKey),
+                'origin_color' => \App\Support\GrimbaSourceBreakdown::originColor($originKey),
                 'url' => $post->url ?? '#story-article-' . (int) $post->id,
             ];
         })
@@ -49,7 +54,7 @@
         <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
             <div>
                 <span class="grimba-methodology__kicker">{{ __('Source drilldown') }}</span>
-                <h2 class="h4 mt-2 mb-1" style="font-family:'Fraunces','Playfair Display',Georgia,serif; letter-spacing:-0.02em;">
+                <h2 class="h4 mt-2 mb-1" style="font-family:'Fraunces','Playfair Display',Georgia,serif; letter-spacing:0;">
                     {{ __('Qui soutient quel angle ?') }}
                 </h2>
                 <p class="small opacity-70 mb-0">
@@ -81,6 +86,9 @@
                             @if($row['credibility'])
                                 <span>{{ __('Crédibilité') }} {{ $row['credibility'] }}</span>
                             @endif
+                            <span class="grimba-source-drilldown__origin" style="--origin-color: {{ $row['origin_color'] }};">
+                                {{ __('Origine') }}: {{ $row['origin'] }} · {{ $row['country'] }}
+                            </span>
                             @if($row['owner'])
                                 <span>{{ __('Propriété') }}: {{ $row['owner'] }}</span>
                             @endif
@@ -105,7 +113,10 @@
             border: 1px solid rgba(26, 23, 19, 0.1);
             border-left: 4px solid var(--source-bias-color);
             border-radius: 14px;
-            background: rgba(255, 255, 255, 0.54);
+            background:
+                linear-gradient(135deg, color-mix(in srgb, var(--source-bias-color) 8%, transparent), transparent 48%),
+                rgba(255, 255, 255, 0.58);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10);
         }
         .grimba-source-drilldown__bias {
             display: flex;
@@ -115,7 +126,7 @@
             font-family: 'Public Sans', system-ui, sans-serif;
             font-size: 12px;
             font-weight: 800;
-            letter-spacing: 0.05em;
+            letter-spacing: 0;
             text-transform: uppercase;
         }
         .grimba-source-drilldown__bias span {
@@ -148,9 +159,24 @@
             color: var(--gn-ink-soft, #6b6459);
             font-size: 12px;
         }
+        .grimba-source-drilldown__origin {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .grimba-source-drilldown__origin::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--origin-color);
+            box-shadow: 0 0 0 5px color-mix(in srgb, var(--origin-color) 13%, transparent);
+        }
         html[data-bs-theme="dark"] .grimba-source-drilldown__row,
         body[data-theme="dark"] .grimba-source-drilldown__row {
-            background: rgba(246, 241, 232, 0.08);
+            background:
+                linear-gradient(135deg, color-mix(in srgb, var(--source-bias-color) 13%, transparent), transparent 50%),
+                rgba(246, 241, 232, 0.08);
             border-color: rgba(246, 241, 232, 0.14);
         }
         @media (max-width: 575.98px) {
