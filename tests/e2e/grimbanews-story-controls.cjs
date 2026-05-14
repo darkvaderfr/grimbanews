@@ -250,6 +250,10 @@ function assertModal(metrics, scenarioKey) {
         const activeContrast = contrast(parseRgb(articleTabs.activeColor), parseRgb(articleTabs.activeBackground));
         assert(activeContrast >= 4.5, `${scenario.key} active tab contrast ${activeContrast.toFixed(2)}`);
 
+        const reader = await collectComponent(page, '.grimba-full-article');
+        assertComponent(reader, scenario.key);
+        assert(/Lire l'|Source originale|Texte intégral|Extrait disponible/.test(reader.text), `${scenario.key} reader module copy`);
+
         await page.locator('.grimba-story-article').first().scrollIntoViewIfNeeded();
         const articleCard = await collectComponent(page, '.grimba-story-article');
         const sourceRow = await collectComponent(page, '.grimba-story-article__source-row');
@@ -282,6 +286,7 @@ function assertModal(metrics, scenarioKey) {
         results[scenario.key] = {
             heroTabs: heroTabs.rect,
             articleTabs: articleTabs.rect,
+            reader: reader.rect,
             articleCard: articleCard.rect,
             compareToggle: compareToggle.rect,
             toolbar: toolbar.rect,

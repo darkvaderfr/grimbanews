@@ -239,7 +239,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-urgency { color: #1a1713; }
     font-family: var(--gn-font-mono);
     font-size: 0.7rem;
     font-weight: 700;
-    letter-spacing: 0.05em;
+    letter-spacing: 0;
     text-transform: uppercase;
     line-height: 1;
     border: 1px solid rgba(26, 23, 19, 0.12);
@@ -305,7 +305,7 @@ body.grimba-home .echo-hero-title a {
     font-size: clamp(1.75rem, 2.8vw, 2.6rem) !important;
     font-weight: 700 !important;
     line-height: 1.12 !important;
-    letter-spacing: -0.015em !important;
+    letter-spacing: 0 !important;
     color: var(--gn-ink) !important;
     font-feature-settings: "ss01";
 }
@@ -900,7 +900,7 @@ body.grimba-home .ck-content h2 {
     font-size: 1.55rem;
     font-weight: 700;
     margin: 2.25rem 0 0.9rem;
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
     line-height: 1.25;
 }
 body.grimba-home .ck-content h3 {
@@ -1009,7 +1009,7 @@ body.grimba-home .echo-top-story em a {
     font-family: var(--gn-font-body);
     font-style: normal !important;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     font-size: 0.78rem;
     font-weight: 600;
     text-decoration: none;
@@ -1614,9 +1614,7 @@ button.btn-grimba--solid,
     padding: clamp(14px, 2vw, 20px);
     border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 22px;
-    background:
-        linear-gradient(135deg, rgba(11, 10, 8, 0.92), rgba(11, 10, 8, 0.78)),
-        radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.16), transparent 36%);
+    background: linear-gradient(135deg, rgba(11, 10, 8, 0.92), rgba(11, 10, 8, 0.78));
     color: #fff !important;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
     text-shadow: 0 2px 14px rgba(0,0,0,0.52), 0 1px 2px rgba(0,0,0,0.72);
@@ -1958,7 +1956,7 @@ button.btn-grimba--solid,
     font-size: 0.82rem;
     color: var(--gn-ink-soft);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0;
     font-weight: 600;
 }
 .grimba-topnews__headline {
@@ -2017,7 +2015,7 @@ button.btn-grimba--solid,
     font-family: var(--gn-font-mono);
     font-size: 0.72rem;
     font-weight: 800;
-    letter-spacing: 0.14em;
+    letter-spacing: 0;
     text-transform: uppercase;
     color: var(--gn-ink-soft);
 }
@@ -2137,7 +2135,7 @@ button.btn-grimba--solid,
     color: var(--gn-ink-soft);
     font-size: 0.76rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
     text-transform: uppercase;
 }
 .grimba-most-read__empty {
@@ -2171,7 +2169,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-most-read__rank {
 .grimba-section__title {
     font-size: 1.75rem;
     margin: 0;
-    letter-spacing: -0.015em;
+    letter-spacing: 0;
 }
 .grimba-section__hero {
     display: block;
@@ -2199,16 +2197,14 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-most-read__rank {
     padding: 14px;
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 18px;
-    background:
-        linear-gradient(135deg, rgba(11, 10, 8, 0.90), rgba(11, 10, 8, 0.72)),
-        radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.13), transparent 34%);
+    background: linear-gradient(135deg, rgba(11, 10, 8, 0.90), rgba(11, 10, 8, 0.72));
     color: #fff;
     box-shadow: 0 18px 44px rgba(0, 0, 0, 0.30);
 }
 .grimba-section__kicker {
     font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     font-weight: 600;
     display: inline-block;
     margin-bottom: 0.35rem;
@@ -2264,7 +2260,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-most-read__rank {
     font-size: 0.82rem;
     color: var(--gn-ink-soft);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0;
     font-weight: 600;
 }
 .grimba-latest__headline {
@@ -2387,7 +2383,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card .opacity-6
 .grimba-footer__heading {
     font-family: var(--gn-font-body);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     font-size: 0.75rem;
     font-weight: 700;
     color: rgba(246, 241, 232, 0.72);
@@ -2405,7 +2401,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card .opacity-6
 .grimba-methodology__kicker {
     font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     font-weight: 600;
     opacity: 0.6;
 }
@@ -2415,7 +2411,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card .opacity-6
     font-weight: 700;
     line-height: 1.1;
     margin: 0.5rem 0 1rem;
-    letter-spacing: -0.015em;
+    letter-spacing: 0;
 }
 .grimba-methodology__lede {
     font-size: 1.1rem;
@@ -2437,7 +2433,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card .opacity-6
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0 0 1rem;
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
 }
 .grimba-methodology__section p,
 .grimba-methodology__section li {
@@ -2496,7 +2492,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card .opacity-6
 .grimba-comparison-index__dossier {
     font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     font-weight: 700;
     opacity: 0.6;
 }
@@ -2506,7 +2502,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card .opacity-6
     line-height: 1.25;
     font-weight: 700;
     margin: 0.25rem 0 1rem;
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
 }
 .grimba-comparison-index__bar {
     display: flex;
@@ -2545,7 +2541,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card .opacity-6
     font-size: 1.4rem;
     font-weight: 700;
     margin: 2rem 0 0.75rem;
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
 }
 .grimba-page__body .ck-content a {
     color: var(--gn-ink);
@@ -3396,7 +3392,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     .grimba-sources__controls label {
         margin-bottom: 0.34rem !important;
         font-size: 0.68rem;
-        letter-spacing: 0.08em;
+        letter-spacing: 0;
     }
     .grimba-sources__controls .form-control,
     .grimba-sources__controls .form-select {
@@ -3874,7 +3870,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-story-timeline div[aria-hidd
 }
 .grimba-local__title {
     font-size: clamp(26px, 3.4vw, 42px);
-    letter-spacing: -0.3px;
+    letter-spacing: 0;
 }
 .grimba-local__lede {
     max-width: 60ch;
@@ -3887,7 +3883,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-story-timeline div[aria-hidd
     font-family: 'Public Sans', system-ui, sans-serif;
     font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.4px;
+    letter-spacing: 0;
 }
 .grimba-local__field--country {
     flex: 0 0 110px;
@@ -4106,6 +4102,10 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-insights .grimba-insights__s
 .grimba-full-article {
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(26, 23, 19, 0.08);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(246, 241, 232, 0.56)),
+        rgba(255, 255, 255, 0.62);
 }
 .grimba-full-article--reader {
     scroll-margin-top: 110px;
@@ -4113,11 +4113,12 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-insights .grimba-insights__s
 .grimba-full-article::before {
     content: "";
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 1rem;
+    right: 1rem;
+    height: 3px;
     pointer-events: none;
-    background:
-        radial-gradient(circle at 8% 0%, rgba(192, 57, 43, 0.10), transparent 30%),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.30), transparent 48%);
+    background: linear-gradient(90deg, transparent, rgba(192, 57, 43, 0.52), rgba(59, 130, 246, 0.42), transparent);
 }
 .grimba-full-article > * {
     position: relative;
@@ -4138,7 +4139,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-insights .grimba-insights__s
     font-size: clamp(1.4rem, 2.2vw, 2rem);
     font-weight: 800;
     line-height: 1.05;
-    letter-spacing: -0.03em;
+    letter-spacing: 0;
 }
 .grimba-full-article__count {
     flex: 0 0 auto;
@@ -4153,7 +4154,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-insights .grimba-insights__s
     font-family: var(--gn-font-mono);
     font-size: 0.72rem;
     font-weight: 800;
-    letter-spacing: 0.06em;
+    letter-spacing: 0;
     text-transform: uppercase;
 }
 .grimba-full-article__copy {
@@ -4181,7 +4182,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-insights .grimba-insights__s
     margin: 1.75rem 0 0.75rem;
     color: var(--gn-ink);
     font-family: var(--gn-font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
 }
 .grimba-full-article__source {
     max-width: 72ch;
@@ -4195,13 +4196,13 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-insights .grimba-insights__s
     font-weight: 800;
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-full-article {
-    background: rgba(28, 24, 17, 0.78);
+    background:
+        linear-gradient(135deg, rgba(255, 250, 240, 0.065), rgba(255, 250, 240, 0.018)),
+        rgba(28, 24, 17, 0.78);
     border-color: rgba(246, 241, 232, 0.14);
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-full-article::before {
-    background:
-        radial-gradient(circle at 8% 0%, rgba(255, 155, 145, 0.13), transparent 30%),
-        linear-gradient(135deg, rgba(246, 241, 232, 0.05), transparent 48%);
+    background: linear-gradient(90deg, transparent, rgba(255, 155, 145, 0.58), rgba(91, 145, 255, 0.44), transparent);
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-full-article__count {
     background: rgba(246, 241, 232, 0.08);
@@ -4554,7 +4555,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-save-btn[aria-pressed="true"
     color: #8d3025;
     font-size: 11px;
     font-weight: 800;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     text-transform: uppercase;
 }
 .grimba-account-digest h2 {
@@ -4837,7 +4838,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-account-searches__row {
     font-family: var(--gn-font-body);
     font-size: 13px;
     font-weight: 800;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
     text-decoration: none;
     box-shadow: 0 14px 40px rgba(26, 23, 19, 0.22);
     transition: transform 0.16s ease;
@@ -4882,7 +4883,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-account-searches__row {
     font-family: var(--gn-font-body);
     font-size: 10.5px;
     font-weight: 800;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
     line-height: 1.2;
     text-transform: uppercase;
 }
@@ -4929,7 +4930,7 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-translation-note .gn-nobuai-
 .grimba-header-pulse {
     font-family: var(--gn-font-mono);
     font-size: 11px;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
     text-transform: uppercase;
     color: var(--gn-ink-soft);
 }
