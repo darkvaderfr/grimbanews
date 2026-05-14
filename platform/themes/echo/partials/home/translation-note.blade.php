@@ -6,8 +6,8 @@
         default => null,
     };
     $shortCopy = match ($lang) {
-        'en' => 'French articles show in English when available.',
-        'fr' => 'Articles traduits en français quand disponible.',
+        'en' => 'NobuAI translations available.',
+        'fr' => 'Traductions NobuAI disponibles.',
         default => null,
     };
 @endphp

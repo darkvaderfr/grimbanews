@@ -130,7 +130,7 @@ class GrimbaNewsApiFetcher
 
     public function maxCallsPerRun(): int
     {
-        return max(1, (int) setting('grimba_newsapi_max_calls_per_run', 40));
+        return max(1, (int) setting('grimba_newsapi_max_calls_per_run', 120));
     }
 
     public function callsToday(): int
@@ -150,7 +150,7 @@ class GrimbaNewsApiFetcher
      */
     public function countries(): array
     {
-        $raw = (string) setting('grimba_newsapi_countries', 'fr,us,gb,ca');
+        $raw = (string) setting('grimba_newsapi_countries', 'fr,us,gb,ca,ng,za,eg,ma,au,in,ae,il,br,mx');
         $list = array_filter(array_map(fn ($s) => mb_strtolower(trim((string) $s)), explode(',', $raw)));
         return $list ?: ['fr'];
     }
@@ -311,6 +311,9 @@ class GrimbaNewsApiFetcher
         // Resolve to our news_sources row. If absent, auto-create a
         // placeholder marked unknown bias for editor review.
         $sourceId = $this->resolveSourceId($apiSourceId, $sourceName, $url);
+        $sourceCountry = $sourceId
+            ? DB::table('news_sources')->where('id', $sourceId)->value('country')
+            : null;
 
         $title = trim((string) ($article['title'] ?? ''));
         if ($title === '') {
@@ -356,6 +359,7 @@ class GrimbaNewsApiFetcher
                 'image_error'  => $imageError,
                 'source_id'    => $sourceId,
                 'source_name'  => $sourceName ?: null,
+                'source_country' => $sourceCountry,
                 'published_at' => $publishedAt,
             ]);
             if ($postId === null) {
@@ -641,7 +645,7 @@ class GrimbaNewsApiFetcher
             // S165 — auto-classify into news categories at ingest.
             try {
                 $catIds = app(\App\Services\GrimbaCategoryClassifier::class)
-                    ->classify((string) $post->name, $post->description, $post->source_name);
+                    ->classify((string) $post->name, $post->description, $post->source_name, $a['source_country'] ?? null);
                 foreach ($catIds as $cid) {
                     DB::table('post_categories')->insertOrIgnore([
                         'category_id' => $cid,

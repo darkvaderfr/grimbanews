@@ -18,6 +18,7 @@ class GrimbaSourceBreakdownTest extends TestCase
                 'bias_rating' => 'left',
                 'credibility_score' => 91,
                 'ownership_type' => 'independent',
+                'country' => 'US',
             ],
             (object) [
                 'id' => 2,
@@ -26,6 +27,7 @@ class GrimbaSourceBreakdownTest extends TestCase
                 'bias_rating' => 'center',
                 'credibility_score' => 76,
                 'ownership_type' => 'media_conglomerate',
+                'country' => 'FR',
             ],
             (object) [
                 'id' => 3,
@@ -34,6 +36,7 @@ class GrimbaSourceBreakdownTest extends TestCase
                 'bias_rating' => 'right',
                 'credibility_score' => 46,
                 'ownership_type' => 'government',
+                'country' => 'NG',
             ],
         ]);
 
@@ -45,5 +48,10 @@ class GrimbaSourceBreakdownTest extends TestCase
         $this->assertSame(1, $breakdown['factBuckets']['low']->items->count());
         $this->assertSame('Conglomérat média', $breakdown['ownershipBuckets']->firstWhere('label', 'Conglomérat média')->label);
         $this->assertStringContainsString('transparent', $breakdown['donutGradient']);
+        $this->assertSame(1, $breakdown['originBuckets']->firstWhere('key', 'americas')->count);
+        $this->assertSame(1, $breakdown['originBuckets']->firstWhere('key', 'europe')->count);
+        $this->assertSame(1, $breakdown['originBuckets']->firstWhere('key', 'africa')->count);
+        $this->assertSame(1, $breakdown['originBiasBuckets']->firstWhere('key', 'americas')->bias['left']->count);
+        $this->assertStringContainsString('US', $breakdown['countryBuckets']->firstWhere('key', 'US')->label);
     }
 }

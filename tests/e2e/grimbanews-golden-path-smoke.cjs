@@ -71,7 +71,11 @@ async function waitForVaultCookie(page, postId, shouldContain) {
 (async () => {
     const { chromium } = loadPlaywright();
     const baseUrl = (process.env.GRIMBANEWS_BASE_URL || 'http://127.0.0.1:8003').replace(/\/$/, '');
-    const browser = await chromium.launch({ headless: process.env.PLAYWRIGHT_HEADLESS !== '0' });
+    const launchOptions = { headless: process.env.PLAYWRIGHT_HEADLESS !== '0' };
+    if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE) {
+        launchOptions.executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
+    }
+    const browser = await chromium.launch(launchOptions);
     const context = await browser.newContext({
         viewport: { width: 390, height: 844 },
         colorScheme: 'dark',

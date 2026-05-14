@@ -2753,13 +2753,13 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
         max-width: 100%;
         align-items: center;
         gap: 0.55rem;
-        padding: 0.58rem 0.7rem;
-        border-radius: 18px;
+        padding: 0.54rem 0.7rem;
+        border-radius: 999px;
         font-size: 0.78rem;
-        line-height: 1.35;
+        line-height: 1.25;
     }
     .grimba-translation-note .gn-nobuai-chip {
-        max-width: 46%;
+        max-width: 43%;
         overflow: hidden;
         gap: 5px !important;
         padding: 2px 7px !important;
@@ -2769,9 +2769,9 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     .grimba-translation-note > span:not(.gn-nobuai-chip) {
         display: -webkit-box;
         overflow: hidden;
-        line-height: 1.35;
+        line-height: 1.25;
         -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 1;
     }
     .grimba-foryou,
     .grimba-sources,
@@ -2779,8 +2779,8 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     .blindspot-page,
     .grimba-owners,
     .grimba-methodology {
-        padding-top: 1.35rem !important;
-        padding-bottom: calc(7.25rem + env(safe-area-inset-bottom)) !important;
+        padding-top: 0.95rem !important;
+        padding-bottom: calc(7rem + env(safe-area-inset-bottom)) !important;
     }
     .grimba-foryou > .container > header.glass-panel,
     .grimba-sources > .container > header.glass-panel,
@@ -2788,8 +2788,8 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     .blindspot-page > .container > header.glass-panel,
     .grimba-owners > .container > header.glass-panel,
     .grimba-methodology__hero {
-        padding: 1.15rem !important;
-        margin-bottom: 1rem !important;
+        padding: 0.98rem !important;
+        margin-bottom: 0.85rem !important;
         border-radius: 22px;
     }
     .grimba-foryou .grimba-methodology__title,
@@ -2798,8 +2798,9 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     .grimba-owners .grimba-methodology__title,
     .grimba-methodology .grimba-methodology__title,
     .blindspot-page h1 {
-        font-size: clamp(1.72rem, 8vw, 2.12rem) !important;
+        font-size: clamp(1.56rem, 7vw, 1.92rem) !important;
         line-height: 1.08;
+        letter-spacing: 0;
     }
     .grimba-foryou__lede,
     .grimba-sources__lede,
@@ -2807,13 +2808,62 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     .blindspot-page__lede,
     .grimba-owners__lede,
     .grimba-methodology__lede {
-        font-size: 1rem !important;
-        line-height: 1.48 !important;
+        font-size: 0.95rem !important;
+        line-height: 1.42 !important;
         opacity: 1 !important;
+    }
+    .grimba-sources__controls {
+        padding: 0.95rem !important;
+        margin-bottom: 0.95rem !important;
+        border-radius: 22px;
+    }
+    .grimba-sources__controls .row {
+        --bs-gutter-y: 0.72rem;
+    }
+    .grimba-sources__controls label {
+        margin-bottom: 0.34rem !important;
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+    }
+    .grimba-sources__controls .form-control,
+    .grimba-sources__controls .form-select {
+        min-height: 44px;
+        border-radius: 16px;
+        font-size: 0.95rem;
+    }
+    .grimba-sources__bias-filter,
+    .grimba-sources__fact-filter,
+    .grimba-comparison-index header [role="tablist"] {
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 0.15rem;
+    }
+    .grimba-sources__bias-filter::-webkit-scrollbar,
+    .grimba-sources__fact-filter::-webkit-scrollbar,
+    .grimba-comparison-index header [role="tablist"]::-webkit-scrollbar {
+        display: none;
+    }
+    .grimba-sources__bias-filter .btn-grimba,
+    .grimba-sources__fact-filter .btn-grimba,
+    .grimba-comparison-index header [role="tablist"] .btn-grimba {
+        min-height: 36px;
+        padding: 0.38rem 0.72rem;
+    }
+    .grimba-sources__controls > .d-flex {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.72rem !important;
+    }
+    #grimba-sources-count {
+        line-height: 1.35;
     }
     .grimba-owners header .small.opacity-65 {
         color: var(--gn-ink-muted);
-        line-height: 1.48;
+        font-size: 0.9rem;
+        line-height: 1.42;
         opacity: 1 !important;
     }
     .grimba-all-sides {
@@ -4302,20 +4352,23 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-translation-note .gn-nobuai-
     .grimba-translation-note {
         display: flex;
         width: 100%;
-        align-items: flex-start;
-        gap: 0.75rem;
-        padding: 0.8rem 0.9rem;
-        border-radius: 22px;
-        font-size: 0.9rem;
-        line-height: 1.45;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.54rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        line-height: 1.25;
     }
     .grimba-translation-note > span.grimba-translation-note__copy--full {
         display: none;
     }
     .grimba-translation-note > span.grimba-translation-note__copy--short {
         display: block;
-        overflow: visible;
-        -webkit-line-clamp: unset;
+        min-width: 0;
+        overflow: hidden;
+        line-height: 1.25;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }
 

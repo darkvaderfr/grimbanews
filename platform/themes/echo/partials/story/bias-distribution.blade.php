@@ -12,7 +12,7 @@
     $sourceMeta = $sourceMeta ?? null;
     if (! $sourceMeta) {
         $sourceIds = $clusterPosts->pluck('source_id')->filter()->unique()->all();
-        $sourceMeta = \App\Support\GrimbaSourceMeta::forIds($sourceIds, ['id', 'name', 'website', 'logo_url', 'logo_status', 'logo_checked_at']);
+        $sourceMeta = \App\Support\GrimbaSourceMeta::forIds($sourceIds, ['id', 'name', 'website', 'country', 'logo_url', 'logo_status', 'logo_checked_at']);
     }
 
     $sourcesByBias = ['left' => [], 'center' => [], 'right' => [], 'unknown' => []];
@@ -29,7 +29,18 @@
             ? $sourceMeta[$cp->source_id]->website
             : null;
         $logo = $cp->source_id && isset($sourceMeta[$cp->source_id]) ? $sourceMeta[$cp->source_id] : null;
-        $sourcesByBias[$b][] = ['id' => $cp->source_id, 'name' => $name, 'website' => $website, 'logo' => $logo];
+        $country = $logo->country ?? null;
+        $originKey = \App\Support\GrimbaSourceBreakdown::originKeyForCountry($country);
+        $sourcesByBias[$b][] = [
+            'id' => $cp->source_id,
+            'name' => $name,
+            'website' => $website,
+            'logo' => $logo,
+            'country' => \App\Support\GrimbaSourceBreakdown::countryLabel($country),
+            'origin_key' => $originKey,
+            'origin_label' => \App\Support\GrimbaSourceBreakdown::originLabel($originKey),
+            'origin_color' => \App\Support\GrimbaSourceBreakdown::originColor($originKey),
+        ];
     }
 
     $counts = [
@@ -49,6 +60,23 @@
         'center' => ['label' => __('Centre'), 'color' => '#a8a8a8'],
         'right'  => ['label' => __('Droite'), 'color' => '#e84c3d'],
     ];
+
+    $originEntries = collect(array_merge($sourcesByBias['left'], $sourcesByBias['center'], $sourcesByBias['right']));
+    $originBuckets = $originEntries
+        ->groupBy('origin_key')
+        ->map(function ($items, string $key) {
+            $first = $items->first();
+
+            return (object) [
+                'key' => $key,
+                'label' => $first['origin_label'] ?? \App\Support\GrimbaSourceBreakdown::originLabel($key),
+                'color' => $first['origin_color'] ?? \App\Support\GrimbaSourceBreakdown::originColor($key),
+                'count' => $items->count(),
+                'countries' => $items->pluck('country')->unique()->take(4)->values()->all(),
+            ];
+        })
+        ->sortByDesc('count')
+        ->values();
 @endphp
 
 @if($known === 0)
@@ -56,6 +84,55 @@
          instead of rendering an empty/fake-balanced bar. --}}
 @else
     <aside class="grimba-story-distribution glass-panel p-3 mb-3">
+        <style>
+            .grimba-story-distribution__origin {
+                border-top: 1px solid rgba(20, 18, 14, .10);
+                border-bottom: 1px solid rgba(20, 18, 14, .10);
+                padding: 10px 0;
+                margin: 0 0 14px;
+            }
+            [data-bs-theme="dark"] .grimba-story-distribution__origin {
+                border-color: rgba(248, 243, 234, .16);
+            }
+            .grimba-story-distribution__origin-bar {
+                display: flex;
+                height: 10px;
+                overflow: hidden;
+                border-radius: 999px;
+                background: rgba(20, 18, 14, .10);
+                margin-bottom: 8px;
+            }
+            [data-bs-theme="dark"] .grimba-story-distribution__origin-bar {
+                background: rgba(248, 243, 234, .12);
+            }
+            .grimba-story-distribution__origin-bar span {
+                display: block;
+                width: var(--w);
+                min-width: 4px;
+                background: linear-gradient(90deg, color-mix(in srgb, var(--dot) 64%, #fff), var(--dot));
+            }
+            .grimba-story-distribution__origin-chips {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            .grimba-story-distribution__origin-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                border: 1px solid rgba(20, 18, 14, .10);
+                border-radius: 999px;
+                padding: 3px 7px;
+                background: color-mix(in srgb, var(--dot) 9%, rgba(255, 255, 255, .68));
+                color: inherit;
+                font-size: 11px;
+                font-weight: 800;
+            }
+            [data-bs-theme="dark"] .grimba-story-distribution__origin-chip {
+                border-color: rgba(248, 243, 234, .15);
+                background: color-mix(in srgb, var(--dot) 12%, rgba(20, 18, 14, .72));
+            }
+        </style>
         <h2 class="h6 mb-2" style="font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; font-size:13px; opacity:0.75;">
             {{ __('Distribution des biais') }}
         </h2>
@@ -103,6 +180,28 @@
             <span style="color:#a8a8a8;font-weight:600;">{{ $biasMeta['center']['label'] }} {{ $pct['center'] }}%</span>
             <span style="color:#e84c3d;font-weight:600;">{{ $biasMeta['right']['label'] }} {{ $pct['right'] }}%</span>
         </div>
+
+        @if($originBuckets->isNotEmpty())
+            <div class="grimba-story-distribution__origin" aria-label="{{ __('Origine des sources classées') }}">
+                <div class="small mb-2" style="font-weight:800; text-transform:uppercase; letter-spacing:.35px; opacity:.72;">
+                    {{ __('Origines') }}
+                </div>
+                <div class="grimba-story-distribution__origin-bar">
+                    @foreach($originBuckets as $bucket)
+                        @php($originPct = (int) round($bucket->count * 100 / max(1, $known)))
+                        <span title="{{ $bucket->label }} · {{ $originPct }}%" style="--dot: {{ $bucket->color }}; --w: {{ max(1, $originPct) }}%;"></span>
+                    @endforeach
+                </div>
+                <div class="grimba-story-distribution__origin-chips">
+                    @foreach($originBuckets->take(4) as $bucket)
+                        @php($originPct = (int) round($bucket->count * 100 / max(1, $known)))
+                        <span class="grimba-story-distribution__origin-chip" style="--dot: {{ $bucket->color }};">
+                            {{ $bucket->label }} {{ $originPct }}%
+                        </span>
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
             @foreach(['left', 'center', 'right'] as $b)

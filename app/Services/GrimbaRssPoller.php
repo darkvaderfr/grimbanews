@@ -46,6 +46,7 @@ class GrimbaRssPoller
                 'rss_feeds.*',
                 'news_sources.name as source_name',
                 'news_sources.bias_rating as source_bias',
+                'news_sources.country as source_country',
             ]);
 
         $summary = [];
@@ -486,7 +487,7 @@ class GrimbaRssPoller
             // S165 — auto-classify into news categories at ingest.
             try {
                 $catIds = app(\App\Services\GrimbaCategoryClassifier::class)
-                    ->classify((string) $post->name, $post->description, $post->source_name);
+                    ->classify((string) $post->name, $post->description, $post->source_name, $feed->source_country ?? null);
                 foreach ($catIds as $cid) {
                     DB::table('post_categories')->insertOrIgnore([
                         'category_id' => $cid,

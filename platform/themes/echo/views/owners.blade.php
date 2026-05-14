@@ -24,11 +24,11 @@
                 {{ __('Qui possède quoi') }}
             </h1>
             <p class="grimba-owners__lede mb-2" style="font-size:17px; line-height:1.5; max-width: 65ch;">
-                {{ __(':owners propriétaires identifiés contrôlent :sources des sources que GrimbaNews suit.', ['owners' => $totalOwners, 'sources' => $totalSources]) }}
-                {{ __("La concentration éditoriale n'est pas un détail — quand un même groupe possède des outlets de différents biais, la diversité apparente du paysage médiatique cache une convergence d'intérêts au sommet.") }}
+                {{ __(':owners propriétaires identifiés contrôlent :sources sources suivies par GrimbaNews.', ['owners' => $totalOwners, 'sources' => $totalSources]) }}
+                {{ __("Quand un même groupe possède des médias de différents biais, la diversité apparente peut masquer une concentration au sommet.") }}
             </p>
             <p class="small opacity-65 mb-0" style="max-width:65ch;">
-                {{ __("Données issues de sources publiques (registres d'entreprises, rapports annuels, AllSides, MBFC). Ouvrez une fiche source via le panneau du dessous pour voir le profil détaillé.") }}
+                {{ __("Données publiques : registres d'entreprises, rapports annuels, AllSides et MBFC. Ouvrez une fiche source pour voir le détail.") }}
             </p>
         </header>
 

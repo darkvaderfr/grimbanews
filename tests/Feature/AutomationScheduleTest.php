@@ -18,8 +18,8 @@ class AutomationScheduleTest extends TestCase
         $this->assertStringContainsString('grimba:poll-feeds', $output);
         $this->assertStringContainsString('grimba:publish-trusted', $output);
         $this->assertStringContainsString('grimba:publish-guardrail-categories', $output);
-        $this->assertStringContainsString('grimba:ensure-daily-publish --min=12 --window-hours=24', $output);
-        $this->assertStringContainsString('grimba:health --fail-on-risk', $output);
+        $this->assertStringContainsString('grimba:ensure-daily-publish --min=12 --window-hours=24 --per-category-min=1', $output);
+        $this->assertStringContainsString('grimba:health --fail-on-risk --min-full-content-coverage=70 --min-category-published-24h=1', $output);
         $this->assertStringContainsString('grimba:verify-backups --min=1', $output);
         $this->assertStringContainsString('grimba:prune-img-proxy-cache --days=60', $output);
         $this->assertStringContainsString('grimba:prune-release-evidence --days=30 --keep=30', $output);

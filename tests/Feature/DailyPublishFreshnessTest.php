@@ -69,6 +69,83 @@ class DailyPublishFreshnessTest extends TestCase
         $this->assertNotNull(DB::table('posts')->where('id', $newestId)->value('published_at'));
     }
 
+    public function test_freshness_watchdog_promotes_recent_trusted_drafts_for_stale_editorial_categories(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        DB::table('posts')
+            ->where('status', 'published')
+            ->update(['published_at' => now()->subDays(7)]);
+
+        $suffix = Str::lower(Str::random(8));
+        $author = $this->admin();
+        $europeId = $this->categoryId('Europe', 2, $author);
+        $americasId = $this->categoryId('Amériques', 3, $author);
+        $sourceId = $this->trustedSourceId('Category Freshness ' . $suffix, 101);
+
+        $recentEuropeId = $this->publishedPostId('category freshness global floor ' . $suffix, $sourceId, $author, now());
+        $draftAmericasId = $this->draftPostId('category freshness americas draft ' . $suffix, $sourceId, $author, now()->subHours(2));
+
+        DB::table('post_categories')->insertOrIgnore([
+            ['post_id' => $recentEuropeId, 'category_id' => $europeId],
+            ['post_id' => $draftAmericasId, 'category_id' => $americasId],
+        ]);
+
+        $this->artisan('grimba:ensure-daily-publish', [
+            '--min' => 1,
+            '--window-hours' => 24,
+            '--per-category-min' => 1,
+            '--category-window-hours' => 24,
+            '--categories' => 'Amériques',
+            '--lookback-hours' => 24,
+            '--threshold' => 101,
+            '--min-age-minutes' => 0,
+        ])->assertSuccessful();
+
+        $this->assertSame('published', DB::table('posts')->where('id', $draftAmericasId)->value('status'));
+        $this->assertNotNull(DB::table('posts')->where('id', $draftAmericasId)->value('published_at'));
+    }
+
+    public function test_freshness_watchdog_fails_when_stale_editorial_category_has_no_publishable_drafts(): void
+    {
+        $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
+
+        DB::table('posts')
+            ->where('status', 'published')
+            ->update(['published_at' => now()->subDays(7)]);
+
+        $suffix = Str::lower(Str::random(8));
+        $author = $this->admin();
+        $europeId = $this->categoryId('Europe', 2, $author);
+        $internationalId = $this->categoryId('International', 4, $author);
+        $sourceId = $this->trustedSourceId('Category Freshness Missing ' . $suffix, 101);
+        $recentEuropeId = $this->publishedPostId('category freshness still global ' . $suffix, $sourceId, $author, now());
+
+        DB::table('post_categories')->insertOrIgnore([
+            ['post_id' => $recentEuropeId, 'category_id' => $europeId],
+        ]);
+
+        $this->artisan('grimba:ensure-daily-publish', [
+            '--min' => 1,
+            '--window-hours' => 24,
+            '--per-category-min' => 1,
+            '--category-window-hours' => 24,
+            '--categories' => 'International',
+            '--lookback-hours' => 24,
+            '--threshold' => 101,
+            '--min-age-minutes' => 0,
+        ])
+            ->expectsOutputToContain('Category freshness below target after remediation: International 0/1')
+            ->assertFailed();
+
+        $this->assertSame(0, DB::table('post_categories')
+            ->where('category_id', $internationalId)
+            ->join('posts', 'posts.id', '=', 'post_categories.post_id')
+            ->where('posts.status', 'published')
+            ->where('posts.published_at', '>=', now()->subDay())
+            ->count());
+    }
+
     public function test_manual_ingest_guardrail_publish_stamps_publication_time(): void
     {
         $this->artisan('migrate', ['--force' => true])->assertExitCode(0);
@@ -496,6 +573,35 @@ class DailyPublishFreshnessTest extends TestCase
             'credibility_score' => $credibility,
             'country' => 'FR',
             'language' => 'fr',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    private function categoryId(string $name, int $order, User $author): int
+    {
+        $existing = DB::table('categories')->where('name', $name)->first(['id']);
+        if ($existing) {
+            DB::table('categories')->where('id', $existing->id)->update([
+                'status' => 'published',
+                'order' => $order,
+                'updated_at' => now(),
+            ]);
+
+            return (int) $existing->id;
+        }
+
+        return (int) DB::table('categories')->insertGetId([
+            'name' => $name,
+            'parent_id' => 0,
+            'description' => 'Daily publish category freshness fixture.',
+            'status' => 'published',
+            'author_id' => $author->getKey(),
+            'author_type' => User::class,
+            'icon' => null,
+            'order' => $order,
+            'is_featured' => 0,
+            'is_default' => 0,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

@@ -23,8 +23,8 @@
             </h1>
             <p class="grimba-foryou__lede mb-3">
                 @if($followed->isEmpty())
-                    {!! __('Cliquez sur le <strong>+</strong> à côté d\'un sujet pour l\'ajouter à votre fil.') !!}
-                    {{ __('Votre sélection reste locale à votre navigateur — aucun compte requis.') }}
+                    {!! __('Ajoutez des sujets avec le <strong>+</strong>.') !!}
+                    {{ __('Votre sélection reste locale à votre navigateur, sans compte requis.') }}
                 @else
                     {{ __('Les histoires récentes de') }}
                     @foreach($followed as $i => $c)

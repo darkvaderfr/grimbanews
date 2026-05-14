@@ -7,6 +7,7 @@ use App\Services\GrimbaUrlCanonicalizer;
 use App\Support\GrimbaAutomationMonitor;
 use App\Support\GrimbaDatabaseBackups;
 use App\Support\GrimbaDedupeReview;
+use App\Support\GrimbaEditorialCategoryFreshness;
 use App\Support\GrimbaFullArticleCoverage;
 use App\Support\GrimbaPublicationPipeline;
 use App\Support\GrimbaRssFeedHealth;
@@ -37,6 +38,8 @@ class GrimbaHealth extends Command
         {--min-free-mb=2048 : minimum free disk space required when failing on risk}
         {--min-published-24h=12 : minimum published posts required in the last 24h when failing on risk}
         {--min-ingested-published-24h= : minimum RSS/NewsAPI-backed published posts required in the last 24h; defaults to min-published-24h}
+        {--min-category-published-24h=0 : minimum published posts required per editorial category in the last 24h; 0 observes only}
+        {--category-freshness-scope=all : category freshness scope: all, editions, topics, or comma-separated category names}
         {--min-full-content-coverage=0 : minimum percent of recent upstream-backed posts with readable full text; 0 observes only}
         {--full-content-retry-after-hours=24 : retry window used by full article extraction health}
         {--backup-dir= : database backup directory to inspect; defaults to database/backups}';
@@ -51,6 +54,8 @@ class GrimbaHealth extends Command
         $minIngestedPublished24h = $minIngestedPublishedOption === null || $minIngestedPublishedOption === ''
             ? $minPublished24h
             : max(0, (int) $minIngestedPublishedOption);
+        $minCategoryPublished24h = max(0, (int) $this->option('min-category-published-24h'));
+        $categoryFreshnessScope = (string) $this->option('category-freshness-scope');
         $minFullContentCoverage = min(100, max(0, (int) $this->option('min-full-content-coverage')));
         $fullContentRetryAfterHours = max(0, (int) $this->option('full-content-retry-after-hours'));
         $backupDir = (string) ($this->option('backup-dir') ?: GrimbaDatabaseBackups::defaultDir());
@@ -327,6 +332,24 @@ class GrimbaHealth extends Command
             );
         }
 
+        $categoryFreshness = GrimbaEditorialCategoryFreshness::counts($last24h, $categoryFreshnessScope);
+        $staleCategories = $categoryFreshness
+            ->filter(fn (object $category): bool => (int) $category->recent_count < $minCategoryPublished24h)
+            ->values();
+
+        if ($minCategoryPublished24h > 0) {
+            if ($categoryFreshness->isEmpty()) {
+                $riskWarnings[] = sprintf('category freshness scope has no published categories: %s', $categoryFreshnessScope);
+            } elseif ($staleCategories->isNotEmpty()) {
+                $riskWarnings[] = sprintf(
+                    'category freshness below floor: %s',
+                    $staleCategories
+                        ->map(fn (object $category): string => sprintf('%s %d/%d', $category->name, (int) $category->recent_count, $minCategoryPublished24h))
+                        ->implode(', ')
+                );
+            }
+        }
+
         $freeBytes = @disk_free_space(base_path());
         $totalBytes = @disk_total_space(base_path());
         $freeMb = is_int($freeBytes) || is_float($freeBytes) ? (int) floor($freeBytes / 1048576) : null;
@@ -355,6 +378,14 @@ class GrimbaHealth extends Command
             '   latest public        : %s',
             $publicationPipeline->latestPublishedAt ?: 'never'
         ));
+        if ($minCategoryPublished24h > 0) {
+            $this->line(sprintf(
+                '   category freshness  : %d stale / %d tracked (floor %d)',
+                $staleCategories->count(),
+                $categoryFreshness->count(),
+                $minCategoryPublished24h
+            ));
+        }
         $this->line(sprintf(
             '   disk free            : %s%s (floor %dMB)',
             $freeMb === null ? 'unknown' : $freeMb . 'MB',

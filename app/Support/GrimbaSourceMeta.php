@@ -35,6 +35,7 @@ class GrimbaSourceMeta
             'ownership_type',
             'credibility_score',
             'owner_name',
+            'country',
             'logo_url',
             'logo_status',
             'logo_checked_at',

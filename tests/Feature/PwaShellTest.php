@@ -96,14 +96,15 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('-webkit-line-clamp: 2;', $css);
         $this->assertStringContainsString('.grimba-sources > .container > header.glass-panel', $css);
         $this->assertStringContainsString('.grimba-methodology__hero', $css);
-        $this->assertStringContainsString('padding-top: 1.35rem !important;', $css);
-        $this->assertStringContainsString('padding-bottom: calc(7.25rem + env(safe-area-inset-bottom)) !important;', $css);
-        $this->assertStringContainsString('font-size: clamp(1.72rem, 8vw, 2.12rem) !important;', $css);
+        $this->assertStringContainsString('padding-top: 0.95rem !important;', $css);
+        $this->assertStringContainsString('padding-bottom: calc(7rem + env(safe-area-inset-bottom)) !important;', $css);
+        $this->assertStringContainsString('font-size: clamp(1.56rem, 7vw, 1.92rem) !important;', $css);
         $this->assertStringContainsString('bottom: calc(92px + env(safe-area-inset-bottom));', $cookieConsent);
         $this->assertStringContainsString('max-height: min(420px, calc(100vh - 150px - env(safe-area-inset-bottom)));', $cookieConsent);
         $this->assertStringContainsString('max-height: 8.5rem;', $cookieConsent);
         $this->assertStringContainsString('grid-template-columns: 1fr;', $cookieConsent);
         $this->assertStringContainsString('grimba-translation-note__copy--short', $translationNote);
+        $this->assertStringContainsString('Traductions NobuAI disponibles.', $translationNote);
         $this->assertStringContainsString('.grimba-translation-note > span.grimba-translation-note__copy--short', $css);
         $this->assertStringContainsString('hyphens: none;', $css);
         $this->assertStringContainsString('font-size: clamp(1.6rem, 6.9vw, 1.82rem);', $css);
@@ -118,6 +119,9 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('grimba-comparison-index__lede', $comparisonView);
         $this->assertStringContainsString('blindspot-page__lede', $blindspotView);
         $this->assertStringContainsString('.grimba-foryou .pagination', $css);
+        $this->assertStringContainsString('.grimba-sources__bias-filter,', $css);
+        $this->assertStringContainsString('flex-wrap: nowrap !important;', $css);
+        $this->assertStringContainsString('overscroll-behavior-x: contain;', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-foryou__lede', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-sources__lede', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-comparison-index__lede', $css);

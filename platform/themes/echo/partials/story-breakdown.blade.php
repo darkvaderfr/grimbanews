@@ -22,6 +22,11 @@
     $donutGradient = $breakdown['donutGradient'];
     $topOwner = $breakdown['topOwner'];
     $topOwnerPct = $breakdown['topOwnerPct'];
+    $originBuckets = $breakdown['originBuckets'];
+    $countryBuckets = $breakdown['countryBuckets'];
+    $originBiasBuckets = $breakdown['originBiasBuckets'];
+    $topOrigin = $breakdown['topOrigin'];
+    $topOriginPct = $breakdown['topOriginPct'];
 @endphp
 
 <section class="grimba-breakdown glass-panel p-3 p-md-4 mb-4" id="{{ $uid }}">
@@ -125,7 +130,7 @@
 
         #{{ $uid }} .grimba-breakdown__tabs {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             position: relative;
             padding: 3px;
             border: 1px solid var(--gbd-line);
@@ -141,7 +146,7 @@
             top: 4px;
             bottom: 4px;
             left: 4px;
-            width: calc((100% - 8px) / 3);
+            width: calc((100% - 8px) / 4);
             border-radius: 9px;
             background: var(--gbd-tab);
             box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
@@ -150,8 +155,9 @@
         }
 
         #{{ $uid }} #{{ $uid }}-bias:checked ~ .grimba-breakdown__tabs { --tab-x: 0; }
-        #{{ $uid }} #{{ $uid }}-fact:checked ~ .grimba-breakdown__tabs { --tab-x: 100%; }
-        #{{ $uid }} #{{ $uid }}-owner:checked ~ .grimba-breakdown__tabs { --tab-x: 200%; }
+        #{{ $uid }} #{{ $uid }}-origin:checked ~ .grimba-breakdown__tabs { --tab-x: 100%; }
+        #{{ $uid }} #{{ $uid }}-fact:checked ~ .grimba-breakdown__tabs { --tab-x: 200%; }
+        #{{ $uid }} #{{ $uid }}-owner:checked ~ .grimba-breakdown__tabs { --tab-x: 300%; }
 
         #{{ $uid }} #{{ $uid }}-bias:checked ~ .grimba-breakdown__tabs::before {
             background: linear-gradient(135deg, #111827, #2f6fe9);
@@ -159,6 +165,10 @@
 
         #{{ $uid }} #{{ $uid }}-fact:checked ~ .grimba-breakdown__tabs::before {
             background: linear-gradient(135deg, #111827, #18a058);
+        }
+
+        #{{ $uid }} #{{ $uid }}-origin:checked ~ .grimba-breakdown__tabs::before {
+            background: linear-gradient(135deg, #111827, #7c3aed);
         }
 
         #{{ $uid }} #{{ $uid }}-owner:checked ~ .grimba-breakdown__tabs::before {
@@ -171,6 +181,10 @@
 
         [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-fact:checked ~ .grimba-breakdown__tabs::before {
             background: linear-gradient(135deg, #f8f3ea, #22c55e);
+        }
+
+        [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-origin:checked ~ .grimba-breakdown__tabs::before {
+            background: linear-gradient(135deg, #f8f3ea, #a78bfa);
         }
 
         [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-owner:checked ~ .grimba-breakdown__tabs::before {
@@ -198,6 +212,7 @@
         }
 
         #{{ $uid }} #{{ $uid }}-bias:checked ~ .grimba-breakdown__tabs label[for="{{ $uid }}-bias"],
+        #{{ $uid }} #{{ $uid }}-origin:checked ~ .grimba-breakdown__tabs label[for="{{ $uid }}-origin"],
         #{{ $uid }} #{{ $uid }}-fact:checked ~ .grimba-breakdown__tabs label[for="{{ $uid }}-fact"],
         #{{ $uid }} #{{ $uid }}-owner:checked ~ .grimba-breakdown__tabs label[for="{{ $uid }}-owner"] {
             color: #fff;
@@ -205,6 +220,7 @@
         }
 
         [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-bias:checked ~ .grimba-breakdown__tabs label[for="{{ $uid }}-bias"],
+        [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-origin:checked ~ .grimba-breakdown__tabs label[for="{{ $uid }}-origin"],
         [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-fact:checked ~ .grimba-breakdown__tabs label[for="{{ $uid }}-fact"],
         [data-bs-theme="dark"] #{{ $uid }} #{{ $uid }}-owner:checked ~ .grimba-breakdown__tabs label[for="{{ $uid }}-owner"] {
             color: #15130f;
@@ -217,6 +233,7 @@
         }
 
         #{{ $uid }} #{{ $uid }}-bias:checked ~ .grimba-breakdown__panels [data-panel="bias"],
+        #{{ $uid }} #{{ $uid }}-origin:checked ~ .grimba-breakdown__panels [data-panel="origin"],
         #{{ $uid }} #{{ $uid }}-fact:checked ~ .grimba-breakdown__panels [data-panel="fact"],
         #{{ $uid }} #{{ $uid }}-owner:checked ~ .grimba-breakdown__panels [data-panel="owner"] {
             display: block;
@@ -493,6 +510,161 @@
             font-weight: 700;
         }
 
+        #{{ $uid }} .grimba-breakdown__origin-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.04fr) minmax(260px, .96fr);
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-card {
+            border: 1px solid var(--gbd-line);
+            border-radius: 18px;
+            padding: 12px;
+            background:
+                linear-gradient(135deg, rgba(124, 58, 237, .08), transparent 40%),
+                linear-gradient(180deg, var(--gbd-card), var(--gbd-surface));
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10);
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-card h3 {
+            margin: 0 0 10px;
+            font: 800 12px/1.1 "Public Sans", system-ui, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            color: var(--gbd-muted);
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-bar {
+            display: flex;
+            height: 18px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: var(--gbd-track);
+            box-shadow: inset 0 0 0 1px var(--gbd-line), 0 12px 24px rgba(0, 0, 0, .08);
+            margin-bottom: 10px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-bar span {
+            display: block;
+            width: var(--w);
+            min-width: 4px;
+            background: linear-gradient(90deg, color-mix(in srgb, var(--dot) 65%, #fff), var(--dot));
+            transform-origin: left;
+            animation: gbd-fill .72s cubic-bezier(.2,.8,.2,1) both;
+            animation-delay: var(--delay, 0ms);
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 10px;
+            align-items: center;
+            padding: 7px 0;
+            border-bottom: 1px solid var(--gbd-line);
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-row:last-child {
+            border-bottom: 0;
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-meta {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-weight: 800;
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-meta span:last-child {
+            color: var(--gbd-muted);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-score {
+            display: inline-flex;
+            min-width: 46px;
+            justify-content: flex-end;
+            color: var(--gbd-ink);
+            font: 800 18px/1 "Fraunces", Georgia, serif;
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-matrix {
+            display: grid;
+            gap: 8px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-bias {
+            display: grid;
+            gap: 6px;
+            padding: 10px;
+            border: 1px solid var(--gbd-line);
+            border-radius: 14px;
+            background: color-mix(in srgb, var(--dot) 8%, var(--gbd-paper));
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-bias-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            color: var(--gbd-muted);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .35px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-bias-head strong {
+            color: var(--gbd-ink);
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-triptych {
+            display: flex;
+            height: 12px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: var(--gbd-track);
+        }
+
+        #{{ $uid }} .grimba-breakdown__origin-triptych span {
+            width: var(--w);
+            min-width: 3px;
+            background: var(--dot);
+        }
+
+        #{{ $uid }} .grimba-breakdown__country-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__country-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            max-width: 100%;
+            min-height: 30px;
+            border: 1px solid var(--gbd-line);
+            border-radius: 999px;
+            padding: 5px 10px;
+            background: color-mix(in srgb, var(--dot) 9%, var(--gbd-paper));
+            color: var(--gbd-ink);
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        #{{ $uid }} .grimba-breakdown__country-chip em {
+            color: var(--gbd-muted);
+            font-style: normal;
+            font-weight: 700;
+        }
+
         @media (max-width: 640px) {
             #{{ $uid }} .grimba-breakdown__top {
                 align-items: flex-start;
@@ -527,6 +699,23 @@
             #{{ $uid }} .grimba-breakdown__insight-grid {
                 grid-template-columns: 1fr;
             }
+
+            #{{ $uid }} .grimba-breakdown__tabs {
+                width: 100%;
+            }
+
+            #{{ $uid }} .grimba-breakdown__tab {
+                padding-inline: 6px;
+                font-size: 11px;
+            }
+
+            #{{ $uid }} .grimba-breakdown__origin-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #{{ $uid }} .grimba-breakdown__country-chip {
+                white-space: normal;
+            }
         }
     </style>
 
@@ -541,11 +730,13 @@
     </div>
 
     <input type="radio" id="{{ $uid }}-bias" name="{{ $uid }}-tab" checked>
+    <input type="radio" id="{{ $uid }}-origin" name="{{ $uid }}-tab">
     <input type="radio" id="{{ $uid }}-fact" name="{{ $uid }}-tab">
     <input type="radio" id="{{ $uid }}-owner" name="{{ $uid }}-tab">
 
     <div class="grimba-breakdown__tabs" role="tablist" aria-label="{{ __('Analyse du dossier') }}">
         <label class="grimba-breakdown__tab" for="{{ $uid }}-bias" role="tab">{{ __('Biais') }}</label>
+        <label class="grimba-breakdown__tab" for="{{ $uid }}-origin" role="tab">{{ __('Origines') }}</label>
         <label class="grimba-breakdown__tab" for="{{ $uid }}-fact" role="tab">{{ __('Factualité') }}</label>
         <label class="grimba-breakdown__tab" for="{{ $uid }}-owner" role="tab">{{ __('Propriété') }}</label>
     </div>
@@ -601,6 +792,77 @@
                 <span style="--w: {{ max(1, (int) round(($biasBuckets->firstWhere('key', 'left')?->count ?? 0) * 100 / $total)) }}%; --delay: 60ms; background:#3b82f6;">L {{ (int) round(($biasBuckets->firstWhere('key', 'left')?->count ?? 0) * 100 / $total) }}%</span>
                 <span style="--w: {{ max(1, (int) round(($biasBuckets->firstWhere('key', 'center')?->count ?? 0) * 100 / $total)) }}%; --delay: 140ms; background:#9ca3af;">C {{ (int) round(($biasBuckets->firstWhere('key', 'center')?->count ?? 0) * 100 / $total) }}%</span>
                 <span style="--w: {{ max(1, (int) round(($biasBuckets->firstWhere('key', 'right')?->count ?? 0) * 100 / $total)) }}%; --delay: 220ms; background:#ef4444;">R {{ (int) round(($biasBuckets->firstWhere('key', 'right')?->count ?? 0) * 100 / $total) }}%</span>
+            </div>
+        </div>
+
+        <div class="grimba-breakdown__panel" data-panel="origin">
+            <div class="grimba-breakdown__callout">
+                <span class="grimba-breakdown__icon">◇</span>
+                <span>
+                    <strong>{{ $topOriginPct }}% {{ $topOrigin?->label ?? __('Non renseigné') }}</strong>
+                    {{ __('des sources proviennent du même bassin éditorial.') }}
+                </span>
+            </div>
+
+            <div class="grimba-breakdown__origin-grid">
+                <div class="grimba-breakdown__origin-card">
+                    <h3>{{ __('Pays d’origine des sources') }}</h3>
+                    <div class="grimba-breakdown__origin-bar" aria-label="{{ __('Répartition géographique des sources') }}">
+                        @foreach($originBuckets->filter(fn ($bucket) => $bucket->count > 0) as $bucket)
+                            @php($pct = (int) round($bucket->count * 100 / $total))
+                            <span title="{{ $bucket->label }} · {{ $pct }}%" style="--dot: {{ $bucket->color }}; --w: {{ max(1, $pct) }}%; --delay: {{ $loop->index * 70 }}ms;"></span>
+                        @endforeach
+                    </div>
+
+                    @foreach($originBuckets->filter(fn ($bucket) => $bucket->count > 0) as $bucket)
+                        @php($pct = (int) round($bucket->count * 100 / $total))
+                        <div class="grimba-breakdown__origin-row" style="--dot: {{ $bucket->color }};">
+                            <div class="grimba-breakdown__legend">
+                                <span class="grimba-breakdown__dot" style="--dot: {{ $bucket->color }};"></span>
+                                <span class="grimba-breakdown__origin-meta">
+                                    <span>{{ $bucket->label }}</span>
+                                    <span>{{ trans_choice(':count source|:count sources', $bucket->count, ['count' => $bucket->count]) }}</span>
+                                </span>
+                            </div>
+                            <span class="grimba-breakdown__origin-score">{{ $pct }}%</span>
+                        </div>
+                    @endforeach
+
+                    <div class="grimba-breakdown__country-cloud" aria-label="{{ __('Pays représentés') }}">
+                        @foreach($countryBuckets->take(8) as $country)
+                            <span class="grimba-breakdown__country-chip" style="--dot: {{ $country->color }};">
+                                {{ $country->label }}
+                                <em>{{ $country->count }}</em>
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="grimba-breakdown__origin-card">
+                    <h3>{{ __('Biais par origine') }}</h3>
+                    <div class="grimba-breakdown__origin-matrix">
+                        @foreach($originBiasBuckets as $bucket)
+                            <article class="grimba-breakdown__origin-bias" style="--dot: {{ $bucket->color }};">
+                                <div class="grimba-breakdown__origin-bias-head">
+                                    <strong>{{ $bucket->label }}</strong>
+                                    <span>{{ trans_choice(':count source|:count sources', $bucket->count, ['count' => $bucket->count]) }}</span>
+                                </div>
+                                <div class="grimba-breakdown__origin-triptych" aria-label="{{ __('Répartition des biais pour :origin', ['origin' => $bucket->label]) }}">
+                                    @foreach(['left', 'center', 'right'] as $biasKey)
+                                        @php($bias = $bucket->bias[$biasKey])
+                                        <span title="{{ $bias->label }} · {{ $bias->pct }}%" style="--dot: {{ $bias->color }}; --w: {{ max(1, $bias->pct) }}%;"></span>
+                                    @endforeach
+                                </div>
+                                <div class="d-flex justify-content-between small" style="color: var(--gbd-muted); font-weight:800;">
+                                    @foreach(['left', 'center', 'right'] as $biasKey)
+                                        @php($bias = $bucket->bias[$biasKey])
+                                        <span>{{ mb_substr($bias->label, 0, 1) }} {{ $bias->pct }}%</span>
+                                    @endforeach
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </div>
 

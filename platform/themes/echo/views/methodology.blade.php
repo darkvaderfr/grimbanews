@@ -14,10 +14,9 @@
             <span class="grimba-methodology__kicker">Méthodologie</span>
             <h1 class="grimba-methodology__title">Comment GrimbaNews classe l'information</h1>
             <p class="grimba-methodology__lede">
-                Cette page explique comment nous évaluons le biais éditorial d'une source,
-                repérons les angles morts, notons la crédibilité et gouvernons la liste
-                des médias suivis. Notre méthode est ouverte, révisable, et vos
-                contestations sont bienvenues.
+                Nous évaluons le biais éditorial des sources, repérons les angles morts,
+                notons la crédibilité et gouvernons la liste des médias suivis.
+                La méthode reste ouverte, révisable et contestable.
             </p>
             <div class="d-flex gap-2 flex-wrap mt-3">
                 <a href="{{ url('/sources') }}" class="btn-grimba btn-grimba--solid btn-grimba--sm">Voir les sources classées</a>
