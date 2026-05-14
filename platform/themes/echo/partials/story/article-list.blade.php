@@ -46,21 +46,20 @@
 
 <section class="grimba-story-articles">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-        <h2 class="m-0" style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:24px; letter-spacing:-0.2px;">
+        <h2 class="m-0" style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:24px; letter-spacing:0;">
             <span style="opacity:0.55;">{{ $totalCount }}</span>
             {{ trans_choice('article|articles', $totalCount) }}
         </h2>
-        <div class="grimba-story-articles__tabs" role="tablist" aria-label="{{ __('Filtrer les articles du dossier') }}" data-grimba-cluster-tabs
-             style="display:flex; gap:4px; border-radius:9999px; background:rgba(0,0,0,0.04); padding:4px;">
+        <div class="grimba-story-articles__tabs" role="tablist" aria-label="{{ __('Filtrer les articles du dossier') }}" data-grimba-cluster-tabs>
             <button type="button" data-bias-tab="all" role="tab" aria-controls="grimba-cluster-panel" aria-selected="true"
-                    style="padding:6px 12px; border-radius:9999px; border:none; background:var(--gn-ink,#1a1713); color:var(--gn-paper,#f6f1e8); font-weight:700; font-size:13px;">
+                    class="grimba-story-articles__tab">
                 {{ __('Tous') }} · {{ $totalCount }}
             </button>
             @foreach(['left', 'center', 'right'] as $b)
                 @if($countLabels[$b] > 0)
                     <button type="button" data-bias-tab="{{ $b }}" role="tab" aria-controls="grimba-cluster-panel" aria-selected="false"
-                            style="padding:6px 12px; border-radius:9999px; border:none; background:transparent; color:var(--gn-ink,#1a1713); font-weight:600; font-size:13px;">
-                        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:{{ $biasMeta[$b]['color'] }}; margin-right:4px;"></span>
+                            class="grimba-story-articles__tab">
+                        <span class="grimba-story-articles__tab-dot" style="--tab-dot: {{ $biasMeta[$b]['color'] }};"></span>
                         {{ $biasMeta[$b]['label'] }} · {{ $countLabels[$b] }}
                     </button>
                 @endif
@@ -227,7 +226,7 @@
                             <span style="
                                 padding:3px 10px; border-radius:9999px;
                                 background:var(--gn-ink,#1a1713); color:var(--gn-paper,#f6f1e8);
-                                font-size:11px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;
+                                font-size:11px; font-weight:700; letter-spacing:0; text-transform:uppercase;
                             ">{{ __('Vous lisez') }}</span>
                         @endif
 
@@ -235,7 +234,7 @@
                         {!! Theme::partial('save-button', ['post' => $cp, 'variant' => 'icon']) !!}
                     </div>
 
-                    <h3 style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; line-height:1.3; letter-spacing:-0.2px; margin:0 0 6px;">
+                    <h3 style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; line-height:1.3; letter-spacing:0; margin:0 0 6px;">
                         @if($isCurrent)
                             {{ $title }}
                         @else
@@ -343,31 +342,29 @@
 
     {{-- S307 — Compare modal (3-up side-by-side). --}}
     <div id="grimba-compare-modal"
-         class="grimba-newsletter-modal"
+         class="grimba-newsletter-modal grimba-compare-modal"
          role="dialog"
          aria-modal="true"
          aria-hidden="true"
          aria-labelledby="grimba-compare-title">
         <div class="grimba-newsletter-modal__backdrop" data-grimba-compare-close></div>
-        <div class="grimba-newsletter-modal__panel glass-panel"
-             role="document"
-             style="max-width: 1080px; padding: 22px 24px 20px;">
+        <div class="grimba-newsletter-modal__panel glass-panel grimba-compare-modal__panel"
+             role="document">
             <button type="button"
                     class="grimba-newsletter-modal__close"
                     aria-label="{{ __('Fermer') }}"
                     data-grimba-compare-close>×</button>
 
-            <header class="d-flex align-items-baseline gap-2 mb-3 flex-wrap">
-                <h2 id="grimba-compare-title" class="m-0"
-                    style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:22px; letter-spacing:-0.2px;">
+            <header class="grimba-compare-modal__header">
+                <h2 id="grimba-compare-title" class="m-0 grimba-compare-modal__title">
                     {{ __('Comparer le cadrage') }}
                 </h2>
-                <span class="opacity-65 small">{{ __('Voyez comment chaque source titre la même histoire.') }}</span>
+                <span class="grimba-compare-modal__lede">{{ __('Voyez comment chaque source titre la même histoire.') }}</span>
             </header>
 
-            <div class="row g-3" data-grimba-compare-grid></div>
+            <div class="row g-3 grimba-compare-modal__grid" data-grimba-compare-grid></div>
 
-            <p class="small opacity-55 mt-3 mb-0" style="font-size:11.5px; line-height:1.5;">
+            <p class="grimba-compare-modal__note">
                 {{ __('Le titre et l\'extrait sont reproduits depuis la source d\'origine. Cliquez sur "Lire l\'article complet" pour ouvrir l\'article chez l\'éditeur.') }}
             </p>
         </div>
@@ -385,8 +382,6 @@
             tabs.forEach(t => {
                 const isActive = t.dataset.biasTab === filter;
                 t.setAttribute('aria-selected', String(isActive));
-                t.style.background = isActive ? 'var(--gn-ink, #1a1713)' : 'transparent';
-                t.style.color = isActive ? 'var(--gn-paper, #f6f1e8)' : 'var(--gn-ink, #1a1713)';
             });
             items.forEach(li => {
                 const bias = li.dataset.bias;
@@ -495,23 +490,23 @@
             const url    = row.dataset.compareUrl || '';
 
             const col = document.createElement('article');
-            col.className = (selected.length === 2 ? 'col-12 col-md-6' : 'col-12 col-md-4');
+            col.className = (selected.length === 2 ? 'col-12 col-md-6' : 'col-12 col-md-4') + ' grimba-compare-modal__col';
 
             const inner = document.createElement('div');
-            inner.style.cssText =
-                'height: 100%; padding: 14px 14px 12px; border-radius: 12px;' +
-                'border: 1px solid ' + color + '33; border-top: 3px solid ' + color + ';' +
-                'background: ' + color + '08;';
+            inner.className = 'grimba-compare-modal__card';
+            inner.style.setProperty('--compare-color', color);
+            inner.style.setProperty('--compare-color-line', color + '33');
+            inner.style.setProperty('--compare-color-soft', color + '08');
 
             const header = document.createElement('header');
-            header.style.marginBottom = '8px';
+            header.className = 'grimba-compare-modal__card-head';
             const sourceEl = document.createElement('strong');
-            sourceEl.style.cssText = "font-family:'Public Sans',system-ui,sans-serif; font-size:13px; font-weight:700; letter-spacing:0.4px; color:" + color + ';';
+            sourceEl.className = 'grimba-compare-modal__source';
             sourceEl.textContent = source;
             header.appendChild(sourceEl);
 
             const h3 = document.createElement('h3');
-            h3.style.cssText = "font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; line-height:1.3; letter-spacing:-0.2px; margin:0 0 10px; color: var(--gn-ink, #1a1713);";
+            h3.className = 'grimba-compare-modal__headline';
             h3.textContent = title;
 
             inner.appendChild(header);
@@ -519,7 +514,7 @@
 
             if (desc) {
                 const p = document.createElement('p');
-                p.style.cssText = 'font-size:14px; line-height:1.5; margin:0 0 10px; color: var(--gn-ink, #1a1713); opacity: 0.85;';
+                p.className = 'grimba-compare-modal__excerpt';
                 p.textContent = desc;
                 inner.appendChild(p);
             }
@@ -529,7 +524,7 @@
                 a.href = url;
                 a.target = '_blank';
                 a.rel = 'noopener';
-                a.style.cssText = 'color:#c0392b; text-decoration:none; font-weight:700; font-size:13px;';
+                a.className = 'grimba-compare-modal__link';
                 a.textContent = READ_FULL_LABEL + ' ↗';
                 inner.appendChild(a);
             }
