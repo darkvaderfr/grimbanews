@@ -12,7 +12,7 @@ set -euo pipefail
 #   3. SSH in and extract into /var/www/grimbanews/current, preserving
 #      .env, storage/, bootstrap/cache, vendor/, and the live SQLite DB
 #   4. Composer install (no-dev, optimize-autoloader)
-#   5. php artisan migrate --force + RssFeedsSeeder (idempotent)
+#   5. php artisan migrate --force + source/feed/category seeders (idempotent)
 #   6. Clear + rewarm view/route caches (NOT config — Botble's installer
 #      middleware reads env() at request time, same gotcha as NobuReach)
 #   7. Reset OPcache + reload php-fpm
@@ -118,6 +118,15 @@ echo "=== Running migrations (idempotent) ==="
 # Incremental deploys: snapshot application is bootstrap-only. Only
 # net-new migrations should run here.
 sudo -u www-data php artisan migrate --force 2>&1 | tail -10 || true
+
+echo "=== Seeding news sources (idempotent) ==="
+sudo -u www-data php artisan db:seed \
+    --class='Database\Seeders\NewsSourcesSeeder' \
+    --force 2>&1 | tail -5 || true
+
+sudo -u www-data php artisan db:seed \
+    --class='Database\Seeders\NewsApiSourceBiasSeeder' \
+    --force 2>&1 | tail -5 || true
 
 echo "=== Seeding RSS feeds (idempotent) ==="
 sudo -u www-data php artisan db:seed \
