@@ -43,12 +43,12 @@ class GrimbaAutomationMonitor
             ],
             'freshness_watchdog' => [
                 'label' => 'Freshness watchdog',
-                'command' => 'grimba:ensure-daily-publish --min=12 --window-hours=24 --per-category-min=1 --category-window-hours=24 --categories=all --max-publish-per-category=5',
+                'command' => 'grimba:ensure-daily-publish --min=12 --window-hours=24 --per-category-min=3 --category-window-hours=24 --categories=all --max-publish-per-category=5',
                 'expected_minutes' => 30,
             ],
             'ops_health' => [
                 'label' => 'Ops health guard',
-                'command' => 'grimba:health --fail-on-risk --min-full-content-coverage=70 --min-category-published-24h=1 --category-freshness-scope=all',
+                'command' => 'grimba:health --fail-on-risk --min-full-content-coverage=70 --min-category-published-24h=3 --category-freshness-scope=all',
                 'expected_minutes' => 60,
             ],
             'backup_verify' => [

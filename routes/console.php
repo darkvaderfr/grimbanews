@@ -105,7 +105,7 @@ grimba_schedule_command('publish_guardrails', 'grimba:publish-guardrail-categori
 // GrimbaNews — freshness watchdog. If the public feed ever drops
 // below the daily publication floor, promote trusted recent drafts
 // immediately and fail loudly when there is no healthy intake to use.
-grimba_schedule_command('freshness_watchdog', 'grimba:ensure-daily-publish --min=12 --window-hours=24 --per-category-min=1 --category-window-hours=24 --categories=all --max-publish-per-category=5')
+grimba_schedule_command('freshness_watchdog', 'grimba:ensure-daily-publish --min=12 --window-hours=24 --per-category-min=3 --category-window-hours=24 --categories=all --max-publish-per-category=5')
     ->cron('11,41 * * * *')
     ->onOneServer()
     ->withoutOverlapping(15);
@@ -113,7 +113,7 @@ grimba_schedule_command('freshness_watchdog', 'grimba:ensure-daily-publish --min
 // GrimbaNews — ops health guard. This fails into the automation
 // monitor when intake, public freshness, or disk headroom drops below
 // the operating floor, before readers have to report stale news.
-grimba_schedule_command('ops_health', 'grimba:health --fail-on-risk --min-full-content-coverage=70 --min-category-published-24h=1 --category-freshness-scope=all')
+grimba_schedule_command('ops_health', 'grimba:health --fail-on-risk --min-full-content-coverage=70 --min-category-published-24h=3 --category-freshness-scope=all')
     ->hourlyAt(27)
     ->onOneServer()
     ->withoutOverlapping(10);
