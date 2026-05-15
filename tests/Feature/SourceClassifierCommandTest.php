@@ -84,6 +84,14 @@ class SourceClassifierCommandTest extends TestCase
             'NHL News' => ['center', 'US'],
             'DW (English)' => ['center', 'DE'],
             'TV5MONDE' => ['center', 'FR'],
+            'Sciences et Avenir' => ['center', 'FR'],
+            "L'Humanité" => ['left', 'FR'],
+            'RTL.fr' => ['center', 'FR'],
+            'Le Vif' => ['center', 'BE'],
+            'Euronews.com' => ['center', 'FR'],
+            'Anadolu Ajansı' => ['right', 'TR'],
+            'CNews' => ['right', 'FR'],
+            'La Croix' => ['center', 'FR'],
         ];
 
         foreach ($cases as $name => [$bias, $country]) {

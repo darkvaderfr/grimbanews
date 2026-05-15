@@ -5,7 +5,7 @@ namespace App\Ground;
 /**
  * 5-tier factuality classification for sources.
  *
- * Mirrors Ground.news's tiers (Very Low, Low, Mixed, High, Very High).
+ * Uses GrimbaNews factuality tiers (Very Low, Low, Mixed, High, Very High).
  * Aggregation source: editorial seed + Ad Fontes + MBFC averages once wired.
  * Until then, derived from `news_sources.credibility_score` (0-100):
  *   0-20 → very_low

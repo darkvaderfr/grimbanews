@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 /**
  * 8-category ownership classification for sources.
  *
- * Mirrors Ground.news:
+ * Uses GrimbaNews ownership categories:
  *   conglomerate | private_equity | individual | government |
  *   telecom | corporation | independent | other
  *

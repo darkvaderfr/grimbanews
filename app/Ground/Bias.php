@@ -8,7 +8,7 @@ namespace App\Ground;
  * Lives under App\Ground because App\Support is root-owned
  * (cache-dir-style permission residue). Pure-PHP helpers, no DB.
  *
- * The 7 tiers mirror Ground.news's source-level resolution:
+ * The 7 tiers use GrimbaNews's source-level resolution:
  * Far Left, Left, Lean Left, Center, Lean Right, Right, Far Right.
  * The story-level coverage bar still compresses to 3 sides.
  */
