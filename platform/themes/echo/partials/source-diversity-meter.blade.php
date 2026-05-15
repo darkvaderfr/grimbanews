@@ -1,6 +1,6 @@
 @php
     /**
-     * Source Diversity Meter — GroundNews-inspired
+     * Source Diversity Meter
      *
      * Visual balance bar showing Left / Center / Right coverage of a story.
      *

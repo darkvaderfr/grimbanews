@@ -104,7 +104,23 @@
         const root = document.querySelector('[data-grimba-edition-root]');
         if (!root) return;
         const trigger = root.querySelector('[data-grimba-edition-trigger]');
+        const menu = root.querySelector('.grimba-edition-picker__menu');
         const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+        function positionMenu() {
+            if (!trigger || !menu) return;
+
+            const gap = 8;
+            const pad = 8;
+            const rect = trigger.getBoundingClientRect();
+            const menuWidth = Math.min(menu.offsetWidth || 216, window.innerWidth - (pad * 2));
+            const menuHeight = menu.offsetHeight || 168;
+            const left = Math.min(window.innerWidth - menuWidth - pad, Math.max(pad, rect.right - menuWidth));
+            const top = Math.min(window.innerHeight - menuHeight - pad, rect.bottom + gap);
+
+            menu.style.left = left + 'px';
+            menu.style.top = Math.max(pad, top) + 'px';
+        }
 
         function close() {
             root.classList.remove('is-open');
@@ -116,6 +132,7 @@
             const open = !root.classList.contains('is-open');
             root.classList.toggle('is-open', open);
             trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) positionMenu();
         });
 
         document.addEventListener('click', event => {
@@ -125,6 +142,14 @@
         document.addEventListener('keydown', event => {
             if (event.key === 'Escape') close();
         });
+
+        window.addEventListener('resize', () => {
+            if (root.classList.contains('is-open')) positionMenu();
+        }, { passive: true });
+
+        window.addEventListener('scroll', () => {
+            if (root.classList.contains('is-open')) positionMenu();
+        }, { passive: true });
 
         root.querySelectorAll('[data-grimba-edition]').forEach(link => {
             link.addEventListener('click', async event => {

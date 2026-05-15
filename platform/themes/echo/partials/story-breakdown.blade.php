@@ -1,6 +1,6 @@
 @php
     /**
-     * GroundNews-style story breakdown.
+     * GrimbaNews story breakdown.
      *
      * Computes coverage from the actual posts/sources inside a story
      * cluster: political bias, source factuality, and ownership.

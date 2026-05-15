@@ -250,7 +250,7 @@ class StaticUiTranslationTest extends TestCase
             ->assertSee('coverage items')
             ->assertSee('Updated')
             ->assertSee('Filter dossier articles')
-            ->assertSee('Bias comparison')
+            ->assertSee('Source analysis')
             ->assertSee('Bias distribution')
             ->assertSee('Read in GrimbaNews');
     }

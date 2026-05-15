@@ -45,7 +45,7 @@
                 <h2 id="grimba-most-read-title" class="grimba-most-read__title">{{ __('Les plus lus par tendance') }}</h2>
             </div>
             <p class="grimba-most-read__dek">
-                {{ __('Un instantané GroundNews-style de ce qui monte à gauche, au centre et à droite.') }}
+                {{ __('Un instantané GrimbaNews de ce qui monte à gauche, au centre et à droite.') }}
             </p>
         </header>
 

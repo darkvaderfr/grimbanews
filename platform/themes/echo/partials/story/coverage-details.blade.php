@@ -1,7 +1,7 @@
 @php
     /**
      * S148 — Coverage Details panel (right sidebar on the story
-     * page). Mirrors the GroundNews "Coverage Details" block.
+     * page).
      *
      * @var \Illuminate\Database\Eloquent\Collection $clusterPosts  All posts in the same cluster
      * @var int $clusterId

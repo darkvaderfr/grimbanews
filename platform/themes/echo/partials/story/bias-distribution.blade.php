@@ -193,11 +193,26 @@
             }
 
             .grimba-story-distribution__bar button {
+                position: relative;
                 width: var(--w);
-                border: 0;
+                min-width: 42px;
+                border: 1px solid rgba(255, 255, 255, .34);
                 padding: 0;
                 cursor: pointer;
                 background: linear-gradient(90deg, color-mix(in srgb, var(--dot) 72%, #fff), var(--dot));
+                box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+                transition: filter .16s ease, transform .16s ease, box-shadow .16s ease;
+            }
+
+            .grimba-story-distribution__bar button:hover {
+                filter: saturate(1.14) brightness(1.04);
+                transform: translateY(-1px);
+            }
+
+            .grimba-story-distribution__bar button[aria-pressed="true"] {
+                box-shadow:
+                    inset 0 0 0 2px rgba(255, 255, 255, .86),
+                    0 0 0 2px color-mix(in srgb, var(--dot) 45%, transparent);
             }
 
             .grimba-story-distribution__bar button:focus-visible {
@@ -398,6 +413,7 @@
                     @if($pct[$biasKey] > 0)
                         <button type="button"
                             data-grimba-bar-side="{{ $biasKey }}"
+                            aria-pressed="false"
                             title="{{ __('Filtrer la liste : :side', ['side' => $biasMeta[$biasKey]['label']]) }} · {{ $pct[$biasKey] }}%"
                             aria-label="{{ __('Filtrer la liste : :side', ['side' => $biasMeta[$biasKey]['label']]) }} ({{ $pct[$biasKey] }}%)"
                             style="--dot: {{ $biasMeta[$biasKey]['color'] }}; --w: {{ $pct[$biasKey] }}%;"></button>
@@ -494,16 +510,22 @@
         (function () {
             const segments = document.querySelectorAll('[data-grimba-bar-side]');
             if (! segments.length) return;
+            function sync(side) {
+                segments.forEach(segment => {
+                    segment.setAttribute('aria-pressed', String(segment.dataset.grimbaBarSide === side));
+                });
+            }
             segments.forEach((segment) => {
                 segment.addEventListener('click', () => {
                     const side = segment.dataset.grimbaBarSide;
-                    const tab = document.querySelector('[data-grimba-cluster-tabs] [data-bias-tab="' + side + '"]');
-                    if (tab) {
-                        tab.click();
-                        const list = document.querySelector('[data-grimba-cluster-list]');
-                        if (list) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    sync(side);
+                    document.dispatchEvent(new CustomEvent('grimba:cluster-filter', {
+                        detail: { side, scroll: true }
+                    }));
                 });
+            });
+            document.addEventListener('grimba:cluster-filtered', event => {
+                sync(event.detail?.side || 'all');
             });
         })();
     </script>

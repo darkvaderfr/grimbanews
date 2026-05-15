@@ -141,7 +141,7 @@ grimba_schedule_command('full_articles', 'grimba:fetch-full-articles --limit=80'
 
 // GrimbaNews — NobuAI insight treatment for newly published story
 // clusters. Runs after publish + full extraction + translation ticks so
-// reader-facing stories get GroundNews-style analysis automatically.
+// reader-facing stories get multi-source analysis automatically.
 grimba_schedule_command('nobuai_summaries', 'grimba:nobuai-summaries --limit=80')
     ->cron('18,48 * * * *')
     ->onOneServer()

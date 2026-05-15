@@ -186,9 +186,9 @@
 
     // S148 — story-page mode. When this post belongs to a story
     // cluster with at least 2 published articles total, render the
-    // GroundNews-style cluster view instead of the legacy single-post
-    // layout. The legacy layout is kept as fallback for orphan posts
-    // (no cluster) and clusters of 1 (no comparison value).
+    // multi-source dossier view instead of the legacy single-post layout.
+    // The legacy layout is kept as fallback for orphan posts (no cluster)
+    // and clusters of 1 (no comparison value).
     $__gnClusterPosts = collect();
     $__gnSourceMeta = collect();
     $__gnIsStoryPage = false;
@@ -255,8 +255,8 @@
                     </div>
                 </div>
 
-                {{-- S170 — Hero block matches GroundNews article display:
-                     kicker → title → bias filter tabs + Bias Comparison
+                {{-- S170 — Hero block:
+                     kicker → title → bias filter tabs + source analysis
                      button → bullet summary with NobuAI insights toggle. --}}
                 @php
                     $__gnLatest = $__gnClusterPosts->max('updated_at');
@@ -333,20 +333,19 @@
                         </div>
                     @endif
 
-                    {{-- S170 — bias filter tabs sit right under the title,
-                         GroundNews-style. Tabs use the same data attribute
-                         as the article-list section below; clicking filters
-                         in place via the existing JS handler. --}}
+                    {{-- S170 — bias filter tabs sit right under the title.
+                         Tabs use the same data attribute as the article-list
+                         section below; clicking filters in place via JS. --}}
                     <div class="grimba-story-page__actions d-flex align-items-center gap-2 flex-wrap mb-3" data-grimba-cluster-tabs>
                         <div class="grimba-story-page__tablist" role="tablist">
-                            <button type="button" class="grimba-story-page__tab" data-bias-tab="all" role="tab" aria-selected="true">
-                                {{ __('Tous') }}
+                            <button type="button" class="grimba-story-page__tab" data-bias-tab="all" role="tab" aria-controls="grimba-cluster-panel" aria-selected="true">
+                                {{ __('Tous') }} · {{ $__gnClusterPosts->count() }}
                             </button>
                             @foreach(['left' => [__('Gauche'),'#3b82f6'], 'center' => [__('Centre'),'#a8a8a8'], 'right' => [__('Droite'),'#e84c3d']] as $b => [$lbl,$col])
                                 @if($__gnByBias[$b] > 0)
-                                    <button type="button" class="grimba-story-page__tab" data-bias-tab="{{ $b }}" role="tab" aria-selected="false">
+                                    <button type="button" class="grimba-story-page__tab" data-bias-tab="{{ $b }}" role="tab" aria-controls="grimba-cluster-panel" aria-selected="false">
                                         <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:{{ $col }}; margin-right:5px; vertical-align:1px;"></span>
-                                        {{ $lbl }}
+                                        {{ $lbl }} · {{ $__gnByBias[$b] }}
                                     </button>
                                 @endif
                             @endforeach
@@ -356,9 +355,9 @@
                                 class="grimba-story-page__compare"
                                 onclick="document.querySelector('.grimba-story-distribution')?.scrollIntoView({behavior:'smooth', block:'start'});"
                                 title="{{ __('Voir la distribution des biais') }}">
-                            <span aria-hidden="true">⚖️</span>
-                            <span class="grimba-story-page__compare-label grimba-story-page__compare-label--full">{{ __('Comparaison des biais') }}</span>
-                            <span class="grimba-story-page__compare-label grimba-story-page__compare-label--short">{{ __('Comparer') }}</span>
+                            <span aria-hidden="true">⚖</span>
+                            <span class="grimba-story-page__compare-label grimba-story-page__compare-label--full">{{ __('Analyse des sources') }}</span>
+                            <span class="grimba-story-page__compare-label grimba-story-page__compare-label--short">{{ __('Sources') }}</span>
                         </button>
 
                         {{-- S173 — save-for-later pill. Cookie-only (no auth).

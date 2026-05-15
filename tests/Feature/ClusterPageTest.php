@@ -116,7 +116,7 @@ class ClusterPageTest extends TestCase
             ->assertSee('grimba-orphan-hero', false)
             ->assertSee('Article')
             ->assertDontSee('class="grimba-story container', false)
-            ->assertDontSee('Comparaison des biais');
+            ->assertDontSee('Analyse des sources');
     }
 
     public function test_cluster_size_two_or_more_uses_story_layout(): void
@@ -129,7 +129,7 @@ class ClusterPageTest extends TestCase
             ->assertSee('class="grimba-story container', false)
             ->assertSee('Histoire')
             ->assertSee('2 couvertures')
-            ->assertSee('Comparaison des biais');
+            ->assertSee('Analyse des sources');
     }
 
     public function test_one_sided_cluster_shows_coverage_gap_callout(): void
@@ -152,7 +152,7 @@ class ClusterPageTest extends TestCase
             ->get($this->pathFor($post))
             ->assertOk()
             ->assertSee('class="grimba-story container', false)
-            ->assertSee('Comparaison des biais')
+            ->assertSee('Analyse des sources')
             ->assertDontSee('Couverture déséquilibrée');
     }
 
@@ -179,7 +179,7 @@ class ClusterPageTest extends TestCase
             ->assertDontSee('summary_driver');
     }
 
-    public function test_public_nobuai_insights_show_groundnews_style_labels_and_note(): void
+    public function test_public_nobuai_insights_show_multi_source_labels_and_note(): void
     {
         $ids = $this->publishedPostIds(2, 13);
         $post = $this->assignCluster($ids, 910006, ['left', 'center']);
@@ -430,6 +430,15 @@ class ClusterPageTest extends TestCase
             ->assertDontSee('target="_blank" rel="noopener" class="grimba-story-article__read"', false)
             ->assertDontSee('Trusted Source Credibility')
             ->assertSee('Sibling region-scope fixture description.');
+
+        $this->withUnencryptedCookies($this->readerCookies(['grimba_region' => 'africa']))
+            ->get('/comparatif/910013')
+            ->assertOk()
+            ->assertSee('Lire dans GrimbaNews')
+            ->assertSee('href="' . $articleUrlPrefix, false)
+            ->assertDontSee('href="#" class="text-decoration-none title-hover"', false)
+            ->assertDontSee('Score de crédibilité')
+            ->assertDontSee('Type de propriété');
     }
 
     public function test_newsapi_truncation_marker_is_scrubbed_from_article_body(): void

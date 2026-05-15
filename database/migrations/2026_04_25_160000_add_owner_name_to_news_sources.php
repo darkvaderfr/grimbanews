@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * S139 — parent-company column for the GroundNews-style ownership map.
+ * S139 — parent-company column for the GrimbaNews ownership map.
  *
  * `ownership_type` (corporate / public / state-owned / etc.) was a
  * coarse signal — a reader looking at "Disney" would not know it owns

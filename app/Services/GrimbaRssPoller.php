@@ -572,7 +572,7 @@ class GrimbaRssPoller
 
     /**
      * S132 — full cluster resolution: existing match OR new cluster
-     * formation from orphans. THE GroundNews-grade unlock.
+     * formation from orphans. This unlocks dense multi-source dossiers.
      *
      * Without this method, two un-clustered articles on the same
      * event NEVER cluster — findLikelyCluster only matches against

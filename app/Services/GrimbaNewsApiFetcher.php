@@ -18,7 +18,7 @@ use Throwable;
 /*
  * S128 — NewsAPI.org fetcher.
  *
- * GroundNews-grade story coverage requires a much wider news pool
+ * GrimbaNews-grade story coverage requires a much wider news pool
  * than the 13 RSS feeds GrimbaNews shipped with. NewsAPI returns up
  * to 100 articles per query, supports /everything (full search) and
  * /top-headlines (curated breaking), and exposes ~80 known sources

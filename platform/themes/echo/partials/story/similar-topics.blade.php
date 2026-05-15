@@ -2,7 +2,7 @@
     /**
      * S148 — Similar News Topics sidebar block. Surfaces other recent
      * story_clusters that share at least one category with the
-     * current post. Mirrors the GroundNews sidebar.
+     * current post.
      *
      * @var \Botble\Blog\Models\Post $post
      */

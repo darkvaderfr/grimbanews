@@ -1,6 +1,6 @@
 @php
     /**
-     * Bias Badge Component — GroundNews-inspired
+     * Bias Badge Component
      *
      * Displays political bias indicator: Left / Center / Right
      *

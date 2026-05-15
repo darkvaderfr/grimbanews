@@ -56,7 +56,7 @@ async function collectComponent(page, selector) {
     return page.evaluate((selector) => {
         const node = document.querySelector(selector);
         const viewportWidth = window.innerWidth;
-        const ignored = '.phpdebugbar, #admin_bar, .grimba-mobile-nav, .grimba-command-palette, .grimba-chips__row';
+        const ignored = '.phpdebugbar, #admin_bar, .grimba-mobile-nav, .grimba-command-palette, .grimba-chips__row, .grimba-breaking';
         const rect = node ? node.getBoundingClientRect() : null;
         const active = node ? node.querySelector('[aria-selected="true"]') : null;
         const activeStyle = active ? getComputedStyle(active) : null;
@@ -249,6 +249,27 @@ function assertModal(metrics, scenarioKey) {
 
         const activeContrast = contrast(parseRgb(articleTabs.activeColor), parseRgb(articleTabs.activeBackground));
         assert(activeContrast >= 4.5, `${scenario.key} active tab contrast ${activeContrast.toFixed(2)}`);
+
+        const sideTab = page.locator('.grimba-story-articles__tab[data-bias-tab]:not([data-bias-tab="all"])').first();
+        const sideTabCount = await sideTab.count();
+        assert(sideTabCount > 0, `${scenario.key} has a side filter tab`);
+        const selectedSide = await sideTab.getAttribute('data-bias-tab');
+        await sideTab.click();
+        const filteredBiases = await page.locator('[data-grimba-cluster-list] [data-bias]').evaluateAll(nodes => nodes
+            .filter(node => !node.hidden && getComputedStyle(node).display !== 'none')
+            .map(node => node.dataset.bias));
+        assert(filteredBiases.length > 0, `${scenario.key} side filter leaves visible articles`);
+        assert(filteredBiases.every(bias => bias === selectedSide), `${scenario.key} side filter only shows ${selectedSide}: ${filteredBiases.join(',')}`);
+
+        const distributionSegment = page.locator(`[data-grimba-bar-side="${selectedSide}"]`).first();
+        if (await distributionSegment.count()) {
+            await distributionSegment.click();
+            await page.waitForTimeout(80);
+            const pressed = await distributionSegment.getAttribute('aria-pressed');
+            assert.equal(pressed, 'true', `${scenario.key} distribution segment reflects active filter`);
+        }
+
+        await page.locator('.grimba-story-articles__tab[data-bias-tab="all"]').first().click();
 
         const reader = await collectComponent(page, '.grimba-full-article');
         assertComponent(reader, scenario.key);

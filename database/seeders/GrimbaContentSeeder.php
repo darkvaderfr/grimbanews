@@ -13,7 +13,7 @@ class GrimbaContentSeeder extends Seeder
 {
     /**
      * Seed 3 story clusters (3 posts each, Left/Centre/Droite) and
-     * 6 standalone French posts so the GroundNews-style homepage
+     * 6 standalone French posts so the GrimbaNews homepage
      * has real material to render. Attaches posts to existing
      * news_sources rows — the Post::saving hook propagates bias,
      * ownership, credibility and source_name automatically.

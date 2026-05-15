@@ -328,22 +328,47 @@
     (function () {
         const tabs = document.querySelectorAll('[data-grimba-cluster-tabs] [data-bias-tab]');
         const items = document.querySelectorAll('[data-grimba-cluster-list] [data-bias]');
+        const list = document.querySelector('[data-grimba-cluster-list]');
         const sortWrap = document.querySelector('[data-grimba-cluster-sort]');
         if (! tabs.length || ! items.length) return;
 
-        function activate(filter) {
+        function normalize(filter) {
+            const requested = filter || 'all';
+
+            if (requested === 'all') {
+                return 'all';
+            }
+
+            return Array.from(items).some(item => item.dataset.bias === requested) ? requested : 'all';
+        }
+
+        function activate(filter, options = {}) {
+            const selected = normalize(filter);
             tabs.forEach(t => {
-                const isActive = t.dataset.biasTab === filter;
+                const isActive = t.dataset.biasTab === selected;
                 t.setAttribute('aria-selected', String(isActive));
             });
             items.forEach(li => {
                 const bias = li.dataset.bias;
-                li.style.display = (filter === 'all' || bias === filter) ? '' : 'none';
+                const visible = selected === 'all' || bias === selected;
+                li.hidden = !visible;
+                li.setAttribute('aria-hidden', String(!visible));
+                li.style.display = visible ? '' : 'none';
             });
+
+            if (list) {
+                list.dataset.activeBias = selected;
+                if (options.scroll) {
+                    list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            document.dispatchEvent(new CustomEvent('grimba:cluster-filtered', {
+                detail: { side: selected }
+            }));
         }
 
         function sortItems(mode) {
-            const list = document.querySelector('[data-grimba-cluster-list]');
             if (! list) return;
             const nodes = Array.from(items);
             nodes.sort((a, b) => {
@@ -368,6 +393,11 @@
         }
 
         tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.biasTab)));
+        document.addEventListener('grimba:cluster-filter', event => {
+            activate(event.detail?.side || event.detail?.filter || 'all', {
+                scroll: Boolean(event.detail?.scroll)
+            });
+        });
         sortWrap?.querySelectorAll('[data-sort-mode]').forEach(btn => {
             btn.addEventListener('click', () => sortItems(btn.dataset.sortMode || 'bias'));
         });

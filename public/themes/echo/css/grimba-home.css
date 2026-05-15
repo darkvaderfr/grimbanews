@@ -1,6 +1,6 @@
 /* ============================================================
    GrimbaNews — Homepage (Steve's cinematic glass over newsprint)
-   Reference: GroundNews, reinterpreted for francophone + glass.
+   GrimbaNews glass reader system.
    ============================================================ */
 
 :root {
@@ -441,8 +441,14 @@ body.grimba-home .grimba-story-page__tablist {
     max-width: 100%;
     gap: 4px;
     padding: 4px;
+    border: 1px solid rgba(26, 23, 19, 0.1);
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.05);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.76), rgba(246, 241, 232, 0.46)),
+        rgba(26, 23, 19, 0.045);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.46),
+        0 12px 30px rgba(26, 23, 19, 0.08);
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
@@ -459,24 +465,38 @@ body.grimba-home .grimba-story-page__compare {
     min-height: 34px;
     padding: 6px 14px;
     border-radius: 999px;
-    border: 0;
+    border: 1px solid rgba(26, 23, 19, 0.12);
     color: var(--gn-ink);
-    background: transparent;
+    background: rgba(255, 255, 255, 0.58);
     font-family: var(--gn-font-body);
     font-size: 13px;
     font-weight: 700;
     line-height: 1.1;
     white-space: nowrap;
     cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+    transition: background .16s ease, border-color .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+body.grimba-home .grimba-story-page__tab:hover,
+body.grimba-home .grimba-story-page__tab:focus-visible,
+body.grimba-home .grimba-story-page__compare:hover,
+body.grimba-home .grimba-story-page__compare:focus-visible {
+    border-color: rgba(26, 23, 19, 0.28);
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 10px 22px rgba(26, 23, 19, 0.12);
+    transform: translateY(-1px);
 }
 body.grimba-home .grimba-story-page__tab[aria-selected="true"] {
     background: var(--gn-ink);
+    border-color: var(--gn-ink);
     color: var(--gn-paper);
 }
 body.grimba-home .grimba-story-page__compare {
     margin-left: auto;
-    border: 1px solid rgba(26, 23, 19, 0.18);
-    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(26, 23, 19, 0.22);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(246, 241, 232, 0.58)),
+        rgba(255, 255, 255, 0.7);
 }
 body.grimba-home .grimba-story-page__compare-label--short {
     display: none;
@@ -519,9 +539,9 @@ body.grimba-home .grimba-story-articles__tab {
     min-width: 0;
     min-height: 34px;
     padding: 6px 10px;
-    border: 0;
+    border: 1px solid rgba(26, 23, 19, 0.1);
     border-radius: 999px;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.52);
     color: var(--gn-ink);
     font-family: var(--gn-font-body);
     font-size: 13px;
@@ -529,9 +549,17 @@ body.grimba-home .grimba-story-articles__tab {
     line-height: 1.1;
     white-space: normal;
     cursor: pointer;
+    transition: background .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+body.grimba-home .grimba-story-articles__tab:hover,
+body.grimba-home .grimba-story-articles__tab:focus-visible {
+    border-color: rgba(26, 23, 19, 0.24);
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 8px 18px rgba(26, 23, 19, 0.1);
 }
 body.grimba-home .grimba-story-articles__tab[aria-selected="true"] {
     background: var(--gn-ink);
+    border-color: var(--gn-ink);
     color: var(--gn-paper);
     box-shadow: 0 10px 22px rgba(0, 0, 0, 0.14);
 }
@@ -551,6 +579,27 @@ body.grimba-home .grimba-story-articles__tools {
     flex-wrap: wrap;
     gap: 0.85rem 1rem;
     margin-bottom: 1rem;
+}
+body.grimba-home .grimba-comparison-card__read {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    min-height: 34px;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid rgba(26, 23, 19, 0.14);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.68);
+    color: var(--gn-ink);
+    font-size: 12px;
+    font-weight: 780;
+    text-decoration: none;
+    box-shadow: 0 10px 22px rgba(26, 23, 19, 0.08);
+}
+body.grimba-home .grimba-comparison-card__read:hover,
+body.grimba-home .grimba-comparison-card__read:focus-visible {
+    background: var(--gn-ink);
+    color: var(--gn-paper);
 }
 body.grimba-home .grimba-story-jump {
     display: flex;
@@ -1962,13 +2011,15 @@ body.grimba-home img[alt=""] {
     transform: rotate(180deg);
 }
 .grimba-edition-picker__menu {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    z-index: 90;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: auto;
+    z-index: 2147483000;
     display: grid;
     gap: 4px;
     min-width: 13.5rem;
+    max-width: calc(100vw - 16px);
     padding: 6px;
     border: 1px solid rgba(26, 23, 19, 0.12);
     border-radius: 18px;
@@ -2106,7 +2157,6 @@ html.grimba-header-shrunk .grimba-header__main .py-3 {
         padding-inline: 0.6rem 0.38rem;
     }
     .grimba-edition-picker__menu {
-        right: 0;
         min-width: min(14rem, calc(100vw - 1.5rem));
     }
 }
@@ -5025,14 +5075,30 @@ html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page_
     color: rgba(255, 250, 240, 0.74) !important;
 }
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__tablist {
-    background: rgba(246, 241, 232, 0.07);
+    border-color: rgba(255, 250, 240, 0.14);
+    background:
+        linear-gradient(135deg, rgba(255, 250, 240, 0.08), rgba(70, 61, 42, 0.1)),
+        rgba(255, 250, 240, 0.07);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 250, 240, 0.06),
+        0 18px 38px rgba(0, 0, 0, 0.26);
 }
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__tab,
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__compare {
+    border-color: rgba(255, 250, 240, 0.13);
+    background: rgba(255, 250, 240, 0.07);
     color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__tab:hover,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__tab:focus-visible,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__compare:hover,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__compare:focus-visible {
+    border-color: rgba(255, 250, 240, 0.28);
+    background: rgba(255, 250, 240, 0.12);
 }
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__tab[aria-selected="true"] {
     background: #fffaf0;
+    border-color: #fffaf0;
     color: #15130f;
 }
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-page__compare {
@@ -5049,9 +5115,27 @@ html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-artic
         0 18px 38px rgba(0, 0, 0, 0.26);
 }
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-articles__tab {
+    border-color: rgba(255, 250, 240, 0.13);
+    background: rgba(255, 250, 240, 0.07);
     color: #fffaf0;
 }
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-articles__tab:hover,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-articles__tab:focus-visible {
+    border-color: rgba(255, 250, 240, 0.28);
+    background: rgba(255, 250, 240, 0.12);
+}
 html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-story-articles__tab[aria-selected="true"] {
+    background: #fffaf0;
+    border-color: #fffaf0;
+    color: #15130f;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-comparison-card__read {
+    border-color: rgba(255, 250, 240, 0.14);
+    background: rgba(255, 250, 240, 0.08);
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-comparison-card__read:hover,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-comparison-card__read:focus-visible {
     background: #fffaf0;
     color: #15130f;
 }

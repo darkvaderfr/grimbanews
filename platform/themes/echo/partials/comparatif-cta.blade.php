@@ -6,7 +6,7 @@
      *
      * Surfaces the unique GrimbaNews value prop the moment the
      * reader is consuming a single perspective: "we have 8 other
-     * angles on this story". One of GroundNews's strongest UX moves.
+     * angles on this story".
      *
      * @var \Botble\Blog\Models\Post $post
      */

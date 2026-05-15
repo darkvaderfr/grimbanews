@@ -2,8 +2,7 @@
     /**
      * S180 — Story timeline panel. Chronological view of how a cluster
      * unfolded: one entry per source, sorted by published-at ascending,
-     * with date + outlet name + bias dot. Mirrors GroundNews' "Story
-     * Updates" block.
+     * with date + outlet name + bias dot.
      *
      * Skipped when the cluster has fewer than 3 posts — at that point
      * the cluster article list above already reads as a chronology.

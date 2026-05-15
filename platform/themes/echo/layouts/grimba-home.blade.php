@@ -1,6 +1,6 @@
 @php
     /**
-     * GrimbaNews — Homepage layout (GroundNews-inspired, Steve cinematic glass).
+     * GrimbaNews — Homepage layout (cinematic glass).
      * Standalone shell: bypasses the stock Echo header/footer chrome.
      */
 

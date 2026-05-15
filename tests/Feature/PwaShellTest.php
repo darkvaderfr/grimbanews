@@ -42,6 +42,8 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('.grimba-header__tools .grimba-edition-toggle', $css);
         $this->assertStringContainsString('.grimba-edition-picker__trigger', $css);
         $this->assertStringContainsString('.grimba-edition-picker__menu', $css);
+        $this->assertStringContainsString('position: fixed;', $css);
+        $this->assertStringContainsString('z-index: 2147483000;', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-edition-picker__menu', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-edition-toggle__option.is-active', $css);
     }
