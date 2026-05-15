@@ -20,6 +20,8 @@ class PwaShellTest extends TestCase
         // Fleet K (2026-05-05) — picker now exposes 4 regions:
         // Africa / Europe / Americas / International. Legacy values
         // (france/uk/us/canada) are migration-only and not surfaced.
+        $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+
         $this->get('/')
             ->assertOk()
             ->assertSee('data-grimba-edition="africa"', false)
@@ -34,12 +36,14 @@ class PwaShellTest extends TestCase
             ->assertDontSee('data-grimba-edition="uk"', false)
             ->assertDontSee('data-grimba-edition="us"', false)
             ->assertDontSee('data-grimba-edition="canada"', false)
-            ->assertSee('.grimba-edition-toggle', false)
-            ->assertSee('background: #1a1713;', false)
-            ->assertSee('grimba-header__tools', false)
-            ->assertSee('html[data-bs-theme="dark"] .grimba-edition-toggle__option', false)
-            ->assertSee('color: #fffaf0;', false)
-            ->assertSee('html[data-bs-theme="dark"] .grimba-edition-toggle__count', false);
+            ->assertSee('grimba-edition-picker__trigger', false)
+            ->assertSee('grimba-edition-picker__menu', false);
+
+        $this->assertStringContainsString('.grimba-header__tools .grimba-edition-toggle', $css);
+        $this->assertStringContainsString('.grimba-edition-picker__trigger', $css);
+        $this->assertStringContainsString('.grimba-edition-picker__menu', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-edition-picker__menu', $css);
+        $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-edition-toggle__option.is-active', $css);
     }
 
     public function test_header_tool_css_does_not_override_edition_toggle_links(): void
@@ -91,6 +95,13 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-mobile-nav', $css);
         $this->assertStringContainsString('background: #17140f;', $css);
         $this->assertStringContainsString('0 -14px 36px rgba(12, 10, 7, 0.78)', $css);
+        $this->assertStringContainsString('-webkit-backdrop-filter: none !important;', $css);
+        $this->assertStringContainsString('backdrop-filter: none !important;', $css);
+        $this->assertStringContainsString('body.grimba-home .grimba-latest__item', $css);
+        $this->assertStringContainsString('body.grimba-home .grimba-most-read__panel', $css);
+        $this->assertStringContainsString('.grimba-blind-card {', $css);
+        $this->assertStringContainsString('isolation: isolate;', $css);
+        $this->assertStringContainsString('.grimba-blind-card__body', $css);
         $this->assertStringContainsString('.grimba-breaking__inner', $css);
         $this->assertStringContainsString('.grimba-breaking__viewport', $css);
         $this->assertStringContainsString('min-height: 42px;', $css);
@@ -456,6 +467,7 @@ class PwaShellTest extends TestCase
         $css = file_get_contents(dirname(__DIR__, 2) . '/public/themes/echo/css/grimba-home.css');
 
         $this->assertStringContainsString('body.grimba-home .modal-backdrop', $css);
+        $this->assertStringContainsString('body.grimba-home .offcanvas-backdrop', $css);
         $this->assertStringContainsString('body.grimba-home.modal-open', $css);
         $this->assertStringContainsString('pointer-events: none !important', $css);
     }

@@ -65,106 +65,66 @@
 
         return $counts;
     });
+    $activeEdition = $editions[$currentRegion] ?? $editions['international'];
+    $activeCount = (int) ($editionCounts[$currentRegion] ?? 0);
 @endphp
 
-<style>
-    .grimba-edition-toggle {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 4px;
-        border: 1px solid rgba(26, 23, 19, 0.14);
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.58);
-        box-shadow: 0 10px 28px rgba(26, 23, 19, 0.08);
-    }
+<div class="grimba-edition-toggle grimba-edition-picker" aria-label="{{ __('Choisir une édition') }}" data-grimba-edition-root>
+    <button type="button"
+            class="grimba-edition-picker__trigger"
+            data-grimba-edition-trigger
+            aria-haspopup="true"
+            aria-expanded="false">
+        <span class="grimba-edition-picker__label">{{ $activeEdition['label'] }}</span>
+        <span class="grimba-edition-toggle__count">{{ number_format($activeCount) }}</span>
+        <span class="grimba-edition-picker__chevron" aria-hidden="true">⌄</span>
+    </button>
 
-    .grimba-edition-toggle__option {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        min-height: 34px;
-        padding: 6px 12px;
-        border: 0;
-        border-radius: 999px;
-        background: transparent;
-        color: #1a1713;
-        font-size: 13px;
-        font-weight: 800;
-        line-height: 1;
-        text-decoration: none;
-        cursor: pointer;
-        white-space: nowrap;
-    }
-
-    .grimba-edition-toggle__option:hover,
-    .grimba-edition-toggle__option:focus-visible {
-        color: #1a1713;
-        background: rgba(26, 23, 19, 0.07);
-        outline: none;
-    }
-
-    .grimba-edition-toggle__option.is-active {
-        background: #1a1713;
-        color: #f8f1e6;
-        box-shadow: 0 8px 18px rgba(26, 23, 19, 0.16);
-    }
-
-    .grimba-edition-toggle__count {
-        opacity: .62;
-        font-size: 11px;
-        font-weight: 700;
-        font-variant-numeric: tabular-nums;
-    }
-
-    html[data-bs-theme="dark"] .grimba-edition-toggle {
-        background: rgba(246, 241, 232, 0.14);
-        border-color: rgba(246, 241, 232, 0.30);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
-    }
-
-    html[data-bs-theme="dark"] .grimba-edition-toggle__option {
-        color: #fffaf0;
-    }
-
-    html[data-bs-theme="dark"] .grimba-edition-toggle__option:hover,
-    html[data-bs-theme="dark"] .grimba-edition-toggle__option:focus-visible {
-        color: #ffffff;
-        background: rgba(246, 241, 232, 0.12);
-    }
-
-    html[data-bs-theme="dark"] .grimba-edition-toggle__option.is-active {
-        background: #fffaf0;
-        color: #15130f;
-        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.32);
-    }
-
-    html[data-bs-theme="dark"] .grimba-edition-toggle__count {
-        opacity: .86;
-    }
-</style>
-
-<div class="grimba-edition-toggle" role="group" aria-label="{{ __('Choisir une édition') }}" data-grimba-edition-root>
-    @foreach($editions as $key => $edition)
+    <div class="grimba-edition-picker__menu" role="menu">
+        @foreach($editions as $key => $edition)
         @php
             $count = (int) ($editionCounts[$key] ?? 0);
             $isActive = $key === $currentRegion;
         @endphp
         <a href="{{ $edition['href'] }}"
-           class="grimba-edition-toggle__option @if($isActive) is-active @endif"
+           class="grimba-edition-toggle__option grimba-edition-picker__option @if($isActive) is-active @endif"
            aria-pressed="{{ $isActive ? 'true' : 'false' }}"
+           role="menuitemradio"
+           aria-checked="{{ $isActive ? 'true' : 'false' }}"
            data-grimba-edition="{{ $key }}">
             <span>{{ $edition['label'] }}</span>
             <span class="grimba-edition-toggle__count">{{ number_format($count) }}</span>
         </a>
-    @endforeach
+        @endforeach
+    </div>
 </div>
 
 <script>
     (function () {
         const root = document.querySelector('[data-grimba-edition-root]');
         if (!root) return;
+        const trigger = root.querySelector('[data-grimba-edition-trigger]');
         const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+        function close() {
+            root.classList.remove('is-open');
+            trigger?.setAttribute('aria-expanded', 'false');
+        }
+
+        trigger?.addEventListener('click', event => {
+            event.preventDefault();
+            const open = !root.classList.contains('is-open');
+            root.classList.toggle('is-open', open);
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', event => {
+            if (!root.contains(event.target)) close();
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') close();
+        });
 
         root.querySelectorAll('[data-grimba-edition]').forEach(link => {
             link.addEventListener('click', async event => {
