@@ -1,7 +1,7 @@
 @php
     use App\Support\GrimbaEditorialCategories;
 
-    $chips = GrimbaEditorialCategories::homepageChips(10);
+    $chips = GrimbaEditorialCategories::homepageChips(17);
 
     $rawFollow = (string) request()->cookie('grimba_follow', '');
     $followedIds = array_filter(array_map('intval', explode(',', $rawFollow)));

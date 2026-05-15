@@ -418,6 +418,56 @@ async function inspectDesktopHeaderSearch(page) {
     });
 }
 
+async function inspectCategoryEditions(page, width) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/blog/europe', { waitUntil: 'networkidle' });
+
+    return page.evaluate(() => {
+        const rect = element => {
+            const bounds = element.getBoundingClientRect();
+
+            return {
+                x: bounds.x,
+                width: bounds.width,
+                height: bounds.height,
+                right: bounds.right,
+            };
+        };
+        const nav = document.querySelector('.grimba-category-editions');
+        const rootStyle = getComputedStyle(document.documentElement);
+        const items = [...document.querySelectorAll('.grimba-category-editions__item')].map(item => {
+            const label = item.querySelector('span');
+            const count = item.querySelector('strong');
+            const style = getComputedStyle(item);
+
+            return {
+                text: label?.textContent?.trim() || '',
+                countText: count?.textContent?.trim() || '',
+                ariaCurrent: item.getAttribute('aria-current') || '',
+                rect: rect(item),
+                color: style.color,
+                backgroundColor: style.backgroundColor,
+                labelClientWidth: label?.clientWidth || 0,
+                labelScrollWidth: label?.scrollWidth || 0,
+            };
+        });
+
+        return {
+            theme: document.documentElement.getAttribute('data-bs-theme'),
+            viewportWidth: window.innerWidth,
+            scrollWidth: document.documentElement.scrollWidth,
+            bodyScrollWidth: document.body.scrollWidth,
+            paper: rootStyle.getPropertyValue('--gn-paper').trim(),
+            nav: nav ? {
+                clientWidth: nav.clientWidth,
+                scrollWidth: nav.scrollWidth,
+                rect: rect(nav),
+            } : null,
+            items,
+        };
+    });
+}
+
 (async () => {
     const { chromium } = loadPlaywright();
     const baseUrl = (process.env.GRIMBANEWS_BASE_URL || 'http://127.0.0.1:8003').replace(/\/$/, '');
@@ -441,6 +491,7 @@ async function inspectDesktopHeaderSearch(page) {
         { name: 'grimba_onboarded', value: '1', url: baseUrl },
         { name: 'grimba_cookie_consent', value: 'necessary', url: baseUrl },
         { name: 'grimba_theme', value: 'dark', url: baseUrl },
+        { name: 'grimba_region', value: 'europe', url: baseUrl },
         { name: 'grimba_vault', value: '987654321', url: baseUrl },
     ]);
 
@@ -480,6 +531,10 @@ async function inspectDesktopHeaderSearch(page) {
             assert.ok(snapshot.chipRow, `topic chip row exists at ${width}px`);
             assert.ok(snapshot.chipRow.clientWidth <= width + 1, `topic chip row stays viewport-bounded at ${width}px`);
             assert.ok(snapshot.topicChips.length > 0, `topic chips render at ${width}px`);
+            const chipTexts = new Set(snapshot.topicChips.map(chip => chip.text));
+            for (const edition of ['Europe', 'Afrique', 'Am\u00e9riques', 'International']) {
+                assert.ok(chipTexts.has(edition), `${edition} edition chip renders at ${width}px`);
+            }
             for (const chip of snapshot.topicChips) {
                 assert.ok(chip.labelScrollWidth <= chip.labelClientWidth + 1, `${chip.text} chip label does not overflow at ${width}px`);
                 assert.ok(chip.followRect.width >= 24, `${chip.text} follow control keeps a 24px visual target at ${width}px`);
@@ -561,6 +616,32 @@ async function inspectDesktopHeaderSearch(page) {
         assert.ok(desktopHeaderSearch.width >= 320, 'desktop header search keeps its expected width');
         assert.ok(desktopHeaderSearch.placeholder.length <= 24, 'desktop header search placeholder is concise enough to fit');
         assert.match(desktopHeaderSearch.placeholder, /source/i, 'desktop header search placeholder still names sources');
+
+        const categoryEditions = [];
+        for (const width of [320, 390, 1440]) {
+            const snapshot = await inspectCategoryEditions(page, width);
+            categoryEditions.push(snapshot);
+
+            assert.equal(snapshot.theme, 'dark', `category page keeps dark theme at ${width}px`);
+            assert.ok(snapshot.scrollWidth <= width + 1, `category page width stays contained at ${width}px`);
+            assert.ok(snapshot.bodyScrollWidth <= width + 1, `category body width stays contained at ${width}px`);
+            assert.ok(snapshot.nav, `category editions strip renders at ${width}px`);
+            assert.ok(snapshot.nav.scrollWidth <= snapshot.nav.clientWidth + 1, `category editions strip does not overflow at ${width}px`);
+            assert.equal(snapshot.items.length, 4, `category editions strip shows all four editions at ${width}px`);
+
+            const current = snapshot.items.find(item => item.ariaCurrent === 'page');
+            assert.ok(current, `category editions strip marks the current edition at ${width}px`);
+            const currentBackground = blend(parseRgb(current.backgroundColor), parseHex(snapshot.paper));
+            assert.ok(contrast(parseRgb(current.color), currentBackground) >= 7, `current edition chip contrast is AAA-sized at ${width}px`);
+
+            for (const item of snapshot.items) {
+                assert.ok(item.rect.height >= 44, `${item.text} edition chip keeps a 44px tap target at ${width}px`);
+                assert.ok(item.rect.x >= -1, `${item.text} edition chip stays inside the left viewport edge at ${width}px`);
+                assert.ok(item.rect.right <= width + 1, `${item.text} edition chip stays inside the right viewport edge at ${width}px`);
+                assert.ok(item.labelScrollWidth <= item.labelClientWidth + 1, `${item.text} edition label does not overflow at ${width}px`);
+                assert.match(item.countText, /^\d+$/, `${item.text} edition chip exposes a 24h count at ${width}px`);
+            }
+        }
 
         for (const width of [320, 390]) {
             const searchWidth = await inspectPageWidth(page, '/search?q=afrique', width);
@@ -743,6 +824,7 @@ async function inspectDesktopHeaderSearch(page) {
             formControls,
             subpagePolish,
             desktopHeaderSearch,
+            categoryEditions,
             desktopArticlePolish,
             saveButton: { contrast: Number(saveButtonContrast.toFixed(2)), pressedButtonStyle },
         }));

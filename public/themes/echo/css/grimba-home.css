@@ -2355,6 +2355,72 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-most-read__rank {
     padding: 10px 12px;
     border-radius: 10px;
 }
+.grimba-topic-top-sources__title {
+    font-family: var(--gn-font-body);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+.grimba-category-editions {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+}
+.grimba-category-editions__item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 3px 8px;
+    min-width: 0;
+    min-height: 54px;
+    padding: 9px 10px;
+    border: 1px solid rgba(26, 23, 19, 0.10);
+    border-radius: 12px;
+    background:
+        linear-gradient(90deg, rgba(59, 130, 246, 0.06), transparent 42%, rgba(232, 76, 61, 0.05)),
+        rgba(255, 255, 255, 0.48);
+    color: var(--gn-ink);
+    text-decoration: none;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+.grimba-category-editions__item span {
+    min-width: 0;
+    overflow: hidden;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.grimba-category-editions__item strong {
+    color: var(--gn-ink);
+    font-family: var(--gn-font-display);
+    font-size: 22px;
+    line-height: 1;
+}
+.grimba-category-editions__item em {
+    grid-column: 1 / -1;
+    color: var(--gn-ink-soft);
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+.grimba-category-editions__item.is-current {
+    border-color: rgba(26, 23, 19, 0.28);
+    background: #15130f;
+    color: #fffaf0;
+}
+body.grimba-home .grimba-category-editions__item.is-current,
+body.grimba-home .grimba-category-editions__item.is-current span {
+    color: #fffaf0;
+}
+.grimba-category-editions__item.is-current strong,
+.grimba-category-editions__item.is-current em {
+    color: #fffaf0;
+}
 .grimba-similar-source {
     padding: 14px 16px;
     border-radius: 12px;
@@ -2382,6 +2448,32 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card {
     color: #fffaf0 !important;
     box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.03);
 }
+html.grimba-home-html[data-bs-theme="dark"] .grimba-category-editions__item {
+    background:
+        linear-gradient(90deg, rgba(59, 130, 246, 0.12), transparent 42%, rgba(232, 76, 61, 0.10)),
+        rgba(246, 241, 232, 0.07);
+    border-color: rgba(246, 241, 232, 0.16);
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-category-editions__item strong {
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-category-editions__item em {
+    color: var(--gn-ink-soft);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-category-editions__item.is-current {
+    border-color: rgba(255, 250, 240, 0.42);
+    background: #fffaf0;
+    color: #15130f;
+}
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-category-editions__item.is-current,
+html.grimba-home-html[data-bs-theme="dark"] body.grimba-home .grimba-category-editions__item.is-current span {
+    color: #15130f;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-category-editions__item.is-current strong,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-category-editions__item.is-current em {
+    color: #15130f;
+}
 html.grimba-home-html[data-bs-theme="dark"] .grimba-similar__chip:hover,
 html.grimba-home-html[data-bs-theme="dark"] .grimba-topic-source-card:hover,
 html.grimba-home-html[data-bs-theme="dark"] .grimba-similar-source:hover,
@@ -2398,6 +2490,28 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-similar-source .opacity-65,
 html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card .opacity-65 {
     opacity: 1 !important;
     color: var(--gn-ink-soft);
+}
+
+@media (max-width: 767.98px) {
+    .grimba-category-editions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .grimba-category-editions__item {
+        grid-template-columns: minmax(0, 1fr);
+        min-height: 68px;
+    }
+    .grimba-category-editions__item span {
+        font-size: 14px;
+        line-height: 1.1;
+        white-space: normal;
+    }
+    .grimba-category-editions__item strong {
+        justify-self: start;
+        font-size: 20px;
+    }
+    .grimba-category-editions__item em {
+        grid-column: auto;
+    }
 }
 
 /* ------------------------------------------------------------

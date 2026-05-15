@@ -31,21 +31,38 @@ class EditorialCategoriesTest extends TestCase
 
     public function test_homepage_chips_include_news_categories_for_selected_editorial_location(): void
     {
+        $africaId = $this->category('Afrique', 1);
         $europeId = $this->category('Europe', 2);
+        $americasId = $this->category('Amériques', 3);
+        $internationalId = $this->category('International', 4);
         $politicsId = $this->category('Politique', 11);
         $sourceId = $this->source('Editorial Categories Homepage ' . Str::lower(Str::random(8)), 'FR');
         $postId = $this->postId('Editorial categories election fixture ' . Str::lower(Str::random(8)), $sourceId);
+        $africaPostId = $this->postId('Editorial categories Africa fixture ' . Str::lower(Str::random(8)), $this->source('Editorial Categories Africa ' . Str::lower(Str::random(8)), 'ZA'));
+        $americasPostId = $this->postId('Editorial categories Americas fixture ' . Str::lower(Str::random(8)), $this->source('Editorial Categories Americas ' . Str::lower(Str::random(8)), 'US'));
+        $internationalPostId = $this->postId('Editorial categories International fixture ' . Str::lower(Str::random(8)), $this->source('Editorial Categories International ' . Str::lower(Str::random(8)), 'QA'));
 
         DB::table('post_categories')->insertOrIgnore([
             ['post_id' => $postId, 'category_id' => $europeId],
             ['post_id' => $postId, 'category_id' => $politicsId],
+            ['post_id' => $africaPostId, 'category_id' => $africaId],
+            ['post_id' => $americasPostId, 'category_id' => $americasId],
+            ['post_id' => $internationalPostId, 'category_id' => $internationalId],
         ]);
 
         $this->withUnencryptedCookies(['grimba_region' => 'europe'])
             ->get('/')
             ->assertOk()
             ->assertSee('data-grimba-edition="europe"', false)
+            ->assertSee('data-category-id="' . $africaId . '"', false)
+            ->assertSee('data-category-id="' . $europeId . '"', false)
+            ->assertSee('data-category-id="' . $americasId . '"', false)
+            ->assertSee('data-category-id="' . $internationalId . '"', false)
             ->assertSee('data-category-id="' . $politicsId . '"', false)
+            ->assertSee('Afrique')
+            ->assertSee('Europe')
+            ->assertSee('Amériques')
+            ->assertSee('International')
             ->assertSee('Politique');
     }
 
