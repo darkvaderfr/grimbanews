@@ -98,6 +98,12 @@ class SourceClassifierCommandTest extends TestCase
             'Témoignages.RE' => ['left', 'FR'],
             'Boursier.com' => ['center', 'FR'],
             'Woopets' => ['center', 'FR'],
+            'TF1 Info' => ['center', 'FR'],
+            'Europe 1' => ['right', 'FR'],
+            'Radio-Canada' => ['center', 'CA'],
+            "L'Orient-Le Jour" => ['center', 'LB'],
+            'Actualite.cd' => ['center', 'CD'],
+            'Actu17' => ['right', 'FR'],
         ];
 
         foreach ($cases as $name => [$bias, $country]) {
