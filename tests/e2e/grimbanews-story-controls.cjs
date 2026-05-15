@@ -254,6 +254,17 @@ function assertModal(metrics, scenarioKey) {
         assertComponent(reader, scenario.key);
         assert(/Lire l'|Source originale|Texte intégral|Extrait disponible/.test(reader.text), `${scenario.key} reader module copy`);
 
+        await page.locator('.grimba-source-drilldown').first().scrollIntoViewIfNeeded();
+        const provenance = await collectComponent(page, '.grimba-source-drilldown');
+        const provenanceCountries = await collectComponent(page, '.grimba-source-drilldown__countries');
+        assertComponent(provenance, scenario.key);
+        assertComponent(provenanceCountries, scenario.key);
+        const provenanceText = await page.locator('.grimba-source-drilldown').first().innerText();
+        assert(/Provenance des sources/.test(provenance.text), `${scenario.key} provenance kicker copy`);
+        assert(/Matrice des angles/.test(provenance.text), `${scenario.key} provenance title copy`);
+        assert(/Ouvrir dans le dossier/.test(provenanceText), `${scenario.key} provenance dossier links`);
+        assert(!/Lire cette source|Propriété/.test(provenanceText), `${scenario.key} provenance avoids repeated source ownership copy`);
+
         await page.locator('.grimba-story-article').first().scrollIntoViewIfNeeded();
         const articleCard = await collectComponent(page, '.grimba-story-article');
         const sourceRow = await collectComponent(page, '.grimba-story-article__source-row');
@@ -287,6 +298,8 @@ function assertModal(metrics, scenarioKey) {
             heroTabs: heroTabs.rect,
             articleTabs: articleTabs.rect,
             reader: reader.rect,
+            provenance: provenance.rect,
+            provenanceCountries: provenanceCountries.rect,
             articleCard: articleCard.rect,
             compareToggle: compareToggle.rect,
             toolbar: toolbar.rect,
