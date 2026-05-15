@@ -50,6 +50,7 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('.grimba-header__tools > a', $css);
         $this->assertStringContainsString('.grimba-header__tools .grimba-edition-toggle', $css);
         $this->assertStringContainsString(':not([class*="grimba-edition-toggle__option"])', $css);
+        $this->assertMatchesRegularExpression('/\\.grimba-lang-toggle\\s*\\{[^}]*flex:\\s*0 0 auto;[^}]*width:\\s*auto;[^}]*max-width:\\s*none;/s', $css);
         $this->assertStringNotContainsString('.grimba-header__tools a {', $css);
     }
 

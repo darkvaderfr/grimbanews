@@ -1470,10 +1470,14 @@ body.grimba-home .echo-author-area {
 }
 .grimba-lang-toggle {
     position: relative;
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none;
     min-width: 48px;
     min-height: 30px;
     padding: 3px 5px 3px 7px;
     gap: 4px;
+    white-space: nowrap;
 }
 .grimba-lang-toggle__current,
 .grimba-lang-toggle__next {
