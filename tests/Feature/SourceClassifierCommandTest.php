@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Support\GrimbaSourceClassifier;
 use Botble\ACL\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -68,6 +69,32 @@ class SourceClassifierCommandTest extends TestCase
         $this->assertSame(92, (int) $row->classification_confidence);
         $this->assertSame('source-map-v1', $row->classification_method);
         $this->assertNotNull($row->classified_at);
+    }
+
+    public function test_source_classifier_maps_current_high_volume_name_only_sources(): void
+    {
+        $cases = [
+            'Gematsu' => ['center', 'US'],
+            'Sports Illustrated' => ['center', 'US'],
+            'Android Police' => ['center', 'US'],
+            'Phoronix' => ['center', 'US'],
+            'BleepingComputer' => ['center', 'US'],
+            'Mashable' => ['center', 'US'],
+            'Defector.com' => ['left', 'US'],
+            'NHL News' => ['center', 'US'],
+            'DW (English)' => ['center', 'DE'],
+            'TV5MONDE' => ['center', 'FR'],
+        ];
+
+        foreach ($cases as $name => [$bias, $country]) {
+            $profile = GrimbaSourceClassifier::classify($name, null, Str::slug($name));
+
+            $this->assertNotNull($profile, $name);
+            $this->assertSame($bias, $profile['bias_rating'], $name);
+            $this->assertSame($country, $profile['country'], $name);
+            $this->assertGreaterThanOrEqual(80, $profile['confidence'], $name);
+            $this->assertSame('source-map-v1', $profile['method'], $name);
+        }
     }
 
     public function test_source_classifier_respects_manual_lock_notes(): void
