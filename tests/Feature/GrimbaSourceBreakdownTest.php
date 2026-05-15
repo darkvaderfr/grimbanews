@@ -57,5 +57,7 @@ class GrimbaSourceBreakdownTest extends TestCase
         $this->assertSame(1, $breakdown['originBuckets']->firstWhere('key', 'africa')->count);
         $this->assertSame(1, $breakdown['originBiasBuckets']->firstWhere('key', 'americas')->bias['left']->count);
         $this->assertStringContainsString('US', $breakdown['countryBuckets']->firstWhere('key', 'US')->label);
+        $this->assertSame(1, $breakdown['countryBiasBuckets']->firstWhere('key', 'US')->bias['left']->count);
+        $this->assertSame('Gauche', $breakdown['countryBiasBuckets']->firstWhere('key', 'US')->dominant_bias);
     }
 }

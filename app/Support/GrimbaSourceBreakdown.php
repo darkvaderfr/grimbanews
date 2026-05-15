@@ -46,6 +46,7 @@ class GrimbaSourceBreakdown
             'originBuckets' => $originBuckets,
             'countryBuckets' => self::countryBuckets($sources),
             'originBiasBuckets' => self::originBiasBuckets($originBuckets),
+            'countryBiasBuckets' => self::countryBiasBuckets($sources),
             'topOrigin' => $topOrigin,
             'topOriginPct' => $topOrigin ? (int) round($topOrigin->count * 100 / $total) : 0,
         ];
@@ -308,6 +309,50 @@ class GrimbaSourceBreakdown
                     'bias' => $bias,
                 ];
             })
+            ->values();
+    }
+
+    private static function countryBiasBuckets(Collection $sources): Collection
+    {
+        $biasMeta = [
+            'left' => ['label' => __('Gauche'), 'color' => '#3b82f6'],
+            'center' => ['label' => __('Centre'), 'color' => '#9ca3af'],
+            'right' => ['label' => __('Droite'), 'color' => '#ef4444'],
+            'unknown' => ['label' => __('Non classé'), 'color' => '#64748b'],
+        ];
+
+        return $sources
+            ->groupBy(fn ($source) => $source->country_code ?: 'unknown')
+            ->map(function (Collection $items, string $code) use ($biasMeta): object {
+                $first = $items->first();
+                $bias = collect($biasMeta)
+                    ->map(function (array $meta, string $key) use ($items): object {
+                        $count = $items->filter(fn ($source) => ($source->bias ?: 'unknown') === $key)->count();
+
+                        return (object) [
+                            'key' => $key,
+                            'label' => $meta['label'],
+                            'color' => $meta['color'],
+                            'count' => $count,
+                            'pct' => (int) round($count * 100 / max(1, $items->count())),
+                        ];
+                    });
+                $dominant = $bias->sortByDesc('count')->first();
+
+                return (object) [
+                    'key' => $code,
+                    'label' => $code === 'unknown' ? __('Non renseigné') : self::countryLabel($code),
+                    'origin_key' => $first?->origin_key ?: 'unknown',
+                    'origin_label' => $first?->origin_label ?: self::originLabel('unknown'),
+                    'color' => $first?->origin_color ?: self::originColor('unknown'),
+                    'items' => $items->values(),
+                    'count' => $items->count(),
+                    'bias' => $bias,
+                    'dominant_bias' => $dominant?->label ?? __('Non classé'),
+                    'dominant_pct' => $dominant ? (int) $dominant->pct : 0,
+                ];
+            })
+            ->sortByDesc('count')
             ->values();
     }
 

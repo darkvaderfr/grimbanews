@@ -30,6 +30,7 @@
     $originBuckets = $breakdown['originBuckets'];
     $countryBuckets = $breakdown['countryBuckets'];
     $originBiasBuckets = $breakdown['originBiasBuckets'];
+    $countryBiasBuckets = $breakdown['countryBiasBuckets'];
     $topOrigin = $breakdown['topOrigin'];
     $topOriginPct = $breakdown['topOriginPct'];
 @endphp
@@ -873,6 +874,12 @@
             gap: 8px;
         }
 
+        #{{ $uid }} .grimba-breakdown__origin-card-title-spaced {
+            margin-top: 16px !important;
+            padding-top: 14px;
+            border-top: 1px solid var(--gbd-line);
+        }
+
         #{{ $uid }} .grimba-breakdown__origin-bias {
             display: grid;
             gap: 6px;
@@ -880,6 +887,62 @@
             border: 1px solid var(--gbd-line);
             border-radius: 14px;
             background: color-mix(in srgb, var(--dot) 8%, var(--gbd-paper));
+        }
+
+        #{{ $uid }} .grimba-breakdown__country-bias-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__country-bias-card {
+            min-width: 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(96px, .62fr);
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--gbd-line);
+            border-radius: 14px;
+            background:
+                radial-gradient(circle at 12% 12%, color-mix(in srgb, var(--dot) 15%, transparent), transparent 34%),
+                color-mix(in srgb, var(--dot) 7%, var(--gbd-paper));
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
+        }
+
+        #{{ $uid }} .grimba-breakdown__country-bias-copy {
+            min-width: 0;
+            display: grid;
+            gap: 3px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__country-bias-copy strong {
+            color: var(--gbd-ink);
+            font-weight: 850;
+            line-height: 1.15;
+            overflow-wrap: anywhere;
+        }
+
+        #{{ $uid }} .grimba-breakdown__country-bias-copy span,
+        #{{ $uid }} .grimba-breakdown__country-bias-copy em {
+            color: var(--gbd-muted);
+            font-size: 11px;
+            font-style: normal;
+            font-weight: 750;
+            line-height: 1.2;
+        }
+
+        #{{ $uid }} .grimba-breakdown__country-bias-viz {
+            min-width: 0;
+            display: grid;
+            gap: 6px;
+        }
+
+        #{{ $uid }} .grimba-breakdown__country-bias-sources {
+            display: flex;
+            justify-content: flex-end;
+            gap: 4px;
+            min-width: 0;
+            overflow: hidden;
         }
 
         #{{ $uid }} .grimba-breakdown__origin-bias-head {
@@ -1052,6 +1115,14 @@
 
             #{{ $uid }} .grimba-breakdown__country-chip {
                 white-space: normal;
+            }
+
+            #{{ $uid }} .grimba-breakdown__country-bias-card {
+                grid-template-columns: 1fr;
+            }
+
+            #{{ $uid }} .grimba-breakdown__country-bias-sources {
+                justify-content: flex-start;
             }
         }
     </style>
@@ -1269,6 +1340,45 @@
                             </article>
                         @endforeach
                     </div>
+
+                    @if($countryBiasBuckets->isNotEmpty())
+                        <h3 class="grimba-breakdown__origin-card-title-spaced">{{ __('Biais par pays source') }}</h3>
+                        <div class="grimba-breakdown__country-bias-grid">
+                            @foreach($countryBiasBuckets->take(6) as $bucket)
+                                <article class="grimba-breakdown__country-bias-card" style="--dot: {{ $bucket->color }};">
+                                    <div class="grimba-breakdown__country-bias-copy">
+                                        <strong>{{ $bucket->label }}</strong>
+                                        <span>{{ $bucket->origin_label }} · {{ trans_choice(':count source|:count sources', $bucket->count, ['count' => $bucket->count]) }}</span>
+                                        <em>{{ __('Dominant') }}: {{ $bucket->dominant_bias }} {{ $bucket->dominant_pct }}%</em>
+                                    </div>
+                                    <div class="grimba-breakdown__country-bias-viz">
+                                        <div class="grimba-breakdown__origin-triptych" aria-label="{{ __('Répartition des biais pour :origin', ['origin' => $bucket->label]) }}">
+                                            @foreach(['left', 'center', 'right'] as $biasKey)
+                                                @php
+                                                    $bias = $bucket->bias[$biasKey];
+                                                @endphp
+                                                <span title="{{ $bias->label }} · {{ $bias->pct }}%" style="--dot: {{ $bias->color }}; --w: {{ max(1, $bias->pct) }}%;"></span>
+                                            @endforeach
+                                        </div>
+                                        <div class="grimba-breakdown__country-bias-sources" aria-label="{{ __('Sources') }}">
+                                            @foreach($bucket->items->take(3) as $source)
+                                                {!! Theme::partial('source-logo', [
+                                                    'source_id' => $source->key,
+                                                    'name' => $source->name,
+                                                    'website' => $source->website,
+                                                    'logo_url' => $source->logo_url ?? null,
+                                                    'logo_status' => $source->logo_status ?? 'unknown',
+                                                    'logo_checked_at' => $source->logo_checked_at ?? null,
+                                                    'size' => 20,
+                                                    'color' => $bucket->color,
+                                                ]) !!}
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

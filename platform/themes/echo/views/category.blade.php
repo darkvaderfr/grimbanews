@@ -34,27 +34,39 @@
         'center' => $catKnown ? round($catBias['center'] * 100 / $catKnown) : 0,
         'right'  => $catKnown ? round($catBias['right']  * 100 / $catKnown) : 0,
     ];
+    $catBiasLabels = [
+        'left' => __('Gauche'),
+        'center' => __('Centre'),
+        'right' => __('Droite'),
+    ];
+    $catDominantKey = collect($catPct)->sortDesc()->keys()->first();
+    $catDominantLabel = $catKnown ? ($catBiasLabels[$catDominantKey] ?? __('Non classé')) : __('Non classé');
+    $catFresh24 = Post::query()
+        ->whereHas('categories', fn ($q) => $q->where('categories.id', $category->id))
+        ->where('status', 'published')
+        ->whereRaw(GrimbaPostRecency::expression() . ' >= ?', [now()->subDay()->toDateTimeString()])
+        ->count();
 @endphp
 
 <section class="grimba-category-hero container">
-    <header class="glass-panel p-4 p-md-5 mb-4">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-            <div>
+    <header class="glass-panel grimba-category-hero__panel p-4 p-md-5 mb-4">
+        <div class="grimba-category-hero__top">
+            <div class="grimba-category-hero__intro">
                 <span class="grimba-methodology__kicker">Sujet</span>
                 <h1 class="grimba-methodology__title mt-2 mb-2">{{ $category->name }}</h1>
                 @if($category->description)
-                    <p class="mb-0 opacity-85" style="max-width: 62ch;">
+                    <p class="grimba-category-hero__copy mb-0">
                         {!! \Illuminate\Support\Str::limit(strip_tags($category->description), 260) !!}
                     </p>
                 @else
-                    <p class="mb-0 opacity-85" style="max-width: 62ch;">
-                        Toutes les histoires classées dans <strong>{{ $category->name }}</strong>, côté à côté avec leurs biais éditoriaux et sources.
+                    <p class="grimba-category-hero__copy mb-0">
+                        {{ __('Toutes les histoires classées dans :topic, côté à côté avec leurs biais éditoriaux, sources et pays d’origine.', ['topic' => $category->name]) }}
                     </p>
                 @endif
             </div>
 
             <button type="button"
-                    class="btn-grimba {{ $isFollowed ? 'btn-grimba--solid' : 'btn-grimba--ghost' }}"
+                    class="btn-grimba grimba-category-hero__follow {{ $isFollowed ? 'btn-grimba--solid' : 'btn-grimba--ghost' }}"
                     data-grimba-follow="{{ $category->id }}"
                     data-grimba-category-hero>
                 <span class="grimba-category-hero__glyph">{{ $isFollowed ? '✓' : '+' }}</span>
@@ -63,24 +75,45 @@
         </div>
 
         @if($catKnown > 0)
-            <div class="mt-4">
-                <p class="small opacity-75 mb-2">
-                    <strong>Couverture sur {{ $category->name }}</strong> ·
-                    {{ $catTotal }} {{ $catTotal === 1 ? 'article archivé' : 'articles archivés' }}{{ $catBias['unknown'] > 0 ? ' (' . $catBias['unknown'] . ' non classé' . ($catBias['unknown'] === 1 ? '' : 's') . ')' : '' }}
-                </p>
-                <div style="display:flex;height:14px;border-radius:9999px;overflow:hidden;background:rgba(0,0,0,.08);">
-                    <div style="width:{{ $catPct['left'] }}%;background:#3b82f6;" title="Gauche {{ $catPct['left'] }}%"></div>
-                    <div style="width:{{ $catPct['center'] }}%;background:#a8a8a8;" title="Centre {{ $catPct['center'] }}%"></div>
-                    <div style="width:{{ $catPct['right'] }}%;background:#e84c3d;" title="Droite {{ $catPct['right'] }}%"></div>
+            <div class="grimba-category-signal mt-4">
+                <div class="grimba-category-signal__summary">
+                    <div>
+                        <span>{{ __('Signal éditorial') }}</span>
+                        <strong>{{ __('Couverture sur :topic', ['topic' => $category->name]) }}</strong>
+                    </div>
+                    <em>
+                        {{ trans_choice(':count article archivé|:count articles archivés', $catTotal, ['count' => $catTotal]) }}
+                        @if($catBias['unknown'] > 0)
+                            · {{ trans_choice(':count non classé|:count non classés', $catBias['unknown'], ['count' => $catBias['unknown']]) }}
+                        @endif
+                    </em>
                 </div>
-                <div class="d-flex justify-content-between small mt-2">
-                    <span style="color:#3b82f6;font-weight:600;">Gauche {{ $catPct['left'] }}%</span>
-                    <span style="color:#a8a8a8;font-weight:600;">Centre {{ $catPct['center'] }}%</span>
-                    <span style="color:#e84c3d;font-weight:600;">Droite {{ $catPct['right'] }}%</span>
+                <div class="grimba-category-signal__bar" aria-label="{{ __('Distribution des biais') }}">
+                    <span style="--w: {{ $catPct['left'] }}%; --dot: #3b82f6;" title="{{ __('Gauche') }} {{ $catPct['left'] }}%"></span>
+                    <span style="--w: {{ $catPct['center'] }}%; --dot: #a8a8a8;" title="{{ __('Centre') }} {{ $catPct['center'] }}%"></span>
+                    <span style="--w: {{ $catPct['right'] }}%; --dot: #e84c3d;" title="{{ __('Droite') }} {{ $catPct['right'] }}%"></span>
                 </div>
-                <p class="small opacity-60 mt-2 mb-0">
-                    Distribution réelle des biais sur les 200 derniers articles de ce sujet.
-                    Quand un côté domine, vous voyez immédiatement où la couverture s'écarte.
+                <div class="grimba-category-signal__legend">
+                    <span style="--dot:#3b82f6;">{{ __('Gauche') }} {{ $catPct['left'] }}%</span>
+                    <span style="--dot:#a8a8a8;">{{ __('Centre') }} {{ $catPct['center'] }}%</span>
+                    <span style="--dot:#e84c3d;">{{ __('Droite') }} {{ $catPct['right'] }}%</span>
+                </div>
+                <div class="grimba-category-signal__stats">
+                    <article>
+                        <span>{{ __('Dominant') }}</span>
+                        <strong>{{ $catDominantLabel }}</strong>
+                    </article>
+                    <article>
+                        <span>{{ __('Fraîcheur 24h') }}</span>
+                        <strong>{{ $catFresh24 }}</strong>
+                    </article>
+                    <article>
+                        <span>{{ __('Base analysée') }}</span>
+                        <strong>{{ $catKnown }}</strong>
+                    </article>
+                </div>
+                <p class="grimba-category-signal__note mb-0">
+                    {{ __("Distribution réelle des biais sur les 200 derniers articles du sujet. Si un côté domine, l’écart devient visible avant d’ouvrir un article.") }}
                 </p>
             </div>
         @endif
@@ -120,15 +153,23 @@
                     @php
                         $__tsBias = \App\Ground\Bias::tier($ts->bias_rating ?? null, $ts->bias_score ?? null);
                         $__tsFact = \App\Ground\Factuality::tier($ts->credibility_score ?? null);
+                        $__tsOriginKey = \App\Support\GrimbaSourceBreakdown::originKeyForCountry($ts->country ?? null);
+                        $__tsCountry = \App\Support\GrimbaSourceBreakdown::countryLabel($ts->country ?? null);
+                        $__tsOrigin = \App\Support\GrimbaSourceBreakdown::originLabel($__tsOriginKey);
+                        $__tsOriginColor = \App\Support\GrimbaSourceBreakdown::originColor($__tsOriginKey);
                     @endphp
                     <div class="col-12 col-md-6 col-lg-3">
                         <a href="{{ url('/sources/' . $ts->slug) }}"
-                           class="grimba-topic-source-card">
-                            <strong style="font-size:13.5px; font-family:'Public Sans',system-ui,sans-serif;">{{ $ts->name }}</strong>
-                            <div class="small opacity-65 mt-1">
-                                {{ trans_choice(':count article|:count articles', (int) $ts->article_count, ['count' => (int) $ts->article_count]) }}
+                           class="grimba-topic-source-card"
+                           style="--topic-origin-color: {{ $__tsOriginColor }};">
+                            <span class="grimba-topic-source-card__rank">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                            <strong>{{ $ts->name }}</strong>
+                            <div class="grimba-topic-source-card__meta">
+                                <span>{{ trans_choice(':count article|:count articles', (int) $ts->article_count, ['count' => (int) $ts->article_count]) }}</span>
+                                <span>{{ $__tsCountry }}</span>
                             </div>
-                            <div class="d-flex flex-wrap gap-1 mt-2">
+                            <div class="grimba-topic-source-card__chips">
+                                <span class="grimba-topic-source-card__origin">{{ $__tsOrigin }}</span>
                                 {!! Theme::partial('bias-chip', ['tier' => $__tsBias, 'size' => 'sm']) !!}
                                 @if($__tsFact !== 'unknown')
                                     {!! Theme::partial('factuality-chip', ['tier' => $__tsFact, 'size' => 'sm', 'showLabel' => false]) !!}
