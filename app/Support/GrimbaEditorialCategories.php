@@ -128,7 +128,6 @@ class GrimbaEditorialCategories
             ])
             ->orderBy('order')
             ->get()
-            ->filter(fn (Category $category): bool => (int) ($category->posts_count ?? 0) > 0)
             ->take($limit)
             ->values();
     }

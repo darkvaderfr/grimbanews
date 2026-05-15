@@ -31,45 +31,42 @@
 @endphp
 <header class="grimba-header">
     <div class="grimba-header__meta">
-        <div class="container-xxl d-flex flex-wrap justify-content-between align-items-center py-1 grimba-utility-bar">
-            <div class="small opacity-75 d-flex align-items-center gap-2">
+        <div class="container-xxl grimba-utility-bar py-1">
+            <div class="grimba-utility-bar__scroll">
+                <div class="small opacity-75 d-flex align-items-center gap-2 grimba-utility-bar__cluster">
                 {{-- Theme as icon-only toggle — label moved to tooltip --}}
-                <div class="grimba-theme-switch" role="radiogroup" aria-label="{{ __('Choix du thème') }}">
-                    <button type="button" data-grimba-theme="light" aria-pressed="false"
-                            aria-label="{{ __('Thème clair') }}" title="{{ __('Thème clair') }}">
-                        <span aria-hidden="true">☀</span>
-                    </button>
-                    <button type="button" data-grimba-theme="dark" aria-pressed="false"
-                            aria-label="{{ __('Thème sombre') }}" title="{{ __('Thème sombre') }}">
-                        <span aria-hidden="true">☾</span>
-                    </button>
-                    <button type="button" data-grimba-theme="auto" aria-pressed="true"
-                            aria-label="{{ __('Thème auto (suit le système)') }}" title="{{ __('Thème auto (suit le système)') }}">
-                        <span aria-hidden="true">◐</span>
-                    </button>
+                    <div class="grimba-theme-switch" role="radiogroup" aria-label="{{ __('Choix du thème') }}">
+                        <button type="button" data-grimba-theme="light" aria-pressed="false"
+                                aria-label="{{ __('Thème clair') }}" title="{{ __('Thème clair') }}">
+                            <span aria-hidden="true">☀</span>
+                        </button>
+                        <button type="button" data-grimba-theme="dark" aria-pressed="false"
+                                aria-label="{{ __('Thème sombre') }}" title="{{ __('Thème sombre') }}">
+                            <span aria-hidden="true">☾</span>
+                        </button>
+                        <button type="button" data-grimba-theme="auto" aria-pressed="true"
+                                aria-label="{{ __('Thème auto (suit le système)') }}" title="{{ __('Thème auto (suit le système)') }}">
+                            <span aria-hidden="true">◐</span>
+                        </button>
+                    </div>
+                    @include(Theme::getThemeNamespace('partials.home.lang-switch'))
+                    <span class="grimba-header-pulse">
+                        <span class="grimba-stat-pill">{{ trans_choice(':count nouveau ce matin|:count nouveaux ce matin', $pulse['new'], ['count' => $pulse['new']]) }}</span>
+                        <span class="grimba-stat-pill">{{ trans_choice(':count angle mort|:count angles morts', $pulse['blindspots'], ['count' => $pulse['blindspots']]) }}</span>
+                        <span class="grimba-stat-pill">{{ trans_choice(':count dossier actif|:count dossiers actifs', $pulse['clusters'], ['count' => $pulse['clusters']]) }}</span>
+                    </span>
                 </div>
-                <span class="opacity-25">·</span>
-                @include(Theme::getThemeNamespace('partials.home.lang-switch'))
-                <span class="opacity-25 d-none d-lg-inline">·</span>
-                <span class="grimba-header-pulse d-none d-lg-inline">
-                    {{ trans_choice(':count nouveau ce matin|:count nouveaux ce matin', $pulse['new'], ['count' => $pulse['new']]) }} ·
-                    {{ trans_choice(':count angle mort|:count angles morts', $pulse['blindspots'], ['count' => $pulse['blindspots']]) }} ·
-                    {{ trans_choice(':count dossier actif|:count dossiers actifs', $pulse['clusters'], ['count' => $pulse['clusters']]) }}
-                </span>
-            </div>
-            <div class="small d-flex align-items-center gap-2 grimba-header__tools">
-                <span class="d-none d-md-inline">{{ ucfirst($topDate) }}</span>
-                <span class="opacity-25 d-none d-md-inline">·</span>
-                <a href="{{ url('/pour-vous') }}" class="text-decoration-none" title="{{ __('Pour vous') }}">
-                    {{ __('Pour vous') }} (<span id="grimba-follow-count">{{ $followCount }}</span>)
-                </a>
-                <span class="opacity-25">·</span>
-                {{-- S178 — vault link in utility bar so readers find their saves. --}}
-                <a href="{{ url('/coffre') }}" class="text-decoration-none" title="{{ __('Mes articles sauvegardés') }}">
-                    <span aria-hidden="true">★</span>&nbsp;<span id="grimba-vault-count" data-grimba-vault-count>{{ $vaultCount }}</span>
-                </a>
-                <span class="opacity-25">·</span>
-                @include(Theme::getThemeNamespace('partials.home.region-dropdown'))
+                <div class="small d-flex align-items-center gap-2 grimba-header__tools">
+                    <span class="grimba-header-date">{{ ucfirst($topDate) }}</span>
+                    <a href="{{ url('/pour-vous') }}" class="grimba-header-tool-link" title="{{ __('Pour vous') }}">
+                        {{ __('Pour vous') }} <span id="grimba-follow-count">{{ $followCount }}</span>
+                    </a>
+                    {{-- S178 — vault link in utility bar so readers find their saves. --}}
+                    <a href="{{ url('/coffre') }}" class="grimba-header-tool-link" title="{{ __('Mes articles sauvegardés') }}">
+                        <span aria-hidden="true">★</span><span id="grimba-vault-count" data-grimba-vault-count>{{ $vaultCount }}</span>
+                    </a>
+                    @include(Theme::getThemeNamespace('partials.home.region-dropdown'))
+                </div>
             </div>
         </div>
     </div>
@@ -85,7 +82,6 @@
                 <a href="{{ url('/') }}" class="active">{{ __('Accueil') }}</a>
                 <a href="{{ url('/pour-vous') }}">{{ __('Pour vous') }}</a>
                 <a href="{{ url('/local') }}">{{ __('Local') }}</a>
-                <a href="{{ url('/angles-morts') }}">{{ __('Angles morts') }}</a>
                 <a href="{{ url('/sources') }}">{{ __('Sources') }}</a>
             </nav>
 

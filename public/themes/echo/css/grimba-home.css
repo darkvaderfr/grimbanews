@@ -136,6 +136,33 @@ html.grimba-home-html[data-theme="dark"] .echo-home-1-hero-area-top-story {
 }
 
 /* Dark-mode header surfaces — brighter glass so text stays readable */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-breaking,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-urgency {
+    color: #fffaf0;
+    border-bottom-color: rgba(246, 241, 232, 0.14);
+    background:
+        linear-gradient(90deg, rgba(59, 130, 246, 0.18), rgba(255, 255, 255, 0.03) 36%, rgba(232, 76, 61, 0.14)),
+        rgba(24, 20, 13, 0.92);
+    box-shadow: inset 0 -1px 0 rgba(246, 241, 232, 0.09);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-breaking__lede {
+    background: rgba(246, 241, 232, 0.09);
+    border-color: rgba(246, 241, 232, 0.16);
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(246, 241, 232, 0.08);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-breaking__eyebrow {
+    background: #fffaf0;
+    color: #15120e;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-breaking__headline,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-breaking__item {
+    color: #fffaf0 !important;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-breaking__item {
+    background: rgba(246, 241, 232, 0.08);
+    border-color: rgba(246, 241, 232, 0.12);
+    box-shadow: inset 0 1px 0 rgba(246, 241, 232, 0.08);
+}
 html.grimba-home-html[data-bs-theme="dark"] .grimba-header__main {
     background: rgba(28, 24, 17, 0.88);
     border-bottom-color: rgba(246, 241, 232, 0.12);
@@ -151,6 +178,12 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-chips {
     border-bottom-color: rgba(246, 241, 232, 0.08);
     color: var(--gn-ink-muted);
 }
+html.grimba-home-html[data-bs-theme="dark"] .grimba-chips__rail::before {
+    background: linear-gradient(90deg, rgba(18, 16, 7, 0.98), rgba(18, 16, 7, 0));
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-chips__rail::after {
+    background: linear-gradient(270deg, rgba(18, 16, 7, 0.98), rgba(18, 16, 7, 0));
+}
 html.grimba-home-html[data-bs-theme="dark"] .grimba-nav a { color: var(--gn-ink-muted); }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-nav a:hover,
 html.grimba-home-html[data-bs-theme="dark"] .grimba-nav a.active { color: var(--gn-ink); border-color: var(--gn-ink); }
@@ -161,6 +194,24 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-header__tools {
 }
 html.grimba-home-html[data-bs-theme="dark"] .grimba-header__tools > a {
     color: rgba(255, 250, 240, 0.92);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-stat-pill,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-header-tool-link {
+    background: rgba(246, 241, 232, 0.07);
+    border-color: rgba(246, 241, 232, 0.12);
+    color: rgba(255, 250, 240, 0.86);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-header-tool-link:hover,
+html.grimba-home-html[data-bs-theme="dark"] .grimba-header-tool-link:focus-visible {
+    background: rgba(246, 241, 232, 0.13);
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-header-date {
+    color: rgba(255, 250, 240, 0.72);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-theme-switch {
+    background: rgba(246, 241, 232, 0.07);
+    border-color: rgba(246, 241, 232, 0.14);
 }
 
 html.grimba-home-html[data-bs-theme="dark"] .grimba-search input {
@@ -1160,6 +1211,8 @@ body.grimba-home .echo-author-area {
     border-radius: 9999px;
     padding: 2px;
     margin-left: 0.25rem;
+    background: rgba(255, 255, 255, 0.34);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 .grimba-theme-switch button {
     appearance: none;
@@ -1243,41 +1296,175 @@ body.grimba-home img[alt=""] {
 }
 
 /* ------------------------------------------------------------
-   1. Urgency banner
+   1. Breaking ticker
    ------------------------------------------------------------ */
+.grimba-breaking,
 .grimba-urgency {
-    background: var(--gn-tan);
-    color: #1a1713;
-    border-bottom: 1px solid var(--gn-tan-strong);
+    position: relative;
+    z-index: 52;
+    overflow: hidden;
+    color: #191611;
+    border-bottom: 1px solid rgba(26, 23, 19, 0.12);
+    background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0.22) 100%),
+        linear-gradient(110deg, rgba(220, 200, 160, 0.96), rgba(244, 234, 207, 0.84) 52%, rgba(221, 203, 164, 0.92));
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.32);
     font-family: var(--gn-font-body);
     font-size: 0.9rem;
 }
-.grimba-urgency__text { font-weight: 500; }
-a.grimba-urgency__cta,
-.grimba-urgency__cta {
+.grimba-breaking::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(90deg, rgba(59, 130, 246, 0.10), transparent 28%, rgba(232, 76, 61, 0.09)),
+        repeating-linear-gradient(90deg, rgba(26, 23, 19, 0.045) 0 1px, transparent 1px 96px);
+    opacity: 0.44;
+}
+.grimba-breaking__inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.9rem;
+    min-height: 46px;
+    padding-top: 0.42rem;
+    padding-bottom: 0.42rem;
+}
+.grimba-breaking__lede {
+    position: relative;
+    display: inline-grid;
+    grid-template-columns: auto;
+    align-items: center;
+    gap: 0.72rem;
+    min-width: 0;
+    padding: 0.28rem;
+    border: 1px solid rgba(26, 23, 19, 0.12);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.38);
+    box-shadow: 0 14px 35px rgba(82, 58, 16, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.34);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+.grimba-breaking__eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    background: var(--gn-ink);
-    color: var(--gn-paper) !important;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: transform .2s ease, background .2s ease;
+    gap: 0.36rem;
+    min-height: 28px;
+    padding: 0 0.72rem;
+    border-radius: 999px;
+    background: #15120e;
+    color: #fff8ea;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
-.grimba-urgency__cta:hover { transform: translateY(-1px); background: #000; color: #fff; }
+.grimba-breaking__eyebrow::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #65d98b;
+    box-shadow: 0 0 0 4px rgba(101, 217, 139, 0.20);
+}
+.grimba-breaking__headline {
+    display: none;
+    min-width: 0;
+    overflow: hidden;
+    color: #201b13;
+    font-weight: 750;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+}
+.grimba-breaking__headline.is-changing {
+    opacity: 0;
+    transform: translateY(9px);
+}
+.grimba-breaking__viewport {
+    min-width: 0;
+    overflow: hidden;
+    padding-left: clamp(0.8rem, 2vw, 1.8rem);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.grimba-breaking__track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+    animation: grimbaBreakingMarquee 54s linear infinite;
+}
+.grimba-breaking__track:hover {
+    animation-play-state: paused;
+}
+.grimba-breaking__group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.72rem;
+    padding-right: 0.72rem;
+}
+.grimba-breaking__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 29rem;
+    min-width: 0;
+    padding: 0.16rem 0.48rem;
+    border: 1px solid rgba(26, 23, 19, 0.08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.23);
+    color: #201b13 !important;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.grimba-breaking__item::after {
+    content: none;
+}
+.grimba-breaking__title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.grimba-breaking__source,
+.grimba-breaking__time {
+    flex: 0 0 auto;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.72;
+}
+.grimba-breaking__time {
+    font-family: var(--gn-font-mono);
+    opacity: 0.54;
+}
+@keyframes grimbaBreakingMarquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .grimba-breaking__track {
+        animation: none;
+    }
+}
 
 /* ------------------------------------------------------------
    2. Header
    ------------------------------------------------------------ */
 .grimba-header { position: sticky; top: 0; z-index: 50; }
 .grimba-header__meta {
-    background: rgba(246, 241, 232, 0.7);
+    background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08)),
+        rgba(246, 241, 232, 0.74);
     border-bottom: 1px solid var(--gn-rule);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34);
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
     font-family: var(--gn-font-body);
     font-size: 0.85rem;
     /* S353 — collapse the meta strip when the page has scrolled. */
@@ -1286,15 +1473,64 @@ a.grimba-urgency__cta,
     max-height: 96px;
 }
 .grimba-utility-bar {
-    gap: 0.45rem 1rem;
+    position: relative;
+    min-width: 0;
+}
+.grimba-utility-bar__scroll {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+.grimba-utility-bar__scroll::-webkit-scrollbar {
+    display: none;
+}
+.grimba-utility-bar__cluster {
+    flex: 0 0 auto;
+    min-width: 0;
 }
 .grimba-header-pulse {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
     white-space: nowrap;
+}
+.grimba-stat-pill,
+.grimba-header-tool-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.24rem;
+    min-height: 26px;
+    padding: 0.18rem 0.5rem;
+    border: 1px solid rgba(26, 23, 19, 0.08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.38);
+    color: rgba(26, 23, 19, 0.76);
+    line-height: 1;
+    text-decoration: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+.grimba-header-tool-link:hover,
+.grimba-header-tool-link:focus-visible {
+    color: var(--gn-ink);
+    border-color: rgba(26, 23, 19, 0.18);
+    background: rgba(255, 255, 255, 0.62);
+}
+.grimba-header-date {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    color: rgba(26, 23, 19, 0.66);
 }
 .grimba-header__tools {
     color: rgba(26, 23, 19, 0.74);
     flex-wrap: nowrap;
     margin-left: auto;
+    flex: 0 0 auto;
 }
 .grimba-header__tools > a {
     color: rgba(26, 23, 19, 0.74);
@@ -1307,23 +1543,25 @@ a.grimba-urgency__cta,
     flex: 0 0 auto;
 }
 .grimba-header__main {
-    background: rgba(246, 241, 232, 0.85);
+    background:
+        linear-gradient(115deg, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0.05) 42%, rgba(255, 255, 255, 0.22)),
+        rgba(246, 241, 232, 0.84);
     border-radius: 0;
     border: none;
     border-bottom: 1px solid var(--gn-rule);
     box-shadow: 0 6px 20px rgba(26, 23, 19, 0.06);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(24px) saturate(1.18);
+    -webkit-backdrop-filter: blur(24px) saturate(1.18);
     /* S353 — slight shrink + lift on scroll. */
     transition: padding 0.22s ease, box-shadow 0.18s ease;
 }
+.grimba-header__main .container-xxl {
+    min-width: 0;
+}
 /* S353 — shrunk state set by JS observer on the html element. */
 html.grimba-header-shrunk .grimba-header__meta {
-    max-height: 0;
-    opacity: 0;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    border-bottom-width: 0;
+    max-height: 44px;
+    opacity: 1;
 }
 html.grimba-header-shrunk .grimba-header__main {
     box-shadow: 0 10px 28px rgba(26, 23, 19, 0.10);
@@ -1335,10 +1573,8 @@ html.grimba-header-shrunk .grimba-header__main .py-3 {
 @media (prefers-reduced-motion: reduce) {
     .grimba-header__meta, .grimba-header__main { transition: none; }
 }
-@media (max-width: 1500px) {
-    .grimba-header-pulse { display: none !important; }
-}
 @media (max-width: 1199.98px) {
+    .grimba-header-date { display: none; }
     .grimba-edition-toggle__count { display: none; }
     .grimba-edition-toggle__option { padding-left: 10px; padding-right: 10px; }
 }
@@ -1479,10 +1715,13 @@ button.btn-grimba--solid,
    3. Topic chip strip
    ------------------------------------------------------------ */
 .grimba-chips {
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.06), rgba(246, 241, 232, 0.76) 34%, rgba(232, 76, 61, 0.06));
+    background:
+        linear-gradient(90deg, rgba(59, 130, 246, 0.08), rgba(246, 241, 232, 0.70) 30%, rgba(232, 76, 61, 0.07)),
+        rgba(246, 241, 232, 0.52);
     border-bottom: 1px solid var(--gn-rule);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34);
+    backdrop-filter: blur(18px) saturate(1.12);
+    -webkit-backdrop-filter: blur(18px) saturate(1.12);
     overflow-x: clip;
     /* S146 — backdrop-filter creates a new stacking context. Without
        an explicit z-index, this strip paints later in DOM order than
@@ -1497,19 +1736,48 @@ button.btn-grimba--solid,
     max-width: 100%;
     overflow-x: clip;
 }
+.grimba-chips__rail {
+    position: relative;
+    overflow: hidden;
+}
+.grimba-chips__rail::before,
+.grimba-chips__rail::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    width: clamp(1.8rem, 5vw, 5rem);
+    pointer-events: none;
+}
+.grimba-chips__rail::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(246, 241, 232, 0.96), rgba(246, 241, 232, 0));
+}
+.grimba-chips__rail::after {
+    right: 0;
+    background: linear-gradient(270deg, rgba(246, 241, 232, 0.96), rgba(246, 241, 232, 0));
+}
 .grimba-chips__row {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.5rem;
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    overflow-x: visible;
+    overflow-x: auto;
     overscroll-behavior-x: contain;
-    padding: 0.6rem 0;
+    padding: 0.62rem clamp(1.2rem, 4vw, 4.2rem);
     scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
 }
 .grimba-chips__row::-webkit-scrollbar { display: none; }
+.grimba-chips__row:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.46);
+    outline-offset: -3px;
+    border-radius: 999px;
+}
 
 .grimba-chip {
     position: relative;
@@ -1521,16 +1789,19 @@ button.btn-grimba--solid,
     min-height: 36px;
     padding: 0.4rem 0.88rem 0.4rem 0.96rem;
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.55);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.36)),
+        rgba(255, 255, 255, 0.55);
     border: 1px solid var(--gn-rule);
     color: var(--gn-ink);
     font-size: 0.95rem;
     font-weight: 500;
     white-space: nowrap;
     text-decoration: none;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 8px 24px rgba(26, 23, 19, 0.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), 0 10px 26px rgba(26, 23, 19, 0.06);
     transition: background .15s, border-color .15s, transform .15s;
     flex-shrink: 0;
+    scroll-snap-align: start;
 }
 .grimba-chip::after {
     content: '';
@@ -3534,7 +3805,18 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
 @media (max-width: 991px) {
     .grimba-briefing { border-right: 0; padding-right: 0; border-bottom: 1px solid var(--gn-rule); padding-bottom: 1.5rem; }
     .grimba-nav { display: none !important; }
-    .grimba-header__meta { display: none; }
+    .grimba-header__meta { display: block; }
+    .grimba-utility-bar__scroll {
+        justify-content: flex-start;
+        -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 2.2rem), transparent);
+        mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 2.2rem), transparent);
+    }
+    .grimba-header-pulse {
+        max-width: none;
+    }
+    .grimba-stat-pill {
+        font-size: 0.72rem;
+    }
     .grimba-header__main .container-xxl { gap: 1rem !important; }
     .grimba-search { max-width: none; margin: 0; }
     .grimba-hero__title { font-size: 1.5rem; }
@@ -3545,25 +3827,60 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
     body.grimba-home {
         overflow-x: hidden;
     }
-    .grimba-urgency .container-xxl {
-        flex-wrap: nowrap !important;
-        justify-content: space-between !important;
-        gap: 0.55rem !important;
-        padding: 0.45rem 1rem !important;
+    .grimba-breaking__inner {
+        display: flex;
+        gap: 0.68rem;
+        min-height: 42px;
+        padding: 0.38rem 0.92rem !important;
     }
-    .grimba-urgency__text {
+    .grimba-breaking__lede {
+        grid-template-columns: auto minmax(0, 1fr);
+        width: min(100%, 25rem);
+        padding-right: 0.58rem;
+    }
+    .grimba-breaking__eyebrow {
+        min-height: 26px;
+        padding: 0 0.58rem;
+        font-size: 0.64rem;
+    }
+    .grimba-breaking__headline {
+        display: block;
         min-width: 0;
         overflow: hidden;
-        font-size: 0.82rem;
+        font-size: 0.78rem;
         line-height: 1.2;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    .grimba-urgency__cta {
-        flex: 0 0 auto;
-        min-height: 32px;
-        padding: 0.36rem 0.68rem;
-        font-size: 0.78rem;
+    .grimba-breaking__viewport {
+        display: none;
+    }
+    .grimba-utility-bar {
+        padding-left: 0.72rem !important;
+        padding-right: 0.72rem !important;
+    }
+    .grimba-utility-bar__scroll {
+        gap: 0.5rem;
+    }
+    .grimba-utility-bar__cluster,
+    .grimba-header__tools {
+        gap: 0.42rem !important;
+    }
+    .grimba-theme-switch {
+        margin-left: 0;
+    }
+    .grimba-theme-switch button {
+        min-width: 28px;
+        padding: 0.12rem 0.38rem;
+        font-size: 0.68rem;
+    }
+    .grimba-stat-pill:nth-child(n+2) {
+        display: none;
+    }
+    .grimba-header-tool-link {
+        min-height: 26px;
+        padding: 0.16rem 0.46rem;
+        font-size: 0.72rem;
     }
     body.show-admin-bar {
         margin-top: 40px !important;

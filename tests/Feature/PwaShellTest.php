@@ -90,8 +90,9 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-mobile-nav', $css);
         $this->assertStringContainsString('background: #17140f;', $css);
         $this->assertStringContainsString('0 -14px 36px rgba(12, 10, 7, 0.78)', $css);
-        $this->assertStringContainsString('.grimba-urgency .container-xxl', $css);
-        $this->assertStringContainsString('min-height: 32px;', $css);
+        $this->assertStringContainsString('.grimba-breaking__inner', $css);
+        $this->assertStringContainsString('.grimba-breaking__viewport', $css);
+        $this->assertStringContainsString('min-height: 42px;', $css);
         $this->assertStringContainsString('.grimba-translation-note-wrap', $css);
         $this->assertStringContainsString('-webkit-line-clamp: 2;', $css);
         $this->assertStringContainsString('.grimba-sources > .container > header.glass-panel', $css);
@@ -293,7 +294,7 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('body.grimba-home .grimba-article-shell .container', $css);
         $this->assertStringContainsString('body.grimba-home .grimba-sub-main > .container-xxl', $css);
         $this->assertStringContainsString('flex-wrap: wrap;', $css);
-        $this->assertStringContainsString('overflow-x: visible;', $css);
+        $this->assertStringContainsString('overflow: visible;', $css);
         $this->assertStringContainsString('body.grimba-home[id^="post-"] .grimba-mobile-nav', $css);
         $this->assertStringContainsString('display: none !important;', $css);
         $this->assertStringContainsString('body.grimba-home .grimba-article-shell .details-share', $css);
