@@ -28,7 +28,7 @@ use Throwable;
  *   - one settings-controlled secret (NEWSAPI_KEY env or
  *     setting('grimba_newsapi_key'))
  *   - per-call dedup against newsapi_items (sha1 of article url)
- *   - drafts persisted via the same Post model + Post::saving hook
+ *   - posts persisted via the same Post model + Post::saving hook
  *     that auto-fills bias / ownership / credibility from source_id
  *   - hero image lifted from `urlToImage` (feed-level field) and
  *     falls back to the article-page scrape used in S93
@@ -583,9 +583,10 @@ class GrimbaNewsApiFetcher
             $post->content     = '<p><a href="' . e($a['url']) . '" target="_blank" rel="noopener">Lire l’article original</a></p>'
                 . '<p>' . e(Str::limit(strip_tags($content), 1200, '…')) . '</p>';
 
-            $autoPublish = (bool) setting('grimba_ingest_auto_publish', false);
-            if (! $autoPublish && env('GRIMBA_INGEST_AUTO_PUBLISH')) {
-                $autoPublish = filter_var(env('GRIMBA_INGEST_AUTO_PUBLISH'), FILTER_VALIDATE_BOOLEAN);
+            $autoPublish = (bool) setting('grimba_ingest_auto_publish', true);
+            $envAutoPublish = env('GRIMBA_INGEST_AUTO_PUBLISH', null);
+            if ($envAutoPublish !== null) {
+                $autoPublish = filter_var($envAutoPublish, FILTER_VALIDATE_BOOLEAN);
             }
             $post->status      = $autoPublish ? 'published' : 'draft';
             if ($autoPublish && Schema::hasColumn('posts', 'published_at')) {

@@ -64,6 +64,39 @@
                         + '; path=/; max-age=' + (60 * 60 * 24 * 365) + '; SameSite=Lax';
                 });
             });
+
+            const rail = document.querySelector('.grimba-chips__row');
+            if (rail) {
+                let lastLeft = rail.scrollLeft;
+                let locking = false;
+
+                rail.addEventListener('wheel', (event) => {
+                    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+                    rail.scrollLeft += event.deltaY;
+                    event.preventDefault();
+                }, { passive: false });
+
+                rail.addEventListener('scroll', () => {
+                    if (locking) return;
+
+                    const max = rail.scrollWidth - rail.clientWidth;
+                    if (max <= 24) return;
+
+                    const current = rail.scrollLeft;
+                    if (current > lastLeft && current >= max - 2) {
+                        locking = true;
+                        rail.scrollLeft = 1;
+                    } else if (current < lastLeft && current <= 0) {
+                        locking = true;
+                        rail.scrollLeft = max - 2;
+                    }
+                    lastLeft = rail.scrollLeft;
+
+                    window.requestAnimationFrame(() => {
+                        locking = false;
+                    });
+                }, { passive: true });
+            }
         })();
     </script>
 @endif

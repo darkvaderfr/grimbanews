@@ -66,6 +66,18 @@ grimba_schedule_command('rss_ingest', 'grimba:poll-feeds')
     ->withoutOverlapping(20)
     ->runInBackground();
 
+// GrimbaNews — live breaking/recent provider sweep. GDELT + Google News
+// RSS are no-key and run by default; paid providers such as Mediastack
+// are wired but skipped until their keys are configured. This is
+// separate from RSS so breaking rows and stale categories do not depend
+// on publisher feeds alone.
+grimba_schedule_command('breaking_live', 'grimba:fetch-breaking')
+    ->cron('*/15 * * * *')
+    ->onOneServer()
+    ->withoutOverlapping(15)
+    ->runInBackground()
+    ->when(fn () => (bool) setting('grimba_breaking_active', true));
+
 // GrimbaNews — translation of un-translated posts. French and English
 // queues run separately so the public language switch can serve both
 // English-source articles in French and French-source articles in English.

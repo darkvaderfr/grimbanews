@@ -8,6 +8,9 @@
     // landing page on first paint. Live JS updates handled below.
     $rawVault = (string) request()->cookie(\App\Support\GrimbaVault::COOKIE, '');
     $vaultCount = count(\App\Support\GrimbaVault::parseIds($rawVault));
+    $themePref = (string) request()->cookie('grimba_theme', 'auto');
+    if (! in_array($themePref, ['light', 'dark', 'auto'], true)) $themePref = 'auto';
+    $themeIcon = ['light' => '☀', 'dark' => '☾', 'auto' => '◐'][$themePref];
 
     // S206/D3 — cached editorial pulse for first paint.
     $pulse = \Illuminate\Support\Facades\Cache::remember('grimba_header_pulse_v2', 300, function (): array {
@@ -34,35 +37,38 @@
         <div class="container-xxl grimba-utility-bar py-1">
             <div class="grimba-utility-bar__scroll">
                 <div class="small opacity-75 d-flex align-items-center gap-2 grimba-utility-bar__cluster">
-                {{-- Theme as icon-only toggle — label moved to tooltip --}}
-                    <div class="grimba-theme-switch" role="radiogroup" aria-label="{{ __('Choix du thème') }}">
-                        <button type="button" data-grimba-theme="light" aria-pressed="false"
-                                aria-label="{{ __('Thème clair') }}" title="{{ __('Thème clair') }}">
-                            <span aria-hidden="true">☀</span>
-                        </button>
-                        <button type="button" data-grimba-theme="dark" aria-pressed="false"
-                                aria-label="{{ __('Thème sombre') }}" title="{{ __('Thème sombre') }}">
-                            <span aria-hidden="true">☾</span>
-                        </button>
-                        <button type="button" data-grimba-theme="auto" aria-pressed="true"
-                                aria-label="{{ __('Thème auto (suit le système)') }}" title="{{ __('Thème auto (suit le système)') }}">
-                            <span aria-hidden="true">◐</span>
-                        </button>
-                    </div>
+                    <button type="button"
+                            class="grimba-theme-cycle"
+                            data-grimba-theme-cycle
+                            data-grimba-theme-current="{{ $themePref }}"
+                            aria-label="{{ __('Changer le thème') }}"
+                            title="{{ __('Changer le thème') }}">
+                        <span data-grimba-theme-icon aria-hidden="true">{{ $themeIcon }}</span>
+                    </button>
                     @include(Theme::getThemeNamespace('partials.home.lang-switch'))
                     <span class="grimba-header-pulse">
-                        <span class="grimba-stat-pill">{{ trans_choice(':count nouveau ce matin|:count nouveaux ce matin', $pulse['new'], ['count' => $pulse['new']]) }}</span>
-                        <span class="grimba-stat-pill">{{ trans_choice(':count angle mort|:count angles morts', $pulse['blindspots'], ['count' => $pulse['blindspots']]) }}</span>
-                        <span class="grimba-stat-pill">{{ trans_choice(':count dossier actif|:count dossiers actifs', $pulse['clusters'], ['count' => $pulse['clusters']]) }}</span>
+                        <span class="grimba-stat-pill" title="{{ trans_choice(':count nouveau ce matin|:count nouveaux ce matin', $pulse['new'], ['count' => $pulse['new']]) }}">
+                            <span class="grimba-stat-pill__value">{{ number_format((int) $pulse['new']) }}</span>
+                            <span class="grimba-stat-pill__label">{{ __('nouveau') }}</span>
+                        </span>
+                        <span class="grimba-stat-pill" title="{{ trans_choice(':count angle mort|:count angles morts', $pulse['blindspots'], ['count' => $pulse['blindspots']]) }}">
+                            <span class="grimba-stat-pill__value">{{ number_format((int) $pulse['blindspots']) }}</span>
+                            <span class="grimba-stat-pill__label">{{ __('angles') }}</span>
+                        </span>
+                        <span class="grimba-stat-pill" title="{{ trans_choice(':count dossier actif|:count dossiers actifs', $pulse['clusters'], ['count' => $pulse['clusters']]) }}">
+                            <span class="grimba-stat-pill__value">{{ number_format((int) $pulse['clusters']) }}</span>
+                            <span class="grimba-stat-pill__label">{{ __('dossiers') }}</span>
+                        </span>
                     </span>
                 </div>
                 <div class="small d-flex align-items-center gap-2 grimba-header__tools">
                     <span class="grimba-header-date">{{ ucfirst($topDate) }}</span>
-                    <a href="{{ url('/pour-vous') }}" class="grimba-header-tool-link" title="{{ __('Pour vous') }}">
-                        {{ __('Pour vous') }} <span id="grimba-follow-count">{{ $followCount }}</span>
+                    <a href="{{ url('/pour-vous') }}" class="grimba-header-tool-link grimba-header-tool-link--follow" title="{{ __('Pour vous') }}">
+                        <span class="grimba-header-tool-link__label">{{ __('Pour vous') }}</span>
+                        <span id="grimba-follow-count">{{ $followCount }}</span>
                     </a>
                     {{-- S178 — vault link in utility bar so readers find their saves. --}}
-                    <a href="{{ url('/coffre') }}" class="grimba-header-tool-link" title="{{ __('Mes articles sauvegardés') }}">
+                    <a href="{{ url('/coffre') }}" class="grimba-header-tool-link grimba-header-tool-link--vault" title="{{ __('Mes articles sauvegardés') }}">
                         <span aria-hidden="true">★</span><span id="grimba-vault-count" data-grimba-vault-count>{{ $vaultCount }}</span>
                     </a>
                     @include(Theme::getThemeNamespace('partials.home.region-dropdown'))
@@ -111,15 +117,18 @@
 
 <script>
     (function () {
-        const buttons = document.querySelectorAll('[data-grimba-theme]');
-        if (!buttons.length) return;
+        const cycle = document.querySelector('[data-grimba-theme-cycle]');
+        if (!cycle) return;
 
         const root = document.documentElement;
         const VALID = ['light', 'dark', 'auto'];
+        const ICONS = { light: '☀', dark: '☾', auto: '◐' };
 
         function refresh() {
             const pref = root.getAttribute('data-grimba-theme-pref') || 'auto';
-            buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.grimbaTheme === pref)));
+            cycle.dataset.grimbaThemeCurrent = pref;
+            const icon = cycle.querySelector('[data-grimba-theme-icon]');
+            if (icon) icon.textContent = ICONS[pref] || ICONS.auto;
         }
 
         function apply(pref) {
@@ -136,7 +145,11 @@
         }
 
         refresh();
-        buttons.forEach(b => b.addEventListener('click', () => apply(b.dataset.grimbaTheme)));
+        cycle.addEventListener('click', () => {
+            const pref = root.getAttribute('data-grimba-theme-pref') || 'auto';
+            const next = VALID[(VALID.indexOf(pref) + 1) % VALID.length] || 'auto';
+            apply(next);
+        });
 
         // Live-track OS theme while user is in auto mode.
         const mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');

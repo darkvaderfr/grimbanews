@@ -16,13 +16,13 @@ use Throwable;
 
 /*
  * GrimbaRssPoller — fetch registered RSS/Atom feeds, dedup items via
- * the rss_feed_items ledger, and create draft Post rows so editors
- * can review before publishing.
+ * the rss_feed_items ledger, and create public Post rows by default.
  *
  * Deliberately minimal: no queue, no retries beyond Http::retry, no
  * HTML scrubbing beyond strip_tags. Those are later-sprint concerns.
- * MVP goal is to get real francophone content flowing into the DB so
- * comparator pages stop running on 15 seed posts.
+ * The launch default is publish-first: editors can still force draft
+ * review with grimba_ingest_auto_publish=false / env override, but
+ * stale public categories are treated as the higher product risk.
  */
 class GrimbaRssPoller
 {
@@ -396,18 +396,16 @@ class GrimbaRssPoller
                 ? '<p><a href="' . e($item['link']) . '" target="_blank" rel="noopener">Lire l’article original</a></p>'
                 . '<p>' . e($item['summary'] ?? '') . '</p>'
                 : '<p>' . e($item['summary'] ?? '') . '</p>';
-            // S92: status defaults to 'draft' so editors review before
-            // the public reader sees new items. Flip
-            // GRIMBA_INGEST_AUTO_PUBLISH=true (or the equivalent Botble
-            // setting) to short-circuit review and publish immediately —
-            // useful during launch / demo phases when we want the site
-            // to feel alive without an editor babysitting the queue.
-            $autoPublish = false;
+            // Publish-first is now the default. Editors can opt back
+            // into review-first with GRIMBA_INGEST_AUTO_PUBLISH=false
+            // or the matching Botble setting.
+            $autoPublish = true;
             if (is_callable('setting')) {
-                $autoPublish = (bool) setting('grimba_ingest_auto_publish', false);
+                $autoPublish = (bool) setting('grimba_ingest_auto_publish', true);
             }
-            if (! $autoPublish && env('GRIMBA_INGEST_AUTO_PUBLISH')) {
-                $autoPublish = filter_var(env('GRIMBA_INGEST_AUTO_PUBLISH'), FILTER_VALIDATE_BOOLEAN);
+            $envAutoPublish = env('GRIMBA_INGEST_AUTO_PUBLISH', null);
+            if ($envAutoPublish !== null) {
+                $autoPublish = filter_var($envAutoPublish, FILTER_VALIDATE_BOOLEAN);
             }
             $post->status      = $autoPublish ? 'published' : 'draft';
             if ($autoPublish && Schema::hasColumn('posts', 'published_at')) {

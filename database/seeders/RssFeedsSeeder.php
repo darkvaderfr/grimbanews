@@ -35,14 +35,23 @@ class RssFeedsSeeder extends Seeder
             'Libération'        => ['url' => 'https://www.liberation.fr/arc/outboundfeeds/rss/?outputType=xml', 'active' => true,  'notes' => null],
             'Mediapart'         => ['url' => 'https://www.mediapart.fr/articles/feed',                           'active' => true,  'notes' => null],
             'Le Figaro'         => ['url' => 'https://www.lefigaro.fr/rss/figaro_actualites.xml',                'active' => true,  'notes' => null],
-            'France 24'         => ['url' => 'https://www.france24.com/fr/france/rss',                           'active' => true,  'notes' => null],
+            'France 24'         => [
+                ['url' => 'https://www.france24.com/fr/france/rss',  'active' => true,  'notes' => null],
+                ['url' => 'https://www.france24.com/fr/afrique/rss', 'active' => true,  'notes' => 'Free Africa-section RSS backstop.'],
+            ],
             'L\'Opinion'        => ['url' => 'https://www.lopinion.fr/feed.xml',                                 'active' => false, 'notes' => '2026-04-24: returns 404 behind CF. Needs replacement URL from editor.'],
             'Valeurs Actuelles' => ['url' => 'https://www.valeursactuelles.com/feed',                            'active' => true,  'notes' => null],
             'Jeune Afrique'     => ['url' => 'https://www.jeuneafrique.com/feed/',                               'active' => true,  'notes' => null],
             'RFI Afrique'       => ['url' => 'https://www.rfi.fr/fr/afrique/rss',                                'active' => true,  'notes' => null],
             'Cameroon Tribune'  => ['url' => 'https://www.cameroon-tribune.cm/rss',                              'active' => false, 'notes' => '2026-04-24: returns 403. Host serves iso-8859-1 404 body — likely UA-filtered or feed removed.'],
-            'BBC'               => ['url' => 'https://feeds.bbci.co.uk/news/rss.xml',                            'active' => true,  'notes' => null],
-            'The Guardian'      => ['url' => 'https://www.theguardian.com/world/rss',                            'active' => true,  'notes' => null],
+            'BBC'               => [
+                ['url' => 'https://feeds.bbci.co.uk/news/rss.xml',                  'active' => true,  'notes' => null],
+                ['url' => 'https://feeds.bbci.co.uk/news/world/africa/rss.xml',     'active' => true,  'notes' => 'Free BBC Africa RSS backstop.'],
+            ],
+            'The Guardian'      => [
+                ['url' => 'https://www.theguardian.com/world/rss',        'active' => true,  'notes' => null],
+                ['url' => 'https://www.theguardian.com/world/africa/rss', 'active' => true,  'notes' => 'Free Guardian Africa RSS backstop.'],
+            ],
             'Reuters'           => ['url' => 'https://feeds.reuters.com/reuters/topNews',                        'active' => false, 'notes' => '2026-04-24: feeds.reuters.com DNS gone after their paywall migration. No replacement without API access.'],
             'All Africa'        => [
                 ['url' => 'https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf',        'active' => false, 'notes' => $allAfricaQuarantineNote],
@@ -76,6 +85,7 @@ class RssFeedsSeeder extends Seeder
                 ['url' => 'https://www.afro.who.int/rss/featured-news.xml', 'active' => true, 'notes' => 'WHO Africa featured news feed.'],
                 ['url' => 'https://www.afro.who.int/rss/emergencies.xml',   'active' => true, 'notes' => 'WHO Africa emergencies feed.'],
             ],
+            'Financial Afrik'    => ['url' => 'https://www.financialafrik.com/feed/', 'active' => true, 'notes' => 'Financial Afrik official RSS feed.'],
 
             // S152 — right-leaning feeds added 2026-04-26 to balance the
             // FR/center-heavy default mix. Seven of these poll cleanly;

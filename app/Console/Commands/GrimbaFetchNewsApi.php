@@ -10,7 +10,7 @@ class GrimbaFetchNewsApi extends Command
 {
     protected $signature = 'grimba:fetch-newsapi';
 
-    protected $description = 'Fetch articles from NewsAPI.org top-headlines + everything queries and ingest as draft posts (S128).';
+    protected $description = 'Fetch articles from NewsAPI.org top-headlines + everything queries and publish into GrimbaNews (S128).';
 
     public function handle(GrimbaNewsApiFetcher $fetcher): int
     {

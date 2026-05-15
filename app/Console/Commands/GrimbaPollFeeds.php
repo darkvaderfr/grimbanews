@@ -13,7 +13,7 @@ class GrimbaPollFeeds extends Command
 {
     protected $signature = 'grimba:poll-feeds {--feed= : Only poll a specific rss_feeds.id}';
 
-    protected $description = 'Poll active RSS/Atom feeds, dedup items, and create draft posts for editor review.';
+    protected $description = 'Poll active RSS/Atom feeds, dedup items, and publish new GrimbaNews posts.';
 
     public function handle(GrimbaRssPoller $poller): int
     {
@@ -27,6 +27,7 @@ class GrimbaPollFeeds extends Command
                     'rss_feeds.*',
                     'news_sources.name as source_name',
                     'news_sources.bias_rating as source_bias',
+                    'news_sources.country as source_country',
                 ]);
             if (! $feed) {
                 $this->error("No feed with id {$feedId}.");
@@ -50,8 +51,8 @@ class GrimbaPollFeeds extends Command
             $totalIngested += $s['ingested'];
         }
 
-        $this->table(['Feed', 'Source', 'Status', 'New drafts', 'Error'], $rows);
-        $this->info(sprintf('Done. %d feed(s), %d new draft post(s).', count($summary), $totalIngested));
+        $this->table(['Feed', 'Source', 'Status', 'New posts', 'Error'], $rows);
+        $this->info(sprintf('Done. %d feed(s), %d new post(s).', count($summary), $totalIngested));
 
         if ($totalIngested > 0) {
             $this->retroCluster();

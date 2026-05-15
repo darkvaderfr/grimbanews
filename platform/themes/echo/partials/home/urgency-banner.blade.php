@@ -4,17 +4,41 @@
     use Botble\Blog\Models\Post;
     use Illuminate\Support\Str;
 
+    $breakingWindowHours = max(1, (int) setting('grimba_breaking_window_hours', 6));
     $breakingPosts = \Illuminate\Support\Facades\Cache::remember(
-        'grimba_breaking_ticker_v1:' . GnTr::targetLocale(),
-        120,
-        function () {
-            $query = Post::withoutGlobalScope('grimba_region')
+        'grimba_breaking_ticker_v2:' . GnTr::targetLocale() . ':' . $breakingWindowHours,
+        60,
+        function () use ($breakingWindowHours) {
+            $recentQuery = Post::withoutGlobalScope('grimba_region')
+                ->where('status', 'published')
+                ->whereNotNull('source_name')
+                ->with('slugable');
+            GrimbaPostRecency::wherePublishedSince($recentQuery, now()->subHours($breakingWindowHours));
+            GrimbaPostRecency::orderByPublished($recentQuery);
+
+            $recent = $recentQuery->limit(12)->get();
+            if ($recent->isNotEmpty()) {
+                return $recent;
+            }
+
+            $fallbackQuery = Post::withoutGlobalScope('grimba_region')
+                ->where('status', 'published')
+                ->whereNotNull('source_name')
+                ->with('slugable');
+            GrimbaPostRecency::wherePublishedSince($fallbackQuery, now()->subDay());
+            GrimbaPostRecency::orderByPublished($fallbackQuery);
+
+            $fallback = $fallbackQuery->limit(12)->get();
+            if ($fallback->isNotEmpty()) {
+                return $fallback;
+            }
+
+            $latestQuery = Post::withoutGlobalScope('grimba_region')
                 ->where('status', 'published')
                 ->with('slugable');
+            GrimbaPostRecency::orderByPublished($latestQuery);
 
-            GrimbaPostRecency::orderByPublished($query);
-
-            return $query->limit(10)->get();
+            return $latestQuery->limit(10)->get();
         }
     );
 
