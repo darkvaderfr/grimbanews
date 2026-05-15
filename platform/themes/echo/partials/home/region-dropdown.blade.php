@@ -101,74 +101,106 @@
 
 <script>
     (function () {
-        const root = document.querySelector('[data-grimba-edition-root]');
-        if (!root) return;
-        const trigger = root.querySelector('[data-grimba-edition-trigger]');
-        const menu = root.querySelector('.grimba-edition-picker__menu');
+        const roots = document.querySelectorAll('[data-grimba-edition-root]');
+        if (! roots.length) return;
         const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        const instances = [];
 
-        function positionMenu() {
+        function positionMenu(instance) {
+            const { trigger, menu } = instance;
             if (!trigger || !menu) return;
 
             const gap = 8;
             const pad = 8;
             const rect = trigger.getBoundingClientRect();
-            const menuWidth = Math.min(menu.offsetWidth || 216, window.innerWidth - (pad * 2));
+            const menuWidth = Math.min(Math.max(menu.offsetWidth || 216, rect.width), window.innerWidth - (pad * 2));
             const menuHeight = menu.offsetHeight || 168;
             const left = Math.min(window.innerWidth - menuWidth - pad, Math.max(pad, rect.right - menuWidth));
             const top = Math.min(window.innerHeight - menuHeight - pad, rect.bottom + gap);
 
             menu.style.left = left + 'px';
             menu.style.top = Math.max(pad, top) + 'px';
+            menu.style.minWidth = Math.max(216, Math.ceil(rect.width)) + 'px';
         }
 
-        function close() {
+        function close(instance) {
+            const { root, trigger, menu } = instance;
             root.classList.remove('is-open');
+            menu?.classList.remove('is-floating-open');
             trigger?.setAttribute('aria-expanded', 'false');
         }
 
-        trigger?.addEventListener('click', event => {
-            event.preventDefault();
-            const open = !root.classList.contains('is-open');
-            root.classList.toggle('is-open', open);
-            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
-            if (open) positionMenu();
+        function closeAll(except = null) {
+            instances.forEach(instance => {
+                if (instance !== except) close(instance);
+            });
+        }
+
+        roots.forEach(root => {
+            if (root.dataset.grimbaEditionReady === '1') return;
+            root.dataset.grimbaEditionReady = '1';
+
+            const trigger = root.querySelector('[data-grimba-edition-trigger]');
+            const menu = root.querySelector('.grimba-edition-picker__menu');
+            if (! trigger || ! menu) return;
+
+            document.body.appendChild(menu);
+            const instance = { root, trigger, menu };
+            instances.push(instance);
+
+            trigger.addEventListener('click', event => {
+                event.preventDefault();
+                const open = ! root.classList.contains('is-open');
+                closeAll(instance);
+                root.classList.toggle('is-open', open);
+                menu.classList.toggle('is-floating-open', open);
+                trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+                if (open) positionMenu(instance);
+            });
+
+            menu.querySelectorAll('[data-grimba-edition]').forEach(link => {
+                link.addEventListener('click', async event => {
+                    event.preventDefault();
+                    const region = link.dataset.grimbaEdition;
+                    const res = await fetch(@json(route('public.region.set')), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrf,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ region })
+                    }).then(r => r.json()).catch(() => null);
+
+                    if (res && res.ok) {
+                        window.location.href = link.href;
+                    }
+                });
+            });
         });
 
         document.addEventListener('click', event => {
-            if (!root.contains(event.target)) close();
-        });
-
-        document.addEventListener('keydown', event => {
-            if (event.key === 'Escape') close();
-        });
-
-        window.addEventListener('resize', () => {
-            if (root.classList.contains('is-open')) positionMenu();
-        }, { passive: true });
-
-        window.addEventListener('scroll', () => {
-            if (root.classList.contains('is-open')) positionMenu();
-        }, { passive: true });
-
-        root.querySelectorAll('[data-grimba-edition]').forEach(link => {
-            link.addEventListener('click', async event => {
-                event.preventDefault();
-                const region = link.dataset.grimbaEdition;
-                const res = await fetch(@json(route('public.region.set')), {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrf,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ region })
-                }).then(r => r.json()).catch(() => null);
-
-                if (res && res.ok) {
-                    window.location.href = link.href;
+            instances.forEach(instance => {
+                if (! instance.root.contains(event.target) && ! instance.menu.contains(event.target)) {
+                    close(instance);
                 }
             });
         });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeAll();
+        });
+
+        window.addEventListener('resize', () => {
+            instances.forEach(instance => {
+                if (instance.root.classList.contains('is-open')) positionMenu(instance);
+            });
+        }, { passive: true });
+
+        window.addEventListener('scroll', () => {
+            instances.forEach(instance => {
+                if (instance.root.classList.contains('is-open')) positionMenu(instance);
+            });
+        }, { passive: true });
     })();
 </script>

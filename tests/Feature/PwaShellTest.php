@@ -21,6 +21,7 @@ class PwaShellTest extends TestCase
         // Africa / Europe / Americas / International. Legacy values
         // (france/uk/us/canada) are migration-only and not surfaced.
         $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
+        $view = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/home/region-dropdown.blade.php');
 
         $this->get('/')
             ->assertOk()
@@ -39,11 +40,14 @@ class PwaShellTest extends TestCase
             ->assertSee('grimba-edition-picker__trigger', false)
             ->assertSee('grimba-edition-picker__menu', false);
 
+        $this->assertStringContainsString("document.querySelectorAll('[data-grimba-edition-root]')", $view);
+        $this->assertStringContainsString('document.body.appendChild(menu)', $view);
         $this->assertStringContainsString('.grimba-header__tools .grimba-edition-toggle', $css);
         $this->assertStringContainsString('.grimba-edition-picker__trigger', $css);
         $this->assertStringContainsString('.grimba-edition-picker__menu', $css);
         $this->assertStringContainsString('position: fixed;', $css);
         $this->assertStringContainsString('z-index: 2147483000;', $css);
+        $this->assertStringContainsString('.grimba-edition-picker__menu.is-floating-open', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-edition-picker__menu', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-edition-toggle__option.is-active', $css);
     }
