@@ -86,6 +86,11 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:fetch-newsapi',
                 'expected_minutes' => 288,
             ],
+            'source_classifier' => [
+                'label' => 'Source classifier',
+                'command' => 'grimba:classify-sources --apply --sync-posts --min-confidence=80',
+                'expected_minutes' => 1440,
+            ],
             'vault_events_archive' => [
                 'label' => 'Vault analytics archive',
                 'command' => 'grimba:archive-vault-events',

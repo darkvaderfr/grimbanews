@@ -166,7 +166,6 @@ app('events')->listen(RenderingThemeOptionSettings::class, function (): void {
                     'attributes' => [
                         'name' => 'theme_style',
                         'list' => [
-                            'auto' => __('Auto'),
                             'dark' => __('Dark mode'),
                             'light' => __('Light mode'),
                         ],

@@ -12,33 +12,27 @@
 @endphp
 <!doctype html>
 @php
-    // Auto/light/dark — read user's saved preference (default auto). SSR
-    // can't know `prefers-color-scheme`, so when the user is in auto we
-    // paint light first and let the boot script swap to dark before the
-    // page becomes visible (no flash for explicit-dark users).
-    $__grimbaPref = (string) request()->cookie('grimba_theme', 'auto');
-    if (! in_array($__grimbaPref, ['light', 'dark', 'auto'], true)) {
-        $__grimbaPref = 'auto';
+    // Light/dark only. "auto" previously followed system preference and
+    // caused inconsistent review sessions; stale/invalid cookies fall
+    // back to light.
+    $__grimbaPref = (string) request()->cookie('grimba_theme', 'light');
+    if (! in_array($__grimbaPref, ['light', 'dark'], true)) {
+        $__grimbaPref = 'light';
     }
-    $__grimbaInitialTheme = $__grimbaPref === 'dark' ? 'dark' : 'light';
 @endphp
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ $__grimbaInitialTheme }}" data-theme="light" data-grimba-theme-pref="{{ $__grimbaPref }}" class="grimba-home-html">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ $__grimbaPref }}" data-theme="light" data-grimba-theme-pref="{{ $__grimbaPref }}" class="grimba-home-html">
 <script>
-    // Resolve the saved theme preference before paint. We keep
+    // Resolve the saved theme before paint. We keep
     // data-theme="light" hard-set so stock Echo's data-theme="dark"
     // CSS never bleeds in; our own dark palette keys off data-bs-theme.
     (function () {
         const m = document.cookie.match(/(?:^|; )grimba_theme=([^;]+)/);
-        let pref = 'auto';
+        let pref = 'light';
         if (m) {
             try { pref = decodeURIComponent(m[1]); } catch (_) { pref = m[1]; }
         }
-        if (pref !== 'light' && pref !== 'dark' && pref !== 'auto') pref = 'auto';
-        let effective = pref;
-        if (pref === 'auto') {
-            effective = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-        document.documentElement.setAttribute('data-bs-theme', effective);
+        if (pref !== 'light' && pref !== 'dark') pref = 'light';
+        document.documentElement.setAttribute('data-bs-theme', pref);
         document.documentElement.setAttribute('data-grimba-theme-pref', pref);
 
         // S344 — edition-aware bias color flip. Default convention is

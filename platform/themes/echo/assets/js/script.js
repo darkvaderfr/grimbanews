@@ -81,13 +81,15 @@ $(document).ready(function() {
         var rts_light = $('.rts-dark-light')
 
         if (rts_light.length) {
-            var currentTheme = document.documentElement.getAttribute('data-theme') || 'auto'
+            var currentTheme = document.documentElement.getAttribute('data-theme') || 'light'
             var toggle = document.getElementById('rts-data-toggle')
             var storedTheme = localStorage.getItem('echo-theme')
 
-            if (!storedTheme && currentTheme === 'auto') {
-                storedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-            } else if (!storedTheme) {
+            if (currentTheme !== 'light' && currentTheme !== 'dark') {
+                currentTheme = 'light'
+            }
+
+            if (storedTheme !== 'light' && storedTheme !== 'dark') {
                 storedTheme = currentTheme
             }
 

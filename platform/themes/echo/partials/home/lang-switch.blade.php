@@ -4,13 +4,13 @@
 @endphp
 
 <button type="button"
-        class="grimba-lang-toggle"
+        class="grimba-lang-toggle grimba-lang-toggle--compact"
         data-grimba-lang-toggle
         data-current-lang="{{ $currentLang }}"
         aria-label="{{ $currentLang === 'fr' ? __('Passer en anglais') : __('Switch to French') }}"
         title="{{ $currentLang === 'fr' ? 'English' : 'Français' }}">
-    <span class="grimba-lang-toggle__option @if($currentLang === 'fr') is-active @endif">FR</span>
-    <span class="grimba-lang-toggle__option @if($currentLang === 'en') is-active @endif">EN</span>
+    <span class="grimba-lang-toggle__current">{{ strtoupper($currentLang) }}</span>
+    <span class="grimba-lang-toggle__next" aria-hidden="true">{{ $currentLang === 'fr' ? 'EN' : 'FR' }}</span>
 </button>
 
 <script>

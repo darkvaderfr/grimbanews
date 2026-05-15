@@ -231,9 +231,9 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $postId = max(0, (int) $request->query('pid', 0));
             $parts = parse_url($url);
             $host = strtolower((string) ($parts['host'] ?? ''));
-            $theme = (string) $request->query('theme', $request->cookie('grimba_theme', 'auto'));
-            if (! in_array($theme, ['light', 'dark', 'auto'], true)) {
-                $theme = 'auto';
+            $theme = (string) $request->query('theme', $request->cookie('grimba_theme', 'light'));
+            if (! in_array($theme, ['light', 'dark'], true)) {
+                $theme = 'light';
             }
 
             $allowedHosts = match ($provider) {

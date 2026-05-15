@@ -1035,6 +1035,144 @@
 
                         {!! apply_filters(BASE_FILTER_PUBLIC_COMMENT_AREA, null, $post) !!}
 
+                        <script>
+                            (function () {
+                                const articleShell = document.currentScript.closest('.grimba-article-shell');
+                                if (! articleShell) return;
+
+                                const sanitizeCommentText = (value) => (value || '')
+                                    .replace(/\u00a0/g, ' ')
+                                    .replace(/[ \t]+\n/g, '\n')
+                                    .replace(/\n{4,}/g, '\n\n\n')
+                                    .trimStart()
+                                    .slice(0, 1000);
+
+                                const insertAroundSelection = (editor, before, after = before, fallback = '') => {
+                                    editor.focus();
+                                    const selection = window.getSelection();
+                                    if (! selection || selection.rangeCount === 0 || ! editor.contains(selection.anchorNode)) {
+                                        editor.textContent = sanitizeCommentText(editor.textContent + fallback);
+                                        return;
+                                    }
+
+                                    const range = selection.getRangeAt(0);
+                                    const selected = range.toString() || fallback;
+                                    range.deleteContents();
+                                    range.insertNode(document.createTextNode(before + selected + after));
+                                    selection.removeAllRanges();
+                                    editor.dispatchEvent(new Event('input', { bubbles: true }));
+                                };
+
+                                const prefixSelectionLines = (editor, prefix) => {
+                                    editor.focus();
+                                    const selection = window.getSelection();
+                                    const selected = selection && selection.rangeCount && editor.contains(selection.anchorNode)
+                                        ? selection.getRangeAt(0).toString()
+                                        : '';
+                                    const text = selected || 'Votre point';
+                                    const prefixed = text.split(/\n/).map((line) => prefix + line.replace(new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), '')).join('\n');
+
+                                    if (! selected) {
+                                        editor.textContent = sanitizeCommentText(editor.textContent + (editor.textContent ? '\n' : '') + prefixed);
+                                        editor.dispatchEvent(new Event('input', { bubbles: true }));
+                                        return;
+                                    }
+
+                                    const range = selection.getRangeAt(0);
+                                    range.deleteContents();
+                                    range.insertNode(document.createTextNode(prefixed));
+                                    selection.removeAllRanges();
+                                    editor.dispatchEvent(new Event('input', { bubbles: true }));
+                                };
+
+                                const enhanceCommentForm = (form) => {
+                                    if (form.grimbaRichTextEnhanced) return;
+
+                                    const textarea = form.querySelector('textarea[name="content"]');
+                                    if (! textarea) return;
+
+                                    form.grimbaRichTextEnhanced = true;
+                                    form.querySelectorAll('.gn-comments-composer').forEach((node) => node.remove());
+                                    textarea.classList.add('gn-comments__source-textarea');
+
+                                    const composer = document.createElement('div');
+                                    composer.className = 'gn-comments-composer';
+                                    composer.innerHTML = [
+                                        '<div class="gn-comments-composer__toolbar" role="toolbar" aria-label="Mise en forme du commentaire">',
+                                        '<button type="button" data-gn-format="bold" aria-label="Gras"><strong>B</strong></button>',
+                                        '<button type="button" data-gn-format="italic" aria-label="Italique"><em>I</em></button>',
+                                        '<button type="button" data-gn-format="quote" aria-label="Citation">"</button>',
+                                        '<button type="button" data-gn-format="bullet" aria-label="Liste">•</button>',
+                                        '</div>',
+                                        '<div class="gn-comments-composer__editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Ajoutez une lecture nuancée, une source ou une question..."></div>',
+                                        '<div class="gn-comments-composer__meta"><span>Texte léger, liens inclus si utiles.</span><span data-gn-count>0/1000</span></div>',
+                                    ].join('');
+
+                                    textarea.insertAdjacentElement('beforebegin', composer);
+
+                                    const editor = composer.querySelector('.gn-comments-composer__editor');
+                                    const counter = composer.querySelector('[data-gn-count]');
+                                    const sync = () => {
+                                        const value = sanitizeCommentText(editor.innerText);
+                                        textarea.value = value;
+                                        counter.textContent = value.length + '/1000';
+                                    };
+                                    form.grimbaSyncComposer = () => {
+                                        editor.textContent = textarea.value || '';
+                                        sync();
+                                    };
+
+                                    editor.textContent = textarea.value || '';
+                                    sync();
+
+                                    editor.addEventListener('input', sync);
+                                    editor.addEventListener('paste', (event) => {
+                                        event.preventDefault();
+                                        const text = event.clipboardData?.getData('text/plain') || '';
+                                        document.execCommand('insertText', false, sanitizeCommentText(text));
+                                    });
+                                    textarea.addEventListener('input', () => {
+                                        if (textarea.value !== sanitizeCommentText(editor.innerText)) {
+                                            editor.textContent = textarea.value;
+                                            sync();
+                                        }
+                                    });
+                                    form.addEventListener('submit', sync);
+                                    form.addEventListener('reset', () => window.setTimeout(() => {
+                                        editor.textContent = '';
+                                        sync();
+                                    }, 0));
+
+                                    composer.addEventListener('click', (event) => {
+                                        const button = event.target.closest('[data-gn-format]');
+                                        if (! button) return;
+
+                                        const action = button.dataset.gnFormat;
+                                        if (action === 'bold') insertAroundSelection(editor, '**', '**', 'texte important');
+                                        if (action === 'italic') insertAroundSelection(editor, '_', '_', 'nuance');
+                                        if (action === 'quote') prefixSelectionLines(editor, '> ');
+                                        if (action === 'bullet') prefixSelectionLines(editor, '- ');
+                                        sync();
+                                    });
+                                };
+
+                                const enhanceAll = () => articleShell
+                                    .querySelectorAll('.fob-comment-form')
+                                    .forEach(enhanceCommentForm);
+
+                                enhanceAll();
+                                new MutationObserver(enhanceAll).observe(articleShell, { childList: true, subtree: true });
+                                if (window.jQuery) {
+                                    window.jQuery(document).on('ajaxSuccess', function (_event, _xhr, settings) {
+                                        if (! settings?.url || ! String(settings.url).includes('/fob-comment')) return;
+                                        window.setTimeout(() => articleShell
+                                            .querySelectorAll('.fob-comment-form')
+                                            .forEach((form) => form.grimbaSyncComposer?.()), 0);
+                                    });
+                                }
+                            })();
+                        </script>
+
                         @if($__gnBlogBottomSidebarHtml !== '')
                             <div class="mt-5">
                                 {!! $__gnBlogBottomSidebarHtml !!}

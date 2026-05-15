@@ -13,7 +13,10 @@
     $__defaultUrl = \Botble\Media\Facades\RvMedia::getDefaultImage(false, $__size);
     $__hasUsableImg = $__resolved !== null && $__resolved !== $__defaultUrl;
     $__isExternal = $__hasUsableImg && is_string($__resolved) && preg_match('#^https?://#i', $__resolved);
-    $__theme = request()?->cookie('grimba_theme', 'auto') ?: 'auto';
+    $__theme = request()?->cookie('grimba_theme', 'light') ?: 'light';
+    if (! in_array($__theme, ['light', 'dark'], true)) {
+        $__theme = 'light';
+    }
 @endphp
 @if($__isExternal)
     <img

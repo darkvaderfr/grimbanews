@@ -8,9 +8,9 @@
     // landing page on first paint. Live JS updates handled below.
     $rawVault = (string) request()->cookie(\App\Support\GrimbaVault::COOKIE, '');
     $vaultCount = count(\App\Support\GrimbaVault::parseIds($rawVault));
-    $themePref = (string) request()->cookie('grimba_theme', 'auto');
-    if (! in_array($themePref, ['light', 'dark', 'auto'], true)) $themePref = 'auto';
-    $themeIcon = ['light' => '☀', 'dark' => '☾', 'auto' => '◐'][$themePref];
+    $themePref = (string) request()->cookie('grimba_theme', 'light');
+    if (! in_array($themePref, ['light', 'dark'], true)) $themePref = 'light';
+    $themeIcon = ['light' => '☀', 'dark' => '☾'][$themePref];
 
     // S206/D3 — cached editorial pulse for first paint.
     $pulse = \Illuminate\Support\Facades\Cache::remember('grimba_header_pulse_v2', 300, function (): array {
@@ -121,23 +121,27 @@
         if (!cycle) return;
 
         const root = document.documentElement;
-        const VALID = ['light', 'dark', 'auto'];
-        const ICONS = { light: '☀', dark: '☾', auto: '◐' };
+        const VALID = ['light', 'dark'];
+        const ICONS = { light: '☀', dark: '☾' };
+        const THEME_COLORS = { light: '#f6f1e8', dark: '#121007' };
+
+        function syncThemeColor(pref) {
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', THEME_COLORS[pref] || THEME_COLORS.light);
+        }
 
         function refresh() {
-            const pref = root.getAttribute('data-grimba-theme-pref') || 'auto';
+            let pref = root.getAttribute('data-grimba-theme-pref') || 'light';
+            if (!VALID.includes(pref)) pref = 'light';
             cycle.dataset.grimbaThemeCurrent = pref;
             const icon = cycle.querySelector('[data-grimba-theme-icon]');
-            if (icon) icon.textContent = ICONS[pref] || ICONS.auto;
+            if (icon) icon.textContent = ICONS[pref] || ICONS.light;
+            syncThemeColor(pref);
         }
 
         function apply(pref) {
-            if (!VALID.includes(pref)) pref = 'auto';
-            let effective = pref;
-            if (pref === 'auto') {
-                effective = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            }
-            root.setAttribute('data-bs-theme', effective);
+            if (!VALID.includes(pref)) pref = 'light';
+            root.setAttribute('data-bs-theme', pref);
             root.setAttribute('data-grimba-theme-pref', pref);
             const oneYear = 60 * 60 * 24 * 365;
             document.cookie = 'grimba_theme=' + pref + '; path=/; max-age=' + oneYear + '; SameSite=Lax';
@@ -146,19 +150,9 @@
 
         refresh();
         cycle.addEventListener('click', () => {
-            const pref = root.getAttribute('data-grimba-theme-pref') || 'auto';
-            const next = VALID[(VALID.indexOf(pref) + 1) % VALID.length] || 'auto';
+            const pref = root.getAttribute('data-grimba-theme-pref') || 'light';
+            const next = pref === 'dark' ? 'light' : 'dark';
             apply(next);
         });
-
-        // Live-track OS theme while user is in auto mode.
-        const mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-        if (mq && typeof mq.addEventListener === 'function') {
-            mq.addEventListener('change', (e) => {
-                if ((root.getAttribute('data-grimba-theme-pref') || 'auto') === 'auto') {
-                    root.setAttribute('data-bs-theme', e.matches ? 'dark' : 'light');
-                }
-            });
-        }
     })();
 </script>

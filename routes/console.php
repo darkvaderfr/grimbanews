@@ -170,6 +170,16 @@ grimba_schedule_command('newsapi_fetch', 'grimba:fetch-newsapi')
         trim((string) setting('grimba_newsapi_key', env('NEWSAPI_KEY', ''))) !== ''
     ));
 
+// GrimbaNews — daily source classification audit/backfill. This keeps
+// newly added RSS/NewsAPI sources from sitting as "unknown" and syncs
+// source-level bias/factuality/ownership metadata to posts that still
+// have missing provider fields.
+grimba_schedule_command('source_classifier', 'grimba:classify-sources --apply --sync-posts --min-confidence=80')
+    ->dailyAt('04:00')
+    ->onOneServer()
+    ->withoutOverlapping(30)
+    ->runInBackground();
+
 // GrimbaNews — weekly image-backfill sweep (S94). Catches two cases
 // the live poller misses:
 //   1. Older drafts (aged out of the feed window at the time of their

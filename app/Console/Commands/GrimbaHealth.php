@@ -136,10 +136,11 @@ class GrimbaHealth extends Command
             ->limit(8)
             ->get();
         $this->newLine();
-        $this->line('5. Top unclassified sources (need editor triage)');
+        $this->line('5. Top unclassified sources (classifier/editor triage)');
         if ($unknown->isEmpty()) {
             $this->line('   ✓ no unclassified sources with ingested articles');
         } else {
+            $this->line('   run: php artisan grimba:classify-sources --apply --sync-posts');
             foreach ($unknown as $s) {
                 $this->line(sprintf('   %-30s %d articles', \Illuminate\Support\Str::limit($s->name, 30), $s->c));
             }

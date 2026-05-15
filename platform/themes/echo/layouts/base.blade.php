@@ -1,5 +1,11 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ theme_option('theme_style', 'auto') }}">
+@php
+    $__echoBaseTheme = (string) request()->cookie('grimba_theme', theme_option('theme_style', 'light'));
+    if (! in_array($__echoBaseTheme, ['light', 'dark'], true)) {
+        $__echoBaseTheme = 'light';
+    }
+@endphp
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ $__echoBaseTheme }}" data-bs-theme="{{ $__echoBaseTheme }}" data-grimba-theme-pref="{{ $__echoBaseTheme }}">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1" name="viewport" />

@@ -340,15 +340,15 @@ class PwaShellTest extends TestCase
         }
     }
 
-    public function test_homepage_respects_grimba_theme_cookie_for_dark_light_auto(): void
+    public function test_homepage_respects_grimba_theme_cookie_for_dark_light_only(): void
     {
-        // No cookie → SSR defaults to light (auto preference; client may swap to dark on prefers-color-scheme).
+        // No cookie → SSR defaults to explicit light.
         $this->get('/')
             ->assertOk()
             ->assertSee('data-bs-theme="light"', false)
             ->assertSee('data-theme="light"', false)
-            ->assertSee('data-grimba-theme-pref="auto"', false)
-            ->assertSee("matchMedia('(prefers-color-scheme: dark)')", false);
+            ->assertSee('data-grimba-theme-pref="light"', false)
+            ->assertDontSee("prefers-color-scheme", false);
 
         // Explicit dark → SSR paints dark immediately so there's no flash.
         $this->withUnencryptedCookies(['grimba_theme' => 'dark'])
@@ -365,11 +365,12 @@ class PwaShellTest extends TestCase
             ->assertSee('data-bs-theme="light"', false)
             ->assertSee('data-grimba-theme-pref="light"', false);
 
-        // Garbage value falls back to auto.
+        // Garbage value falls back to light. There is no system/auto mode.
         $this->withUnencryptedCookies(['grimba_theme' => 'banana'])
             ->get('/')
             ->assertOk()
-            ->assertSee('data-grimba-theme-pref="auto"', false);
+            ->assertSee('data-bs-theme="light"', false)
+            ->assertSee('data-grimba-theme-pref="light"', false);
     }
 
     public function test_homepage_does_not_clobber_user_theme_storage(): void
@@ -378,7 +379,7 @@ class PwaShellTest extends TestCase
 
         // Previous regression: boot script force-overwrote grimba_theme to "light"
         // and rewrote echo-theme/themeMode in localStorage on every page load,
-        // making it impossible to switch to dark or auto. Guard against that.
+        // making it impossible to switch to dark. Guard against that.
         $this->assertStringNotContainsString("document.cookie = 'grimba_theme=light;", $html);
         $this->assertStringNotContainsString("window.localStorage.setItem('echo-theme', 'light');", $html);
         $this->assertStringNotContainsString("window.localStorage.setItem('themeMode', 'light');", $html);
