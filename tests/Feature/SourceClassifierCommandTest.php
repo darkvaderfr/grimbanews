@@ -104,6 +104,12 @@ class SourceClassifierCommandTest extends TestCase
             "L'Orient-Le Jour" => ['center', 'LB'],
             'Actualite.cd' => ['center', 'CD'],
             'Actu17' => ['right', 'FR'],
+            'ISS Africa' => ['center', 'ZA'],
+            'Daily Kos' => ['left', 'US'],
+            'El Ciudadano' => ['left', 'CL'],
+            'Leadership' => ['center', 'NG'],
+            'Doctissimo' => ['center', 'FR'],
+            'Yeni Akit' => ['right', 'TR'],
         ];
 
         foreach ($cases as $name => [$bias, $country]) {
