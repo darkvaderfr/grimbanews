@@ -18,7 +18,7 @@
         <div class="grimba-full-article__lock">
             <div>
                 <span class="grimba-methodology__kicker">{{ __('Réservé aux abonnés') }}</span>
-                <h2 id="grimba-full-article-lock-{{ $post->id }}" class="grimba-full-article__title">{{ $isFull ? __("Lire l'article complet") : __("Lire l'extrait disponible") }}</h2>
+                <h2 id="grimba-full-article-lock-{{ $post->id }}" class="grimba-full-article__title">{{ $isFull ? __("Lire l'article complet dans GrimbaNews") : __("Lire l'extrait disponible dans GrimbaNews") }}</h2>
                 <p class="grimba-full-article__copy">
                     {{ $isFull ? __("Connectez-vous pour lire le texte intégral extrait par GrimbaNews.") : __("Connectez-vous pour lire le texte disponible dans GrimbaNews.") }}
                 </p>
@@ -31,7 +31,7 @@
         <header class="grimba-full-article__header">
             <div>
                 <span class="grimba-methodology__kicker">{{ $isFull ? __('Texte intégral') : __('Extrait disponible') }}</span>
-                <h2 id="grimba-full-article-{{ $post->id }}" class="grimba-full-article__title">{{ $isFull ? __("Lire l'article complet") : __("Lire l'extrait disponible") }}</h2>
+                <h2 id="grimba-full-article-{{ $post->id }}" class="grimba-full-article__title">{{ $isFull ? __("Lire l'article complet dans GrimbaNews") : __("Lire l'extrait disponible dans GrimbaNews") }}</h2>
             </div>
             @if($wordCount > 0)
                 <span class="grimba-full-article__count">

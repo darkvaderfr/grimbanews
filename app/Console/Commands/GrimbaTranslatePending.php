@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\GrimbaTranslator;
+use App\Support\GrimbaArticleText;
 use Botble\Blog\Models\Post;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +27,7 @@ class GrimbaTranslatePending extends Command
         $force    = (bool) $this->option('force');
         $failedOnly = (bool) $this->option('failed-only');
         $dry      = (bool) $this->option('dry-run');
+        $hasFullContent = Schema::hasColumn('posts', 'full_content');
 
         if (! $translator->enabled()) {
             $this->warn('No translation providers configured (set any of DEEPL_API_KEY, MISTRAL_API_KEY, OPENROUTER_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, GROQ_API_KEY, LIBRETRANSLATE_URL). Skipping.');
@@ -56,7 +58,12 @@ class GrimbaTranslatePending extends Command
         }
 
         if (! $force) {
-            $query->where(function ($q) use ($to) {
+            $sourceBodySql = $hasFullContent
+                ? "length(trim(coalesce(nullif(posts.full_content, ''), posts.content, '')))"
+                : "length(trim(coalesce(posts.content, '')))";
+            $translatedBodySql = "length(trim(coalesce(posts.translated_content, '')))";
+
+            $query->where(function ($q) use ($to, $sourceBodySql, $translatedBodySql) {
                 $q->where(function ($legacy) use ($to) {
                     $legacy->whereNull('translated_to')
                         ->orWhere('translated_to', '!=', $to)
@@ -72,10 +79,36 @@ class GrimbaTranslatePending extends Command
                             ->whereNotNull('grimba_post_translations.translated_name');
                     });
                 }
+
+                $q->orWhere(function ($body) use ($to, $sourceBodySql, $translatedBodySql) {
+                    $body->whereRaw($sourceBodySql . ' >= ?', [GrimbaArticleText::MIN_READABLE_CHARS])
+                        ->where(function ($needsBody) use ($translatedBodySql, $sourceBodySql, $to) {
+                            $needsBody
+                                ->whereNull('posts.translated_content')
+                                ->orWhereRaw("trim(coalesce(posts.translated_content, '')) = ''")
+                                ->orWhereRaw($translatedBodySql . ' < (' . $sourceBodySql . ' * 0.35)');
+
+                            if (Schema::hasTable('grimba_post_translations')) {
+                                $needsBody->orWhereNotExists(function ($sub) use ($to) {
+                                    $sub->selectRaw('1')
+                                        ->from('grimba_post_translations')
+                                        ->whereColumn('grimba_post_translations.post_id', 'posts.id')
+                                        ->where('grimba_post_translations.locale', $to)
+                                        ->whereNotNull('grimba_post_translations.translated_content')
+                                        ->whereRaw("trim(coalesce(grimba_post_translations.translated_content, '')) != ''");
+                                });
+                            }
+                        });
+                });
             });
         }
 
-        $posts = $query->get(['id', 'name', 'description', 'content', 'original_language', 'translated_to']);
+        $columns = ['id', 'name', 'description', 'content', 'original_language', 'translated_to'];
+        if ($hasFullContent) {
+            $columns[] = 'full_content';
+        }
+
+        $posts = $query->get($columns);
 
         if ($posts->isEmpty()) {
             $this->info('Nothing to translate.');
@@ -98,11 +131,14 @@ class GrimbaTranslatePending extends Command
             // effectively a duplicate of description (RSS poller case —
             // content is just a link + the same summary) to keep
             // provider tokens down.
-            $contentPlain = trim(strip_tags((string) $p->content));
+            $contentHtml = GrimbaArticleText::cleanIngestBody($p->full_content ?? null)
+                ?: GrimbaArticleText::cleanIngestBody($p->content ?? null)
+                ?: (string) ($p->content ?? '');
+            $contentPlain = trim(strip_tags((string) $contentHtml));
             $descPlain    = trim(strip_tags((string) ($p->description ?? '')));
             $tContent = null;
             if ($contentPlain !== '' && mb_strlen($contentPlain) > mb_strlen($descPlain) + 40) {
-                $tContent = $translator->translate((string) $p->content, (string) $p->original_language, $to);
+                $tContent = $translator->translate((string) $contentHtml, (string) $p->original_language, $to);
             }
 
             if ($tName === null) {

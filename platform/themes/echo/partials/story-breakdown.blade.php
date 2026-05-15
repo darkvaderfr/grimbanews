@@ -574,7 +574,8 @@
         }
 
         #{{ $uid }} .grimba-breakdown__donut {
-            width: 172px;
+            --gbd-donut-size: clamp(124px, 22vw, 152px);
+            width: min(100%, var(--gbd-donut-size));
             max-width: 100%;
             aspect-ratio: 1;
             margin: 0 auto;
@@ -584,19 +585,19 @@
             transform: rotate(-90deg);
             animation: gbd-donut .72s cubic-bezier(.2,.8,.2,1) both;
             box-shadow:
-                inset 0 0 0 14px rgba(255, 255, 255, .9),
+                inset 0 0 0 10px rgba(255, 255, 255, .9),
                 0 0 0 1px var(--gbd-line),
                 0 14px 36px rgba(0, 0, 0, .12);
         }
 
         [data-bs-theme="dark"] #{{ $uid }} .grimba-breakdown__donut {
-            box-shadow: inset 0 0 0 14px rgba(15, 14, 11, .9), 0 14px 30px rgba(0, 0, 0, .42);
+            box-shadow: inset 0 0 0 10px rgba(15, 14, 11, .9), 0 14px 30px rgba(0, 0, 0, .42);
         }
 
         #{{ $uid }} .grimba-breakdown__donut::after {
             content: "";
             position: absolute;
-            inset: 34%;
+            inset: 28%;
             border-radius: 50%;
             background: var(--gbd-paper);
             box-shadow: 0 0 0 1px var(--gbd-line);
@@ -604,7 +605,7 @@
 
         #{{ $uid }} .grimba-breakdown__donut-center {
             position: absolute;
-            inset: 38%;
+            inset: 28%;
             z-index: 1;
             display: flex;
             flex-direction: column;
@@ -617,16 +618,17 @@
 
         #{{ $uid }} .grimba-breakdown__donut-center strong {
             display: block;
-            font-size: 24px;
+            color: var(--gbd-ink);
+            font-size: clamp(18px, calc(var(--gbd-donut-size) * .16), 24px);
             line-height: 1;
         }
 
         #{{ $uid }} .grimba-breakdown__donut-center span {
             display: block;
-            margin-top: 3px;
-            max-width: 58px;
+            margin-top: 4px;
+            max-width: 72px;
             color: var(--gbd-muted);
-            font-size: 8px;
+            font-size: 9px;
             font-weight: 900;
             line-height: 1;
             text-transform: uppercase;
@@ -635,7 +637,7 @@
 
         #{{ $uid }} .grimba-breakdown__owner-grid {
             display: grid;
-            grid-template-columns: minmax(200px, 260px) minmax(0, 1fr);
+            grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
             gap: 14px;
             align-items: stretch;
             min-width: 0;
@@ -686,7 +688,7 @@
 
         #{{ $uid }} .grimba-breakdown__owner-row {
             display: grid;
-            grid-template-columns: minmax(0, .95fr) minmax(110px, .55fr) minmax(42px, auto) minmax(0, 136px);
+            grid-template-columns: minmax(0, 1.05fr) minmax(96px, .52fr) minmax(48px, auto) minmax(72px, 136px);
             gap: 10px;
             align-items: center;
             min-width: 0;
@@ -947,7 +949,7 @@
             }
 
             #{{ $uid }} .grimba-breakdown__owner-summary-card {
-                grid-template-columns: minmax(132px, 172px) minmax(0, 1fr);
+                grid-template-columns: minmax(124px, 152px) minmax(0, 1fr);
                 column-gap: 12px;
                 place-items: center stretch;
                 text-align: left;
@@ -1008,12 +1010,12 @@
             }
 
             #{{ $uid }} .grimba-breakdown__donut {
-                width: 112px;
+                --gbd-donut-size: 116px;
                 max-width: 100%;
             }
 
             #{{ $uid }} .grimba-breakdown__donut-center strong {
-                font-size: 20px;
+                font-size: 18px;
             }
 
             #{{ $uid }} .grimba-breakdown__row,

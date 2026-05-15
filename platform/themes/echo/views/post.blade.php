@@ -208,7 +208,8 @@
                 // stuck on original-language headlines regardless of
                 // cookie state.
                 'translated_name', 'translated_description',
-                'translated_to', 'original_language',
+                'translated_content', 'translated_to', 'original_language',
+                'content', 'full_content',
             ]);
         GnTr::warm($__gnClusterPosts);
         $__gnIsStoryPage = $__gnClusterPosts->count() >= 2;
@@ -669,6 +670,15 @@
                     @endif
                 </header>
 
+                @include(Theme::getThemeNamespace('partials.story.full-article'), [
+                    'post' => $post,
+                    'body' => $__gnFullBody,
+                    'locked' => $__gnFullArticleLocked,
+                    'loginUrl' => $__gnMemberLoginUrl,
+                    'upstream' => $__gnUpstream,
+                    'source' => $__gnFullBodySource,
+                ])
+
                 @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
                     'location' => 'grimba_story_after_hero',
                     'class' => 'grimba-ad-slot--leaderboard my-3',
@@ -681,15 +691,6 @@
                 @include(Theme::getThemeNamespace('partials.story.source-drilldown'), [
                     'clusterPosts' => $__gnClusterPosts,
                     'sourceMeta'   => $__gnSourceMeta,
-                ])
-
-                @include(Theme::getThemeNamespace('partials.story.full-article'), [
-                    'post' => $post,
-                    'body' => $__gnFullBody,
-                    'locked' => $__gnFullArticleLocked,
-                    'loginUrl' => $__gnMemberLoginUrl,
-                    'upstream' => $__gnUpstream,
-                    'source' => $__gnFullBodySource,
                 ])
 
                 @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
@@ -849,6 +850,17 @@
                             </div>
                         </header>
 
+                        @if($__gnShowsReaderBody)
+                            @include(Theme::getThemeNamespace('partials.story.full-article'), [
+                                'post' => $post,
+                                'body' => $__gnFullBody,
+                                'locked' => $__gnFullArticleLocked,
+                                'loginUrl' => $__gnMemberLoginUrl,
+                                'upstream' => $__gnUpstream,
+                                'source' => $__gnFullBodySource,
+                            ])
+                        @endif
+
                         @include(Theme::getThemeNamespace('partials.story.share-kit'), [
                             'title' => $__gnTitle,
                         ])
@@ -890,17 +902,6 @@
 
                                 {!! apply_filters('ads_render', null, 'post_after', ['class' => 'my-2 text-center']) !!}
                             </div>
-                        @endif
-
-                        @if($__gnShowsReaderBody)
-                            @include(Theme::getThemeNamespace('partials.story.full-article'), [
-                                'post' => $post,
-                                'body' => $__gnFullBody,
-                                'locked' => $__gnFullArticleLocked,
-                                'loginUrl' => $__gnMemberLoginUrl,
-                                'upstream' => $__gnUpstream,
-                                'source' => $__gnFullBodySource,
-                            ])
                         @endif
 
                         {{-- GrimbaNews other angles (sibling cluster posts) --}}

@@ -29,7 +29,7 @@ class EditorialCategoriesTest extends TestCase
         $this->assertContains($politicsId, $ids);
     }
 
-    public function test_homepage_chips_include_news_categories_for_selected_editorial_location(): void
+    public function test_homepage_chips_show_topics_without_repeating_editorial_locations(): void
     {
         $africaId = $this->category('Afrique', 1);
         $europeId = $this->category('Europe', 2);
@@ -54,15 +54,11 @@ class EditorialCategoriesTest extends TestCase
             ->get('/')
             ->assertOk()
             ->assertSee('data-grimba-edition="europe"', false)
-            ->assertSee('data-category-id="' . $africaId . '"', false)
-            ->assertSee('data-category-id="' . $europeId . '"', false)
-            ->assertSee('data-category-id="' . $americasId . '"', false)
-            ->assertSee('data-category-id="' . $internationalId . '"', false)
+            ->assertDontSee('data-category-id="' . $africaId . '"', false)
+            ->assertDontSee('data-category-id="' . $europeId . '"', false)
+            ->assertDontSee('data-category-id="' . $americasId . '"', false)
+            ->assertDontSee('data-category-id="' . $internationalId . '"', false)
             ->assertSee('data-category-id="' . $politicsId . '"', false)
-            ->assertSee('Afrique')
-            ->assertSee('Europe')
-            ->assertSee('Amériques')
-            ->assertSee('International')
             ->assertSee('Politique');
     }
 

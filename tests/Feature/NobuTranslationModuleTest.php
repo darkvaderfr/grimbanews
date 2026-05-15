@@ -149,6 +149,67 @@ class NobuTranslationModuleTest extends TestCase
         $this->assertSame('The budget is adopted', GrimbaTranslationPresenter::title($post));
     }
 
+    public function test_pending_translation_refreshes_stale_body_after_full_article_extraction(): void
+    {
+        Cache::flush();
+
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'grimba_translator_openai_key'],
+            ['value' => 'sk-test-openai', 'created_at' => now(), 'updated_at' => now()]
+        );
+        DB::table('settings')->updateOrInsert(
+            ['key' => 'grimba_translator_driver'],
+            ['value' => 'openai', 'created_at' => now(), 'updated_at' => now()]
+        );
+
+        $longBody = '<p>' . str_repeat('Le texte intégral extrait donne beaucoup plus de contexte que le résumé initial. ', 14) . '</p>';
+        $postId = DB::table('posts')->insertGetId([
+            'name' => 'Le texte complet arrive apres extraction',
+            'description' => 'Un résumé bref existe déjà.',
+            'content' => '<p>Un résumé bref existe déjà.</p>',
+            'full_content' => $longBody,
+            'status' => 'published',
+            'author_type' => 'Botble\\ACL\\Models\\User',
+            'author_id' => 1,
+            'is_featured' => 0,
+            'views' => 0,
+            'bias_rating' => 'center',
+            'is_blindspot' => 0,
+            'source_name' => 'Fixture France Full Body',
+            'original_language' => 'fr',
+            'translated_name' => 'Existing translated headline',
+            'translated_description' => 'Existing translated summary.',
+            'translated_content' => '<p>Short translated summary.</p>',
+            'translated_to' => 'en',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Http::fake([
+            'api.openai.com/v1/chat/completions' => Http::sequence()
+                ->push(['choices' => [['message' => ['content' => 'Refreshed headline']]]])
+                ->push(['choices' => [['message' => ['content' => 'Refreshed summary']]]])
+                ->push(['choices' => [['message' => ['content' => '<p>Translated extracted article body with complete in-app context.</p>']]]]),
+        ]);
+
+        $this->artisan('grimba:translate-pending', [
+            '--to' => 'en',
+            '--limit' => 1,
+        ])->assertSuccessful();
+
+        $this->assertDatabaseHas('posts', [
+            'id' => $postId,
+            'translated_content' => '<p>Translated extracted article body with complete in-app context.</p>',
+            'translated_to' => 'en',
+        ]);
+
+        $this->assertDatabaseHas('grimba_post_translations', [
+            'post_id' => $postId,
+            'locale' => 'en',
+            'translated_content' => '<p>Translated extracted article body with complete in-app context.</p>',
+        ]);
+    }
+
     public function test_locale_priority_prefers_native_then_translated_then_unknown_then_untranslated(): void
     {
         $now = now();

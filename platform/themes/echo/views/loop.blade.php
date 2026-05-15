@@ -2,7 +2,8 @@
     use App\Support\GrimbaTranslationPresenter as GnTr;
 
     Theme::layout('grimba-chrome');
-    $enableSidebar = theme_option('blog_sidebar_enabled', true);
+    $isGrimbaCategoryPage = (bool) Theme::get('grimbaCategoryPage', false);
+    $enableSidebar = $isGrimbaCategoryPage ? false : theme_option('blog_sidebar_enabled', true);
     $postStyle = request()->input('style', theme_option('post_style', 'grid')) ;
 
     $postCollection = $posts instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator
@@ -42,6 +43,7 @@
 
 <section @class([
         'echo-hero-section inner echo-feature-area blog-list-content',
+        'grimba-category-listing' => $isGrimbaCategoryPage,
         'inner-2' => $postStyle == 'list',
         'blog-item-grid' => $postStyle == 'grid',
         'inner-3' => $postStyle == 'grid' || $postStyle == 'mixed'

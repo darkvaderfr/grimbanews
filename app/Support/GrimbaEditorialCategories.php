@@ -116,12 +116,7 @@ class GrimbaEditorialCategories
      */
     public static function homepageChips(int $limit = 10): Collection
     {
-        $editionName = self::editionNameForRegion();
-        $editionNames = collect([$editionName])
-            ->merge(collect(self::editionNames())->reject(fn (string $name): bool => $name === $editionName))
-            ->values()
-            ->all();
-        $names = array_values(array_unique(array_merge($editionNames, self::topicNames())));
+        $names = self::topicNames();
 
         return Category::query()
             ->where('status', 'published')
@@ -131,7 +126,6 @@ class GrimbaEditorialCategories
                     ->withoutGlobalScope('grimba_region')
                     ->where('posts.status', 'published'),
             ])
-            ->orderByRaw('CASE WHEN name = ? THEN 0 ELSE 1 END', [$editionName])
             ->orderBy('order')
             ->get()
             ->filter(fn (Category $category): bool => (int) ($category->posts_count ?? 0) > 0)

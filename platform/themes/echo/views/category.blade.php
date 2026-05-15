@@ -1,5 +1,6 @@
 @php
     Theme::set('pageTitle', $category->name);
+    Theme::set('grimbaCategoryPage', true);
     Theme::layout('grimba-chrome');
 
     $rawFollow = (string) request()->cookie('grimba_follow', '');
@@ -13,9 +14,6 @@
     use App\Support\GrimbaPostRecency;
     use App\Support\GrimbaRegionQuery;
     use App\Support\GrimbaTranslationPresenter as GnTr;
-    use App\Support\GrimbaEditorialCategories;
-    use App\Support\GrimbaEditorialCategoryFreshness;
-    use Botble\Blog\Models\Category as BlogCategory;
     use Botble\Blog\Models\Post;
     $catBias = Post::query()
         ->whereHas('categories', fn ($q) => $q->where('categories.id', $category->id))
@@ -36,14 +34,6 @@
         'center' => $catKnown ? round($catBias['center'] * 100 / $catKnown) : 0,
         'right'  => $catKnown ? round($catBias['right']  * 100 / $catKnown) : 0,
     ];
-    $editionFreshness = GrimbaEditorialCategoryFreshness::counts(now()->subHours(24), 'editions')
-        ->keyBy('id');
-    $editionCategories = BlogCategory::query()
-        ->where('status', 'published')
-        ->whereIn('name', GrimbaEditorialCategories::editionNames())
-        ->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$category->id])
-        ->orderBy('order')
-        ->get();
 @endphp
 
 <section class="grimba-category-hero container">
@@ -95,24 +85,6 @@
             </div>
         @endif
 
-        @if($editionCategories->isNotEmpty())
-            <nav class="grimba-category-editions mt-4" aria-label="{{ __('Éditions éditoriales') }}">
-                @foreach($editionCategories as $editionCategory)
-                    @php
-                        $freshness = $editionFreshness->get($editionCategory->id);
-                        $recentCount = (int) ($freshness->recent_count ?? 0);
-                        $isCurrentEdition = (int) $editionCategory->id === (int) $category->id;
-                    @endphp
-                    <a href="{{ $editionCategory->url }}"
-                       class="grimba-category-editions__item @if($isCurrentEdition) is-current @endif"
-                       @if($isCurrentEdition) aria-current="page" @endif>
-                        <span>{{ $editionCategory->name }}</span>
-                        <strong>{{ $recentCount }}</strong>
-                        <em>{{ __('24h') }}</em>
-                    </a>
-                @endforeach
-            </nav>
-        @endif
     </header>
 
     {{-- S316 — Top sources for this topic. Surfaces which outlets cover

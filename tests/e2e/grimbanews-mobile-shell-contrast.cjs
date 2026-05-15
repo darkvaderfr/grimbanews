@@ -418,9 +418,9 @@ async function inspectDesktopHeaderSearch(page) {
     });
 }
 
-async function inspectCategoryEditions(page, width) {
+async function inspectCategoryPage(page, width) {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto('/blog/europe', { waitUntil: 'networkidle' });
+    await page.goto('/blog/politique', { waitUntil: 'networkidle' });
 
     return page.evaluate(() => {
         const rect = element => {
@@ -428,42 +428,26 @@ async function inspectCategoryEditions(page, width) {
 
             return {
                 x: bounds.x,
+                y: bounds.y,
                 width: bounds.width,
                 height: bounds.height,
                 right: bounds.right,
             };
         };
         const nav = document.querySelector('.grimba-category-editions');
-        const rootStyle = getComputedStyle(document.documentElement);
-        const items = [...document.querySelectorAll('.grimba-category-editions__item')].map(item => {
-            const label = item.querySelector('span');
-            const count = item.querySelector('strong');
-            const style = getComputedStyle(item);
-
-            return {
-                text: label?.textContent?.trim() || '',
-                countText: count?.textContent?.trim() || '',
-                ariaCurrent: item.getAttribute('aria-current') || '',
-                rect: rect(item),
-                color: style.color,
-                backgroundColor: style.backgroundColor,
-                labelClientWidth: label?.clientWidth || 0,
-                labelScrollWidth: label?.scrollWidth || 0,
-            };
-        });
+        const cards = [...document.querySelectorAll('.grimba-category-listing .article-card')].slice(0, 9).map(card => rect(card));
+        const firstRowTop = cards.length ? cards[0].y : 0;
+        const firstRowCount = cards.filter(card => Math.abs(card.y - firstRowTop) <= 4).length;
 
         return {
             theme: document.documentElement.getAttribute('data-bs-theme'),
             viewportWidth: window.innerWidth,
             scrollWidth: document.documentElement.scrollWidth,
             bodyScrollWidth: document.body.scrollWidth,
-            paper: rootStyle.getPropertyValue('--gn-paper').trim(),
-            nav: nav ? {
-                clientWidth: nav.clientWidth,
-                scrollWidth: nav.scrollWidth,
-                rect: rect(nav),
-            } : null,
-            items,
+            navExists: Boolean(nav),
+            hasCategoryListing: Boolean(document.querySelector('.grimba-category-listing')),
+            cards,
+            firstRowCount,
         };
     });
 }
@@ -533,7 +517,10 @@ async function inspectCategoryEditions(page, width) {
             assert.ok(snapshot.topicChips.length > 0, `topic chips render at ${width}px`);
             const chipTexts = new Set(snapshot.topicChips.map(chip => chip.text));
             for (const edition of ['Europe', 'Afrique', 'Am\u00e9riques', 'International']) {
-                assert.ok(chipTexts.has(edition), `${edition} edition chip renders at ${width}px`);
+                assert.ok(! chipTexts.has(edition), `${edition} edition chip is not duplicated in the topic rail at ${width}px`);
+            }
+            for (const topic of ['Politique', '\u00c9conomie', 'Monde']) {
+                assert.ok(chipTexts.has(topic), `${topic} topic chip renders at ${width}px`);
             }
             for (const chip of snapshot.topicChips) {
                 assert.ok(chip.labelScrollWidth <= chip.labelClientWidth + 1, `${chip.text} chip label does not overflow at ${width}px`);
@@ -617,29 +604,27 @@ async function inspectCategoryEditions(page, width) {
         assert.ok(desktopHeaderSearch.placeholder.length <= 24, 'desktop header search placeholder is concise enough to fit');
         assert.match(desktopHeaderSearch.placeholder, /source/i, 'desktop header search placeholder still names sources');
 
-        const categoryEditions = [];
+        const categoryPages = [];
         for (const width of [320, 390, 1440]) {
-            const snapshot = await inspectCategoryEditions(page, width);
-            categoryEditions.push(snapshot);
+            const snapshot = await inspectCategoryPage(page, width);
+            categoryPages.push(snapshot);
 
             assert.equal(snapshot.theme, 'dark', `category page keeps dark theme at ${width}px`);
             assert.ok(snapshot.scrollWidth <= width + 1, `category page width stays contained at ${width}px`);
             assert.ok(snapshot.bodyScrollWidth <= width + 1, `category body width stays contained at ${width}px`);
-            assert.ok(snapshot.nav, `category editions strip renders at ${width}px`);
-            assert.ok(snapshot.nav.scrollWidth <= snapshot.nav.clientWidth + 1, `category editions strip does not overflow at ${width}px`);
-            assert.equal(snapshot.items.length, 4, `category editions strip shows all four editions at ${width}px`);
+            assert.equal(snapshot.navExists, false, `category page does not repeat the editorial edition strip at ${width}px`);
+            assert.ok(snapshot.hasCategoryListing, `category listing class renders at ${width}px`);
+            assert.ok(snapshot.cards.length > 0, `category article cards render at ${width}px`);
 
-            const current = snapshot.items.find(item => item.ariaCurrent === 'page');
-            assert.ok(current, `category editions strip marks the current edition at ${width}px`);
-            const currentBackground = blend(parseRgb(current.backgroundColor), parseHex(snapshot.paper));
-            assert.ok(contrast(parseRgb(current.color), currentBackground) >= 7, `current edition chip contrast is AAA-sized at ${width}px`);
+            for (const card of snapshot.cards) {
+                assert.ok(card.x >= -1, `category article card stays inside the left viewport edge at ${width}px`);
+                assert.ok(card.right <= width + 1, `category article card stays inside the right viewport edge at ${width}px`);
+            }
 
-            for (const item of snapshot.items) {
-                assert.ok(item.rect.height >= 44, `${item.text} edition chip keeps a 44px tap target at ${width}px`);
-                assert.ok(item.rect.x >= -1, `${item.text} edition chip stays inside the left viewport edge at ${width}px`);
-                assert.ok(item.rect.right <= width + 1, `${item.text} edition chip stays inside the right viewport edge at ${width}px`);
-                assert.ok(item.labelScrollWidth <= item.labelClientWidth + 1, `${item.text} edition label does not overflow at ${width}px`);
-                assert.match(item.countText, /^\d+$/, `${item.text} edition chip exposes a 24h count at ${width}px`);
+            if (width >= 1024) {
+                assert.ok(snapshot.firstRowCount >= 3, `desktop category listing renders at least three columns (${snapshot.firstRowCount})`);
+            } else {
+                assert.ok(snapshot.firstRowCount <= 1, `mobile category listing stays single-column (${snapshot.firstRowCount})`);
             }
         }
 
@@ -824,7 +809,7 @@ async function inspectCategoryEditions(page, width) {
             formControls,
             subpagePolish,
             desktopHeaderSearch,
-            categoryEditions,
+            categoryPages,
             desktopArticlePolish,
             saveButton: { contrast: Number(saveButtonContrast.toFixed(2)), pressedButtonStyle },
         }));

@@ -126,10 +126,17 @@
                     };
                     $title = GnTr::title($cp);
                     $description = GnTr::description($cp);
+                    $bodyCandidate = \App\Support\GrimbaArticleText::cleanIngestBody(GnTr::body($cp))
+                        ?: (\App\Support\GrimbaArticleText::readableBody($cp, 80)?->html ?? null);
+                    $bodyPreview = trim(strip_tags((string) $bodyCandidate));
+                    if ($bodyPreview !== '' && mb_strlen($bodyPreview) > mb_strlen(strip_tags((string) $description)) + 60) {
+                        $description = $bodyPreview;
+                    }
                     $isTranslated = GnTr::isTranslated($cp);
                     $categories = $cp->relationLoaded('categories') ? $cp->categories : collect();
                     $categories = $categories
                         ->reject(fn ($category): bool => in_array($category->name, \App\Support\GrimbaEditorialCategories::internalReviewNames(), true))
+                        ->reject(fn ($category): bool => in_array($category->name, \App\Support\GrimbaEditorialCategories::editionNames(), true))
                         ->values();
                 @endphp
                 <li data-bias="{{ $bucket }}"
@@ -147,7 +154,7 @@
                     class="grimba-story-article {{ $isCurrent ? 'grimba-story-article--current' : '' }}"
                     style="--story-side-color: {{ $meta['color'] }}; --story-side-line: {{ $isCurrent ? $meta['color'] . '55' : 'rgba(26,23,19,0.08)' }}; --story-card-bg: {{ $isCurrent ? $meta['color'] . '0d' : 'rgba(255,255,255,0.55)' }};">
 
-                    {{-- Source row: logo + name + ownership/credibility chips + lean badge --}}
+                    {{-- Source row: compare control, source identity, one lean badge. Detailed ownership/factuality lives in the breakdown panel. --}}
                     <div class="grimba-story-article__source-row">
                         {{-- S307 — compare checkbox. Sits left of the logo, only
                               activates after the reader checks one. --}}
@@ -172,32 +179,13 @@
                             {{ $cp->source_name ?? '—' }}
                         </strong>
 
-                        {{-- S305: 7-tier bias / 5-tier factuality / 8-cat ownership chips
-                              from the Ground-fidelity Wave 0 atoms. The 3-tier border-left
-                              accent on the row stays (it's our visual anchor) — these chips
-                              add the higher-resolution metadata Ground shows in their
-                              full-coverage list. --}}
                         @php
                             $__biasTier = \App\Ground\Bias::tier($cp->bias_rating ?? null, $src->bias_score ?? null);
-                            $__factTier = \App\Ground\Factuality::tier($src->credibility_score ?? null);
-                            $__ownCat   = \App\Ground\Ownership::category($src->ownership_type ?? null, $src->owner_name ?? null);
+                            $__country = trim((string) ($src->country ?? ''));
                         @endphp
 
-                        @if($__ownCat !== 'other')
-                            {!! Theme::partial('ownership-chip', [
-                                'category' => $__ownCat,
-                                'owner' => $src->owner_name ?? null,
-                                'size' => 'sm',
-                                'showLabel' => true,
-                            ]) !!}
-                        @endif
-
-                        @if($__factTier !== 'unknown')
-                            {!! Theme::partial('factuality-chip', [
-                                'tier' => $__factTier,
-                                'size' => 'sm',
-                                'showLabel' => true,
-                            ]) !!}
+                        @if($__country !== '')
+                            <span class="grimba-story-article__source-country">{{ strtoupper($__country) }}</span>
                         @endif
 
                         <span class="grimba-story-article__bias">
@@ -207,10 +195,6 @@
                                 'showLabel' => true,
                             ]) !!}
                         </span>
-                        @include(Theme::getThemeNamespace('partials.bias-confidence'), [
-                            'source' => $src,
-                            'post' => $cp,
-                        ])
 
                         @if($isCurrent)
                             <span class="grimba-story-article__current">{{ __('Vous lisez') }}</span>
