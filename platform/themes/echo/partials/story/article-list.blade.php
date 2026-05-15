@@ -9,6 +9,7 @@
 
     use App\Support\GrimbaTranslationPresenter as GnTr;
     use App\Support\GrimbaStoryInsights;
+    use Botble\Blog\Models\Post as BlogPost;
     use Illuminate\Support\Str;
 
     GnTr::warm($clusterPosts);
@@ -108,6 +109,18 @@
             $__sourceIds = $clusterPosts->pluck('source_id')->filter()->unique()->all();
             $__sources = \App\Support\GrimbaSourceMeta::forIds($__sourceIds);
         }
+
+        $__postIds = $clusterPosts->pluck('id')->filter()->map(fn ($id) => (int) $id)->unique()->values();
+        $__articleUrls = $__postIds->isEmpty()
+            ? collect()
+            : \Illuminate\Support\Facades\DB::table('slugs')
+                ->whereIn('reference_id', $__postIds->all())
+                ->where('reference_type', BlogPost::class)
+                ->whereIn('prefix', ['article', 'blog'])
+                ->orderByRaw("CASE prefix WHEN 'article' THEN 0 ELSE 1 END")
+                ->get(['reference_id', 'key'])
+                ->unique('reference_id')
+                ->mapWithKeys(fn ($slug) => [(int) $slug->reference_id => url('/article/' . $slug->key)]);
     @endphp
 
     <ul class="list-unstyled m-0" data-grimba-cluster-list id="grimba-cluster-panel" role="tabpanel">
@@ -126,6 +139,7 @@
                     };
                     $title = GnTr::title($cp);
                     $description = GnTr::description($cp);
+                    $articleUrl = $__articleUrls->get((int) $cp->id) ?: ($cp->url ?: '#');
                     $bodyCandidate = \App\Support\GrimbaArticleText::cleanIngestBody(GnTr::body($cp))
                         ?: (\App\Support\GrimbaArticleText::readableBody($cp, 80)?->html ?? null);
                     $bodyPreview = trim(strip_tags((string) $bodyCandidate));
@@ -150,7 +164,7 @@
                     data-compare-source="{{ $cp->source_name ?? '—' }}"
                     data-compare-title="{{ $title }}"
                     data-compare-desc="{{ $description ? Str::limit(strip_tags($description), 280) : '' }}"
-                    data-compare-url="{{ $cp->url ?? '' }}"
+                    data-compare-url="{{ $articleUrl }}"
                     class="grimba-story-article {{ $isCurrent ? 'grimba-story-article--current' : '' }}"
                     style="--story-side-color: {{ $meta['color'] }}; --story-side-line: {{ $isCurrent ? $meta['color'] . '55' : 'rgba(26,23,19,0.08)' }}; --story-card-bg: {{ $isCurrent ? $meta['color'] . '0d' : 'rgba(255,255,255,0.55)' }};">
 
@@ -208,7 +222,7 @@
                         @if($isCurrent)
                             {{ $title }}
                         @else
-                            <a href="{{ $cp->url ?? '#' }}" class="grimba-story-article__headline-link">
+                            <a href="{{ $articleUrl }}" class="grimba-story-article__headline-link">
                                 {{ $title }}
                             </a>
                         @endif
@@ -242,8 +256,8 @@
                             {{ $cp->created_at ? $cp->created_at->locale('fr')->diffForHumans() : '' }}
                         </span>
                         @if(! $isCurrent)
-                            <a href="{{ $cp->url ?? '#' }}" target="_blank" rel="noopener" class="grimba-story-article__read">
-                                {{ __("Lire l'article complet") }} ↗
+                            <a href="{{ $articleUrl }}" class="grimba-story-article__read">
+                                {{ __('Lire dans GrimbaNews') }}
                             </a>
                         @endif
                     </div>
@@ -304,7 +318,7 @@
             <div class="row g-3 grimba-compare-modal__grid" data-grimba-compare-grid></div>
 
             <p class="grimba-compare-modal__note">
-                {{ __('Le titre et l\'extrait sont reproduits depuis la source d\'origine. Cliquez sur "Lire l\'article complet" pour ouvrir l\'article chez l\'éditeur.') }}
+                {{ __('Le titre et l\'extrait viennent de la source originale. Ouvrez l\'article dans GrimbaNews pour lire le texte disponible et accéder au lien éditeur depuis le lecteur.') }}
             </p>
         </div>
     </div>
@@ -373,7 +387,7 @@
         if (!toolbar || !modal || !grid) return;
 
         const MAX = 3;
-        const READ_FULL_LABEL = @json(__("Lire l'article complet"));
+        const READ_IN_GRIMBA_LABEL = @json(__('Lire dans GrimbaNews'));
         let selected = [];
         let lastFocus = null;
         const trap = window.GrimbaFocus?.trap(modal, {
@@ -458,13 +472,11 @@
                 inner.appendChild(p);
             }
 
-            if (url && /^https?:\/\//i.test(url)) {
+            if (url && (/^https?:\/\//i.test(url) || url.startsWith('/'))) {
                 const a = document.createElement('a');
                 a.href = url;
-                a.target = '_blank';
-                a.rel = 'noopener';
                 a.className = 'grimba-compare-modal__link';
-                a.textContent = READ_FULL_LABEL + ' ↗';
+                a.textContent = READ_IN_GRIMBA_LABEL;
                 inner.appendChild(a);
             }
 

@@ -274,6 +274,8 @@ function assertModal(metrics, scenarioKey) {
         assertComponent(compareToggle, scenario.key);
         assert(articleCard.text.length > 80, `${scenario.key} article card has readable text`);
         assert(compareToggle.rect.width >= 34, `${scenario.key} compare target width ${compareToggle.rect.width}`);
+        const storyReadTarget = await page.locator('.grimba-story-article:not(.grimba-story-article--current) .grimba-story-article__read').first().getAttribute('target');
+        assert.equal(storyReadTarget, null, `${scenario.key} dossier read link stays inside GrimbaNews`);
 
         await page.evaluate(() => {
             document.querySelectorAll('[data-grimba-compare-toggle]').forEach((input, index) => {
@@ -293,6 +295,8 @@ function assertModal(metrics, scenarioKey) {
         await page.waitForSelector('#grimba-compare-modal.is-open');
         const modal = await collectModal(page);
         assertModal(modal, scenario.key);
+        const modalReadLinks = await page.locator('#grimba-compare-modal .grimba-compare-modal__link', { hasText: 'Lire dans GrimbaNews' }).count();
+        assert.equal(modalReadLinks, 2, `${scenario.key} compare modal links route into GrimbaNews`);
 
         results[scenario.key] = {
             heroTabs: heroTabs.rect,

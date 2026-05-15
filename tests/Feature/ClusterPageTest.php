@@ -413,6 +413,8 @@ class ClusterPageTest extends TestCase
             ]);
         }
 
+        $articleUrlPrefix = url('/article/');
+
         $this->withUnencryptedCookies($this->readerCookies(['grimba_region' => 'africa']))
             ->get($this->pathFor($post))
             ->assertOk()
@@ -422,6 +424,10 @@ class ClusterPageTest extends TestCase
             ->assertSee('Region Scoped Wire A')
             ->assertSee('Region Scoped Wire B')
             ->assertSee('Monde')
+            ->assertSee('Lire dans GrimbaNews')
+            ->assertSee('data-compare-url="' . $articleUrlPrefix, false)
+            ->assertSee('href="' . $articleUrlPrefix, false)
+            ->assertDontSee('target="_blank" rel="noopener" class="grimba-story-article__read"', false)
             ->assertDontSee('Trusted Source Credibility')
             ->assertSee('Sibling region-scope fixture description.');
     }

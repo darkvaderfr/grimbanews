@@ -51,6 +51,7 @@ class StaticUiTranslationTest extends TestCase
             base_path('platform/themes/echo/partials/home/vault-script.blade.php'),
             base_path('platform/themes/echo/partials/home/coverage-bar.blade.php'),
             base_path('platform/themes/echo/partials/story/bias-distribution.blade.php'),
+            base_path('platform/themes/echo/partials/story/article-list.blade.php'),
             base_path('platform/themes/echo/partials/story/source-drilldown.blade.php'),
             base_path('platform/themes/echo/partials/story-breakdown.blade.php'),
         ];
@@ -251,7 +252,7 @@ class StaticUiTranslationTest extends TestCase
             ->assertSee('Filter dossier articles')
             ->assertSee('Bias comparison')
             ->assertSee('Bias distribution')
-            ->assertSee('Read the full article');
+            ->assertSee('Read in GrimbaNews');
     }
 
     public function test_english_search_and_source_shells_use_saved_catalog_copy(): void
