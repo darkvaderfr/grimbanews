@@ -37,8 +37,9 @@
                         @if($p->source_name)
                             <span class="opacity-50">·</span> {{ $p->source_name }}
                         @endif
+                        {!! Theme::partial('country-pill', ['post' => $p]) !!}
                         @if($publishedAt)
-                            <span class="opacity-50">·</span> {{ $publishedAt->locale('fr')->diffForHumans(['short' => false]) }}
+                            <span class="opacity-50">·</span> {{ $publishedAt->locale(app()->getLocale())->diffForHumans(['short' => false]) }}
                         @endif
                     </span>
                     <a href="{{ $p->url }}" class="grimba-topnews__headline">{{ $title }}</a>
