@@ -6909,3 +6909,44 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-home [role="button"]:focus-v
 html.grimba-home-html[data-bs-theme="dark"] .grimba-home [role="tab"]:focus-visible {
     outline-color: var(--gn-paper);
 }
+
+/* ------------------------------------------------------------
+   Editorial ribbon utility — Vader 2026-05-16 standing rule.
+   Adds the canonical gradient ribbon + glass treatment to any
+   surface that opts in via the .grimba-editorial-ribbon class.
+   Used by cards that previously didn't carry the signature.
+   ------------------------------------------------------------ */
+.grimba-editorial-ribbon {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(246, 241, 232, 0.56)),
+        rgba(255, 255, 255, 0.62) !important;
+    border: 1px solid rgba(26, 23, 19, 0.08) !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+        0 20px 52px rgba(26, 23, 19, 0.075) !important;
+}
+.grimba-editorial-ribbon::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 1rem;
+    right: 1rem;
+    height: 3px;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(192, 57, 43, 0.52), rgba(59, 130, 246, 0.42), transparent);
+}
+.grimba-editorial-ribbon > * {
+    position: relative;
+    z-index: 1;
+}
+[data-bs-theme="dark"] .grimba-editorial-ribbon,
+body[data-theme="dark"] .grimba-editorial-ribbon {
+    background:
+        linear-gradient(135deg, rgba(28, 24, 17, 0.78), rgba(40, 35, 28, 0.68)),
+        rgba(28, 24, 17, 0.66) !important;
+    border-color: rgba(255, 250, 240, 0.10) !important;
+}

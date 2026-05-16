@@ -32,7 +32,7 @@
 <section class="grimba-sources py-5">
     <div class="container">
 
-        <header class="glass-panel p-4 mb-4">
+        <header class="glass-panel p-4 mb-4 grimba-editorial-ribbon">
             <span class="grimba-methodology__kicker">{{ __('Sources classées') }}</span>
             <h1 class="grimba-methodology__title mt-2 mb-2">
                 {{ trans_choice(':count média sous notre grille d’analyse|:count médias sous notre grille d’analyse', $total, ['count' => $total]) }}
