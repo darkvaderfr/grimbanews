@@ -650,6 +650,32 @@
         .grimba-article-card__excerpt-body--full li {
             margin: 0.4em 0;
         }
+
+        [data-bs-theme="dark"] .grimba-article-card__excerpt-body--full,
+        body[data-theme="dark"] .grimba-article-card__excerpt-body--full {
+            color: #fffaf0;
+        }
+        [data-bs-theme="dark"] .grimba-article-card__excerpt-body--full p:first-of-type::first-letter,
+        body[data-theme="dark"] .grimba-article-card__excerpt-body--full p:first-of-type::first-letter {
+            color: #e84c3d;
+        }
+        [data-bs-theme="dark"] .grimba-article-card__excerpt-body--full a,
+        body[data-theme="dark"] .grimba-article-card__excerpt-body--full a {
+            color: #ffb4a8;
+        }
+        [data-bs-theme="dark"] .grimba-article-card__excerpt-body--full a:hover,
+        body[data-theme="dark"] .grimba-article-card__excerpt-body--full a:hover {
+            color: #fffaf0;
+        }
+        [data-bs-theme="dark"] .grimba-article-card__excerpt-body--full blockquote,
+        body[data-theme="dark"] .grimba-article-card__excerpt-body--full blockquote {
+            border-left-color: #e84c3d;
+            color: rgba(255, 250, 240, .82);
+        }
+        [data-bs-theme="dark"] .grimba-article-card__excerpt-body--full figcaption,
+        body[data-theme="dark"] .grimba-article-card__excerpt-body--full figcaption {
+            color: rgba(255, 250, 240, .58);
+        }
         .grimba-article-card__excerpt-foot {
             text-align: center;
             padding-top: 8px;
