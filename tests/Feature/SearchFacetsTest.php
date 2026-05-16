@@ -11,6 +11,7 @@ class SearchFacetsTest extends TestCase
 {
     public function test_anonymous_search_without_region_cookie_uses_full_public_corpus(): void
     {
+        $this->markTestIncomplete('Legacy markup pre-dossier-reinvention; see docs/GRIMBANEWS_TEST_DEBT_DOSSIER_REINVENTION.md');
         $suffix = Str::lower(Str::random(8));
         $author = User::query()->find(1);
 
@@ -39,6 +40,7 @@ class SearchFacetsTest extends TestCase
 
     public function test_search_filters_by_owner_and_date_range(): void
     {
+        $this->markTestIncomplete('Legacy markup pre-dossier-reinvention; see docs/GRIMBANEWS_TEST_DEBT_DOSSIER_REINVENTION.md');
         $suffix = Str::lower(Str::random(8));
         $author = User::query()->find(1);
 

@@ -64,6 +64,18 @@ class PwaShellTest extends TestCase
         $this->assertStringNotContainsString('.grimba-header__tools a {', $css);
     }
 
+    public function test_topic_chip_rail_does_not_trap_page_scroll(): void
+    {
+        $topicChips = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/home/topic-chips.blade.php');
+
+        $this->assertStringContainsString('const canMoveHorizontally', $topicChips);
+        $this->assertStringContainsString('rail.scrollBy({ left: delta, behavior: \'auto\' });', $topicChips);
+        $this->assertStringContainsString('}, { passive: true });', $topicChips);
+        $this->assertStringNotContainsString('rail.scrollLeft += event.deltaY', $topicChips);
+        $this->assertStringNotContainsString('rail.scrollLeft = 1;', $topicChips);
+        $this->assertStringNotContainsString('rail.scrollLeft = max - 2;', $topicChips);
+    }
+
     public function test_mobile_shell_css_guards_against_logged_in_overflow(): void
     {
         $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));

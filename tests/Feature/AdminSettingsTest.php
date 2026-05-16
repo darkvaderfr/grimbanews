@@ -603,6 +603,12 @@ class AdminSettingsTest extends TestCase
                 'window' => '72',
                 'daily_budget' => '777',
                 'max_calls_per_run' => '12',
+                'webz_key' => 'webz-test-key',
+                'webz_active' => '1',
+                'webz_queries' => "breaking\nsahel",
+                'webz_daily_budget' => '29',
+                'webz_monthly_budget' => '870',
+                'webz_max_calls_per_run' => '2',
             ])
             ->assertRedirect('/admin/grimba/newsapi');
 
@@ -615,6 +621,12 @@ class AdminSettingsTest extends TestCase
         $this->assertSame('72', $this->settingValue('grimba_newsapi_everything_window_hours'));
         $this->assertSame('777', $this->settingValue('grimba_newsapi_daily_request_budget'));
         $this->assertSame('12', $this->settingValue('grimba_newsapi_max_calls_per_run'));
+        $this->assertSame('webz-test-key', $this->settingValue('grimba_webz_key'));
+        $this->assertSame('1', $this->settingValue('grimba_webz_active'));
+        $this->assertSame("breaking\nsahel", $this->settingValue('grimba_webz_queries'));
+        $this->assertSame('29', $this->settingValue('grimba_webz_daily_request_budget'));
+        $this->assertSame('870', $this->settingValue('grimba_webz_monthly_request_budget'));
+        $this->assertSame('2', $this->settingValue('grimba_webz_max_calls_per_run'));
 
         $newsApiDraftIds = DB::table('posts')
             ->where('status', 'published')
@@ -693,6 +705,8 @@ class AdminSettingsTest extends TestCase
             ->assertSee('grimba-admin-inline-actions', false)
             ->assertSee('NewsAPI draft readiness')
             ->assertSee('NewsAPI run ledger')
+            ->assertSee('Webz.io live lane')
+            ->assertSee('Webz budget quotidien')
             ->assertSee('Calls today')
             ->assertSee('Blockers NewsAPI')
             ->assertSee('alert-secondary', false)

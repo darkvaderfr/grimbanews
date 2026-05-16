@@ -21,6 +21,8 @@ class SecurityHeadersTest extends TestCase
         $this->assertStringContainsString("frame-ancestors 'self'", $csp);
         $this->assertStringContainsString("object-src 'none'", $csp);
         $this->assertStringContainsString("script-src 'self' 'unsafe-inline'", $csp);
+        $this->assertStringContainsString('googlesyndication.com', $csp);
+        $this->assertStringContainsString('doubleclick.net', $csp);
         $this->assertNull($response->headers->get('Content-Security-Policy-Report-Only'));
 
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
