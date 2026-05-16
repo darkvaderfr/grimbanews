@@ -505,6 +505,10 @@
                                 </span>
                                 <h2 id="grimba-insights-title" class="grimba-insights-panel__title">
                                     {{ __('Ce que les sources disent') }}
+                                    @include(Theme::getThemeNamespace('partials.info-pill'), [
+                                        'size' => 'sm',
+                                        'body' => __('Synthèse générée par NobuAI à partir des articles du dossier. Mode extractif = phrases tirées des articles tels quels. Mode NobuAI = synthèse rédigée. Vérifiez toujours la source pour les chiffres et citations.'),
+                                    ])
                                 </h2>
                             </header>
 
@@ -1043,10 +1047,11 @@
                         @include(Theme::getThemeNamespace('partials.story.share-kit'), [
                             'title' => $__gnTitle,
                         ])
-                        @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
-                            'location' => 'grimba_article_top',
-                            'class' => 'grimba-ad-slot--leaderboard my-3',
-                        ])
+                        {{-- Vader 2026-05-16: the larger top ad below share
+                             is removed — the smaller native ad inside
+                             .ck-content is the only post-content placement.
+                             Big banner already sits between the hero and
+                             excerpt cards (article-hero-card). --}}
 
                         @if (echo_is_audio_post($post))
                             <div class="wrapper-audio-control">
@@ -1059,8 +1064,17 @@
                         @php
                             $__gnBody = $__gnShowsReaderBody ? null : $__gnTranslatedBody;
                             $__gnShowOrig = $__gnHasTr && GnTr::hasTranslatedBody($post, $__gnTarget);
+                            // Vader 2026-05-16 — strip the ingester
+                            // boilerplate ("Lire l'article original" link +
+                            // "Full text is unavailable…" NewsAPI marker)
+                            // before rendering. The reader already has a
+                            // clean canonical-source link up in the excerpt
+                            // card.
+                            $__gnContentClean = $__gnBody
+                                ? \App\Support\GrimbaArticleText::cleanIngestBody($__gnBody)
+                                : null;
                         @endphp
-                        @if ($content = $__gnBody)
+                        @if (! empty($__gnContentClean))
                             <div class="ck-content">
                                 @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
                                     'location' => 'grimba_article_mid',
@@ -1068,7 +1082,7 @@
                                 ])
                                 {!! apply_filters('ads_render', null, 'post_before', ['class' => 'my-2 text-center']) !!}
 
-                                {!! BaseHelper::clean($content) !!}
+                                {!! BaseHelper::clean($__gnContentClean) !!}
 
                                 @if ($__gnShowOrig)
                                     <details class="mt-4 mb-2 small">

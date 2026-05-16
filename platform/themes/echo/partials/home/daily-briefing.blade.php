@@ -54,10 +54,16 @@
                 </p>
             @endif
 
-            <div class="grimba-daily-briefing__bar" role="img" aria-label="{{ __('Répartition gauche centre droite') }}">
-                <div class="grimba-daily-briefing__bar-seg" style="width: {{ $__pct['left'] }}%; background: var(--gn-left);"></div>
-                <div class="grimba-daily-briefing__bar-seg" style="width: {{ $__pct['center'] }}%; background: var(--gn-center);"></div>
-                <div class="grimba-daily-briefing__bar-seg" style="width: {{ $__pct['right'] }}%; background: var(--gn-right);"></div>
+            <div class="grimba-daily-briefing__bar-row d-flex align-items-center gap-2">
+                <div class="grimba-daily-briefing__bar flex-grow-1" role="img" aria-label="{{ __('Répartition gauche centre droite') }}">
+                    <div class="grimba-daily-briefing__bar-seg" style="width: {{ $__pct['left'] }}%; background: var(--gn-left);"></div>
+                    <div class="grimba-daily-briefing__bar-seg" style="width: {{ $__pct['center'] }}%; background: var(--gn-center);"></div>
+                    <div class="grimba-daily-briefing__bar-seg" style="width: {{ $__pct['right'] }}%; background: var(--gn-right);"></div>
+                </div>
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'body' => __('Cette barre montre la répartition Gauche / Centre / Droite des sources qui couvrent ce dossier. Plus elle est équilibrée, plus le sujet sort du bruit éditorial.'),
+                ])
             </div>
 
             <div class="grimba-daily-briefing__meta">

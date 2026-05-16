@@ -392,10 +392,10 @@ class GrimbaRssPoller
             $post = new Post();
             $post->name        = Str::limit($item['title'], 240, '');
             $post->description = $item['summary'] ?? '';
-            $post->content     = $item['link']
-                ? '<p><a href="' . e($item['link']) . '" target="_blank" rel="noopener">Lire l’article original</a></p>'
-                . '<p>' . e($item['summary'] ?? '') . '</p>'
-                : '<p>' . e($item['summary'] ?? '') . '</p>';
+            // Vader 2026-05-16 — drop the "Lire l'article original" link
+            // wrapper inside the post body. The canonical-source link is
+            // rendered by the article-hero-card from rss_feed_items.link.
+            $post->content     = '<p>' . e($item['summary'] ?? '') . '</p>';
             // Publish-first is now the default. Editors can opt back
             // into review-first with GRIMBA_INGEST_AUTO_PUBLISH=false
             // or the matching Botble setting.

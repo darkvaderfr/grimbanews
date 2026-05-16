@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Support\GrimbaArticleText;
+use App\Support\GrimbaArticleDedupe;
 use App\Support\GrimbaSourceCountryBackfill;
 use Botble\Blog\Models\Post;
 use Botble\Slug\Facades\SlugHelper;
@@ -21,6 +22,7 @@ class GrimbaLiveNewsFetcher
     private const FETCH_TIMEOUT = 20;
     private const GDELT_ENDPOINT = 'https://api.gdeltproject.org/api/v2/doc/doc';
     private const GOOGLE_NEWS_ENDPOINT = 'https://news.google.com/rss/search';
+    private const WEBZ_ENDPOINT = 'https://api.webz.io/newsApiLite';
     private const MEDIASTACK_ENDPOINT = 'https://api.mediastack.com/v1/news';
 
     /**
@@ -38,6 +40,7 @@ class GrimbaLiveNewsFetcher
             $summary = array_merge($summary, match ($provider) {
                 'gdelt' => $this->fetchGdelt(),
                 'google', 'google-news' => $this->fetchGoogleNews(),
+                'webz', 'webzio', 'webz-io' => $this->fetchWebz(),
                 'mediastack' => $this->fetchMediastack(),
                 default => [[
                     'provider' => $provider,
@@ -60,7 +63,7 @@ class GrimbaLiveNewsFetcher
      */
     public function providers(): array
     {
-        $raw = (string) setting('grimba_breaking_providers', 'google-news,gdelt,mediastack');
+        $raw = (string) setting('grimba_breaking_providers', 'google-news,gdelt,webz,mediastack');
 
         return collect(explode(',', str_replace("\n", ',', $raw)))
             ->map(fn (string $provider): string => mb_strtolower(trim($provider)))
@@ -331,6 +334,150 @@ class GrimbaLiveNewsFetcher
     }
 
     /**
+     * @return array<int, array{provider:string, query:string, status:string, returned:int, ingested:int, deduped:int, skipped:int, error:?string}>
+     */
+    private function fetchWebz(): array
+    {
+        $key = $this->webzKey();
+        if ($key === '') {
+            return [$this->skipped('webz', '-', 'WEBZ_NEWS_API_LITE_TOKEN not set.')];
+        }
+
+        if (! (bool) setting('grimba_webz_active', true)) {
+            return [$this->skipped('webz', '-', 'grimba_webz_active=false')];
+        }
+
+        $queries = $this->webzQueries();
+        if ($queries === []) {
+            return [$this->skipped('webz', '-', 'No Webz.io queries configured.')];
+        }
+
+        $dailyBudget = max(1, min(1000, (int) setting('grimba_webz_daily_request_budget', 30)));
+        $monthlyBudget = max(1, min(1000, (int) setting('grimba_webz_monthly_request_budget', 900)));
+        $callsToday = $this->webzCallsSince(now()->startOfDay());
+        $callsThisMonth = $this->webzCallsSince(now()->startOfMonth());
+        $remaining = min(
+            max(1, min(10, (int) setting('grimba_webz_max_calls_per_run', 1))),
+            $dailyBudget - $callsToday,
+            $monthlyBudget - $callsThisMonth
+        );
+
+        if ($remaining <= 0) {
+            return [$this->skipped('webz', '-', 'Webz.io request budget reached.')];
+        }
+
+        $summary = [];
+        $startIndex = count($queries) > 0 ? $callsThisMonth % count($queries) : 0;
+
+        for ($i = 0; $i < $remaining && $i < count($queries); $i++) {
+            $query = $queries[($startIndex + $i) % count($queries)];
+            $summary[] = $this->fetchWebzQuery($key, $query);
+        }
+
+        return $summary;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function webzQueries(): array
+    {
+        $default = implode("\n", [
+            '(breaking OR "breaking news" OR urgent OR alerte)',
+            '(africa OR afrique OR sahel OR mali OR senegal OR nigeria OR sudan OR kenya OR congo OR cameroon)',
+            'topic:"financial and economic news" (africa OR afrique OR economy OR économie)',
+        ]);
+        $raw = (string) setting('grimba_webz_queries', $default);
+
+        return collect(explode("\n", str_replace(',', "\n", $raw)))
+            ->map(fn (string $query): string => trim($query))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array{provider:string, query:string, status:string, returned:int, ingested:int, deduped:int, skipped:int, error:?string}
+     */
+    private function fetchWebzQuery(string $key, string $query): array
+    {
+        $started = now();
+        $startedAt = microtime(true);
+        $runId = $this->startLiveRun('webz', $query, $started);
+
+        try {
+            $response = Http::withUserAgent(self::USER_AGENT)
+                ->timeout(max(3, (int) setting('grimba_webz_timeout', 12)))
+                ->connectTimeout(max(2, (int) setting('grimba_webz_connect_timeout', 6)))
+                ->get(self::WEBZ_ENDPOINT, [
+                    'token' => $key,
+                    'q' => $query,
+                ]);
+
+            if (! $response->successful()) {
+                $summary = $this->failed('webz', $query, 'HTTP ' . $response->status());
+                $this->finishLiveRun($runId, $summary, $startedAt);
+
+                return $summary;
+            }
+
+            $body = $response->json();
+            $posts = (array) (
+                data_get($body, 'posts')
+                ?? data_get($body, 'articles')
+                ?? data_get($body, 'data')
+                ?? data_get($body, 'results')
+                ?? []
+            );
+            $articles = array_map(
+                fn (array $article): array => $this->normaliseWebzArticle($article),
+                array_filter($posts, 'is_array')
+            );
+
+            $summary = $this->ingestMany('webz', $query, $articles);
+            $this->finishLiveRun($runId, $summary, $startedAt);
+
+            return $summary;
+        } catch (Throwable $e) {
+            Log::warning('[GrimbaLiveNewsFetcher] Webz.io call failed', [
+                'query' => $query,
+                'error' => $e->getMessage(),
+            ]);
+
+            $summary = $this->failed('webz', $query, $e->getMessage());
+            $this->finishLiveRun($runId, $summary, $startedAt);
+
+            return $summary;
+        }
+    }
+
+    private function webzKey(): string
+    {
+        $fromSetting = trim((string) setting('grimba_webz_key', ''));
+        if ($fromSetting !== '') {
+            return $fromSetting;
+        }
+
+        $fromEnv = trim((string) env('WEBZ_NEWS_API_LITE_TOKEN', env('WEBZ_API_KEY', '')));
+
+        return $fromEnv;
+    }
+
+    private function webzCallsSince(Carbon $since): int
+    {
+        if (! Schema::hasTable('grimba_live_news_provider_runs')) {
+            return 0;
+        }
+
+        return DB::table('grimba_live_news_provider_runs')
+            ->where('provider', 'webz')
+            ->where('status', '!=', 'skipped')
+            ->where('started_at', '>=', $since)
+            ->count();
+    }
+
+    /**
      * @param array<int, array<string, mixed>> $articles
      * @return array{provider:string, query:string, status:string, returned:int, ingested:int, deduped:int, skipped:int, error:?string}
      */
@@ -373,15 +520,21 @@ class GrimbaLiveNewsFetcher
             return 'skipped';
         }
 
-        $hash = sha1($url);
-        if ($this->hasSeenUrl($url, $hash)) {
-            return 'duplicate';
-        }
-
         $title = trim((string) ($article['title'] ?? ''));
         if ($title === '') {
             return 'skipped';
         }
+
+        if (GrimbaArticleDedupe::hasSeen(
+            $url,
+            $title,
+            (string) ($article['source_name'] ?? ''),
+            (string) ($article['source_domain'] ?? '')
+        )) {
+            return 'duplicate';
+        }
+
+        $hash = sha1($url);
 
         $sourceId = $this->resolveSourceId(
             (string) ($article['source_name'] ?? ''),
@@ -437,29 +590,6 @@ class GrimbaLiveNewsFetcher
         }
     }
 
-    private function hasSeenUrl(string $url, string $hash): bool
-    {
-        if (Schema::hasTable('grimba_live_news_items')
-            && DB::table('grimba_live_news_items')->where('article_url_hash', $hash)->exists()) {
-            return true;
-        }
-
-        if (Schema::hasTable('newsapi_items')
-            && DB::table('newsapi_items')->where('article_url_hash', $hash)->exists()) {
-            return true;
-        }
-
-        if (Schema::hasTable('rss_feed_items') && Schema::hasColumn('rss_feed_items', 'canonical_url_hash')) {
-            $canonicalHash = app(GrimbaUrlCanonicalizer::class)->hash($url);
-            if ($canonicalHash
-                && DB::table('rss_feed_items')->where('canonical_url_hash', $canonicalHash)->exists()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private function createPost(string $provider, array $article, ?int $sourceId, ?string $sourceCountry): ?int
     {
         try {
@@ -480,8 +610,16 @@ class GrimbaLiveNewsFetcher
             $post = new Post();
             $post->name = Str::limit((string) $article['title'], 240, '');
             $post->description = Str::limit(strip_tags($description ?: $body), 600, '…');
-            $post->content = '<p><a href="' . e($url) . '" target="_blank" rel="noopener">Lire l’article original</a></p>'
-                . '<p>' . e(Str::limit($body, 1400, '…')) . '</p>';
+            // Vader 2026-05-16 — drop "Lire l'article original" link
+            // wrapper + strip NewsAPI truncation boilerplate. Canonical
+            // source link already lives in the article-hero-card.
+            $__rawBody = (string) $body;
+            $__rawBody = preg_replace(
+                '#\s*Full text is unavailable in the news API lite version\.?\s*#iu',
+                '',
+                $__rawBody
+            ) ?? $__rawBody;
+            $post->content = '<p>' . e(Str::limit($__rawBody, 1400, '…')) . '</p>';
 
             $autoPublish = $this->autoPublish();
             $post->status = $autoPublish ? 'published' : 'draft';
@@ -751,6 +889,55 @@ class GrimbaLiveNewsFetcher
         ];
     }
 
+    private function normaliseWebzArticle(array $article): array
+    {
+        $url = (string) (data_get($article, 'url') ?: data_get($article, 'thread.url') ?: '');
+        $domain = (string) (
+            data_get($article, 'thread.site')
+            ?: data_get($article, 'site')
+            ?: data_get($article, 'domain')
+            ?: $this->hostFromUrl($url)
+        );
+        $sourceName = (string) (
+            data_get($article, 'thread.site_full')
+            ?: data_get($article, 'site_full')
+            ?: data_get($article, 'source.name')
+            ?: $domain
+        );
+        $text = (string) (
+            data_get($article, 'text')
+            ?: data_get($article, 'content')
+            ?: data_get($article, 'description')
+            ?: data_get($article, 'summary')
+            ?: ''
+        );
+        $description = (string) (
+            data_get($article, 'highlightText')
+            ?: data_get($article, 'highlight_text')
+            ?: Str::limit(strip_tags($text), 600, '')
+        );
+
+        return [
+            'provider_item_id' => (string) (data_get($article, 'uuid') ?: data_get($article, 'thread.uuid') ?: ($url !== '' ? sha1($url) : '')),
+            'url' => $url,
+            'title' => (string) (data_get($article, 'title') ?: data_get($article, 'thread.title') ?: ''),
+            'description' => $description,
+            'content' => $text,
+            'image' => (string) (
+                data_get($article, 'thread.main_image')
+                ?: data_get($article, 'main_image')
+                ?: data_get($article, 'image')
+                ?: data_get($article, 'urlToImage')
+                ?: ''
+            ),
+            'source_name' => $sourceName,
+            'source_domain' => $domain,
+            'source_country' => data_get($article, 'thread.country') ?: data_get($article, 'country'),
+            'language' => $this->normaliseWebzLanguage(data_get($article, 'language') ?: data_get($article, 'thread.language')),
+            'published_at' => $this->toIso(data_get($article, 'published') ?: data_get($article, 'published_at') ?: data_get($article, 'thread.published')),
+        ];
+    }
+
     private function normaliseMediastackArticle(array $article): array
     {
         $url = (string) ($article['url'] ?? '');
@@ -768,6 +955,66 @@ class GrimbaLiveNewsFetcher
             'language' => $article['language'] ?? null,
             'published_at' => $this->toIso($article['published_at'] ?? null),
         ];
+    }
+
+    private function normaliseWebzLanguage(mixed $language): ?string
+    {
+        $language = mb_strtolower(trim((string) $language));
+        if ($language === '') {
+            return null;
+        }
+
+        $map = [
+            'english' => 'en',
+            'french' => 'fr',
+            'français' => 'fr',
+            'francais' => 'fr',
+            'spanish' => 'es',
+            'portuguese' => 'pt',
+            'arabic' => 'ar',
+            'german' => 'de',
+            'italian' => 'it',
+        ];
+
+        return $map[$language] ?? (preg_match('/^[a-z]{2,5}$/', $language) ? $language : null);
+    }
+
+    private function startLiveRun(string $provider, string $query, Carbon $started): ?int
+    {
+        if (! Schema::hasTable('grimba_live_news_provider_runs')) {
+            return null;
+        }
+
+        return (int) DB::table('grimba_live_news_provider_runs')->insertGetId([
+            'provider' => $provider,
+            'query_label' => Str::limit($query, 500, ''),
+            'status' => 'pending',
+            'started_at' => $started,
+            'created_at' => $started,
+            'updated_at' => $started,
+        ]);
+    }
+
+    /**
+     * @param array{provider:string, query:string, status:string, returned:int, ingested:int, deduped:int, skipped:int, error:?string} $summary
+     */
+    private function finishLiveRun(?int $runId, array $summary, float $startedAt): void
+    {
+        if ($runId === null || ! Schema::hasTable('grimba_live_news_provider_runs')) {
+            return;
+        }
+
+        DB::table('grimba_live_news_provider_runs')->where('id', $runId)->update([
+            'status' => $summary['status'],
+            'returned_articles' => $summary['returned'],
+            'ingested_articles' => $summary['ingested'],
+            'deduped_articles' => $summary['deduped'],
+            'skipped_articles' => $summary['skipped'],
+            'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+            'error_message' => $summary['error'],
+            'finished_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     private function toIso(mixed $value): ?string

@@ -24,6 +24,10 @@
             <span class="grimba-methodology__kicker">{{ __('Couvert par tous les côtés') }}</span>
             <h2 class="grimba-methodology__title grimba-all-sides__title m-0 mt-1">
                 {{ __('Histoires que gauche, centre et droite couvrent en même temps') }}
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'body' => __('Quand les trois camps se croisent sur une même histoire, le sujet sort vraiment du bruit éditorial. Le ruban coloré au-dessus de chaque carte montre la part de couverture par camp.'),
+                ])
             </h2>
         </div>
         <span class="small grimba-all-sides__count">{{ trans_choice(':count histoire ce moment|:count histoires ce moment', count($cards), ['count' => count($cards)]) }}</span>

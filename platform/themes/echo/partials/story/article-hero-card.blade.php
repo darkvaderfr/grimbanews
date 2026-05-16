@@ -213,7 +213,7 @@
                 @endif
                 @if($__ownership)
                     <span class="grimba-article-card__chip grimba-article-card__chip--ownership">
-                        {{ __(ucfirst((string) $__ownership)) }}
+                        {{ __(ucfirst(str_replace('_', ' ', (string) $__ownership))) }}
                     </span>
                 @endif
             </div>
@@ -244,19 +244,43 @@
     @if($__excerptDisplay !== '')
         <article class="grimba-article-card__excerpt-card grimba-article-card__excerpt-card--featured @if($__hasFullBody) grimba-article-card__excerpt-card--full @endif">
             <header class="grimba-article-card__excerpt-head">
-                <div>
+                <div class="grimba-article-card__excerpt-head-left">
                     <span class="grimba-article-card__source-label">
                         {{ $__hasFullBody ? __('Article intégral') : __('Extrait disponible') }}
                     </span>
-                    <h2 class="grimba-article-card__excerpt-title">
-                        {{ $__hasFullBody
-                            ? __("Lire l'article complet dans GrimbaNews")
-                            : __("Lire l'extrait disponible dans GrimbaNews") }}
-                    </h2>
+                    <div class="grimba-article-card__excerpt-pills">
+                        @if($__regionLabel)
+                            <span class="grimba-article-card__pill grimba-article-card__pill--region">
+                                {{ __($__regionLabel) }}
+                            </span>
+                        @endif
+                        @if($__primaryCategory)
+                            <a href="{{ $__primaryCategory->url }}" class="grimba-article-card__pill grimba-article-card__pill--category">
+                                {{ __($__primaryCategory->name) }}
+                            </a>
+                        @endif
+                        @if(in_array($__biasKey, ['left', 'center', 'right'], true))
+                            <span class="grimba-article-card__pill grimba-article-card__pill--bias" style="--pill-color: {{ $__biasColor }};">
+                                <span class="grimba-article-card__pill-dot" aria-hidden="true">—</span>
+                                {{ $__biasLabel }}
+                            </span>
+                        @endif
+                        @if($__ownership)
+                            <span class="grimba-article-card__pill grimba-article-card__pill--ownership">
+                                {{ __(ucfirst(str_replace('_', ' ', (string) $__ownership))) }}
+                            </span>
+                        @endif
+                    </div>
                 </div>
-                <span class="grimba-article-card__excerpt-count">
-                    {{ trans_choice(':count mot|:count mots', $__excerptWords, ['count' => $__excerptWords]) }}
-                </span>
+                <div class="grimba-article-card__excerpt-meta">
+                    <span class="grimba-article-card__excerpt-count">
+                        {{ trans_choice(':count mot|:count mots', $__excerptWords, ['count' => $__excerptWords]) }}
+                    </span>
+                    <span class="grimba-article-card__excerpt-readmin" title="{{ trans_choice(':count minute de lecture estimée|:count minutes de lecture estimées', $__readMin, ['count' => $__readMin]) }}">
+                        <span aria-hidden="true">⏱</span>
+                        <span>≈{{ $__readMin }} min</span>
+                    </span>
+                </div>
             </header>
             @if($__hasFullBody)
                 <div class="grimba-article-card__excerpt-body grimba-article-card__excerpt-body--full">
@@ -549,8 +573,38 @@
         .grimba-article-card__excerpt-head {
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 10px;
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .grimba-article-card__excerpt-head-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+        .grimba-article-card__excerpt-pills {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .grimba-article-card__excerpt-pills .grimba-article-card__pill {
+            font-size: 11.5px;
+            padding: 3px 9px;
+        }
+        .grimba-article-card__pill--ownership {
+            background: rgba(255, 252, 245, .9);
+            color: var(--gn-ink, #1a1713);
+            border-color: rgba(26, 23, 19, .10);
+            font-weight: 600;
+        }
+        .grimba-article-card__excerpt-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
         }
         .grimba-article-card__excerpt-count {
             font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -562,6 +616,19 @@
             border-radius: 999px;
             background: rgba(26, 23, 19, .05);
             color: var(--gn-ink-muted, rgba(26, 23, 19, .56));
+        }
+        .grimba-article-card__excerpt-readmin {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: rgba(26, 23, 19, .05);
+            color: var(--gn-ink-muted, rgba(26, 23, 19, .56));
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .04em;
         }
         .grimba-article-card__excerpt-body {
             margin: 0 0 12px;

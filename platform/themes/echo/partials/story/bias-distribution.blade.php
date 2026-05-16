@@ -627,6 +627,10 @@
             <div class="grimba-story-distribution__score">
                 <strong>{{ $balanceScore }}</strong>
                 <span>{{ __('Signal') }}</span>
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'body' => __('Le score Signal va de 0 à 100. 0 = un seul camp couvre. 100 = équilibre parfait Gauche / Centre / Droite. Plus le score est haut, plus le dossier est multi-perspectives.'),
+                ])
             </div>
         </header>
 

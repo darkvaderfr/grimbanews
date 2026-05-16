@@ -137,6 +137,11 @@
                         <span class="grimba-voices__absent-mark" aria-hidden="true">∅</span>
                         <p>{{ __(':side n\'a pas couvert cette histoire.', ['side' => $sideLabel]) }}</p>
                         <span class="grimba-voices__absent-hint">{{ __('Couverture asymétrique') }}</span>
+                        @include(Theme::getThemeNamespace('partials.info-pill'), [
+                            'size' => 'sm',
+                            'tone' => 'soft',
+                            'body' => __("Aucune source de ce camp n'a publié sur ce dossier. C'est ce qu'on appelle un angle mort — un signal éditorial en soi, pas un bug d'affichage."),
+                        ])
                     </div>
                 @endif
             </article>

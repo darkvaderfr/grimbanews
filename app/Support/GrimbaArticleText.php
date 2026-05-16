@@ -44,8 +44,25 @@ class GrimbaArticleText
             return null;
         }
 
+        // Strip the "Read original article" link wrapper that ingesters
+        // prepend. The reader already has a canonical link button.
         $clean = preg_replace(
-            '#^\s*<p>\s*<a\b[^>]*>[^<]*(?:article original|original article|read original|lire l)[^<]*</a>\s*</p>\s*#iu',
+            '#\s*<p>\s*<a\b[^>]*>[^<]*(?:article original|original article|read original|lire l)[^<]*</a>\s*</p>\s*#iu',
+            '',
+            $clean
+        ) ?? $clean;
+
+        // Strip the NewsAPI "Full text is unavailable in the news API
+        // lite version" boilerplate. Vader 2026-05-16 — never expose
+        // upstream provider names to readers.
+        $clean = preg_replace(
+            '#\s*<p>\s*Full text is unavailable in the news API lite version\.?\s*</p>\s*#iu',
+            '',
+            $clean
+        ) ?? $clean;
+        // Match the same line without the wrapping <p> tag.
+        $clean = preg_replace(
+            '#\s*Full text is unavailable in the news API lite version\.?\s*#iu',
             '',
             $clean
         ) ?? $clean;

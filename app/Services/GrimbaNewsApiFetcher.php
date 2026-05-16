@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Support\GrimbaArticleText;
+use App\Support\GrimbaArticleDedupe;
 use App\Support\GrimbaSourceCountryBackfill;
 use Botble\Blog\Models\Post;
 use Botble\Slug\Facades\SlugHelper;
@@ -299,12 +300,6 @@ class GrimbaNewsApiFetcher
             return 'skipped';
         }
 
-        $hash = sha1($url);
-
-        if (DB::table('newsapi_items')->where('article_url_hash', $hash)->exists()) {
-            return 'duplicate';
-        }
-
         $apiSourceId = (string) ($article['source']['id'] ?? '');
         $sourceName  = (string) ($article['source']['name'] ?? '');
 
@@ -323,6 +318,12 @@ class GrimbaNewsApiFetcher
         // Strip the trailing source attribution that NewsAPI bakes
         // into many headlines (" - Le Monde", " | BBC News").
         $title = preg_replace('/\s+[–\-—|]\s+[^|–\-—]+$/u', '', $title) ?: $title;
+
+        if (GrimbaArticleDedupe::hasSeen($url, $title, $sourceName, $this->hostFromUrl($url))) {
+            return 'duplicate';
+        }
+
+        $hash = sha1($url);
 
         $description = GrimbaArticleText::stripNewsApiTruncationMarker((string) ($article['description'] ?? '')) ?? '';
         $content     = GrimbaArticleText::stripNewsApiTruncationMarker((string) ($article['content'] ?? $description)) ?? '';
@@ -580,8 +581,17 @@ class GrimbaNewsApiFetcher
 
             $post->name        = Str::limit($a['title'], 240, '');
             $post->description = Str::limit(strip_tags($description), 600, '…');
-            $post->content     = '<p><a href="' . e($a['url']) . '" target="_blank" rel="noopener">Lire l’article original</a></p>'
-                . '<p>' . e(Str::limit(strip_tags($content), 1200, '…')) . '</p>';
+            // Vader 2026-05-16 — drop the "Lire l'article original" link
+            // wrapper + suppress the NewsAPI "Full text is unavailable in
+            // the news API lite version" boilerplate. Canonical source is
+            // already linked from the article-hero-card.
+            $__rawContent = (string) $content;
+            $__rawContent = preg_replace(
+                '#\s*Full text is unavailable in the news API lite version\.?\s*#iu',
+                '',
+                $__rawContent
+            ) ?? $__rawContent;
+            $post->content     = '<p>' . e(Str::limit(strip_tags($__rawContent), 1200, '…')) . '</p>';
 
             $autoPublish = (bool) setting('grimba_ingest_auto_publish', true);
             $envAutoPublish = env('GRIMBA_INGEST_AUTO_PUBLISH', null);
@@ -709,5 +719,24 @@ class GrimbaNewsApiFetcher
             }
         }
         return $slug;
+    }
+
+    private function hostFromUrl(string $url): string
+    {
+        $raw = trim($url);
+        if ($raw === '') {
+            return '';
+        }
+
+        $url = preg_match('#^https?://#i', $raw) ? $raw : 'https://' . ltrim($raw, '/');
+        $host = parse_url($url, PHP_URL_HOST);
+        if (! is_string($host) || $host === '') {
+            return '';
+        }
+
+        $host = mb_strtolower(trim($host));
+        $host = preg_replace('/^(www|m|amp)\./', '', $host) ?: $host;
+
+        return trim($host, '.');
     }
 }

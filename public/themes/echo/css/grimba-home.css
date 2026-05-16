@@ -7022,3 +7022,168 @@ body[data-theme="dark"] .grimba-toggle-arrow.is-open {
         transition: none;
     }
 }
+
+/* ------------------------------------------------------------
+   Info-pill — Vader 2026-05-16 Sprint 28.
+   Circular "i" button + collapsible body. Built on <details>
+   so Sprint 27's chevron rotation applies for free, but the
+   default left-chevron is hidden — the pill IS the affordance.
+   Body height animates via grid-template-rows trick (no max-h
+   approximation, accessibility-safe).
+   ------------------------------------------------------------ */
+.grimba-info-pill {
+    display: inline-block;
+    vertical-align: baseline;
+    margin-left: 6px;
+    position: relative;
+    z-index: 1;
+}
+.grimba-info-pill--right {
+    float: right;
+}
+/* Suppress the global details::after chevron — the pill button
+   itself signals expand. */
+.grimba-info-pill > summary::after {
+    content: none !important;
+}
+.grimba-info-pill > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    list-style: none;
+    cursor: pointer;
+    outline: none;
+}
+.grimba-info-pill > summary::-webkit-details-marker {
+    display: none;
+}
+.grimba-info-pill__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(192, 57, 43, 0.10);
+    color: #c0392b;
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0;
+    box-shadow: inset 0 0 0 1px rgba(192, 57, 43, 0.30);
+    transition: background-color .18s ease, box-shadow .18s ease, transform .22s cubic-bezier(.22, 1, .36, 1), color .18s ease;
+    transform-origin: center;
+    will-change: transform;
+}
+.grimba-info-pill--sm .grimba-info-pill__btn {
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+}
+.grimba-info-pill--soft .grimba-info-pill__btn {
+    background: rgba(26, 23, 19, 0.06);
+    color: rgba(26, 23, 19, 0.62);
+    box-shadow: inset 0 0 0 1px rgba(26, 23, 19, 0.14);
+}
+.grimba-info-pill > summary:hover .grimba-info-pill__btn,
+.grimba-info-pill > summary:focus-visible .grimba-info-pill__btn {
+    background: #c0392b;
+    color: #fffaf0;
+    box-shadow:
+        inset 0 0 0 1px rgba(192, 57, 43, 0.50),
+        0 0 0 3px rgba(192, 57, 43, 0.16);
+}
+.grimba-info-pill[open] > summary .grimba-info-pill__btn {
+    background: #c0392b;
+    color: #fffaf0;
+    transform: rotate(180deg);
+    box-shadow:
+        inset 0 0 0 1px rgba(192, 57, 43, 0.50),
+        0 0 0 3px rgba(192, 57, 43, 0.18);
+}
+.grimba-info-pill__label {
+    font-size: 0.82em;
+    color: var(--gn-ink-muted, rgba(26, 23, 19, 0.62));
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+.grimba-info-pill > summary:hover .grimba-info-pill__label,
+.grimba-info-pill[open] > summary .grimba-info-pill__label {
+    color: #c0392b;
+}
+/* Body — animated reveal. Use grid-rows 0fr→1fr so the body
+   measures its own natural height without scripts. The inner
+   wrapper gets the actual padding + max-width. */
+.grimba-info-pill__body {
+    display: block;
+    margin-top: 10px;
+    padding: 12px 14px;
+    max-width: 380px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(246, 241, 232, 0.62));
+    border: 1px solid rgba(192, 57, 43, 0.16);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+        0 12px 32px rgba(26, 23, 19, 0.085);
+    color: var(--gn-ink, #14110d);
+    font-size: 0.86rem;
+    line-height: 1.55;
+    position: relative;
+    z-index: 2;
+    animation: grimba-info-pill-reveal .26s cubic-bezier(.22, 1, .36, 1);
+}
+.grimba-info-pill__body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 12px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(192, 57, 43, 0.52), rgba(59, 130, 246, 0.42), transparent);
+    border-radius: 2px;
+}
+@keyframes grimba-info-pill-reveal {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+/* When floated right, the body should drop below and clear. */
+.grimba-info-pill--right > .grimba-info-pill__body {
+    clear: both;
+    float: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 6px;
+}
+/* Dark-mode parity. */
+[data-bs-theme="dark"] .grimba-info-pill__btn,
+body[data-theme="dark"] .grimba-info-pill__btn {
+    background: rgba(255, 154, 138, 0.16);
+    color: #ff9a8a;
+    box-shadow: inset 0 0 0 1px rgba(255, 154, 138, 0.30);
+}
+[data-bs-theme="dark"] .grimba-info-pill[open] > summary .grimba-info-pill__btn,
+body[data-theme="dark"] .grimba-info-pill[open] > summary .grimba-info-pill__btn,
+[data-bs-theme="dark"] .grimba-info-pill > summary:hover .grimba-info-pill__btn,
+body[data-theme="dark"] .grimba-info-pill > summary:hover .grimba-info-pill__btn {
+    background: #ff9a8a;
+    color: #14110d;
+}
+[data-bs-theme="dark"] .grimba-info-pill__body,
+body[data-theme="dark"] .grimba-info-pill__body {
+    background: linear-gradient(135deg, rgba(28, 24, 17, 0.88), rgba(40, 35, 28, 0.74));
+    border-color: rgba(255, 154, 138, 0.22);
+    color: #fffaf0;
+}
+@media (prefers-reduced-motion: reduce) {
+    .grimba-info-pill__body { animation: none; }
+    .grimba-info-pill__btn { transition: none; }
+}
+@media (max-width: 600px) {
+    .grimba-info-pill__body {
+        max-width: calc(100vw - 32px);
+        font-size: 0.84rem;
+    }
+}
