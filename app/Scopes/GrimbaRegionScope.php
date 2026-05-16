@@ -7,6 +7,7 @@ use Botble\Blog\Models\Post;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
+use Illuminate\Support\Facades\Schema;
 
 /*
  * S147 / Fleet K2 — edition scope (4-region rework, 2026-05-05).
@@ -47,19 +48,33 @@ class GrimbaRegionScope implements Scope
 
         // International (default editorial view) — NO filter. Per Vader
         // 2026-05-16: "the international shows all articles across
-        // regions". Treat it as the unfiltered global feed; named
-        // regions below are the focused cuts.
+        // regions". Named regions below are the focused cuts.
         if ($region === 'international') {
             return;
         }
 
+        $table = $model->getTable();
+
+        // Preferred path: filter by the first-class posts.editorial_region
+        // column set at ingest. Cheaper than the join-through-source
+        // pattern (no subquery), reflects the editorial intent of the
+        // post directly, and lets editors override the region on a
+        // case-by-case basis without changing source records.
+        if (Schema::hasColumn($table, 'editorial_region')) {
+            $builder->where($table . '.editorial_region', $region);
+
+            return;
+        }
+
+        // Legacy fallback for environments where the migration hasn't
+        // run yet — derive region from the joined source country list.
         $countries = Regions::countries($region);
         if ($countries === null) {
-            return; // Defensive: shouldn't reach here for a valid region.
+            return;
         }
 
         $builder->whereIn(
-            $model->getTable() . '.source_id',
+            $table . '.source_id',
             function ($q) use ($countries): void {
                 $q->select('id')
                     ->from('news_sources')

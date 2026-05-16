@@ -84,6 +84,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="{{ url('/og/home.png') }}">
     {!! Theme::header() !!}
+    @include(Theme::getThemeNamespace('partials.ads.head'))
     @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
 </head>
 <body class="grimba-home" {!! Theme::bodyAttributes() !!}>
@@ -105,6 +106,7 @@
             {{-- S154 — multi-bias hero rail. Shows only when ≥1 cluster
                  has cross-spectrum coverage; hides itself otherwise. --}}
             @include(Theme::getThemeNamespace('partials.home.daily-briefing'))
+            @include(Theme::getThemeNamespace('partials.home.regional-mix'))
             @include(Theme::getThemeNamespace('partials.home.all-sides-rail'))
             @include(Theme::getThemeNamespace('partials.home.hero-grid'))
             @include(Theme::getThemeNamespace('partials.home.ad-slot'), [

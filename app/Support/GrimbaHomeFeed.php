@@ -130,6 +130,24 @@ class GrimbaHomeFeed
         return self::build()['latest'];
     }
 
+    /**
+     * @return array<string, Collection<int, Post>>
+     */
+    public static function regionalMix(): array
+    {
+        return self::build()['regionalMix'] ?? [];
+    }
+
+    /**
+     * Resolve the active editorial region from the request cookie. Used
+     * by both the allocator (to gate the regional-mix on International)
+     * and partials (to conditionally render the mix rails).
+     */
+    public static function activeRegion(): string
+    {
+        return self::resolveRegionKey();
+    }
+
     public static function isShown(int $postId): bool
     {
         return isset(self::build()['allShown'][$postId]);
@@ -138,6 +156,13 @@ class GrimbaHomeFeed
     private static function compose(): array
     {
         $state = new HomeFeedState(self::SOURCE_CAP_PRIMARY);
+
+        // International is the only edition that gets the curated
+        // regional mix at the top — Africa / Europe / Americas readers
+        // already see only their region, so the mix would be redundant.
+        $regionalMix = self::resolveRegionKey() === 'international'
+            ? self::pickRegionalMix($state, 3)
+            : [];
 
         $briefing = self::pickBriefing($state);
         $allSides = self::pickAllSides($state);
@@ -151,6 +176,7 @@ class GrimbaHomeFeed
         $latest = self::pickLatest($state, 10);
 
         return [
+            'regionalMix' => $regionalMix,
             'briefing' => $briefing,
             'allSides' => $allSides,
             'hero' => $hero,
@@ -163,6 +189,62 @@ class GrimbaHomeFeed
             'latest' => $latest,
             'allShown' => $state->shown,
         ];
+    }
+
+    /**
+     * Three top stories per named region, surfaced as mini-rails at
+     * the top of the International home. Each pick is added to the
+     * shown set so the rest of the page doesn't repeat them.
+     *
+     * @return array<string, Collection<int, Post>>
+     */
+    private static function pickRegionalMix(HomeFeedState $state, int $perRegion): array
+    {
+        $out = [];
+        $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('posts', 'editorial_region');
+
+        foreach (['africa', 'europe', 'americas'] as $region) {
+            $query = Post::query()
+                ->withoutGlobalScope('grimba_region')
+                ->where('status', 'published')
+                ->whereNotIn('id', $state->shownIds() ?: [0])
+                ->with('categories');
+
+            if ($hasColumn) {
+                $query->where('editorial_region', $region);
+            } else {
+                $countries = \App\Ground\Regions::countries($region) ?? [];
+                if ($countries === []) {
+                    $out[$region] = collect();
+                    continue;
+                }
+                $query->whereIn('source_id', function ($q) use ($countries): void {
+                    $q->select('id')
+                      ->from('news_sources')
+                      ->whereIn('country', $countries);
+                });
+            }
+
+            $candidates = $query
+                ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+                ->limit($perRegion * 4)
+                ->get();
+
+            $picked = collect();
+            foreach ($candidates as $post) {
+                if ($picked->count() >= $perRegion) {
+                    break;
+                }
+                if ($state->take($post)) {
+                    $picked->push($post);
+                }
+            }
+
+            GrimbaTranslationPresenter::warm($picked);
+            $out[$region] = $picked;
+        }
+
+        return $out;
     }
 
     private static function pickBriefing(HomeFeedState $state): ?array

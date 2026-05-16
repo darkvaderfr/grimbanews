@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Ground\Regions;
 use App\Scopes\GrimbaRegionScope;
 use Botble\Blog\Models\Post;
 use Botble\Slug\Models\Slug;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -46,6 +49,27 @@ class AppServiceProvider extends ServiceProvider
         // resolves dots as nested-path separators, so 'grimba.region'
         // would be invisible to hasGlobalScope/getGlobalScope.
         Post::addGlobalScope('grimba_region', new GrimbaRegionScope());
+
+        // Editorial region tag, set at save time so every ingest path
+        // (RSS, NewsAPI, LiveNews, manual editor) writes the column
+        // automatically. Falls back gracefully when the column is not
+        // present (the migration is opt-in per Vader's "no migrations
+        // without ask" rule).
+        Post::saving(function (Post $post): void {
+            if (! Schema::hasColumn('posts', 'editorial_region')) {
+                return;
+            }
+            if (! empty($post->editorial_region)) {
+                return; // already set explicitly upstream
+            }
+            $country = null;
+            if (! empty($post->source_id)) {
+                $country = DB::table('news_sources')
+                    ->where('id', $post->source_id)
+                    ->value('country');
+            }
+            $post->editorial_region = Regions::regionForCountry($country);
+        });
     }
 
     private function canonicalizeArticleUrls(): void

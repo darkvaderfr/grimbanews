@@ -564,6 +564,16 @@
     "Droite": "Right",
     "Catégories": "Categories",
     "Catégories éditoriales": "Editorial categories",
+
+    "Afrique": "Africa",
+    "Amériques": "Americas",
+    "International": "International",
+    "Édition internationale": "International edition",
+    "Les régions, en bref": "Regions, at a glance",
+    "Trois histoires phares par région. Choisissez une édition pour zoomer.": "Three lead stories per region. Pick an edition to zoom in.",
+    "Voir l'édition": "View the edition",
+    "Voir l'édition :region": "View the :region edition",
+
     "Votre biais de lecture": "Your reading bias",
     "0 source · 0 article ·": "0 sources · 0 articles ·",
     "lisez quelques articles pour voir votre profil": "read a few articles to see your profile",

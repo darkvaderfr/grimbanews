@@ -124,6 +124,41 @@ class Regions
     }
 
     /**
+     * Classify a source country code (ISO-2) into one of the four
+     * canonical regions. Used at ingest time to tag posts with their
+     * editorial region instead of deriving it at every render.
+     *
+     *   null / unknown  → 'international'
+     *   AF country      → 'africa'
+     *   EU country      → 'europe'
+     *   AM country      → 'americas'
+     *   anything else   → 'international' (Asia, Oceania, ME, etc.)
+     */
+    public static function regionForCountry(?string $code): string
+    {
+        if ($code === null) {
+            return 'international';
+        }
+
+        $up = strtoupper(trim($code));
+        if ($up === '') {
+            return 'international';
+        }
+
+        if (in_array($up, self::AFRICA, true)) {
+            return 'africa';
+        }
+        if (in_array($up, self::EUROPE, true)) {
+            return 'europe';
+        }
+        if (in_array($up, self::AMERICAS, true)) {
+            return 'americas';
+        }
+
+        return 'international';
+    }
+
+    /**
      * Map legacy / synonymous cookie values to the canonical 4 regions.
      * Returns the canonical key, or 'international' as the safe fallback.
      */
