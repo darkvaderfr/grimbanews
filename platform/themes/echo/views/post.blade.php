@@ -1025,7 +1025,11 @@
                             {!! Theme::partial('save-button', ['post' => $post, 'variant' => 'pill']) !!}
                         </div>
 
-                        @if($__gnShowsReaderBody)
+                        {{-- Same dedupe as the story-page path (Sprint 12):
+                             article-hero-card now consumes the excerpt/full
+                             body inline, so the legacy full-article partial
+                             only fires for the locked member-gate case. --}}
+                        @if($__gnFullArticleLocked)
                             @include(Theme::getThemeNamespace('partials.story.full-article'), [
                                 'post' => $post,
                                 'body' => $__gnFullBody,
