@@ -29,28 +29,28 @@
 
     $sides = array_filter($counts, fn ($c) => $c > 0);
     $balanceLabel = match (count($sides)) {
-        3 => 'Couverture équilibrée',
-        2 => 'Couverture partielle',
-        1 => 'Couverture unilatérale',
-        default => 'Aucune source classée',
+        3 => __('Couverture équilibrée'),
+        2 => __('Couverture partielle'),
+        1 => __('Couverture unilatérale'),
+        default => __('Aucune source classée'),
     };
 @endphp
 
 <div class="diversity-meter glass-panel p-3 mb-4">
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <strong class="text-uppercase small">Diversité des sources</strong>
-        <span class="small opacity-75">{{ $balanceLabel }} — {{ $total }} {{ $total > 1 ? 'sources' : 'source' }}</span>
+        <strong class="text-uppercase small">{{ __('Diversité des sources') }}</strong>
+        <span class="small opacity-75">{{ $balanceLabel }} — {{ trans_choice(':count source|:count sources', $total, ['count' => $total]) }}</span>
     </div>
 
     <div class="diversity-bar" style="display:flex;height:10px;border-radius:9999px;overflow:hidden;background:rgba(0,0,0,0.06);">
         <div style="width: {{ $pct['left'] }}%;background:#3b82f6;" title="{{ __('Gauche') }} — {{ $counts['left'] }}"></div>
-        <div style="width: {{ $pct['center'] }}%;background:#22c55e;" title="{{ __('Centre') }} — {{ $counts['center'] }}"></div>
-        <div style="width: {{ $pct['right'] }}%;background:#ef4444;" title="{{ __('Droite') }} — {{ $counts['right'] }}"></div>
+        <div style="width: {{ $pct['center'] }}%;background:#a8a8a8;" title="{{ __('Centre') }} — {{ $counts['center'] }}"></div>
+        <div style="width: {{ $pct['right'] }}%;background:#e84c3d;" title="{{ __('Droite') }} — {{ $counts['right'] }}"></div>
     </div>
 
     <div class="d-flex justify-content-between small mt-2">
-        <span style="color:#3b82f6;font-weight:600;">● Gauche {{ $pct['left'] }}%</span>
-        <span style="color:#22c55e;font-weight:600;">● Centre {{ $pct['center'] }}%</span>
-        <span style="color:#ef4444;font-weight:600;">● Droite {{ $pct['right'] }}%</span>
+        <span style="color:#3b82f6;font-weight:600;">● {{ __('Gauche') }} {{ $pct['left'] }}%</span>
+        <span style="color:#a8a8a8;font-weight:600;">● {{ __('Centre') }} {{ $pct['center'] }}%</span>
+        <span style="color:#e84c3d;font-weight:600;">● {{ __('Droite') }} {{ $pct['right'] }}%</span>
     </div>
 </div>

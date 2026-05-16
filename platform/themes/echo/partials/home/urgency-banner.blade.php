@@ -132,12 +132,14 @@
             ->whereIn('id', $__sourceIds)
             ->pluck('name', 'id');
 
-    // Source rendered as a short uppercased monogram (1-2 words max) per
-    // Vader 2026-05-16: ticker should read like a CNN crawl, not a
-    // truncated headline. "Le Monde" → "LE MONDE", "Yahoo Sports" → "YAHOO".
+    // Source rendered as a clean uppercased monogram. Per Vader 2026-05-16:
+    // "1 or 2 words for the providers/source" — but "Times of Israel"
+    // truncated to "TIMES OF" reads broken, so we allow a 3rd word when
+    // the second is a short connector ("of", "de", "du", "&") that
+    // shouldn't end the monogram. Trailing generic suffixes ("Inc",
+    // "Group", "News", "Media", "Online") are dropped because they
+    // add no signal.
     $__shortSource = static function ($post) use ($__sourceNames): string {
-        // Prefer the canonical publisher name from news_sources over
-        // posts.source_name (which is sometimes the upstream domain).
         $name = '';
         if (! empty($post->source_id) && isset($__sourceNames[$post->source_id])) {
             $name = trim((string) $__sourceNames[$post->source_id]);
@@ -147,18 +149,31 @@
         }
         if ($name === '') return 'GRIMBANEWS';
 
-        // If it still looks like a domain (contains a dot or TLD),
-        // collapse to the registrable label only.
+        // If it still looks like a domain, collapse to the registrable label.
         if (preg_match('/^[a-z0-9-]+(\\.[a-z]{2,})+$/i', $name)) {
             $parts = explode('.', $name);
             $name = $parts[count($parts) - 2] ?? $name;
         }
 
-        // Drop common publisher noise prefixes.
+        // Drop leading articles.
         $name = preg_replace('/^(the|le|la|les|l\')\\s+/iu', '', $name) ?? $name;
 
         $words = preg_split('/\\s+/u', $name) ?: [$name];
-        $words = array_slice($words, 0, 2);
+
+        // Drop trailing generic suffixes that carry no editorial signal.
+        $suffixDrop = ['inc', 'inc.', 'group', 'corp', 'corp.', 'co.', 'ltd', 'sa', 's.a.', 'media', 'news', 'online', 'magazine', 'press'];
+        while (count($words) > 1 && in_array(mb_strtolower(end($words)), $suffixDrop, true)) {
+            array_pop($words);
+        }
+
+        // Connector words that shouldn't end a monogram — bump to 3
+        // words when the 2nd is a connector.
+        $connectors = ['of', 'de', 'du', 'des', 'la', 'le', 'les', 'and', 'et', '&', 'für', 'von'];
+        $cap = 2;
+        if (count($words) >= 3 && in_array(mb_strtolower($words[1] ?? ''), $connectors, true)) {
+            $cap = 3;
+        }
+        $words = array_slice($words, 0, $cap);
 
         return mb_strtoupper(implode(' ', $words));
     };

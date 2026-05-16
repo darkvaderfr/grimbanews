@@ -27,7 +27,7 @@
 @if($entries->count() >= 3)
     <aside class="grimba-story-timeline glass-panel p-3 mb-3">
         <h2 class="h6 mb-3" style="font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; font-size:13px; opacity:0.75;">
-            Chronologie
+            {{ __('Chronologie') }}
         </h2>
 
         <ol class="list-unstyled m-0" style="position:relative; padding-left:18px;">
