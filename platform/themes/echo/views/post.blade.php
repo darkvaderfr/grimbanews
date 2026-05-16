@@ -929,10 +929,10 @@
                     ])
                 @endif
 
-                @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
-                    'location' => 'grimba_story_after_hero',
-                    'class' => 'grimba-ad-slot--leaderboard my-3',
-                ])
+                {{-- grimba_story_after_hero ad is now rendered inside
+                     the article-hero-card partial between SOURCE and
+                     EXCERPT cards (Vader 2026-05-16 reposition). The
+                     duplicate include here is dropped. --}}
 
                 @include(Theme::getThemeNamespace('partials.story.share-kit'), [
                     'title' => $__gnTitle,

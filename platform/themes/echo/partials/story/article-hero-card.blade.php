@@ -206,6 +206,15 @@
         @endif
     </article>
 
+    {{-- Sprint 11 (Vader 2026-05-16): the larger ad sits between the
+         SOURCE card above and the EXCERPT card below, so the ad reads
+         as part of the article-opening flow instead of clutter at the
+         end of the dossier. --}}
+    @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+        'location' => 'grimba_story_after_hero',
+        'class' => 'grimba-ad-slot--leaderboard my-3',
+    ])
+
     @if($__excerptDisplay !== '')
         <article class="grimba-article-card__excerpt-card grimba-article-card__excerpt-card--featured">
             <header class="grimba-article-card__excerpt-head">
