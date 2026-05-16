@@ -5,7 +5,6 @@
 
     $latest = GrimbaHomeFeed::latest();
     GnTr::warm($latest);
-    $latest->loadMissing('categories');
 
     $followChips = GrimbaEditorialCategories::homepageChips(8);
 @endphp
