@@ -197,7 +197,7 @@
             ->where('story_cluster_id', $post->story_cluster_id)
             ->where('status', 'published')
             ->with('categories')
-            ->orderBy('created_at', 'desc')
+            ->tap(fn ($q) => \App\Support\GrimbaPostRecency::orderByPublished($q))
             ->get([
                 'id', 'name', 'description', 'source_id', 'source_name',
                 'bias_rating', 'story_cluster_id', 'created_at', 'updated_at',

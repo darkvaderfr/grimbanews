@@ -542,7 +542,7 @@ class GrimbaHomeFeed
                 ->whereNotIn('id', $state->shownIds() ?: [0])
                 ->with('categories')
                 ->orderByDesc('views')
-                ->latest()
+                ->tap(fn ($q) => GrimbaPostRecency::orderByPublished($q))
                 ->limit($perBias * 4)
                 ->get();
 
