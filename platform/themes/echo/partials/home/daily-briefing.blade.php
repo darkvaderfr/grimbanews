@@ -79,18 +79,35 @@
         display: grid;
         grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
         gap: 0;
-        border-radius: 18px;
+        border-radius: 16px;
         overflow: hidden;
         text-decoration: none;
         color: inherit;
-        background: var(--gn-paper);
-        border: 1px solid var(--gn-rule);
-        box-shadow: 0 18px 44px rgba(26, 23, 19, 0.10);
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(246, 241, 232, 0.56)),
+            rgba(255, 255, 255, 0.62);
+        border: 1px solid rgba(26, 23, 19, 0.08);
+        box-shadow:
+            inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+            0 20px 52px rgba(26, 23, 19, 0.075);
+        transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .grimba-daily-briefing__card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 1rem;
+        right: 1rem;
+        height: 3px;
+        z-index: 3;
+        pointer-events: none;
+        background: linear-gradient(90deg, transparent, rgba(192, 57, 43, 0.52), rgba(59, 130, 246, 0.42), transparent);
     }
     .grimba-daily-briefing__card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 24px 60px rgba(26, 23, 19, 0.14);
+        transform: translateY(-3px);
+        box-shadow:
+            inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+            0 26px 64px rgba(26, 23, 19, 0.12);
     }
     .grimba-daily-briefing__cover {
         position: relative;
