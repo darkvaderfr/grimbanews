@@ -6,8 +6,8 @@
 
     $breakingWindowHours = max(1, (int) setting('grimba_breaking_window_hours', 6));
     $breakingPosts = \Illuminate\Support\Facades\Cache::remember(
-        'grimba_breaking_ticker_v2:' . GnTr::targetLocale() . ':' . $breakingWindowHours,
-        60,
+        'grimba_breaking_ticker_v3:' . GnTr::targetLocale() . ':' . $breakingWindowHours,
+        45,
         function () use ($breakingWindowHours) {
             $recentQuery = Post::withoutGlobalScope('grimba_region')
                 ->where('status', 'published')
@@ -16,7 +16,7 @@
             GrimbaPostRecency::wherePublishedSince($recentQuery, now()->subHours($breakingWindowHours));
             GrimbaPostRecency::orderByPublished($recentQuery);
 
-            $recent = $recentQuery->limit(12)->get();
+            $recent = $recentQuery->limit(14)->get();
             if ($recent->isNotEmpty()) {
                 return $recent;
             }
@@ -28,7 +28,7 @@
             GrimbaPostRecency::wherePublishedSince($fallbackQuery, now()->subDay());
             GrimbaPostRecency::orderByPublished($fallbackQuery);
 
-            $fallback = $fallbackQuery->limit(12)->get();
+            $fallback = $fallbackQuery->limit(14)->get();
             if ($fallback->isNotEmpty()) {
                 return $fallback;
             }
@@ -44,16 +44,32 @@
 
     GnTr::warm($breakingPosts);
 
+    $biasDot = [
+        'left' => '#3b82f6',
+        'center' => '#a8a8a8',
+        'right' => '#e84c3d',
+    ];
+
+    $breakingTotal = max(1, $breakingPosts->count());
     $breakingItems = $breakingPosts
-        ->map(function ($post): array {
+        ->values()
+        ->map(function ($post, int $index) use ($breakingTotal, $biasDot): array {
             $title = trim((string) GnTr::title($post));
             $publishedAt = GnTr::publishedAt($post);
+            $bias = $post->bias_rating ?? 'unknown';
+            // Brighter for fresher items: 1.0 at the head, fading to 0.55
+            // at the tail. Keeps the rail readable without making old
+            // items disappear.
+            $alpha = round(1.0 - ($index / max(1, $breakingTotal - 1)) * 0.45, 3);
 
             return [
                 'title' => $title !== '' ? $title : (string) __('Nouvelle histoire'),
                 'url' => $post->url,
                 'source' => trim((string) ($post->source_name ?? '')) ?: 'GrimbaNews',
                 'time' => $publishedAt ? $publishedAt->locale(app()->getLocale())->diffForHumans() : '',
+                'bias' => isset($biasDot[$bias]) ? $bias : null,
+                'bias_color' => $biasDot[$bias] ?? null,
+                'alpha' => $alpha,
             ];
         })
         ->filter(fn (array $item): bool => trim($item['title']) !== '')
@@ -65,6 +81,9 @@
             'url' => url('/search'),
             'source' => 'GrimbaNews',
             'time' => '',
+            'bias' => null,
+            'bias_color' => null,
+            'alpha' => 1.0,
         ]]);
     }
 @endphp
@@ -81,7 +100,13 @@
                 @for($i = 0; $i < 2; $i++)
                     <div class="grimba-breaking__group">
                         @foreach($breakingItems as $item)
-                            <a href="{{ $item['url'] }}" class="grimba-breaking__item" data-breaking-item-title="{{ $item['title'] }}">
+                            <a href="{{ $item['url'] }}"
+                               class="grimba-breaking__item"
+                               data-breaking-item-title="{{ $item['title'] }}"
+                               style="--gn-break-alpha: {{ $item['alpha'] }};{{ $item['bias_color'] ? ' --gn-break-bias: ' . $item['bias_color'] . ';' : '' }}">
+                                @if(! empty($item['bias_color']))
+                                    <span class="grimba-breaking__dot" aria-hidden="true"></span>
+                                @endif
                                 <span class="grimba-breaking__source">{{ $item['source'] }}</span>
                                 <span class="grimba-breaking__title">{{ Str::limit($item['title'], 96) }}</span>
                                 @if($item['time'] !== '')
@@ -95,6 +120,31 @@
         </div>
     </div>
 </div>
+
+<style>
+    .grimba-breaking__item {
+        opacity: var(--gn-break-alpha, 1);
+        transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .grimba-breaking__item:hover,
+    .grimba-breaking__item:focus-visible {
+        opacity: 1 !important;
+        transform: translateY(-1px);
+    }
+
+    .grimba-breaking__dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        margin-right: 6px;
+        border-radius: 50%;
+        background: var(--gn-break-bias, #a8a8a8);
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, .42), 0 0 10px color-mix(in srgb, var(--gn-break-bias, #a8a8a8) 60%, transparent);
+        flex-shrink: 0;
+        vertical-align: middle;
+    }
+</style>
 
 <script>
     (function () {
