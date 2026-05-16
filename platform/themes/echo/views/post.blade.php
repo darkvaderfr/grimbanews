@@ -983,95 +983,21 @@
                         'col-xl-8 col-lg-8' => $__gnHasPrimarySidebar,
                         'col-xl-9 col-lg-10 mx-auto' => ! $__gnHasPrimarySidebar,
                     ])>
-                        {{-- S200 — orphan-post parity. Single-source posts now
-                             use the same glass-language hero as clustered
-                             stories instead of the stock Echo Bootstrap block. --}}
-                        <header class="grimba-orphan-hero grimba-story-page__header glass-panel p-0 mb-4" style="overflow:hidden;">
-                            @if (defined('GALLERY_MODULE_SCREEN_NAME') && ! empty($galleries = gallery_meta_data($post)))
-                                <div class="grimba-orphan-hero__media">
-                                    {!! render_object_gallery($galleries) !!}
-                                </div>
-                            @elseif ($image = $post->image)
-                                <div class="ratio ratio-21x9" style="background:rgba(0,0,0,0.04);">
-                                    {{ RvMedia::image($image, $post->name, attributes: [
-                                        'style' => 'object-fit:cover;width:100%;height:100%;',
-                                        'loading' => 'eager',
-                                        'decoding' => 'sync',
-                                        'width' => 1200,
-                                        'height' => 630,
-                                    ]) }}
-                                </div>
-                            @else
-                                <div class="ratio ratio-21x9" style="background:rgba(0,0,0,0.04);">
-                                    <img src="{{ route('public.og.placeholder', $post->id) }}"
-                                         alt="{{ $__gnTitle }}"
-                                         loading="eager"
-                                         decoding="sync"
-                                         width="1200"
-                                         height="630"
-                                         style="object-fit:cover;width:100%;height:100%;">
-                                </div>
-                            @endif
+                        {{-- Single-post (orphan) layout now uses the
+                             canonical article-hero-card pattern shared
+                             with dossier pages. Vader 2026-05-16: "all
+                             article pages should be displayed moving
+                             forward" with this shape. The compare-CTA
+                             + save pill ride below as a thin action
+                             bar so the card stays clean. --}}
+                        @include(Theme::getThemeNamespace('partials.story.article-hero-card'), [
+                            'post' => $post,
+                        ])
 
-                            <div class="p-3 p-md-4">
-                                <div class="grimba-story-page__meta d-flex align-items-center gap-2 flex-wrap mb-2 small">
-                                    <span class="grimba-methodology__kicker">{{ __('Article') }}</span>
-                                    @if($post->source_name)
-                                        <span class="opacity-50">·</span>
-                                        <span class="opacity-75">{{ __('Lu chez :source', ['source' => $post->source_name]) }}</span>
-                                    @endif
-                                    <span class="opacity-50">·</span>
-                                    <span class="opacity-75">{{ optional($__gnPublishedAt)->locale($__gnTarget)->diffForHumans() }}</span>
-                                    {!! Theme::partial('reading-time', ['post' => $post]) !!}
-                                </div>
-
-                                <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
-                                    @include(Theme::getThemeNamespace('partials.category-badge'), ['post' => $post, 'limit' => 8])
-                                    @include(Theme::getThemeNamespace('partials.bias-badge'), ['bias' => $post->bias_rating ?? 'unknown', 'size' => 'sm'])
-                                </div>
-
-                                <h1 class="grimba-methodology__title grimba-story-page__title grimba-story-page__title--orphan m-0 mb-3">
-                                    {{ $__gnTitle }}
-                                </h1>
-                                @if($__gnHasTr)
-                                    <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
-                                        {!! Theme::partial('nobuai-chip', ['size' => 'md']) !!}
-                                        <span class="small opacity-65">
-                                            {{ __('Article original en :source affiché en :target.', ['source' => strtoupper((string) $post->original_language), 'target' => $__gnTargetLabel]) }}
-                                        </span>
-                                    </div>
-                                @endif
-
-                                @include(Theme::getThemeNamespace('partials.blog.post.partials.source-attribution'), ['post' => $post])
-
-                                @if ($description = trim(strip_tags((string) $__gnDesc)))
-                                    <div style="border-top:1px dashed rgba(26,23,19,0.15); padding-top:14px; margin-top:18px;">
-                                        <div class="d-flex align-items-center gap-2 mb-2">
-                                            <span style="
-                                                display:inline-flex; align-items:center; gap:6px;
-                                                padding:4px 10px; border-radius:9999px;
-                                                background:linear-gradient(135deg,#1a1713,#3a342c);
-                                                color:#f6f1e8;
-                                                font-family:'Public Sans',system-ui,sans-serif;
-                                                font-size:11.5px; font-weight:700; letter-spacing:0.5px;
-                                            ">
-                                                <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#f6f1e8;"></span>
-                                                {{ __('Aperçu') }}
-                                            </span>
-                                            <span class="small opacity-55">{{ __("Résumé multi-sources à venir si d'autres couvertures rejoignent cette histoire.") }}</span>
-                                        </div>
-                                        <p class="m-0" style="font-size:15.5px; line-height:1.6; color:var(--gn-ink,#1a1713);">
-                                            {{ \Illuminate\Support\Str::limit($description, 260) }}
-                                        </p>
-                                    </div>
-                                @endif
-
-                                <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
-                                    {!! Theme::partial('comparatif-cta', ['post' => $post]) !!}
-                                    {!! Theme::partial('save-button', ['post' => $post, 'variant' => 'pill']) !!}
-                                </div>
-                            </div>
-                        </header>
+                        <div class="grimba-orphan-actions d-flex flex-wrap align-items-center gap-2 mb-4">
+                            {!! Theme::partial('comparatif-cta', ['post' => $post]) !!}
+                            {!! Theme::partial('save-button', ['post' => $post, 'variant' => 'pill']) !!}
+                        </div>
 
                         @if($__gnShowsReaderBody)
                             @include(Theme::getThemeNamespace('partials.story.full-article'), [
