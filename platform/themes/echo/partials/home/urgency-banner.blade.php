@@ -359,26 +359,68 @@
             <span class="grimba-breaking__headline" data-grimba-breaking-headline>{{ $breakingItems->first()['summary'] }}</span>
         </div>
 
-        <div class="grimba-breaking__viewport" aria-hidden="true">
-            <div class="grimba-breaking__track">
-                @for($i = 0; $i < 2; $i++)
-                    <div class="grimba-breaking__group">
-                        @foreach($breakingItems as $item)
-                            <a href="{{ $item['url'] }}"
-                               class="grimba-breaking__item"
-                               data-breaking-item-title="{{ $item['summary'] }}"
-                               style="--gn-break-alpha: {{ $item['alpha'] }};">
-                                <span class="grimba-breaking__source">{{ $item['source'] }}</span>
-                                <span class="grimba-breaking__sep" aria-hidden="true">—</span>
-                                <span class="grimba-breaking__title">{{ $item['summary'] }}</span>
-                            </a>
-                        @endforeach
-                    </div>
-                @endfor
+        @if($breakingItems->count() >= 3)
+            <div class="grimba-breaking__viewport" aria-hidden="true" data-grimba-marquee>
+                <div class="grimba-breaking__track" data-grimba-marquee-track>
+                    @for($i = 0; $i < 2; $i++)
+                        <div class="grimba-breaking__group">
+                            @foreach($breakingItems as $item)
+                                <a href="{{ $item['url'] }}"
+                                   class="grimba-breaking__item"
+                                   data-breaking-item-title="{{ $item['summary'] }}"
+                                   style="--gn-break-alpha: {{ $item['alpha'] }};">
+                                    <span class="grimba-breaking__source">{{ $item['source'] }}</span>
+                                    <span class="grimba-breaking__sep" aria-hidden="true">—</span>
+                                    <span class="grimba-breaking__title">{{ $item['summary'] }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    @endfor
+                </div>
             </div>
-        </div>
+        @endif
     </div>
 </div>
+
+<script>
+    /*
+     * Marquee speed normaliser.
+     *
+     * Vader 2026-05-17: africa edition felt faster because its track
+     * was shorter (fewer items × same 34s animation = much higher
+     * effective pixel speed). The animation translates by -50% (one
+     * group width) over the duration, so we want a constant px/sec
+     * rate regardless of edition. Measure the track width on load and
+     * resize, then derive `--gn-marquee-duration` from it.
+     */
+    (function () {
+        const PX_PER_SEC = 60; // constant crawl speed
+        const tracks = document.querySelectorAll('[data-grimba-marquee-track]');
+        if (! tracks.length) return;
+
+        function tune(track) {
+            const half = track.scrollWidth / 2;
+            if (! Number.isFinite(half) || half <= 0) return;
+            const seconds = Math.max(12, Math.min(120, half / PX_PER_SEC));
+            track.style.setProperty('--gn-marquee-duration', seconds.toFixed(2) + 's');
+        }
+
+        tracks.forEach(tune);
+
+        // Re-tune on viewport resize (the absolute width of each item
+        // changes with breakpoints + font scaling).
+        let resizeFrame = null;
+        window.addEventListener('resize', () => {
+            if (resizeFrame) cancelAnimationFrame(resizeFrame);
+            resizeFrame = requestAnimationFrame(() => tracks.forEach(tune));
+        }, { passive: true });
+
+        // Web fonts can change layout late — re-tune once after load.
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(() => tracks.forEach(tune)).catch(() => {});
+        }
+    })();
+</script>
 
 <style>
     /* CNN-style breaking crawl: short source monogram, em-dash
