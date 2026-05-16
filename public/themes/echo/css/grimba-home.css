@@ -6950,3 +6950,75 @@ body[data-theme="dark"] .grimba-editorial-ribbon {
         rgba(28, 24, 17, 0.66) !important;
     border-color: rgba(255, 250, 240, 0.10) !important;
 }
+
+/* ------------------------------------------------------------
+   Reusable collapse arrow — Vader 2026-05-16 Sprint 27.
+   Left-pointing chevron that rotates clockwise to point down
+   when the surface is expanded. Auto-applies to every <details>
+   site-wide and to any element with the .grimba-toggle-arrow
+   class inside an [aria-expanded] toggle.
+   ------------------------------------------------------------ */
+details > summary {
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+}
+details > summary::-webkit-details-marker {
+    display: none;
+}
+details > summary .grimba-toggle-arrow,
+details > summary::after,
+[aria-expanded] > .grimba-toggle-arrow,
+.grimba-toggle-arrow {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 0.78em;
+    color: #c0392b;
+    line-height: 1;
+    vertical-align: middle;
+    transition: transform .28s cubic-bezier(.22, 1, .36, 1), color .18s ease;
+    transform-origin: center;
+    will-change: transform;
+}
+/* Default: chevron pointing left. */
+details > summary::after {
+    content: "◂";
+}
+/* Expanded: rotate +90° clockwise so the tip points DOWN. */
+details[open] > summary::after,
+details[open] > summary .grimba-toggle-arrow,
+[aria-expanded="true"] > .grimba-toggle-arrow,
+.grimba-toggle-arrow.is-open {
+    transform: rotate(90deg);
+    color: #14110d;
+}
+/* Hover state — brighten the chevron so it reads as an
+   actionable affordance. */
+details > summary:hover::after,
+details > summary:hover .grimba-toggle-arrow,
+[aria-expanded] > .grimba-toggle-arrow:hover,
+[aria-expanded]:hover > .grimba-toggle-arrow {
+    color: #14110d;
+    filter: drop-shadow(0 0 4px rgba(192, 57, 43, 0.32));
+}
+/* Dark mode parity */
+[data-bs-theme="dark"] details > summary::after,
+body[data-theme="dark"] details > summary::after,
+[data-bs-theme="dark"] .grimba-toggle-arrow,
+body[data-theme="dark"] .grimba-toggle-arrow {
+    color: #ff9a8a;
+}
+[data-bs-theme="dark"] details[open] > summary::after,
+body[data-theme="dark"] details[open] > summary::after,
+[data-bs-theme="dark"] [aria-expanded="true"] > .grimba-toggle-arrow,
+body[data-theme="dark"] [aria-expanded="true"] > .grimba-toggle-arrow,
+[data-bs-theme="dark"] .grimba-toggle-arrow.is-open,
+body[data-theme="dark"] .grimba-toggle-arrow.is-open {
+    color: #fffaf0;
+}
+@media (prefers-reduced-motion: reduce) {
+    details > summary::after,
+    .grimba-toggle-arrow {
+        transition: none;
+    }
+}

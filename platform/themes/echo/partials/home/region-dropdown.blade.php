@@ -100,7 +100,7 @@
             aria-expanded="false">
         <span class="grimba-edition-picker__label">{{ $activeEdition['label'] }}</span>
         <span class="grimba-edition-toggle__count">{{ number_format($activeCount) }}</span>
-        <span class="grimba-edition-picker__chevron" aria-hidden="true">⌄</span>
+        <span class="grimba-edition-picker__chevron grimba-toggle-arrow" aria-hidden="true">◂</span>
     </button>
 
     <div class="grimba-edition-picker__menu" role="menu">
