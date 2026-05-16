@@ -73,6 +73,10 @@
         <span class="grimba-voices__kicker">{{ __('Trois angles, une histoire') }}</span>
         <h2 id="grimba-voices-title" class="grimba-voices__title">
             {{ __('Comment chaque camp cadre cette histoire') }}
+            @include(Theme::getThemeNamespace('partials.info-pill'), [
+                'size' => 'sm',
+                'body' => __("Un extrait représentatif par camp. Si un camp manque, c'est qu'aucune source de ce bord n'a couvert l'histoire — un signal éditorial en soi, pas un oubli."),
+            ])
         </h2>
         <p class="grimba-voices__lede">
             {{ __('Un seul angle représentatif par camp éditorial. Toutes les autres sources sont listées plus bas, sans répétition de carte.') }}

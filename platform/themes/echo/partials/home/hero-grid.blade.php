@@ -19,7 +19,13 @@
         {{-- Left: Daily Briefing --}}
         <aside class="col-xl-3 col-lg-4 col-12 grimba-briefing">
             <header class="grimba-briefing__head">
-                <h2 class="grimba-briefing__title">{{ __('Briefing du jour') }}</h2>
+                <h2 class="grimba-briefing__title">
+                    {{ __('Briefing du jour') }}
+                    @include(Theme::getThemeNamespace('partials.info-pill'), [
+                        'size' => 'sm',
+                        'body' => __("Les 6 histoires les plus partagées entre camps ce matin. Triées par diversité de sources, pas par viralité."),
+                    ])
+                </h2>
                 <p class="grimba-briefing__sub">
                     {{ trans_choice(':count histoire|:count histoires', $briefingStats->count(), ['count' => $briefingStats->count()]) }} ·
                     {{ trans_choice(':count article|:count articles', $totalArticles, ['count' => $totalArticles]) }} ·
@@ -156,6 +162,13 @@
 
         {{-- Center: Hero Story --}}
         <section class="col-xl-6 col-lg-8 col-12 grimba-hero">
+            <div class="grimba-hero__rail-pill text-end mb-2">
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'tone' => 'soft',
+                    'body' => __("Sous l'image phare, le mince ruban L / C / D résume d'un coup d'œil quels camps ont publié sur cette histoire. Tap la carte pour voir le dossier complet et la répartition exacte des sources."),
+                ])
+            </div>
             @if($hero)
                 @php
                     $heroTitle = GnTr::title($hero);

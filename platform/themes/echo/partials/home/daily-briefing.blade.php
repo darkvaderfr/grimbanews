@@ -39,6 +39,11 @@
         <div class="grimba-daily-briefing__body">
             <div class="grimba-daily-briefing__kicker">
                 <span class="grimba-daily-briefing__badge">{{ __('Briefing du jour') }}</span>
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'tone' => 'soft',
+                    'body' => __("Le briefing du jour, c'est le dossier qui réunit le plus de sources et de camps autour d'une même histoire ce matin."),
+                ])
                 @if($__date)
                     <span class="grimba-daily-briefing__date">{{ $__date }}</span>
                 @endif

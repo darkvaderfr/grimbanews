@@ -33,8 +33,13 @@
 @endphp
 
 <aside class="grimba-story-coverage glass-panel p-3 mb-3">
-    <h2 class="h6 mb-3" style="font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; font-size:13px; opacity:0.75;">
-        {{ __('Détails de la couverture') }}
+    <h2 class="h6 mb-3 d-flex align-items-center gap-2" style="font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; font-size:13px; opacity:0.75;">
+        <span>{{ __('Détails de la couverture') }}</span>
+        @include(Theme::getThemeNamespace('partials.info-pill'), [
+            'size' => 'sm',
+            'tone' => 'soft',
+            'body' => __("Compte exact des sources par camp, plus la dernière mise à jour. C'est la version chiffres-bruts de la barre L / C / D au-dessus."),
+        ])
     </h2>
 
     <dl class="m-0" style="display:grid; grid-template-columns:1fr auto; gap:6px 16px; font-size:14px;">

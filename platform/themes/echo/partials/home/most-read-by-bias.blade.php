@@ -32,7 +32,13 @@
         <header class="grimba-most-read__head">
             <div>
                 <span class="grimba-most-read__eyebrow">{{ __('Lecture publique') }}</span>
-                <h2 id="grimba-most-read-title" class="grimba-most-read__title">{{ __('Les plus lus par tendance') }}</h2>
+                <h2 id="grimba-most-read-title" class="grimba-most-read__title">
+                    {{ __('Les plus lus par tendance') }}
+                    @include(Theme::getThemeNamespace('partials.info-pill'), [
+                        'size' => 'sm',
+                        'body' => __("Ce que lisent en ce moment les visiteurs côté gauche, centre et droite. Un instantané de l'attention publique — pas un classement éditorial GrimbaNews."),
+                    ])
+                </h2>
             </div>
             <p class="grimba-most-read__dek">
                 {{ __('Un instantané GrimbaNews de ce qui monte à gauche, au centre et à droite.') }}

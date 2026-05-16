@@ -622,7 +622,13 @@
         <header class="grimba-story-distribution__top">
             <div>
                 <span class="grimba-story-distribution__kicker">{{ __('Sources classées') }}</span>
-                <h2 class="grimba-story-distribution__title">{{ __('Distribution des biais') }}</h2>
+                <h2 class="grimba-story-distribution__title">
+                    {{ __('Distribution des biais') }}
+                    @include(Theme::getThemeNamespace('partials.info-pill'), [
+                        'size' => 'sm',
+                        'body' => __("Pourcentage de sources par camp parmi les sources classées de ce dossier. Les sources non classées sont exclues du calcul pour ne pas fausser la lecture."),
+                    ])
+                </h2>
             </div>
             <div class="grimba-story-distribution__score">
                 <strong>{{ $balanceScore }}</strong>
@@ -688,6 +694,13 @@
         @endif
 
         @if(! empty($spectrumChips))
+            <div class="d-flex justify-content-end mb-1">
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'tone' => 'soft',
+                    'body' => __("Chaque pastille est une source placée sur l'axe politique (gauche à droite). Tap une pastille pour ne garder que les articles de cette source dans la liste en bas."),
+                ])
+            </div>
             <section class="grimba-story-spectrum"
                      aria-label="{{ __('Distribution des sources sur le spectre politique') }}"
                      data-grimba-spectrum-field>

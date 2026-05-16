@@ -266,3 +266,19 @@ Vader directive 2026-05-16 — third programmatic breaking-news provider next to
 | S-NDI-20 | Docs + resume-memory handoff | 45m | open |
 
 **Total remaining: ~17h of focused work.** Pick up at S-NDI-06 (HTTP layer) once an upstream API key is provisioned.
+
+---
+
+## Glass-button + light-mode shadow polish + category backfill (Vader 2026-05-16 mid-session)
+
+Vader directive 2026-05-16 (mid-session): three asks to add to the queue, NOT to pivot the current run:
+
+| Sprint | Title | Estimate | Notes |
+|---|---|---|---|
+| GLASS-BTN-1 | Post Comment button → glass pill, centered, reduced padding | 30m | Audit comment-form button across blog templates. Apply `.grimba-glass-pill` modifier. |
+| GLASS-BTN-2 | Promote `.grimba-glass-pill` to every reader button site-wide | 90m | Rebrand `.btn-grimba--solid` / `.btn-grimba--ghost` to glass-pill defaults: translucent gradient, backdrop blur, hover/active sheen. Inventory `.btn`/`.btn-grimba`/`button[type=submit]` across all reader templates. |
+| GLASS-BTN-3 | Light-mode shadow + text-contrast audit | 60m | Sweep every reader page in light mode. Catalogue surfaces where text+shadow combos drop below WCAG AA (4.5:1). Fix list expected: hero overlays on light heroes, glass-card subtitles, kicker labels. |
+| BACKFILL-CAT-1 | Per-editorial-category 500+ article backfill | 90m | New artisan command `grimba:backfill-category --target=500`. Iterates `GrimbaEditorialCategories::canonical()` and runs NewsAPI + RSS queries narrowly scoped per category until each category has ≥500 articles within its trailing-90-day window. Run with `--dry-run` first to size the work. |
+| BACKFILL-CAT-2 | UI gate: hide a category from chips until ≥500 articles ingested | 30m | Prevent users from clicking into thin-content categories during pre-launch validation. |
+
+All five queued — do not start until current `S-NDI-*` and info-pill Phase 2 work closes.

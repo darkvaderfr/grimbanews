@@ -11,6 +11,14 @@
 @if($chips->isNotEmpty())
     <div class="grimba-chips" aria-label="{{ __('Sujets à suivre') }}">
         <div class="container-xxl">
+            <div class="grimba-chips__hint">
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'tone' => 'soft',
+                    'label' => __('Sujets à suivre'),
+                    'body' => __("Suivez un sujet en tapant +. Les sujets suivis remontent automatiquement dans votre fil. Pas de compte requis — c'est stocké dans un cookie local sur votre appareil."),
+                ])
+            </div>
             <div class="grimba-chips__rail">
                 <div class="grimba-chips__row" tabindex="0" aria-label="{{ __('Catégories éditoriales') }}">
                     @foreach($chips as $chip)

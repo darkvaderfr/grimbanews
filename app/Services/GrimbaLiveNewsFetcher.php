@@ -482,7 +482,13 @@ class GrimbaLiveNewsFetcher
      * @param array<int, array<string, mixed>> $articles
      * @return array{provider:string, query:string, status:string, returned:int, ingested:int, deduped:int, skipped:int, error:?string}
      */
-    private function ingestMany(string $provider, string $query, array $articles): array
+    /**
+     * @internal Public so sibling fetchers (e.g. GrimbaNewsdataIoFetcher)
+     *           can reuse the post-creation pipeline without forking
+     *           200+ lines of logic. Architect plan §1.1 fallback path.
+     * @param array<int, array<string, mixed>> $articles
+     */
+    public function ingestMany(string $provider, string $query, array $articles): array
     {
         $ingested = 0;
         $deduped = 0;
@@ -980,7 +986,8 @@ class GrimbaLiveNewsFetcher
         return $map[$language] ?? (preg_match('/^[a-z]{2,5}$/', $language) ? $language : null);
     }
 
-    private function startLiveRun(string $provider, string $query, Carbon $started): ?int
+    /** @internal Public for sibling fetcher reuse — see ingestMany() docblock. */
+    public function startLiveRun(string $provider, string $query, Carbon $started): ?int
     {
         if (! Schema::hasTable('grimba_live_news_provider_runs')) {
             return null;
@@ -999,7 +1006,8 @@ class GrimbaLiveNewsFetcher
     /**
      * @param array{provider:string, query:string, status:string, returned:int, ingested:int, deduped:int, skipped:int, error:?string} $summary
      */
-    private function finishLiveRun(?int $runId, array $summary, float $startedAt): void
+    /** @internal Public for sibling fetcher reuse — see ingestMany() docblock. */
+    public function finishLiveRun(?int $runId, array $summary, float $startedAt): void
     {
         if ($runId === null || ! Schema::hasTable('grimba_live_news_provider_runs')) {
             return;
@@ -1018,7 +1026,8 @@ class GrimbaLiveNewsFetcher
         ]);
     }
 
-    private function toIso(mixed $value): ?string
+    /** @internal Public for sibling fetcher reuse — see ingestMany() docblock. */
+    public function toIso(mixed $value): ?string
     {
         $raw = trim((string) $value);
         if ($raw === '') {
@@ -1032,7 +1041,8 @@ class GrimbaLiveNewsFetcher
         }
     }
 
-    private function hostFromUrl(?string $url): ?string
+    /** @internal Public for sibling fetcher reuse — see ingestMany() docblock. */
+    public function hostFromUrl(?string $url): ?string
     {
         $raw = trim((string) $url);
         if ($raw === '') {
@@ -1126,7 +1136,8 @@ class GrimbaLiveNewsFetcher
     /**
      * @return array{provider:string, query:string, status:string, returned:int, ingested:int, deduped:int, skipped:int, error:?string}
      */
-    private function failed(string $provider, string $query, string $error): array
+    /** @internal Public for sibling fetcher reuse — see ingestMany() docblock. */
+    public function failed(string $provider, string $query, string $error): array
     {
         return [
             'provider' => $provider,

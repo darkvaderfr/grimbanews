@@ -54,6 +54,10 @@
         <span class="grimba-regional-mix__kicker">{{ __('Édition internationale') }}</span>
         <h2 id="grimba-regional-mix-title" class="grimba-regional-mix__title">
             {{ __('Les régions, en bref') }}
+            @include(Theme::getThemeNamespace('partials.info-pill'), [
+                'size' => 'sm',
+                'body' => __("Trois histoires phares par région. C'est l'édition Internationale — choisissez une édition régionale en haut pour zoomer sur Afrique, Europe ou Amériques."),
+            ])
         </h2>
         <p class="grimba-regional-mix__lede">
             {{ __('Trois histoires phares par région. Choisissez une édition pour zoomer.') }}

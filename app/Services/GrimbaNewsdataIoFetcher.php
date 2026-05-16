@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\Support\GrimbaProviderCredits;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Throwable;
 
 /**
  * newsdata.io free-tier breaking-news fetcher — Vader 2026-05-16.
@@ -29,6 +32,12 @@ class GrimbaNewsdataIoFetcher
     private const DEFAULT_LANGUAGES = 'fr,en';
     private const DEFAULT_COUNTRIES = 'fr,sn,ci,ml,cm';
     private const DEFAULT_CATEGORIES = 'top,politics,world';
+    private const USER_AGENT = 'GrimbaNewsBot/1.0 (+https://grimbanews.com/bot)';
+
+    public function __construct(
+        private readonly GrimbaLiveNewsFetcher $pipeline,
+    ) {
+    }
 
     /**
      * @param array<int, string>|null $queries Override queries from settings.
@@ -44,21 +53,173 @@ class GrimbaNewsdataIoFetcher
             return [$this->skipped('-', 'newsdata.io API key is not configured.')];
         }
 
-        if ($this->creditsRemainingToday() <= 0) {
+        $queries = $queries ?: $this->queries();
+        if (! $queries) {
+            return [$this->skipped('-', 'No newsdata.io queries configured.')];
+        }
+
+        // S-NDI-08 — round-robin starting index based on credits-used so
+        // that the rotation surfaces all configured queries across a day
+        // even if cron ticks lose calls to budget.
+        $startIdx = $this->creditsUsedToday() % count($queries);
+        $maxCalls = min($this->maxCallsPerRun(), count($queries), $this->creditsRemainingToday());
+
+        if ($maxCalls <= 0) {
             return [$this->skipped('-', 'newsdata.io daily credit budget reached.')];
         }
 
-        // S-NDI-06 (next sprint) wires the HTTP call + normaliser; until
-        // then we surface a clear "not implemented" sentinel so the
-        // admin "Run now" button + cron lines fail loudly rather than
-        // silently consuming credits.
-        Log::info('[GrimbaNewsdataIoFetcher] fetch invoked — HTTP layer not yet implemented (S-NDI-06).', [
-            'queries_configured' => count($this->queries()),
-            'credits_used_today' => GrimbaProviderCredits::fast(self::PROVIDER),
-            'credits_remaining'  => $this->creditsRemainingToday(),
-        ]);
+        $summary = [];
+        for ($i = 0; $i < $maxCalls; $i++) {
+            $query = $queries[($startIdx + $i) % count($queries)];
+            $summary[] = $this->fetchQuery($query);
+        }
 
-        return [$this->skipped('-', 'newsdata.io HTTP fetcher pending (S-NDI-06).')];
+        return $summary;
+    }
+
+    /**
+     * @return array{provider:string, query:string, status:string, returned:int, ingested:int, deduped:int, skipped:int, error:?string}
+     */
+    public function fetchQuery(string $query): array
+    {
+        // S-NDI-07 — pre-flight credit check. DB is canonical; cache is
+        // hot-path fast guard. Either flag stops the call before we
+        // consume a credit.
+        if (GrimbaProviderCredits::fast(self::PROVIDER) >= $this->dailyCreditBudget()) {
+            return $this->skipped($query, 'newsdata.io daily credit budget reached.');
+        }
+
+        $started = now();
+        $startedAt = microtime(true);
+        $runId = $this->pipeline->startLiveRun(self::PROVIDER, $query, $started);
+
+        try {
+            $params = $this->buildParams($query);
+
+            $response = Http::withUserAgent(self::USER_AGENT)
+                ->timeout($this->timeoutSeconds())
+                ->connectTimeout($this->connectTimeoutSeconds())
+                ->get($this->baseUrl() . '/latest', $params);
+
+            // Credit consumed regardless of outcome — bump immediately so
+            // a hot-loop bug can't burn the budget. Skipped pre-flight
+            // checks short-circuit before this line.
+            GrimbaProviderCredits::bump(self::PROVIDER);
+
+            if (! $response->successful()) {
+                $summary = $this->pipeline->failed(self::PROVIDER, $query, 'HTTP ' . $response->status());
+                $this->pipeline->finishLiveRun($runId, $summary, $startedAt);
+
+                return $summary;
+            }
+
+            $body = $response->json();
+            $status = (string) (data_get($body, 'status') ?? '');
+
+            // newsdata.io returns HTTP 200 with status='error' on auth /
+            // rate-limit failures. Treat those as failed runs.
+            if ($status !== '' && $status !== 'success') {
+                $error = (string) (
+                    data_get($body, 'results.message')
+                    ?: data_get($body, 'message')
+                    ?: data_get($body, 'code')
+                    ?: 'newsdata.io returned status="' . $status . '"'
+                );
+                $summary = $this->pipeline->failed(self::PROVIDER, $query, $error);
+                $this->pipeline->finishLiveRun($runId, $summary, $startedAt);
+
+                return $summary;
+            }
+
+            $results = (array) (data_get($body, 'results') ?: []);
+            $articles = array_map(
+                fn (array $a): array => $this->normaliseArticle($a),
+                array_values(array_filter($results, 'is_array'))
+            );
+            $articles = array_values(array_filter($articles, fn (array $a): bool => $a['url'] !== '' && $a['title'] !== ''));
+
+            $summary = $this->pipeline->ingestMany(self::PROVIDER, $query, $articles);
+            $this->pipeline->finishLiveRun($runId, $summary, $startedAt);
+
+            return $summary;
+        } catch (Throwable $e) {
+            Log::warning('[GrimbaNewsdataIoFetcher] call failed', [
+                'query' => $query,
+                'error' => $e->getMessage(),
+            ]);
+
+            $summary = $this->pipeline->failed(self::PROVIDER, $query, $e->getMessage());
+            $this->pipeline->finishLiveRun($runId, $summary, $startedAt);
+
+            return $summary;
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildParams(string $query): array
+    {
+        $params = [
+            'apikey' => $this->apiKey(),
+            'q'      => $query,
+            'size'   => $this->pageSize(),
+        ];
+        if ($languages = $this->languages()) {
+            $params['language'] = implode(',', $languages);
+        }
+        if ($countries = $this->countries()) {
+            $params['country'] = implode(',', $countries);
+        }
+        if ($categories = $this->categories()) {
+            $params['category'] = implode(',', $categories);
+        }
+
+        return $params;
+    }
+
+    /**
+     * Normalise a newsdata.io result row into the shape ingestMany() expects.
+     *
+     * @param array<string, mixed> $article
+     * @return array<string, mixed>
+     */
+    public function normaliseArticle(array $article): array
+    {
+        $url = (string) (data_get($article, 'link') ?: '');
+        $title = (string) (data_get($article, 'title') ?: '');
+        $description = (string) (data_get($article, 'description') ?: '');
+        $content = (string) (data_get($article, 'content') ?: $description);
+
+        $sourceName = (string) (
+            data_get($article, 'source_name')
+            ?: data_get($article, 'source_id')
+            ?: $this->pipeline->hostFromUrl($url)
+            ?: ''
+        );
+        $sourceDomain = (string) (
+            data_get($article, 'source_url')
+            ?: $this->pipeline->hostFromUrl($url)
+            ?: ''
+        );
+
+        $country = data_get($article, 'country.0') ?: data_get($article, 'country');
+        $language = data_get($article, 'language');
+        $providerArticleId = (string) (data_get($article, 'article_id') ?: ($url !== '' ? sha1($url) : ''));
+
+        return [
+            'provider_item_id' => 'newsdata-io:' . $providerArticleId,
+            'url' => $url,
+            'title' => Str::limit($title, 240, ''),
+            'description' => Str::limit(strip_tags($description), 600, '…'),
+            'content' => $content,
+            'image' => (string) (data_get($article, 'image_url') ?: ''),
+            'source_name' => $sourceName,
+            'source_domain' => $sourceDomain,
+            'source_country' => is_string($country) ? strtoupper($country) : null,
+            'language' => is_string($language) ? strtolower($language) : null,
+            'published_at' => $this->pipeline->toIso(data_get($article, 'pubDate')),
+        ];
     }
 
     public function isConfigured(): bool

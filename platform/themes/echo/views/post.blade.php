@@ -299,6 +299,11 @@
                         <div class="grimba-story-page__bar-stat">
                             <span class="grimba-story-page__bar-stat-num">{{ $__gnClusterPosts->count() }}</span>
                             <span class="grimba-story-page__bar-stat-label">{{ trans_choice(':count source contributrice|:count sources contributrices', $__gnClusterPosts->count()) }}</span>
+                            @include(Theme::getThemeNamespace('partials.info-pill'), [
+                                'size' => 'sm',
+                                'tone' => 'soft',
+                                'body' => __("Pour ce dossier, combien de sources de chaque camp politique couvrent la même histoire. Tap les pastilles à droite pour filtrer la liste par camp."),
+                            ])
                             @foreach(['left' => '#3b82f6', 'center' => '#a8a8a8', 'right' => '#e84c3d'] as $b => $col)
                                 @if($__gnByBias[$b] > 0)
                                     <span class="grimba-story-page__bar-pill"
