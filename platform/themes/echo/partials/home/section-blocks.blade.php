@@ -1,37 +1,15 @@
 @php
-    use App\Support\GrimbaEditorialCategories;
+    use App\Support\GrimbaHomeFeed;
     use App\Support\GrimbaTranslationPresenter as GnTr;
-    use Botble\Blog\Models\Post;
 
-    $featuredCategories = GrimbaEditorialCategories::sectionTopics(2);
+    $__sectionBlocks = GrimbaHomeFeed::sections();
 @endphp
 
-@foreach($featuredCategories as $cat)
+@foreach($__sectionBlocks as $__section)
     @php
-        $latest = Post::query()
-            ->whereHas('categories', fn ($q) => $q->where('categories.id', $cat->id))
-            ->where('status', 'published')
-            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-            ->first();
-
-        $categoryBlindspots = Post::query()
-            ->whereHas('categories', fn ($q) => $q->where('categories.id', $cat->id))
-            ->where('status', 'published')
-            ->where('is_blindspot', true)
-            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-            ->limit(2)
-            ->get();
-
-        if ($categoryBlindspots->count() < 2) {
-            $filler = Post::query()
-                ->where('status', 'published')
-                ->where('is_blindspot', true)
-                ->whereNotIn('id', $categoryBlindspots->pluck('id'))
-                ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-                ->limit(2 - $categoryBlindspots->count())
-                ->get();
-            $categoryBlindspots = $categoryBlindspots->concat($filler);
-        }
+        $cat = $__section['category'];
+        $latest = $__section['latest'];
+        $categoryBlindspots = $__section['blindspots'];
 
         GnTr::warm(collect([$latest])->filter()->concat($categoryBlindspots));
     @endphp

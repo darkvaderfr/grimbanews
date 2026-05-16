@@ -1,75 +1,14 @@
 @php
     /**
-     * S154 — "Couvert par tous les côtés" rail.
-     *
-     * The defining GrimbaNews promise: stories covered across the
-     * political spectrum. This rail surfaces them prominently — a
-     * horizontal scroll of cards, each linking to the comparison
-     * page for that cluster, not the legacy blog index.
-     *
-     * Pulls only clusters with ≥2 bias sides — the legacy "single-
-     * bias-cluster" output stays in the regular hero / blog grids
-     * below. Capped at 8 cards; if no multi-bias clusters exist yet,
-     * the rail hides itself entirely.
+     * "Couvert par tous les côtés" rail. Cards sourced from
+     * GrimbaHomeFeed so cluster-head posts never collide with the
+     * sections below.
      */
 
+    use App\Support\GrimbaHomeFeed;
     use App\Support\GrimbaTranslationPresenter as GnTr;
-    use App\Support\GrimbaPostRecency as GnRecency;
-    use Botble\Blog\Models\Post;
 
-    // Cluster ids with ≥2 bias sides + post-counts (recency-weighted).
-    $multiBiasClusters = \Illuminate\Support\Facades\DB::table('posts')
-        ->whereNotNull('story_cluster_id')
-        ->where('status', 'published')
-        ->whereIn('bias_rating', ['left', 'center', 'right'])
-        ->select(
-            'story_cluster_id',
-            \Illuminate\Support\Facades\DB::raw('COUNT(DISTINCT bias_rating) as sides'),
-            \Illuminate\Support\Facades\DB::raw('COUNT(*) as articles'),
-            \Illuminate\Support\Facades\DB::raw('MAX(' . GnRecency::expression() . ') as latest')
-        )
-        ->groupBy('story_cluster_id')
-        ->havingRaw('COUNT(DISTINCT bias_rating) >= 2')
-        ->orderByDesc('sides')
-        ->orderByDesc('latest')
-        ->limit(8)
-        ->get();
-
-    if ($multiBiasClusters->isEmpty()) return;
-
-    // Hydrate the most-recent post + bias breakdown per cluster.
-    $clusterIds = $multiBiasClusters->pluck('story_cluster_id')->all();
-    $pickPosts = Post::query()
-        ->whereIn('story_cluster_id', $clusterIds)
-        ->where('status', 'published')
-        ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-        ->get(['id', 'name', 'translated_name', 'translated_description', 'translated_to', 'original_language', 'story_cluster_id', 'bias_rating', 'image', 'source_name']);
-
-    GnTr::warm($pickPosts);
-    $picks = $pickPosts->groupBy('story_cluster_id');
-
-    $cards = [];
-    foreach ($multiBiasClusters as $c) {
-        $clusterPosts = $picks[$c->story_cluster_id] ?? collect();
-        if ($clusterPosts->isEmpty()) continue;
-
-        $head = $clusterPosts->first();
-        $counts = ['left' => 0, 'center' => 0, 'right' => 0];
-        foreach ($clusterPosts as $cp) {
-            $b = $cp->bias_rating ?? 'unknown';
-            if (isset($counts[$b])) $counts[$b]++;
-        }
-
-        $cards[] = [
-            'cluster_id' => (int) $c->story_cluster_id,
-            'sides'      => (int) $c->sides,
-            'articles'   => (int) $c->articles,
-            'head'       => $head,
-            'counts'     => $counts,
-            'image'      => $clusterPosts->pluck('image')->filter()->first(),
-        ];
-    }
-
+    $cards = GrimbaHomeFeed::allSides();
     if (empty($cards)) return;
 
     $biasMeta = [

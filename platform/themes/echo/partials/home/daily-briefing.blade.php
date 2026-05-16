@@ -1,81 +1,12 @@
 @php
     /**
-     * S328 — Daily Briefing hero card.
-     *
-     * Ground.news opens with a "Daily Briefing" — biggest story of the
-     * cycle, dramatic 21:9 hero treatment, X stories · Y articles ·
-     * Zm read metadata. We replicate that as the lead element above
-     * the all-sides rail.
-     *
-     * Pick: most-covered cluster (highest source count) in the last
-     * 24h that has at least 3 sources AND coverage from ≥2 bias sides.
-     * That filter rules out one-side-only blindspots (which have their
-     * own surface) and tiny-cluster noise.
+     * Daily Briefing hero card. Sourced from GrimbaHomeFeed so the
+     * same post never repeats elsewhere on the page.
      */
-    use App\Support\GrimbaPostRecency as GnRecency;
+    use App\Support\GrimbaHomeFeed;
     use App\Support\GrimbaTranslationPresenter as GnTr;
-    use Botble\Blog\Models\Post;
-    use Illuminate\Support\Facades\Cache;
-    use Illuminate\Support\Facades\DB;
 
-    $__brief = Cache::remember('grimba_daily_briefing_v3', 300, function () {
-        $resolveClusters = function ($since) {
-            return DB::table('posts')
-                ->where('status', 'published')
-                ->whereNotNull('story_cluster_id')
-                ->when($since, fn ($q) => GnRecency::wherePublishedSince($q, $since))
-                ->select('story_cluster_id', 'bias_rating', DB::raw('count(*) as c'))
-                ->groupBy('story_cluster_id', 'bias_rating')
-                ->get();
-        };
-
-        // Prefer last-36h clusters; fall back to all-time when ingest
-        // is paused (dev fixtures, weekend lulls).
-        $rows = $resolveClusters(now()->subHours(36));
-        if ($rows->isEmpty()) {
-            $rows = $resolveClusters(null);
-        }
-
-        $clusters = [];
-        foreach ($rows as $r) {
-            $cid = (int) $r->story_cluster_id;
-            if (! isset($clusters[$cid])) {
-                $clusters[$cid] = ['total' => 0, 'sides' => []];
-            }
-            $clusters[$cid]['total'] += (int) $r->c;
-            if (in_array($r->bias_rating, ['left', 'center', 'right'], true)) {
-                $clusters[$cid]['sides'][$r->bias_rating] = (int) $r->c;
-            }
-        }
-
-        $candidates = collect($clusters)
-            ->filter(fn ($c) => $c['total'] >= 3 && count($c['sides']) >= 2)
-            ->sortByDesc(fn ($c) => $c['total'])
-            ->take(5)
-            ->keys();
-
-        if ($candidates->isEmpty()) {
-            return null;
-        }
-
-        $clusterId = (int) $candidates->first();
-        $count = $clusters[$clusterId]['total'];
-        $sides = $clusters[$clusterId]['sides'];
-
-        $lead = Post::query()
-            ->where('story_cluster_id', $clusterId)
-            ->where('status', 'published')
-            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-            ->first();
-
-        return $lead ? [
-            'post'      => $lead,
-            'clusterId' => $clusterId,
-            'count'     => $count,
-            'sides'     => $sides,
-        ] : null;
-    });
-
+    $__brief = GrimbaHomeFeed::briefing();
     if (! $__brief) return;
 
     $__post  = $__brief['post'];

@@ -1,6 +1,6 @@
 @php
+    use App\Support\GrimbaHomeFeed;
     use App\Support\GrimbaTranslationPresenter as GnTr;
-    use Botble\Blog\Models\Post;
     use Illuminate\Support\Str;
 
     $biasMeta = [
@@ -19,17 +19,7 @@
     ];
 
     $topByBias = collect(array_keys($biasMeta))
-        ->mapWithKeys(fn (string $bias) => [
-            $bias => Post::query()
-                ->where('status', 'published')
-                ->where('bias_rating', $bias)
-                ->where('views', '>', 0)
-                ->with('categories')
-                ->orderByDesc('views')
-                ->latest()
-                ->limit(4)
-                ->get(),
-        ]);
+        ->mapWithKeys(fn (string $bias) => [$bias => GrimbaHomeFeed::mostRead($bias)]);
 
     $topStories = $topByBias->flatten(1);
     GnTr::warm($topStories);

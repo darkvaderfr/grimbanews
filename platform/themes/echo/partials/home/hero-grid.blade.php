@@ -1,68 +1,11 @@
 @php
+    use App\Support\GrimbaHomeFeed;
     use App\Support\GrimbaTranslationPresenter as GnTr;
-    use Botble\Blog\Models\Post;
-    use Illuminate\Support\Facades\DB;
 
-    // Clusters that actually have ≥2 bias sides — only those unlock the L/C/R bar.
-    $balancedClusters = DB::table('posts')
-        ->select('story_cluster_id')
-        ->where('status', 'published')
-        ->whereNotNull('story_cluster_id')
-        ->whereIn('bias_rating', ['left', 'center', 'right'])
-        ->groupBy('story_cluster_id')
-        ->havingRaw('COUNT(DISTINCT bias_rating) >= 2')
-        ->pluck('story_cluster_id');
-
-    // Hero = most recent featured post that's part of a balanced cluster
-    // AND has a real hero image (RSS-sourced external URL beats the dark
-    // gradient placeholder SVGs the seeds use). Falls back to:
-    //   featured + real-image (any cluster) → featured (any image) →
-    //   published + real-image → latest published.
-    $realImageFilter = fn ($q) => $q->where('image', 'like', 'http%');
-
-    $hero = Post::query()->where('status', 'published')->where('is_featured', true)
-            ->whereIn('story_cluster_id', $balancedClusters)
-            ->tap($realImageFilter)
-            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))->first()
-        ?? Post::query()->where('status', 'published')->where('is_featured', true)
-            ->tap($realImageFilter)->tap(fn ($q) => GnTr::orderForTargetLocale($q))->first()
-        ?? Post::query()->where('status', 'published')->where('is_featured', true)
-            ->whereIn('story_cluster_id', $balancedClusters)
-            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))->first()
-        ?? Post::query()->where('status', 'published')->where('is_featured', true)->tap(fn ($q) => GnTr::orderForTargetLocale($q))->first()
-        ?? Post::query()->where('status', 'published')->tap($realImageFilter)->tap(fn ($q) => GnTr::orderForTargetLocale($q))->first()
-        ?? Post::query()->where('status', 'published')->tap(fn ($q) => GnTr::orderForTargetLocale($q))->first();
-
-    // Briefing prefers clustered posts (bar draws under each), then fills
-    // with non-clustered recents so the column is always 5 items.
-    $clusteredRecent = Post::query()
-        ->where('status', 'published')
-        ->whereIn('story_cluster_id', $balancedClusters)
-        ->when($hero, fn ($q) => $q->where('id', '!=', $hero->id))
-        ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-        ->limit(5)
-        ->get();
-
-    $briefing = $clusteredRecent;
-    if ($briefing->count() < 5) {
-        $fill = Post::query()
-            ->where('status', 'published')
-            ->whereNotIn('id', $briefing->pluck('id')->push($hero?->id)->filter())
-            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-            ->limit(5 - $briefing->count())
-            ->get();
-        $briefing = $briefing->concat($fill);
-    }
-
-    $blindspots = Post::query()
-        ->where('status', 'published')
-        ->where('is_blindspot', true)
-        ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-        ->limit(2)
-        ->get();
-
-    // Counter values — full published recent set, not just what we render.
-    $briefingStats = Post::query()->where('status', 'published')->tap(fn ($q) => GnTr::orderForTargetLocale($q))->limit(9)->get();
+    $hero          = GrimbaHomeFeed::hero();
+    $briefing      = GrimbaHomeFeed::heroBriefingColumn();
+    $blindspots    = GrimbaHomeFeed::heroBlindspots();
+    $briefingStats = GrimbaHomeFeed::heroStats();
 
     GnTr::warm(collect([$hero])->filter()->concat($briefing)->concat($blindspots)->concat($briefingStats));
 

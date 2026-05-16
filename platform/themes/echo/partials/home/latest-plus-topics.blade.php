@@ -1,14 +1,9 @@
 @php
     use App\Support\GrimbaEditorialCategories;
+    use App\Support\GrimbaHomeFeed;
     use App\Support\GrimbaTranslationPresenter as GnTr;
-    use Botble\Blog\Models\Post;
 
-    $latest = Post::query()
-        ->where('status', 'published')
-        ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-        ->limit(10)
-        ->get();
-
+    $latest = GrimbaHomeFeed::latest();
     GnTr::warm($latest);
     $latest->loadMissing('categories');
 

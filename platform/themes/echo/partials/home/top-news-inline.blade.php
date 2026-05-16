@@ -1,45 +1,9 @@
 @php
+    use App\Support\GrimbaHomeFeed;
     use App\Support\GrimbaTranslationPresenter as GnTr;
-    use Botble\Blog\Models\Post;
-    use Illuminate\Support\Facades\DB;
 
-    $balancedClusters = DB::table('posts')
-        ->select('story_cluster_id')
-        ->where('status', 'published')
-        ->whereNotNull('story_cluster_id')
-        ->whereIn('bias_rating', ['left', 'center', 'right'])
-        ->groupBy('story_cluster_id')
-        ->havingRaw('COUNT(DISTINCT bias_rating) >= 2')
-        ->pluck('story_cluster_id');
-
-    // Principales histoires: prefer clustered posts (so the L/C/R bar
-    // actually draws) then pad with latest published.
-    $clustered = Post::query()
-        ->where('status', 'published')
-        ->where(function ($q) {
-            $q->where('is_featured', false)->orWhereNull('is_featured');
-        })
-        ->whereIn('story_cluster_id', $balancedClusters)
-        ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-        ->limit(6)
-        ->get();
-
-    if ($clustered->count() < 6) {
-        $pad = Post::query()
-            ->where('status', 'published')
-            ->whereNotIn('id', $clustered->pluck('id'))
-            ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
-            ->limit(6 - $clustered->count())
-            ->get();
-        $topNews = $clustered->concat($pad);
-    } else {
-        $topNews = $clustered;
-    }
-
+    $topNews = GrimbaHomeFeed::topNews();
     GnTr::warm($topNews);
-    if ($topNews->isNotEmpty()) {
-        (new \Illuminate\Database\Eloquent\Collection($topNews->all()))->loadMissing('categories');
-    }
 @endphp
 
 <section class="grimba-topnews mt-4">
