@@ -207,10 +207,17 @@
     </article>
 
     @if($__excerptDisplay !== '')
-        <article class="grimba-article-card__excerpt-card">
+        <article class="grimba-article-card__excerpt-card grimba-article-card__excerpt-card--featured">
             <header class="grimba-article-card__excerpt-head">
-                <span class="grimba-article-card__source-label">{{ __('Extrait disponible') }}</span>
-                <span class="grimba-article-card__excerpt-count">{{ $__excerptWords }} {{ __('mots') }}</span>
+                <div>
+                    <span class="grimba-article-card__source-label">{{ __('Extrait disponible') }}</span>
+                    <h2 class="grimba-article-card__excerpt-title">
+                        {{ __("Lire l'extrait disponible dans GrimbaNews") }}
+                    </h2>
+                </div>
+                <span class="grimba-article-card__excerpt-count">
+                    {{ trans_choice(':count mot|:count mots', $__excerptWords, ['count' => $__excerptWords]) }}
+                </span>
             </header>
             <p class="grimba-article-card__excerpt-body">{{ $__excerptDisplay }}</p>
             @if($__publisherUrl)
@@ -358,6 +365,47 @@
             background: rgba(255, 255, 255, .68);
             border: 1px solid rgba(26, 23, 19, .08);
             box-shadow: 0 10px 28px rgba(26, 23, 19, .04);
+        }
+
+        /* Featured excerpt card — inherits the legacy full-article look
+           Vader called out: gradient top bar, deeper glass background,
+           Fraunces title above the body. Replaces the duplicate excerpt
+           panel further down the page. */
+        .grimba-article-card__excerpt-card--featured {
+            position: relative;
+            overflow: hidden;
+            padding: 22px 24px;
+            border-radius: 16px;
+            background:
+                linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(246, 241, 232, 0.56)),
+                rgba(255, 255, 255, 0.62);
+            border: 1px solid rgba(26, 23, 19, 0.08);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+                0 20px 52px rgba(26, 23, 19, 0.075);
+        }
+        .grimba-article-card__excerpt-card--featured::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 1rem;
+            right: 1rem;
+            height: 3px;
+            pointer-events: none;
+            background: linear-gradient(90deg, transparent, rgba(192, 57, 43, 0.52), rgba(59, 130, 246, 0.42), transparent);
+        }
+        .grimba-article-card__excerpt-card--featured > * {
+            position: relative;
+            z-index: 1;
+        }
+        .grimba-article-card__excerpt-title {
+            margin: 6px 0 0;
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 800;
+            font-size: clamp(1.4rem, 2.2vw, 2rem);
+            line-height: 1.05;
+            letter-spacing: -0.01em;
+            color: var(--gn-ink, #1a1713);
         }
 
         .grimba-article-card__source-head {

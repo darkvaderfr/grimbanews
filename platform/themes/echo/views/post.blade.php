@@ -893,14 +893,24 @@
                     @endif
                 </header>
 
-                @include(Theme::getThemeNamespace('partials.story.full-article'), [
-                    'post' => $post,
-                    'body' => $__gnFullBody,
-                    'locked' => $__gnFullArticleLocked,
-                    'loginUrl' => $__gnMemberLoginUrl,
-                    'upstream' => $__gnUpstream,
-                    'source' => $__gnFullBodySource,
-                ])
+                {{-- Render the full-article reader only when it adds
+                     value beyond the article-hero-card's excerpt card:
+                     (a) the body is the publisher's FULL article — paid
+                     reader mode, not a 200-char preview, OR
+                     (b) the reader is locked behind the member gate.
+                     Vader 2026-05-16: kill the duplicate "AVAILABLE
+                     EXCERPT" panel that was rendering the same extract
+                     twice on every dossier. --}}
+                @if($__gnFullArticleLocked || $__gnFullBodySource === 'full')
+                    @include(Theme::getThemeNamespace('partials.story.full-article'), [
+                        'post' => $post,
+                        'body' => $__gnFullBody,
+                        'locked' => $__gnFullArticleLocked,
+                        'loginUrl' => $__gnMemberLoginUrl,
+                        'upstream' => $__gnUpstream,
+                        'source' => $__gnFullBodySource,
+                    ])
+                @endif
 
                 @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
                     'location' => 'grimba_story_after_hero',
