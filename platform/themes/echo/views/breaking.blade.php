@@ -88,7 +88,32 @@
             margin-inline: auto;
         }
         .grimba-breaking-page__head {
+            position: relative;
+            overflow: hidden;
             margin-bottom: 28px;
+            padding: 24px 26px;
+            border-radius: 16px;
+            background:
+                linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(246, 241, 232, 0.56)),
+                rgba(255, 255, 255, 0.62);
+            border: 1px solid rgba(26, 23, 19, 0.08);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+                0 20px 52px rgba(26, 23, 19, 0.075);
+        }
+        .grimba-breaking-page__head::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 1rem;
+            right: 1rem;
+            height: 3px;
+            pointer-events: none;
+            background: linear-gradient(90deg, transparent, rgba(192, 57, 43, 0.52), rgba(59, 130, 246, 0.42), transparent);
+        }
+        .grimba-breaking-page__head > * {
+            position: relative;
+            z-index: 1;
         }
         .grimba-breaking-page__kicker {
             display: inline-flex;
