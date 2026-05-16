@@ -19,7 +19,7 @@
             </header>
 
             <ul class="grimba-latest__list">
-                @foreach($latest as $p)
+                @foreach($latest as $__idx => $p)
                     @php
                         $title = GnTr::title($p);
                         $isTranslated = GnTr::isTranslated($p);
@@ -48,6 +48,10 @@
                             {!! Theme::partial('post-hero-img', ['post' => $p, 'size' => 'thumb-medium']) !!}
                         </a>
                     </li>
+
+                    {{-- (in-feed native ad slot deferred: queued for
+                         after the new grimba_home_in_feed slot lands
+                         in app/Support/GrimbaAds.php) --}}
                 @endforeach
             </ul>
         </div>
