@@ -19,13 +19,13 @@
                             $isSelected = (int) $chip->id === $selectedChip;
                         @endphp
                         <span class="grimba-chip @if($isFollowed) grimba-chip--followed @endif @if($isSelected) grimba-chip--selected @endif" data-category-id="{{ $chip->id }}">
-                            <a class="grimba-chip__label" href="{{ $chip->url }}" data-grimba-chip-select="{{ $chip->id }}">{{ $chip->name }}</a>
+                            <a class="grimba-chip__label" href="{{ $chip->url }}" data-grimba-chip-select="{{ $chip->id }}">{{ __($chip->name) }}</a>
                             <button type="button"
                                     class="grimba-chip__follow"
                                     data-grimba-follow="{{ $chip->id }}"
                                     data-label-follow="{{ __('Suivre') }}"
                                     data-label-unfollow="{{ __('Ne plus suivre') }}"
-                                    aria-label="{{ ($isFollowed ? __('Ne plus suivre') : __('Suivre')) . ' ' . $chip->name }}">{{ $isFollowed ? '✓' : '+' }}</button>
+                                    aria-label="{{ ($isFollowed ? __('Ne plus suivre') : __('Suivre')) . ' ' . __($chip->name) }}">{{ $isFollowed ? '✓' : '+' }}</button>
                         </span>
                     @endforeach
                 </div>
@@ -67,34 +67,21 @@
 
             const rail = document.querySelector('.grimba-chips__row');
             if (rail) {
-                let lastLeft = rail.scrollLeft;
-                let locking = false;
-
                 rail.addEventListener('wheel', (event) => {
-                    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-                    rail.scrollLeft += event.deltaY;
-                    event.preventDefault();
-                }, { passive: false });
-
-                rail.addEventListener('scroll', () => {
-                    if (locking) return;
+                    const hasHorizontalIntent = Math.abs(event.deltaX) > Math.abs(event.deltaY);
+                    if (hasHorizontalIntent || event.shiftKey) return;
 
                     const max = rail.scrollWidth - rail.clientWidth;
-                    if (max <= 24) return;
+                    if (max <= 1) return;
 
-                    const current = rail.scrollLeft;
-                    if (current > lastLeft && current >= max - 2) {
-                        locking = true;
-                        rail.scrollLeft = 1;
-                    } else if (current < lastLeft && current <= 0) {
-                        locking = true;
-                        rail.scrollLeft = max - 2;
-                    }
-                    lastLeft = rail.scrollLeft;
+                    const delta = event.deltaY;
+                    const atStart = rail.scrollLeft <= 1;
+                    const atEnd = rail.scrollLeft >= max - 1;
+                    const canMoveHorizontally = (delta < 0 && !atStart) || (delta > 0 && !atEnd);
 
-                    window.requestAnimationFrame(() => {
-                        locking = false;
-                    });
+                    if (!canMoveHorizontally) return;
+
+                    rail.scrollBy({ left: delta, behavior: 'auto' });
                 }, { passive: true });
             }
         })();

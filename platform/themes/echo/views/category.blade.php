@@ -1,5 +1,5 @@
 @php
-    Theme::set('pageTitle', $category->name);
+    Theme::set('pageTitle', __($category->name));
     Theme::set('grimbaCategoryPage', true);
     Theme::layout('grimba-chrome');
 
@@ -53,14 +53,14 @@
         <div class="grimba-category-hero__top">
             <div class="grimba-category-hero__intro">
                 <span class="grimba-methodology__kicker">Sujet</span>
-                <h1 class="grimba-methodology__title mt-2 mb-2">{{ $category->name }}</h1>
+                <h1 class="grimba-methodology__title mt-2 mb-2">{{ __($category->name) }}</h1>
                 @if($category->description)
                     <p class="grimba-category-hero__copy mb-0">
                         {!! \Illuminate\Support\Str::limit(strip_tags($category->description), 260) !!}
                     </p>
                 @else
                     <p class="grimba-category-hero__copy mb-0">
-                        {{ __('Toutes les histoires classées dans :topic, côté à côté avec leurs biais éditoriaux, sources et pays d’origine.', ['topic' => $category->name]) }}
+                        {{ __('Toutes les histoires classées dans :topic, côté à côté avec leurs biais éditoriaux, sources et pays d’origine.', ['topic' => __($category->name)]) }}
                     </p>
                 @endif
             </div>
@@ -79,7 +79,7 @@
                 <div class="grimba-category-signal__summary">
                     <div>
                         <span>{{ __('Signal éditorial') }}</span>
-                        <strong>{{ __('Couverture sur :topic', ['topic' => $category->name]) }}</strong>
+                        <strong>{{ __('Couverture sur :topic', ['topic' => __($category->name)]) }}</strong>
                     </div>
                     <em>
                         {{ trans_choice(':count article archivé|:count articles archivés', $catTotal, ['count' => $catTotal]) }}
@@ -146,7 +146,7 @@
     @if($__topSources->isNotEmpty())
         <section class="grimba-topic-top-sources container mt-4 mb-2">
             <h2 class="h6 mb-3 grimba-section-eyebrow grimba-topic-top-sources__title">
-                {{ __('Sources qui couvrent le plus :topic ces 90 jours', ['topic' => $category->name]) }}
+                {{ __('Sources qui couvrent le plus :topic ces 90 jours', ['topic' => __($category->name)]) }}
             </h2>
             <div class="row g-2">
                 @foreach($__topSources as $ts)

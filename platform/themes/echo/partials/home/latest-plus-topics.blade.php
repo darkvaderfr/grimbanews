@@ -64,7 +64,7 @@
                 @foreach($followChips as $c)
                     <li>
                         <a class="grimba-similar__chip" href="{{ $c->url }}">
-                            <span>{{ $c->name }}</span>
+                            <span>{{ __($c->name) }}</span>
                             <span class="grimba-similar__plus" aria-label="{{ __('Suivre') }}">+</span>
                         </a>
                     </li>

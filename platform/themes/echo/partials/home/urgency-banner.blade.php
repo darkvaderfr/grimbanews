@@ -13,34 +13,93 @@
         (string) request()->cookie(\App\Scopes\GrimbaRegionScope::COOKIE_NAME, 'international')
     );
 
+    // Real-breaking phrase set (FR + EN). Editorially-loaded markers
+    // that distinguish "we are interrupting normal coverage" from
+    // routine reporting. Single ambiguous words ("breaking", "urgent",
+    // "fire") match too liberally — "ground-breaking", "urgent
+    // refresh", "fire department announcement" are NOT breaking news.
+    // Phrases below only fire on intentional editorial usage.
+    $__breakingKeywords = [
+        'breaking news', 'breaking:', 'just in:', 'live updates',
+        'state of emergency', 'declared dead', 'evacuation order',
+        'mass casualty', 'death toll', 'massive explosion',
+        'en direct', 'dernière minute', 'flash info', 'alerte info',
+        'alerte enlèvement', "état d'urgence", 'urgent :', 'urgent –',
+        'plan blanc', 'attentat', 'sous les décombres',
+    ];
+
+    // Substring match (case-insensitive). Since the keyword set is
+    // multi-word phrases now, naive substring is precise enough — no
+    // word-boundary trickery needed, and 'ground-breaking' can't
+    // accidentally match 'breaking news'.
+    $__breakingRegex = '/(?:' .
+        implode('|', array_map(fn ($kw) => preg_quote($kw, '/'), $__breakingKeywords)) .
+        ')/iu';
+
     $breakingPosts = \Illuminate\Support\Facades\Cache::remember(
-        'grimba_breaking_ticker_v4:' . GnTr::targetLocale() . ':' . $__breakingRegion . ':' . $breakingWindowHours,
+        'grimba_breaking_ticker_v6:' . GnTr::targetLocale() . ':' . $__breakingRegion . ':' . $breakingWindowHours,
         45,
-        function () use ($breakingWindowHours) {
+        function () use ($breakingWindowHours, $__breakingKeywords, $__breakingRegex) {
             $cols = ['id','name','translated_name','translated_description','translated_to','original_language','description','content','summary_nobuai','source_name','source_id','bias_rating','published_at','created_at','image'];
 
-            $recentQuery = Post::query()
+            // 1) Strict breaking-news pass: SQL pre-filters via LIKE on
+            //    title fields only (descriptions contain subscribe-prompt
+            //    boilerplate like "Get our breaking news alerts" that
+            //    would otherwise pollute the ticker with non-breaking
+            //    coverage). PHP regex finalises the match against title
+            //    proper. Wider 24h window since breaking stories
+            //    legitimately run beyond a 6h cycle.
+            $candidatesQuery = Post::query()
+                ->where('status', 'published')
+                ->whereNotNull('source_name')
+                ->where(function ($q) use ($__breakingKeywords): void {
+                    foreach ($__breakingKeywords as $kw) {
+                        $like = '%' . $kw . '%';
+                        $q->orWhere('name', 'like', $like)
+                          ->orWhere('translated_name', 'like', $like);
+                    }
+                })
+                ->with('slugable');
+            GrimbaPostRecency::wherePublishedSince($candidatesQuery, now()->subHours(24));
+            GrimbaPostRecency::orderByPublished($candidatesQuery);
+
+            // Over-fetch since post-filter will drop false positives.
+            $candidates = $candidatesQuery->limit(40)->get($cols);
+
+            $breaking = $candidates->filter(function ($post) use ($__breakingRegex): bool {
+                $haystack = mb_strtolower(trim((string) ($post->name ?? '') . ' ' . (string) ($post->translated_name ?? '')));
+                return (bool) preg_match($__breakingRegex, $haystack);
+            })->take(14);
+
+            if ($breaking->isNotEmpty()) {
+                return $breaking->values();
+            }
+
+            // 2) No live breaking — surface the freshest recent posts so
+            //    the rail still moves. Marked as fallback via the
+            //    eyebrow style elsewhere.
+            $recentFallback = Post::query()
                 ->where('status', 'published')
                 ->whereNotNull('source_name')
                 ->with('slugable');
-            GrimbaPostRecency::wherePublishedSince($recentQuery, now()->subHours($breakingWindowHours));
-            GrimbaPostRecency::orderByPublished($recentQuery);
+            GrimbaPostRecency::wherePublishedSince($recentFallback, now()->subHours($breakingWindowHours));
+            GrimbaPostRecency::orderByPublished($recentFallback);
 
-            $recent = $recentQuery->limit(14)->get($cols);
+            $recent = $recentFallback->limit(14)->get($cols);
             if ($recent->isNotEmpty()) {
                 return $recent;
             }
 
-            $fallbackQuery = Post::query()
+            $dailyFallback = Post::query()
                 ->where('status', 'published')
                 ->whereNotNull('source_name')
                 ->with('slugable');
-            GrimbaPostRecency::wherePublishedSince($fallbackQuery, now()->subDay());
-            GrimbaPostRecency::orderByPublished($fallbackQuery);
+            GrimbaPostRecency::wherePublishedSince($dailyFallback, now()->subDay());
+            GrimbaPostRecency::orderByPublished($dailyFallback);
 
-            $fallback = $fallbackQuery->limit(14)->get($cols);
-            if ($fallback->isNotEmpty()) {
-                return $fallback;
+            $daily = $dailyFallback->limit(14)->get($cols);
+            if ($daily->isNotEmpty()) {
+                return $daily;
             }
 
             $latestQuery = Post::query()

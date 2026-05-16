@@ -37,7 +37,7 @@
                 <h4 class="grimba-footer__heading">{{ __('Sujets') }}</h4>
                 <ul>
                     @foreach($footerTopics as $t)
-                        <li><a href="{{ $t->url }}">{{ $t->name }}</a></li>
+                        <li><a href="{{ $t->url }}">{{ __($t->name) }}</a></li>
                     @endforeach
                 </ul>
             </div>

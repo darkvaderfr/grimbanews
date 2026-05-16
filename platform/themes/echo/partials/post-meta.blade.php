@@ -47,9 +47,9 @@
             <div class="echo-hero-area-like-read-comment-share mb-2">
                 <x-core::icon name="ti ti-tags" class="me-1" />
                 @foreach ($post->categories as $category)
-                    <a href="{{ $category->url }}" class="mx-0 px-0" title="{{ $category->name }}">
+                    <a href="{{ $category->url }}" class="mx-0 px-0" title="{{ __($category->name) }}">
                         @if ($category->icon) <i class="{{ $category->icon }}"></i> @endif
-                        <span>{{ $category->name }}</span>
+                        <span>{{ __($category->name) }}</span>
                     </a>@if (!$loop->last), @endif
                 @endforeach
             </div>
