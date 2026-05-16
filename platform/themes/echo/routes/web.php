@@ -248,6 +248,21 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             SeoHelper::setTitle(__('Breaking news') . ' — GrimbaNews')
                 ->setDescription(__('Real-time breaking news from across the political spectrum.'));
 
+            // Sprint 20 — JSON-LD CollectionPage schema for SEO.
+            SeoHelper::openGraph()->setUrl(url('/breaking'));
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => __('Breaking news') . ' — GrimbaNews',
+                'description' => __('Real-time breaking news from across the political spectrum.'),
+                'url' => url('/breaking'),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'mainEntity' => [
+                    '@type' => 'ItemList',
+                    'numberOfItems' => $posts->count(),
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Breaking news'), url('/breaking'));
@@ -263,6 +278,20 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             SeoHelper::setTitle(__('Latest news') . ' — GrimbaNews')
                 ->setDescription(__('The freshest editorial coverage in the selected edition.'));
+
+            SeoHelper::openGraph()->setUrl(url('/latest'));
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => __('Latest news') . ' — GrimbaNews',
+                'description' => __('The freshest editorial coverage in the selected edition.'),
+                'url' => url('/latest'),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'mainEntity' => [
+                    '@type' => 'ItemList',
+                    'numberOfItems' => $posts->count(),
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))

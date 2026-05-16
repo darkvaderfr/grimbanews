@@ -84,6 +84,9 @@
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="{{ $__grimbaOgImage }}">
+    @if($jsonLd = Theme::get('grimbaJsonLd'))
+        <script type="application/ld+json">{!! $jsonLd !!}</script>
+    @endif
     {!! Theme::header() !!}
     @include(Theme::getThemeNamespace('partials.ads.head'))
     @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
