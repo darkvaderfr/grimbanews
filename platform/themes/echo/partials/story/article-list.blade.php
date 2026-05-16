@@ -124,11 +124,40 @@
     @endphp
 
     <ul class="list-unstyled m-0" data-grimba-cluster-list id="grimba-cluster-panel" role="tabpanel">
+        @php $__lastSideRendered = null; @endphp
         @foreach($clusterList as $cp)
                 @php
                     $bucket = isset($biasMeta[$cp->bias_rating ?? '']) ? ($cp->bias_rating ?? 'unknown') : 'unknown';
                     $isCurrent = (int) $cp->id === (int) $currentPost->id;
                     $meta = $biasMeta[$bucket];
+                @endphp
+
+                @if($sortMode === 'bias' && $bucket !== $__lastSideRendered && ($countLabels[$bucket] ?? 0) > 0)
+                    @php
+                        $__lastSideRendered = $bucket;
+                        $__sideSources = collect($byBias[$bucket])->pluck('source_name')->filter()->unique()->values();
+                        $__sideCountries = collect($byBias[$bucket])
+                            ->map(fn ($p) => $p->source_id && isset($__sources[$p->source_id]) ? $__sources[$p->source_id]->country : null)
+                            ->filter()
+                            ->unique()
+                            ->values();
+                    @endphp
+                    <li class="grimba-story-divider" data-bias="{{ $bucket }}" data-grimba-side-divider
+                        style="--story-side-color: {{ $meta['color'] }};">
+                        <div class="grimba-story-divider__bar" aria-hidden="true"></div>
+                        <div class="grimba-story-divider__body">
+                            <span class="grimba-story-divider__dot" style="background: {{ $meta['color'] }};" aria-hidden="true"></span>
+                            <strong class="grimba-story-divider__label">{{ $meta['label'] }}</strong>
+                            <span class="grimba-story-divider__count">{{ $countLabels[$bucket] }} · {{ trans_choice(':count couverture|:count couvertures', $countLabels[$bucket], ['count' => $countLabels[$bucket]]) }}</span>
+                            @if($__sideCountries->isNotEmpty())
+                                <span class="grimba-story-divider__sep" aria-hidden="true">·</span>
+                                <span class="grimba-story-divider__countries">{{ $__sideCountries->take(4)->map(fn ($c) => strtoupper($c))->join(' · ') }}</span>
+                            @endif
+                        </div>
+                    </li>
+                @endif
+
+                @php
                     $src = $cp->source_id && isset($__sources[$cp->source_id]) ? $__sources[$cp->source_id] : null;
                     $sortTs = optional($cp->created_at)->timestamp ?? 0;
                     $sortBias = match ($bucket) {
@@ -324,6 +353,125 @@
     </div>
 </section>
 
+<style>
+    /* Cinematic per-side dividers — surface only when sorted by camp. */
+    .grimba-story-divider {
+        position: relative;
+        margin: 18px 0 10px;
+        padding: 0;
+        list-style: none;
+    }
+
+    .grimba-story-divider:first-of-type {
+        margin-top: 4px;
+    }
+
+    .grimba-story-divider__bar {
+        position: relative;
+        height: 2px;
+        border-radius: 999px;
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            var(--story-side-color, #a8a8a8) 18%,
+            color-mix(in srgb, var(--story-side-color, #a8a8a8) 60%, #fff) 50%,
+            var(--story-side-color, #a8a8a8) 82%,
+            transparent 100%
+        );
+        overflow: hidden;
+    }
+
+    .grimba-story-divider__bar::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, .9) 50%,
+            transparent 100%
+        );
+        transform: translateX(-100%);
+        animation: grimbaStoryDividerShimmer 4.8s ease-in-out infinite;
+    }
+
+    @keyframes grimbaStoryDividerShimmer {
+        0%   { transform: translateX(-100%); }
+        55%  { transform: translateX(100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .grimba-story-divider__body {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+        padding: 0 4px;
+        font-family: 'Public Sans', system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        color: var(--gn-ink, #171717);
+    }
+
+    .grimba-story-divider__dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, .6), 0 0 12px color-mix(in srgb, var(--story-side-color, #a8a8a8) 60%, transparent);
+    }
+
+    .grimba-story-divider__label {
+        font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        color: var(--story-side-color, var(--gn-ink, #171717));
+    }
+
+    .grimba-story-divider__count,
+    .grimba-story-divider__countries {
+        color: var(--gn-ink-muted, rgba(23, 23, 23, .62));
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: .02em;
+        text-transform: uppercase;
+    }
+
+    .grimba-story-divider__countries {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        letter-spacing: .08em;
+    }
+
+    .grimba-story-divider__sep {
+        color: var(--gn-ink-muted, rgba(23, 23, 23, .35));
+        opacity: .5;
+    }
+
+    [data-bs-theme="dark"] .grimba-story-divider__label,
+    body[data-theme="dark"] .grimba-story-divider__label {
+        color: color-mix(in srgb, var(--story-side-color, #fffaf0) 80%, #fffaf0);
+    }
+
+    [data-bs-theme="dark"] .grimba-story-divider__count,
+    [data-bs-theme="dark"] .grimba-story-divider__countries,
+    body[data-theme="dark"] .grimba-story-divider__count,
+    body[data-theme="dark"] .grimba-story-divider__countries {
+        color: rgba(255, 250, 240, .68);
+    }
+
+    [data-grimba-cluster-list].is-recent-sort .grimba-story-divider {
+        display: none !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .grimba-story-divider__bar::after {
+            animation: none;
+        }
+    }
+</style>
+
 <script>
     (function () {
         const tabs = document.querySelectorAll('[data-grimba-cluster-tabs] [data-bias-tab]');
@@ -370,8 +518,12 @@
 
         function sortItems(mode) {
             if (! list) return;
-            const nodes = Array.from(items);
-            nodes.sort((a, b) => {
+            // Dividers SSR'd in bias-sort mode only; in recent mode they
+            // get re-shown via the .is-recent-sort gate below and the
+            // sort pass leaves them in place.
+            const articleNodes = Array.from(items).filter(node => !node.matches('[data-grimba-side-divider]'));
+            const dividers = Array.from(list.querySelectorAll('[data-grimba-side-divider]'));
+            articleNodes.sort((a, b) => {
                 if (mode === 'recent') {
                     return Number(b.dataset.sortTs || 0) - Number(a.dataset.sortTs || 0);
                 }
@@ -379,7 +531,29 @@
                 if (biasDelta !== 0) return biasDelta;
                 return Number(b.dataset.sortTs || 0) - Number(a.dataset.sortTs || 0);
             });
-            nodes.forEach(node => list.appendChild(node));
+
+            if (mode === 'recent') {
+                list.classList.add('is-recent-sort');
+                articleNodes.forEach(node => list.appendChild(node));
+                dividers.forEach(d => list.appendChild(d)); // park them at end (hidden via CSS)
+            } else {
+                list.classList.remove('is-recent-sort');
+                // Re-thread by walking buckets so dividers sit directly
+                // before the first article of each side.
+                const byBucket = { left: [], center: [], right: [], unknown: [] };
+                articleNodes.forEach(node => {
+                    const bias = node.dataset.bias in byBucket ? node.dataset.bias : 'unknown';
+                    byBucket[bias].push(node);
+                });
+                ['left', 'center', 'right', 'unknown'].forEach(bucket => {
+                    const divider = dividers.find(d => d.dataset.bias === bucket);
+                    if (divider && byBucket[bucket].length > 0) {
+                        list.appendChild(divider);
+                    }
+                    byBucket[bucket].forEach(node => list.appendChild(node));
+                });
+            }
+
             document.cookie = 'grimba_cluster_sort=' + mode + '; path=/; max-age=' + (60 * 60 * 24 * 365) + '; SameSite=Lax';
 
             if (sortWrap) {
