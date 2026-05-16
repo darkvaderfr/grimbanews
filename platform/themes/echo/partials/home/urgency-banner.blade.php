@@ -36,8 +36,13 @@
         implode('|', array_map(fn ($kw) => preg_quote($kw, '/'), $__breakingKeywords)) .
         ')/iu';
 
-    $breakingPosts = \Illuminate\Support\Facades\Cache::remember(
-        'grimba_breaking_ticker_v6:' . GnTr::targetLocale() . ':' . $__breakingRegion . ':' . $breakingWindowHours,
+    // Track whether the ticker is in REAL-BREAKING mode vs LATEST-FALLBACK
+    // so the eyebrow can be honest. Vader 2026-05-16 + Echo audit:
+    // labeling normal recent posts as "Live" is exactly the firehose
+    // problem we just fixed.
+    $__breakingMode = 'real';
+    $__cacheBundle = \Illuminate\Support\Facades\Cache::remember(
+        'grimba_breaking_ticker_v7:' . GnTr::targetLocale() . ':' . $__breakingRegion . ':' . $breakingWindowHours,
         45,
         function () use ($breakingWindowHours, $__breakingKeywords, $__breakingRegex) {
             $cols = ['id','name','translated_name','translated_description','translated_to','original_language','description','content','summary_nobuai','source_name','source_id','bias_rating','published_at','created_at','image'];
@@ -72,12 +77,12 @@
             })->take(14);
 
             if ($breaking->isNotEmpty()) {
-                return $breaking->values();
+                return ['mode' => 'real', 'posts' => $breaking->values()];
             }
 
             // 2) No live breaking — surface the freshest recent posts so
-            //    the rail still moves. Marked as fallback via the
-            //    eyebrow style elsewhere.
+            //    the rail still moves. Mode flips to 'latest' so the
+            //    eyebrow can render honestly.
             $recentFallback = Post::query()
                 ->where('status', 'published')
                 ->whereNotNull('source_name')
@@ -87,7 +92,7 @@
 
             $recent = $recentFallback->limit(14)->get($cols);
             if ($recent->isNotEmpty()) {
-                return $recent;
+                return ['mode' => 'latest', 'posts' => $recent];
             }
 
             $dailyFallback = Post::query()
@@ -99,7 +104,7 @@
 
             $daily = $dailyFallback->limit(14)->get($cols);
             if ($daily->isNotEmpty()) {
-                return $daily;
+                return ['mode' => 'latest', 'posts' => $daily];
             }
 
             $latestQuery = Post::query()
@@ -107,9 +112,12 @@
                 ->with('slugable');
             GrimbaPostRecency::orderByPublished($latestQuery);
 
-            return $latestQuery->limit(10)->get($cols);
+            return ['mode' => 'latest', 'posts' => $latestQuery->limit(10)->get($cols)];
         }
     );
+
+    $__breakingMode = $__cacheBundle['mode'] ?? 'latest';
+    $breakingPosts = $__cacheBundle['posts'] ?? collect();
 
     GnTr::warm($breakingPosts);
 
@@ -272,10 +280,20 @@
     }
 @endphp
 
-<div class="grimba-breaking grimba-urgency" role="region" aria-label="{{ __('Dernières nouvelles') }}" data-grimba-breaking>
+<div class="grimba-breaking grimba-urgency grimba-breaking--mode-{{ $__breakingMode }}"
+     role="region"
+     aria-label="{{ __('Dernières nouvelles') }}"
+     data-grimba-breaking
+     data-grimba-mode="{{ $__breakingMode }}">
     <div class="container-xxl grimba-breaking__inner">
         <div class="grimba-breaking__lede">
-            <span class="grimba-breaking__eyebrow">{{ __('En direct') }}</span>
+            <span class="grimba-breaking__eyebrow">
+                @if($__breakingMode === 'real')
+                    {{ __('En direct') }}
+                @else
+                    {{ __('Dernières') }}
+                @endif
+            </span>
             <span class="grimba-breaking__headline" data-grimba-breaking-headline>{{ $breakingItems->first()['summary'] }}</span>
         </div>
 

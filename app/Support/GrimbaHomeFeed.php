@@ -198,10 +198,19 @@ class GrimbaHomeFeed
      *
      * @return array<string, Collection<int, Post>>
      */
+    /** @var bool|null */
+    private static ?bool $regionColumnCache = null;
+
     private static function pickRegionalMix(HomeFeedState $state, int $perRegion): array
     {
         $out = [];
-        $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('posts', 'editorial_region');
+
+        // Cache Schema::hasColumn since it hits information_schema each
+        // call — once per request lifecycle is plenty (Zen 2026-05-16).
+        if (self::$regionColumnCache === null) {
+            self::$regionColumnCache = \Illuminate\Support\Facades\Schema::hasColumn('posts', 'editorial_region');
+        }
+        $hasColumn = self::$regionColumnCache;
 
         foreach (['africa', 'europe', 'americas'] as $region) {
             $query = Post::query()

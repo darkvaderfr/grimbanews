@@ -55,8 +55,22 @@ class AppServiceProvider extends ServiceProvider
         // automatically. Falls back gracefully when the column is not
         // present (the migration is opt-in per Vader's "no migrations
         // without ask" rule).
-        Post::saving(function (Post $post): void {
-            if (! Schema::hasColumn('posts', 'editorial_region')) {
+        //
+        // NOTE: Schema::hasColumn hits information_schema on every call.
+        // We cache the result in a static so a bulk ingest cron doesn't
+        // pay 2x extra round-trips per saved post (Zen audit 2026-05-16).
+        //
+        // ASSUMPTION: every ingest pipeline (GrimbaRssPoller line ~475,
+        // GrimbaNewsApiFetcher, GrimbaLiveNewsFetcher) calls $post->save()
+        // — raw DB::table('posts')->insert paths would bypass this hook.
+        // If a future "perf optimization" switches one path to raw insert,
+        // the column needs to be set explicitly there.
+        static $hasRegionCol = null;
+        Post::saving(function (Post $post) use (&$hasRegionCol): void {
+            if ($hasRegionCol === null) {
+                $hasRegionCol = Schema::hasColumn('posts', 'editorial_region');
+            }
+            if (! $hasRegionCol) {
                 return;
             }
             if (! empty($post->editorial_region)) {

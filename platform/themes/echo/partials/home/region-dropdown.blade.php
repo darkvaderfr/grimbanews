@@ -27,16 +27,42 @@
         ],
     ];
 
-    $editionCounts = \Illuminate\Support\Facades\Cache::remember('grimba_edition_counts_v2', 60, function () {
-        $excluded = Regions::otherNamedCodes();
-
+    $editionCounts = \Illuminate\Support\Facades\Cache::remember('grimba_edition_counts_v3', 60, function () {
         $counts = [
-            'africa'   => 0,
-            'europe'   => 0,
-            'americas' => 0,
+            'africa'        => 0,
+            'europe'        => 0,
+            'americas'      => 0,
             'international' => 0,
         ];
 
+        // Prefer the indexed posts.editorial_region column so the
+        // dropdown count matches what GrimbaRegionScope will actually
+        // surface. Falls back to the legacy join-through-source
+        // pattern only when the migration hasn't been applied yet.
+        $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('posts', 'editorial_region');
+
+        if ($hasColumn) {
+            // Named regions: direct column filter.
+            foreach (['africa', 'europe', 'americas'] as $region) {
+                $counts[$region] = \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
+                    ->where('status', 'published')
+                    ->where('editorial_region', $region)
+                    ->count();
+            }
+            // International scope returns all posts (per Vader 2026-05-16
+            // — "the international shows all articles across regions").
+            // The count UI still shows only the international slice so
+            // the picker reads sensibly.
+            $counts['international'] = \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
+                ->where('status', 'published')
+                ->where('editorial_region', 'international')
+                ->count();
+
+            return $counts;
+        }
+
+        // Legacy fallback path (pre-migration environments).
+        $excluded = Regions::otherNamedCodes();
         foreach (['africa', 'europe', 'americas'] as $region) {
             $codes = Regions::countries($region);
             if (! $codes) continue;
@@ -48,9 +74,6 @@
                 ->count();
         }
 
-        // International: posts whose source country is NOT in any of
-        // the three named regions, OR has no country tag, OR has no
-        // source at all. Mirrors the GrimbaRegionScope negative filter.
         $counts['international'] = \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
             ->where('status', 'published')
             ->where(function ($q) use ($excluded): void {
