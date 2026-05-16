@@ -25,6 +25,8 @@
                 <h4 class="grimba-footer__heading">{{ __('Lecteur') }}</h4>
                 <ul>
                     <li><a href="{{ url('/') }}">{{ __('Accueil') }}</a></li>
+                    <li><a href="{{ url('/breaking') }}">{{ __('Breaking news') }}</a></li>
+                    <li><a href="{{ url('/latest') }}">{{ __('Latest news') }}</a></li>
                     <li><a href="{{ url('/pour-vous') }}">{{ __('Pour vous') }}</a></li>
                     <li><a href="{{ url('/local') }}">{{ __('Local') }}</a></li>
                     <li><a href="{{ url('/coffre') }}">{{ __('Mon coffre') }}</a></li>
@@ -50,6 +52,8 @@
                     <li><a href="{{ url('/methodologie') }}">{{ __('Méthodologie') }}</a></li>
                     <li><a href="{{ url('/comprendre-le-barometre') }}">{{ __('Comprendre le baromètre') }}</a></li>
                     <li><a href="{{ url('/feed.xml') }}">{{ __('Flux RSS') }}</a></li>
+                    <li><a href="{{ url('/feed.breaking.xml') }}">{{ __('RSS · Breaking') }}</a></li>
+                    <li><a href="{{ url('/feed.latest.xml') }}">{{ __('RSS · Latest') }}</a></li>
                     <li><a href="#newsletter" data-grimba-newsletter-open>{{ __('Infolettre') }}</a></li>
                 </ul>
             </div>
