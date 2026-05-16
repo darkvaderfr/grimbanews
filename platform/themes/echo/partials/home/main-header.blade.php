@@ -12,25 +12,35 @@
     if (! in_array($themePref, ['light', 'dark'], true)) $themePref = 'light';
     $themeIcon = ['light' => '☀', 'dark' => '☾'][$themePref];
 
-    // S206/D3 — cached editorial pulse for first paint.
-    $pulse = \Illuminate\Support\Facades\Cache::remember('grimba_header_pulse_v2', 300, function (): array {
-        $morning = now()->setTime(6, 0);
-        return [
-            'new' => \App\Support\GrimbaPostRecency::wherePublishedSince(
-                \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')->where('status', 'published'),
-                $morning
-            )->count(),
-            'blindspots' => \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
-                ->where('status', 'published')
-                ->where('is_blindspot', true)
-                ->count(),
-            'clusters' => \Botble\Blog\Models\Post::withoutGlobalScope('grimba_region')
-                ->where('status', 'published')
-                ->whereNotNull('story_cluster_id')
-                ->distinct('story_cluster_id')
-                ->count('story_cluster_id'),
-        ];
-    });
+    // Region-scoped editorial pulse for first paint. Per Vader 2026-05-16
+    // every editorial surface for a named edition (Africa / Europe /
+    // Americas) must show only that region's pulse. International stays
+    // global because the scope short-circuits on `international`.
+    $__pulseRegion = \App\Ground\Regions::migrate(
+        (string) request()->cookie(\App\Scopes\GrimbaRegionScope::COOKIE_NAME, 'international')
+    );
+    $pulse = \Illuminate\Support\Facades\Cache::remember(
+        'grimba_header_pulse_v3:' . $__pulseRegion,
+        300,
+        function (): array {
+            $morning = now()->setTime(6, 0);
+            return [
+                'new' => \App\Support\GrimbaPostRecency::wherePublishedSince(
+                    \Botble\Blog\Models\Post::query()->where('status', 'published'),
+                    $morning
+                )->count(),
+                'blindspots' => \Botble\Blog\Models\Post::query()
+                    ->where('status', 'published')
+                    ->where('is_blindspot', true)
+                    ->count(),
+                'clusters' => \Botble\Blog\Models\Post::query()
+                    ->where('status', 'published')
+                    ->whereNotNull('story_cluster_id')
+                    ->distinct('story_cluster_id')
+                    ->count('story_cluster_id'),
+            ];
+        }
+    );
 @endphp
 <header class="grimba-header">
     <div class="grimba-header__meta">

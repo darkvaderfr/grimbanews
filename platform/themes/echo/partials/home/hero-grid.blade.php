@@ -168,12 +168,30 @@
                         'right' => '#e84c3d',
                         default => null,
                     };
+
+                    // Detect whether post-hero-img will fall through to the
+                    // editorial /og/placeholder/{id}.svg — that SVG has the
+                    // post title baked in, which collides with the cinematic
+                    // overlay title and creates the ghost-text Vader caught.
+                    // Pre-resolve here and only render the image when it's a
+                    // real publisher hero; otherwise skip and let the
+                    // bias-tinted gradient carry the card alone.
+                    $__heroResolved = ! empty($hero->image)
+                        ? \Botble\Media\Facades\RvMedia::getImageUrl($hero->image, 'extra-large')
+                        : null;
+                    $__heroDefault = \Botble\Media\Facades\RvMedia::getDefaultImage(false, 'extra-large');
+                    $__heroHasRealImage = $__heroResolved !== null
+                        && $__heroResolved !== $__heroDefault
+                        && is_string($__heroResolved)
+                        && preg_match('#^https?://#i', $__heroResolved);
                 @endphp
                 <a href="{{ $hero->url }}"
-                   class="grimba-hero__media grimba-hero__media--cinematic"
+                   class="grimba-hero__media grimba-hero__media--cinematic @if(! $__heroHasRealImage) grimba-hero__media--no-image @endif"
                    data-grimba-hero-parallax
                    @if($__heroBiasColor) style="--gn-hero-bias: {{ $__heroBiasColor }};" @endif>
-                    {!! Theme::partial('post-hero-img', ['post' => $hero, 'size' => 'extra-large', 'eager' => true]) !!}
+                    @if($__heroHasRealImage)
+                        {!! Theme::partial('post-hero-img', ['post' => $hero, 'size' => 'extra-large', 'eager' => true]) !!}
+                    @endif
                     <div class="grimba-hero__gradient"></div>
                     @if($__heroBiasColor)
                         <span class="grimba-hero__bias-strip" aria-hidden="true"></span>
@@ -199,6 +217,28 @@
                         overflow: hidden;
                         transition: transform .35s cubic-bezier(.22, 1, .36, 1), box-shadow .35s ease;
                         will-change: transform;
+                    }
+
+                    /* No real publisher image — render a bias-tinted
+                       editorial gradient so the foreground title carries
+                       the card alone (no placeholder SVG ghosting through
+                       behind the headline). */
+                    .grimba-hero__media--no-image {
+                        aspect-ratio: 21 / 9;
+                        background:
+                            radial-gradient(120% 90% at 0% 100%, color-mix(in srgb, var(--gn-hero-bias, #1a1713) 35%, transparent), transparent 65%),
+                            radial-gradient(90% 60% at 100% 0%, rgba(255, 250, 240, .12), transparent 60%),
+                            linear-gradient(135deg, #14110d 0%, color-mix(in srgb, var(--gn-hero-bias, #3a342c) 42%, #1a1713) 100%);
+                    }
+
+                    .grimba-hero__media--no-image::after {
+                        content: "";
+                        position: absolute;
+                        inset: 0;
+                        z-index: 0;
+                        pointer-events: none;
+                        background:
+                            radial-gradient(50% 50% at 70% 30%, rgba(255, 250, 240, .08), transparent 60%);
                     }
 
                     .grimba-hero__media--cinematic::before {

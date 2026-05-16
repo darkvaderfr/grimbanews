@@ -118,12 +118,15 @@ class GrimbaEditorialCategories
     {
         $names = self::topicNames();
 
+        // Posts count respects the active region scope so an Africa
+        // reader sees how many Politique stories Africa has, not the
+        // global total. International readers see the global count
+        // because the scope short-circuits to "no filter" there.
         return Category::query()
             ->where('status', 'published')
             ->whereIn('name', $names)
             ->withCount([
                 'posts' => fn ($query) => $query
-                    ->withoutGlobalScope('grimba_region')
                     ->where('posts.status', 'published'),
             ])
             ->orderBy('order')
