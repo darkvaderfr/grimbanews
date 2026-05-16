@@ -28,7 +28,7 @@
                         <div class="grimba-latest__body">
                             <span class="grimba-latest__kicker">
                                 @if($p->categories->first())
-                                    {{ $p->categories->first()->name }}
+                                    {{ __($p->categories->first()->name) }}
                                 @endif
                                 @if($p->source_name)
                                     <span class="opacity-50">·</span> {{ $p->source_name }}

@@ -1931,6 +1931,15 @@ body.grimba-home img[alt=""] {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.grimba-stat-pill__icon {
+    display: none;
+    font-size: 0.78rem;
+    line-height: 1;
+    opacity: 0.78;
+}
+@media (max-width: 767.98px) {
+    .grimba-stat-pill__icon { display: inline-block; }
+}
 .grimba-header-tool-link:hover,
 .grimba-header-tool-link:focus-visible {
     color: var(--gn-ink);
@@ -4512,8 +4521,28 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-command-palette__item-icon {
         padding: 0.12rem 0.38rem;
         font-size: 0.68rem;
     }
+    /* Keep all three pulse pills visible on mobile but compact —
+       icon + value only. Vader 2026-05-16: the lone "0" with no label
+       was unreadable. */
     .grimba-stat-pill:nth-child(n+2) {
+        display: inline-flex;
+    }
+    .grimba-header-pulse {
+        max-width: none;
+        flex-wrap: nowrap;
+    }
+    .grimba-stat-pill {
+        padding: 0.16rem 0.42rem;
+        gap: 3px;
+    }
+    .grimba-stat-pill__label {
         display: none;
+    }
+    .grimba-stat-pill__icon {
+        display: inline-block;
+        font-size: 0.78rem;
+        line-height: 1;
+        opacity: .82;
     }
     .grimba-header-tool-link {
         min-height: 26px;

@@ -57,15 +57,24 @@
                     </button>
                     @include(Theme::getThemeNamespace('partials.home.lang-switch'))
                     <span class="grimba-header-pulse">
-                        <span class="grimba-stat-pill" title="{{ trans_choice(':count nouveau ce matin|:count nouveaux ce matin', $pulse['new'], ['count' => $pulse['new']]) }}">
+                        <span class="grimba-stat-pill"
+                              title="{{ trans_choice(':count nouveau ce matin|:count nouveaux ce matin', $pulse['new'], ['count' => $pulse['new']]) }}"
+                              aria-label="{{ trans_choice(':count nouveau ce matin|:count nouveaux ce matin', $pulse['new'], ['count' => $pulse['new']]) }}">
+                            <span class="grimba-stat-pill__icon" aria-hidden="true">✦</span>
                             <span class="grimba-stat-pill__value">{{ number_format((int) $pulse['new']) }}</span>
                             <span class="grimba-stat-pill__label">{{ __('nouveau') }}</span>
                         </span>
-                        <span class="grimba-stat-pill" title="{{ trans_choice(':count angle mort|:count angles morts', $pulse['blindspots'], ['count' => $pulse['blindspots']]) }}">
+                        <span class="grimba-stat-pill"
+                              title="{{ trans_choice(':count angle mort|:count angles morts', $pulse['blindspots'], ['count' => $pulse['blindspots']]) }}"
+                              aria-label="{{ trans_choice(':count angle mort|:count angles morts', $pulse['blindspots'], ['count' => $pulse['blindspots']]) }}">
+                            <span class="grimba-stat-pill__icon" aria-hidden="true">⊘</span>
                             <span class="grimba-stat-pill__value">{{ number_format((int) $pulse['blindspots']) }}</span>
                             <span class="grimba-stat-pill__label">{{ __('angles') }}</span>
                         </span>
-                        <span class="grimba-stat-pill" title="{{ trans_choice(':count dossier actif|:count dossiers actifs', $pulse['clusters'], ['count' => $pulse['clusters']]) }}">
+                        <span class="grimba-stat-pill"
+                              title="{{ trans_choice(':count dossier actif|:count dossiers actifs', $pulse['clusters'], ['count' => $pulse['clusters']]) }}"
+                              aria-label="{{ trans_choice(':count dossier actif|:count dossiers actifs', $pulse['clusters'], ['count' => $pulse['clusters']]) }}">
+                            <span class="grimba-stat-pill__icon" aria-hidden="true">◉</span>
                             <span class="grimba-stat-pill__value">{{ number_format((int) $pulse['clusters']) }}</span>
                             <span class="grimba-stat-pill__label">{{ __('dossiers') }}</span>
                         </span>

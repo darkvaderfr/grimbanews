@@ -18,7 +18,7 @@
         <header class="grimba-section__head grimba-section__head--editorial">
             <div class="grimba-section__head-left">
                 <span class="grimba-section__eyebrow">{{ __('Rubrique') }}</span>
-                <h2 class="grimba-section__title grimba-section__title--editorial">{{ $cat->name }}</h2>
+                <h2 class="grimba-section__title grimba-section__title--editorial">{{ __($cat->name) }}</h2>
             </div>
             <span class="grimba-section__rule" aria-hidden="true"></span>
             <div class="grimba-section__head-actions">
@@ -37,7 +37,7 @@
                     <a href="{{ $latest->url }}" class="grimba-section__hero">
                         {!! Theme::partial('post-hero-img', ['post' => $latest, 'size' => 'extra-large']) !!}
                         <div class="grimba-section__hero-body">
-                            <span class="grimba-section__kicker">{{ __('Dernières :category', ['category' => strtolower($cat->name)]) }}</span>
+                            <span class="grimba-section__kicker">{{ __('Dernières :category', ['category' => strtolower(__($cat->name))]) }}</span>
                             <h3 class="grimba-section__hero-title">{{ $latestTitle }}</h3>
                             @if($latestTranslated)
                                 {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
@@ -49,7 +49,7 @@
             </div>
 
             <div class="col-lg-5 col-12 d-flex flex-column gap-3">
-                <span class="grimba-section__kicker grimba-section__kicker--rail">{{ __('Angles morts') }} · {{ $cat->name }}</span>
+                <span class="grimba-section__kicker grimba-section__kicker--rail">{{ __('Angles morts') }} · {{ __($cat->name) }}</span>
 
                 @foreach($categoryBlindspots as $b)
                     @php
