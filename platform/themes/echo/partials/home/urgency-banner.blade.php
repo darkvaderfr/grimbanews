@@ -86,12 +86,40 @@
             'alpha' => 1.0,
         ]]);
     }
+
+    // Newest published timestamp — drives the "Actualisé X" chip readers
+    // see in the ticker eyebrow. If the feed's stalled (cron failed, key
+    // unset), this surfaces it without needing an admin login.
+    $__breakingFreshest = $breakingPosts
+        ->map(fn ($p) => GrimbaPostRecency::value($p))
+        ->filter()
+        ->sortDesc()
+        ->first();
+
+    $__freshnessLabel = $__breakingFreshest
+        ? $__breakingFreshest->locale(app()->getLocale())->diffForHumans(['short' => true])
+        : null;
+    $__freshnessAge = $__breakingFreshest ? $__breakingFreshest->diffInMinutes(now()) : null;
+    $__freshnessTone = match (true) {
+        $__freshnessAge === null => 'unknown',
+        $__freshnessAge <= 30 => 'live',
+        $__freshnessAge <= 180 => 'recent',
+        default => 'stale',
+    };
 @endphp
 
 <div class="grimba-breaking grimba-urgency" role="region" aria-label="{{ __('Dernières nouvelles') }}" data-grimba-breaking>
     <div class="container-xxl grimba-breaking__inner">
         <div class="grimba-breaking__lede">
-            <span class="grimba-breaking__eyebrow">{{ __('En direct') }}</span>
+            <span class="grimba-breaking__eyebrow">
+                <span class="grimba-breaking__pulse grimba-breaking__pulse--{{ $__freshnessTone }}" aria-hidden="true"></span>
+                {{ __('En direct') }}
+                @if($__freshnessLabel)
+                    <span class="grimba-breaking__freshness" title="{{ __('Dernière publication') }}">
+                        · {{ __('Actualisé :time', ['time' => $__freshnessLabel]) }}
+                    </span>
+                @endif
+            </span>
             <span class="grimba-breaking__headline" data-grimba-breaking-headline>{{ $breakingItems->first()['title'] }}</span>
         </div>
 
@@ -143,6 +171,57 @@
         box-shadow: 0 0 0 2px rgba(255, 255, 255, .42), 0 0 10px color-mix(in srgb, var(--gn-break-bias, #a8a8a8) 60%, transparent);
         flex-shrink: 0;
         vertical-align: middle;
+    }
+
+    .grimba-breaking__eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .grimba-breaking__pulse {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, .22);
+        animation: grimbaBreakingPulse 2.2s ease-in-out infinite;
+    }
+
+    .grimba-breaking__pulse--recent {
+        background: #f59e0b;
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, .22);
+    }
+
+    .grimba-breaking__pulse--stale {
+        background: #ef4444;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, .22);
+        animation: none;
+    }
+
+    .grimba-breaking__pulse--unknown {
+        background: #94a3b8;
+        animation: none;
+    }
+
+    @keyframes grimbaBreakingPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.32); opacity: .55; }
+    }
+
+    .grimba-breaking__freshness {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        opacity: .82;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .grimba-breaking__pulse { animation: none; }
     }
 </style>
 
