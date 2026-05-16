@@ -26,7 +26,7 @@
 @endphp
 
 <section class="grimba-search-page container py-5">
-    <header class="grimba-search-page__panel glass-panel p-4 p-md-5 mb-4">
+    <header class="grimba-search-page__panel glass-panel grimba-editorial-ribbon p-4 p-md-5 mb-4">
         <span class="grimba-methodology__kicker">{{ __('Recherche') }}</span>
         <h1 class="grimba-methodology__title mt-2 mb-2">
             @if($query === '')

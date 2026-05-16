@@ -42,7 +42,7 @@
 <section class="grimba-local py-4 py-md-5">
     <div class="container">
 
-        <header class="grimba-local__panel glass-panel p-4 p-md-5 mb-4">
+        <header class="grimba-local__panel glass-panel grimba-editorial-ribbon p-4 p-md-5 mb-4">
             <span class="grimba-methodology__kicker">{{ __('Local') }}</span>
 
             @if($hasLocation)
