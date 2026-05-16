@@ -680,7 +680,6 @@
                                     'items' => $__gnComparisonItems,
                                 ])
                             @endif
-                        </div>
 
                         <style>
                             .grimba-insights-panel {
