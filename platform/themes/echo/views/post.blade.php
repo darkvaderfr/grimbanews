@@ -333,37 +333,112 @@
                         </div>
                     @endif
 
-                    {{-- S170 — bias filter tabs sit right under the title.
-                         Tabs use the same data attribute as the article-list
-                         section below; clicking filters in place via JS. --}}
-                    <div class="grimba-story-page__actions d-flex align-items-center gap-2 flex-wrap mb-3" data-grimba-cluster-tabs>
-                        <div class="grimba-story-page__tablist" role="tablist">
-                            <button type="button" class="grimba-story-page__tab" data-bias-tab="all" role="tab" aria-controls="grimba-cluster-panel" aria-selected="true">
-                                {{ __('Tous') }} · {{ $__gnClusterPosts->count() }}
-                            </button>
-                            @foreach(['left' => [__('Gauche'),'#3b82f6'], 'center' => [__('Centre'),'#a8a8a8'], 'right' => [__('Droite'),'#e84c3d']] as $b => [$lbl,$col])
+                    {{-- Dossier action bar (post-reinvention 2026-05-16).
+                         The old filter tabs targeted article-list which
+                         no longer exists; dossier-voices renders below
+                         already split by side. Single line: coverage
+                         stat + analyse-sources jump + save pill. --}}
+                    <div class="grimba-story-page__bar mb-3">
+                        <div class="grimba-story-page__bar-stat">
+                            <span class="grimba-story-page__bar-stat-num">{{ $__gnClusterPosts->count() }}</span>
+                            <span class="grimba-story-page__bar-stat-label">{{ trans_choice(':count source contributrice|:count sources contributrices', $__gnClusterPosts->count()) }}</span>
+                            @foreach(['left' => '#3b82f6', 'center' => '#a8a8a8', 'right' => '#e84c3d'] as $b => $col)
                                 @if($__gnByBias[$b] > 0)
-                                    <button type="button" class="grimba-story-page__tab" data-bias-tab="{{ $b }}" role="tab" aria-controls="grimba-cluster-panel" aria-selected="false">
-                                        <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:{{ $col }}; margin-right:5px; vertical-align:1px;"></span>
-                                        {{ $lbl }} · {{ $__gnByBias[$b] }}
-                                    </button>
+                                    <span class="grimba-story-page__bar-pill"
+                                          style="--pill-color: {{ $col }};"
+                                          title="{{ trans_choice(':count source|:count sources', $__gnByBias[$b]) }}">
+                                        {{ $__gnByBias[$b] }}
+                                    </span>
                                 @endif
                             @endforeach
                         </div>
 
-                        <button type="button"
-                                class="grimba-story-page__compare"
-                                onclick="document.querySelector('.grimba-story-distribution')?.scrollIntoView({behavior:'smooth', block:'start'});"
-                                title="{{ __('Voir la distribution des biais') }}">
-                            <span aria-hidden="true">⚖</span>
-                            <span class="grimba-story-page__compare-label grimba-story-page__compare-label--full">{{ __('Analyse des sources') }}</span>
-                            <span class="grimba-story-page__compare-label grimba-story-page__compare-label--short">{{ __('Sources') }}</span>
-                        </button>
+                        <div class="grimba-story-page__bar-actions">
+                            <button type="button"
+                                    class="grimba-story-page__compare"
+                                    onclick="document.querySelector('.grimba-story-distribution')?.scrollIntoView({behavior:'smooth', block:'start'});"
+                                    title="{{ __('Voir la distribution des biais') }}">
+                                <span aria-hidden="true">⚖</span>
+                                <span class="grimba-story-page__compare-label grimba-story-page__compare-label--full">{{ __('Analyse des sources') }}</span>
+                                <span class="grimba-story-page__compare-label grimba-story-page__compare-label--short">{{ __('Sources') }}</span>
+                            </button>
 
-                        {{-- S173 — save-for-later pill. Cookie-only (no auth).
-                             Toggles post id in grimba_vault, surfaces in /coffre. --}}
-                        {!! Theme::partial('save-button', ['post' => $post, 'variant' => 'pill']) !!}
+                            {{-- Save-for-later pill (cookie-only, no auth). --}}
+                            {!! Theme::partial('save-button', ['post' => $post, 'variant' => 'pill']) !!}
+                        </div>
                     </div>
+
+                    <style>
+                        .grimba-story-page__bar {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            gap: 12px;
+                            flex-wrap: wrap;
+                            padding: 10px 14px;
+                            border-radius: 14px;
+                            background: rgba(255, 255, 255, .54);
+                            border: 1px solid rgba(26, 23, 19, .08);
+                        }
+                        .grimba-story-page__bar-stat {
+                            display: flex;
+                            align-items: baseline;
+                            gap: 8px;
+                            min-width: 0;
+                            flex-wrap: wrap;
+                        }
+                        .grimba-story-page__bar-stat-num {
+                            font-family: 'Fraunces', Georgia, serif;
+                            font-weight: 800;
+                            font-size: 24px;
+                            line-height: 1;
+                            color: var(--gn-ink, #1a1713);
+                            letter-spacing: -0.02em;
+                        }
+                        .grimba-story-page__bar-stat-label {
+                            font-family: 'Public Sans', system-ui, sans-serif;
+                            font-size: 12.5px;
+                            font-weight: 600;
+                            color: var(--gn-ink-muted, rgba(26, 23, 19, .62));
+                        }
+                        .grimba-story-page__bar-pill {
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-width: 24px;
+                            height: 22px;
+                            padding: 0 7px;
+                            border-radius: 999px;
+                            background: color-mix(in srgb, var(--pill-color, #a8a8a8) 14%, transparent);
+                            color: var(--pill-color, #a8a8a8);
+                            font-family: 'JetBrains Mono', ui-monospace, monospace;
+                            font-size: 11px;
+                            font-weight: 800;
+                            letter-spacing: .04em;
+                            border: 1px solid color-mix(in srgb, var(--pill-color, #a8a8a8) 32%, transparent);
+                        }
+                        .grimba-story-page__bar-actions {
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            flex-shrink: 0;
+                        }
+                        [data-bs-theme="dark"] .grimba-story-page__bar,
+                        body[data-theme="dark"] .grimba-story-page__bar {
+                            background: rgba(28, 24, 17, .58);
+                            border-color: rgba(255, 250, 240, .10);
+                        }
+                        [data-bs-theme="dark"] .grimba-story-page__bar-stat-num,
+                        body[data-theme="dark"] .grimba-story-page__bar-stat-num {
+                            color: #fffaf0;
+                        }
+                        @media (max-width: 575.98px) {
+                            .grimba-story-page__bar-actions {
+                                width: 100%;
+                                justify-content: flex-start;
+                            }
+                        }
+                    </style>
 
                     {{-- S175 — Multi-source summary. When the post has a
                          pre-generated summary_nobuai, use it (LLM-driven,
@@ -465,25 +540,16 @@
                                 default      => __("Résumé multi-sources à venir dès qu'une autre couverture rejoint cette histoire."),
                             };
                         @endphp
-                        <div style="border-top:1px dashed rgba(26,23,19,0.15); padding-top:14px; margin-top:18px;">
-                            <details open class="grimba-insights" style="cursor:default;">
-                                <summary class="grimba-insights__summary"
-                                    style="cursor:pointer; list-style:none; display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-                                    <span style="
-                                        display:inline-flex; align-items:center; gap:6px;
-                                        padding:4px 10px; border-radius:9999px;
-                                        background:linear-gradient(135deg,#1a1713,#3a342c);
-                                        color:#f6f1e8;
-                                        font-family:'Public Sans',system-ui,sans-serif;
-                                        font-size:11.5px; font-weight:700; letter-spacing:0.5px;
-                                    ">
-                                        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#f6f1e8;"></span>
-                                        {{ $__badgeLabel }}
-                                    </span>
-                                    <span class="ms-auto small opacity-55" style="font-size:12px;">
-                                        ▾ <span style="margin-left:4px;">{{ __('cliquer pour masquer') }}</span>
-                                    </span>
-                                </summary>
+                        <section class="grimba-insights-panel" aria-labelledby="grimba-insights-title">
+                            <header class="grimba-insights-panel__head">
+                                <span class="grimba-insights-panel__badge">
+                                    <span class="grimba-insights-panel__badge-dot" aria-hidden="true"></span>
+                                    {{ $__badgeLabel }}
+                                </span>
+                                <h2 id="grimba-insights-title" class="grimba-insights-panel__title">
+                                    {{ __('Ce que les sources disent') }}
+                                </h2>
+                            </header>
 
                                 @if($__gnSummaryMode === 'extractive')
                                     {{-- S175/S183 — bulleted list with bias-colored
@@ -496,18 +562,17 @@
                                             'unknown' => 'rgba(26,23,19,0.45)',
                                         ];
                                     @endphp
-                                    <ul class="m-0" style="list-style:none; padding:0; font-size:15.5px; line-height:1.55; color:var(--gn-ink,#1a1713);">
+                                    <ul class="grimba-insights-panel__list" data-mode="extractive">
                                         @foreach($__gnSummaryItems as $item)
                                             @php
                                                 $__bColor = $__bulletColor[$item['bias'] ?? 'unknown'] ?? $__bulletColor['unknown'];
                                             @endphp
-                                            <li style="display:flex; gap:10px; margin-bottom:12px; align-items:flex-start;">
-                                                <span aria-hidden="true" title="{{ __($item['bias'] ?? 'non classé') }}"
-                                                      style="flex:0 0 8px; width:8px; height:8px; margin-top:8px; border-radius:50%; background:{{ $__bColor }};"></span>
-                                                <span style="flex:1;">
+                                            <li class="grimba-insights-panel__row" style="--insight-tone: {{ $__bColor }};">
+                                                <span class="grimba-insights-panel__row-dot" aria-hidden="true"></span>
+                                                <span class="grimba-insights-panel__row-body">
                                                     {{ $item['text'] }}
                                                     @if($item['source'])
-                                                        <span class="opacity-60" style="font-size:12.5px; margin-left:4px;">— {{ $item['source'] }}</span>
+                                                        <span class="grimba-insights-panel__row-source">— {{ $item['source'] }}</span>
                                                     @endif
                                                 </span>
                                             </li>
@@ -543,43 +608,45 @@
                                             ->take(6)
                                             ->values();
                                     @endphp
-                                    <div class="grimba-nobuai-insights">
+                                    <div class="grimba-insights-panel__cards" data-mode="nobuai">
                                         @foreach($__parsedInsights as $insight)
                                             @php
                                                 $__meta = $__insightMeta[$insight['label']] ?? ['icon' => '•', 'tone' => 'var(--gn-ink,#1a1713)'];
                                             @endphp
-                                            <div class="grimba-nobuai-insight">
-                                                <span class="grimba-nobuai-insight__dot" style="--insight-tone: {{ $__meta['tone'] }};">{{ $__meta['icon'] }}</span>
-                                                <span class="grimba-nobuai-insight__copy">
-                                                    <strong>{{ __($insight['label']) }}</strong>
-                                                    {{ $insight['body'] }}
-                                                </span>
-                                            </div>
+                                            <article class="grimba-insights-panel__card" style="--insight-tone: {{ $__meta['tone'] }};">
+                                                <span class="grimba-insights-panel__card-icon" aria-hidden="true">{{ $__meta['icon'] }}</span>
+                                                <div class="grimba-insights-panel__card-body">
+                                                    <span class="grimba-insights-panel__card-label">{{ __($insight['label']) }}</span>
+                                                    <p class="grimba-insights-panel__card-text">{{ $insight['body'] }}</p>
+                                                </div>
+                                            </article>
                                         @endforeach
                                     </div>
                                 @elseif(count($__gnSummaryItems) === 1)
-                                    <p class="m-0" style="font-size:15.5px; line-height:1.6; color:var(--gn-ink,#1a1713);">
+                                    <p class="grimba-insights-panel__single">
                                         {{ is_array($__gnSummaryItems[0]) ? $__gnSummaryItems[0]['text'] : $__gnSummaryItems[0] }}
                                     </p>
                                 @else
-                                    <ul class="m-0 ps-3" style="font-size:15.5px; line-height:1.6; color:var(--gn-ink,#1a1713);">
+                                    <ul class="grimba-insights-panel__list" data-mode="fallback">
                                         @foreach(array_slice($__gnSummaryItems, 0, 6) as $line)
-                                            <li style="margin-bottom:10px;">{{ is_array($line) ? $line['text'] : $line }}</li>
+                                            <li class="grimba-insights-panel__row" style="--insight-tone: rgba(26,23,19,0.45);">
+                                                <span class="grimba-insights-panel__row-dot" aria-hidden="true"></span>
+                                                <span class="grimba-insights-panel__row-body">{{ is_array($line) ? $line['text'] : $line }}</span>
+                                            </li>
                                         @endforeach
                                     </ul>
                                 @endif
 
-                                @if($__badgeFootnote)
-                                    <p class="small opacity-55 mt-2 mb-0">{{ $__badgeFootnote }}</p>
-                                @endif
-
-                                <div class="d-flex justify-content-end mt-3">
+                                <footer class="grimba-insights-panel__foot">
+                                    @if($__badgeFootnote)
+                                        <span class="grimba-insights-panel__foot-note">{{ $__badgeFootnote }}</span>
+                                    @endif
                                     <a href="{{ url('/contact') }}?topic=insight&post={{ $post->id }}"
-                                       style="font-size:12px; color:var(--gn-ink,#1a1713); opacity:0.55; text-decoration:underline;">
-                                        {{ __('Ce résumé vous semble incorrect ?') }}
+                                       class="grimba-insights-panel__foot-link">
+                                        {{ __('Signaler une imprécision') }}
                                     </a>
-                                </div>
-                            </details>
+                                </footer>
+                            </section>
 
                             {{-- S306 — Bias Comparison Summary (3-column framing).
                                   Both extractive (already bias-attributed) and
@@ -616,10 +683,211 @@
                         </div>
 
                         <style>
-                            .grimba-insights__summary::-webkit-details-marker { display: none; }
-                            .grimba-insights[open] .grimba-insights__summary span:last-child::before {
-                                content: '▴ ';
+                            .grimba-insights-panel {
+                                position: relative;
+                                margin-top: 18px;
+                                padding: 18px 18px 16px;
+                                border-radius: 20px;
+                                background:
+                                    radial-gradient(120% 60% at 0% 0%, rgba(26, 23, 19, .04), transparent 65%),
+                                    linear-gradient(180deg, rgba(255, 255, 255, .68), rgba(255, 255, 255, .48));
+                                border: 1px solid rgba(26, 23, 19, .10);
+                                box-shadow: 0 18px 44px rgba(26, 23, 19, .06);
                             }
+                            .grimba-insights-panel__head {
+                                display: flex;
+                                align-items: baseline;
+                                gap: 10px;
+                                flex-wrap: wrap;
+                                margin-bottom: 14px;
+                            }
+                            .grimba-insights-panel__badge {
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 6px;
+                                padding: 4px 10px;
+                                border-radius: 9999px;
+                                background: linear-gradient(135deg, #1a1713, #3a342c);
+                                color: #f6f1e8;
+                                font-family: 'Public Sans', system-ui, sans-serif;
+                                font-size: 10.5px;
+                                font-weight: 800;
+                                letter-spacing: .14em;
+                                text-transform: uppercase;
+                                box-shadow: 0 6px 18px rgba(26, 23, 19, .22);
+                            }
+                            .grimba-insights-panel__badge-dot {
+                                width: 6px;
+                                height: 6px;
+                                border-radius: 50%;
+                                background: #f6f1e8;
+                                box-shadow: 0 0 8px rgba(246, 241, 232, .8);
+                            }
+                            .grimba-insights-panel__title {
+                                margin: 0;
+                                font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
+                                font-weight: 700;
+                                font-size: 18px;
+                                line-height: 1.2;
+                                letter-spacing: -0.01em;
+                                color: var(--gn-ink, #1a1713);
+                            }
+                            .grimba-insights-panel__list {
+                                list-style: none;
+                                margin: 0;
+                                padding: 0;
+                                display: flex;
+                                flex-direction: column;
+                                gap: 10px;
+                            }
+                            .grimba-insights-panel__row {
+                                display: flex;
+                                gap: 12px;
+                                align-items: flex-start;
+                                padding: 0 0 0 4px;
+                                font-family: 'Public Sans', system-ui, sans-serif;
+                                font-size: 14.5px;
+                                line-height: 1.5;
+                                color: var(--gn-ink, #1a1713);
+                            }
+                            .grimba-insights-panel__row-dot {
+                                flex: 0 0 8px;
+                                width: 8px;
+                                height: 8px;
+                                margin-top: 8px;
+                                border-radius: 50%;
+                                background: var(--insight-tone, rgba(26, 23, 19, .45));
+                                box-shadow: 0 0 0 2px rgba(255, 255, 255, .42), 0 0 10px color-mix(in srgb, var(--insight-tone, #a8a8a8) 40%, transparent);
+                            }
+                            .grimba-insights-panel__row-body {
+                                flex: 1;
+                                min-width: 0;
+                            }
+                            .grimba-insights-panel__row-source {
+                                opacity: .58;
+                                font-size: 12.5px;
+                                margin-left: 4px;
+                            }
+                            .grimba-insights-panel__single {
+                                margin: 0;
+                                font-family: 'Public Sans', system-ui, sans-serif;
+                                font-size: 15px;
+                                line-height: 1.55;
+                                color: var(--gn-ink, #1a1713);
+                            }
+                            .grimba-insights-panel__cards {
+                                display: grid;
+                                gap: 10px;
+                            }
+                            .grimba-insights-panel__card {
+                                display: grid;
+                                grid-template-columns: 30px minmax(0, 1fr);
+                                gap: 12px;
+                                align-items: flex-start;
+                                padding: 12px 14px;
+                                border-radius: 14px;
+                                border: 1px solid color-mix(in srgb, var(--insight-tone, #1a1713) 18%, rgba(26, 23, 19, .08));
+                                background: linear-gradient(180deg, rgba(255, 255, 255, .82), rgba(255, 255, 255, .52));
+                            }
+                            .grimba-insights-panel__card::before {
+                                content: "";
+                                position: absolute;
+                            }
+                            .grimba-insights-panel__card-icon {
+                                width: 30px;
+                                height: 30px;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                border-radius: 50%;
+                                background: color-mix(in srgb, var(--insight-tone, #1a1713) 14%, rgba(255, 255, 255, .85));
+                                color: var(--insight-tone, var(--gn-ink, #1a1713));
+                                font-family: 'Public Sans', system-ui, sans-serif;
+                                font-size: 14px;
+                                font-weight: 800;
+                                box-shadow: 0 4px 12px color-mix(in srgb, var(--insight-tone, #a8a8a8) 25%, transparent);
+                            }
+                            .grimba-insights-panel__card-body {
+                                display: flex;
+                                flex-direction: column;
+                                gap: 3px;
+                                min-width: 0;
+                            }
+                            .grimba-insights-panel__card-label {
+                                font-family: 'JetBrains Mono', ui-monospace, monospace;
+                                font-size: 10px;
+                                font-weight: 700;
+                                letter-spacing: .14em;
+                                text-transform: uppercase;
+                                color: var(--insight-tone, var(--gn-ink-muted, rgba(26, 23, 19, .6)));
+                            }
+                            .grimba-insights-panel__card-text {
+                                margin: 0;
+                                font-family: 'Public Sans', system-ui, sans-serif;
+                                font-size: 14.5px;
+                                line-height: 1.5;
+                                color: var(--gn-ink, #1a1713);
+                            }
+                            .grimba-insights-panel__foot {
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                gap: 12px;
+                                flex-wrap: wrap;
+                                margin-top: 14px;
+                                padding-top: 12px;
+                                border-top: 1px dashed rgba(26, 23, 19, .14);
+                            }
+                            .grimba-insights-panel__foot-note {
+                                font-family: 'JetBrains Mono', ui-monospace, monospace;
+                                font-size: 10.5px;
+                                font-weight: 600;
+                                letter-spacing: .04em;
+                                color: var(--gn-ink-muted, rgba(26, 23, 19, .58));
+                            }
+                            .grimba-insights-panel__foot-link {
+                                font-family: 'Public Sans', system-ui, sans-serif;
+                                font-size: 12px;
+                                font-weight: 700;
+                                color: var(--gn-ink-muted, rgba(26, 23, 19, .55));
+                                text-decoration: underline;
+                                text-decoration-thickness: 1px;
+                                text-underline-offset: 3px;
+                                transition: color .18s ease;
+                            }
+                            .grimba-insights-panel__foot-link:hover,
+                            .grimba-insights-panel__foot-link:focus-visible {
+                                color: var(--gn-ink, #1a1713);
+                            }
+
+                            [data-bs-theme="dark"] .grimba-insights-panel,
+                            body[data-theme="dark"] .grimba-insights-panel {
+                                background:
+                                    radial-gradient(120% 60% at 0% 0%, rgba(255, 250, 240, .06), transparent 65%),
+                                    linear-gradient(180deg, rgba(28, 24, 17, .82), rgba(28, 24, 17, .58));
+                                border-color: rgba(255, 250, 240, .12);
+                            }
+                            [data-bs-theme="dark"] .grimba-insights-panel__title,
+                            body[data-theme="dark"] .grimba-insights-panel__title,
+                            [data-bs-theme="dark"] .grimba-insights-panel__row,
+                            body[data-theme="dark"] .grimba-insights-panel__row,
+                            [data-bs-theme="dark"] .grimba-insights-panel__card-text,
+                            body[data-theme="dark"] .grimba-insights-panel__card-text,
+                            [data-bs-theme="dark"] .grimba-insights-panel__single,
+                            body[data-theme="dark"] .grimba-insights-panel__single {
+                                color: #fffaf0;
+                            }
+                            [data-bs-theme="dark"] .grimba-insights-panel__card,
+                            body[data-theme="dark"] .grimba-insights-panel__card {
+                                background: linear-gradient(180deg, rgba(255, 250, 240, .04), rgba(255, 250, 240, .02));
+                            }
+                            [data-bs-theme="dark"] .grimba-insights-panel__foot,
+                            body[data-theme="dark"] .grimba-insights-panel__foot {
+                                border-color: rgba(255, 250, 240, .18);
+                            }
+
+                            /* Legacy alias block — preserved as a no-op until the
+                               next deploy clears old cached views. */
                             .grimba-nobuai-insights {
                                 display: grid;
                                 gap: 10px;
