@@ -82,9 +82,9 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $maxCalls  = max(1, min(6, (int) $request->input('max_calls_per_run', 2)));
             $pageSize  = max(1, min(10, (int) $request->input('page_size', 10)));
             $queries   = trim((string) $request->input('queries', ''));
-            $languages = $__csvClamp((string) $request->input('languages', 'fr,en'), 5);
-            $countries = $__csvClamp((string) $request->input('countries', 'fr,sn,ci,ml,cm'), 5);
-            $categories = $__csvClamp((string) $request->input('categories', 'top,politics,world'), 8);
+            $languages = __csvClamp((string) $request->input('languages', 'fr,en'), 5);
+            $countries = __csvClamp((string) $request->input('countries', 'fr,sn,ci,ml,cm'), 5);
+            $categories = __csvClamp((string) $request->input('categories', 'top,politics,world'), 8);
             $timeout   = max(2, min(60, (int) $request->input('timeout', 12)));
             $connectTimeout = max(1, min(30, (int) $request->input('connect_timeout', 5)));
             $dedicatedCron = $request->boolean('dedicated_cron');

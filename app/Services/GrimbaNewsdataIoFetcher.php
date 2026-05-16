@@ -217,9 +217,49 @@ class GrimbaNewsdataIoFetcher
             'source_name' => $sourceName,
             'source_domain' => $sourceDomain,
             'source_country' => is_string($country) ? strtoupper($country) : null,
-            'language' => is_string($language) ? strtolower($language) : null,
+            'language' => $this->normaliseLanguage($language),
             'published_at' => $this->pipeline->toIso(data_get($article, 'pubDate')),
         ];
+    }
+
+    /**
+     * newsdata.io returns full language names ("english") on some endpoints
+     * and ISO-2 codes ("en") on others. Normalise to ISO-2 so downstream
+     * filters (posts.language reader-facing) behave consistently.
+     */
+    private function normaliseLanguage(mixed $language): ?string
+    {
+        $raw = strtolower(trim((string) $language));
+        if ($raw === '') {
+            return null;
+        }
+
+        $map = [
+            'english'     => 'en',
+            'french'      => 'fr',
+            'français'    => 'fr',
+            'francais'    => 'fr',
+            'spanish'     => 'es',
+            'español'     => 'es',
+            'portuguese'  => 'pt',
+            'arabic'      => 'ar',
+            'german'      => 'de',
+            'italian'     => 'it',
+            'russian'     => 'ru',
+            'mandarin'    => 'zh',
+            'chinese'     => 'zh',
+            'japanese'    => 'ja',
+            'korean'      => 'ko',
+            'turkish'     => 'tr',
+            'dutch'       => 'nl',
+            'swahili'     => 'sw',
+            'yoruba'      => 'yo',
+            'hausa'       => 'ha',
+            'amharic'     => 'am',
+            'wolof'       => 'wo',
+        ];
+
+        return $map[$raw] ?? (preg_match('/^[a-z]{2,5}$/', $raw) ? $raw : null);
     }
 
     public function isConfigured(): bool

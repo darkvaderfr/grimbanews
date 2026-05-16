@@ -671,7 +671,14 @@
 
         @if($originBuckets->isNotEmpty())
             <section class="grimba-story-distribution__origin" aria-label="{{ __('Origine des sources classées') }}">
-                <span class="grimba-story-distribution__label">{{ __('Origines éditoriales') }}</span>
+                <span class="grimba-story-distribution__label d-inline-flex align-items-center gap-1">
+                    {{ __('Origines éditoriales') }}
+                    @include(Theme::getThemeNamespace('partials.info-pill'), [
+                        'size' => 'sm',
+                        'tone' => 'soft',
+                        'body' => __("D'où viennent géographiquement les sources qui couvrent ce dossier. Aide à repérer si l'histoire est rapportée surtout en local, en région, ou internationalement."),
+                    ])
+                </span>
                 <div class="grimba-story-distribution__origin-bar">
                     @foreach($originBuckets as $bucket)
                         @php

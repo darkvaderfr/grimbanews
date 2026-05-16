@@ -154,8 +154,31 @@ class GrimbaNewsdataIoFetcherTest extends TestCase
         $this->assertSame('https://reuters.com/world/test-article', $row['url']);
         $this->assertSame('Reuters', $row['source_name']);
         $this->assertSame('US', $row['source_country']);
-        $this->assertSame('english', $row['language']);
+        // Zen audit 2026-05-16: normalise full-name "english" → ISO-2 "en"
+        // so downstream posts.language filters get a consistent shape.
+        $this->assertSame('en', $row['language']);
         $this->assertNotNull($row['published_at']);
+    }
+
+    public function test_language_normalisation_handles_iso2_and_full_names(): void
+    {
+        $fetcher = app(GrimbaNewsdataIoFetcher::class);
+        $base = [
+            'article_id' => 'lang-test',
+            'title' => 'Title',
+            'link' => 'https://example.com/test',
+        ];
+
+        // ISO-2 codes pass through.
+        $this->assertSame('fr', $fetcher->normaliseArticle($base + ['language' => 'fr'])['language']);
+        // Full names map.
+        $this->assertSame('en', $fetcher->normaliseArticle($base + ['language' => 'English'])['language']);
+        $this->assertSame('fr', $fetcher->normaliseArticle($base + ['language' => 'français'])['language']);
+        $this->assertSame('es', $fetcher->normaliseArticle($base + ['language' => 'spanish'])['language']);
+        // Unknown maps to null when not matching the 2-5-char ISO pattern.
+        $this->assertNull($fetcher->normaliseArticle($base + ['language' => 'Klingon space dialect'])['language']);
+        // Missing language = null.
+        $this->assertNull($fetcher->normaliseArticle($base)['language']);
     }
 
     public function test_credit_counter_bumps_on_successful_call(): void
