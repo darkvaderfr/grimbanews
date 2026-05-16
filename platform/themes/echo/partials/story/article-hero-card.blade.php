@@ -359,22 +359,10 @@
 
         .grimba-article-card__source-card,
         .grimba-article-card__excerpt-card {
-            padding: 18px 20px;
-            margin: 18px 0;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, .68);
-            border: 1px solid rgba(26, 23, 19, .08);
-            box-shadow: 0 10px 28px rgba(26, 23, 19, .04);
-        }
-
-        /* Featured excerpt card — inherits the legacy full-article look
-           Vader called out: gradient top bar, deeper glass background,
-           Fraunces title above the body. Replaces the duplicate excerpt
-           panel further down the page. */
-        .grimba-article-card__excerpt-card--featured {
             position: relative;
             overflow: hidden;
             padding: 22px 24px;
+            margin: 18px 0;
             border-radius: 16px;
             background:
                 linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(246, 241, 232, 0.56)),
@@ -384,7 +372,12 @@
                 inset 0 0 0 1px rgba(255, 255, 255, 0.18),
                 0 20px 52px rgba(26, 23, 19, 0.075);
         }
-        .grimba-article-card__excerpt-card--featured::before {
+
+        /* Gradient top ribbon — editorial signature shared with the
+           legacy full-article card. Vader 2026-05-16: every excerpt-
+           class card on the site carries this. */
+        .grimba-article-card__source-card::before,
+        .grimba-article-card__excerpt-card::before {
             content: "";
             position: absolute;
             top: 0;
@@ -394,10 +387,12 @@
             pointer-events: none;
             background: linear-gradient(90deg, transparent, rgba(192, 57, 43, 0.52), rgba(59, 130, 246, 0.42), transparent);
         }
-        .grimba-article-card__excerpt-card--featured > * {
+        .grimba-article-card__source-card > *,
+        .grimba-article-card__excerpt-card > * {
             position: relative;
             z-index: 1;
         }
+
         .grimba-article-card__excerpt-title {
             margin: 6px 0 0;
             font-family: 'Fraunces', Georgia, serif;
