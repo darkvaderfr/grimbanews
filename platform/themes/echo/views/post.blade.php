@@ -226,38 +226,24 @@
         <div class="row gx-4 gx-lg-5">
             <div class="col-lg-8 col-12 mb-4">
 
-                @php
-                    // Best hero image for the story: current post's image
-                    // first, else any cluster post that has one, else the
-                    // editorial placeholder route. The cards below each
-                    // carry their own image too.
-                    $__gnHero = $post->image ?: $__gnClusterPosts->pluck('image')->filter()->first();
-                    // S329 — pre-resolve and skip RvMedia's 1920×1080
-                    // generic placeholder so SSR ships our editorial
-                    // /og/placeholder/{id}.svg instead of a dimension box.
-                    $__gnHeroResolved = $__gnHero ? \Botble\Media\Facades\RvMedia::getImageUrl($__gnHero) : null;
-                    $__gnHeroDefault  = \Botble\Media\Facades\RvMedia::getDefaultImage();
-                    $__gnHeroUrl = ($__gnHeroResolved && $__gnHeroResolved !== $__gnHeroDefault)
-                        ? $__gnHeroResolved
-                        : route('public.og.placeholder', $post->id);
-                @endphp
+                {{-- Canonical article hero card per Vader 2026-05-16
+                     screenshot: hero image + meta line + pill row +
+                     Fraunces title + SOURCE card + AVAILABLE EXCERPT
+                     card. Replaces the legacy grimba-story-hero +
+                     grimba-story-page__header pair. --}}
+                @include(Theme::getThemeNamespace('partials.story.article-hero-card'), [
+                    'post' => $post,
+                    'sourceMeta' => $__gnSourceMeta,
+                ])
 
-                <div class="grimba-story-hero glass-panel p-0 mb-3" style="overflow:hidden;">
-                    <div class="ratio ratio-21x9" style="background:rgba(0,0,0,0.04);">
-                        <img src="{{ $__gnHeroUrl }}"
-                             alt="{{ $__gnTitle }}"
-                             loading="eager"
-                             decoding="sync"
-                             width="1200"
-                             height="630"
-                             data-grimba-post-id="{{ $post->id }}"
-                             style="object-fit:cover; width:100%; height:100%;">
-                    </div>
-                </div>
-
-                {{-- S170 — Hero block:
-                     kicker → title → bias filter tabs + source analysis
-                     button → bullet summary with NobuAI insights toggle. --}}
+                {{-- Cluster-side companion to the canonical article hero
+                     card above. The hero card carries the title + meta +
+                     SOURCE card + AVAILABLE EXCERPT card. The block
+                     below adds the cluster-only signals: coverage-gap
+                     warning when only one side covers the story, the
+                     action bar with source-count stat + Analyse des
+                     sources jump + Save pill, and the NobuAI insights
+                     synthesis. --}}
                 @php
                     $__gnLatest = $__gnClusterPosts->max('updated_at');
                     $__gnByBias = ['left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0];
@@ -268,35 +254,6 @@
                     }
                 @endphp
                 <header class="grimba-story-page__header glass-panel p-3 p-md-4 mb-3">
-                    <div class="grimba-story-page__meta d-flex align-items-center gap-2 flex-wrap mb-2 small">
-                        <span class="grimba-methodology__kicker">{{ __('Histoire') }}</span>
-                        @if($post->source_name)
-                            <span class="opacity-50">·</span>
-                            <span class="opacity-75">{{ __("Lu d'abord chez :source", ['source' => $post->source_name]) }}</span>
-                        @endif
-                        <span class="opacity-50">·</span>
-                        <span class="opacity-75">
-                            {{ trans_choice(':count couverture|:count couvertures', $__gnClusterPosts->count(), ['count' => $__gnClusterPosts->count()]) }}
-                        </span>
-                        @if($__gnLatest)
-                            <span class="opacity-50">·</span>
-                            <span class="opacity-75">{{ __('Mis à jour :time', ['time' => $__gnLatest->locale($__gnTarget)->diffForHumans()]) }}</span>
-                        @endif
-                        {{-- S179 — reading time chip on the story hero meta line --}}
-                        {!! Theme::partial('reading-time', ['post' => $post]) !!}
-                    </div>
-
-                    <h1 class="grimba-methodology__title grimba-story-page__title m-0 mb-3">
-                        {{ $__gnTitle }}
-                    </h1>
-                    @if($__gnHasTr)
-                        <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
-                            {!! Theme::partial('nobuai-chip', ['size' => 'md']) !!}
-                            <span class="small opacity-65">
-                                {{ __('Article original en :source affiché en :target.', ['source' => strtoupper((string) $post->original_language), 'target' => $__gnTargetLabel]) }}
-                            </span>
-                        </div>
-                    @endif
 
                     {{-- S181 — derived coverage-gap callout. When a cluster
                          has 2+ sources but only one of L/C/R is represented,

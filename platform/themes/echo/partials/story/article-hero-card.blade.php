@@ -1,0 +1,546 @@
+@php
+    /**
+     * Article Hero Card — canonical layout per Vader 2026-05-16
+     * screenshot. Every article / dossier page leads with the same
+     * shape:
+     *   1. Hero image (21:9)
+     *   2. Meta line: ARTICLE · Read at <source> · <time> · ≈<min>
+     *   3. Pill row: category + region + bias
+     *   4. Big Fraunces title
+     *   5. SOURCE card (publisher, country/lang, bias, credibility bar)
+     *   6. AVAILABLE EXCERPT card (word count, body, original-source link)
+     *
+     * @var \Botble\Blog\Models\Post $post
+     * @var \Illuminate\Support\Collection|null $sourceMeta
+     */
+
+    use App\Support\GrimbaTranslationPresenter as GnTr;
+    use Illuminate\Support\Str;
+
+    GnTr::warm($post);
+
+    $__title = GnTr::title($post);
+    $__desc = trim(strip_tags((string) GnTr::description($post)));
+    $__publishedAt = GnTr::publishedAt($post);
+    $__isTranslated = GnTr::isTranslated($post);
+
+    // Hero image — same fallback chain as the legacy story hero.
+    $__heroSrc = $post->image ?? null;
+    $__heroResolved = $__heroSrc ? \Botble\Media\Facades\RvMedia::getImageUrl($__heroSrc) : null;
+    $__heroDefault = \Botble\Media\Facades\RvMedia::getDefaultImage();
+    $__heroUrl = ($__heroResolved && $__heroResolved !== $__heroDefault)
+        ? $__heroResolved
+        : route('public.og.placeholder', $post->id);
+
+    // Source resolution from news_sources for credibility + ownership.
+    $__sourceMetaRow = null;
+    if (! empty($post->source_id)) {
+        if (isset($sourceMeta) && $sourceMeta instanceof \Illuminate\Support\Collection && isset($sourceMeta[$post->source_id])) {
+            $__sourceMetaRow = $sourceMeta[$post->source_id];
+        } else {
+            $__sourceMetaRow = \Illuminate\Support\Facades\DB::table('news_sources')
+                ->where('id', $post->source_id)
+                ->first(['id', 'name', 'website', 'country', 'language', 'credibility_score', 'bias_score', 'ownership_type', 'logo_url']);
+        }
+    }
+
+    $__sourceName = $post->source_name
+        ?: ($__sourceMetaRow->name ?? __('Source'));
+    $__sourceCountry = strtoupper((string) ($__sourceMetaRow->country ?? $post->country ?? ''));
+    $__sourceLang = strtoupper((string) ($__sourceMetaRow->language ?? $post->original_language ?? ''));
+    $__credibility = (int) ($__sourceMetaRow->credibility_score ?? $post->credibility_score ?? 0);
+    $__ownership = $__sourceMetaRow->ownership_type ?? $post->ownership_type ?? null;
+
+    // Bias chip data.
+    $__biasKey = $post->bias_rating ?? 'unknown';
+    $__biasMeta = [
+        'left' => ['label' => __('Gauche'), 'color' => '#3b82f6'],
+        'center' => ['label' => __('Centre'), 'color' => '#a8a8a8'],
+        'right' => ['label' => __('Droite'), 'color' => '#e84c3d'],
+    ];
+    $__biasLabel = $__biasMeta[$__biasKey]['label'] ?? __('Non classé');
+    $__biasColor = $__biasMeta[$__biasKey]['color'] ?? '#6b6459';
+
+    // Region pill — pull from the post's editorial_region tag.
+    $__region = $post->editorial_region ?? null;
+    $__regionLabel = $__region ? \App\Ground\Regions::label($__region) : null;
+
+    // Reading-time estimate (200 wpm).
+    $__readWords = max(1, str_word_count(strip_tags((string) ($post->content ?? $post->description ?? ''))));
+    $__readMin = max(1, (int) ceil($__readWords / 200));
+
+    // Excerpt + word count for the "AVAILABLE EXCERPT" card.
+    $__excerpt = $__desc !== ''
+        ? $__desc
+        : trim(strip_tags((string) ($post->content ?? '')));
+    $__excerptWords = $__excerpt !== '' ? str_word_count($__excerpt) : 0;
+    $__excerptDisplay = Str::limit($__excerpt, 400);
+
+    // Publisher URL for "Original source →".
+    $__publisherUrl = null;
+    if (! empty($post->source_id)) {
+        $__publisherUrl = \Illuminate\Support\Facades\DB::table('rss_feed_items')
+            ->where('post_id', $post->id)
+            ->value('link')
+            ?? \Illuminate\Support\Facades\DB::table('newsapi_items')
+                ->where('post_id', $post->id)
+                ->value('article_url');
+        if (! $__publisherUrl && ! empty($__sourceMetaRow->website)) {
+            $__publisherUrl = $__sourceMetaRow->website;
+        }
+    }
+
+    // First-published-at relative time (e.g. "5 days ago").
+    $__readAtTime = $__publishedAt
+        ? $__publishedAt->locale(app()->getLocale())->diffForHumans()
+        : null;
+
+    // First category (skip internal review buckets).
+    $__primaryCategory = null;
+    if (method_exists($post, 'categories')) {
+        $__cats = $post->relationLoaded('categories')
+            ? $post->categories
+            : $post->categories()->limit(5)->get();
+        $__primaryCategory = $__cats
+            ->reject(fn ($c) => in_array($c->name, \App\Support\GrimbaEditorialCategories::internalReviewNames(), true))
+            ->reject(fn ($c) => in_array($c->name, \App\Support\GrimbaEditorialCategories::editionNames(), true))
+            ->first();
+    }
+@endphp
+
+<section class="grimba-article-card" aria-labelledby="grimba-article-card-title">
+    @if($__heroUrl)
+        <figure class="grimba-article-card__hero">
+            <img src="{{ $__heroUrl }}"
+                 alt="{{ $__title }}"
+                 loading="eager"
+                 decoding="sync"
+                 width="1200"
+                 height="630"
+                 data-grimba-post-id="{{ $post->id }}">
+        </figure>
+    @endif
+
+    <div class="grimba-article-card__meta">
+        <span class="grimba-article-card__meta-kicker">{{ __('ARTICLE') }}</span>
+        @if($__sourceName)
+            <span class="grimba-article-card__sep" aria-hidden="true">·</span>
+            <span class="grimba-article-card__meta-read">{{ __('Lu chez :source', ['source' => $__sourceName]) }}</span>
+        @endif
+        @if($__readAtTime)
+            <span class="grimba-article-card__sep" aria-hidden="true">·</span>
+            <span class="grimba-article-card__meta-time">{{ $__readAtTime }}</span>
+        @endif
+        <span class="grimba-article-card__readmin" title="{{ trans_choice(':count minute de lecture estimée|:count minutes de lecture estimées', $__readMin, ['count' => $__readMin]) }}">
+            <span aria-hidden="true">⏱</span>
+            <span>≈{{ $__readMin }} min</span>
+        </span>
+    </div>
+
+    <div class="grimba-article-card__pills">
+        @if($__primaryCategory)
+            <a href="{{ $__primaryCategory->url }}" class="grimba-article-card__pill grimba-article-card__pill--category">
+                {{ __($__primaryCategory->name) }}
+            </a>
+        @endif
+        @if($__regionLabel)
+            <span class="grimba-article-card__pill grimba-article-card__pill--region">
+                {{ __($__regionLabel) }}
+            </span>
+        @endif
+        @if(in_array($__biasKey, ['left', 'center', 'right'], true))
+            <span class="grimba-article-card__pill grimba-article-card__pill--bias" style="--pill-color: {{ $__biasColor }};">
+                <span class="grimba-article-card__pill-dot" aria-hidden="true">—</span>
+                {{ $__biasLabel }}
+            </span>
+        @endif
+    </div>
+
+    <h1 id="grimba-article-card-title" class="grimba-article-card__title">
+        {{ $__title }}
+    </h1>
+
+    @if($__isTranslated)
+        <div class="grimba-article-card__translated">
+            {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+        </div>
+    @endif
+
+    <article class="grimba-article-card__source-card">
+        <header class="grimba-article-card__source-head">
+            <div class="grimba-article-card__source-id">
+                <span class="grimba-article-card__source-label">{{ __('Source') }}</span>
+                <strong class="grimba-article-card__source-name">{{ $__sourceName }}</strong>
+                @if($__sourceCountry || $__sourceLang)
+                    <span class="grimba-article-card__source-tag">
+                        @if($__sourceCountry){{ $__sourceCountry }}@endif
+                        @if($__sourceCountry && $__sourceLang) · @endif
+                        @if($__sourceLang){{ $__sourceLang }}@endif
+                    </span>
+                @endif
+            </div>
+            <div class="grimba-article-card__source-chips">
+                @if(in_array($__biasKey, ['left', 'center', 'right'], true))
+                    <span class="grimba-article-card__chip" style="--chip-color: {{ $__biasColor }};">
+                        <span aria-hidden="true">—</span> {{ $__biasLabel }}
+                    </span>
+                @endif
+                @if($__ownership)
+                    <span class="grimba-article-card__chip grimba-article-card__chip--ownership">
+                        {{ __(ucfirst((string) $__ownership)) }}
+                    </span>
+                @endif
+            </div>
+        </header>
+
+        @if($__credibility > 0)
+            <div class="grimba-article-card__credibility">
+                <div class="grimba-article-card__credibility-row">
+                    <span class="grimba-article-card__credibility-label">{{ __('Crédibilité de la source') }}</span>
+                    <strong class="grimba-article-card__credibility-value">{{ $__credibility }}/100</strong>
+                </div>
+                <div class="grimba-article-card__credibility-bar" aria-hidden="true">
+                    <span style="width: {{ max(0, min(100, $__credibility)) }}%;"></span>
+                </div>
+            </div>
+        @endif
+    </article>
+
+    @if($__excerptDisplay !== '')
+        <article class="grimba-article-card__excerpt-card">
+            <header class="grimba-article-card__excerpt-head">
+                <span class="grimba-article-card__source-label">{{ __('Extrait disponible') }}</span>
+                <span class="grimba-article-card__excerpt-count">{{ $__excerptWords }} {{ __('mots') }}</span>
+            </header>
+            <p class="grimba-article-card__excerpt-body">{{ $__excerptDisplay }}</p>
+            @if($__publisherUrl)
+                <footer class="grimba-article-card__excerpt-foot">
+                    <a href="{{ $__publisherUrl }}"
+                       class="grimba-article-card__excerpt-link"
+                       target="_blank"
+                       rel="noopener external">
+                        {{ __('Source originale') }} : <strong>{{ $__sourceName }}</strong> <span aria-hidden="true">↗</span>
+                    </a>
+                </footer>
+            @endif
+        </article>
+    @endif
+</section>
+
+@once
+    <style>
+        .grimba-article-card {
+            margin-bottom: 24px;
+            color: var(--gn-ink, #1a1713);
+        }
+
+        .grimba-article-card__hero {
+            margin: 0 0 16px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #14110d;
+            aspect-ratio: 21 / 9;
+        }
+        .grimba-article-card__hero img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .grimba-article-card__meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--gn-ink-muted, rgba(26, 23, 19, .58));
+        }
+        .grimba-article-card__meta-kicker {
+            color: var(--gn-ink, #1a1713);
+        }
+        .grimba-article-card__sep {
+            opacity: .5;
+        }
+        .grimba-article-card__meta-read,
+        .grimba-article-card__meta-time {
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-size: 12px;
+            text-transform: none;
+            letter-spacing: .01em;
+            font-weight: 600;
+        }
+        .grimba-article-card__readmin {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(26, 23, 19, .06);
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: .02em;
+        }
+
+        .grimba-article-card__pills {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .grimba-article-card__pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(26, 23, 19, .06);
+            border: 1px solid rgba(26, 23, 19, .10);
+            color: var(--gn-ink, #1a1713);
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: .01em;
+        }
+        .grimba-article-card__pill:hover,
+        .grimba-article-card__pill:focus-visible {
+            background: rgba(26, 23, 19, .10);
+            color: var(--gn-ink, #1a1713);
+            text-decoration: none;
+        }
+        .grimba-article-card__pill--category {
+            background: rgba(255, 245, 235, .8);
+            border-color: rgba(192, 57, 43, .22);
+            color: #c0392b;
+        }
+        .grimba-article-card__pill--region {
+            background: rgba(247, 244, 235, .9);
+            border-color: rgba(26, 23, 19, .12);
+            font-weight: 600;
+        }
+        .grimba-article-card__pill--bias {
+            background: rgba(26, 23, 19, .04);
+            color: var(--pill-color, var(--gn-ink, #1a1713));
+            border-color: color-mix(in srgb, var(--pill-color, #a8a8a8) 22%, rgba(26, 23, 19, .10));
+        }
+        .grimba-article-card__pill-dot {
+            opacity: .7;
+            font-weight: 800;
+        }
+
+        .grimba-article-card__title {
+            margin: 0 0 12px;
+            font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
+            font-weight: 800;
+            font-size: clamp(28px, 4.4vw, 48px);
+            line-height: 1.05;
+            letter-spacing: -0.025em;
+            color: var(--gn-ink, #1a1713);
+        }
+
+        .grimba-article-card__translated {
+            margin-bottom: 12px;
+        }
+
+        .grimba-article-card__source-card,
+        .grimba-article-card__excerpt-card {
+            padding: 18px 20px;
+            margin: 18px 0;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, .68);
+            border: 1px solid rgba(26, 23, 19, .08);
+            box-shadow: 0 10px 28px rgba(26, 23, 19, .04);
+        }
+
+        .grimba-article-card__source-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .grimba-article-card__source-id {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+        .grimba-article-card__source-label {
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--gn-ink-muted, rgba(26, 23, 19, .56));
+        }
+        .grimba-article-card__source-name {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            color: var(--gn-ink, #1a1713);
+        }
+        .grimba-article-card__source-tag {
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .12em;
+            color: var(--gn-ink-muted, rgba(26, 23, 19, .58));
+            text-transform: uppercase;
+        }
+        .grimba-article-card__source-chips {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .grimba-article-card__chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(26, 23, 19, .04);
+            border: 1px solid color-mix(in srgb, var(--chip-color, #a8a8a8) 22%, rgba(26, 23, 19, .10));
+            color: var(--chip-color, var(--gn-ink, #1a1713));
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .grimba-article-card__chip--ownership {
+            background: rgba(255, 252, 245, .9);
+            color: var(--gn-ink, #1a1713);
+            border-color: rgba(26, 23, 19, .10);
+        }
+
+        .grimba-article-card__credibility {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px dashed rgba(26, 23, 19, .12);
+        }
+        .grimba-article-card__credibility-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .grimba-article-card__credibility-label {
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--gn-ink-muted, rgba(26, 23, 19, .58));
+        }
+        .grimba-article-card__credibility-value {
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 800;
+            font-size: 15px;
+            color: var(--gn-ink, #1a1713);
+        }
+        .grimba-article-card__credibility-bar {
+            position: relative;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(26, 23, 19, .08);
+            overflow: hidden;
+        }
+        .grimba-article-card__credibility-bar > span {
+            display: block;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #16a34a, #15803d);
+        }
+
+        .grimba-article-card__excerpt-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+        }
+        .grimba-article-card__excerpt-count {
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: rgba(26, 23, 19, .05);
+            color: var(--gn-ink-muted, rgba(26, 23, 19, .56));
+        }
+        .grimba-article-card__excerpt-body {
+            margin: 0 0 12px;
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.6;
+            color: var(--gn-ink, #1a1713);
+        }
+        .grimba-article-card__excerpt-foot {
+            text-align: center;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(26, 23, 19, .12);
+        }
+        .grimba-article-card__excerpt-link {
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gn-ink-muted, rgba(26, 23, 19, .65));
+            text-decoration: none;
+        }
+        .grimba-article-card__excerpt-link:hover,
+        .grimba-article-card__excerpt-link:focus-visible {
+            color: var(--gn-ink, #1a1713);
+        }
+        .grimba-article-card__excerpt-link strong {
+            color: var(--gn-ink, #1a1713);
+        }
+
+        [data-bs-theme="dark"] .grimba-article-card__title,
+        body[data-theme="dark"] .grimba-article-card__title,
+        [data-bs-theme="dark"] .grimba-article-card__source-name,
+        body[data-theme="dark"] .grimba-article-card__source-name,
+        [data-bs-theme="dark"] .grimba-article-card__excerpt-body,
+        body[data-theme="dark"] .grimba-article-card__excerpt-body,
+        [data-bs-theme="dark"] .grimba-article-card__credibility-value,
+        body[data-theme="dark"] .grimba-article-card__credibility-value {
+            color: #fffaf0;
+        }
+        [data-bs-theme="dark"] .grimba-article-card__source-card,
+        body[data-theme="dark"] .grimba-article-card__source-card,
+        [data-bs-theme="dark"] .grimba-article-card__excerpt-card,
+        body[data-theme="dark"] .grimba-article-card__excerpt-card {
+            background: rgba(28, 24, 17, .62);
+            border-color: rgba(255, 250, 240, .12);
+        }
+        [data-bs-theme="dark"] .grimba-article-card__meta-kicker,
+        body[data-theme="dark"] .grimba-article-card__meta-kicker {
+            color: rgba(255, 250, 240, .92);
+        }
+        [data-bs-theme="dark"] .grimba-article-card__credibility,
+        body[data-theme="dark"] .grimba-article-card__credibility {
+            border-top-color: rgba(255, 250, 240, .14);
+        }
+        [data-bs-theme="dark"] .grimba-article-card__excerpt-foot,
+        body[data-theme="dark"] .grimba-article-card__excerpt-foot {
+            border-top-color: rgba(255, 250, 240, .14);
+        }
+
+        @media (max-width: 575.98px) {
+            .grimba-article-card__source-card,
+            .grimba-article-card__excerpt-card {
+                padding: 14px 14px;
+            }
+            .grimba-article-card__title {
+                font-size: clamp(24px, 7vw, 32px);
+            }
+        }
+    </style>
+@endonce
