@@ -687,20 +687,20 @@
                     'title' => $__gnTitle,
                 ])
 
-                @include(Theme::getThemeNamespace('partials.story.source-drilldown'), [
+                {{-- Steve-led reinvention 2026-05-16: replaces the old
+                     source-drilldown + article-list double card-grid
+                     with a single three-voices panel + slim sources
+                     table. A dossier is one story from many angles, not
+                     twelve restatements of the same headline. --}}
+                @include(Theme::getThemeNamespace('partials.story.dossier-voices'), [
                     'clusterPosts' => $__gnClusterPosts,
+                    'currentPost'  => $post,
                     'sourceMeta'   => $__gnSourceMeta,
                 ])
 
                 @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
                     'location' => 'grimba_story_mid',
                     'class' => 'grimba-ad-slot--native my-3',
-                ])
-
-                @include(Theme::getThemeNamespace('partials.story.article-list'), [
-                    'clusterPosts' => $__gnClusterPosts,
-                    'currentPost'  => $post,
-                    'sourceMeta'   => $__gnSourceMeta,
                 ])
             </div>
 
@@ -727,9 +727,9 @@
                     @include(Theme::getThemeNamespace('partials.story.highlights'), [
                         'clusterPosts' => $__gnClusterPosts,
                     ])
-                    @include(Theme::getThemeNamespace('partials.story.voices'), [
-                        'clusterPosts' => $__gnClusterPosts,
-                    ])
+                    {{-- Sidebar voices partial superseded by the
+                         main-column dossier-voices panel — was
+                         showing the same per-side quotes twice. --}}
                     @include(Theme::getThemeNamespace('partials.story.similar-topics'), [
                         'post' => $post,
                     ])
