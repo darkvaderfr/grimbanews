@@ -149,6 +149,42 @@ class GrimbaHomeFeed
     }
 
     /**
+     * Latest stream — Phase D-02. Symmetric sibling to breaking().
+     * Returns the freshest N posts for the active region + locale, no
+     * exclusions, configurable count. Cached separately so home rails,
+     * /latest route, and any future surface share one result without
+     * each running its own query.
+     *
+     * @return Collection<int, Post>
+     */
+    public static function latestStream(int $count = 14): Collection
+    {
+        $count = max(1, min(60, $count));
+        $region = self::resolveRegionKey();
+        $locale = app()->getLocale();
+
+        return Cache::remember(
+            'grimba_latest_stream_v1:' . $locale . ':' . $region . ':' . $count,
+            60,
+            function () use ($count): Collection {
+                $cols = ['id','name','translated_name','translated_description','translated_to','original_language','description','content','summary_nobuai','source_name','source_id','bias_rating','published_at','created_at','image','editorial_region'];
+
+                $posts = Post::query()
+                    ->where('status', 'published')
+                    ->whereNotNull('source_name')
+                    ->with(['slugable', 'categories'])
+                    ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+                    ->limit($count)
+                    ->get($cols);
+
+                GrimbaTranslationPresenter::warm($posts);
+
+                return $posts;
+            }
+        );
+    }
+
+    /**
      * Breaking-news stream — Phase D-01 of the architect plan.
      *
      * Strict keyword match on titles within an 18h recency window

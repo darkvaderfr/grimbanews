@@ -1,6 +1,7 @@
 <?php
 
 use App\Support\GrimbaTranslationPresenter as GnTr;
+use App\Support\GrimbaAds;
 use App\Support\GrimbaPostRecency;
 use App\Support\GrimbaSavedSearches;
 use App\Support\GrimbaVault;
@@ -14,6 +15,7 @@ use Botble\Theme\Facades\Theme;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
@@ -174,6 +176,70 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         // PHP's built-in dev server which skips the router for .xml.
         Route::get('feed.xml', $feedHandler)->name('public.feed');
         Route::get('feed',     $feedHandler)->name('public.feed.alt');
+
+        Route::get('ads.txt', function () {
+            $path = public_path('ads.txt');
+            if (File::exists($path)) {
+                return response(File::get($path), 200)
+                    ->header('Content-Type', 'text/plain; charset=UTF-8')
+                    ->header('Cache-Control', 'public, max-age=3600');
+            }
+
+            $txt = GrimbaAds::adsTxt();
+            abort_if($txt === '', 404);
+
+            return response($txt . "\n", 200)
+                ->header('Content-Type', 'text/plain; charset=UTF-8')
+                ->header('Cache-Control', 'public, max-age=3600');
+        })->name('public.ads-txt');
+
+        // Phase D-03 — public /breaking landing surface. Lists every
+        // post that matched the strict breaking-news keyword pool in
+        // the active region + locale. Falls back to a clean empty
+        // state when no real breaking is firing right now.
+        Route::get('breaking', function (Request $request) {
+            $bundle = \App\Support\GrimbaHomeFeed::breaking(18);
+            $mode = $bundle['mode'] ?? 'latest';
+            $posts = $bundle['posts'] ?? collect();
+
+            SeoHelper::setTitle(__('Breaking news') . ' — GrimbaNews')
+                ->setDescription(__('Real-time breaking news from across the political spectrum.'));
+
+            Theme::breadcrumb()
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Breaking news'), url('/breaking'));
+
+            return Theme::scope('breaking', compact('mode', 'posts'))->render();
+        })->name('public.breaking');
+
+        // Phase D-02 companion — public /latest landing surface for the
+        // freshest articles per active region + locale, sorted by
+        // published_at desc.
+        Route::get('latest', function (Request $request) {
+            $posts = \App\Support\GrimbaHomeFeed::latestStream(40);
+
+            SeoHelper::setTitle(__('Latest news') . ' — GrimbaNews')
+                ->setDescription(__('The freshest editorial coverage in the selected edition.'));
+
+            Theme::breadcrumb()
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Latest news'), url('/latest'));
+
+            return Theme::scope('latest', compact('posts'))->render();
+        })->name('public.latest');
+
+        Route::get('advertise', function (Request $request) {
+            SeoHelper::setTitle(__('Advertise') . ' — GrimbaNews')
+                ->setDescription(__('Sponsor GrimbaNews coverage across source comparison, bias analysis, and daily briefings.'));
+
+            Theme::breadcrumb()
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Advertise'), url('/advertise'));
+
+            return Theme::scope('advertise', [
+                'slot' => (string) $request->query('slot', ''),
+            ])->render();
+        })->name('public.advertise');
 
         // Both variants because PHP's built-in dev server short-circuits
         // .png paths before routing kicks in; /og/post/{id} works in dev,
