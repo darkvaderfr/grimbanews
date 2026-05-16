@@ -659,6 +659,27 @@ class GrimbaHomeFeed
 
     private static function cacheKey(): string
     {
-        return 'grimba_home_feed_v1_' . app()->getLocale();
+        // Region selection lives in a cookie. Without it in the key, the
+        // first request poisons the cache for every region for the
+        // duration of the TTL — readers selecting Africa would see
+        // whoever's region landed first.
+        $region = self::resolveRegionKey();
+
+        return 'grimba_home_feed_v1_' . app()->getLocale() . '_' . $region;
+    }
+
+    private static function resolveRegionKey(): string
+    {
+        $request = request();
+        if (! $request) {
+            return 'international';
+        }
+
+        $raw = (string) $request->cookie(\App\Scopes\GrimbaRegionScope::COOKIE_NAME, 'international');
+        $migrated = \App\Ground\Regions::migrate($raw);
+
+        return in_array($migrated, ['africa', 'europe', 'americas', 'international'], true)
+            ? $migrated
+            : 'international';
     }
 }

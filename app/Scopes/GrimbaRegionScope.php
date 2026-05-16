@@ -45,25 +45,11 @@ class GrimbaRegionScope implements Scope
             return;
         }
 
-        // International — NEGATIVE filter. Match posts whose source has
-        // a country NOT in any of the three named regions, OR whose
-        // source has no country tag at all (so legitimately-cross-region
-        // outlets like Reuters-without-country don't disappear).
+        // International (default editorial view) — NO filter. Per Vader
+        // 2026-05-16: "the international shows all articles across
+        // regions". Treat it as the unfiltered global feed; named
+        // regions below are the focused cuts.
         if ($region === 'international') {
-            $excluded = Regions::otherNamedCodes();
-            $builder->where(function ($q) use ($model, $excluded): void {
-                $q->whereIn(
-                    $model->getTable() . '.source_id',
-                    function ($sub) use ($excluded): void {
-                        $sub->select('id')
-                            ->from('news_sources')
-                            ->where(function ($w) use ($excluded): void {
-                                $w->whereNull('country')
-                                  ->orWhereNotIn('country', $excluded);
-                            });
-                    }
-                )->orWhereNull($model->getTable() . '.source_id');
-            });
             return;
         }
 
