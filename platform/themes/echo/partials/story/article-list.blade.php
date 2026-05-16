@@ -496,6 +496,10 @@
                 const isActive = t.dataset.biasTab === selected;
                 t.setAttribute('aria-selected', String(isActive));
             });
+
+            // Dividers share data-bias with their bucket and are SSR'd
+            // only for non-empty buckets, so the same visibility rule
+            // works for both articles and dividers.
             items.forEach(li => {
                 const bias = li.dataset.bias;
                 const visible = selected === 'all' || bias === selected;

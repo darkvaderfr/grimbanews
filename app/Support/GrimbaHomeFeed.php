@@ -43,8 +43,38 @@ class GrimbaHomeFeed
             return self::$cached;
         }
 
+        // Cache::lock blocks a stampede when many fastcgi workers all
+        // miss the cache at once — without it, every miss runs the full
+        // 25-ish-query allocator. Fall back to a plain remember() when
+        // the configured cache driver doesn't support atomic locks
+        // (e.g. file / array in dev fixtures).
+        $key = self::cacheKey();
+        $lockSupported = method_exists(Cache::store(), 'lock');
+
+        if ($lockSupported) {
+            $lock = Cache::store()->lock($key . ':lock', 6);
+            try {
+                $lock->block(2);
+
+                return self::$cached = Cache::remember(
+                    $key,
+                    self::CACHE_TTL_SECONDS,
+                    static fn () => self::compose()
+                );
+            } catch (\Throwable) {
+                // If the lock blocks too long, fall through to a
+                // non-locked resolve rather than throwing back to the
+                // request — readers shouldn't see a 500 because the
+                // cache lock was contended.
+            } finally {
+                if (isset($lock) && method_exists($lock, 'release')) {
+                    @$lock->release();
+                }
+            }
+        }
+
         return self::$cached = Cache::remember(
-            self::cacheKey(),
+            $key,
             self::CACHE_TTL_SECONDS,
             static fn () => self::compose()
         );
@@ -335,6 +365,7 @@ class GrimbaHomeFeed
                 ->where('status', 'published')
                 ->whereIn('story_cluster_id', $balancedClusters)
                 ->whereNotIn('id', $state->shownIds() ?: [0])
+                ->with('categories')
                 ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
                 ->limit($count * 4)
                 ->get();
@@ -353,6 +384,7 @@ class GrimbaHomeFeed
             $fill = Post::query()
                 ->where('status', 'published')
                 ->whereNotIn('id', $state->shownIds() ?: [0])
+                ->with('categories')
                 ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
                 ->limit(($count - $picked->count()) * 4)
                 ->get();
@@ -376,6 +408,7 @@ class GrimbaHomeFeed
             ->where('status', 'published')
             ->where('is_blindspot', true)
             ->whereNotIn('id', $state->shownIds() ?: [0])
+            ->with('categories')
             ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
             ->limit($count * 4)
             ->get();
@@ -398,6 +431,7 @@ class GrimbaHomeFeed
         // Counter values only — does NOT consume from the shown set.
         return Post::query()
             ->where('status', 'published')
+            ->with('categories')
             ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
             ->limit($count)
             ->get();
@@ -450,6 +484,7 @@ class GrimbaHomeFeed
                 })
                 ->whereIn('story_cluster_id', $balancedClusters)
                 ->whereNotIn('id', $state->shownIds() ?: [0])
+                ->with('categories')
                 ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
                 ->limit($count * 4)
                 ->get();
@@ -468,6 +503,7 @@ class GrimbaHomeFeed
             $pad = Post::query()
                 ->where('status', 'published')
                 ->whereNotIn('id', $state->shownIds() ?: [0])
+                ->with('categories')
                 ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
                 ->limit(($count - $picked->count()) * 4)
                 ->get();
@@ -480,10 +516,6 @@ class GrimbaHomeFeed
                     $picked->push($post);
                 }
             }
-        }
-
-        if ($picked->isNotEmpty()) {
-            (new \Illuminate\Database\Eloquent\Collection($picked->all()))->loadMissing('categories');
         }
 
         return $picked;
@@ -569,6 +601,7 @@ class GrimbaHomeFeed
         $candidates = Post::query()
             ->where('status', 'published')
             ->whereNotIn('id', $state->shownIds() ?: [0])
+            ->with('categories')
             ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
             ->limit($count * 3)
             ->get();
@@ -583,20 +616,30 @@ class GrimbaHomeFeed
             }
         }
 
-        // Last-resort fill: better to show an already-shown article than
-        // to leave the below-the-fold list short. Rare in practice.
+        // Last-resort fill: keep re-checking shownIds so we never
+        // reintroduce a post the briefing/hero/allSides already
+        // claimed (Zen's concern). Source-cap is intentionally
+        // relaxed via relaxSourceCap above so the latest list can
+        // mention a publisher one extra time when the pool is thin.
         if ($picked->count() < $count) {
             $pad = Post::query()
                 ->where('status', 'published')
-                ->whereNotIn('id', $picked->pluck('id')->all() ?: [0])
+                ->whereNotIn('id', $state->shownIds() ?: [0])
+                ->with('categories')
                 ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
-                ->limit($count - $picked->count())
+                ->limit(($count - $picked->count()) * 3)
                 ->get();
 
-            $picked = $picked->concat($pad);
+            foreach ($pad as $post) {
+                if ($picked->count() >= $count) {
+                    break;
+                }
+                if ($state->take($post)) {
+                    $picked->push($post);
+                }
+            }
         }
 
-        $picked->loadMissing('categories');
         GrimbaTranslationPresenter::warm($picked);
 
         return $picked;

@@ -701,6 +701,7 @@
                                 class="grimba-story-spectrum__chip"
                                 data-grimba-spectrum-chip
                                 data-bias="{{ $chip['bias'] }}"
+                                data-bias-active="true"
                                 style="--x: {{ $chip['x'] }}%; --dot: {{ $chip['color'] }}; --delay: {{ $i * 38 }}ms;"
                                 title="{{ $chip['name'] }}{{ $chip['country'] ? ' · ' . $chip['country'] : '' }}{{ $chip['origin_label'] ? ' · ' . $chip['origin_label'] : '' }}"
                                 aria-label="{{ $chip['name'] }} — {{ $biasMeta[$chip['bias']]['label'] }}">
