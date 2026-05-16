@@ -177,6 +177,49 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('feed.xml', $feedHandler)->name('public.feed');
         Route::get('feed',     $feedHandler)->name('public.feed.alt');
 
+        // Phase D-09 — per-stream RSS feeds. /feed.breaking.xml
+        // surfaces every post that matched the strict breaking-news
+        // keyword pool in the active region + locale; /feed.latest.xml
+        // surfaces the freshest 30 articles for the active region + locale.
+        $breakingFeedHandler = function () {
+            $bundle = \App\Support\GrimbaHomeFeed::breaking(18);
+            $posts = $bundle['posts'] ?? collect();
+
+            $xml = view('theme.grimba-feed', [
+                'posts' => $posts,
+                'siteTitle' => 'GrimbaNews · Breaking',
+                'siteUrl' => url('/breaking'),
+                'siteDesc' => 'Stories flagged as breaking news in the past 18 hours, scoped to your edition and language.',
+                'feedUrl' => url('/feed.breaking.xml'),
+                'builtAt' => now()->toRssString(),
+            ])->render();
+
+            return response($xml, 200)
+                ->header('Content-Type', 'application/rss+xml; charset=UTF-8')
+                ->header('Cache-Control', 'public, max-age=45');
+        };
+        Route::get('feed.breaking.xml', $breakingFeedHandler)->name('public.feed.breaking');
+        Route::get('feed.breaking',     $breakingFeedHandler)->name('public.feed.breaking.alt');
+
+        $latestFeedHandler = function () {
+            $posts = \App\Support\GrimbaHomeFeed::latestStream(30);
+
+            $xml = view('theme.grimba-feed', [
+                'posts' => $posts,
+                'siteTitle' => 'GrimbaNews · Latest',
+                'siteUrl' => url('/latest'),
+                'siteDesc' => 'The freshest editorial coverage in your selected edition.',
+                'feedUrl' => url('/feed.latest.xml'),
+                'builtAt' => now()->toRssString(),
+            ])->render();
+
+            return response($xml, 200)
+                ->header('Content-Type', 'application/rss+xml; charset=UTF-8')
+                ->header('Cache-Control', 'public, max-age=60');
+        };
+        Route::get('feed.latest.xml', $latestFeedHandler)->name('public.feed.latest');
+        Route::get('feed.latest',     $latestFeedHandler)->name('public.feed.latest.alt');
+
         Route::get('ads.txt', function () {
             $path = public_path('ads.txt');
             if (File::exists($path)) {
