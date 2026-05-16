@@ -1803,7 +1803,7 @@ body.grimba-home img[alt=""] {
     display: flex;
     width: max-content;
     will-change: transform;
-    animation: grimbaBreakingMarquee 54s linear infinite;
+    animation: grimbaBreakingMarquee 34s linear infinite;
 }
 .grimba-breaking__track:hover {
     animation-play-state: paused;

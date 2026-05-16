@@ -4,7 +4,9 @@
     use Botble\Blog\Models\Post;
     use Illuminate\Support\Str;
 
-    $breakingWindowHours = max(1, (int) setting('grimba_breaking_window_hours', 6));
+    // Hard 18h cap on what's eligible for the breaking rail per Vader
+    // 2026-05-16. Older than 18h reads as stale on a "live" surface.
+    $breakingWindowHours = min(18, max(1, (int) setting('grimba_breaking_window_hours', 18)));
 
     // Region-scoped per Vader 2026-05-16: editorial surfaces for an
     // edition show only that edition's content. Breaking ticker is
@@ -42,7 +44,7 @@
     // problem we just fixed.
     $__breakingMode = 'real';
     $__cacheBundle = \Illuminate\Support\Facades\Cache::remember(
-        'grimba_breaking_ticker_v7:' . GnTr::targetLocale() . ':' . $__breakingRegion . ':' . $breakingWindowHours,
+        'grimba_breaking_ticker_v8:' . GnTr::targetLocale() . ':' . $__breakingRegion . ':' . $breakingWindowHours,
         45,
         function () use ($breakingWindowHours, $__breakingKeywords, $__breakingRegex) {
             $cols = ['id','name','translated_name','translated_description','translated_to','original_language','description','content','summary_nobuai','source_name','source_id','bias_rating','published_at','created_at','image'];
@@ -214,41 +216,86 @@
         return false;
     };
 
-    $__summaryFor = static function ($post) use ($__firstSentence, $__looksLikeJunk): string {
-        // 1. NobuAI synthesis — already condensed by the agent. First
-        //    pick when present.
-        $nobu = trim((string) ($post->summary_nobuai ?? ''));
-        if ($nobu !== '') {
-            $sentence = $__firstSentence($nobu);
-            if ($sentence !== '' && ! $__looksLikeJunk($sentence)) {
-                return $sentence;
+    // Strip common publisher noise from a headline so the ticker reads
+    // as a clean editorial sentence rather than a raw RSS title.
+    // Removes: leading "Breaking news:", "Live updates:", "Just in:",
+    // trailing publisher dash-suffix " - Yahoo Sports" / "- BBC",
+    // trailing ellipses + truncation artifacts, "[Podcasts]"-style
+    // section tags, "Replay :" prefixes.
+    $__cleanTitle = static function (string $title): string {
+        $t = trim($title);
+
+        // [Podcasts]/[Replay]/[Vidéo] section tag prefix.
+        $t = preg_replace('/^\\[[^\\]]+\\]\\s*/u', '', $t);
+
+        // Prefix: "Breaking news:" / "Live updates:" / "En direct:" etc.
+        $t = preg_replace('/^(breaking news|live updates|just in|en direct|flash info|alerte info|dernière minute|replay)\\s*[:\\-–—]\\s*/iu', '', $t);
+
+        // Mid-string "<context> breaking news: <real story>" → keep <real story>.
+        // Publisher SEO often prepends "<topic> breaking news:" / "<topic>
+        // live updates:" / "<event> news live:" to a headline; the meat
+        // is after the colon. Apply only when the marker is the LAST
+        // colon in the prefix (so a real "X: y, z" headline isn't gutted).
+        if (preg_match('/^(.*?\\b(?:breaking news|live updates|news live|in pictures)\\s*:\\s*)(.+)$/iu', $t, $m)) {
+            $rest = trim($m[2]);
+            if (mb_strlen($rest) >= 40) {
+                $t = $rest;
             }
         }
 
-        // 2. Title — guaranteed editorial sentence in the active locale.
-        //    Cleaner than raw scraped descriptions for the launch while
-        //    NobuAI summaries fill in.
-        $title = trim((string) GnTr::title($post));
+        // Suffix: trailing publisher signature ("- Yahoo Sports" etc.).
+        $t = preg_replace('/\\s*[\\-–—]\\s*(yahoo sports|bbc news|cnn|reuters|associated press|le monde|le figaro|the guardian|nytimes|the times|times of israel|al jazeera|france 24|france 24 \\(.+?\\))\\s*$/iu', '', $t);
 
-        // 3. Use translated_description / description ONLY when they
-        //    don't look like player chrome / junk. Otherwise fall back
-        //    to the title.
+        // Trailing dangling separators + truncation artifacts.
+        $t = preg_replace('/\\s*[\\-–—]\\s*$/u', '', $t);
+        $t = preg_replace('/\\s*\\.\\.\\.\\s*$/u', '', $t);
+        $t = preg_replace('/\\s+here.?s what happened.*$/iu', '', $t);
+
+        return trim($t);
+    };
+
+    $__summaryFor = static function ($post) use ($__firstSentence, $__looksLikeJunk, $__cleanTitle): string {
+        // Pipeline: pick a candidate, clean it, take its first sentence,
+        // verify it's not chrome/junk. Cleaning runs on every candidate
+        // because scraped descriptions often start with the same
+        // publisher boilerplate the title carries.
+        $clean = static function (string $raw) use ($__firstSentence, $__looksLikeJunk, $__cleanTitle): ?string {
+            $cleaned = $__cleanTitle($raw);
+            if ($cleaned === '') return null;
+            $sentence = $__firstSentence($cleaned);
+            // Re-clean post-extraction so trailing dashes / ellipses /
+            // publisher tails introduced inside the first sentence get
+            // stripped too.
+            $sentence = $__cleanTitle($sentence);
+            if ($sentence === '' || $__looksLikeJunk($sentence)) return null;
+            return $sentence;
+        };
+
+        // 1. NobuAI synthesis — already condensed by the agent.
+        $nobu = trim((string) ($post->summary_nobuai ?? ''));
+        if ($nobu !== '') {
+            $sentence = $clean($nobu);
+            if ($sentence) return $sentence;
+        }
+
+        // 2. Cleaned title.
+        $titleSentence = $clean((string) GnTr::title($post));
+
+        // 3. Description ONLY when meaningfully longer than the cleaned
+        //    title and not junk. Cleaned the same way so leading
+        //    "X breaking news:" boilerplate is removed before comparing.
         foreach ([
             (string) GnTr::description($post),
             (string) ($post->description ?? ''),
         ] as $candidate) {
-            $candidate = trim($candidate);
-            if ($candidate === '') continue;
-            $sentence = $__firstSentence($candidate);
-            if ($sentence === '' || $__looksLikeJunk($sentence)) continue;
-            // Prefer the description only when it's meaningfully longer
-            // than the title (i.e., adds context, doesn't duplicate).
-            if (mb_strlen($sentence) > mb_strlen($title) + 24) {
-                return $sentence;
+            $sentence = $clean($candidate);
+            if (! $sentence) continue;
+            if ($titleSentence === null || mb_strlen($sentence) > mb_strlen($titleSentence) + 24) {
+                return Str::limit($sentence, 160);
             }
         }
 
-        return Str::limit($title, 140);
+        return Str::limit($titleSentence ?? trim((string) GnTr::title($post)), 160);
     };
 
     $biasDot = [
@@ -324,9 +371,6 @@
                                 <span class="grimba-breaking__source">{{ $item['source'] }}</span>
                                 <span class="grimba-breaking__sep" aria-hidden="true">—</span>
                                 <span class="grimba-breaking__title">{{ $item['summary'] }}</span>
-                                @if($item['time'] !== '')
-                                    <span class="grimba-breaking__time">{{ $item['time'] }}</span>
-                                @endif
                             </a>
                         @endforeach
                     </div>
