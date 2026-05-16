@@ -1,123 +1,15 @@
 @php
-    use App\Support\GrimbaPostRecency;
+    use App\Support\GrimbaHomeFeed;
     use App\Support\GrimbaTranslationPresenter as GnTr;
-    use Botble\Blog\Models\Post;
     use Illuminate\Support\Str;
 
-    // Hard 18h cap on what's eligible for the breaking rail per Vader
-    // 2026-05-16. Older than 18h reads as stale on a "live" surface.
+    // Phase D-01 — ticker now consumes the centralised
+    // GrimbaHomeFeed::breaking() method instead of running its own
+    // query inline. The allocator handles the keyword filter, region
+    // scope, 18h recency cap, fallback chain, and cache. The partial
+    // is a thin renderer.
     $breakingWindowHours = min(18, max(1, (int) setting('grimba_breaking_window_hours', 18)));
-
-    // Region-scoped per Vader 2026-05-16: editorial surfaces for an
-    // edition show only that edition's content. Breaking ticker is
-    // editorial. International short-circuits the scope to "no filter".
-    $__breakingRegion = \App\Ground\Regions::migrate(
-        (string) request()->cookie(\App\Scopes\GrimbaRegionScope::COOKIE_NAME, 'international')
-    );
-
-    // Real-breaking phrase set (FR + EN). Editorially-loaded markers
-    // that distinguish "we are interrupting normal coverage" from
-    // routine reporting. Single ambiguous words ("breaking", "urgent",
-    // "fire") match too liberally — "ground-breaking", "urgent
-    // refresh", "fire department announcement" are NOT breaking news.
-    // Phrases below only fire on intentional editorial usage.
-    $__breakingKeywords = [
-        'breaking news', 'breaking:', 'just in:', 'live updates',
-        'state of emergency', 'declared dead', 'evacuation order',
-        'mass casualty', 'death toll', 'massive explosion',
-        'en direct', 'dernière minute', 'flash info', 'alerte info',
-        'alerte enlèvement', "état d'urgence", 'urgent :', 'urgent –',
-        'plan blanc', 'attentat', 'sous les décombres',
-    ];
-
-    // Substring match (case-insensitive). Since the keyword set is
-    // multi-word phrases now, naive substring is precise enough — no
-    // word-boundary trickery needed, and 'ground-breaking' can't
-    // accidentally match 'breaking news'.
-    $__breakingRegex = '/(?:' .
-        implode('|', array_map(fn ($kw) => preg_quote($kw, '/'), $__breakingKeywords)) .
-        ')/iu';
-
-    // Track whether the ticker is in REAL-BREAKING mode vs LATEST-FALLBACK
-    // so the eyebrow can be honest. Vader 2026-05-16 + Echo audit:
-    // labeling normal recent posts as "Live" is exactly the firehose
-    // problem we just fixed.
-    $__breakingMode = 'real';
-    $__cacheBundle = \Illuminate\Support\Facades\Cache::remember(
-        'grimba_breaking_ticker_v8:' . GnTr::targetLocale() . ':' . $__breakingRegion . ':' . $breakingWindowHours,
-        45,
-        function () use ($breakingWindowHours, $__breakingKeywords, $__breakingRegex) {
-            $cols = ['id','name','translated_name','translated_description','translated_to','original_language','description','content','summary_nobuai','source_name','source_id','bias_rating','published_at','created_at','image'];
-
-            // 1) Strict breaking-news pass: SQL pre-filters via LIKE on
-            //    title fields only (descriptions contain subscribe-prompt
-            //    boilerplate like "Get our breaking news alerts" that
-            //    would otherwise pollute the ticker with non-breaking
-            //    coverage). PHP regex finalises the match against title
-            //    proper. Wider 24h window since breaking stories
-            //    legitimately run beyond a 6h cycle.
-            $candidatesQuery = Post::query()
-                ->where('status', 'published')
-                ->whereNotNull('source_name')
-                ->where(function ($q) use ($__breakingKeywords): void {
-                    foreach ($__breakingKeywords as $kw) {
-                        $like = '%' . $kw . '%';
-                        $q->orWhere('name', 'like', $like)
-                          ->orWhere('translated_name', 'like', $like);
-                    }
-                })
-                ->with('slugable');
-            GrimbaPostRecency::wherePublishedSince($candidatesQuery, now()->subHours(24));
-            GrimbaPostRecency::orderByPublished($candidatesQuery);
-
-            // Over-fetch since post-filter will drop false positives.
-            $candidates = $candidatesQuery->limit(40)->get($cols);
-
-            $breaking = $candidates->filter(function ($post) use ($__breakingRegex): bool {
-                $haystack = mb_strtolower(trim((string) ($post->name ?? '') . ' ' . (string) ($post->translated_name ?? '')));
-                return (bool) preg_match($__breakingRegex, $haystack);
-            })->take(14);
-
-            if ($breaking->isNotEmpty()) {
-                return ['mode' => 'real', 'posts' => $breaking->values()];
-            }
-
-            // 2) No live breaking — surface the freshest recent posts so
-            //    the rail still moves. Mode flips to 'latest' so the
-            //    eyebrow can render honestly.
-            $recentFallback = Post::query()
-                ->where('status', 'published')
-                ->whereNotNull('source_name')
-                ->with('slugable');
-            GrimbaPostRecency::wherePublishedSince($recentFallback, now()->subHours($breakingWindowHours));
-            GrimbaPostRecency::orderByPublished($recentFallback);
-
-            $recent = $recentFallback->limit(14)->get($cols);
-            if ($recent->isNotEmpty()) {
-                return ['mode' => 'latest', 'posts' => $recent];
-            }
-
-            $dailyFallback = Post::query()
-                ->where('status', 'published')
-                ->whereNotNull('source_name')
-                ->with('slugable');
-            GrimbaPostRecency::wherePublishedSince($dailyFallback, now()->subDay());
-            GrimbaPostRecency::orderByPublished($dailyFallback);
-
-            $daily = $dailyFallback->limit(14)->get($cols);
-            if ($daily->isNotEmpty()) {
-                return ['mode' => 'latest', 'posts' => $daily];
-            }
-
-            $latestQuery = Post::query()
-                ->where('status', 'published')
-                ->with('slugable');
-            GrimbaPostRecency::orderByPublished($latestQuery);
-
-            return ['mode' => 'latest', 'posts' => $latestQuery->limit(10)->get($cols)];
-        }
-    );
-
+    $__cacheBundle = GrimbaHomeFeed::breaking($breakingWindowHours);
     $__breakingMode = $__cacheBundle['mode'] ?? 'latest';
     $breakingPosts = $__cacheBundle['posts'] ?? collect();
 

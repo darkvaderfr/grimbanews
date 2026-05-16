@@ -148,6 +148,118 @@ class GrimbaHomeFeed
         return self::resolveRegionKey();
     }
 
+    /**
+     * Breaking-news stream — Phase D-01 of the architect plan.
+     *
+     * Strict keyword match on titles within an 18h recency window
+     * (Vader 2026-05-17 hard cap). Falls back to recent posts when
+     * nothing matches the breaking phrase set, so the rail still
+     * moves — the caller receives a `mode` flag to render an honest
+     * eyebrow ("En direct" vs "Dernières").
+     *
+     * Independent from the home-feed compose() pass — the ticker
+     * runs every page paint and shouldn't block on the full allocator.
+     *
+     * @return array{mode: string, posts: Collection<int, Post>}
+     */
+    public static function breaking(int $windowHours = 18): array
+    {
+        $windowHours = max(1, min(72, $windowHours));
+        $region = self::resolveRegionKey();
+        $locale = app()->getLocale();
+
+        $cacheKey = 'grimba_breaking_v1:' . $locale . ':' . $region . ':' . $windowHours;
+
+        return Cache::remember($cacheKey, 45, function () use ($windowHours): array {
+            $cols = ['id','name','translated_name','translated_description','translated_to','original_language','description','content','summary_nobuai','source_name','source_id','bias_rating','published_at','created_at','image','editorial_region'];
+
+            $keywords = self::breakingKeywords();
+            $regex = self::breakingRegex($keywords);
+
+            // Strict pass: SQL LIKE on TITLE fields only (descriptions
+            // contain subscribe-prompt boilerplate that would pollute
+            // the ticker with non-breaking coverage).
+            $candidatesQuery = Post::query()
+                ->where('status', 'published')
+                ->whereNotNull('source_name')
+                ->where(function ($q) use ($keywords): void {
+                    foreach ($keywords as $kw) {
+                        $like = '%' . $kw . '%';
+                        $q->orWhere('name', 'like', $like)
+                          ->orWhere('translated_name', 'like', $like);
+                    }
+                })
+                ->with('slugable');
+
+            GrimbaPostRecency::wherePublishedSince($candidatesQuery, now()->subHours(24));
+            GrimbaPostRecency::orderByPublished($candidatesQuery);
+
+            $candidates = $candidatesQuery->limit(40)->get($cols);
+
+            $breaking = $candidates->filter(function ($post) use ($regex): bool {
+                $haystack = mb_strtolower(trim(
+                    (string) ($post->name ?? '') . ' ' . (string) ($post->translated_name ?? '')
+                ));
+                return (bool) preg_match($regex, $haystack);
+            })->take(14);
+
+            if ($breaking->isNotEmpty()) {
+                return ['mode' => 'real', 'posts' => $breaking->values()];
+            }
+
+            // Fallback: freshest posts in the window so the rail still moves.
+            $recent = Post::query()
+                ->where('status', 'published')
+                ->whereNotNull('source_name')
+                ->with('slugable');
+            GrimbaPostRecency::wherePublishedSince($recent, now()->subHours($windowHours));
+            GrimbaPostRecency::orderByPublished($recent);
+
+            $picked = $recent->limit(14)->get($cols);
+            if ($picked->isNotEmpty()) {
+                return ['mode' => 'latest', 'posts' => $picked];
+            }
+
+            // Last-resort fill: drop the recency window entirely.
+            $any = Post::query()
+                ->where('status', 'published')
+                ->with('slugable');
+            GrimbaPostRecency::orderByPublished($any);
+
+            return ['mode' => 'latest', 'posts' => $any->limit(10)->get($cols)];
+        });
+    }
+
+    /**
+     * Multi-word editorial phrases that qualify as "real" breaking
+     * news. Single ambiguous words ("urgent", "fire", "breaking")
+     * deliberately excluded — too liberal, "ground-breaking" and
+     * "urgent refresh" match them.
+     *
+     * @return array<int, string>
+     */
+    private static function breakingKeywords(): array
+    {
+        return [
+            'breaking news', 'breaking:', 'just in:', 'live updates',
+            'state of emergency', 'declared dead', 'evacuation order',
+            'mass casualty', 'death toll', 'massive explosion',
+            'en direct', 'dernière minute', 'flash info', 'alerte info',
+            'alerte enlèvement', "état d'urgence", 'urgent :', 'urgent –',
+            'plan blanc', 'attentat', 'sous les décombres',
+        ];
+    }
+
+    /**
+     * @param  array<int, string>  $keywords
+     */
+    private static function breakingRegex(array $keywords): string
+    {
+        return '/(?:' .
+            implode('|', array_map(fn ($kw) => preg_quote($kw, '/'), $keywords)) .
+            ')/iu';
+    }
+
     public static function isShown(int $postId): bool
     {
         return isset(self::build()['allShown'][$postId]);
