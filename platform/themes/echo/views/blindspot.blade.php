@@ -14,7 +14,7 @@
 
 <section class="blindspot-page py-5">
     <div class="container">
-        <header class="glass-panel p-4 mb-4">
+        <header class="glass-panel grimba-editorial-ribbon p-4 mb-4">
             <span class="blindspot-badge mb-2">{{ __('Angle mort') }}</span>
             <h1 class="h2 mt-2 mb-2">{{ __("Les histoires qu'un seul camp couvre") }}</h1>
             <p class="blindspot-page__lede mb-3">

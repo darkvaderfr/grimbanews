@@ -23,7 +23,7 @@
 <section class="grimba-coffre py-5">
     <div class="container">
 
-        <header class="glass-panel p-4 p-md-5 mb-4">
+        <header class="glass-panel grimba-editorial-ribbon p-4 p-md-5 mb-4">
             <span class="grimba-methodology__kicker">{{ __('Mon coffre') }}</span>
             <h1 class="grimba-methodology__title mt-2 mb-2">
                 @if($count === 0)

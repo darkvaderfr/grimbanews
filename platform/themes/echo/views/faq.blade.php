@@ -90,7 +90,7 @@
 <section class="grimba-faq py-5">
     <div class="container" style="max-width: 920px;">
 
-        <header class="glass-panel p-4 p-md-5 mb-5">
+        <header class="glass-panel grimba-editorial-ribbon p-4 p-md-5 mb-5">
             <span class="grimba-methodology__kicker">{{ __('Foire aux questions') }}</span>
             <h1 class="grimba-methodology__title mt-2 mb-3">
                 {{ __('Comment marche GrimbaNews ?') }}
