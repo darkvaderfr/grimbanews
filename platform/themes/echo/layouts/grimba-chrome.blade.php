@@ -77,12 +77,15 @@
 
     @php($__grimbaOgImage = Theme::get('grimba_og_image') ?: url('/og/home.png'))
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Flux RSS') }}" href="{{ url('/feed.xml') }}">
+    <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Breaking news') }}" href="{{ url('/feed.breaking.xml') }}">
+    <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Latest') }}" href="{{ url('/feed.latest.xml') }}">
     <meta property="og:image" content="{{ $__grimbaOgImage }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="{{ $__grimbaOgImage }}">
     {!! Theme::header() !!}
+    @include(Theme::getThemeNamespace('partials.ads.head'))
     @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
 </head>
 <body class="grimba-home grimba-subpage" {!! Theme::bodyAttributes() !!}>

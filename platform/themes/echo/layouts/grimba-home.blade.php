@@ -78,6 +78,8 @@
     @include(Theme::getThemeNamespace('partials.home.ad-styles'))
 
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Flux RSS') }}" href="{{ url('/feed.xml') }}">
+    <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Breaking news') }}" href="{{ url('/feed.breaking.xml') }}">
+    <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Latest') }}" href="{{ url('/feed.latest.xml') }}">
     <meta property="og:image" content="{{ url('/og/home.png') }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
