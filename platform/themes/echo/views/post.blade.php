@@ -1084,39 +1084,26 @@
                         @include(Theme::getThemeNamespace('partials.blog.post.partials.other-angles'), ['post' => $post])
 
                         @php
-                            $socials = \Botble\Theme\Supports\ThemeSupport::getSocialSharingButtons($post->url, $__gnTitle, RvMedia::getImageUrl($post->image));
                             $tags = $post->tags;
                         @endphp
 
-                        <div class="echo-financial-area">
-                            <div class="content mb-5">
-                                <div class="row align-items-center">
-                                    @if ($tags->isNotEmpty())
-                                        <div @class(['col-lg-6 col-md-6 col-sm-12' => $socials, 'col-12' => ! $socials])>
-                                            <div class="details-tag">
-                                                <h6>{{ __('Tags:') }}</h6>
-                                                @foreach($tags as $tag)
-                                                    <a class="py-2" href="{{ $tag->url }}"><button>{{ $tag->name }}</button></a>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    @if($socials)
-                                        <div @class(['col-lg-6 col-md-6 col-sm-12' => $tags, 'col-12' => $tags->isEmpty() ])>
-                                            <div @class(['details-share', 'justify-content-start' => $tags->isEmpty()] )>
-                                                <h6>{{ __('Share:') }}</h6>
-                                                @foreach($socials as $social)
-                                                    <a target="_blank" href="{{ $social['url'] }}" aria-label="{{ __('Share on :name', ['name' => 'Facebook']) }}">
-                                                        {!! $social['icon'] !!}
-                                                    </a>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endif
+                        {{-- Sprint 13 (Vader 2026-05-16): the legacy
+                             Botble Echo details-share icon row is gone —
+                             share-kit (icon row, NobuAI-branded) now
+                             carries all sharing affordances. Tags stay
+                             here because they're a distinct surface. --}}
+                        @if ($tags->isNotEmpty())
+                            <div class="echo-financial-area">
+                                <div class="content mb-5">
+                                    <div class="details-tag">
+                                        <h6>{{ __('Tags:') }}</h6>
+                                        @foreach($tags as $tag)
+                                            <a class="py-2" href="{{ $tag->url }}"><button>{{ $tag->name }}</button></a>
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                         @if (($posts = get_related_posts($post->id, 2)) && $posts->isNotEmpty())
                             <div class="echo-more-news-area">
                                 <div class="inner">
