@@ -571,6 +571,85 @@
             line-height: 1.6;
             color: var(--gn-ink, #1a1713);
         }
+
+        /* Long-form typography for when the publisher API delivers the
+           full body — proper paragraph rhythm, link treatment, figure
+           handling, blockquote accent. Activates via the --full
+           modifier on the excerpt card. */
+        .grimba-article-card__excerpt-body--full {
+            font-size: 17.5px;
+            line-height: 1.7;
+            max-width: 70ch;
+            margin-inline: auto;
+            margin-bottom: 16px;
+        }
+        .grimba-article-card__excerpt-body--full > * + * {
+            margin-top: 0.85em;
+        }
+        .grimba-article-card__excerpt-body--full p:first-of-type::first-letter {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 3.2em;
+            font-weight: 800;
+            float: left;
+            line-height: 0.95;
+            padding-right: 0.08em;
+            margin-top: 0.06em;
+            color: #c0392b;
+        }
+        .grimba-article-card__excerpt-body--full a {
+            color: #c0392b;
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 3px;
+        }
+        .grimba-article-card__excerpt-body--full a:hover {
+            color: #14110d;
+        }
+        .grimba-article-card__excerpt-body--full blockquote {
+            margin: 1.25em 0;
+            padding: 6px 0 6px 18px;
+            border-left: 3px solid #c0392b;
+            font-style: italic;
+            color: var(--gn-ink, #1a1713);
+            opacity: .82;
+        }
+        .grimba-article-card__excerpt-body--full figure {
+            margin: 1.5em 0;
+        }
+        .grimba-article-card__excerpt-body--full figure img,
+        .grimba-article-card__excerpt-body--full img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: block;
+        }
+        .grimba-article-card__excerpt-body--full figcaption {
+            margin-top: 6px;
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-size: 13px;
+            color: var(--gn-ink-muted, rgba(26, 23, 19, .58));
+            text-align: center;
+        }
+        .grimba-article-card__excerpt-body--full h2,
+        .grimba-article-card__excerpt-body--full h3 {
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            margin-top: 1.5em;
+        }
+        .grimba-article-card__excerpt-body--full h2 {
+            font-size: 1.5em;
+        }
+        .grimba-article-card__excerpt-body--full h3 {
+            font-size: 1.25em;
+        }
+        .grimba-article-card__excerpt-body--full ul,
+        .grimba-article-card__excerpt-body--full ol {
+            padding-left: 1.4em;
+        }
+        .grimba-article-card__excerpt-body--full li {
+            margin: 0.4em 0;
+        }
         .grimba-article-card__excerpt-foot {
             text-align: center;
             padding-top: 8px;
