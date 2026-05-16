@@ -42,6 +42,7 @@ class GrimbaLiveNewsFetcher
                 'google', 'google-news' => $this->fetchGoogleNews(),
                 'webz', 'webzio', 'webz-io' => $this->fetchWebz(),
                 'mediastack' => $this->fetchMediastack(),
+                'newsdata', 'newsdata-io', 'newsdataio' => app(GrimbaNewsdataIoFetcher::class)->fetch(),
                 default => [[
                     'provider' => $provider,
                     'query' => '-',

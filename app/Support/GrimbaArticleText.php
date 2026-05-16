@@ -54,15 +54,18 @@ class GrimbaArticleText
 
         // Strip the NewsAPI "Full text is unavailable in the news API
         // lite version" boilerplate. Vader 2026-05-16 — never expose
-        // upstream provider names to readers.
+        // upstream provider names to readers. (Zen audit 2026-05-16:
+        // wrapped variant strips freely — that's our own ingester
+        // marker. Bare-text variant is anchored to start-of-string OR
+        // an explicit break to avoid scrubbing a legitimate quotation
+        // mid-article.)
         $clean = preg_replace(
             '#\s*<p>\s*Full text is unavailable in the news API lite version\.?\s*</p>\s*#iu',
             '',
             $clean
         ) ?? $clean;
-        // Match the same line without the wrapping <p> tag.
         $clean = preg_replace(
-            '#\s*Full text is unavailable in the news API lite version\.?\s*#iu',
+            '#(?:^|<br\s*/?>|\n)\s*Full text is unavailable in the news API lite version\.?\s*#iu',
             '',
             $clean
         ) ?? $clean;

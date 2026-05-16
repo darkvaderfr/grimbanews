@@ -26,6 +26,11 @@
     $size  = $size  ?? null;
     $tone  = $tone  ?? null;
     $id    = $id    ?? null;
+    // Vader 2026-05-16 (Zen audit) — escape by default. Callers that
+    // need to render trusted HTML (e.g. inline <strong>, <em>) must
+    // pass 'html' => true explicitly so future user-derived content
+    // can't accidentally bypass the escape.
+    $bodyIsHtml = ($html ?? false) === true;
     $classes = 'grimba-info-pill';
     if ($align === 'right') $classes .= ' grimba-info-pill--right';
     if ($size === 'sm')     $classes .= ' grimba-info-pill--sm';
@@ -40,6 +45,10 @@
         @endif
     </summary>
     <div class="grimba-info-pill__body">
-        {!! $body !!}
+        @if($bodyIsHtml)
+            {!! $body !!}
+        @else
+            {{ $body }}
+        @endif
     </div>
 </details>

@@ -235,3 +235,34 @@ Start with these before opening feature work:
 - Subscribers/logged-in users must have a clear full-article reading path with safe extraction and upstream attribution.
 - Admin provider key pages must be readable, solid, redacted, and testable in both themes.
 - The production move is blocked until the executable release gate and rollback drill both pass.
+
+---
+
+## newsdata.io Integration (S-NDI-01 → S-NDI-20)
+
+Vader directive 2026-05-16 — third programmatic breaking-news provider next to GDELT / Google News / Webz / Mediastack. Free plan = 200 credits/day, 10 articles per call. Stay on free until ad revenue covers a paid sub. Full plan at `docs/GRIMBANEWS_NEWSDATAIO_INTEGRATION_PLAN.md`.
+
+| Sprint | Title | Estimate | Status |
+|---|---|---|---|
+| S-NDI-01 | Provider taxonomy + dispatcher arm | 45m | shipped 2026-05-16 |
+| S-NDI-02 | provider_item_id unique-index migration | 30m | open |
+| S-NDI-03 | Settings keys + `.env.example` defaults | 45m | partial (env shipped 2026-05-16) |
+| S-NDI-04 | `GrimbaProviderCredits` helper (DB + cache) | 60m | shipped 2026-05-16 |
+| S-NDI-05 | `GrimbaNewsdataIoFetcher` skeleton (no network) | 75m | shipped 2026-05-16 |
+| S-NDI-06 | newsdata.io HTTP call + article normaliser | 90m | open — next session |
+| S-NDI-07 | Credit-accounting wired into fetcher | 45m | open |
+| S-NDI-08 | Per-tick query rotation | 45m | open |
+| S-NDI-09 | Shared `breaking_live` cron path validated | 30m | open |
+| S-NDI-10 | Dedicated `*/8` cron (gated, off by default) | 30m | open |
+| S-NDI-11 | Admin route shell + dashboard menu item | 75m | open |
+| S-NDI-12 | Admin blade form + stat grid | 90m | open |
+| S-NDI-13 | Save handler + validation | 75m | open |
+| S-NDI-14 | Test + Run-Now admin buttons | 75m | open |
+| S-NDI-15 | Credit progress bar + warning copy | 45m | open |
+| S-NDI-16 | Provider-prefixed `provider_item_id` dedupe | 45m | open |
+| S-NDI-17 | (Optional) Same-day cross-provider title-similarity guard | 60m | deferred |
+| S-NDI-18 | Integration test (`Http::fake` fixture) | 75m | open |
+| S-NDI-19 | Credit-budget E2E test | 60m | open |
+| S-NDI-20 | Docs + resume-memory handoff | 45m | open |
+
+**Total remaining: ~17h of focused work.** Pick up at S-NDI-06 (HTTP layer) once an upstream API key is provisioned.
