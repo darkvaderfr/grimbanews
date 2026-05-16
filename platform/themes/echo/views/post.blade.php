@@ -910,15 +910,14 @@
                     @endif
                 </header>
 
-                {{-- Render the full-article reader only when it adds
-                     value beyond the article-hero-card's excerpt card:
-                     (a) the body is the publisher's FULL article — paid
-                     reader mode, not a 200-char preview, OR
-                     (b) the reader is locked behind the member gate.
-                     Vader 2026-05-16: kill the duplicate "AVAILABLE
-                     EXCERPT" panel that was rendering the same extract
-                     twice on every dossier. --}}
-                @if($__gnFullArticleLocked || $__gnFullBodySource === 'full')
+                {{-- Sprint 12 — article-hero-card now consumes both
+                     the excerpt AND the full-body API output directly
+                     (replaces the excerpt with the full HTML when
+                     readableBody->source === 'full' and the reader
+                     has access). The full-article partial fires ONLY
+                     for the locked-member-gate case so the login CTA
+                     still renders for paid content. --}}
+                @if($__gnFullArticleLocked)
                     @include(Theme::getThemeNamespace('partials.story.full-article'), [
                         'post' => $post,
                         'body' => $__gnFullBody,

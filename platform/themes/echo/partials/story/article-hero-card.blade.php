@@ -69,12 +69,38 @@
     $__readWords = max(1, str_word_count(strip_tags((string) ($post->content ?? $post->description ?? ''))));
     $__readMin = max(1, (int) ceil($__readWords / 200));
 
-    // Excerpt + word count for the "AVAILABLE EXCERPT" card.
-    $__excerpt = $__desc !== ''
-        ? $__desc
-        : trim(strip_tags((string) ($post->content ?? '')));
+    // Sprint 12 — when the publisher API delivers the full article
+    // body AND the reader has access AND the admin has the feature on,
+    // swap the excerpt for the full body. Otherwise fall back to the
+    // standard 400-char description excerpt.
+    $__fullActive = (bool) (function_exists('setting') ? setting('grimba_full_article_active', true) : true);
+    $__memberCanReadFull = (function_exists('is_plugin_active') && is_plugin_active('member') && auth('member')->check()) || auth()->check();
+    $__fullPublic = (bool) (function_exists('setting') ? setting('grimba_full_article_public', true) : true);
+    $__canReadFull = $__fullPublic || $__memberCanReadFull;
+
+    $__readableBody = null;
+    if ($__fullActive && $__canReadFull) {
+        try {
+            $__readableBody = \App\Support\GrimbaArticleText::readableBody($post);
+        } catch (\Throwable) {
+            $__readableBody = null;
+        }
+    }
+    $__hasFullBody = $__readableBody !== null
+        && ($__readableBody->source ?? null) === 'full'
+        && trim((string) ($__readableBody->html ?? '')) !== '';
+    $__fullBodyHtml = $__hasFullBody ? (string) $__readableBody->html : null;
+
+    if ($__hasFullBody) {
+        $__excerpt = trim(strip_tags($__fullBodyHtml));
+    } else {
+        $__excerpt = $__desc !== ''
+            ? $__desc
+            : trim(strip_tags((string) ($post->content ?? '')));
+    }
+
     $__excerptWords = $__excerpt !== '' ? str_word_count($__excerpt) : 0;
-    $__excerptDisplay = Str::limit($__excerpt, 400);
+    $__excerptDisplay = $__hasFullBody ? $__excerpt : Str::limit($__excerpt, 400);
 
     // Publisher URL for "Original source →".
     $__publisherUrl = null;
@@ -216,19 +242,29 @@
     ])
 
     @if($__excerptDisplay !== '')
-        <article class="grimba-article-card__excerpt-card grimba-article-card__excerpt-card--featured">
+        <article class="grimba-article-card__excerpt-card grimba-article-card__excerpt-card--featured @if($__hasFullBody) grimba-article-card__excerpt-card--full @endif">
             <header class="grimba-article-card__excerpt-head">
                 <div>
-                    <span class="grimba-article-card__source-label">{{ __('Extrait disponible') }}</span>
+                    <span class="grimba-article-card__source-label">
+                        {{ $__hasFullBody ? __('Article intégral') : __('Extrait disponible') }}
+                    </span>
                     <h2 class="grimba-article-card__excerpt-title">
-                        {{ __("Lire l'extrait disponible dans GrimbaNews") }}
+                        {{ $__hasFullBody
+                            ? __("Lire l'article complet dans GrimbaNews")
+                            : __("Lire l'extrait disponible dans GrimbaNews") }}
                     </h2>
                 </div>
                 <span class="grimba-article-card__excerpt-count">
                     {{ trans_choice(':count mot|:count mots', $__excerptWords, ['count' => $__excerptWords]) }}
                 </span>
             </header>
-            <p class="grimba-article-card__excerpt-body">{{ $__excerptDisplay }}</p>
+            @if($__hasFullBody)
+                <div class="grimba-article-card__excerpt-body grimba-article-card__excerpt-body--full">
+                    {!! \Botble\Base\Facades\BaseHelper::clean($__fullBodyHtml) !!}
+                </div>
+            @else
+                <p class="grimba-article-card__excerpt-body">{{ $__excerptDisplay }}</p>
+            @endif
             @if($__publisherUrl)
                 <footer class="grimba-article-card__excerpt-foot">
                     <a href="{{ $__publisherUrl }}"
