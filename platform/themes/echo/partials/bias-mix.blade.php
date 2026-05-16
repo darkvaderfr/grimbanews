@@ -62,7 +62,7 @@
             }
         }
     }
-    $biasLabels = ['left' => 'Gauche', 'center' => 'Centre', 'right' => 'Droite'];
+    $biasLabels = ['left' => __('Gauche'), 'center' => __('Centre'), 'right' => __('Droite')];
 
     // Diversity score: 0 when one side dominates; 100 when even.
     // Computed as 100 × (1 - max-deviation-from-third).
@@ -72,28 +72,28 @@
 @endphp
 
 <section class="grimba-bias-profile @if($variant === 'full') grimba-bias-profile--full @endif">
-    <h4 class="@if($variant === 'full') h5 @else h6 @endif mb-1">Votre biais de lecture</h4>
+    <h4 class="@if($variant === 'full') h5 @else h6 @endif mb-1">{{ __('Votre biais de lecture') }}</h4>
     <p class="small opacity-75 mb-2">
         @if($readTotal === 0)
-            0 source · 0 article · <em>lisez quelques articles pour voir votre profil</em>
+            {{ __('0 source · 0 article ·') }} <em>{{ __('lisez quelques articles pour voir votre profil') }}</em>
         @else
-            {{ $sourcesCount }} {{ $sourcesCount === 1 ? 'source' : 'sources' }} · {{ $readTotal }} {{ $readTotal === 1 ? 'article' : 'articles' }} lus
+            {{ trans_choice(':count source|:count sources', $sourcesCount, ['count' => $sourcesCount]) }} · {{ trans_choice(':count article lu|:count articles lus', $readTotal, ['count' => $readTotal]) }}
             @if($variant === 'full' && $diversity !== null)
-                · diversité {{ $diversity }}%
+                · {{ __('diversité') }} {{ $diversity }}%
             @endif
         @endif
     </p>
     <div style="display:flex;height:{{ $variant === 'full' ? '14px' : '8px' }};border-radius:9999px;overflow:hidden;background:rgba(0,0,0,.08);">
-        <div style="width:{{ $pct['left'] }}%;background:#3b82f6;" title="Gauche {{ $pct['left'] }}%"></div>
-        <div style="width:{{ $pct['center'] }}%;background:#a8a8a8;" title="Centre {{ $pct['center'] }}%"></div>
-        <div style="width:{{ $pct['right'] }}%;background:#e84c3d;" title="Droite {{ $pct['right'] }}%"></div>
+        <div style="width:{{ $pct['left'] }}%;background:#3b82f6;" title="{{ __('Gauche') }} {{ $pct['left'] }}%"></div>
+        <div style="width:{{ $pct['center'] }}%;background:#a8a8a8;" title="{{ __('Centre') }} {{ $pct['center'] }}%"></div>
+        <div style="width:{{ $pct['right'] }}%;background:#e84c3d;" title="{{ __('Droite') }} {{ $pct['right'] }}%"></div>
     </div>
 
     @if($readTotal > 0)
         <div class="d-flex justify-content-between small mt-2">
-            <span style="color:#3b82f6;font-weight:600;">Gauche {{ $pct['left'] }}%</span>
-            <span style="color:#a8a8a8;font-weight:600;">Centre {{ $pct['center'] }}%</span>
-            <span style="color:#e84c3d;font-weight:600;">Droite {{ $pct['right'] }}%</span>
+            <span style="color:#3b82f6;font-weight:600;">{{ __('Gauche') }} {{ $pct['left'] }}%</span>
+            <span style="color:#a8a8a8;font-weight:600;">{{ __('Centre') }} {{ $pct['center'] }}%</span>
+            <span style="color:#e84c3d;font-weight:600;">{{ __('Droite') }} {{ $pct['right'] }}%</span>
         </div>
     @else
         <a href="{{ url('/blog') }}" class="small text-decoration-underline mt-2 d-inline-block">Commencer à lire</a>

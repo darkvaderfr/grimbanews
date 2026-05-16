@@ -43,9 +43,9 @@
     </div>
 
     <div class="diversity-bar" style="display:flex;height:10px;border-radius:9999px;overflow:hidden;background:rgba(0,0,0,0.06);">
-        <div style="width: {{ $pct['left'] }}%;background:#3b82f6;" title="Gauche — {{ $counts['left'] }}"></div>
-        <div style="width: {{ $pct['center'] }}%;background:#22c55e;" title="Centre — {{ $counts['center'] }}"></div>
-        <div style="width: {{ $pct['right'] }}%;background:#ef4444;" title="Droite — {{ $counts['right'] }}"></div>
+        <div style="width: {{ $pct['left'] }}%;background:#3b82f6;" title="{{ __('Gauche') }} — {{ $counts['left'] }}"></div>
+        <div style="width: {{ $pct['center'] }}%;background:#22c55e;" title="{{ __('Centre') }} — {{ $counts['center'] }}"></div>
+        <div style="width: {{ $pct['right'] }}%;background:#ef4444;" title="{{ __('Droite') }} — {{ $counts['right'] }}"></div>
     </div>
 
     <div class="d-flex justify-content-between small mt-2">

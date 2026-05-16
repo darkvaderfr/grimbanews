@@ -62,13 +62,13 @@
     {{-- Bias dots: visual signal of which sides exist in the cluster --}}
     <span style="display:inline-flex; gap:4px;" aria-hidden="true">
         @if($counts['left'] > 0)
-            <span style="width:9px;height:9px;border-radius:50%;background:#3b82f6;" title="Gauche"></span>
+            <span style="width:9px;height:9px;border-radius:50%;background:#3b82f6;" title="{{ __('Gauche') }}"></span>
         @endif
         @if($counts['center'] > 0)
-            <span style="width:9px;height:9px;border-radius:50%;background:#a8a8a8;" title="Centre"></span>
+            <span style="width:9px;height:9px;border-radius:50%;background:#a8a8a8;" title="{{ __('Centre') }}"></span>
         @endif
         @if($counts['right'] > 0)
-            <span style="width:9px;height:9px;border-radius:50%;background:#e84c3d;" title="Droite"></span>
+            <span style="width:9px;height:9px;border-radius:50%;background:#e84c3d;" title="{{ __('Droite') }}"></span>
         @endif
     </span>
     <span>
