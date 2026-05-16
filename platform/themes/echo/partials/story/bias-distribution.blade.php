@@ -90,6 +90,42 @@
         })
         ->sortByDesc('count')
         ->values();
+
+    // Spectrum-field: plot each source on a continuous 0-100 bias axis
+    // instead of bucketing them into three columns. Within a bucket we
+    // spread sources across the bucket's range so logos don't pile up
+    // on a single point. This is the cinematic upgrade that replaces
+    // the static 3-column grid as the visual centrepiece.
+    $bucketRange = [
+        'left' => [6.0, 30.0],
+        'center' => [38.0, 62.0],
+        'right' => [70.0, 94.0],
+    ];
+
+    $spectrumChips = [];
+    foreach (['left', 'center', 'right'] as $bucketKey) {
+        $bucketEntries = $sourcesByBias[$bucketKey];
+        $n = count($bucketEntries);
+        if ($n === 0) {
+            continue;
+        }
+        [$lo, $hi] = $bucketRange[$bucketKey];
+        $span = $hi - $lo;
+        foreach (array_values($bucketEntries) as $idx => $entry) {
+            $offset = $n === 1 ? ($lo + $span / 2) : ($lo + ($idx / max(1, $n - 1)) * $span);
+            $spectrumChips[] = [
+                'bias' => $bucketKey,
+                'name' => $entry['name'],
+                'website' => $entry['website'] ?? null,
+                'logo' => $entry['logo'] ?? null,
+                'id' => $entry['id'] ?? 0,
+                'country' => $entry['country'] ?? null,
+                'origin_label' => $entry['origin_label'] ?? null,
+                'x' => round($offset, 2),
+                'color' => $biasMeta[$bucketKey]['color'],
+            ];
+        }
+    }
 @endphp
 
 @if($known === 0)
@@ -394,6 +430,193 @@
                     grid-column: 1 / -1;
                 }
             }
+
+            /* Spectrum field — continuous bias plot. */
+            .grimba-story-spectrum {
+                position: relative;
+                padding: 18px 6px 14px;
+                margin-top: 4px;
+                border: 1px solid var(--gsd-line);
+                border-radius: 18px;
+                background:
+                    radial-gradient(120% 100% at 0% 50%, rgba(59, 130, 246, .14), transparent 48%),
+                    radial-gradient(120% 100% at 100% 50%, rgba(232, 76, 61, .14), transparent 48%),
+                    radial-gradient(70% 100% at 50% 50%, rgba(255, 255, 255, .14), transparent 60%),
+                    var(--gsd-card);
+                overflow: hidden;
+                isolation: isolate;
+            }
+
+            [data-bs-theme="dark"] .grimba-story-spectrum,
+            body[data-theme="dark"] .grimba-story-spectrum {
+                background:
+                    radial-gradient(120% 100% at 0% 50%, rgba(76, 117, 255, .22), transparent 48%),
+                    radial-gradient(120% 100% at 100% 50%, rgba(232, 76, 61, .22), transparent 48%),
+                    radial-gradient(70% 100% at 50% 50%, rgba(255, 255, 255, .04), transparent 60%),
+                    rgba(20, 18, 14, .82);
+            }
+
+            .grimba-story-spectrum__aurora {
+                position: absolute;
+                inset: 0;
+                z-index: 0;
+                pointer-events: none;
+                background: linear-gradient(
+                    90deg,
+                    transparent 0%,
+                    rgba(59, 130, 246, .12) 18%,
+                    rgba(168, 168, 168, .08) 50%,
+                    rgba(232, 76, 61, .12) 82%,
+                    transparent 100%
+                );
+                background-size: 220% 100%;
+                animation: grimbaSpectrumAurora 14s ease-in-out infinite alternate;
+                mix-blend-mode: screen;
+            }
+
+            @keyframes grimbaSpectrumAurora {
+                0% { background-position: 0% 0; }
+                100% { background-position: 100% 0; }
+            }
+
+            .grimba-story-spectrum__axis {
+                position: absolute;
+                left: 14px;
+                right: 14px;
+                top: 50%;
+                height: 1px;
+                background: linear-gradient(
+                    90deg,
+                    rgba(59, 130, 246, .42),
+                    rgba(168, 168, 168, .32) 50%,
+                    rgba(232, 76, 61, .42)
+                );
+                z-index: 1;
+                pointer-events: none;
+            }
+
+            .grimba-story-spectrum__tick {
+                position: absolute;
+                top: -3px;
+                width: 1px;
+                height: 7px;
+                background: var(--gsd-line);
+                transform: translateX(-50%);
+            }
+
+            .grimba-story-spectrum__field {
+                position: relative;
+                z-index: 2;
+                height: 86px;
+                margin: 0 14px;
+            }
+
+            .grimba-story-spectrum__chip {
+                position: absolute;
+                top: 50%;
+                left: var(--x, 50%);
+                transform: translate(-50%, -50%) scale(.6);
+                width: 36px;
+                height: 36px;
+                padding: 0;
+                border: none;
+                background: transparent;
+                cursor: pointer;
+                opacity: 0;
+                animation: grimbaSpectrumPop .56s cubic-bezier(.22, 1, .36, 1) forwards;
+                animation-delay: var(--delay, 0ms);
+                transition: transform .22s ease, filter .22s ease;
+            }
+
+            @keyframes grimbaSpectrumPop {
+                from { opacity: 0; transform: translate(-50%, calc(-50% + 8px)) scale(.4); }
+                to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            }
+
+            .grimba-story-spectrum__chip:hover,
+            .grimba-story-spectrum__chip:focus-visible {
+                transform: translate(-50%, calc(-50% - 4px)) scale(1.16);
+                filter: drop-shadow(0 6px 18px rgba(0, 0, 0, .22));
+                outline: none;
+                z-index: 5;
+            }
+
+            .grimba-story-spectrum__chip[aria-pressed="true"] {
+                transform: translate(-50%, -50%) scale(1.24);
+                filter: drop-shadow(0 6px 18px color-mix(in srgb, var(--dot) 60%, transparent));
+                z-index: 6;
+            }
+
+            .grimba-story-spectrum__chip:not([data-bias-active="true"]) {
+                opacity: 0.22;
+                filter: grayscale(.7);
+            }
+
+            .grimba-story-spectrum__halo {
+                position: absolute;
+                inset: -4px;
+                border-radius: 50%;
+                background: radial-gradient(circle, color-mix(in srgb, var(--dot) 80%, transparent), transparent 70%);
+                opacity: 0;
+                transition: opacity .22s ease;
+                pointer-events: none;
+            }
+
+            .grimba-story-spectrum__chip:hover .grimba-story-spectrum__halo,
+            .grimba-story-spectrum__chip:focus-visible .grimba-story-spectrum__halo,
+            .grimba-story-spectrum__chip[aria-pressed="true"] .grimba-story-spectrum__halo {
+                opacity: 1;
+            }
+
+            .grimba-story-spectrum__avatar {
+                position: relative;
+                display: grid;
+                place-items: center;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, .94);
+                box-shadow: 0 4px 14px rgba(0, 0, 0, .12), inset 0 0 0 2px color-mix(in srgb, var(--dot) 70%, transparent);
+                overflow: hidden;
+            }
+
+            [data-bs-theme="dark"] .grimba-story-spectrum__avatar,
+            body[data-theme="dark"] .grimba-story-spectrum__avatar {
+                background: rgba(28, 24, 17, .94);
+                box-shadow: 0 6px 18px rgba(0, 0, 0, .42), inset 0 0 0 2px color-mix(in srgb, var(--dot) 80%, transparent);
+            }
+
+            .grimba-story-spectrum__legend {
+                position: relative;
+                z-index: 2;
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                margin-top: 8px;
+                padding: 0 8px;
+                color: var(--gsd-muted);
+                font-family: 'JetBrains Mono', ui-monospace, monospace;
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: .16em;
+                text-transform: uppercase;
+            }
+
+            .grimba-story-spectrum__legend span:nth-child(2) { text-align: center; }
+            .grimba-story-spectrum__legend span:nth-child(3) { text-align: right; }
+
+            @media (prefers-reduced-motion: reduce) {
+                .grimba-story-spectrum__aurora { animation: none; }
+                .grimba-story-spectrum__chip {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                    animation: none;
+                }
+            }
+
+            @media (max-width: 575.98px) {
+                .grimba-story-spectrum__field { height: 76px; }
+                .grimba-story-spectrum__chip { width: 30px; height: 30px; }
+            }
         </style>
 
         <header class="grimba-story-distribution__top">
@@ -460,43 +683,50 @@
             </section>
         @endif
 
-        <div class="grimba-story-distribution__columns">
-            @foreach(['left', 'center', 'right'] as $biasKey)
-                @php
-                    $countries = collect($sourcesByBias[$biasKey])->pluck('country')->filter()->unique()->take(3);
-                @endphp
-                <article class="grimba-story-distribution__column" style="--dot: {{ $biasMeta[$biasKey]['color'] }};">
-                    <div class="grimba-story-distribution__column-head">
-                        <span>{{ $biasMeta[$biasKey]['label'] }}</span>
-                        <strong>{{ $pct[$biasKey] }}%</strong>
-                    </div>
-                    <div class="grimba-story-distribution__logos">
-                        @forelse(array_slice($sourcesByBias[$biasKey], 0, 6) as $entry)
-                            {!! Theme::partial('source-logo', [
-                                'source_id' => $entry['id'] ?? 0,
-                                'name' => $entry['name'],
-                                'website' => $entry['website'] ?? null,
-                                'logo_url' => $entry['logo']->logo_url ?? null,
-                                'logo_status' => $entry['logo']->logo_status ?? 'unknown',
-                                'logo_checked_at' => $entry['logo']->logo_checked_at ?? null,
-                                'size' => 30,
-                                'color' => $biasMeta[$biasKey]['color'],
-                            ]) !!}
-                        @empty
-                            <span class="grimba-story-distribution__empty">{{ __('Aucune') }}</span>
-                        @endforelse
-                        @if(count($sourcesByBias[$biasKey]) > 6)
-                            <span class="grimba-story-distribution__more">+{{ count($sourcesByBias[$biasKey]) - 6 }}</span>
-                        @endif
-                    </div>
-                    <div class="grimba-story-distribution__country-chips">
-                        @foreach($countries as $country)
-                            <span class="grimba-story-distribution__chip" style="--dot: {{ $biasMeta[$biasKey]['color'] }};">{{ $country }}</span>
-                        @endforeach
-                    </div>
-                </article>
-            @endforeach
-        </div>
+        @if(! empty($spectrumChips))
+            <section class="grimba-story-spectrum"
+                     aria-label="{{ __('Distribution des sources sur le spectre politique') }}"
+                     data-grimba-spectrum-field>
+                <div class="grimba-story-spectrum__axis" aria-hidden="true">
+                    <span class="grimba-story-spectrum__tick" style="left: 6%;"></span>
+                    <span class="grimba-story-spectrum__tick" style="left: 25%;"></span>
+                    <span class="grimba-story-spectrum__tick" style="left: 50%;"></span>
+                    <span class="grimba-story-spectrum__tick" style="left: 75%;"></span>
+                    <span class="grimba-story-spectrum__tick" style="left: 94%;"></span>
+                </div>
+                <div class="grimba-story-spectrum__aurora" aria-hidden="true"></div>
+                <div class="grimba-story-spectrum__field">
+                    @foreach($spectrumChips as $i => $chip)
+                        <button type="button"
+                                class="grimba-story-spectrum__chip"
+                                data-grimba-spectrum-chip
+                                data-bias="{{ $chip['bias'] }}"
+                                style="--x: {{ $chip['x'] }}%; --dot: {{ $chip['color'] }}; --delay: {{ $i * 38 }}ms;"
+                                title="{{ $chip['name'] }}{{ $chip['country'] ? ' · ' . $chip['country'] : '' }}{{ $chip['origin_label'] ? ' · ' . $chip['origin_label'] : '' }}"
+                                aria-label="{{ $chip['name'] }} — {{ $biasMeta[$chip['bias']]['label'] }}">
+                            <span class="grimba-story-spectrum__halo" aria-hidden="true"></span>
+                            <span class="grimba-story-spectrum__avatar">
+                                {!! Theme::partial('source-logo', [
+                                    'source_id' => $chip['id'] ?? 0,
+                                    'name' => $chip['name'],
+                                    'website' => $chip['website'] ?? null,
+                                    'logo_url' => $chip['logo']->logo_url ?? null,
+                                    'logo_status' => $chip['logo']->logo_status ?? 'unknown',
+                                    'logo_checked_at' => $chip['logo']->logo_checked_at ?? null,
+                                    'size' => 26,
+                                    'color' => $chip['color'],
+                                ]) !!}
+                            </span>
+                        </button>
+                    @endforeach
+                </div>
+                <footer class="grimba-story-spectrum__legend" aria-hidden="true">
+                    <span>{{ __('Gauche') }}</span>
+                    <span>{{ __('Centre') }}</span>
+                    <span>{{ __('Droite') }}</span>
+                </footer>
+            </section>
+        @endif
 
         @if(! empty($sourcesByBias['unknown']))
             <div class="grimba-story-distribution__unknown">
@@ -509,23 +739,52 @@
     <script>
         (function () {
             const segments = document.querySelectorAll('[data-grimba-bar-side]');
-            if (! segments.length) return;
-            function sync(side) {
+            const chips = document.querySelectorAll('[data-grimba-spectrum-chip]');
+
+            // All chips start active (no filter applied).
+            chips.forEach(chip => chip.setAttribute('data-bias-active', 'true'));
+
+            function syncBar(side) {
                 segments.forEach(segment => {
                     segment.setAttribute('aria-pressed', String(segment.dataset.grimbaBarSide === side));
                 });
             }
-            segments.forEach((segment) => {
+
+            function syncChips(side) {
+                const active = side && side !== 'all';
+                chips.forEach(chip => {
+                    const matches = !active || chip.dataset.bias === side;
+                    chip.setAttribute('data-bias-active', String(matches));
+                    chip.setAttribute('aria-pressed', String(active && chip.dataset.bias === side));
+                });
+            }
+
+            segments.forEach(segment => {
                 segment.addEventListener('click', () => {
                     const side = segment.dataset.grimbaBarSide;
-                    sync(side);
+                    syncBar(side);
+                    syncChips(side);
                     document.dispatchEvent(new CustomEvent('grimba:cluster-filter', {
                         detail: { side, scroll: true }
                     }));
                 });
             });
+
+            chips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    const side = chip.dataset.bias;
+                    syncBar(side);
+                    syncChips(side);
+                    document.dispatchEvent(new CustomEvent('grimba:cluster-filter', {
+                        detail: { side, scroll: true }
+                    }));
+                });
+            });
+
             document.addEventListener('grimba:cluster-filtered', event => {
-                sync(event.detail?.side || 'all');
+                const side = event.detail?.side || 'all';
+                syncBar(side);
+                syncChips(side);
             });
         })();
     </script>
