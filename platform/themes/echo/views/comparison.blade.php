@@ -11,7 +11,7 @@
 
 <section class="comparison-page py-5">
     <div class="container">
-        <header class="mb-4">
+        <header class="glass-panel grimba-editorial-ribbon p-4 p-md-5 mb-4">
             <span class="small text-uppercase opacity-75">{{ __('Dossier') }} #{{ $clusterId }}</span>
             <h1 class="h2 mb-2">{{ $storyTitle }}</h1>
             <p class="opacity-85 mb-0">
