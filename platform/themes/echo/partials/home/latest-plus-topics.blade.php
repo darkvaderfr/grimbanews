@@ -14,7 +14,7 @@
         <div class="col-lg-8 col-12">
             <header class="grimba-latest__head d-flex justify-content-between align-items-center mb-3">
                 <h2 class="grimba-latest__title">{{ __('Dernières histoires') }}</h2>
-                <a href="{{ url('/search') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Tout voir') }}</a>
+                <a href="{{ url('/latest') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Voir le flux complet') }}</a>
             </header>
 
             <ul class="grimba-latest__list">

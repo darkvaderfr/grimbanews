@@ -82,6 +82,17 @@
                 </div>
                 <div class="small d-flex align-items-center gap-2 grimba-header__tools">
                     <span class="grimba-header-date">{{ ucfirst($topDate) }}</span>
+                    {{-- Phase D-06: surface the two dedicated streams in
+                         the header so readers can jump straight to
+                         /breaking and /latest. Live-pulse dot beside the
+                         Breaking link mirrors the ticker eyebrow. --}}
+                    <a href="{{ url('/breaking') }}" class="grimba-header-tool-link grimba-header-tool-link--breaking" title="{{ __('Breaking news') }}">
+                        <span class="grimba-header-tool-link__pulse" aria-hidden="true"></span>
+                        <span class="grimba-header-tool-link__label">{{ __('Breaking') }}</span>
+                    </a>
+                    <a href="{{ url('/latest') }}" class="grimba-header-tool-link" title="{{ __('Latest news') }}">
+                        <span class="grimba-header-tool-link__label">{{ __('Dernières') }}</span>
+                    </a>
                     <a href="{{ url('/pour-vous') }}" class="grimba-header-tool-link grimba-header-tool-link--follow" title="{{ __('Pour vous') }}">
                         <span class="grimba-header-tool-link__label">{{ __('Pour vous') }}</span>
                         <span id="grimba-follow-count">{{ $followCount }}</span>
