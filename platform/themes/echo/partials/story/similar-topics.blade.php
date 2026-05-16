@@ -27,7 +27,7 @@
 @endphp
 
 @if($similar->isNotEmpty())
-    <aside class="grimba-story-similar glass-panel p-3 mb-3">
+    <aside class="grimba-story-similar glass-panel grimba-editorial-ribbon p-3 mb-3">
         <h2 class="h6 mb-2" style="font-family:'Public Sans',system-ui,sans-serif; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; font-size:13px; opacity:0.75;">
             {{ __('Sujets similaires') }}
         </h2>
