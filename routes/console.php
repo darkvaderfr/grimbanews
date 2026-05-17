@@ -49,6 +49,15 @@ grimba_schedule_command('img_proxy_prune', 'grimba:prune-img-proxy-cache --days=
     ->onOneServer()
     ->withoutOverlapping(20);
 
+// GrimbaNews — nightly origin-language backfill (S-LANG-04). Sweeps
+// any post that still has original_language=NULL (typically very recent
+// inserts where the ingest hook detector returned null on too-short
+// text). Pure CPU, no upstream calls. Vader 2026-05-16.
+grimba_schedule_command('lang_backfill', 'grimba:backfill-language')
+    ->dailyAt('03:15')
+    ->onOneServer()
+    ->withoutOverlapping(20);
+
 // GrimbaNews — release evidence retention. Keeps the post-deploy proof
 // trail durable without allowing tiny Markdown reports to grow forever.
 grimba_schedule_command('release_evidence_prune', 'grimba:prune-release-evidence --days=30 --keep=30')
@@ -67,8 +76,9 @@ grimba_schedule_command('rss_ingest', 'grimba:poll-feeds')
     ->runInBackground();
 
 // GrimbaNews — live breaking/recent provider sweep. GDELT + Google News
-// RSS are no-key and run by default; paid providers such as Mediastack
-// are wired but skipped until their keys are configured. This is
+// RSS are no-key and run by default; Webz.io News API Lite and paid
+// providers such as Mediastack are wired but skipped until their keys
+// are configured. This is
 // separate from RSS so breaking rows and stale categories do not depend
 // on publisher feeds alone.
 grimba_schedule_command('breaking_live', 'grimba:fetch-breaking')

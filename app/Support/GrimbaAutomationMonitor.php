@@ -21,6 +21,11 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:poll-feeds',
                 'expected_minutes' => 30,
             ],
+            'breaking_live' => [
+                'label' => 'Live news providers',
+                'command' => 'grimba:fetch-breaking',
+                'expected_minutes' => 15,
+            ],
             'translate_fr' => [
                 'label' => 'Translate to FR',
                 'command' => 'grimba:translate-pending --to=fr --limit=50',
@@ -59,6 +64,11 @@ class GrimbaAutomationMonitor
             'img_proxy_prune' => [
                 'label' => 'Image proxy cache prune',
                 'command' => 'grimba:prune-img-proxy-cache --days=60',
+                'expected_minutes' => 1440,
+            ],
+            'lang_backfill' => [
+                'label' => 'Origin-language backfill (S-LANG-04)',
+                'command' => 'grimba:backfill-language',
                 'expected_minutes' => 1440,
             ],
             'release_evidence_prune' => [
@@ -118,6 +128,7 @@ class GrimbaAutomationMonitor
     {
         return [
             'rss_ingest',
+            'breaking_live',
             'publish_trusted',
             'publish_guardrails',
             'freshness_watchdog',

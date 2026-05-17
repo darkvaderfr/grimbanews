@@ -65,5 +65,32 @@ app()->booted(function (): void {
                 $post->{$field} = $value;
             }
         }
+
+        // Vader 2026-05-16 S-LANG-03 — universal language detection. If
+        // source-copy left original_language empty (e.g. auto-created
+        // news_sources row from the LiveNews / NewsAPI / newsdata.io
+        // fetchers, where language=NULL), fall through to the
+        // detector. It uses TLD + text n-gram signals — no DB / HTTP.
+        $currentLang = $post->original_language ?? null;
+        if ($currentLang === null || $currentLang === '' || $currentLang === 'unknown') {
+            $detected = \App\Services\GrimbaLanguageDetector::detect([
+                'source_language' => $source->language ?? null,
+                'source_url'      => $source->website ?? null,
+                'text_sample'     => trim(((string) ($post->name ?? '')) . "\n" . strip_tags((string) ($post->description ?? ''))),
+            ]);
+
+            if ($detected !== null) {
+                $post->original_language = $detected;
+
+                // Bubble verdict up to news_sources.language when that
+                // row is currently NULL so subsequent posts skip the
+                // detector entirely.
+                if (empty($source->language)) {
+                    DB::table('news_sources')->where('id', $sourceId)
+                        ->whereNull('language')
+                        ->update(['language' => $detected]);
+                }
+            }
+        }
     });
 });
