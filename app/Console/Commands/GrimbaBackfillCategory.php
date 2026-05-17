@@ -101,14 +101,16 @@ class GrimbaBackfillCategory extends Command
                 $this->line("  · [{$categoryName}] run " . ($runs + 1) . "/{$maxRuns} → \"{$query}\"");
 
                 try {
-                    // NewsAPI everything endpoint (free quota-aware) — best fit for topic queries.
+                    // NewsAPI /everything per-query (free quota-aware). The
+                    // command keeps it tight by running one focused query at a time
+                    // rather than the configured everythingQueries() sweep.
                     if ($newsapi->isConfigured()) {
-                        $newsapi->fetchOnce($query);
+                        $newsapi->fetchEverythingPublic($query);
                     }
-                    // RSS poll — covers our pre-configured publisher feeds.
-                    $rss->pollAll();
-                    // Breaking-news lane — opportunistic.
+                    // Breaking-news lane (google-news) — opportunistic, no key needed.
                     $live->fetchAll(['google-news']);
+                    // RSS poll runs on a schedule; skipping here to avoid
+                    // re-polling 600+ feeds per category × per run.
                 } catch (\Throwable $e) {
                     $this->warn("    fetch failed: {$e->getMessage()}");
                 }

@@ -109,7 +109,14 @@
 
         @if($known > 0)
             <section class="glass-panel p-3 p-md-4 mb-4">
-                <h2 class="h6 mb-2">{{ __('Distribution sur GrimbaNews') }}</h2>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <h2 class="h6 mb-0">{{ __('Distribution sur GrimbaNews') }}</h2>
+                    @include(Theme::getThemeNamespace('partials.info-pill'), [
+                        'size' => 'sm',
+                        'tone' => 'soft',
+                        'body' => __("Comment les articles de cette source se répartissent dans les rubriques de GrimbaNews. Aide à voir où la source publie le plus."),
+                    ])
+                </div>
                 <p class="small opacity-75 mb-2">
                     {{ trans_choice(':count article archivé|:count articles archivés', $stats['total'], ['count' => $stats['total']]) }} · {{ __('biais déclaré') }}
                     <strong style="color:{{ $biasColor }};">{{ $biasLabel }}</strong>

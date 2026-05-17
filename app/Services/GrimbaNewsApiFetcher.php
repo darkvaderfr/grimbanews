@@ -197,6 +197,21 @@ class GrimbaNewsApiFetcher
     /**
      * @return array{query:string, kind:string, status:string, total:int, returned:int, ingested:int, deduped:int, skipped:int, error:?string}
      */
+    /**
+     * Public per-query wrapper for the `/everything` endpoint. Used by
+     * `grimba:backfill-category` to drive the fetcher with a tightly-
+     * scoped seed query, bypassing the configured `everythingQueries`
+     * list. Returns the same summary row shape as `fetchAll()`.
+     *
+     * Vader 2026-05-17 — fixes the `fetchOnce()` typo in
+     * `GrimbaBackfillCategory` (was referencing a non-existent method).
+     */
+    public function fetchEverythingPublic(string $query, ?string $lang = null): array
+    {
+        $lang = $lang ?: (string) setting('grimba_newsapi_language', 'fr');
+        return $this->fetchEverything($query, $lang);
+    }
+
     private function fetchEverything(string $query, string $lang): array
     {
         // NewsAPI free tier indexes /everything with a ~24h delay,

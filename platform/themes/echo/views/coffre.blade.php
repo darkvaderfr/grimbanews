@@ -25,13 +25,19 @@
 
         <header class="glass-panel grimba-editorial-ribbon p-4 p-md-5 mb-4">
             <span class="grimba-methodology__kicker">{{ __('Mon coffre') }}</span>
-            <h1 class="grimba-methodology__title mt-2 mb-2">
-                @if($count === 0)
-                    {{ __("Aucun article sauvegardé pour l'instant") }}
-                @else
-                    {{ $count === 1 ? __(':count article sauvegardé', ['count' => $count]) : __(':count articles sauvegardés', ['count' => $count]) }}
-                @endif
-            </h1>
+            <div class="d-flex align-items-center gap-2 flex-wrap mt-2 mb-2">
+                <h1 class="grimba-methodology__title mb-0">
+                    @if($count === 0)
+                        {{ __("Aucun article sauvegardé pour l'instant") }}
+                    @else
+                        {{ $count === 1 ? __(':count article sauvegardé', ['count' => $count]) : __(':count articles sauvegardés', ['count' => $count]) }}
+                    @endif
+                </h1>
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'body' => __("Vos articles sauvegardés sont stockés en local dans votre navigateur (cookie). Capacité 50 articles. Ils ne quittent pas votre appareil tant que vous ne créez pas de compte — aucune donnée n'est envoyée à un serveur tiers."),
+                ])
+            </div>
             <p class="grimba-coffre__lede mb-0">
                 @if($count === 0)
                     {{ __("Cliquez sur l'étoile") }} <span aria-hidden="true">☆</span> {{ __("dans n'importe quel article pour l'ajouter ici.") }}

@@ -18,7 +18,7 @@ class GrimbaTranslatePending extends Command
         {--failed-only : Retry only posts currently recorded in the translation failure queue}
         {--dry-run : Report what would be translated without calling providers}';
 
-    protected $description = 'Translate pending un-translated posts via the configured provider chain (OpenAI / OpenRouter / Anthropic / xAI / Perplexity / Mistral / DeepL / Gemini / Groq / LibreTranslate).';
+    protected $description = 'Translate pending un-translated posts via NobuAI (or fallback providers when NobuAI is offline).';
 
     public function handle(GrimbaTranslator $translator): int
     {

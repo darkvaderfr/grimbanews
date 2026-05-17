@@ -20,9 +20,13 @@
 
         <header class="glass-panel p-4 p-md-5 mb-4">
             <span class="grimba-methodology__kicker">{{ __('Propriété des médias') }}</span>
-            <h1 class="grimba-methodology__title mt-2 mb-3">
-                {{ __('Qui possède quoi') }}
-            </h1>
+            <div class="d-flex align-items-center gap-2 flex-wrap mt-2 mb-3">
+                <h1 class="grimba-methodology__title mb-0">{{ __('Qui possède quoi') }}</h1>
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'body' => __("Cartographie des conglomérats qui possèdent les sources que vous lisez. Cliquez un propriétaire pour voir toutes ses publications dans GrimbaNews — la concentration au sommet peut masquer une diversité éditoriale apparente."),
+                ])
+            </div>
             <p class="grimba-owners__lede mb-2" style="font-size:17px; line-height:1.5; max-width: 65ch;">
                 {{ __(':owners propriétaires identifiés contrôlent :sources sources suivies par GrimbaNews.', ['owners' => $totalOwners, 'sources' => $totalSources]) }}
                 {{ __("Quand un même groupe possède des médias de différents biais, la diversité apparente peut masquer une concentration au sommet.") }}
