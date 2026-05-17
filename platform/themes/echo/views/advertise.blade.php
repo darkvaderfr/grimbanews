@@ -1,8 +1,9 @@
-@extends(Theme::getThemeNamespace('layouts.grimba-chrome'))
+@php
+    /* Vader 2026-05-16 Wave I — see breaking.blade.php for the same fix
+       rationale (double <html>/<body> from @extends-pattern). */
+    Theme::layout('grimba-chrome');
 
-@section('content')
-    @php
-        $slot = trim((string) ($slot ?? ''));
+    $slot = trim((string) ($slot ?? ''));
         $email = trim((string) config('grimba_ads.sales_email', 'ads@grimbanews.com'));
         $subject = rawurlencode('Sponsor GrimbaNews' . ($slot !== '' ? ' — ' . $slot : ''));
         $mailto = 'mailto:' . $email . '?subject=' . $subject;
@@ -668,4 +669,3 @@
             </a>
         </section>
     </section>
-@endsection

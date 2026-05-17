@@ -1,16 +1,24 @@
-@extends(Theme::getThemeNamespace('layouts.grimba-chrome'))
+@php
+    /*
+     * Vader 2026-05-16 Wave I — converted from `@extends(...)` /
+     * `@section('content')` pattern to `Theme::layout()` pattern. The
+     * @extends path was producing a complete <html><body>...</body></html>
+     * doc, which Botble's master layout then wrapped in ANOTHER complete
+     * doc → double <html>/<body>/<footer> rendering ("iframe" feel).
+     * The Theme::layout() pattern lets Botble's master pull this view's
+     * body via Theme::content() — single doc.
+     */
+    Theme::layout('grimba-chrome');
 
-@section('content')
-    @php
-        use App\Support\GrimbaTranslationPresenter as GnTr;
-        use App\Ground\Regions;
-        use Illuminate\Support\Str;
+    use App\Support\GrimbaTranslationPresenter as GnTr;
+    use App\Ground\Regions;
+    use Illuminate\Support\Str;
 
-        $regionLabel = Regions::label(
-            Regions::migrate((string) request()->cookie(\App\Scopes\GrimbaRegionScope::COOKIE_NAME, 'international'))
-        );
-        $isReal = ($mode ?? 'latest') === 'real';
-    @endphp
+    $regionLabel = Regions::label(
+        Regions::migrate((string) request()->cookie(\App\Scopes\GrimbaRegionScope::COOKIE_NAME, 'international'))
+    );
+    $isReal = ($mode ?? 'latest') === 'real';
+@endphp
 
     <section class="grimba-breaking-page container py-4 py-md-5">
         <header class="grimba-breaking-page__head">
@@ -291,4 +299,3 @@
             color: #fffaf0;
         }
     </style>
-@endsection

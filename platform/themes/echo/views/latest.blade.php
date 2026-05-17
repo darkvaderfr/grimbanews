@@ -1,15 +1,16 @@
-@extends(Theme::getThemeNamespace('layouts.grimba-chrome'))
+@php
+    /* Vader 2026-05-16 Wave I — see breaking.blade.php for the same fix
+       rationale (double <html>/<body> from @extends-pattern). */
+    Theme::layout('grimba-chrome');
 
-@section('content')
-    @php
-        use App\Support\GrimbaTranslationPresenter as GnTr;
-        use App\Ground\Regions;
-        use Illuminate\Support\Str;
+    use App\Support\GrimbaTranslationPresenter as GnTr;
+    use App\Ground\Regions;
+    use Illuminate\Support\Str;
 
-        $regionLabel = Regions::label(
-            Regions::migrate((string) request()->cookie(\App\Scopes\GrimbaRegionScope::COOKIE_NAME, 'international'))
-        );
-    @endphp
+    $regionLabel = Regions::label(
+        Regions::migrate((string) request()->cookie(\App\Scopes\GrimbaRegionScope::COOKIE_NAME, 'international'))
+    );
+@endphp
 
     <section class="grimba-latest-page container py-4 py-md-5">
         <header class="grimba-latest-page__head">
@@ -249,4 +250,3 @@
             border-bottom-color: rgba(255, 250, 240, .10);
         }
     </style>
-@endsection
