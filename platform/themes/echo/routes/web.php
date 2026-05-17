@@ -127,6 +127,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             return Theme::scope('comparison-index', compact('clusters', 'pagination', 'diversityFilter'))->render();
         })->name('public.comparison.index');
 
+        // Vader 2026-05-16 — `/dossiers` is the user-friendly alias for
+        // `/comparatif`. The nav primary menu button points at this URL.
+        Route::get('dossiers', function (Request $request) {
+            return redirect()->route('public.comparison.index', $request->query());
+        })->name('public.dossiers.index');
+
         Route::get('comparatif/{clusterId}', function (int $clusterId) {
             $posts = Post::withoutGlobalScope('grimba_region')
                 ->where('story_cluster_id', $clusterId)

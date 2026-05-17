@@ -12,12 +12,17 @@
     @break
 
     @case('grid')
-        <div class="row">
+        {{-- Vader 2026-05-16 Wave M — all blog + sub-blog listing pages
+             must display at least 3 columns when the device permits,
+             shrinking to 2 on tablet and 1 on phone. Sidebar variant
+             caps at 3 cols (sidebar already takes 1/3 of the row);
+             no-sidebar variant scales to 4 on xl+. --}}
+        <div class="row g-3 g-md-4">
             @foreach($posts as $post)
                 <div @class([
                     'mb-4',
-                    'col-md-6' => $enableSidebar,
-                    'col-md-6 col-lg-4' => ! $enableSidebar,
+                    'col-12 col-sm-6 col-lg-4' => $enableSidebar,
+                    'col-12 col-sm-6 col-lg-4 col-xl-3' => ! $enableSidebar,
                 ])>
                     {!! Theme::partial('blog.post.item', compact('post', 'postStyle')) !!}
                 </div>

@@ -79,7 +79,9 @@
                             ? \Carbon\Carbon::parse($c->latestAt)->locale('fr')->diffForHumans(['short' => false])
                             : null;
                     @endphp
-                    <div class="col-lg-6 col-12">
+                    {{-- Vader 2026-05-16 Wave M — 3-column min on lg, 2 on
+                         tablet, 1 on phone. Was col-lg-6 (2 cols). --}}
+                    <div class="col-12 col-sm-6 col-lg-4">
                         <a href="{{ url('/comparatif/' . $c->id) }}" class="grimba-comparison-index__card">
                             <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                                 <span class="grimba-comparison-index__dossier">{{ __('Dossier') }} #{{ $c->id }}</span>

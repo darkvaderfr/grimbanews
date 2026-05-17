@@ -1,11 +1,14 @@
 @php
     $current = request()->path();
+    /* Vader 2026-05-16 Wave L — added Dossiers as the second slot
+       (most-used after Home). Compte folded into the "more" menu in
+       a future sprint; for now Coffre is the user-action slot. */
     $items = [
-        ['label' => __('Accueil'), 'href' => url('/'), 'icon' => 'ti ti-home', 'active' => request()->is('/') || $current === '/'],
-        ['label' => __('Pour vous'), 'href' => url('/pour-vous'), 'icon' => 'ti ti-circle-dotted', 'active' => request()->is('pour-vous')],
-        ['label' => __('Local'), 'href' => url('/local'), 'icon' => 'ti ti-current-location', 'active' => request()->is('local')],
-        ['label' => __('Coffre'), 'href' => url('/coffre'), 'icon' => 'ti ti-star', 'active' => request()->is('coffre*')],
-        ['label' => __('Compte'), 'href' => url('/account'), 'icon' => 'ti ti-user-circle', 'active' => request()->is('account') || request()->is('login') || request()->is('register')],
+        ['label' => __('Accueil'),  'href' => url('/'),          'icon' => 'ti ti-home',             'active' => request()->is('/') || $current === '/'],
+        ['label' => __('Dossiers'), 'href' => url('/dossiers'),  'icon' => 'ti ti-folders',          'active' => request()->is('dossiers*') || request()->is('comparatif*')],
+        ['label' => __('Pour vous'),'href' => url('/pour-vous'), 'icon' => 'ti ti-circle-dotted',    'active' => request()->is('pour-vous*') || request()->is('for-you*')],
+        ['label' => __('Local'),    'href' => url('/local'),     'icon' => 'ti ti-current-location', 'active' => request()->is('local*')],
+        ['label' => __('Coffre'),   'href' => url('/coffre'),    'icon' => 'ti ti-star',             'active' => request()->is('coffre*')],
     ];
 @endphp
 

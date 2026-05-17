@@ -114,11 +114,26 @@
                 <span class="grimba-wordmark__tag">News</span>
             </a>
 
+            @php
+                /* Vader 2026-05-16 Wave L — primary nav with dynamic
+                   active state + new Dossiers entry pointing at
+                   /dossiers (alias for /comparatif). */
+                $__navItems = [
+                    ['href' => url('/'),           'label' => __('Accueil'),    'match' => fn () => request()->is('/') || request()->path() === '/'],
+                    ['href' => url('/dossiers'),   'label' => __('Dossiers'),   'match' => fn () => request()->is('dossiers*') || request()->is('comparatif*')],
+                    ['href' => url('/pour-vous'),  'label' => __('Pour vous'),  'match' => fn () => request()->is('pour-vous*') || request()->is('for-you*')],
+                    ['href' => url('/local'),      'label' => __('Local'),      'match' => fn () => request()->is('local*')],
+                    ['href' => url('/sources'),    'label' => __('Sources'),    'match' => fn () => request()->is('sources*') || request()->is('source/*')],
+                ];
+            @endphp
             <nav class="grimba-nav d-none d-lg-flex" aria-label="{{ __('Principal') }}">
-                <a href="{{ url('/') }}" class="active">{{ __('Accueil') }}</a>
-                <a href="{{ url('/pour-vous') }}">{{ __('Pour vous') }}</a>
-                <a href="{{ url('/local') }}">{{ __('Local') }}</a>
-                <a href="{{ url('/sources') }}">{{ __('Sources') }}</a>
+                @foreach($__navItems as $__item)
+                    @php $__isActive = (bool) call_user_func($__item['match']); @endphp
+                    <a href="{{ $__item['href'] }}"
+                       @if($__isActive) class="active" aria-current="page" @endif>
+                        {{ $__item['label'] }}
+                    </a>
+                @endforeach
             </nav>
 
             @php
