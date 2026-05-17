@@ -8,11 +8,33 @@
      * its own full-bleed body instead of a @yield('content') trunk.
      */
 
-    // Locale override from grimba_lang cookie (wins over Botble's Language plugin).
-    $__grimbaLang = (string) request()->cookie('grimba_lang', '');
-    if ($__grimbaLang === 'en' || $__grimbaLang === 'fr') {
+    // Locale override — S-LANG-06 (Vader 2026-05-16) adds query-param
+    // support so search engines can crawl explicit per-locale URLs.
+    // Precedence: ?lang=… (request-scoped, lets bots index FR + EN) >
+    // cookie (sticky for human visitors) > Botble's default.
+    $__grimbaQueryLang = (string) request()->query('lang', '');
+    $__grimbaCookieLang = (string) request()->cookie('grimba_lang', '');
+    $__grimbaLang = '';
+    if ($__grimbaQueryLang === 'fr' || $__grimbaQueryLang === 'en') {
+        $__grimbaLang = $__grimbaQueryLang;
+    } elseif ($__grimbaCookieLang === 'fr' || $__grimbaCookieLang === 'en') {
+        $__grimbaLang = $__grimbaCookieLang;
+    }
+    if ($__grimbaLang !== '') {
         app()->setLocale($__grimbaLang);
     }
+
+    // hreflang URLs — same path, ?lang param swapped per locale.
+    $__grimbaHreflang = function (?string $locale = null): string {
+        $params = request()->query();
+        if ($locale === null) {
+            unset($params['lang']);
+        } else {
+            $params['lang'] = $locale;
+        }
+        $qs = $params ? '?' . http_build_query($params) : '';
+        return url(request()->path()) . $qs;
+    };
 @endphp
 <!doctype html>
 @php
@@ -76,6 +98,14 @@
     @include(Theme::getThemeNamespace('partials.home.ad-styles'))
 
     @php($__grimbaOgImage = Theme::get('grimba_og_image') ?: url('/og/home.png'))
+    {{-- S-LANG-06 — explicit per-locale URLs so search engines index
+         FR and EN versions distinctly. x-default falls back to FR
+         (GrimbaNews's primary locale per editorial policy). --}}
+    <link rel="alternate" hreflang="fr"        href="{{ $__grimbaHreflang('fr') }}">
+    <link rel="alternate" hreflang="en"        href="{{ $__grimbaHreflang('en') }}">
+    <link rel="alternate" hreflang="x-default" href="{{ $__grimbaHreflang('fr') }}">
+    {{-- Botble's SeoHelper emits the canonical further down in
+         Theme::header() — emitting one here would create a duplicate. --}}
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Flux RSS') }}" href="{{ url('/feed.xml') }}">
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Breaking news') }}" href="{{ url('/feed.breaking.xml') }}">
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Latest') }}" href="{{ url('/feed.latest.xml') }}">

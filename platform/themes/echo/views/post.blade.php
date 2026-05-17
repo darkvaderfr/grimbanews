@@ -1098,9 +1098,13 @@
                                 {!! BaseHelper::clean($__gnContentClean) !!}
 
                                 @if ($__gnShowOrig)
+                                    {{-- S-LANG-07: only emit lang="" when the
+                                         origin language is actually known.
+                                         Empty `lang=""` is invalid HTML and
+                                         lies to screen readers. --}}
                                     <details class="mt-4 mb-2 small">
-                                        <summary class="text-muted" style="cursor: pointer;">Afficher le texte original ({{ strtoupper($post->original_language) }})</summary>
-                                        <div class="mt-2 opacity-75" lang="{{ $post->original_language }}">
+                                        <summary class="text-muted" style="cursor: pointer;">{{ __('Afficher le texte original') }}@if(! empty($post->original_language)) ({{ strtoupper($post->original_language) }})@endif</summary>
+                                        <div class="mt-2 opacity-75" @if(! empty($post->original_language)) lang="{{ $post->original_language }}" @endif>
                                             {!! BaseHelper::clean(\App\Support\GrimbaArticleText::stripNewsApiTruncationMarker($post->content ?? '') ?: '') !!}
                                         </div>
                                     </details>

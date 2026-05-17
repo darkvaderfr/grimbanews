@@ -296,8 +296,8 @@ Vader directive 2026-05-16 — tag every article / breaking / dossier / insight 
 | S-LANG-03 | Wire detector into the universal `Post::saving` hook | 60m | shipped 2026-05-16 — covers all 5 ingest writers + bubbles up to `news_sources.language` |
 | S-LANG-04 | `grimba:backfill-language` artisan command + daily cron | 90m | shipped 2026-05-16 — first run recovered 1340 NULL → 36 NULL (97.3%) |
 | S-LANG-05 | Reader-side serving change for NULL posts (lists rank 3, article-page disclosure) | 75m | shipped 2026-05-16 — NULL → rank 3, in-PHP + in-SQL CASE; article-card meta disclosure added |
-| S-LANG-06 | JSON-LD `inLanguage` + `hreflang` correctness | 60m | partial — `post.blade.php` JSON-LD `inLanguage` now omits the key for NULL posts (no longer lies "fr"). hreflang sweep still open. |
-| S-LANG-07 | `<html lang>` + `lang=""` attribute audit | 45m | open |
+| S-LANG-06 | JSON-LD `inLanguage` + `hreflang` correctness | 60m | shipped 2026-05-16 — `?lang=fr`/`?lang=en` query support in both layouts; hreflang alternates (`fr`, `en`, `x-default`) emit on every reader page; JSON-LD `inLanguage` omits for NULL posts |
+| S-LANG-07 | `<html lang>` + `lang=""` attribute audit | 45m | shipped 2026-05-16 — `<html lang>` is correct via `app()->getLocale()` in all 3 layouts; `post.blade.php:1103` empty `lang=""` fixed (now conditional) |
 | S-LANG-08 | NobuAI summary locale tag (`posts.summary_nobuai_locale`) | 60m | open |
 | S-LANG-09 | `grimba_post_translations.translated_summary` column + writer | 75m | open |
 | S-LANG-10 | Translation work-map admin UI — count + list per locale | 90m | shipped 2026-05-16 — `/admin/grimba/translation-map` shows pending counts FR↔EN, per-source top-15 backlog, unclassified-pool size |

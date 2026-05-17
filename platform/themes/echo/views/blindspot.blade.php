@@ -16,7 +16,13 @@
     <div class="container">
         <header class="glass-panel grimba-editorial-ribbon p-4 mb-4">
             <span class="blindspot-badge mb-2">{{ __('Angle mort') }}</span>
-            <h1 class="h2 mt-2 mb-2">{{ __("Les histoires qu'un seul camp couvre") }}</h1>
+            <h1 class="h2 mt-2 mb-2 d-inline-flex align-items-center gap-2 flex-wrap">
+                <span>{{ __("Les histoires qu'un seul camp couvre") }}</span>
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'body' => __("Filtrez par camp : « Pour la gauche » = histoires que la droite ignore, et vice-versa. Permet de voir ce qu'un camp donné ne raconte pas."),
+                ])
+            </h1>
             <p class="blindspot-page__lede mb-3">
                 {{ __("Un angle mort est une histoire importante rapportée presque exclusivement par un côté du spectre politique. GrimbaNews les signale pour que vous sachiez ce qu'on ne vous raconte pas.") }}
             </p>
