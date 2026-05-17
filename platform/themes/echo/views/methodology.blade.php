@@ -208,6 +208,25 @@
             </p>
         </article>
 
+        <article class="grimba-methodology__section" id="language-detection">
+            <h2>{{ __("Détection automatique de la langue") }}</h2>
+            <p>
+                {{ __("Chaque article ingéré par GrimbaNews est tagué avec sa langue d'origine (français ou anglais). Le détecteur combine quatre signaux, dans cet ordre — premier qui gagne :") }}
+            </p>
+            <ol>
+                <li><strong>{{ __("Indication directe du fournisseur") }}</strong> — {{ __("certains flux RSS et API déclarent eux-mêmes la langue de chaque article.") }}</li>
+                <li><strong>{{ __("Langue de la source") }}</strong> — {{ __("la fiche source (rédaction, pays, ligne éditoriale) porte une langue déclarée par l'équipe.") }}</li>
+                <li><strong>{{ __("TLD du domaine") }}</strong> — {{ __("les domaines en .fr, .qc.ca, .sn, .ci, .ml, .ne, .bf, .cm, .dz, .ma, .tn (et 13 autres) sont francophones par défaut ; .uk, .au, .nz, .ie, .za, .ng, .ke, .gh, .in (et 5 autres) sont anglophones.") }}</li>
+                <li><strong>{{ __("Empreinte linguistique du texte") }}</strong> — {{ __("analyse des 800 premiers caractères du titre + description, 19 marqueurs français vs. 17 marqueurs anglais. Le verdict ne s'applique qu'avec une confiance ≥ 75 %.") }}</li>
+            </ol>
+            <p>
+                {{ __("Si aucun signal n'est confiant, l'article reste 'non classifié' jusqu'au prochain balayage nocturne. Vous verrez un badge ambre 'Langue non classifiée' sur ces articles — c'est un état transitoire, pas un défaut de l'article.") }}
+            </p>
+            <p>
+                {{ __("Une fois classés, les articles français sont automatiquement traduits en anglais (et vice versa) par NobuAI ; le lecteur reçoit la version qui correspond à sa préférence de langue.") }}
+            </p>
+        </article>
+
         <footer class="grimba-methodology__footer glass-panel p-4 mt-4">
             <p class="mb-2"><strong>Version 1.0</strong> — publiée le {{ now()->locale(app()->getLocale())->isoFormat('D MMMM YYYY') }}.</p>
             <p class="small mb-0 opacity-75">

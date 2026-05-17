@@ -298,14 +298,14 @@ Vader directive 2026-05-16 — tag every article / breaking / dossier / insight 
 | S-LANG-05 | Reader-side serving change for NULL posts (lists rank 3, article-page disclosure) | 75m | shipped 2026-05-16 — NULL → rank 3, in-PHP + in-SQL CASE; article-card meta disclosure added |
 | S-LANG-06 | JSON-LD `inLanguage` + `hreflang` correctness | 60m | shipped 2026-05-16 — `?lang=fr`/`?lang=en` query support in both layouts; hreflang alternates (`fr`, `en`, `x-default`) emit on every reader page; JSON-LD `inLanguage` omits for NULL posts |
 | S-LANG-07 | `<html lang>` + `lang=""` attribute audit | 45m | shipped 2026-05-16 — `<html lang>` is correct via `app()->getLocale()` in all 3 layouts; `post.blade.php:1103` empty `lang=""` fixed (now conditional) |
-| S-LANG-08 | NobuAI summary locale tag (`posts.summary_nobuai_locale`) | 60m | open |
-| S-LANG-09 | `grimba_post_translations.translated_summary` column + writer | 75m | open |
+| S-LANG-08 | NobuAI summary locale tag (`posts.summary_nobuai_locale`) | 60m | shipped 2026-05-17 — migration created + idempotent FR backfill + `GrimbaGenerateNobuAiSummaries` writer guards. **Operator must run migration `2026_05_17_120000` to activate.** |
+| S-LANG-09 | `grimba_post_translations.translated_summary` column + writer | 75m | shipped 2026-05-17 — migration created + `GrimbaTranslatePending` translates summary when origin locale ≠ target. **Operator must run migration `2026_05_17_120100` to activate.** |
 | S-LANG-10 | Translation work-map admin UI — count + list per locale | 90m | shipped 2026-05-16 — `/admin/grimba/translation-map` shows pending counts FR↔EN, per-source top-15 backlog, unclassified-pool size |
 | S-LANG-11 | Dossier-level `primary_language` + `language_mix_json` denorm | 75m | code shipped 2026-05-16 (migration + `GrimbaDossierLanguage` helper + `grimba:recompute-dossier-language` artisan); **operator must run the migration** before the column writes go live |
 | S-LANG-12 | Recompute job for dossier language modal on cluster touch | 45m | shipped 2026-05-17 — daily cron at 03:45 UTC + `Post::saved` hook fires `GrimbaDossierLanguage::recompute($clusterId)` whenever a post lands in a cluster |
 | S-LANG-13 | Admin map UI — per-source coverage table | 75m | shipped 2026-05-17 — top-40 sources with FR / EN / unknown / in-row-translated counts; unknown% colored green/amber/danger |
-| S-LANG-14 | Reader badge: "Origin language not yet classified" on rare NULL posts | 30m | open |
+| S-LANG-14 | Reader badge: "Origin language not yet classified" on rare NULL posts | 30m | shipped 2026-05-17 — amber pill on `article-hero-card` meta line linking to `/methodology#language-detection` (anchor added the same sprint) |
 | S-LANG-15 | Atomicity assertion test (per-post + translations consistency) | 60m | shipped 2026-05-17 — 4 assertions on in-row vs join-table parity, join-only translations, half-rolled-back state, unique (post_id, locale) index |
-| S-LANG-16 | Docs + handoff to next session | 30m | open |
+| S-LANG-16 | Docs + handoff to next session | 30m | shipped 2026-05-17 — operator handoff lives at `docs/GRIMBANEWS_LANGUAGE_TAGGING_OPERATOR_HANDOFF.md` |
 
 **Total remaining: ~16h of focused work.** Next pickup = S-LANG-05 (reader-side serving for NULL posts) plus S-LANG-11 (dossier language denorm) — those unblock the rest of the reader-facing chain.

@@ -119,6 +119,18 @@ class GrimbaGenerateNobuAiSummaries extends Command
                 continue;
             }
 
+            // S-LANG-08 (Vader 2026-05-17) — tag the summary's locale.
+            // The current prompt is hardcoded French (see systemPrompt
+            // + buildPrompt below); record that explicitly so a future
+            // cluster-aware generator can produce EN summaries without
+            // colliding with the FR cache.
+            //
+            // Zen audit fix 2026-05-17: only set the locale tag to 'fr'
+            // when it's currently NULL or already 'fr'. Future EN-aware
+            // generators will write 'en' once; this FR pass must not
+            // clobber it. Guard via two passes: first an UPDATE of the
+            // summary fields scoped to those rows, then a separate
+            // UPDATE of the locale tag scoped to the safe subset.
             DB::table('posts')
                 ->where('story_cluster_id', $cluster->story_cluster_id)
                 ->update([
@@ -127,6 +139,17 @@ class GrimbaGenerateNobuAiSummaries extends Command
                     'summary_driver' => $result['driver'],
                     'updated_at' => now(),
                 ]);
+
+            if (Schema::hasColumn('posts', 'summary_nobuai_locale')) {
+                DB::table('posts')
+                    ->where('story_cluster_id', $cluster->story_cluster_id)
+                    ->where(function ($q): void {
+                        $q->whereNull('summary_nobuai_locale')
+                          ->orWhere('summary_nobuai_locale', '')
+                          ->orWhere('summary_nobuai_locale', 'fr');
+                    })
+                    ->update(['summary_nobuai_locale' => 'fr']);
+            }
 
             $this->line(sprintf('    wrote %d lines via %s', substr_count($summary, "\n") + 1, $result['driver']));
             $ok++;

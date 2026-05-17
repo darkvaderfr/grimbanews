@@ -107,6 +107,21 @@ class GrimbaTranslatePending extends Command
         if ($hasFullContent) {
             $columns[] = 'full_content';
         }
+        // S-LANG-09 — pull the summary + its locale so the loop below
+        // can decide whether the NobuAI synthesis needs translating.
+        // Zen audit 2026-05-17: hoist schema reflection outside the
+        // per-post loop. These two booleans drive both the SELECT list
+        // here AND the per-row decision below — single source of truth.
+        $hasSummaryCol = Schema::hasColumn('posts', 'summary_nobuai');
+        $hasSummaryLocaleCol = Schema::hasColumn('posts', 'summary_nobuai_locale');
+        $hasTranslatedSummaryCol = Schema::hasTable('grimba_post_translations')
+            && Schema::hasColumn('grimba_post_translations', 'translated_summary');
+        if ($hasSummaryCol) {
+            $columns[] = 'summary_nobuai';
+        }
+        if ($hasSummaryLocaleCol) {
+            $columns[] = 'summary_nobuai_locale';
+        }
 
         $posts = $query->get($columns);
 
@@ -148,6 +163,19 @@ class GrimbaTranslatePending extends Command
                 continue;
             }
 
+            // S-LANG-09 — translate the NobuAI summary when the column
+            // is present and the post has one in its native locale that
+            // differs from $to. (Zen audit 2026-05-17: schema reflection
+            // is hoisted outside the loop — see below.)
+            $tSummary = null;
+            if ($hasSummaryCol && $hasTranslatedSummaryCol) {
+                $summaryRaw = trim((string) ($p->summary_nobuai ?? ''));
+                $summaryLocale = strtolower(substr((string) ($p->summary_nobuai_locale ?? ''), 0, 2)) ?: strtolower(substr((string) ($p->original_language ?? ''), 0, 2));
+                if ($summaryRaw !== '' && $summaryLocale !== '' && $summaryLocale !== strtolower($to)) {
+                    $tSummary = $translator->translate($summaryRaw, $summaryLocale, $to);
+                }
+            }
+
             $payload = [
                 'translated_name'        => $tName['text'],
                 'translated_description' => $tDesc['text'] ?? null,
@@ -161,17 +189,21 @@ class GrimbaTranslatePending extends Command
 
             if (Schema::hasTable('grimba_post_translations')) {
                 $now = now();
+                $joinPayload = [
+                    'translated_name' => $payload['translated_name'],
+                    'translated_description' => $payload['translated_description'],
+                    'translated_content' => $payload['translated_content'],
+                    'translation_driver' => $payload['translation_driver'],
+                    'translated_at' => $payload['translated_at'],
+                    'updated_at' => $now,
+                    'created_at' => $now,
+                ];
+                if ($hasTranslatedSummaryCol && $tSummary !== null) {
+                    $joinPayload['translated_summary'] = $tSummary['text'] ?? null;
+                }
                 DB::table('grimba_post_translations')->updateOrInsert(
                     ['post_id' => $p->id, 'locale' => $to],
-                    [
-                        'translated_name' => $payload['translated_name'],
-                        'translated_description' => $payload['translated_description'],
-                        'translated_content' => $payload['translated_content'],
-                        'translation_driver' => $payload['translation_driver'],
-                        'translated_at' => $payload['translated_at'],
-                        'updated_at' => $now,
-                        'created_at' => $now,
-                    ]
+                    $joinPayload
                 );
             }
 

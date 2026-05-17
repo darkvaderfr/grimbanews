@@ -162,15 +162,19 @@
             <span>≈{{ $__readMin }} min</span>
         </span>
         @if(empty($post->original_language))
-            {{-- S-LANG-05 (Vader 2026-05-16) — small disclosure when the
-                 origin language is unclassified. The reader sees the raw
-                 text, but we never claim it's in their locale. The
-                 daily backfill cron (S-LANG-04) sweeps the NULL backlog
-                 nightly so this state is transient. --}}
+            {{-- S-LANG-14 (Vader 2026-05-17) — promoted from the italic
+                 inline disclosure (S-LANG-05) to a proper visible badge
+                 with a deep-link to methodology. The reader still sees
+                 the raw text, but we never claim it's in their locale
+                 and we explain why. The daily backfill cron (S-LANG-04)
+                 sweeps the NULL backlog nightly so this is transient. --}}
             <span class="grimba-article-card__sep" aria-hidden="true">·</span>
-            <span class="grimba-article-card__meta-unclassified" title="{{ __("Le détecteur n'a pas pu confirmer la langue d'origine. Le balayage nocturne corrigera cet état.") }}">
-                <em>{{ __("Langue d'origine non classifiée") }}</em>
-            </span>
+            <a href="{{ url('/methodologie#language-detection') }}"
+               class="grimba-article-card__lang-badge"
+               title="{{ __("Le détecteur n'a pas pu confirmer la langue d'origine. Cliquez pour comprendre comment GrimbaNews classifie les langues.") }}">
+                <span aria-hidden="true" class="grimba-article-card__lang-badge-dot">·</span>
+                {{ __('Langue non classifiée') }}
+            </a>
         @endif
     </div>
 
@@ -375,16 +379,46 @@
             text-transform: none;
             letter-spacing: .02em;
         }
-        /* S-LANG-05 — unclassified-language disclosure. Italic + soft tone
-           keeps it discreet but visible to the curious reader. */
-        .grimba-article-card__meta-unclassified {
-            font-family: 'Fraunces', Georgia, serif;
-            font-size: 11.5px;
-            font-style: italic;
-            text-transform: none;
-            letter-spacing: 0;
-            color: var(--gn-ink-muted, rgba(26, 23, 19, .55));
-            cursor: help;
+        /* S-LANG-05/14 — unclassified-language badge. Promoted from the
+           italic inline disclosure to a tappable pill so curious readers
+           can deep-link to /methodology and understand what triggered
+           the state. Amber tone (not red): the article isn't wrong,
+           the classifier just hasn't run on it yet — that's an
+           in-progress state, not an error. Zen audit fix 2026-05-17. */
+        .grimba-article-card__lang-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 9px;
+            border-radius: 999px;
+            background: rgba(184, 134, 11, .10);
+            border: 1px solid rgba(184, 134, 11, .26);
+            color: #8a6608;
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .02em;
+            text-decoration: none;
+            transition: background .18s ease, border-color .18s ease;
+        }
+        .grimba-article-card__lang-badge:hover,
+        .grimba-article-card__lang-badge:focus-visible {
+            background: rgba(184, 134, 11, .18);
+            border-color: rgba(184, 134, 11, .38);
+            color: #6e4f02;
+            text-decoration: none;
+        }
+        .grimba-article-card__lang-badge-dot {
+            font-weight: 900;
+            line-height: 0;
+            font-size: 18px;
+            margin-top: -2px;
+        }
+        [data-bs-theme="dark"] .grimba-article-card__lang-badge,
+        body[data-theme="dark"] .grimba-article-card__lang-badge {
+            background: rgba(224, 184, 120, .14);
+            border-color: rgba(224, 184, 120, .30);
+            color: #e0b878;
         }
 
         .grimba-article-card__pills {
