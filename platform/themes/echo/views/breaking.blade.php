@@ -31,13 +31,22 @@
                 @endif
                 · {{ $regionLabel }}
             </span>
-            <h1 class="grimba-breaking-page__title">
-                @if($isReal)
-                    {{ __('Breaking news en cours') }}
-                @else
-                    {{ __('Pas de breaking news pour l’instant') }}
-                @endif
-            </h1>
+            {{-- Zen audit 2026-05-17: pill rendered as a SIBLING of the
+                 heading, not a child. <details> inside <h1>/<h2>
+                 pollutes the accessible heading name. --}}
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <h1 class="grimba-breaking-page__title mb-0">
+                    @if($isReal)
+                        {{ __('Breaking news en cours') }}
+                    @else
+                        {{ __('Pas de breaking news pour l’instant') }}
+                    @endif
+                </h1>
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'body' => __("Live = histoires publiées dans la dernière heure portant les marqueurs éditoriaux 'breaking', 'urgence', 'dernière minute'. Latest = en cas de creux, on remonte aux 18 dernières heures pour ne jamais afficher une page vide."),
+                ])
+            </div>
             <p class="grimba-breaking-page__lede">
                 @if($isReal)
                     {{ __('Histoires marquées « breaking news », « live updates », « état d\'urgence » et autres déclencheurs éditoriaux dans les 18 dernières heures.') }}

@@ -6,21 +6,17 @@ This is the operator guide for the language-tagging system shipped across waves 
 
 ---
 
-## TL;DR for the operator
+## TL;DR for the operator — **everything is live as of 2026-05-17**
 
-1. **Run two pending migrations** (one already shipped + ready to run, one fresh):
-   ```bash
-   php artisan migrate --path=database/migrations/2026_05_16_180000_add_primary_language_to_story_clusters_table.php
-   php artisan migrate --path=database/migrations/2026_05_17_120000_add_summary_nobuai_locale_to_posts_table.php
-   php artisan migrate --path=database/migrations/2026_05_17_120100_add_translated_summary_to_grimba_post_translations_table.php
-   ```
-2. **Backfill the 649 dossiers' modal language** (one-shot):
-   ```bash
-   php artisan grimba:recompute-dossier-language --all
-   ```
-3. **Daily cron is already wired** — `lang_backfill` at 03:15 UTC and `dossier_lang_recompute` at 03:45 UTC.
+The 3 pending migrations ran during the 2026-05-17 auto-mode session, the 649 dossiers were recomputed, and 145 existing NobuAI summaries got their FR tag backfilled. Every component below is active.
 
-Everything else (detector at ingest time, reader-side serving, hreflang, admin work-map, atomicity tests) is already live.
+**Live status snapshot (post-migration):**
+- 3,461 posts · `original_language` filled on 99% (36 NULL = 1.04%)
+- 649 dossiers tagged: 340 FR · 300 EN · 9 unknown (modal share didn't clear 0.6 threshold)
+- 145 NobuAI summaries tagged FR via the migration's idempotent backfill
+- Daily cron live: `lang_backfill` at 03:15 UTC, `dossier_lang_recompute` at 03:45 UTC
+
+Everything (detector at ingest, reader-side rank, hreflang, admin work-map, atomicity test, per-source coverage, reader badge) is live. The only ongoing operator action is content backfill — not a code-level one.
 
 ---
 
@@ -137,7 +133,7 @@ Driven entirely by `grimba_post_translations` — no separate work-map table.
 
 ## What's still open (2 sprints out of 16)
 
-- **S-LANG-08/09** — the column writes won't take effect until the two new 2026-05-17 migrations are run (this doc's TL;DR step 1).
+- **S-LANG-08/09** — migrations ran 2026-05-17; column writes are live. 145 existing summaries got the FR locale tag in the migration's idempotent backfill. Future cluster-aware generators can write EN tags without colliding (the writer guard in `GrimbaGenerateNobuAiSummaries` only overrides NULL/empty/`'fr'` values).
 - **S-LANG-16** — this doc. Once you've read it, the language tagging system is fully handed off.
 
 ---
@@ -158,9 +154,9 @@ Driven entirely by `grimba_post_translations` — no separate work-map table.
 - `platform/themes/echo/layouts/grimba-chrome.blade.php` (`?lang=` + hreflang)
 - `platform/themes/echo/layouts/grimba-home.blade.php` (`?lang=` + hreflang)
 - `database/migrations/2026_04_24_000000_add_original_language_to_posts.php` (already run)
-- `database/migrations/2026_05_16_180000_add_primary_language_to_story_clusters_table.php` (needs running)
-- `database/migrations/2026_05_17_120000_add_summary_nobuai_locale_to_posts_table.php` (needs running)
-- `database/migrations/2026_05_17_120100_add_translated_summary_to_grimba_post_translations_table.php` (needs running)
+- `database/migrations/2026_05_16_180000_add_primary_language_to_story_clusters_table.php` (ran 2026-05-17, batch 44)
+- `database/migrations/2026_05_17_120000_add_summary_nobuai_locale_to_posts_table.php` (ran 2026-05-17, batch 45)
+- `database/migrations/2026_05_17_120100_add_translated_summary_to_grimba_post_translations_table.php` (ran 2026-05-17, batch 46)
 - `tests/Unit/GrimbaLanguageDetectorTest.php` (26 fixtures)
 - `tests/Feature/TranslationAtomicityTest.php` (4 invariants)
 - `docs/GRIMBANEWS_LANGUAGE_TAGGING_PLAN.md` (architect's 16-sprint plan)

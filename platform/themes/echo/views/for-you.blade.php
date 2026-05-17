@@ -60,7 +60,13 @@
                 <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
                     <div>
                         <span class="grimba-methodology__kicker">{{ __('Sujets que vous évitez') }}</span>
-                        <h2 class="h1 mt-2 mb-2">{{ __('Vos angles morts personnels') }}</h2>
+                        <div class="d-flex align-items-center gap-2 flex-wrap mt-2 mb-2">
+                            <h2 class="h1 mb-0">{{ __('Vos angles morts personnels') }}</h2>
+                            @include(Theme::getThemeNamespace('partials.info-pill'), [
+                                'size' => 'sm',
+                                'body' => __("Sujets que votre historique de lecture évite. Calculé localement à partir des chips suivis et des rubriques peu visitées dans votre cookie — aucune donnée n'est envoyée à un serveur tiers."),
+                            ])
+                        </div>
                         <p class="mb-0 opacity-85">
                             {{ __('D’après vos derniers articles lus, ces rubriques récentes n’apparaissent pas encore dans votre historique.') }}
                         </p>

@@ -145,9 +145,16 @@
 
     @if($__topSources->isNotEmpty())
         <section class="grimba-topic-top-sources container mt-4 mb-2">
-            <h2 class="h6 mb-3 grimba-section-eyebrow grimba-topic-top-sources__title">
-                {{ __('Sources qui couvrent le plus :topic ces 90 jours', ['topic' => __($category->name)]) }}
-            </h2>
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <h2 class="h6 grimba-section-eyebrow grimba-topic-top-sources__title mb-0">
+                    {{ __('Sources qui couvrent le plus :topic ces 90 jours', ['topic' => __($category->name)]) }}
+                </h2>
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'tone' => 'soft',
+                    'body' => __("Les sources qui ont le plus contribué à cette rubrique sur 90 jours. Cumul d'articles publiés — pas un score d'audience ou de popularité."),
+                ])
+            </div>
             <div class="row g-2">
                 @foreach($__topSources as $ts)
                     @php

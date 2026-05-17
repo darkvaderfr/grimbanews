@@ -17,7 +17,13 @@
             <span class="grimba-latest-page__kicker">
                 {{ __('Flux frais') }} · {{ $regionLabel }}
             </span>
-            <h1 class="grimba-latest-page__title">{{ __('Dernières histoires') }}</h1>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <h1 class="grimba-latest-page__title mb-0">{{ __('Dernières histoires') }}</h1>
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'body' => __("Flux chronologique strict, tous camps confondus. Pour filtrer par camp politique, ouvrez un dossier individuel — chaque dossier porte sa propre répartition Gauche / Centre / Droite."),
+                ])
+            </div>
             <p class="grimba-latest-page__lede">
                 {{ __('Les 40 articles les plus récents pour votre édition et votre langue, triés par date de publication.') }}
             </p>

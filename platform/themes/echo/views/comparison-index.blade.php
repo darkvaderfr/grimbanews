@@ -34,9 +34,15 @@
 
         <header class="glass-panel grimba-editorial-ribbon p-4 p-md-5 mb-4">
             <span class="grimba-methodology__kicker">{{ __('Comparer les sources') }}</span>
-            <h1 class="grimba-methodology__title mt-2 mb-2">
-                {{ $pagination->totalCount }} {{ $pagination->totalCount === 1 ? __('dossier ouvert') : __('dossiers ouverts') }}
-            </h1>
+            <div class="d-flex align-items-center gap-2 flex-wrap mt-2 mb-2">
+                <h1 class="grimba-methodology__title mb-0">
+                    {{ $pagination->totalCount }} {{ $pagination->totalCount === 1 ? __('dossier ouvert') : __('dossiers ouverts') }}
+                </h1>
+                @include(Theme::getThemeNamespace('partials.info-pill'), [
+                    'size' => 'sm',
+                    'body' => __("Tous les dossiers où plusieurs camps couvrent la même histoire. Les sujets « comparables » sont sélectionnés automatiquement par regroupement de titres et d'entités — pas par une équipe éditoriale."),
+                ])
+            </div>
             <p class="grimba-comparison-index__lede mb-3">
                 {{ __('Chaque dossier regroupe la même histoire couverte par plusieurs médias. Ouvrez-en un pour voir les angles côte à côte — et') }}
                 <a href="{{ url('/methodologie') }}" class="text-decoration-underline">{{ __('comment nous les classons') }}</a>.

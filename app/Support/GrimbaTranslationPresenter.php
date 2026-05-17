@@ -162,6 +162,48 @@ class GrimbaTranslationPresenter
         return $record !== null && trim((string) ($record->translated_content ?? '')) !== '';
     }
 
+    /**
+     * S-LANG-08/09 (Vader 2026-05-17) — locale-aware NobuAI summary.
+     * Returns the FR-tagged summary verbatim to FR readers, the
+     * translated EN summary to EN readers, or NULL when no usable
+     * version exists. Zen audit fix 2026-05-17: prevents the 145
+     * FR-tagged summaries from leaking to /en readers.
+     */
+    public static function summary(object $post): ?string
+    {
+        $target = self::targetLocale();
+        $summaryRaw = trim((string) ($post->summary_nobuai ?? ''));
+        $summaryLocale = strtolower(substr((string) ($post->summary_nobuai_locale ?? ''), 0, 2));
+
+        // Same-locale: serve verbatim.
+        if ($summaryRaw !== '' && $summaryLocale !== '' && $summaryLocale === $target) {
+            return $summaryRaw;
+        }
+
+        // Different locale: look for a translated version on the join table.
+        $record = self::translationRecord($post, $target);
+        if ($record !== null && trim((string) ($record->translated_summary ?? '')) !== '') {
+            return (string) $record->translated_summary;
+        }
+
+        // No same-locale and no translation. We could fall back to the
+        // raw summary in the wrong locale, but that would re-introduce
+        // the 145-row leak Zen flagged. Return null — the caller decides
+        // whether to hide the panel or show the raw text with a
+        // disclosure.
+        return null;
+    }
+
+    /**
+     * Whether to surface the NobuAI summary panel at all. True when a
+     * locale-appropriate summary exists; the article view can hide the
+     * panel cleanly when this returns false.
+     */
+    public static function hasUsableSummary(object $post): bool
+    {
+        return self::summary($post) !== null;
+    }
+
     public static function excerpt(object $post, int $limit = 160): string
     {
         return Str::limit(strip_tags((string) self::description($post)), $limit);
