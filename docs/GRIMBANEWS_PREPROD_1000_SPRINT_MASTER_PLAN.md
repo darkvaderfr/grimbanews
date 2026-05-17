@@ -295,14 +295,14 @@ Vader directive 2026-05-16 — tag every article / breaking / dossier / insight 
 | S-LANG-02 | `GrimbaLanguageDetector` service (pure-function, TLD + n-gram) | 90m | shipped 2026-05-16 — 26 unit tests, 51 assertions |
 | S-LANG-03 | Wire detector into the universal `Post::saving` hook | 60m | shipped 2026-05-16 — covers all 5 ingest writers + bubbles up to `news_sources.language` |
 | S-LANG-04 | `grimba:backfill-language` artisan command + daily cron | 90m | shipped 2026-05-16 — first run recovered 1340 NULL → 36 NULL (97.3%) |
-| S-LANG-05 | Reader-side serving change for NULL posts (lists rank 3, article-page disclosure) | 75m | open — next session |
-| S-LANG-06 | JSON-LD `inLanguage` + `hreflang` correctness | 60m | open |
+| S-LANG-05 | Reader-side serving change for NULL posts (lists rank 3, article-page disclosure) | 75m | shipped 2026-05-16 — NULL → rank 3, in-PHP + in-SQL CASE; article-card meta disclosure added |
+| S-LANG-06 | JSON-LD `inLanguage` + `hreflang` correctness | 60m | partial — `post.blade.php` JSON-LD `inLanguage` now omits the key for NULL posts (no longer lies "fr"). hreflang sweep still open. |
 | S-LANG-07 | `<html lang>` + `lang=""` attribute audit | 45m | open |
 | S-LANG-08 | NobuAI summary locale tag (`posts.summary_nobuai_locale`) | 60m | open |
 | S-LANG-09 | `grimba_post_translations.translated_summary` column + writer | 75m | open |
-| S-LANG-10 | Translation work-map admin UI — count + list per locale | 90m | open |
-| S-LANG-11 | Dossier-level `primary_language` + `language_mix_json` denorm | 75m | open |
-| S-LANG-12 | Recompute job for dossier language modal on cluster touch | 45m | open |
+| S-LANG-10 | Translation work-map admin UI — count + list per locale | 90m | shipped 2026-05-16 — `/admin/grimba/translation-map` shows pending counts FR↔EN, per-source top-15 backlog, unclassified-pool size |
+| S-LANG-11 | Dossier-level `primary_language` + `language_mix_json` denorm | 75m | code shipped 2026-05-16 (migration + `GrimbaDossierLanguage` helper + `grimba:recompute-dossier-language` artisan); **operator must run the migration** before the column writes go live |
+| S-LANG-12 | Recompute job for dossier language modal on cluster touch | 45m | partial — `recomputeStale($since)` + artisan ready; need to wire as daily cron + on-cluster-touch trigger |
 | S-LANG-13 | Admin map UI — per-source coverage table | 75m | open |
 | S-LANG-14 | Reader badge: "Origin language not yet classified" on rare NULL posts | 30m | open |
 | S-LANG-15 | Atomicity assertion test (per-post + translations consistency) | 60m | open |

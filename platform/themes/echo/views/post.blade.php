@@ -78,8 +78,16 @@
             ],
         ],
         'isAccessibleForFree' => true,
-        'inLanguage' => $__gnHasTr ? $__gnTarget : ($post->original_language ?: 'fr'),
+        // S-LANG-06 (Vader 2026-05-16) — JSON-LD inLanguage now respects
+        // unclassified posts. Falling back to 'fr' for a NULL post is a
+        // lie to search engines; omit the key in that case.
+        'inLanguage' => $__gnHasTr
+            ? $__gnTarget
+            : (! empty($post->original_language) ? $post->original_language : null),
     ];
+    if ($__gnJsonLd['inLanguage'] === null) {
+        unset($__gnJsonLd['inLanguage']);
+    }
 
     if ($post->relationLoaded('categories') || method_exists($post, 'categories')) {
         $section = optional($post->categories->first())->name;

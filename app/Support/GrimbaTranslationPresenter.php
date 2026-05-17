@@ -195,6 +195,10 @@ class GrimbaTranslationPresenter
 
         $source = strtolower(substr((string) ($post->original_language ?? ''), 0, 2));
 
+        // S-LANG-05 (Vader 2026-05-16): NULL-language posts are pushed
+        // to LAST (rank 3) — we don't preferentially serve content we
+        // can't confidently label. Wrong-locale-with-no-translation
+        // still ranks above NULL because at least it's labeled.
         if ($source === $target) {
             return 0;
         }
@@ -203,7 +207,11 @@ class GrimbaTranslationPresenter
             return 1;
         }
 
-        return $source === '' ? 2 : 3;
+        if ($source !== '') {
+            return 2; // labeled wrong-locale (no translation yet)
+        }
+
+        return 3; // unclassified — push to last
     }
 
     /**
@@ -228,6 +236,10 @@ class GrimbaTranslationPresenter
             $bindings[] = $target;
         }
 
+        // S-LANG-05 (Vader 2026-05-16) — NULL now ranks LAST so we
+        // don't preferentially serve content we can't confidently label.
+        // Order: same-locale (0) → translated (1) → labeled wrong-locale
+        // (2) → unclassified NULL (3).
         return [
             "CASE
                 WHEN lower(substr(coalesce(posts.original_language, ''), 1, 2)) = ? THEN 0
@@ -236,7 +248,7 @@ class GrimbaTranslationPresenter
                     AND posts.translated_name IS NOT NULL
                     AND trim(posts.translated_name) != ''
                 ){$existsSql} THEN 1
-                WHEN coalesce(posts.original_language, '') = '' THEN 2
+                WHEN coalesce(posts.original_language, '') != '' THEN 2
                 ELSE 3
             END",
             $bindings,

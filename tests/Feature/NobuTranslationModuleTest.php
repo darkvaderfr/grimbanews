@@ -210,7 +210,13 @@ class NobuTranslationModuleTest extends TestCase
         ]);
     }
 
-    public function test_locale_priority_prefers_native_then_translated_then_unknown_then_untranslated(): void
+    /**
+     * S-LANG-05 (Vader 2026-05-16) — NULL-language posts are pushed to
+     * LAST (rank 3) so the reader is never preferentially served
+     * unclassified content. Order: native → translated → labeled
+     * wrong-locale → unclassified NULL.
+     */
+    public function test_locale_priority_prefers_native_then_translated_then_untranslated_then_unknown(): void
     {
         $now = now();
         $suffix = Str::lower(Str::random(8));
@@ -258,8 +264,10 @@ class NobuTranslationModuleTest extends TestCase
 
         $this->assertSame(0, GrimbaTranslationPresenter::rankForTargetLocale($posts[$nativeId], 'en'));
         $this->assertSame(1, GrimbaTranslationPresenter::rankForTargetLocale($posts[$translatedId], 'en'));
-        $this->assertSame(2, GrimbaTranslationPresenter::rankForTargetLocale($posts[$unknownId], 'en'));
-        $this->assertSame(3, GrimbaTranslationPresenter::rankForTargetLocale($posts[$untranslatedId], 'en'));
+        // S-LANG-05: labeled wrong-locale (untranslated) now ranks
+        // ABOVE unclassified NULL. NULL is rank 3 (last).
+        $this->assertSame(2, GrimbaTranslationPresenter::rankForTargetLocale($posts[$untranslatedId], 'en'));
+        $this->assertSame(3, GrimbaTranslationPresenter::rankForTargetLocale($posts[$unknownId], 'en'));
 
         $orderedIds = DB::table('posts')
             ->whereIn('id', [$nativeId, $translatedId, $unknownId, $untranslatedId])
@@ -267,7 +275,8 @@ class NobuTranslationModuleTest extends TestCase
             ->pluck('id')
             ->all();
 
-        $this->assertSame([$nativeId, $translatedId, $unknownId, $untranslatedId], $orderedIds);
+        // S-LANG-05 ordering: native → translated → labeled wrong-locale → NULL.
+        $this->assertSame([$nativeId, $translatedId, $untranslatedId, $unknownId], $orderedIds);
     }
 
     public function test_translation_presenter_warm_primes_records_for_list_rendering(): void

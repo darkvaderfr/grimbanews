@@ -161,6 +161,17 @@
             <span aria-hidden="true">⏱</span>
             <span>≈{{ $__readMin }} min</span>
         </span>
+        @if(empty($post->original_language))
+            {{-- S-LANG-05 (Vader 2026-05-16) — small disclosure when the
+                 origin language is unclassified. The reader sees the raw
+                 text, but we never claim it's in their locale. The
+                 daily backfill cron (S-LANG-04) sweeps the NULL backlog
+                 nightly so this state is transient. --}}
+            <span class="grimba-article-card__sep" aria-hidden="true">·</span>
+            <span class="grimba-article-card__meta-unclassified" title="{{ __("Le détecteur n'a pas pu confirmer la langue d'origine. Le balayage nocturne corrigera cet état.") }}">
+                <em>{{ __("Langue d'origine non classifiée") }}</em>
+            </span>
+        @endif
     </div>
 
     <div class="grimba-article-card__pills">
@@ -363,6 +374,17 @@
             font-weight: 700;
             text-transform: none;
             letter-spacing: .02em;
+        }
+        /* S-LANG-05 — unclassified-language disclosure. Italic + soft tone
+           keeps it discreet but visible to the curious reader. */
+        .grimba-article-card__meta-unclassified {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 11.5px;
+            font-style: italic;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--gn-ink-muted, rgba(26, 23, 19, .55));
+            cursor: help;
         }
 
         .grimba-article-card__pills {
