@@ -2293,39 +2293,211 @@ html.grimba-home-html[data-bs-theme="dark"] {
     min-width: 0;
 }
 
+/* ------------------------------------------------------------
+   Glass-pill button system — Vader 2026-05-16 GLASS-BTN-1/2.
+   Every reader-facing button is now a frosted glass pill with
+   backdrop blur, gradient sheen, and a subtle hover lift. Two
+   tonal variants — --solid (ink-tinted, primary CTAs) and --ghost
+   (paper-tinted, secondary). The .grimba-glass-pill utility opts
+   any other button into the same treatment.
+   ------------------------------------------------------------ */
 .btn-grimba {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    justify-content: center;
+    gap: 0.4rem;
     font-family: var(--gn-font-body);
     font-weight: 600;
     font-size: 0.95rem;
-    padding: 0.55rem 1.1rem;
+    padding: 0.55rem 1.25rem;
     border-radius: 9999px;
     text-decoration: none;
-    transition: transform .15s, background .15s, color .15s, border-color .15s;
-    border: 1px solid transparent;
     cursor: pointer;
-    line-height: 1;
+    line-height: 1.1;
     width: auto;
     flex: 0 0 auto;
     white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    backdrop-filter: blur(14px) saturate(1.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    border: 1px solid rgba(26, 23, 19, 0.10);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.40), rgba(246, 241, 232, 0.22)),
+        rgba(255, 255, 255, 0.28);
+    color: var(--gn-ink, #1a1713);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+        0 6px 18px rgba(26, 23, 19, 0.10);
+    transition: transform .22s cubic-bezier(.22, 1, .36, 1),
+                background .18s ease,
+                color .18s ease,
+                border-color .18s ease,
+                box-shadow .22s ease;
 }
 button.btn-grimba { appearance: none; }
-.btn-grimba--sm { font-size: 0.85rem; padding: 0.4rem 0.85rem; }
+.btn-grimba::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.30), transparent 55%);
+    pointer-events: none;
+    z-index: -1;
+}
+.btn-grimba:hover,
+.btn-grimba:focus-visible {
+    transform: translateY(-1px);
+    border-color: rgba(26, 23, 19, 0.22);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.42),
+        0 12px 28px rgba(26, 23, 19, 0.14);
+}
+.btn-grimba:active { transform: translateY(0); }
+.btn-grimba--sm { font-size: 0.85rem; padding: 0.4rem 0.95rem; }
+
 a.btn-grimba--solid,
 button.btn-grimba--solid,
 .btn-grimba.btn-grimba--solid {
-    background: var(--gn-ink);
-    color: var(--gn-paper) !important;
+    background:
+        linear-gradient(135deg, rgba(26, 23, 19, 0.92), rgba(26, 23, 19, 0.78)),
+        rgba(26, 23, 19, 0.86);
+    color: var(--gn-paper, #f6f1e8) !important;
+    border-color: rgba(26, 23, 19, 0.45);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.10),
+        0 8px 24px rgba(26, 23, 19, 0.28);
 }
-.btn-grimba--solid:hover { background: #000; transform: translateY(-1px); }
+.btn-grimba--solid::before {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 60%);
+}
+.btn-grimba--solid:hover,
+.btn-grimba--solid:focus-visible {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.96), rgba(26, 23, 19, 0.88)),
+        rgba(0, 0, 0, 0.92);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+        0 14px 32px rgba(26, 23, 19, 0.36);
+}
+
 .btn-grimba--ghost {
-    background: transparent;
-    color: var(--gn-ink);
-    border-color: var(--gn-rule);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.28), rgba(246, 241, 232, 0.14)),
+        rgba(255, 255, 255, 0.18);
+    color: var(--gn-ink, #1a1713);
+    border-color: rgba(26, 23, 19, 0.18);
 }
-.btn-grimba--ghost:hover { border-color: var(--gn-ink); background: rgba(26, 23, 19, 0.04); }
+.btn-grimba--ghost:hover,
+.btn-grimba--ghost:focus-visible {
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.45), rgba(246, 241, 232, 0.28)),
+        rgba(255, 255, 255, 0.32);
+    border-color: rgba(26, 23, 19, 0.32);
+}
+
+/* Dark-mode parity */
+[data-bs-theme="dark"] .btn-grimba,
+body[data-theme="dark"] .btn-grimba {
+    background:
+        linear-gradient(135deg, rgba(40, 35, 28, 0.62), rgba(28, 24, 17, 0.45)),
+        rgba(28, 24, 17, 0.42);
+    border-color: rgba(255, 250, 240, 0.16);
+    color: #fffaf0;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 250, 240, 0.10),
+        0 8px 22px rgba(0, 0, 0, 0.45);
+}
+[data-bs-theme="dark"] .btn-grimba::before,
+body[data-theme="dark"] .btn-grimba::before {
+    background: linear-gradient(180deg, rgba(255, 250, 240, 0.16), transparent 55%);
+}
+[data-bs-theme="dark"] .btn-grimba--solid,
+body[data-theme="dark"] .btn-grimba--solid {
+    background:
+        linear-gradient(135deg, rgba(255, 250, 240, 0.92), rgba(232, 224, 208, 0.82)),
+        rgba(255, 250, 240, 0.88);
+    color: #14110d !important;
+    border-color: rgba(255, 250, 240, 0.42);
+}
+[data-bs-theme="dark"] .btn-grimba--solid:hover,
+body[data-theme="dark"] .btn-grimba--solid:hover {
+    background:
+        linear-gradient(135deg, #fff, rgba(255, 250, 240, 0.92)),
+        #fff;
+}
+
+/* Sitewide opt-in utility — wraps non-.btn-grimba buttons in the
+   same glass-pill treatment. Use on Bootstrap .btn or any plain
+   <button> that should match the system. */
+.grimba-glass-pill,
+button.grimba-glass-pill,
+a.grimba-glass-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.25rem;
+    border-radius: 9999px;
+    font-family: var(--gn-font-body, 'Public Sans', system-ui, sans-serif);
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.1;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    backdrop-filter: blur(14px) saturate(1.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    border: 1px solid rgba(26, 23, 19, 0.10);
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.40), rgba(246, 241, 232, 0.22)),
+        rgba(255, 255, 255, 0.28);
+    color: var(--gn-ink, #1a1713);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+        0 6px 18px rgba(26, 23, 19, 0.10);
+    transition: transform .22s cubic-bezier(.22, 1, .36, 1),
+                background .18s ease,
+                box-shadow .22s ease,
+                border-color .18s ease;
+}
+.grimba-glass-pill:hover,
+.grimba-glass-pill:focus-visible {
+    transform: translateY(-1px);
+    border-color: rgba(26, 23, 19, 0.22);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.42),
+        0 12px 28px rgba(26, 23, 19, 0.14);
+}
+.grimba-glass-pill--solid {
+    background:
+        linear-gradient(135deg, rgba(26, 23, 19, 0.92), rgba(26, 23, 19, 0.78)),
+        rgba(26, 23, 19, 0.86);
+    color: var(--gn-paper, #f6f1e8);
+    border-color: rgba(26, 23, 19, 0.45);
+}
+.grimba-glass-pill--center {
+    display: flex;
+    margin-inline: auto;
+}
+[data-bs-theme="dark"] .grimba-glass-pill,
+body[data-theme="dark"] .grimba-glass-pill {
+    background:
+        linear-gradient(135deg, rgba(40, 35, 28, 0.62), rgba(28, 24, 17, 0.45)),
+        rgba(28, 24, 17, 0.42);
+    border-color: rgba(255, 250, 240, 0.16);
+    color: #fffaf0;
+}
+@media (prefers-reduced-motion: reduce) {
+    .btn-grimba,
+    .grimba-glass-pill {
+        transition: none;
+    }
+}
 
 /* ------------------------------------------------------------
    3. Topic chip strip
@@ -7186,4 +7358,69 @@ body[data-theme="dark"] .grimba-info-pill__body {
         max-width: calc(100vw - 32px);
         font-size: 0.84rem;
     }
+}
+
+/* ------------------------------------------------------------
+   Light-mode contrast hardening — Vader 2026-05-16 GLASS-BTN-3.
+   Targets the surfaces where light-mode text dropped below
+   WCAG AA. Each rule explains the offending pattern.
+   ------------------------------------------------------------ */
+
+/* Info-pill body: defensively reset any inherited text-shadow so
+   the explanation copy never smears when a parent (hero overlay,
+   coverage legend) carries a heavy drop-shadow stack. */
+.grimba-info-pill__body,
+.grimba-info-pill__body * {
+    text-shadow: none !important;
+}
+
+/* Hero text overlay needs the dark gradient even when the
+   image fails to load — otherwise white-on-paper renders as
+   invisible. The fallback bg here paints under the .grimba-hero__text
+   wrapper so the white text + shadow remain readable on any
+   placeholder. */
+.grimba-hero__media--no-image .grimba-hero__text {
+    background:
+        linear-gradient(135deg, rgba(11, 10, 8, 0.94), rgba(11, 10, 8, 0.82)),
+        rgba(11, 10, 8, 0.86) !important;
+}
+.grimba-hero__media--no-image .grimba-hero__gradient {
+    background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.36) 36%, rgba(0, 0, 0, 0.88) 100%) !important;
+}
+
+/* Coverage legend white text is correct INSIDE the hero overlay
+   (.grimba-hero__coverage) and any explicitly .--on-dark surface.
+   Anywhere else (e.g. a light glass card), force ink color to
+   prevent invisible chips. */
+:not(.grimba-coverage--on-dark):not(.grimba-hero__coverage) > .grimba-coverage__legend {
+    color: var(--gn-ink, #1a1713);
+    text-shadow: none;
+}
+:not(.grimba-coverage--on-dark):not(.grimba-hero__coverage) > .grimba-coverage__legend
+    .grimba-coverage__sources {
+    color: var(--gn-ink-muted, #4a4540);
+}
+
+/* Editorial kicker labels (mono uppercase) were using --gn-ink-soft
+   at ~5.0:1. Bump them to --gn-ink-muted (~8:1) so the small caps
+   stay sharp on the cream paper background. */
+.grimba-methodology__kicker,
+.grimba-admin-kicker,
+.grimba-story-distribution__kicker,
+.grimba-voices__kicker,
+.grimba-regional-mix__kicker,
+.grimba-most-read__eyebrow,
+.grimba-all-sides__kicker,
+.grimba-briefing__title + .grimba-briefing__sub,
+.grimba-article-card__source-label {
+    color: var(--gn-ink-muted, #4a4540);
+}
+
+/* Comment-form descender shadow was too soft on the new
+   glass-pill button — bump for tactile depth. */
+.fob-comment-form .btn-grimba--solid {
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+        0 12px 28px rgba(26, 23, 19, 0.34) !important;
 }

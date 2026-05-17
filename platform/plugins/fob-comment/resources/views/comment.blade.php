@@ -211,25 +211,15 @@
                 </label>
             @endif
 
-            <button type="submit"
-                    class="btn-grimba btn-grimba--solid"
-                    style="
-                        padding:12px 28px;
-                        border-radius:9999px;
-                        background:var(--gn-ink,#1a1713);
-                        color:var(--gn-paper,#f6f1e8);
-                        font-family:'Public Sans',system-ui,sans-serif;
-                        font-weight:700;
-                        letter-spacing:0.4px;
-                        font-size:14px;
-                        border:none;
-                        cursor:pointer;
-                        transition:opacity 0.15s ease;
-                    "
-                    onmouseover="this.style.opacity='0.92'"
-                    onmouseout="this.style.opacity='1'">
-                {{ trans('plugins/fob-comment::comment.front.form.submit') }}
-            </button>
+            {{-- Vader 2026-05-16 GLASS-BTN-1: glass-pill, centered, reduced
+                 padding. Inline overrides removed — the new
+                 .btn-grimba--solid rule in grimba-home.css carries the
+                 cinematic glass treatment site-wide. --}}
+            <div style="display:flex; justify-content:center; margin-top:6px;">
+                <button type="submit" class="btn-grimba btn-grimba--solid btn-grimba--sm">
+                    {{ trans('plugins/fob-comment::comment.front.form.submit') }}
+                </button>
+            </div>
         </form>
     </div>
 @endif

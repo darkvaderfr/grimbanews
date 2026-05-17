@@ -275,10 +275,10 @@ Vader directive 2026-05-16 (mid-session): three asks to add to the queue, NOT to
 
 | Sprint | Title | Estimate | Notes |
 |---|---|---|---|
-| GLASS-BTN-1 | Post Comment button → glass pill, centered, reduced padding | 30m | Audit comment-form button across blog templates. Apply `.grimba-glass-pill` modifier. |
-| GLASS-BTN-2 | Promote `.grimba-glass-pill` to every reader button site-wide | 90m | Rebrand `.btn-grimba--solid` / `.btn-grimba--ghost` to glass-pill defaults: translucent gradient, backdrop blur, hover/active sheen. Inventory `.btn`/`.btn-grimba`/`button[type=submit]` across all reader templates. |
-| GLASS-BTN-3 | Light-mode shadow + text-contrast audit | 60m | Sweep every reader page in light mode. Catalogue surfaces where text+shadow combos drop below WCAG AA (4.5:1). Fix list expected: hero overlays on light heroes, glass-card subtitles, kicker labels. |
-| BACKFILL-CAT-1 | Per-editorial-category 500+ article backfill | 90m | New artisan command `grimba:backfill-category --target=500`. Iterates `GrimbaEditorialCategories::canonical()` and runs NewsAPI + RSS queries narrowly scoped per category until each category has ≥500 articles within its trailing-90-day window. Run with `--dry-run` first to size the work. |
-| BACKFILL-CAT-2 | UI gate: hide a category from chips until ≥500 articles ingested | 30m | Prevent users from clicking into thin-content categories during pre-launch validation. |
+| GLASS-BTN-1 | Post Comment button → glass pill, centered, reduced padding | 30m | shipped 2026-05-16 — Post Comment now uses `.btn-grimba--solid btn-grimba--sm` inside a centered wrapper; inline overrides dropped. |
+| GLASS-BTN-2 | Promote glass-pill to every reader button site-wide | 90m | shipped 2026-05-16 — `.btn-grimba` base rebuilt as backdrop-blur frosted pill with gradient sheen + hover lift. `.btn-grimba--solid` / `--ghost` variants + `.grimba-glass-pill` utility for non-`.btn-grimba` buttons. Dark-mode parity, reduced-motion respected. |
+| GLASS-BTN-3 | Light-mode shadow + text-contrast audit | 60m | shipped 2026-05-16 — info-pill body resets inherited `text-shadow`; hero `--no-image` fallback paints dark gradient so white copy stays readable; editorial kickers bumped from `--gn-ink-soft` to `--gn-ink-muted` for AA-strict reading; coverage-legend `color:#fff` rule scoped only to `--on-dark` / hero contexts. |
+| BACKFILL-CAT-1 | Per-editorial-category 500+ article backfill | 90m | shipped 2026-05-16 — `grimba:backfill-category --target=500 [--window=90] [--max-runs-per-category=8] [--category=NAME] [--dry-run]`. Dry-run map as of ship: À la une 748✓, Géopolitique 538✓; **needs backfill:** Politique 405/500, Économie 238/500, Monde 77/500, Société 102/500, Immigration 0/500, Justice 168/500, Tech 248/500, Climat 123/500, Santé 104/500, Sciences 114/500, Sports 100/500, Culture 279/500. Operator runs without `--dry-run` to fire the loop. |
+| BACKFILL-CAT-2 | UI gate: hide thin-content categories from chips until ≥500 articles | 30m | open — depends on operator running BACKFILL-CAT-1 first. |
 
-All five queued — do not start until current `S-NDI-*` and info-pill Phase 2 work closes.
+Five queued items: 4 shipped this session, 1 open (BACKFILL-CAT-2 gate).
