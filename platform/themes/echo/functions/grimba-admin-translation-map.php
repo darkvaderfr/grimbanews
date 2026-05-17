@@ -129,9 +129,38 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $totalPending = $work['fr']['pending'] + $work['en']['pending'];
             $totalDone    = $work['fr']['done']    + $work['en']['done'];
 
+            // S-LANG-13 (Vader 2026-05-17) — per-source coverage table.
+            // For every source with at least one published post, show
+            // total / FR / EN / unclassified / translated counts so the
+            // operator can see which publishers have the worst gaps.
+            $perSourceCoverage = collect();
+            if ($hasOriginalLang) {
+                $perSourceCoverage = DB::table('news_sources')
+                    ->leftJoin('posts', function ($join): void {
+                        $join->on('posts.source_id', '=', 'news_sources.id')
+                             ->where('posts.status', 'published');
+                    })
+                    ->select(
+                        'news_sources.id',
+                        'news_sources.name',
+                        'news_sources.language as source_lang',
+                        DB::raw('count(posts.id) as total'),
+                        DB::raw("sum(case when lower(substr(coalesce(posts.original_language, ''), 1, 2)) = 'fr' then 1 else 0 end) as fr_count"),
+                        DB::raw("sum(case when lower(substr(coalesce(posts.original_language, ''), 1, 2)) = 'en' then 1 else 0 end) as en_count"),
+                        DB::raw("sum(case when coalesce(posts.original_language, '') = '' then 1 else 0 end) as unknown_count"),
+                        DB::raw("sum(case when posts.translated_name is not null and trim(posts.translated_name) != '' then 1 else 0 end) as in_row_translated")
+                    )
+                    ->groupBy('news_sources.id', 'news_sources.name', 'news_sources.language')
+                    ->having('total', '>', 0)
+                    ->orderByDesc('total')
+                    ->limit(40)
+                    ->get();
+            }
+
             return view('grimba-admin.translation-map.index', [
                 'pageTitle' => 'Translation work-map',
                 'work' => $work,
+                'perSourceCoverage' => $perSourceCoverage,
                 'perSourceFr' => $perSourceFr,
                 'perSourceEn' => $perSourceEn,
                 'unclassifiedCount' => $unclassifiedCount,

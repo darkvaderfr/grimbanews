@@ -109,6 +109,58 @@
             </div>
         </div>
 
+        {{-- S-LANG-13 (Vader 2026-05-17) — per-source coverage table.
+             Spot publishers whose article archive is heavy on one
+             locale or has a big unclassified pool. --}}
+        @if($perSourceCoverage->isNotEmpty())
+            <x-core::card class="mt-4">
+                <x-core::card.header>
+                    <x-core::card.title>Per-source coverage (top 40 by total)</x-core::card.title>
+                </x-core::card.header>
+                <x-core::card.body>
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Source</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-end">FR</th>
+                                <th class="text-end">EN</th>
+                                <th class="text-end">Unknown</th>
+                                <th class="text-end">In-row translated</th>
+                                <th>Source lang</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($perSourceCoverage as $row)
+                                @php
+                                    $total       = (int) $row->total;
+                                    $unknownPct  = $total > 0 ? round((int) $row->unknown_count * 100 / $total, 1) : 0;
+                                    $unknownTone = $unknownPct >= 30 ? 'danger' : ($unknownPct >= 10 ? 'warning' : 'success');
+                                @endphp
+                                <tr>
+                                    <td><small>{{ $row->name }}</small></td>
+                                    <td class="text-end"><strong>{{ number_format($total) }}</strong></td>
+                                    <td class="text-end">{{ number_format((int) $row->fr_count) }}</td>
+                                    <td class="text-end">{{ number_format((int) $row->en_count) }}</td>
+                                    <td class="text-end">
+                                        <span class="badge bg-{{ $unknownTone }}">{{ number_format((int) $row->unknown_count) }} ({{ $unknownPct }}%)</span>
+                                    </td>
+                                    <td class="text-end">{{ number_format((int) $row->in_row_translated) }}</td>
+                                    <td>
+                                        @if($row->source_lang)
+                                            <code>{{ $row->source_lang }}</code>
+                                        @else
+                                            <small class="text-muted">unset</small>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </x-core::card.body>
+            </x-core::card>
+        @endif
+
         <p class="text-muted mt-4 small">
             How this is computed: pending = posts where <code>original_language</code> is the opposite locale AND no translated row exists (neither in <code>posts.translated_*</code> nor in <code>grimba_post_translations</code>). Posts with <code>original_language=NULL</code> are counted separately as <em>unclassified</em> and don't enter the translate-pending queue until the detector tags them.
         </p>

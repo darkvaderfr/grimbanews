@@ -58,6 +58,15 @@ grimba_schedule_command('lang_backfill', 'grimba:backfill-language')
     ->onOneServer()
     ->withoutOverlapping(20);
 
+// GrimbaNews — daily dossier-language modal recompute (S-LANG-12).
+// Sweeps story_clusters whose language_recomputed_at is older than 24h
+// (or never set). Pure CPU, runs after lang_backfill so the modal
+// gets the freshest tags. Vader 2026-05-17.
+grimba_schedule_command('dossier_lang_recompute', 'grimba:recompute-dossier-language')
+    ->dailyAt('03:45')
+    ->onOneServer()
+    ->withoutOverlapping(20);
+
 // GrimbaNews — release evidence retention. Keeps the post-deploy proof
 // trail durable without allowing tiny Markdown reports to grow forever.
 grimba_schedule_command('release_evidence_prune', 'grimba:prune-release-evidence --days=30 --keep=30')

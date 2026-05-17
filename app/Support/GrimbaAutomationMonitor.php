@@ -71,6 +71,11 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:backfill-language',
                 'expected_minutes' => 1440,
             ],
+            'dossier_lang_recompute' => [
+                'label' => 'Dossier primary-language recompute (S-LANG-12)',
+                'command' => 'grimba:recompute-dossier-language',
+                'expected_minutes' => 1440,
+            ],
             'release_evidence_prune' => [
                 'label' => 'Release evidence prune',
                 'command' => 'grimba:prune-release-evidence --days=30 --keep=30',

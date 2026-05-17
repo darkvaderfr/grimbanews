@@ -93,4 +93,26 @@ app()->booted(function (): void {
             }
         }
     });
+
+    // S-LANG-12 (Vader 2026-05-17) — recompute the dossier-level
+    // language modal whenever a post lands in a cluster. Cheap (one
+    // group-by query on a small per-cluster row count). Skips silently
+    // if the migration hasn't run yet — the `primary_language` column
+    // check inside `recompute()` is a no-op against an absent column.
+    Post::saved(function (Post $post): void {
+        $clusterId = (int) ($post->story_cluster_id ?? 0);
+        if ($clusterId <= 0) {
+            return;
+        }
+        try {
+            \App\Support\GrimbaDossierLanguage::recompute($clusterId);
+        } catch (\Throwable $e) {
+            // Don't let a modal-recompute hiccup block a post save.
+            \Illuminate\Support\Facades\Log::warning('[GrimbaDossierLanguage] post-save recompute failed', [
+                'cluster_id' => $clusterId,
+                'post_id'    => $post->id,
+                'error'      => $e->getMessage(),
+            ]);
+        }
+    });
 });

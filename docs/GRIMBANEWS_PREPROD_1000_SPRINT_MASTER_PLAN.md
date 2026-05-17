@@ -302,10 +302,10 @@ Vader directive 2026-05-16 — tag every article / breaking / dossier / insight 
 | S-LANG-09 | `grimba_post_translations.translated_summary` column + writer | 75m | open |
 | S-LANG-10 | Translation work-map admin UI — count + list per locale | 90m | shipped 2026-05-16 — `/admin/grimba/translation-map` shows pending counts FR↔EN, per-source top-15 backlog, unclassified-pool size |
 | S-LANG-11 | Dossier-level `primary_language` + `language_mix_json` denorm | 75m | code shipped 2026-05-16 (migration + `GrimbaDossierLanguage` helper + `grimba:recompute-dossier-language` artisan); **operator must run the migration** before the column writes go live |
-| S-LANG-12 | Recompute job for dossier language modal on cluster touch | 45m | partial — `recomputeStale($since)` + artisan ready; need to wire as daily cron + on-cluster-touch trigger |
-| S-LANG-13 | Admin map UI — per-source coverage table | 75m | open |
+| S-LANG-12 | Recompute job for dossier language modal on cluster touch | 45m | shipped 2026-05-17 — daily cron at 03:45 UTC + `Post::saved` hook fires `GrimbaDossierLanguage::recompute($clusterId)` whenever a post lands in a cluster |
+| S-LANG-13 | Admin map UI — per-source coverage table | 75m | shipped 2026-05-17 — top-40 sources with FR / EN / unknown / in-row-translated counts; unknown% colored green/amber/danger |
 | S-LANG-14 | Reader badge: "Origin language not yet classified" on rare NULL posts | 30m | open |
-| S-LANG-15 | Atomicity assertion test (per-post + translations consistency) | 60m | open |
+| S-LANG-15 | Atomicity assertion test (per-post + translations consistency) | 60m | shipped 2026-05-17 — 4 assertions on in-row vs join-table parity, join-only translations, half-rolled-back state, unique (post_id, locale) index |
 | S-LANG-16 | Docs + handoff to next session | 30m | open |
 
 **Total remaining: ~16h of focused work.** Next pickup = S-LANG-05 (reader-side serving for NULL posts) plus S-LANG-11 (dossier language denorm) — those unblock the rest of the reader-facing chain.
