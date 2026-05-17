@@ -47,7 +47,14 @@ if (! function_exists('grimba_record_source_logo_probe')) {
 
 Route::group(['middleware' => ['web', 'core']], function (): void {
     Theme::registerRoutes(function (): void {
-        Route::get('comparatif', function (Request $request) {
+        /*
+         * Vader 2026-05-16 — canonical URL flip. `/dossiers` is now
+         * the dossier overview page (Echo audit caught the original
+         * pattern was an alias-redirect rather than a real page).
+         * `/comparatif` stays as a 301 → `/dossiers` so old links,
+         * RSS subscribers, and search-engine indexes keep working.
+         */
+        Route::get('dossiers', function (Request $request) {
             // S324 — paginate (was rendering all 575 clusters in one wall,
             // page measured 72,000px tall). 24 per page, ?diversity= filter.
             $perPage = 24;
@@ -117,21 +124,22 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 'perPage'     => $perPage,
             ];
 
-            SeoHelper::setTitle(__('Comparer les sources') . ' — GrimbaNews')
+            SeoHelper::setTitle(__('Dossiers') . ' — GrimbaNews')
                 ->setDescription(__("Tous les dossiers en cours — chaque histoire vue sous plusieurs angles."));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
-                ->add(__('Comparer les sources'), url('/comparatif'));
+                ->add(__('Dossiers'), url('/dossiers'));
 
             return Theme::scope('comparison-index', compact('clusters', 'pagination', 'diversityFilter'))->render();
-        })->name('public.comparison.index');
-
-        // Vader 2026-05-16 — `/dossiers` is the user-friendly alias for
-        // `/comparatif`. The nav primary menu button points at this URL.
-        Route::get('dossiers', function (Request $request) {
-            return redirect()->route('public.comparison.index', $request->query());
         })->name('public.dossiers.index');
+
+        // Vader 2026-05-16 — back-compat alias. Old `/comparatif` links
+        // (search-engine indexes, RSS subscribers, prior tweets) keep
+        // working but resolve to the new canonical `/dossiers` URL.
+        Route::get('comparatif', function (Request $request) {
+            return redirect()->route('public.dossiers.index', $request->query(), 301);
+        })->name('public.comparison.index');
 
         Route::get('comparatif/{clusterId}', function (int $clusterId) {
             $posts = Post::withoutGlobalScope('grimba_region')

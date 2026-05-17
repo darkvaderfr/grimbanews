@@ -81,50 +81,74 @@ class GrimbaBackfillLanguage extends Command
                 break;
             }
 
-            foreach ($rows as $row) {
-                $lastId = (int) $row->id;
-                if ($limit !== null && $touched >= $limit) {
-                    break 2;
-                }
+            // Zen audit 2026-05-16 — wrap each batch in a transaction
+            // so a Ctrl-C / fatal mid-batch can't leave a partial state.
+            // Per-batch (not per-row) keeps the lock window tight.
+            $batchTouched = 0;
+            $batchFr = 0;
+            $batchEn = 0;
+            $batchUnknown = 0;
+            $batchSourcesPatched = 0;
+            $batchLastId = $lastId;
 
-                $sample = trim(((string) $row->name) . "\n" . strip_tags((string) $row->description));
-                if ($sample === '' && ! $row->src_lang && ! $row->src_url) {
-                    $perLang['unknown']++;
-                    $touched++;
-                    continue;
-                }
-
-                $verdict = GrimbaLanguageDetector::detect([
-                    'source_language' => $row->src_lang,
-                    'source_url'      => $row->src_url,
-                    'text_sample'     => $sample,
-                ], $confidence);
-
-                if ($verdict === null) {
-                    $perLang['unknown']++;
-                    $touched++;
-                    continue;
-                }
-
-                if (! $dry) {
-                    DB::table('posts')->where('id', $row->id)->update([
-                        'original_language' => $verdict,
-                    ]);
-
-                    // Bubble up to news_sources.language when that row is null.
-                    if ($row->source_id && empty($row->src_lang)) {
-                        DB::table('news_sources')->where('id', $row->source_id)
-                            ->whereNull('language')
-                            ->update(['language' => $verdict]);
-                        $sourcesPatched++;
+            DB::transaction(function () use (
+                $rows, $confidence, $dry,
+                &$batchTouched, &$batchFr, &$batchEn, &$batchUnknown,
+                &$batchSourcesPatched, &$batchLastId, &$touched, $limit
+            ): void {
+                foreach ($rows as $row) {
+                    $batchLastId = (int) $row->id;
+                    if ($limit !== null && ($touched + $batchTouched) >= $limit) {
+                        break;
                     }
-                }
 
-                $perLang[$verdict]++;
-                $touched++;
-            }
+                    $sample = trim(((string) $row->name) . "\n" . strip_tags((string) $row->description));
+                    if ($sample === '' && ! $row->src_lang && ! $row->src_url) {
+                        $batchUnknown++;
+                        $batchTouched++;
+                        continue;
+                    }
+
+                    $verdict = GrimbaLanguageDetector::detect([
+                        'source_language' => $row->src_lang,
+                        'source_url'      => $row->src_url,
+                        'text_sample'     => $sample,
+                    ], $confidence);
+
+                    if ($verdict === null) {
+                        $batchUnknown++;
+                        $batchTouched++;
+                        continue;
+                    }
+
+                    if (! $dry) {
+                        DB::table('posts')->where('id', $row->id)->update([
+                            'original_language' => $verdict,
+                        ]);
+                        if ($row->source_id && empty($row->src_lang)) {
+                            DB::table('news_sources')->where('id', $row->source_id)
+                                ->whereNull('language')
+                                ->update(['language' => $verdict]);
+                            $batchSourcesPatched++;
+                        }
+                    }
+
+                    $verdict === 'fr' ? $batchFr++ : $batchEn++;
+                    $batchTouched++;
+                }
+            });
+
+            $touched += $batchTouched;
+            $perLang['fr'] += $batchFr;
+            $perLang['en'] += $batchEn;
+            $perLang['unknown'] += $batchUnknown;
+            $sourcesPatched += $batchSourcesPatched;
+            $lastId = $batchLastId;
 
             $this->line("  · {$touched} touched (lastId={$lastId}) — fr={$perLang['fr']} en={$perLang['en']} unknown={$perLang['unknown']}");
+            if ($limit !== null && $touched >= $limit) {
+                break;
+            }
         }
 
         $this->newLine();

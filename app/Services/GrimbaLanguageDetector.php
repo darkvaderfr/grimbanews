@@ -29,8 +29,6 @@ class GrimbaLanguageDetector
     private const TLD_MAP = [
         '.fr'    => 'fr',
         '.qc.ca' => 'fr',
-        '.be.fr' => 'fr', // not real but defensive
-        '.com.fr' => 'fr',
         '.gp'    => 'fr', // Guadeloupe
         '.mq'    => 'fr', // Martinique
         '.re'    => 'fr', // Réunion

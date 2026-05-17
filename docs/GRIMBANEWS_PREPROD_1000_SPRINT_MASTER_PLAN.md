@@ -282,3 +282,30 @@ Vader directive 2026-05-16 (mid-session): three asks to add to the queue, NOT to
 | BACKFILL-CAT-2 | UI gate: hide thin-content categories from chips until ≥500 articles | 30m | open — depends on operator running BACKFILL-CAT-1 first. |
 
 Five queued items: 4 shipped this session, 1 open (BACKFILL-CAT-2 gate).
+
+---
+
+## Language Tagging System (S-LANG-01 → S-LANG-16)
+
+Vader directive 2026-05-16 — tag every article / breaking / dossier / insight / NobuAI analysis with its original language (FR/EN), serve content based on the tag, build the translation work-map. Architect plan at `docs/GRIMBANEWS_LANGUAGE_TAGGING_PLAN.md` (16 sprints, ~22h, audit/big/polish cadence). Foundation reuses `posts.original_language` (migrated 2026-04-24) and `grimba_post_translations` (already the durable map — no new table needed).
+
+| Sprint | Title | Est. | Status |
+|---|---|---|---|
+| S-LANG-01 | Audit — inventory of every `original_language` read/write site | 45m | shipped 2026-05-16 (folded into the plan doc's "Current State" section rather than a separate ledger) |
+| S-LANG-02 | `GrimbaLanguageDetector` service (pure-function, TLD + n-gram) | 90m | shipped 2026-05-16 — 26 unit tests, 51 assertions |
+| S-LANG-03 | Wire detector into the universal `Post::saving` hook | 60m | shipped 2026-05-16 — covers all 5 ingest writers + bubbles up to `news_sources.language` |
+| S-LANG-04 | `grimba:backfill-language` artisan command + daily cron | 90m | shipped 2026-05-16 — first run recovered 1340 NULL → 36 NULL (97.3%) |
+| S-LANG-05 | Reader-side serving change for NULL posts (lists rank 3, article-page disclosure) | 75m | open — next session |
+| S-LANG-06 | JSON-LD `inLanguage` + `hreflang` correctness | 60m | open |
+| S-LANG-07 | `<html lang>` + `lang=""` attribute audit | 45m | open |
+| S-LANG-08 | NobuAI summary locale tag (`posts.summary_nobuai_locale`) | 60m | open |
+| S-LANG-09 | `grimba_post_translations.translated_summary` column + writer | 75m | open |
+| S-LANG-10 | Translation work-map admin UI — count + list per locale | 90m | open |
+| S-LANG-11 | Dossier-level `primary_language` + `language_mix_json` denorm | 75m | open |
+| S-LANG-12 | Recompute job for dossier language modal on cluster touch | 45m | open |
+| S-LANG-13 | Admin map UI — per-source coverage table | 75m | open |
+| S-LANG-14 | Reader badge: "Origin language not yet classified" on rare NULL posts | 30m | open |
+| S-LANG-15 | Atomicity assertion test (per-post + translations consistency) | 60m | open |
+| S-LANG-16 | Docs + handoff to next session | 30m | open |
+
+**Total remaining: ~16h of focused work.** Next pickup = S-LANG-05 (reader-side serving for NULL posts) plus S-LANG-11 (dossier language denorm) — those unblock the rest of the reader-facing chain.

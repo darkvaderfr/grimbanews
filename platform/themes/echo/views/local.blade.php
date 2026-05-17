@@ -111,7 +111,7 @@
                     {{ __('dans notre archive.') }}
                 </p>
                 <p class="small opacity-75 mb-0">
-                    {{ __('Essayez une ville plus grande, ou ajustez le pays. La couverture locale varie avec les flux RSS et NewsAPI suivis.') }}
+                    {{ __('Essayez une ville plus grande, ou ajustez le pays. La couverture locale varie selon les sources que GrimbaNews suit.') }}
                 </p>
             </div>
         @elseif($posts->isNotEmpty())

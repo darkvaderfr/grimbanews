@@ -123,7 +123,7 @@ class GrimbaEditorialCategories
         // reader sees how many Politique stories Africa has, not the
         // global total. International readers see the global count
         // because the scope short-circuits to "no filter" there.
-        return Category::query()
+        $chips = Category::query()
             ->where('status', 'published')
             ->whereIn('name', $names)
             ->withCount([
@@ -131,9 +131,35 @@ class GrimbaEditorialCategories
                     ->where('posts.status', 'published'),
             ])
             ->orderBy('order')
-            ->get()
-            ->take($limit)
-            ->values();
+            ->get();
+
+        // Vader 2026-05-16 BACKFILL-CAT-2 — chip gate. Hide
+        // thin-content categories during pre-launch validation so
+        // readers don't land on a near-empty rubrique page. The
+        // threshold is configurable via `grimba_chip_min_articles`
+        // (default 0 = ungated; flip to 500 to enforce Vader's
+        // pre-launch threshold). Once a category crosses the line
+        // it shows up automatically on the next page render.
+        $minArticles = (int) self::chipMinArticles();
+        if ($minArticles > 0) {
+            $chips = $chips->filter(
+                fn (Category $c): bool => (int) ($c->posts_count ?? 0) >= $minArticles
+            );
+        }
+
+        return $chips->take($limit)->values();
+    }
+
+    /**
+     * Threshold below which an editorial chip is suppressed from the
+     * homepage rail. 0 = ungated. Operator flips to 500 once
+     * `grimba:backfill-category` has populated all chosen categories.
+     */
+    public static function chipMinArticles(): int
+    {
+        $raw = function_exists('setting') ? setting('grimba_chip_min_articles', 0) : 0;
+
+        return max(0, (int) $raw);
     }
 
     /**
