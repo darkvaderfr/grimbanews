@@ -63,14 +63,18 @@
                     >
                 </div>
                 <div class="col-lg-5 col-md-7 col-12">
-                    <label class="small text-uppercase opacity-75 fw-semibold mb-1 d-flex align-items-center gap-1">
-                        <span>{{ __('Biais') }}</span>
+                    {{-- Zen audit 2026-05-17: pill MUST be outside the
+                         <label> — interactive <details> inside a <label>
+                         steals focus + can re-trigger the associated
+                         filter on click. --}}
+                    <div class="d-flex align-items-center gap-1 mb-1">
+                        <label class="small text-uppercase opacity-75 fw-semibold mb-0">{{ __('Biais') }}</label>
                         @include(Theme::getThemeNamespace('partials.info-pill'), [
                             'size' => 'sm',
                             'tone' => 'soft',
                             'body' => __("Filtrer les sources par classement éditorial. Une source non classée n'a pas encore assez d'historique de publication chez nous pour être étiquetée — voir notre méthodologie pour les critères."),
                         ])
-                    </label>
+                    </div>
                     <div class="grimba-sources__bias-filter d-flex gap-2 flex-wrap" role="tablist">
                         <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--solid" data-bias="all">{{ __('Tous') }}</button>
                         <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--ghost" data-bias="left"
@@ -102,14 +106,14 @@
             {{-- S311 — factuality tier filter pills. --}}
             <div class="row g-3 align-items-center mt-2">
                 <div class="col-12">
-                    <label class="small text-uppercase opacity-75 fw-semibold mb-1 d-flex align-items-center gap-1">
-                        <span>{{ __('Fiabilité') }}</span>
+                    <div class="d-flex align-items-center gap-1 mb-1">
+                        <label class="small text-uppercase opacity-75 fw-semibold mb-0">{{ __('Fiabilité') }}</label>
                         @include(Theme::getThemeNamespace('partials.info-pill'), [
                             'size' => 'sm',
                             'tone' => 'soft',
                             'body' => __("Filtrer par fiabilité factuelle. Les paliers (Très haute, Haute, Mixte, Basse, Très basse) sont basés sur le score historique de fact-checking de chaque source — pas sur l'article individuel."),
                         ])
-                    </label>
+                    </div>
                     <div class="grimba-sources__fact-filter d-flex gap-2 flex-wrap" role="tablist">
                         <button type="button" class="btn-grimba btn-grimba--sm btn-grimba--solid" data-fact="all">{{ __('Toutes') }}</button>
                         @foreach(['very_high' => 'Très haute', 'high' => 'Haute', 'mixed' => 'Mixte', 'low' => 'Basse', 'very_low' => 'Très basse'] as $tier => $label)

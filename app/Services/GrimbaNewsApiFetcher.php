@@ -203,12 +203,23 @@ class GrimbaNewsApiFetcher
      * scoped seed query, bypassing the configured `everythingQueries`
      * list. Returns the same summary row shape as `fetchAll()`.
      *
-     * Vader 2026-05-17 — fixes the `fetchOnce()` typo in
-     * `GrimbaBackfillCategory` (was referencing a non-existent method).
+     * Zen audit fix 2026-05-17: enforces the daily-request-budget gate
+     * BEFORE calling the upstream so an operator running the backfill
+     * command twice doesn't burn the quota silently. Original
+     * `fetchAll()` flow has its own guard; this public wrapper now
+     * mirrors that defensive posture.
      */
     public function fetchEverythingPublic(string $query, ?string $lang = null): array
     {
         $lang = $lang ?: (string) setting('grimba_newsapi_language', 'fr');
+
+        if (! $this->isConfigured()) {
+            return $this->skippedSummary('everything', "q={$query} ({$lang})", 'NewsAPI key not configured.');
+        }
+        if ($this->callsToday() >= $this->dailyRequestBudget()) {
+            return $this->skippedSummary('everything', "q={$query} ({$lang})", 'NewsAPI daily request budget reached.');
+        }
+
         return $this->fetchEverything($query, $lang);
     }
 

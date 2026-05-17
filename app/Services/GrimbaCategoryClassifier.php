@@ -21,10 +21,15 @@ class GrimbaCategoryClassifier
     ];
 
     private const TOPIC_TRIGGERS = [
+        // Vader 2026-05-17 / Zen audit — Immigration MUST be listed
+        // BEFORE Société because the first-match rule was funneling
+        // immigration / migrant / asile / refugee tokens into Société.
+        // 20 posts had keyword matches; 0 were tagged Immigration.
+        'Immigration' => ['immigration','migrant','migrants','asile','asylum','refugee','réfugié','refugies','réfugiés','frontière','frontières','border policy','border control','sans-papiers','undocumented','dreamer','dreamers','OQTF','naturalisation','expulsion','deportation','expulsé','expulsée','expulsés','seeker','seekers'],
         'Politique' => ['election','élection','president','président','gouvernement','government','parlement','parliament','ministre','minister','senat','sénat','parti politique','campaign','campagne','vote','ballot'],
         'Économie' => ['économie','economie','economic','economy','business','market','marché','inflation','budget','taxe','tax','tariff','tarif','commerce','trade','emploi','jobs','finance','banque','bank','bourse','stock'],
         'Géopolitique' => ['guerre','war','ukraine','russie','russia','gaza','israel','israël','iran','militaire','military','armée','army','defense','défense','security','sécurité','sanction','nato','otan','ceasefire','cessez-le-feu'],
-        'Société' => ['société','societe','education','éducation','school','école','migration','immigration','famille','family','logement','housing','protest','manifestation','student','étudiant','travailleur','worker'],
+        'Société' => ['société','societe','education','éducation','school','école','famille','family','logement','housing','protest','manifestation','student','étudiant','travailleur','worker'],
         'Justice' => ['justice','court','tribunal','procès','proces','trial','judge','juge','police','enquête','investigation','crime','lawsuit','plainte','arrestation','prison','droits','rights'],
         'Tech & Numérique' => ['tech','technology','technologie','numérique','numerique','digital','ai ','ia ','artificial intelligence','intelligence artificielle','cyber','software','logiciel','startup','platform','plateforme','data','données'],
         'Climat & Environnement' => ['climat','climate','environment','environnement','énergie','energie','energy','oil','pétrole','petrole','gas','gaz','biodiversity','biodiversité','pollution','flood','inondation','drought','sécheresse','secheresse'],
