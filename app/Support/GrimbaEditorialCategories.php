@@ -218,15 +218,65 @@ class GrimbaEditorialCategories
      */
     public static function sectionTopics(int $limit = 2): Collection
     {
-        return Category::query()
+        // S-CAT-03 (Vader 2026-05-18) — operator-pinned slots first.
+        // `grimba_section_pin_1` / `grimba_section_pin_2` (etc.)
+        // hold category names. Empty = auto-pick. Pins take
+        // priority over auto-picked categories, then we fill the
+        // remaining slots with auto-pick to reach `$limit`.
+        $pinned = self::pinnedSectionCategories($limit);
+        $pinnedIds = $pinned->pluck('id')->all();
+
+        if ($pinned->count() >= $limit) {
+            return $pinned->take($limit)->values();
+        }
+
+        $remaining = max(0, $limit - $pinned->count());
+        $auto = Category::query()
             ->where('status', 'published')
             ->whereIn('name', self::topicNames(includeFront: false))
+            ->when(! empty($pinnedIds), fn ($q) => $q->whereNotIn('id', $pinnedIds))
             ->withCount(['posts' => fn ($query) => $query->where('posts.status', 'published')])
             ->orderByDesc('posts_count')
             ->orderBy('order')
             ->get()
             ->filter(fn (Category $category): bool => (int) ($category->posts_count ?? 0) > 0)
-            ->take($limit)
+            ->take($remaining)
+            ->values();
+
+        return $pinned->concat($auto)->take($limit)->values();
+    }
+
+    /**
+     * Resolve operator-pinned section categories from settings.
+     *
+     * @return \Illuminate\Support\Collection<int, \Botble\Blog\Models\Category>
+     */
+    public static function pinnedSectionCategories(int $limit = 2): Collection
+    {
+        if (! function_exists('setting')) {
+            return collect();
+        }
+        $names = [];
+        for ($i = 1; $i <= $limit; $i++) {
+            $raw = trim((string) setting('grimba_section_pin_' . $i, ''));
+            if ($raw !== '') {
+                $names[] = $raw;
+            }
+        }
+        if (empty($names)) {
+            return collect();
+        }
+        $valid = self::topicNames(includeFront: true);
+        $names = array_values(array_intersect($names, $valid));
+        if (empty($names)) {
+            return collect();
+        }
+        return Category::query()
+            ->where('status', 'published')
+            ->whereIn('name', $names)
+            ->get()
+            // Preserve the operator's order — sort by position in $names.
+            ->sortBy(fn (Category $c) => array_search($c->name, $names, true))
             ->values();
     }
 }
