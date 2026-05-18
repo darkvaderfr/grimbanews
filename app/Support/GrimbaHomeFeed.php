@@ -258,7 +258,10 @@ class GrimbaHomeFeed
         return Cache::remember($cacheKey, 45, function () use ($windowHours, $strict, $locale): array {
             $cols = ['id','name','translated_name','translated_description','translated_to','original_language','description','content','summary_nobuai','source_name','source_id','bias_rating','published_at','created_at','image','editorial_region'];
 
-            $keywords = self::breakingKeywords();
+            // S-LSAT-06 — locale-scoped keyword set in strict mode
+            // so the EN reader doesn't pick up FR-only "Alerte
+            // enlèvement" headings the row filter then drops.
+            $keywords = self::breakingKeywordsForLocale($locale, $strict);
             $regex = self::breakingRegex($keywords);
 
             // Strict pass: SQL LIKE on TITLE fields only (descriptions
@@ -334,18 +337,60 @@ class GrimbaHomeFeed
      * deliberately excluded — too liberal, "ground-breaking" and
      * "urgent refresh" match them.
      *
+     * S-LSAT-06 (Vader 2026-05-18) — kept as the union method, but
+     * the FR/EN sets are split below so a reader in strict-mode EN
+     * doesn't pick up FR-keyword posts that have no EN translation
+     * (and vice versa). breaking() routes through breakingKeywordsForLocale().
+     *
      * @return array<int, string>
      */
     private static function breakingKeywords(): array
+    {
+        return array_merge(self::breakingKeywordsEn(), self::breakingKeywordsFr());
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function breakingKeywordsEn(): array
     {
         return [
             'breaking news', 'breaking:', 'just in:', 'live updates',
             'state of emergency', 'declared dead', 'evacuation order',
             'mass casualty', 'death toll', 'massive explosion',
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function breakingKeywordsFr(): array
+    {
+        return [
             'en direct', 'dernière minute', 'flash info', 'alerte info',
             'alerte enlèvement', "état d'urgence", 'urgent :', 'urgent –',
             'plan blanc', 'attentat', 'sous les décombres',
         ];
+    }
+
+    /**
+     * S-LSAT-06 — return the keyword set matching the reader's
+     * locale when strict mode is on, otherwise the union. Strict
+     * mode is a contract from the filter side (filterForTargetLocale
+     * already drops opposite-locale-no-translation rows), but the
+     * keyword filter ALSO honors it so an EN reader's breaking
+     * ticker doesn't surface a FR-only "Alerte enlèvement"
+     * heading that the row filter then drops, leaving a confusing
+     * fallback path.
+     *
+     * @return array<int, string>
+     */
+    private static function breakingKeywordsForLocale(string $locale, bool $strict): array
+    {
+        if (! $strict) {
+            return self::breakingKeywords();
+        }
+        return $locale === 'en' ? self::breakingKeywordsEn() : self::breakingKeywordsFr();
     }
 
     /**
