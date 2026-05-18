@@ -7300,40 +7300,92 @@ body[data-theme="dark"] .grimba-toggle-arrow.is-open {
    pattern as native menus / dropdowns. */
 .grimba-info-pill__body {
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + 8px);
     left: 0;
     width: max-content;
-    min-width: 240px;
+    min-width: 260px;
     max-width: min(380px, calc(100vw - 32px));
-    padding: 12px 14px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(246, 241, 232, 0.84));
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(246, 241, 232, 0.86));
     border: 1px solid rgba(192, 57, 43, 0.18);
     box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.42),
-        0 18px 44px rgba(26, 23, 19, 0.18);
+        0 22px 52px rgba(26, 23, 19, 0.22);
     color: var(--gn-ink, #14110d);
-    font-size: 0.86rem;
-    line-height: 1.55;
-    z-index: 1000;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    /* Vader 2026-05-18 — bumped z-index from 1000 to 10000 so the
+       popover floats above sticky headers, glass top-bar, mobile
+       bottom nav, and any modal-style dropdown. */
+    z-index: 10000;
     pointer-events: auto;
-    animation: grimba-info-pill-reveal .22s cubic-bezier(.22, 1, .36, 1);
-    backdrop-filter: blur(8px) saturate(1.1);
-    -webkit-backdrop-filter: blur(8px) saturate(1.1);
+    animation: grimba-info-pill-reveal .24s cubic-bezier(.22, 1, .36, 1);
+    backdrop-filter: blur(10px) saturate(1.15);
+    -webkit-backdrop-filter: blur(10px) saturate(1.15);
+    /* Smooth visual close — when [open] is removed the body simply
+       unmounts (display:none from <details>), so the close animation
+       lives in JS by setting transform/opacity on the body before
+       removing the attribute. This transition is the receiver. */
+    transition: transform .18s ease-out, opacity .18s ease-out;
+    transform-origin: top left;
+}
+/* Caret pointing to the pill button — Vader 2026-05-18 polish.
+   Sits at the body's top-left edge by default; the `--right` modifier
+   flips to top-right. JS hides this entirely when the body is flipped
+   above the summary (rare). */
+.grimba-info-pill__body::after {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: 16px;
+    width: 14px;
+    height: 14px;
+    background: inherit;
+    border-left: 1px solid rgba(192, 57, 43, 0.18);
+    border-top: 1px solid rgba(192, 57, 43, 0.18);
+    transform: rotate(45deg);
+    border-top-left-radius: 4px;
+    z-index: -1;
+}
+.grimba-info-pill--right > .grimba-info-pill__body::after {
+    left: auto;
+    right: 16px;
+}
+.grimba-info-pill__body[data-pill-flipped="up"]::after {
+    top: auto;
+    bottom: -7px;
+    border-left: none;
+    border-top: none;
+    border-right: 1px solid rgba(192, 57, 43, 0.18);
+    border-bottom: 1px solid rgba(192, 57, 43, 0.18);
+    border-bottom-right-radius: 4px;
+    border-top-left-radius: 0;
 }
 .grimba-info-pill__body::before {
     content: "";
     position: absolute;
     top: 0;
-    left: 12px;
-    right: 12px;
+    left: 14px;
+    right: 14px;
     height: 2px;
     background: linear-gradient(90deg, transparent, rgba(192, 57, 43, 0.52), rgba(59, 130, 246, 0.42), transparent);
     border-radius: 2px;
 }
 @keyframes grimba-info-pill-reveal {
-    from { opacity: 0; transform: translateY(-4px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(-6px) scale(.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Vader 2026-05-18 — when the JS flips the body above the summary,
+   the caret repositions but the reveal animation also flips its
+   origin so it grows DOWN from the bottom edge. */
+.grimba-info-pill__body[data-pill-flipped="up"] {
+    animation-name: grimba-info-pill-reveal-up;
+    transform-origin: bottom left;
+}
+@keyframes grimba-info-pill-reveal-up {
+    from { opacity: 0; transform: translateY(6px) scale(.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 /* When the pill is anchored at the right edge of a row, flip the
    popover so it hangs from the right side and doesn't overflow the

@@ -60,56 +60,83 @@
          switch the body to `position: fixed` with viewport-anchored
          coordinates measured from the pill button's rect. CSS handles
          the default `absolute` fallback for browsers that don't fire
-         the `toggle` event (graceful degradation). --}}
+         the `toggle` event (graceful degradation).
+
+         Polish 2026-05-18: smoother close animation, caret pointer
+         that flips when the popover renders above the summary, and
+         a small dimmer backdrop on mobile so the bottom-sheet feels
+         tactile. --}}
     <script>
         (function () {
             if (window.__grimbaInfoPillReady) return;
             window.__grimbaInfoPillReady = true;
 
             const VIEWPORT_PAD = 12;
-            const CHEVRON_GAP = 6;
+            const CHEVRON_GAP = 10;
             const MOBILE_BP = 600;
+            const CLOSE_ANIM_MS = 180;
+
+            // Ensure a single shared backdrop exists for mobile.
+            const getBackdrop = () => {
+                let bd = document.getElementById('grimba-info-pill-backdrop');
+                if (!bd) {
+                    bd = document.createElement('div');
+                    bd.id = 'grimba-info-pill-backdrop';
+                    bd.setAttribute('aria-hidden', 'true');
+                    document.body.appendChild(bd);
+                    bd.addEventListener('click', () => closeOthers(null));
+                }
+                return bd;
+            };
+
+            const showBackdrop = (show) => {
+                const bd = getBackdrop();
+                bd.dataset.active = show ? '1' : '0';
+            };
 
             const positionBody = (details) => {
                 const body = details.querySelector('[data-grimba-info-pill-body]');
                 if (!body) return;
                 const isMobile = window.innerWidth <= MOBILE_BP;
                 if (isMobile) {
-                    // Mobile already uses position:fixed bottom-sheet via CSS — reset inline styles.
+                    // Mobile uses the CSS bottom-sheet pattern; reset
+                    // any inline coordinates from a previous desktop
+                    // toggle and turn the backdrop on.
                     body.style.position = '';
                     body.style.top = '';
                     body.style.left = '';
                     body.style.right = '';
                     body.style.bottom = '';
                     body.style.maxHeight = '';
+                    body.removeAttribute('data-pill-flipped');
+                    showBackdrop(true);
                     return;
                 }
+                showBackdrop(false);
                 const summary = details.querySelector('summary');
                 if (!summary) return;
                 const sRect = summary.getBoundingClientRect();
                 const bodyW = Math.min(380, window.innerWidth - VIEWPORT_PAD * 2);
-                // Position relative to viewport so we escape any
-                // overflow:hidden ancestor.
                 body.style.position = 'fixed';
                 body.style.right = 'auto';
                 body.style.bottom = 'auto';
                 body.style.width = bodyW + 'px';
                 body.style.maxWidth = bodyW + 'px';
-                // Anchor below the summary, clamp left/right to viewport.
                 let left = sRect.left;
                 if (left + bodyW + VIEWPORT_PAD > window.innerWidth) {
                     left = Math.max(VIEWPORT_PAD, window.innerWidth - bodyW - VIEWPORT_PAD);
                 }
                 if (left < VIEWPORT_PAD) left = VIEWPORT_PAD;
                 let top = sRect.bottom + CHEVRON_GAP;
-                // If the popover would run off the bottom, flip above the summary.
                 const bodyH = body.offsetHeight || 200;
+                let flippedUp = false;
                 if (top + bodyH + VIEWPORT_PAD > window.innerHeight) {
                     const flipped = sRect.top - CHEVRON_GAP - bodyH;
                     if (flipped >= VIEWPORT_PAD) {
                         top = flipped;
+                        flippedUp = true;
                     } else {
-                        // Constrained — pin to viewport bottom and let it scroll internally.
+                        // Constrained — pin to viewport, scroll internally.
                         top = Math.max(VIEWPORT_PAD, window.innerHeight - bodyH - VIEWPORT_PAD);
                         body.style.maxHeight = (window.innerHeight - VIEWPORT_PAD * 2) + 'px';
                         body.style.overflowY = 'auto';
@@ -117,11 +144,45 @@
                 }
                 body.style.top = top + 'px';
                 body.style.left = left + 'px';
+                if (flippedUp) {
+                    body.setAttribute('data-pill-flipped', 'up');
+                } else {
+                    body.removeAttribute('data-pill-flipped');
+                }
+            };
+
+            // Smooth close — fade the body out, then drop the open attr.
+            const closeWithAnim = (details) => {
+                const body = details.querySelector('[data-grimba-info-pill-body]');
+                if (!body) {
+                    details.removeAttribute('open');
+                    return;
+                }
+                // Respect reduced motion — drop immediately.
+                if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    details.removeAttribute('open');
+                    showBackdrop(false);
+                    return;
+                }
+                body.style.opacity = '0';
+                body.style.transform = (body.getAttribute('data-pill-flipped') === 'up')
+                    ? 'translateY(6px) scale(.98)'
+                    : 'translateY(-6px) scale(.98)';
+                setTimeout(() => {
+                    details.removeAttribute('open');
+                    body.style.opacity = '';
+                    body.style.transform = '';
+                    // Backdrop is per-page, not per-pill — only hide
+                    // when no pills remain open.
+                    if (!document.querySelector('[data-grimba-info-pill][open]')) {
+                        showBackdrop(false);
+                    }
+                }, CLOSE_ANIM_MS);
             };
 
             const closeOthers = (except) => {
                 document.querySelectorAll('[data-grimba-info-pill][open]').forEach((d) => {
-                    if (d !== except) d.removeAttribute('open');
+                    if (d !== except) closeWithAnim(d);
                 });
             };
 
@@ -131,13 +192,17 @@
                 if (t.open) {
                     closeOthers(t);
                     positionBody(t);
+                } else if (!document.querySelector('[data-grimba-info-pill][open]')) {
+                    showBackdrop(false);
                 }
             }, true);
 
-            // Click outside / Escape closes.
+            // Click outside / Escape closes — but ignore clicks on a
+            // pill's own summary so the second-click-to-close native
+            // <details> behavior still fires.
             document.addEventListener('click', (e) => {
                 document.querySelectorAll('[data-grimba-info-pill][open]').forEach((d) => {
-                    if (!d.contains(e.target)) d.removeAttribute('open');
+                    if (!d.contains(e.target)) closeWithAnim(d);
                 });
             });
             document.addEventListener('keydown', (e) => {
@@ -152,4 +217,27 @@
             window.addEventListener('resize', reflow);
         })();
     </script>
+    <style>
+        /* Mobile backdrop — sits between the page and the bottom-sheet
+           pill body. Pure CSS-driven via the [data-active] attribute. */
+        #grimba-info-pill-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 17, 13, 0.34);
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .18s ease-out;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+        #grimba-info-pill-backdrop[data-active="1"] {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        @media (min-width: 601px) {
+            /* Desktop never shows the backdrop. */
+            #grimba-info-pill-backdrop { display: none; }
+        }
+    </style>
 @endonce
