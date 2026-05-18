@@ -48,9 +48,10 @@
                         <span class="grimba-latest-page__rank" aria-hidden="true">{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}</span>
                         <article class="grimba-latest-page__body">
                             <header class="grimba-latest-page__meta">
-                                @if($primaryCategory)
-                                    <a href="{{ $primaryCategory->url }}" class="grimba-latest-page__category">{{ __($primaryCategory->name) }}</a>
-                                @endif
+                                {{-- S-CAT-02b — primaryTopicFor() badge replaces the raw
+                                     "first attached category" link that often surfaced
+                                     a regional bin (Europe/Afrique) instead of the topic. --}}
+                                @include(Theme::getThemeNamespace('partials.cards.category-badge'), ['post' => $post, 'size' => 'sm'])
                                 @if($post->source_name)
                                     <span class="grimba-latest-page__source">{{ $post->source_name }}</span>
                                 @endif

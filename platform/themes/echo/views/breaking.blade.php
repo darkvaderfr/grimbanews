@@ -82,6 +82,8 @@
                     <li class="grimba-breaking-page__item" style="--bp-color: {{ $biasColor }};">
                         <a href="{{ $post->url }}" class="grimba-breaking-page__link">
                             <header class="grimba-breaking-page__meta">
+                                {{-- S-CAT-02b — topic badge in the breaking row meta --}}
+                                @include(Theme::getThemeNamespace('partials.cards.category-badge'), ['post' => $post, 'size' => 'sm'])
                                 <span class="grimba-breaking-page__source">{{ $post->source_name ?: 'GrimbaNews' }}</span>
                                 {!! Theme::partial('country-pill', ['post' => $post]) !!}
                                 @if($publishedAt)

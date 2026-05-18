@@ -110,20 +110,22 @@ class GrimbaCategoryBadgeSmokeTest extends TestCase
         $this->assertStringContainsString('.grimba-cat-badge--dark', $html);
     }
 
-    public function test_breaking_does_not_render_topic_badge_yet(): void
+    public function test_breaking_renders_category_badge(): void
     {
-        // S-CAT-01/02 wired hero + briefing + most-read + topNews +
-        // latest on the HOME page. /breaking is a separate template
-        // that doesn't include the badge yet (queued for S-CAT-03+).
-        // This test pins that scoping so a future refactor that
-        // accidentally extends to breaking still passes — but if a
-        // FUTURE wave deliberately adds the badge there, this test
-        // gets removed in that commit.
+        // Wave HHHH (S-CAT-02b) extended the badge to /breaking.
+        // At least one badge must render on the page.
         $html = $this->get('/breaking')->assertOk()->getContent();
-        $this->assertStringNotContainsString(
+        $this->assertStringContainsString(
             'data-grimba-cat-badge',
             $html,
-            'Badge on /breaking was not in S-CAT-01/02 scope. If a later wave adds it, remove this test in the same commit.',
+            '/breaking must render at least one category badge after Wave HHHH.',
         );
+    }
+
+    public function test_latest_renders_category_badge(): void
+    {
+        // Wave HHHH — same extension for /latest.
+        $html = $this->get('/latest')->assertOk()->getContent();
+        $this->assertStringContainsString('data-grimba-cat-badge', $html);
     }
 }
