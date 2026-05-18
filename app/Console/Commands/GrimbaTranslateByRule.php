@@ -80,14 +80,18 @@ class GrimbaTranslateByRule extends Command
             $columns[] = 'summary_nobuai_locale';
         }
 
-        // We pull candidates ordered by views DESC so the highest-
-        // signal posts hit the cap first. Without this ordering an
-        // africa-region backlog could starve the global popularity
-        // rule when the cap is tight.
+        // We pull candidates ordered by translation_priority DESC
+        // then views DESC so editorial pins (priority=2 via the
+        // post-edit form) reach the front of the queue before
+        // popularity-threshold matches. Within priority bands, the
+        // highest-signal posts still hit the cap first; without
+        // this an africa-region backlog could starve the global
+        // popularity rule when the cap is tight.
         $candidates = Post::query()
             ->where('status', 'published')
             ->whereNotNull('original_language')
             ->whereIn('original_language', ['fr', 'en'])
+            ->orderByDesc('translation_priority')
             ->orderByDesc('views')
             ->orderByDesc('id')
             ->limit($limit)
