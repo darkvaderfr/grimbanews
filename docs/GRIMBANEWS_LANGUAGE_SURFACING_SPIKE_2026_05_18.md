@@ -87,6 +87,27 @@ Vader's two new rules are exactly the levers that would close the gap:
 
 ---
 
+## 6b. Rule-engine cost ceiling (live data)
+
+Snapshot at 2026-05-18 — 4,578 published posts in corpus.
+
+**Rule #1: African articles must have both FR + EN translations.**
+- Africa-region posts: **302** (150 FR-origin + 152 EN-origin)
+- Currently missing the cross-locale translation: **150 FR-Africa missing EN**, **152 EN-Africa missing FR**
+- One-shot backfill cost: **302 NobuTranslate calls** (≈ a few hours of throttled cron)
+- Ongoing per-day cost: ≈ 5-10 calls/day (estimated based on Africa ingest cadence × 50% missing-other-locale rate)
+
+**Rule #2: Popular articles auto-translate when crossing the view threshold.**
+- Posts with views ≥ 500: **30 posts** today
+- Posts with views ≥ 1000: **22 posts** today
+- Posts with views ≥ 100: **35 posts**
+- One-shot backfill at the 500-view threshold: **≈30 calls** (half already have a translation per their region; net new ≈15)
+- Ongoing cost: highly skewed — viral spikes burst, otherwise dormant. The architect must budget for the worst case (e.g., a Le Monde Africa scoop trending in both langs).
+
+**Net cost ceiling for both rules combined at launch:** ≈300-400 NobuTranslate calls one-shot, then 10-20/day ongoing. **Well within NobuAI's budget envelope** — these rules are SAFE to roll out as cron-driven without quota risk.
+
+---
+
 ## 7. Acceptance gates for Vader
 
 When the plan is done, `/breaking?lang=en` should show:
