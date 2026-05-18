@@ -153,6 +153,19 @@ class GrimbaTranslateByRule extends Command
             $this->line(sprintf('    reason: %s', $d->reason));
 
             if ($dry) {
+                // S-LSAT-19 — dashboard still surfaces dry-run
+                // decisions so operators can see what WOULD fire.
+                self::recordDecision([
+                    'ts'      => now()->toIso8601String(),
+                    'post_id' => (int) $p->id,
+                    'title'   => \Illuminate\Support\Str::limit((string) ($p->name ?? ''), 120),
+                    'from'    => (string) ($p->original_language ?? ''),
+                    'to'      => $to,
+                    'region'  => (string) ($p->editorial_region ?? ''),
+                    'views'   => (int) ($p->views ?? 0),
+                    'reason'  => $d->reason,
+                    'outcome' => 'dry',
+                ]);
                 continue;
             }
 
@@ -167,6 +180,17 @@ class GrimbaTranslateByRule extends Command
             $tName = $translator->translate((string) $p->name, (string) $p->original_language, $to);
             if ($tName === null) {
                 $this->line('    (skipped — all providers failed)');
+                self::recordDecision([
+                    'ts'      => now()->toIso8601String(),
+                    'post_id' => (int) $p->id,
+                    'title'   => \Illuminate\Support\Str::limit((string) ($p->name ?? ''), 120),
+                    'from'    => (string) ($p->original_language ?? ''),
+                    'to'      => $to,
+                    'region'  => (string) ($p->editorial_region ?? ''),
+                    'views'   => (int) ($p->views ?? 0),
+                    'reason'  => $d->reason,
+                    'outcome' => 'fail',
+                ]);
                 $fail++;
                 continue;
             }
@@ -227,6 +251,18 @@ class GrimbaTranslateByRule extends Command
             }
 
             self::recordCall();
+            self::recordDecision([
+                'ts'      => now()->toIso8601String(),
+                'post_id' => (int) $p->id,
+                'title'   => \Illuminate\Support\Str::limit((string) ($p->name ?? ''), 120),
+                'from'    => (string) ($p->original_language ?? ''),
+                'to'      => $to,
+                'region'  => (string) ($p->editorial_region ?? ''),
+                'views'   => (int) ($p->views ?? 0),
+                'reason'  => $d->reason,
+                'outcome' => 'ok',
+                'driver'  => (string) ($tName['driver'] ?? ''),
+            ]);
             $this->line(sprintf('    → %s via %s', \Illuminate\Support\Str::limit($tName['text'], 60), $tName['driver']));
             $ok++;
         }
@@ -263,5 +299,44 @@ class GrimbaTranslateByRule extends Command
     private static function callsCacheKey(): string
     {
         return 'grimba_rule_engine_calls:' . now()->format('Y-m-d');
+    }
+
+    /**
+     * S-LSAT-19 (Vader 2026-05-18) — rolling decisions log for the
+     * admin observability dashboard. Each entry carries timestamp +
+     * post id + post title (truncated) + reason + target locale +
+     * outcome (ok / fail / dry / pinned). Capped at 100 entries on a
+     * 36h TTL so a noisy day doesn't fill the cache.
+     */
+    public static function recordDecision(array $entry): void
+    {
+        $key = self::decisionsCacheKey();
+        $log = (array) Cache::get($key, []);
+        // Prepend so the most recent decision is index 0 — the
+        // dashboard reads from index 0 down.
+        array_unshift($log, $entry);
+        if (count($log) > 100) {
+            $log = array_slice($log, 0, 100);
+        }
+        Cache::put($key, $log, now()->addHours(36));
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public static function recentDecisions(int $limit = 50): array
+    {
+        $log = (array) Cache::get(self::decisionsCacheKey(), []);
+        return array_slice($log, 0, max(1, min(100, $limit)));
+    }
+
+    public static function clearDecisions(): void
+    {
+        Cache::forget(self::decisionsCacheKey());
+    }
+
+    private static function decisionsCacheKey(): string
+    {
+        return 'grimba_rule_engine_decisions:' . now()->format('Y-m-d');
     }
 }
