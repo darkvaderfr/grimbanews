@@ -39,6 +39,19 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $callsToday = GrimbaTranslateByRule::callsToday();
             $decisions = GrimbaTranslateByRule::recentDecisions(50);
 
+            // S-LSAT-19b — provider visibility. Operators need to
+            // know which translator drivers are wired so a silent
+            // "no provider available" failure mode isn't invisible.
+            $providerStatus = ['enabled' => false, 'configured' => []];
+            try {
+                $translator = app(\App\Services\GrimbaTranslator::class);
+                $providerStatus['enabled'] = $translator->enabled();
+                $providerStatus['configured'] = $translator->configuredDrivers();
+            } catch (\Throwable $e) {
+                // Service container couldn't resolve — admin still
+                // gets a "no providers" tile rather than a 500.
+            }
+
             $pinnedQueue = 0;
             $ruleQueue = 0;
             $recentlyTranslated = collect();
@@ -75,6 +88,7 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'ruleQueue',
                 'recentlyTranslated',
                 'enabled',
+                'providerStatus',
             ));
         })->name('translation-monitor.index');
 

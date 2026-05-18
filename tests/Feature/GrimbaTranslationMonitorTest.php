@@ -148,6 +148,21 @@ class GrimbaTranslationMonitorTest extends TestCase
         }
     }
 
+    public function test_provider_visibility_card_renders(): void
+    {
+        // S-LSAT-19b — the provider-visibility card surfaces
+        // whether any translator drivers are configured. Without
+        // it, a silent "no drivers" failure mode is invisible to
+        // operators.
+        $this->actingAs($this->admin())
+            ->get('/admin/grimba/translation-monitor')
+            ->assertOk()
+            ->assertSee('Drivers traducteur', false);
+        // The test fixture environment may or may not have keys
+        // configured; we just assert the card section exists with
+        // the canonical label.
+    }
+
     public function test_decisions_log_caps_at_100_entries(): void
     {
         // Push 150 entries; only the most recent 100 should survive.

@@ -32,6 +32,35 @@
             <div class="alert alert-success">{{ session('success_msg') }}</div>
         @endif
 
+        {{-- S-LSAT-19b — provider visibility. If zero providers
+             are configured the engine silently no-ops; this card
+             surfaces that condition prominently. --}}
+        <div class="row g-3 mb-3">
+            <div class="col-12">
+                <div class="grimba-admin-stat rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap gap-2"
+                     style="background: rgba({{ ($providerStatus['enabled'] ?? false) ? '22, 101, 52' : '192, 57, 43' }}, 0.08); border: 1px solid rgba({{ ($providerStatus['enabled'] ?? false) ? '22, 101, 52' : '192, 57, 43' }}, 0.22);">
+                    <div>
+                        <div style="font-family: 'Public Sans', system-ui, sans-serif; font-weight: 800; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.62;">
+                            {{ __('Drivers traducteur') }}
+                        </div>
+                        <div style="font-size: 14px; margin-top: 4px;">
+                            @if(empty($providerStatus['configured']))
+                                <span style="color:#c0392b; font-weight:700;">{{ __('Aucun driver configuré — le moteur de règles est en no-op silencieux.') }}</span>
+                            @else
+                                {{ __(':n driver(s) prêt(s)', ['n' => count($providerStatus['configured'])]) }} :
+                                @foreach($providerStatus['configured'] as $drv)
+                                    <span style="display:inline-block; padding:2px 9px; margin:2px 4px 2px 0; border-radius:999px; background:rgba(26,23,19,.08); color:#1a1713; font-family:'JetBrains Mono', ui-monospace, monospace; font-size:11px; font-weight:700;">{{ $drv }}</span>
+                                @endforeach
+                            @endif
+                        </div>
+                    </div>
+                    @if(empty($providerStatus['configured']))
+                        <a href="{{ url('/admin/grimba/translation') }}" class="btn btn-outline-primary btn-sm">{{ __('Régler les clés API') }}</a>
+                    @endif
+                </div>
+            </div>
+        </div>
+
         @php
             $capPct = $cap > 0 ? min(100, (int) round($callsToday / $cap * 100)) : 0;
         @endphp
