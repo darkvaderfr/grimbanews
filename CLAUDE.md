@@ -33,3 +33,15 @@ No direct-on-VPS edits. Co-author trailer on every commit. Stage specific files 
 Say **"continue work on grimbanews"** → Claude loads `project_grimbanews_next_prompt.md` from memory first.
 
 Current state snapshot (2026-04-24): 65+ sprints shipped, prod live at 209.74.88.135, TLS blocked on DNS (Vader's registrar step). Latest sprint: S84 image backfill (186/215 posts enriched, 86.5%).
+
+---
+
+## Team protocol — all hands on deck (inherited from global)
+
+**Vader directive 2026-04-29.** Every non-trivial sprint surfaces a **Team that shipped this** credits block at close. Names come exclusively from `~/.claude/projects/-Users-vb-kaizen/memory/project_iboga_full_roster.md`. **Never fabricate.**
+
+The **Zen / Echo / Mnemo** audit panel runs in parallel before declaring any code change shipped (see `feedback_dream_team_audit.md`). Trivial copy edits exempt.
+
+Output pattern: `Backend: <names> · Frontend/Product: Steve/Liam/Alex/Nina · Ops & Infra: Jacob/Hannah/Larry · QA: Sara Kim, Zenkai · Audit: Zen/Echo/Mnemo · Oversight: <exec leads + Zenkai final signoff>`. Pull names that actually match the work.
+
+Full rule: `/Users/vb/.claude/CLAUDE.md` → "All-hands-on-deck team protocol".

@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class GrimbaFetchBreakingNews extends Command
 {
-    protected $signature = 'grimba:fetch-breaking {--provider=* : Provider(s) to run: gdelt, google-news, mediastack}';
+    protected $signature = 'grimba:fetch-breaking {--provider=* : Provider(s) to run: gdelt, google-news, webz, mediastack}';
 
     protected $description = 'Fetch live/breaking articles from free + paid providers and publish them into GrimbaNews.';
 

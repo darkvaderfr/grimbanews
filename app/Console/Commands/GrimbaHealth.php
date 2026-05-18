@@ -204,11 +204,13 @@ class GrimbaHealth extends Command
         // 8. Last 24h ingest
         $rss24 = DB::table('rss_feed_items')->where('seen_at', '>=', $last24h)->count();
         $api24 = DB::table('newsapi_items')->where('fetched_at', '>=', $last24h)->count();
+        $live24 = DB::table('grimba_live_news_items')->where('fetched_at', '>=', $last24h)->count();
         $this->newLine();
         $this->line('8. Ingest last 24h');
         $this->line(sprintf('   RSS poller    : %d items', $rss24));
         $this->line(sprintf('   NewsAPI fetch : %d items', $api24));
-        $this->line(sprintf('   Combined      : %d items', $rss24 + $api24));
+        $this->line(sprintf('   Live providers: %d items', $live24));
+        $this->line(sprintf('   Combined      : %d items', $rss24 + $api24 + $live24));
 
         $newsApiConfigured = $newsApiFetcher->isConfigured();
         $newsApiActive = (bool) setting('grimba_newsapi_active', $newsApiConfigured);

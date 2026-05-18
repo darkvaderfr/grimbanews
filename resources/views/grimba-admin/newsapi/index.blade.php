@@ -10,25 +10,21 @@
         <section class="grimba-admin-hero d-flex justify-content-between gap-3 flex-wrap align-items-start">
             <div>
                 <span class="grimba-admin-kicker">Moteur d'ingest</span>
-                <h1 class="grimba-admin-title">NewsAPI pipeline</h1>
+                <h1 class="grimba-admin-title">News provider pipeline</h1>
                 <p class="grimba-admin-copy">
-                    Pilotez le flux secondaire, testez l'accès fournisseur et lancez une récupération sans quitter le backend éditorial.
+                    Pilotez les fournisseurs payants et gratuits, testez l'accès, surveillez les budgets et lancez une récupération sans quitter le backend éditorial.
                 </p>
             </div>
             <span class="grimba-admin-status">
-                {{ $key ? 'Key configured' : 'No key' }} · {{ $active ? 'Active' : 'Paused' }} · {{ $newsApiStats['calls_today'] }}/{{ $newsApiStats['daily_budget'] }} calls today
+                NewsAPI {{ $key ? 'configured' : 'missing' }} · Webz {{ $webzKey ? 'configured' : 'missing' }} · {{ $newsApiStats['calls_today'] }}/{{ $newsApiStats['daily_budget'] }} NewsAPI calls today
             </span>
         </section>
 
         <x-core::card>
             <x-core::card.header class="d-flex align-items-center justify-content-between">
-                <x-core::card.title>GrimbaNews — NewsAPI</x-core::card.title>
+                <x-core::card.title>GrimbaNews — providers</x-core::card.title>
                 <div class="small text-muted">
-                    @if($key)
-                        Clé configurée · {{ $active ? 'actif' : 'pause' }}
-                    @else
-                        Clé non configurée
-                    @endif
+                    NewsAPI {{ $active ? 'actif' : 'pause' }} · Webz.io {{ $webzActive ? 'actif' : 'pause' }}
                 </div>
             </x-core::card.header>
 
@@ -39,13 +35,101 @@
             <x-core::card.body>
                 <div class="grimba-admin-section mb-4">
                     <p class="text-muted small mb-0">
-                    Pipeline d'ingest secondaire — récupère <strong>top-headlines</strong> (par pays) et
-                    <strong>everything</strong> (recherche par mots-clés) toutes les 30 minutes,
-                    dédoublonne par URL d'article (sha1) et crée des brouillons que la file d'éditeur
-                    peut publier. Les sources connues (50+ outlets dans <code>NewsApiSourceBiasSeeder</code>)
-                    sont mappées automatiquement avec leur biais L/C/R, propriétaire et crédibilité.
-                    Les sources inconnues sont créées en <code>biais=unknown</code> pour révision manuelle.
+                    Pipeline d'ingest secondaire — NewsAPI récupère <strong>top-headlines</strong> et
+                    <strong>everything</strong>; Webz.io News API Lite ajoute une source live avec quota mensuel.
+                    Les deux chemins passent par le même dédoublonnage URL canonique + titre/source avant de créer
+                    un article, afin qu'un doublon fournisseur ne compte pas deux fois dans l'analyse des biais.
                     </p>
+                </div>
+
+                <div class="grimba-admin-section mb-4">
+                    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
+                        <div>
+                            <h3 class="h5 mb-1">Webz.io live lane</h3>
+                            <p class="text-muted small mb-0">
+                                News API Lite: 1,000 appels/mois, 10 articles/appel. Le scheduler limite par jour et par mois avant de toucher le fournisseur.
+                            </p>
+                        </div>
+                        <span class="badge {{ $webzActive && $webzKey ? 'bg-success' : 'bg-secondary' }}">
+                            {{ $webzActive && $webzKey ? 'ready' : 'paused' }}
+                        </span>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-3">
+                            <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                                <div class="text-muted small text-uppercase">Webz today</div>
+                                <div class="fs-4 fw-semibold">{{ $liveProviderStats['webz_calls_today'] }}/{{ $liveProviderStats['webz_daily_budget'] }}</div>
+                                <div class="text-muted small">max {{ $webzMaxCallsPerRun }} call/run</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                                <div class="text-muted small text-uppercase">Webz month</div>
+                                <div class="fs-4 fw-semibold">{{ $liveProviderStats['webz_calls_month'] }}/{{ $liveProviderStats['webz_monthly_budget'] }}</div>
+                                <div class="text-muted small">hard cap under Lite quota</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                                <div class="text-muted small text-uppercase">Webz 24h ingest</div>
+                                <div class="fs-4 fw-semibold">{{ $liveProviderStats['webz_ingested_24h'] }}</div>
+                                <div class="text-muted small">{{ $liveProviderStats['webz_deduped_24h'] }} deduped</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="grimba-admin-stat rounded-3 p-3 h-100">
+                                <div class="text-muted small text-uppercase">Webz failures</div>
+                                <div class="fs-4 fw-semibold">{{ $liveProviderStats['webz_failed_24h'] }}</div>
+                                <div class="text-muted small">last 24h</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if($recentLiveRuns->isNotEmpty())
+                        <div class="table-responsive grimba-admin-table-responsive">
+                            <table class="table table-sm align-middle grimba-admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Provider</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Returned</th>
+                                        <th class="text-end">Ingested</th>
+                                        <th class="text-end">Deduped</th>
+                                        <th>When</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($recentLiveRuns as $run)
+                                        <tr>
+                                            <td data-label="Provider">
+                                                <strong>{{ $run->provider }}</strong>
+                                                <div class="small text-muted">{{ \Illuminate\Support\Str::limit($run->query_label, 84) }}</div>
+                                            </td>
+                                            <td data-label="Status">
+                                                <span class="badge {{ $run->status === 'ok' ? 'bg-success' : ($run->status === 'failed' ? 'bg-danger' : 'bg-secondary') }}">
+                                                    {{ $run->status }}
+                                                </span>
+                                                @if($run->error_message)
+                                                    <div class="small text-danger">{{ \Illuminate\Support\Str::limit($run->error_message, 70) }}</div>
+                                                @endif
+                                            </td>
+                                            <td data-label="Returned" class="text-end">{{ $run->returned_articles }}</td>
+                                            <td data-label="Ingested" class="text-end">{{ $run->ingested_articles }}</td>
+                                            <td data-label="Deduped" class="text-end">{{ $run->deduped_articles }}</td>
+                                            <td data-label="When" class="small text-muted">
+                                                {{ $run->started_at ? \Carbon\Carbon::parse($run->started_at)->diffForHumans() : '—' }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="alert alert-secondary py-2 mb-0">
+                            Aucun run live fournisseur enregistré. Lancez Webz.io une fois pour remplir ce ledger.
+                        </div>
+                    @endif
                 </div>
 
                 <div class="grimba-admin-section mb-4">
@@ -287,6 +371,22 @@
                         <div class="form-text">Stocké dans la table <code>settings</code>. Compte gratuit : 1000 req/jour, délai de 24h sur <code>/everything</code>.</div>
                     </div>
 
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <strong>Clé Webz.io News API Lite</strong>
+                            <span class="text-muted small">(ou <code>WEBZ_NEWS_API_LITE_TOKEN</code>)</span>
+                        </label>
+                        <input type="password"
+                               name="webz_key"
+                               class="form-control"
+                               value="{{ $webzKey }}"
+                               autocomplete="off"
+                               placeholder="webz token…">
+                        <div class="form-text">
+                            Quota Lite: 1,000 appels/mois, 10 articles/appel. Le token reste côté serveur et n'est jamais exposé au front public.
+                        </div>
+                    </div>
+
                     <div class="form-check form-switch mb-4">
                         <input type="hidden" name="active" value="0">
                         <input type="checkbox"
@@ -303,6 +403,22 @@
                         </label>
                     </div>
 
+                    <div class="form-check form-switch mb-4">
+                        <input type="hidden" name="webz_active" value="0">
+                        <input type="checkbox"
+                               class="form-check-input"
+                               name="webz_active"
+                               id="webz-active"
+                               value="1"
+                               {{ $webzActive ? 'checked' : '' }}>
+                        <label class="form-check-label" for="webz-active">
+                            <strong>Webz.io actif</strong>
+                            <span class="text-muted small d-block">
+                                Ajoute Webz.io au flux <code>grimba:fetch-breaking</code> avec garde-fous de coût.
+                            </span>
+                        </label>
+                    </div>
+
                     <div class="mb-4">
                         <label class="form-label"><strong>Requêtes /everything</strong></label>
                         <textarea name="queries"
@@ -311,6 +427,16 @@
                         <div class="form-text">
                             Une requête par ligne (ou virgules). Syntaxe NewsAPI : <code>OR</code>, <code>AND</code>, guillemets, parenthèses.
                             Exemple : <code>"intelligence artificielle" OR "IA générative"</code>.
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label"><strong>Requêtes Webz.io</strong></label>
+                        <textarea name="webz_queries"
+                                  class="form-control font-monospace"
+                                  rows="4">{{ $webzQueries }}</textarea>
+                        <div class="form-text">
+                            Une requête par ligne. Le scheduler tourne les requêtes au fil du mois pour éviter de consommer le quota sur un seul sujet.
                         </div>
                     </div>
 
@@ -371,6 +497,33 @@
                                    value="{{ $maxCallsPerRun }}">
                             <div class="form-text">Cap de sécurité pour éviter une explosion pays × catégories.</div>
                         </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Webz budget quotidien</strong></label>
+                            <input type="number"
+                                   name="webz_daily_budget"
+                                   min="1" max="1000"
+                                   class="form-control"
+                                   value="{{ $webzDailyBudget }}">
+                            <div class="form-text">Recommandé: 30 appels/jour pour rester sous 1,000/mois.</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Webz budget mensuel</strong></label>
+                            <input type="number"
+                                   name="webz_monthly_budget"
+                                   min="1" max="1000"
+                                   class="form-control"
+                                   value="{{ $webzMonthlyBudget }}">
+                            <div class="form-text">Hard cap local; protège le quota Lite.</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Webz max calls/run</strong></label>
+                            <input type="number"
+                                   name="webz_max_calls_per_run"
+                                   min="1" max="10"
+                                   class="form-control"
+                                   value="{{ $webzMaxCallsPerRun }}">
+                            <div class="form-text">Le cron live tourne toutes les 15 minutes.</div>
+                        </div>
                     </div>
 
                     <div class="grimba-admin-actions mt-4">
@@ -380,6 +533,9 @@
                         </button>
                         <button type="button" class="btn btn-outline-secondary" id="newsapi-run-btn">
                             Lancer un fetch maintenant
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="webz-run-btn">
+                            Lancer Webz.io maintenant
                         </button>
                     </div>
 
@@ -459,6 +615,29 @@
                     const a = alertNode('success');
                     const head = document.createElement('strong');
                     head.textContent = 'Fetch terminé.';
+                    a.appendChild(head);
+                    const pre = document.createElement('pre');
+                    pre.className = 'mb-0 mt-2 small bg-light p-2 rounded';
+                    pre.textContent = d.output || '';
+                    a.appendChild(pre);
+                    result.appendChild(a);
+                } catch (e) { setStatus('Erreur réseau: ' + e.message, 'danger'); }
+            });
+
+            document.getElementById('webz-run-btn').addEventListener('click', async () => {
+                setStatus("Lancement de grimba:fetch-breaking --provider=webz…", 'info');
+                try {
+                    const r = await fetch(@json(route('grimba.newsapi.run-live')), {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                    });
+                    const d = await r.json();
+                    if (! d.ok) { setStatus('Erreur: ' + (d.error || 'exit ' + d.exitCode), 'danger'); return; }
+
+                    clearResult();
+                    const a = alertNode('success');
+                    const head = document.createElement('strong');
+                    head.textContent = 'Fetch Webz.io terminé.';
                     a.appendChild(head);
                     const pre = document.createElement('pre');
                     pre.className = 'mb-0 mt-2 small bg-light p-2 rounded';
