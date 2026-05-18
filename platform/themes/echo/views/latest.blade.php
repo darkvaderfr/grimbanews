@@ -70,6 +70,9 @@
                 @endforeach
             </ol>
         @endif
+
+        {{-- S-LSAT-05 — tail expander (opposite-locale prompt). --}}
+        @include(Theme::getThemeNamespace('partials.lang.tail-expander'), ['surface' => 'latest', 'hours' => 72])
     </section>
 
     <style>

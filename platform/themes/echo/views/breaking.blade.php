@@ -97,6 +97,12 @@
                 @endforeach
             </ol>
         @endif
+
+        {{-- S-LSAT-05 — bottom-of-rail "X articles also available in
+             [other locale]" ribbon. Hidden when no opposite-locale
+             posts exist in the recency window OR the operator
+             disabled the feature via the admin form. --}}
+        @include(Theme::getThemeNamespace('partials.lang.tail-expander'), ['surface' => 'breaking', 'hours' => 24])
     </section>
 
     <style>

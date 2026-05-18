@@ -137,5 +137,9 @@
                 </nav>
             @endif
         @endif
+
+        {{-- S-LSAT-05 — tail expander. Hours are wide here because
+             dossiers move on a slower cadence than breaking. --}}
+        @include(Theme::getThemeNamespace('partials.lang.tail-expander'), ['surface' => 'dossiers', 'hours' => 168])
     </div>
 </section>
