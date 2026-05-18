@@ -109,6 +109,15 @@
                             <dt style="opacity:.62;">{{ __('Slot d\'origine') }}</dt>
                             <dd class="m-0">{{ $lead->source_slot ?? '—' }}</dd>
 
+                            <dt style="opacity:.62;">{{ __('Pack d\'origine') }}</dt>
+                            <dd class="m-0">
+                                @if($lead->source_pack_tier ?? null)
+                                    <span class="badge" style="background: linear-gradient(135deg, #c0392b, #1a1713); color: #fffaf1;">{{ $lead->source_pack_tier }}</span>
+                                @else
+                                    <span style="opacity:.4;">—</span>
+                                @endif
+                            </dd>
+
                             <dt style="opacity:.62;">{{ __('Référent') }}</dt>
                             <dd class="m-0" style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size:11.5px; word-break:break-all;">
                                 {{ $lead->source_referrer ?: '—' }}

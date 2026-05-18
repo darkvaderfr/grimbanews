@@ -53,6 +53,7 @@ class AdvertiserLeadController extends Controller
             'budget_band' => ['nullable', 'string', 'max:32', 'in:' . implode(',', self::BUDGET_BANDS)],
             'goals'       => ['nullable', 'string', 'max:2000'],
             'source_slot' => ['nullable', 'string', 'max:64'],
+            'source_pack_tier' => ['nullable', 'string', 'max:64'],
         ]);
 
         $locale = $request->cookie('grimba_lang') ?: app()->getLocale();
@@ -65,6 +66,7 @@ class AdvertiserLeadController extends Controller
             'goals'           => $data['goals'] ?? null,
             'source_referrer' => substr((string) $request->headers->get('referer', ''), 0, 512) ?: null,
             'source_slot'     => $data['source_slot'] ?? null,
+            'source_pack_tier' => $data['source_pack_tier'] ?? null,
             'locale'          => $locale,
             'ip'              => $ip,
             'status'          => 'new',
@@ -92,6 +94,7 @@ class AdvertiserLeadController extends Controller
                         leadSourceSlot: $data['source_slot'] ?? null,
                         leadLocale: $locale,
                         detailUrl: $detailUrl,
+                        leadSourcePackTier: $data['source_pack_tier'] ?? null,
                     )
                 );
             }

@@ -31,6 +31,7 @@ class GrimbaAdvertiserLeadNotification extends Mailable
         public ?string $leadSourceSlot,
         public ?string $leadLocale,
         public string $detailUrl,
+        public ?string $leadSourcePackTier = null,
     ) {
     }
 

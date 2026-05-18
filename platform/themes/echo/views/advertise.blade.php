@@ -1195,6 +1195,15 @@
                     @if(! empty($slot))
                         <input type="hidden" name="source_slot" value="{{ $slot }}">
                     @endif
+                    {{-- S-ADS-11 — pack-tier telemetry. Populated by
+                         the JS hook below when a reader clicks a pack
+                         CTA. Stays empty for direct form fills. --}}
+                    <input type="hidden" name="source_pack_tier" id="grimba-ads-page__lead-pack-tier" value="">
+                    <noscript>
+                        {{-- JS-less readers still POST a clean payload
+                             (source_pack_tier stays empty). Skip the
+                             hook entirely. --}}
+                    </noscript>
                     {{-- Honeypot — hidden from humans, bots fill everything. --}}
                     <label class="grimba-ads-page__lead-hp" aria-hidden="true">
                         <span>Leave this field empty</span>
@@ -1237,4 +1246,28 @@
                 </form>
             </div>
         </section>
+
+        {{-- S-ADS-11 (Vader 2026-05-18) — pack-tier telemetry hook.
+             When a reader clicks a pricing pack's "Demander un devis"
+             CTA, this script copies the data-pack-tier attribute into
+             the hidden lead-form input, so the captured lead carries
+             which tier originated it. Pure delegated listener, no
+             dependencies, no-ops gracefully if either the CTAs or the
+             input are absent. --}}
+        <script>
+            (function () {
+                var input = document.getElementById('grimba-ads-page__lead-pack-tier');
+                if (! input) return;
+                document.addEventListener('click', function (e) {
+                    var t = e.target;
+                    if (! (t instanceof Element)) return;
+                    var cta = t.closest('.grimba-ads-page__pack-cta[data-pack-tier]');
+                    if (! cta) return;
+                    var tier = cta.getAttribute('data-pack-tier') || '';
+                    if (tier !== '') {
+                        input.value = tier.substring(0, 64);
+                    }
+                }, true);
+            })();
+        </script>
     </section>

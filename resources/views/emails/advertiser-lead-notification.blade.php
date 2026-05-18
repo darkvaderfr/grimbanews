@@ -40,6 +40,16 @@
                 <td style="padding: 6px 0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px;">{{ $leadSourceSlot }}</td>
             </tr>
         @endif
+        @if(isset($leadSourcePackTier) && $leadSourcePackTier)
+            <tr>
+                <td style="padding: 6px 0; opacity: 0.62;">Pack d'origine</td>
+                <td style="padding: 6px 0;">
+                    <span style="display: inline-block; padding: 3px 10px; border-radius: 6px; background: linear-gradient(135deg, #c0392b, #1a1713); color: #fffaf1; font-weight: 700; font-size: 12px; letter-spacing: 0.06em;">
+                        {{ $leadSourcePackTier }}
+                    </span>
+                </td>
+            </tr>
+        @endif
         @if($leadLocale)
             <tr>
                 <td style="padding: 6px 0; opacity: 0.62;">Locale</td>

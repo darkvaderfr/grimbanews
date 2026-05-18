@@ -95,8 +95,15 @@
                                 <tr>
                                     <td>
                                         <a href="{{ route('grimba.advertiser-leads.show', $lead->id) }}" style="color: var(--gn-left); text-decoration: underline; font-weight: 600;">{{ $lead->email }}</a>
-                                        @if($lead->source_slot)
-                                            <div style="font-size: 11px; opacity: .6;">slot: {{ $lead->source_slot }}</div>
+                                        @if($lead->source_slot || ($lead->source_pack_tier ?? null))
+                                            <div style="font-size: 11px; opacity: .6;">
+                                                @if($lead->source_pack_tier ?? null)
+                                                    <span title="Pack tier d'origine" style="font-weight: 700; color: #c0392b;">{{ $lead->source_pack_tier }}</span>
+                                                @endif
+                                                @if($lead->source_slot)
+                                                    @if($lead->source_pack_tier ?? null) · @endif slot: {{ $lead->source_slot }}
+                                                @endif
+                                            </div>
                                         @endif
                                     </td>
                                     <td>{{ $lead->company ?? '—' }}</td>

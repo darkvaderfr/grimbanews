@@ -176,6 +176,38 @@ class GrimbaAdvertiserLeadsTest extends TestCase
         }
     }
 
+    public function test_source_pack_tier_persists_and_carries_into_mail(): void
+    {
+        // S-ADS-11 — when the lead form's JS hook fills source_pack_tier,
+        // the controller must persist it AND forward it to the queued
+        // sales notification.
+        \Illuminate\Support\Facades\Mail::fake();
+        setting()->set('grimba_advertiser_leads_sales_mailbox', 'sales-pack@example.com');
+        setting()->save();
+
+        try {
+            $email = self::EMAIL_PREFIX . 'packtier@example.com';
+            $this->post('/advertise/leads', [
+                'email' => $email,
+                'source_pack_tier' => 'Editorial',
+            ])->assertRedirect();
+
+            $this->assertSame('Editorial', DB::table('grimba_advertiser_leads')
+                ->where('email', $email)
+                ->value('source_pack_tier'));
+
+            \Illuminate\Support\Facades\Mail::assertQueued(
+                \App\Mail\GrimbaAdvertiserLeadNotification::class,
+                function ($mail) {
+                    return $mail->leadSourcePackTier === 'Editorial';
+                }
+            );
+        } finally {
+            setting()->set('grimba_advertiser_leads_sales_mailbox', '');
+            setting()->save();
+        }
+    }
+
     public function test_no_mail_queued_when_sales_mailbox_unset(): void
     {
         \Illuminate\Support\Facades\Mail::fake();
