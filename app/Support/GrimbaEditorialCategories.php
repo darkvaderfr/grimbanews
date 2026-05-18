@@ -155,12 +155,34 @@ class GrimbaEditorialCategories
 
         // Prefer topic categories.
         $topic = $list->first(fn ($c) => in_array((string) ($c->name ?? ''), $topicNames, true));
-        if ($topic !== null) {
-            return $topic;
+        if ($topic === null) {
+            // Fallback: any non-skipped category.
+            $topic = $list->first(fn ($c) => ! in_array((string) ($c->name ?? ''), $skip, true));
         }
 
-        // Fallback: any non-skipped category.
-        return $list->first(fn ($c) => ! in_array((string) ($c->name ?? ''), $skip, true));
+        if ($topic === null) {
+            return null;
+        }
+
+        // S-CAT-07 (Vader 2026-05-18) — the clickable badge needs
+        // $category->url which requires the slug relation. Most
+        // callers eager-load `categories` without the slug nested
+        // relation, so the accessor returns empty. Load it now if
+        // missing — single query when the chain isn't warmed.
+        if (
+            $topic instanceof \Botble\Blog\Models\Category
+            && method_exists($topic, 'relationLoaded')
+            && ! $topic->relationLoaded('slugable')
+        ) {
+            try {
+                $topic->load('slugable');
+            } catch (\Throwable $e) {
+                // Slug system absent — fall through with un-loaded
+                // model; badge renders as non-clickable rather than fail.
+            }
+        }
+
+        return $topic;
     }
 
     /**
