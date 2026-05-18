@@ -114,6 +114,19 @@ grimba_schedule_command('translate_en', 'grimba:translate-pending --to=en --limi
     ->withoutOverlapping(20)
     ->runInBackground();
 
+// GrimbaNews — S-LSAT-11 (Vader 2026-05-18) — rule-driven auto-
+// translate. Every 15 min, the rule engine picks high-views posts
+// + force-both regions (default: africa) and translates them so a
+// reader on the opposite locale gets coverage without manual
+// editorial action. Bounded by the daily cap from
+// `grimba_lang_rule_engine_daily_cap` (default 500/day). Safe
+// no-op when `grimba_lang_rule_engine_enabled` is off.
+grimba_schedule_command('translate_by_rule', 'grimba:translate-by-rule --limit=200')
+    ->cron('*/15 * * * *')
+    ->onOneServer()
+    ->withoutOverlapping(20)
+    ->runInBackground();
+
 // GrimbaNews — auto-publish drafts from trusted classified sources
 // (S150). Runs every 15 min, 1h after each :15/:45 ingest cadence so
 // any new draft has settled before promotion. Editor still has the

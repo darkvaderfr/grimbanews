@@ -36,6 +36,11 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:translate-pending --to=en --limit=50',
                 'expected_minutes' => 30,
             ],
+            'translate_by_rule' => [
+                'label' => 'Rule-driven auto-translate (S-LSAT-10)',
+                'command' => 'grimba:translate-by-rule --limit=200',
+                'expected_minutes' => 15,
+            ],
             'publish_trusted' => [
                 'label' => 'Trusted publish',
                 'command' => 'grimba:publish-trusted',
