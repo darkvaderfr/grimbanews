@@ -76,6 +76,20 @@ class AppServiceProvider extends ServiceProvider
             if (! empty($post->editorial_region)) {
                 return; // already set explicitly upstream
             }
+            // Vader 2026-05-18: topic-based detection first. If the
+            // article's title + description has strong region anchors
+            // (e.g. Le Monde covering Senegal), tag by what it's
+            // ABOUT rather than who published it.
+            $topical = \App\Support\GrimbaArticleRegion::detectFromText(
+                (string) ($post->name ?? ''),
+                (string) ($post->description ?? ''),
+                (string) ($post->summary_nobuai ?? ''),
+            );
+            if ($topical !== null) {
+                $post->editorial_region = $topical;
+                return;
+            }
+            // Fallback: source-country region (the legacy path).
             $country = null;
             if (! empty($post->source_id)) {
                 $country = DB::table('news_sources')
