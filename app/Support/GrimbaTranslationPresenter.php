@@ -228,6 +228,69 @@ class GrimbaTranslationPresenter
         return $withRecency ? GrimbaPostRecency::orderByPublished($query) : $query;
     }
 
+    /**
+     * S-LSAT-02 (Vader 2026-05-18) — strict reader-language surfacing.
+     *
+     * Adds a WHERE clause to the query so ONLY posts that are either
+     * already in the target locale OR have a translation in that locale
+     * are returned. Wrong-locale posts with no translation, and
+     * unclassified NULL-language posts, are excluded.
+     *
+     * Use this on hard-filter surfaces (`/breaking`, `/latest`, home
+     * rails). Lists that should remain inclusive (`/search`, multi-side
+     * dossiers) keep using the soft `orderForTargetLocale()` ranker.
+     *
+     * Non-breaking: callers must opt in. The ranker `orderForTargetLocale`
+     * stays untouched.
+     *
+     * Internal-only: when `$target` is invalid (anything other than
+     * `fr`/`en`), the method is a no-op and the query passes through
+     * unchanged — the caller's downstream order remains.
+     *
+     * @param mixed   $query       Eloquent or Query Builder instance.
+     * @param ?string $target      Override the locale; defaults to active reader locale.
+     * @param bool    $applyOrder  When true (default), also applies the soft ranker
+     *                             so within the filtered set, native-locale posts
+     *                             still come before translated ones.
+     */
+    public static function filterForTargetLocale(mixed $query, ?string $target = null, bool $applyOrder = true): mixed
+    {
+        $target = strtolower(substr($target ?: self::targetLocale(), 0, 2));
+        if (! in_array($target, ['fr', 'en'], true)) {
+            return $query;
+        }
+
+        $query->where(function ($q) use ($target): void {
+            // Branch A — post is natively in the target locale.
+            $q->whereRaw("lower(substr(coalesce(posts.original_language, ''), 1, 2)) = ?", [$target]);
+
+            // Branch B — post has an in-row translation to the target.
+            $q->orWhere(function ($inner) use ($target): void {
+                $inner->whereRaw("lower(substr(coalesce(posts.translated_to, ''), 1, 2)) = ?", [$target])
+                      ->whereNotNull('posts.translated_name')
+                      ->whereRaw("trim(posts.translated_name) != ''");
+            });
+
+            // Branch C — post has a join-table translation row.
+            if (self::hasTranslationsTable()) {
+                $q->orWhereExists(function ($exists) use ($target): void {
+                    $exists->select(DB::raw(1))
+                        ->from('grimba_post_translations')
+                        ->whereColumn('grimba_post_translations.post_id', 'posts.id')
+                        ->whereRaw('lower(grimba_post_translations.locale) = ?', [$target])
+                        ->whereNotNull('grimba_post_translations.translated_name')
+                        ->whereRaw("trim(grimba_post_translations.translated_name) != ''");
+                });
+            }
+        });
+
+        if ($applyOrder) {
+            self::orderForTargetLocale($query, $target);
+        }
+
+        return $query;
+    }
+
     public static function rankForTargetLocale(object $post, ?string $target = null): int
     {
         $target = strtolower(substr($target ?: self::targetLocale(), 0, 2));
