@@ -70,6 +70,7 @@
                                     <div class="grimba-most-read__body">
                                         <a href="{{ $post->url }}" class="grimba-most-read__headline">{{ $title }}</a>
                                         <div class="grimba-most-read__meta">
+                                            @include(Theme::getThemeNamespace('partials.cards.category-badge'), ['post' => $post, 'size' => 'sm'])
                                             @if($source)
                                                 <span>{{ Str::limit($source, 32) }}</span>
                                             @endif

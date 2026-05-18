@@ -210,7 +210,11 @@
                         <span class="grimba-hero__bias-strip" aria-hidden="true"></span>
                     @endif
                     <div class="grimba-hero__text">
-                        <span class="grimba-hero__kicker">{{ __('Histoire phare') }}</span>
+                        <div class="grimba-hero__kicker-row">
+                            <span class="grimba-hero__kicker">{{ __('Histoire phare') }}</span>
+                            {{-- S-CAT-01 — topic category badge on the hero. --}}
+                            @include(Theme::getThemeNamespace('partials.cards.category-badge'), ['post' => $hero, 'variant' => 'dark', 'size' => 'sm'])
+                        </div>
                         <h1 class="grimba-hero__title">{{ $heroTitle }}</h1>
                         @if($heroTranslated)
                             {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
@@ -274,9 +278,16 @@
                         opacity: 1;
                     }
 
+                    .grimba-hero__kicker-row {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        margin-bottom: 6px;
+                        flex-wrap: wrap;
+                    }
+
                     .grimba-hero__kicker {
                         display: inline-block;
-                        margin-bottom: 6px;
                         padding: 4px 10px;
                         border-radius: 999px;
                         background: rgba(255, 255, 255, .92);
@@ -353,6 +364,7 @@
                     <div class="grimba-blind-card__body">
                         <span class="grimba-blind-card__tag">
                             <span class="blindspot-badge blindspot-badge--on-dark">{{ __('Angle mort') }}</span>
+                            @include(Theme::getThemeNamespace('partials.cards.category-badge'), ['post' => $b, 'variant' => 'dark', 'size' => 'sm'])
                         </span>
                         <h3 class="grimba-blind-card__title">{{ $blindTitle }}</h3>
                         @if($blindTranslated)

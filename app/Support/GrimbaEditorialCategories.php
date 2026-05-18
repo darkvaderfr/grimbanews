@@ -113,6 +113,57 @@ class GrimbaEditorialCategories
     }
 
     /**
+     * S-CAT-01 (Vader 2026-05-18) — pick the most representative
+     * TOPIC category for a post. Vader's directive: "each article
+     * is within its category (ie culture, politics, sports etc.)
+     * even for breaking news, top stories, latest stories".
+     *
+     * The category-badge partial uses this to render a small
+     * topic chip on every card surface (hero, briefing, most-read).
+     *
+     * Picks the first attached category in this order:
+     *   1. Topic category (Politique, Culture, Sports, …) — skips
+     *      regional bins (Afrique, Europe, Amériques, International)
+     *      and the "À la une" front-page bucket since both duplicate
+     *      signals already visible elsewhere.
+     *   2. Falls back to the first non-internal-review category if
+     *      no topic match (very rare given the corpus).
+     *   3. Returns null when the post is uncategorized OR carries
+     *      only regional + housekeeping tags.
+     *
+     * Posts must be `with('categories')` loaded — the caller is
+     * responsible for warming the relation to avoid N+1.
+     */
+    public static function primaryTopicFor(object $post): ?object
+    {
+        $cats = $post->categories ?? null;
+        if ($cats === null) {
+            return null;
+        }
+        // Normalize Collection / array / iterable into a flat
+        // collection of category models.
+        $list = $cats instanceof Collection ? $cats : collect($cats);
+        if ($list->isEmpty()) {
+            return null;
+        }
+
+        $editionNames = self::editionNames();
+        $internalNames = self::internalReviewNames();
+        $skip = array_merge($editionNames, $internalNames, ['À la une']);
+
+        $topicNames = self::topicNames(includeFront: false);
+
+        // Prefer topic categories.
+        $topic = $list->first(fn ($c) => in_array((string) ($c->name ?? ''), $topicNames, true));
+        if ($topic !== null) {
+            return $topic;
+        }
+
+        // Fallback: any non-skipped category.
+        return $list->first(fn ($c) => ! in_array((string) ($c->name ?? ''), $skip, true));
+    }
+
+    /**
      * @return \Illuminate\Support\Collection<int, \Botble\Blog\Models\Category>
      */
     public static function homepageChips(int $limit = 10): Collection
