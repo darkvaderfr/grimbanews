@@ -63,7 +63,22 @@
 
         @php
             $capPct = $cap > 0 ? min(100, (int) round($callsToday / $cap * 100)) : 0;
+            $capExhausted = $enabled && $cap > 0 && $callsToday >= $cap;
+            $capWarning = $enabled && ! $capExhausted && $capPct >= 90;
         @endphp
+
+        @if($capExhausted)
+            <div class="alert" role="alert" style="background: rgba(192, 57, 43, 0.10); border: 1px solid rgba(192, 57, 43, 0.32); color: #c0392b;">
+                <strong>{{ __('Plafond quotidien atteint :') }}</strong>
+                {{ __(":n / :cap appels effectués aujourd'hui. Le moteur ne traduira plus rien avant minuit (locale du serveur). Pour augmenter le plafond, voir l'écran Règles de traduction.", ['n' => $callsToday, 'cap' => $cap]) }}
+                <a href="{{ route('grimba.translation-rules.index') }}" class="btn btn-outline-danger btn-sm ms-2">{{ __('Régler le plafond') }}</a>
+            </div>
+        @elseif($capWarning)
+            <div class="alert" role="alert" style="background: rgba(217, 119, 6, 0.10); border: 1px solid rgba(217, 119, 6, 0.32); color: #b45309;">
+                <strong>{{ __('Plafond proche :') }}</strong>
+                {{ __(":pct % du plafond consommé (:n / :cap). Le moteur s'arrêtera quand le compteur atteindra :cap.", ['pct' => $capPct, 'n' => $callsToday, 'cap' => $cap]) }}
+            </div>
+        @endif
 
         <div class="row g-3 mb-3">
             <div class="col-md-3 col-6">

@@ -148,6 +148,53 @@ class GrimbaTranslationMonitorTest extends TestCase
         }
     }
 
+    public function test_cap_exhausted_banner_shows_when_calls_match_cap(): void
+    {
+        // S-LSAT-19c — when calls_today >= cap and the engine is
+        // enabled, surface a red "plafond atteint" banner so the
+        // operator doesn't wonder why no translations are firing.
+        setting()->set('grimba_lang_rule_engine_daily_cap', '5');
+        setting()->set('grimba_lang_rule_engine_enabled', '1');
+        setting()->save();
+        \App\Support\GrimbaLanguageSettings::flush();
+        GrimbaTranslateByRule::recordCall(5);
+
+        try {
+            $this->actingAs($this->admin())
+                ->get('/admin/grimba/translation-monitor')
+                ->assertOk()
+                ->assertSee('Plafond quotidien atteint', false);
+        } finally {
+            setting()->set('grimba_lang_rule_engine_daily_cap', '');
+            setting()->set('grimba_lang_rule_engine_enabled', '');
+            setting()->save();
+            \App\Support\GrimbaLanguageSettings::flush();
+        }
+    }
+
+    public function test_cap_warning_banner_shows_at_90_percent_consumption(): void
+    {
+        // When calls_today >= 90% of cap (but below cap), show an
+        // amber heads-up banner.
+        setting()->set('grimba_lang_rule_engine_daily_cap', '10');
+        setting()->set('grimba_lang_rule_engine_enabled', '1');
+        setting()->save();
+        \App\Support\GrimbaLanguageSettings::flush();
+        GrimbaTranslateByRule::recordCall(9);
+
+        try {
+            $this->actingAs($this->admin())
+                ->get('/admin/grimba/translation-monitor')
+                ->assertOk()
+                ->assertSee('Plafond proche', false);
+        } finally {
+            setting()->set('grimba_lang_rule_engine_daily_cap', '');
+            setting()->set('grimba_lang_rule_engine_enabled', '');
+            setting()->save();
+            \App\Support\GrimbaLanguageSettings::flush();
+        }
+    }
+
     public function test_provider_visibility_card_renders(): void
     {
         // S-LSAT-19b — the provider-visibility card surfaces
