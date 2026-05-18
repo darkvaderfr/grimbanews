@@ -128,4 +128,19 @@ class GrimbaCategoryBadgeSmokeTest extends TestCase
         $html = $this->get('/latest')->assertOk()->getContent();
         $this->assertStringContainsString('data-grimba-cat-badge', $html);
     }
+
+    public function test_dossiers_renders_majority_topic_badge(): void
+    {
+        // Wave IIII — /dossiers attaches `primary_topic` per visible
+        // cluster via a single grouped query and renders a badge on
+        // each card. The post-shaped wrapper synthesizes the
+        // expected `categories` collection so the shared partial
+        // doesn't need a special code path.
+        $html = $this->get('/dossiers')->assertOk()->getContent();
+        $this->assertStringContainsString(
+            'data-grimba-cat-badge',
+            $html,
+            '/dossiers must render majority-topic badges per cluster after Wave IIII.',
+        );
+    }
 }

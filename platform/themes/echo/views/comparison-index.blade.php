@@ -96,6 +96,17 @@
                                 @endif
                             </div>
 
+                            @if(! empty($c->primary_topic))
+                                {{-- S-CAT-02c — dossier majority-topic badge.
+                                     Synthesize a `categories` shape so the
+                                     shared partial doesn't need a special
+                                     code path. --}}
+                                @include(Theme::getThemeNamespace('partials.cards.category-badge'), [
+                                    'post' => (object) ['categories' => collect([$c->primary_topic])],
+                                    'size' => 'sm',
+                                ])
+                            @endif
+
                             <h2 class="grimba-comparison-index__title">{{ $c->topic }}</h2>
 
                             <div class="grimba-comparison-index__bar">

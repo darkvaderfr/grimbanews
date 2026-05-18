@@ -133,6 +133,56 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $totalCount = $filtered->count();
             $clusters = $filtered->slice(($page - 1) * $perPage, $perPage)->values();
 
+            // S-CAT-02c (Vader 2026-05-18) — attach a dominant
+            // topic per visible cluster so the badge can render
+            // without a per-card subquery. One grouped query
+            // across (post_categories × posts × categories)
+            // restricted to the visible cluster IDs and the
+            // topic-only name list. Skip-list mirrors
+            // GrimbaEditorialCategories::primaryTopicFor() so the
+            // dossier badge and the post-card badge agree.
+            if ($clusters->isNotEmpty()) {
+                $clusterIds = $clusters->pluck('id')->all();
+                $skipNames = array_merge(
+                    \App\Support\GrimbaEditorialCategories::editionNames(),
+                    \App\Support\GrimbaEditorialCategories::internalReviewNames(),
+                    ['À la une'],
+                );
+                $catCounts = DB::table('post_categories')
+                    ->join('posts', 'posts.id', '=', 'post_categories.post_id')
+                    ->join('categories', 'categories.id', '=', 'post_categories.category_id')
+                    ->whereIn('posts.story_cluster_id', $clusterIds)
+                    ->where('posts.status', 'published')
+                    ->whereNotIn('categories.name', $skipNames)
+                    ->select(
+                        'posts.story_cluster_id as cid',
+                        'categories.id as catid',
+                        'categories.name as catname',
+                        DB::raw('count(*) as c'),
+                    )
+                    ->groupBy('posts.story_cluster_id', 'categories.id', 'categories.name')
+                    ->orderByDesc('c')
+                    ->get();
+
+                $topByCluster = [];
+                foreach ($catCounts as $row) {
+                    $cid = (int) $row->cid;
+                    // First (highest-count) hit wins. orderByDesc
+                    // above already sorted, so we skip any cluster
+                    // that's already filled.
+                    if (! isset($topByCluster[$cid])) {
+                        $topByCluster[$cid] = (object) [
+                            'id'   => (int) $row->catid,
+                            'name' => $row->catname,
+                        ];
+                    }
+                }
+                $clusters = $clusters->map(function ($c) use ($topByCluster) {
+                    $c->primary_topic = $topByCluster[(int) $c->id] ?? null;
+                    return $c;
+                });
+            }
+
             $pagination = (object) [
                 'currentPage' => $page,
                 'lastPage'    => max(1, (int) ceil($totalCount / $perPage)),
