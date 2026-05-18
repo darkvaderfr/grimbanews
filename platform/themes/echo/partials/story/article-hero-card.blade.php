@@ -121,16 +121,18 @@
         ? $__publishedAt->locale(app()->getLocale())->diffForHumans()
         : null;
 
-    // First category (skip internal review buckets).
+    // S-CAT-02d (Vader 2026-05-18) — route through
+    // primaryTopicFor() so the article detail page surfaces the
+    // SAME topic the home / breaking / latest / dossiers cards
+    // show. Prior logic took the first non-internal-review,
+    // non-edition category — which could still surface "À la une"
+    // (housekeeping). primaryTopicFor() drops that too.
     $__primaryCategory = null;
     if (method_exists($post, 'categories')) {
-        $__cats = $post->relationLoaded('categories')
-            ? $post->categories
-            : $post->categories()->limit(5)->get();
-        $__primaryCategory = $__cats
-            ->reject(fn ($c) => in_array($c->name, \App\Support\GrimbaEditorialCategories::internalReviewNames(), true))
-            ->reject(fn ($c) => in_array($c->name, \App\Support\GrimbaEditorialCategories::editionNames(), true))
-            ->first();
+        if (! $post->relationLoaded('categories')) {
+            $post->load('categories');
+        }
+        $__primaryCategory = \App\Support\GrimbaEditorialCategories::primaryTopicFor($post);
     }
 @endphp
 

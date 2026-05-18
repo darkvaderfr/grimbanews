@@ -143,4 +143,38 @@ class GrimbaCategoryBadgeSmokeTest extends TestCase
             '/dossiers must render majority-topic badges per cluster after Wave IIII.',
         );
     }
+
+    public function test_article_detail_page_carries_primary_topic_pill(): void
+    {
+        // Wave PPPP (S-CAT-02d) — the article detail page's hero
+        // card uses primaryTopicFor() so the topic surfaces match
+        // what the home / breaking / latest / dossiers cards show
+        // for the same post.
+        $slug = \Botble\Slug\Models\Slug::query()
+            ->where('reference_type', \Botble\Blog\Models\Post::class)
+            ->orderByDesc('id')
+            ->value('key');
+        if (! $slug) {
+            $this->markTestSkipped('No published post slug available in the corpus.');
+        }
+        // The blog/{slug} URL may 301-canonicalize to a region- or
+        // category-prefixed URL. Follow the redirect chain (max 3).
+        $response = $this->get('/blog/' . $slug);
+        $hops = 0;
+        while ($response->isRedirect() && $hops < 3) {
+            $hops++;
+            $loc = $response->headers->get('Location');
+            if (! $loc) break;
+            $parsed = parse_url($loc);
+            $path = ($parsed['path'] ?? '/') . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
+            $response = $this->get($path);
+        }
+        $response->assertOk();
+        $html = $response->getContent();
+        $this->assertStringContainsString(
+            'grimba-article-card__pill--category',
+            $html,
+            'Article hero card must render a topic-category pill (Wave PPPP).',
+        );
+    }
 }
