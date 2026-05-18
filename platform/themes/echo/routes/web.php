@@ -88,8 +88,24 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 }
             }
 
-            $allClusters = DB::table('story_clusters')
-                ->orderByDesc('id')
+            // S-LSAT-04 phase 3 (Vader 2026-05-18) — strict reader-
+            // locale surfacing on /dossiers. When `strict_dossiers`
+            // is on (default), drop clusters whose `primary_language`
+            // doesn't match the reader's locale. NULL-language
+            // clusters are also dropped to match the post-level
+            // contract — they'll resurface once S-LANG-12 reclassifies
+            // them on the next cron pass.
+            $strictDossiers = \App\Support\GrimbaLanguageSettings::strictForDossiers();
+            $readerLocale = \App\Support\GrimbaHomeFeed::resolveReaderLocale();
+
+            $clusterQuery = DB::table('story_clusters')
+                ->orderByDesc('id');
+
+            if ($strictDossiers) {
+                $clusterQuery->where('primary_language', $readerLocale);
+            }
+
+            $allClusters = $clusterQuery
                 ->get()
                 ->map(function ($c) use ($aggByCluster) {
                     $cid = (int) $c->id;
