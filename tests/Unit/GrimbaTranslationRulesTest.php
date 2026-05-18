@@ -195,6 +195,38 @@ class GrimbaTranslationRulesTest extends TestCase
         $this->assertSame([], $picked);
     }
 
+    public function test_editorial_pin_overrides_view_threshold(): void
+    {
+        // S-LSAT-12 — when an operator pins a post via the post-edit
+        // form (priority=2), the rule engine translates regardless
+        // of region or view count.
+        $d = GrimbaTranslationRules::decide($this->makePost([
+            'original_language' => 'fr',
+            'editorial_region' => 'europe',
+            'views' => 0, // Below threshold; ordinarily skipped.
+            'translation_priority' => 2,
+        ]));
+        $this->assertTrue($d->shouldTranslate);
+        $this->assertSame('en', $d->targetLocale);
+        $this->assertSame(2, $d->priority);
+        $this->assertStringContainsString('editorial-pin', $d->reason);
+    }
+
+    public function test_editorial_pin_still_skips_when_already_translated(): void
+    {
+        // The already-translated guard runs BEFORE the editorial-pin
+        // check, so a pinned post with an existing target translation
+        // doesn't get translated twice.
+        $d = GrimbaTranslationRules::decide($this->makePost([
+            'original_language' => 'fr',
+            'translated_to' => 'en',
+            'translation_priority' => 2,
+            'views' => 10000,
+        ]));
+        $this->assertFalse($d->shouldTranslate);
+        $this->assertSame('already-translated', $d->reason);
+    }
+
     public function test_force_both_regions_none_sentinel_disables_africa_rule(): void
     {
         setting()->set('grimba_lang_region_force_both', 'none');

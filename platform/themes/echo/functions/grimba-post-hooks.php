@@ -24,7 +24,7 @@ app()->booted(function (): void {
         $req = request();
 
         if ($req) {
-            foreach (['source_id', 'story_cluster_id', 'bias_rating', 'is_blindspot'] as $key) {
+            foreach (['source_id', 'story_cluster_id', 'bias_rating', 'is_blindspot', 'translation_priority'] as $key) {
                 $formKey = 'grimba_' . $key;
                 if ($req->has($formKey)) {
                     $raw = $req->input($formKey);
@@ -32,6 +32,14 @@ app()->booted(function (): void {
                         $post->{$key} = in_array($raw, ['1', 1, 'on', true, 'true'], true);
                     } elseif ($key === 'source_id' || $key === 'story_cluster_id') {
                         $post->{$key} = $raw === '' || $raw === null ? null : (int) $raw;
+                    } elseif ($key === 'translation_priority') {
+                        // S-LSAT-12 — clamp to 0/1/2. The form only
+                        // exposes 0 and 2; 1 is reserved for the rule
+                        // engine itself. An admin posting an arbitrary
+                        // integer can still cross the floor via tinker
+                        // — the column accepts anything ≥0.
+                        $val = (int) ($raw === '' ? 0 : $raw);
+                        $post->{$key} = max(0, min(2, $val));
                     } else {
                         $post->{$key} = $raw === '' || $raw === null ? null : $raw;
                     }

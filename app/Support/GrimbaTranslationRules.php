@@ -58,6 +58,20 @@ class GrimbaTranslationRules
             return new Decision(false, $target, 'already-translated', 0);
         }
 
+        // S-LSAT-12 — editorial pin. When an operator sets
+        // `translation_priority=2` on the Botble post-edit form, the
+        // post translates regardless of region or view count. Priority
+        // 1 stays reserved for the rule engine itself.
+        $currentPriority = (int) ($row->translation_priority ?? 0);
+        if ($currentPriority >= 2) {
+            return new Decision(
+                true,
+                $target,
+                'editorial-pin priority=' . $currentPriority,
+                2,
+            );
+        }
+
         $views = (int) ($row->views ?? 0);
         $region = strtolower((string) ($row->editorial_region ?? ''));
         $forced = GrimbaLanguageSettings::forceBothRegions();

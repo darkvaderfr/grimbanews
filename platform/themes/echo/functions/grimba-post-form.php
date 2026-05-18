@@ -97,6 +97,20 @@ app()->booted(function (): void {
             )
             ->addAfter(
                 'grimba_is_blindspot',
+                'grimba_translation_priority',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label('Priorité de traduction (S-LSAT)')
+                    ->helperText("Force la prochaine passe du moteur (grimba:translate-by-rule) à traduire ce post. 0 = défaut, 2 = épinglage éditorial — l'article passe en tête de file même sans atteindre le seuil de popularité.")
+                    ->choices([
+                        '0' => '0 — Défaut (laisser le moteur décider)',
+                        '2' => '2 — Épinglage éditorial (traduire en priorité)',
+                    ])
+                    ->selected((string) (optional($form->getModel())->translation_priority ?? '0'))
+                    ->toArray()
+            )
+            ->addAfter(
+                'grimba_translation_priority',
                 'grimba_preview_card',
                 HtmlField::class,
                 [
