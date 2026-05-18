@@ -159,6 +159,72 @@ class GrimbaTailExpanderTest extends TestCase
         }
     }
 
+    public function test_cache_key_partitions_by_surface(): void
+    {
+        // S-LSAT-20 — the count cache must NOT collide between
+        // surfaces. /breaking's 24h window and /latest's 72h window
+        // count different sets; sharing a cache key would serve
+        // /latest's count to /breaking and vice versa.
+        $this->insertFr(self::FIXTURE_BASE + 10);
+        Cache::flush();
+        $this->renderExpander('breaking', 24, 'en');
+        $this->renderExpander('latest', 72, 'en');
+        // Both keys should exist; their values would only equal by
+        // coincidence (different windows = different post sets).
+        $this->assertNotNull(Cache::get('grimba_tail_expander:breaking:en:24h'), 'breaking surface key missing');
+        $this->assertNotNull(Cache::get('grimba_tail_expander:latest:en:72h'), 'latest surface key missing');
+    }
+
+    public function test_cache_key_partitions_by_locale(): void
+    {
+        $this->insertFr(self::FIXTURE_BASE + 11);
+        Cache::flush();
+        $this->renderExpander('breaking', 24, 'en');
+        $this->renderExpander('breaking', 24, 'fr');
+        // An EN reader counts FR posts; an FR reader counts EN
+        // posts. Same surface + same window, different locale —
+        // must NOT share a cache slot.
+        $this->assertNotNull(Cache::get('grimba_tail_expander:breaking:en:24h'));
+        $this->assertNotNull(Cache::get('grimba_tail_expander:breaking:fr:24h'));
+    }
+
+    public function test_cache_key_partitions_by_window(): void
+    {
+        $this->insertFr(self::FIXTURE_BASE + 12);
+        Cache::flush();
+        $this->renderExpander('breaking', 24, 'en');
+        $this->renderExpander('breaking', 72, 'en');
+        $this->assertNotNull(Cache::get('grimba_tail_expander:breaking:en:24h'));
+        $this->assertNotNull(Cache::get('grimba_tail_expander:breaking:en:72h'));
+    }
+
+    public function test_flushing_cache_re_runs_the_query(): void
+    {
+        // Prime: render once at zero fixtures (cache → 0 or live
+        // count, doesn't matter — what matters is the cache exists).
+        Cache::flush();
+        $this->renderExpander('breaking', 24, 'en');
+        $cacheKey = 'grimba_tail_expander:breaking:en:24h';
+        $primed = Cache::get($cacheKey);
+        $this->assertNotNull($primed);
+
+        // Insert a fixture FR post — without flush, the cache still
+        // serves the primed value (TTL 60s).
+        $this->insertFr(self::FIXTURE_BASE + 13);
+        $this->renderExpander('breaking', 24, 'en');
+        $this->assertSame($primed, Cache::get($cacheKey), 'Without flush, cache must hold the primed count.');
+
+        // After Cache::flush(), the next render re-runs the query.
+        Cache::flush();
+        $this->renderExpander('breaking', 24, 'en');
+        $afterFlush = Cache::get($cacheKey);
+        $this->assertGreaterThanOrEqual(
+            (int) $primed,
+            (int) $afterFlush,
+            'Post-flush render must include the new fixture row (count >= primed value).'
+        );
+    }
+
     public function test_display_count_is_present_in_some_form(): void
     {
         // We can't pin a specific count without a deterministic fixture
