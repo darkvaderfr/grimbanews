@@ -148,6 +148,12 @@
             ])
             @include(Theme::getThemeNamespace('partials.home.section-blocks'))
             @include(Theme::getThemeNamespace('partials.home.latest-plus-topics'))
+
+            {{-- S-LSAT-05b (Vader 2026-05-18) — home tail expander.
+                 Sits below the last rail so the reader sees it once
+                 they've scanned the full page. 48h window so it
+                 represents recent-enough coverage without padding. --}}
+            @include(Theme::getThemeNamespace('partials.lang.tail-expander'), ['surface' => 'home', 'hours' => 48])
         </div>
     </main>
 

@@ -23,9 +23,31 @@ class GrimbaTranslationPresenter
 
     public static function targetLocale(): string
     {
-        $lang = (string) (request()?->cookie('grimba_lang') ?: app()->getLocale() ?: 'fr');
-
-        return in_array($lang, ['fr', 'en'], true) ? $lang : 'fr';
+        // S-LSAT-13 (Vader 2026-05-18): consult `?lang=` query first,
+        // then cookie, then framework default. Without this, a reader
+        // hitting `/?lang=en` for the first time (no cookie yet) sees
+        // EN strict-filtered cards from GrimbaHomeFeed but the
+        // title/description presenter still resolves to FR for that
+        // first request — visible inconsistency until the cookie sets.
+        $req = request();
+        if ($req) {
+            $query = $req->query('lang', '');
+            if (is_string($query)) {
+                $q = strtolower($query);
+                if ($q === 'fr' || $q === 'en') {
+                    return $q;
+                }
+            }
+            $cookie = $req->cookie('grimba_lang');
+            if (is_string($cookie)) {
+                $c = strtolower($cookie);
+                if ($c === 'fr' || $c === 'en') {
+                    return $c;
+                }
+            }
+        }
+        $fallback = strtolower(substr((string) (app()->getLocale() ?: 'fr'), 0, 2));
+        return in_array($fallback, ['fr', 'en'], true) ? $fallback : 'fr';
     }
 
     /**
