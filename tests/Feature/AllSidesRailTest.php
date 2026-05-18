@@ -8,48 +8,43 @@ use Tests\TestCase;
 
 class AllSidesRailTest extends TestCase
 {
+    /**
+     * Vader 2026-05-18 — paid down from test debt. The post-dossier-
+     * reinvention rail keeps `grimba-all-sides__card` / `__title` /
+     * `__headline` classes and the per-card link still resolves to
+     * `/comparatif/{clusterId}`, but the old `-webkit-text-fill-color`
+     * dark-mode hack was retired. The rail uses production data; the
+     * fixture insert is no longer required because the home selects
+     * its all-sides clusters via `GrimbaHomeFeed`, not by clusterId.
+     */
     public function test_all_sides_cards_link_to_cluster_comparison_not_blog_index(): void
     {
-        $this->markTestIncomplete('Legacy markup pre-dossier-reinvention; see docs/GRIMBANEWS_TEST_DEBT_DOSSIER_REINVENTION.md');
-        $clusterId = 998877;
-        $now = now();
+        $response = $this->get('/')->assertOk();
 
-        foreach (['left', 'center', 'right'] as $index => $bias) {
-            DB::table('posts')->insert([
-                'name' => 'All sides rail route fixture ' . $bias,
-                'description' => 'Route fixture for all sides rail.',
-                'content' => '<p>Route fixture.</p>',
-                'status' => 'published',
-                'author_id' => 1,
-                'author_type' => User::class,
-                'is_featured' => 0,
-                'image' => null,
-                'views' => 0,
-                'bias_rating' => $bias,
-                'is_blindspot' => 0,
-                'credibility_score' => 80,
-                'ownership_type' => 'fixture',
-                'story_cluster_id' => $clusterId,
-                'source_name' => 'Fixture Source ' . $bias,
-                'created_at' => $now->copy()->addMinutes($index),
-                'updated_at' => $now->copy()->addMinutes($index),
-            ]);
-        }
+        $body = $response->getContent();
 
-        $this->get('/')
-            ->assertOk()
-            ->assertSee('grimba-all-sides__card', false)
-            ->assertSee('grimba-all-sides__title', false)
-            ->assertSee('grimba-all-sides__headline', false)
-            ->assertSee('/comparatif/' . $clusterId, false)
-            ->assertDontSee('-webkit-text-fill-color:var(--gn-ink,#1a1713);', false)
-            ->assertDontSee('onmouseover="this.style.transform', false);
+        // The all-sides rail renders production data — confirm the
+        // canonical card markup is present.
+        $this->assertStringContainsString('grimba-all-sides__card', $body);
+        $this->assertStringContainsString('grimba-all-sides__title', $body);
+        $this->assertStringContainsString('grimba-all-sides__headline', $body);
 
+        // Every card link points at the dossier comparison page.
+        $this->assertMatchesRegularExpression(
+            '#href="[^"]*?/comparatif/\d+"#',
+            $body,
+            'All-sides cards must link to /comparatif/{clusterId}.'
+        );
+
+        // Inline-style anti-patterns from the legacy rail are gone.
+        $this->assertStringNotContainsString('onmouseover="this.style.transform', $body);
+
+        // Spot-check the canonical CSS contracts (rail is glass-card
+        // + scroll-snap + responsive grid).
         $css = file_get_contents(public_path('themes/echo/css/grimba-home.css'));
         $this->assertStringContainsString('.grimba-all-sides__title', $css);
         $this->assertStringContainsString('.grimba-all-sides__headline', $css);
         $this->assertStringContainsString('html.grimba-home-html[data-bs-theme="dark"] .grimba-all-sides__card', $css);
-        $this->assertStringContainsString('-webkit-text-fill-color: #fffaf0 !important;', $css);
         $this->assertStringContainsString('scroll-snap-type: x proximity;', $css);
         $this->assertStringContainsString('grid-auto-columns: minmax(270px, 84vw) !important;', $css);
     }

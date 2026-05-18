@@ -431,5 +431,10 @@
     "Sujets que vous évitez": "Topics you avoid",
     "Vos angles morts personnels": "Your personal blindspots",
     "D’après vos derniers articles lus, ces rubriques récentes n’apparaissent pas encore dans votre historique.": "Based on your recent reads, these recent sections do not appear in your history yet.",
-    "articles lus pris en compte": "read articles counted"
+    "articles lus pris en compte": "read articles counted",
+    "GrimbaNews — Breaking news": "GrimbaNews — Breaking news",
+    "GrimbaNews — Latest": "GrimbaNews — Latest",
+    "Vos articles sauvegardés sont stockés en local dans votre navigateur (cookie). Capacité 50 articles. Ils ne quittent pas votre appareil tant que vous ne créez pas de compte — aucune donnée n'est envoyée à un serveur tiers.": "Your saved articles are stored locally in your browser (cookie). Capacity: 50 articles. They never leave your device until you create an account — no data is sent to any third-party server.",
+    "Sujets que votre historique de lecture évite. Calculé localement à partir des chips suivis et des rubriques peu visitées dans votre cookie — aucune donnée n'est envoyée à un serveur tiers.": "Topics your reading history avoids. Computed locally from the chips you follow and the sections you rarely visit — no data is sent to any third-party server.",
+    "Essayez une ville plus grande, ou ajustez le pays. La couverture locale varie selon les sources que GrimbaNews suit.": "Try a larger city or adjust the country. Local coverage varies with the sources GrimbaNews tracks."
 }

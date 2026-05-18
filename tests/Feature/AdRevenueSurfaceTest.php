@@ -67,17 +67,21 @@ class AdRevenueSurfaceTest extends TestCase
             ->assertSee('google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0');
     }
 
+    /**
+     * Vader 2026-05-18 — paid down from test debt. The advertise page
+     * was rebuilt during the B2B-rebrand sprint; the heading copy
+     * shifted from "GrimbaNews Ads / Book inventory" to "Reach readers
+     * who compare every side." (EN) / "Toucher les lecteurs qui
+     * comparent chaque camp." (FR). Test now pins the canonical copy
+     * AND the slot-query-param echo, which is the load-bearing
+     * sales-handle behavior.
+     */
     public function test_advertise_page_is_public_sales_surface(): void
     {
-        $this->markTestIncomplete('Legacy markup pre-dossier-reinvention; see docs/GRIMBANEWS_TEST_DEBT_DOSSIER_REINVENTION.md');
-        $this->withUnencryptedCookies([
-            'grimba_lang' => 'en',
-            'grimba_onboarded' => '1',
-        ])->get('/advertise?slot=home-top')
+        $this->get('/advertise?slot=home-top')
             ->assertOk()
-            ->assertSee('GrimbaNews Ads')
-            ->assertSee('home-top')
-            ->assertSee('Book inventory');
+            ->assertSee('Toucher les lecteurs')
+            ->assertSee('home-top');
     }
 
     private function clearConfiguredAds(): void
