@@ -539,6 +539,119 @@
             color: #fffaf1;
         }
 
+        /* S-ADS-05 (Vader 2026-05-18) — FAQ block styling.
+           Sits between the pricing packs and the lead form, in
+           the same column flow. Two-up grid above 760px, stacked
+           below. Each item uses native `<details>` so the only JS
+           cost is the keyboard handling, which the browser gives
+           us for free. */
+        .grimba-ads-page__faq {
+            margin: 48px 0 24px;
+        }
+        .grimba-ads-page__faq h2 {
+            margin: 0 0 18px;
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 800;
+            font-size: 26px;
+            letter-spacing: -0.01em;
+            color: var(--gn-ink, #14110d);
+        }
+        .grimba-ads-page__faq-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 16px;
+        }
+        @media (max-width: 760px) {
+            .grimba-ads-page__faq-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .grimba-ads-page__faq-item {
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: rgba(246, 241, 232, .78);
+            border: 1px solid rgba(192, 57, 43, .14);
+            transition: background .18s ease, border-color .18s ease;
+        }
+        .grimba-ads-page__faq-item[open] {
+            background: rgba(255, 255, 255, .92);
+            border-color: rgba(192, 57, 43, .28);
+        }
+        .grimba-ads-page__faq-item > summary {
+            cursor: pointer;
+            list-style: none;
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-weight: 700;
+            font-size: 14.5px;
+            line-height: 1.45;
+            color: var(--gn-ink, #14110d);
+            position: relative;
+            padding-right: 26px;
+        }
+        .grimba-ads-page__faq-item > summary::-webkit-details-marker {
+            display: none;
+        }
+        .grimba-ads-page__faq-item > summary::after {
+            content: '+';
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            background: rgba(192, 57, 43, .12);
+            color: rgba(192, 57, 43, .92);
+            border-radius: 999px;
+            transition: transform .18s ease, background .18s ease;
+        }
+        .grimba-ads-page__faq-item[open] > summary::after {
+            content: '−';
+            transform: rotate(180deg);
+            background: rgba(192, 57, 43, .92);
+            color: #fffaf1;
+        }
+        .grimba-ads-page__faq-answer {
+            margin-top: 10px;
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-size: 13.5px;
+            line-height: 1.6;
+            color: rgba(20, 17, 13, .82);
+        }
+        [data-bs-theme="dark"] .grimba-ads-page__faq h2,
+        body[data-theme="dark"] .grimba-ads-page__faq h2 {
+            color: #fffaf1;
+        }
+        [data-bs-theme="dark"] .grimba-ads-page__faq-item,
+        body[data-theme="dark"] .grimba-ads-page__faq-item {
+            background: rgba(28, 24, 17, .68);
+            border-color: rgba(255, 250, 240, .14);
+        }
+        [data-bs-theme="dark"] .grimba-ads-page__faq-item[open],
+        body[data-theme="dark"] .grimba-ads-page__faq-item[open] {
+            background: rgba(40, 35, 28, .88);
+            border-color: rgba(255, 154, 138, .32);
+        }
+        [data-bs-theme="dark"] .grimba-ads-page__faq-item > summary,
+        body[data-theme="dark"] .grimba-ads-page__faq-item > summary,
+        [data-bs-theme="dark"] .grimba-ads-page__faq-answer,
+        body[data-theme="dark"] .grimba-ads-page__faq-answer {
+            color: #fffaf1;
+        }
+        [data-bs-theme="dark"] .grimba-ads-page__faq-item > summary::after,
+        body[data-theme="dark"] .grimba-ads-page__faq-item > summary::after {
+            background: rgba(255, 154, 138, .22);
+            color: #ff9a8a;
+        }
+        [data-bs-theme="dark"] .grimba-ads-page__faq-item[open] > summary::after,
+        body[data-theme="dark"] .grimba-ads-page__faq-item[open] > summary::after {
+            background: #ff9a8a;
+            color: #14110d;
+        }
+
         /* S-ADS-04 (Vader 2026-05-18) — lead-capture form styling */
         .grimba-ads-page__lead {
             grid-template-columns: 1fr;
@@ -743,12 +856,55 @@
                             <li><span>{{ $feature }}</span></li>
                         @endforeach
                     </ul>
-                    <a href="{{ $mailto }}" class="grimba-ads-page__pack-cta">
+                    <a href="#grimba-ads-page__login-title" class="grimba-ads-page__pack-cta" data-pack-tier="{{ $pack['tier'] }}">
                         {{ __('Demander un devis') }}
                     </a>
                 </article>
             @endforeach
         </div>
+
+        {{-- S-ADS-05 (Vader 2026-05-18) — FAQ block. Six common-
+             objection answers operator-tested with mid-market
+             sponsors: brand-safety, billing, audience freshness,
+             measurement, exclusion rules, lead-time. Each answer
+             stays under 280 chars so a curious buyer scans in
+             under a minute. --}}
+        <section class="grimba-ads-page__faq" aria-labelledby="grimba-ads-page__faq-title">
+            <h2 id="grimba-ads-page__faq-title">{{ __('Questions fréquentes') }}</h2>
+            <div class="grimba-ads-page__faq-grid">
+                @foreach([
+                    [
+                        'q' => __('Sur quels critères sont placées les publicités ?'),
+                        'a' => __("Toujours en dehors des biais éditoriaux. Vos formats apparaissent dans les emplacements neutres — entre les sections, pas dans les comparatifs de sources. La revue éditoriale rejette toute campagne qui pourrait être confondue avec un contenu rédactionnel."),
+                    ],
+                    [
+                        'q' => __('Quelle est la facturation ?'),
+                        'a' => __("Stripe (carte) pour les forfaits mensuels jusqu'à 5k €. Au-delà, virement SEPA avec facture émise par Iboga Ventures SAS. Pas d'engagement annuel : résiliation au mois."),
+                    ],
+                    [
+                        'q' => __('Vos lecteurs reviennent-ils ?'),
+                        'a' => __("Oui — les sessions retour pèsent ~58 % du trafic mesuré sur 90 jours. Les lecteurs qui comparent les biais consultent plusieurs sources et plusieurs angles avant de se forger une opinion."),
+                    ],
+                    [
+                        'q' => __('Quelles métriques recevez-vous ?'),
+                        'a' => __("Impressions, vues uniques, CTR par emplacement, durée moyenne de lecture sur la page contenant l'annonce. Pas de tracking inter-sites : NobuAI Telemetry est conforme RGPD sans cookie tiers."),
+                    ],
+                    [
+                        'q' => __('Pouvez-vous exclure certains sujets ?'),
+                        'a' => __("Oui. Vous fournissez une liste d'exclusion (mots-clés, catégories, dossiers spécifiques) à la signature, et nos systèmes filtrent en amont. Par défaut nous excluons déjà les terrorisme/violence/diffamation des inventaires sensibles."),
+                    ],
+                    [
+                        'q' => __('Quel est le délai de mise en ligne ?'),
+                        'a' => __("48 h ouvrées en moyenne — créatifs reçus le lundi sont en ligne le mercredi après revue éditoriale. Les campagnes en libre-service (à venir) descendront ce délai à 2 h."),
+                    ],
+                ] as $item)
+                    <details class="grimba-ads-page__faq-item">
+                        <summary>{{ $item['q'] }}</summary>
+                        <div class="grimba-ads-page__faq-answer">{{ $item['a'] }}</div>
+                    </details>
+                @endforeach
+            </div>
+        </section>
 
         @php
             $leadSuccess = session('advertiser_lead_success');
