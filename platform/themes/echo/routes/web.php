@@ -343,6 +343,13 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ])->render();
         })->name('public.advertise');
 
+        // S-ADS-03 (Vader 2026-05-18) — sponsor lead capture POST.
+        // Real form replaces the prior `mailto:` CTA so leads are
+        // persisted to `grimba_advertiser_leads` (S-ADS-02) and
+        // queued for the sales handoff in S-ADS-10.
+        Route::post('advertise/leads', [\App\Http\Controllers\AdvertiserLeadController::class, 'store'])
+            ->name('public.advertise.leads.store');
+
         // Both variants because PHP's built-in dev server short-circuits
         // .png paths before routing kicks in; /og/post/{id} works in dev,
         // /og/post/{id}.png is the canonical URL in prod (Apache/Nginx rewrites).

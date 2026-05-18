@@ -539,6 +539,100 @@
             color: #fffaf1;
         }
 
+        /* S-ADS-04 (Vader 2026-05-18) — lead-capture form styling */
+        .grimba-ads-page__lead {
+            grid-template-columns: 1fr;
+            align-items: stretch;
+        }
+        .grimba-ads-page__lead-form {
+            margin-top: 18px;
+            display: grid;
+            gap: 12px;
+        }
+        .grimba-ads-page__lead-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width: 640px) {
+            .grimba-ads-page__lead-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .grimba-ads-page__lead-field {
+            display: grid;
+            gap: 6px;
+        }
+        .grimba-ads-page__lead-field span {
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: rgba(255, 250, 241, .68);
+        }
+        .grimba-ads-page__lead-field input,
+        .grimba-ads-page__lead-field select,
+        .grimba-ads-page__lead-field textarea {
+            font: inherit;
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 10px 12px;
+            background: rgba(255, 250, 241, .08);
+            color: #fffaf1;
+            border: 1px solid rgba(255, 250, 241, .18);
+            border-radius: 10px;
+            transition: border-color .18s ease, box-shadow .18s ease;
+        }
+        .grimba-ads-page__lead-field input:focus,
+        .grimba-ads-page__lead-field select:focus,
+        .grimba-ads-page__lead-field textarea:focus {
+            outline: none;
+            border-color: rgba(255, 250, 241, .55);
+            box-shadow: 0 0 0 4px rgba(255, 250, 241, .14);
+        }
+        .grimba-ads-page__lead-field input::placeholder,
+        .grimba-ads-page__lead-field textarea::placeholder {
+            color: rgba(255, 250, 241, .42);
+        }
+        .grimba-ads-page__lead-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+        .grimba-ads-page__lead-actions small {
+            color: rgba(255, 250, 241, .72);
+            font-size: 12px;
+        }
+        .grimba-ads-page__lead-hp {
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+        .grimba-ads-page__lead-result {
+            margin: 12px 0 0;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .grimba-ads-page__lead-result--ok {
+            background: rgba(34, 139, 84, .22);
+            border: 1px solid rgba(34, 139, 84, .42);
+            color: #d6f6e2;
+        }
+        .grimba-ads-page__lead-result--err {
+            background: rgba(192, 57, 43, .22);
+            border: 1px solid rgba(192, 57, 43, .42);
+            color: #ffd9d3;
+        }
+
         @media (max-width: 991.98px) {
             .grimba-ads-page__hero {
                 grid-template-columns: 1fr;
@@ -656,16 +750,82 @@
             @endforeach
         </div>
 
-        <section class="grimba-ads-page__login" aria-labelledby="grimba-ads-page__login-title">
+        @php
+            $leadSuccess = session('advertiser_lead_success');
+            $leadError = session('advertiser_lead_error');
+        @endphp
+        <section class="grimba-ads-page__login grimba-ads-page__lead" aria-labelledby="grimba-ads-page__login-title">
             <div>
                 <h2 id="grimba-ads-page__login-title">{{ __('Espace annonceurs') }}</h2>
                 <p>
-                    {{ __("Création de campagne en libre-service, télémétrie temps réel, facturation Stripe, file de revue éditoriale. La plateforme annonceurs lance dans les prochains jours — laissez-nous votre adresse via :sales pour avoir un accès anticipé.", ['sales' => '']) }}
-                    <a href="{{ $mailto }}" style="color: #fffaf1; text-decoration: underline;">{{ __("Contacter l'équipe ventes") }}</a>
+                    {{ __("Création de campagne en libre-service, télémétrie temps réel, facturation Stripe, file de revue éditoriale. La plateforme annonceurs lance dans les prochains jours — laissez-nous votre email pour un accès anticipé.") }}
                 </p>
+
+                @if($leadSuccess)
+                    <div class="grimba-ads-page__lead-result grimba-ads-page__lead-result--ok" role="status">
+                        {{ $leadSuccess }}
+                    </div>
+                @endif
+                @if($leadError)
+                    <div class="grimba-ads-page__lead-result grimba-ads-page__lead-result--err" role="alert">
+                        {{ $leadError }}
+                    </div>
+                @endif
+                @if($errors->any())
+                    <div class="grimba-ads-page__lead-result grimba-ads-page__lead-result--err" role="alert">
+                        <ul style="margin: 0; padding-left: 18px;">
+                            @foreach($errors->all() as $err)
+                                <li>{{ $err }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ url('/advertise/leads') }}" class="grimba-ads-page__lead-form" novalidate>
+                    @csrf
+                    @if(! empty($slot))
+                        <input type="hidden" name="source_slot" value="{{ $slot }}">
+                    @endif
+                    {{-- Honeypot — hidden from humans, bots fill everything. --}}
+                    <label class="grimba-ads-page__lead-hp" aria-hidden="true">
+                        <span>Leave this field empty</span>
+                        <input type="text" name="_hp" tabindex="-1" autocomplete="off">
+                    </label>
+
+                    <div class="grimba-ads-page__lead-row">
+                        <label class="grimba-ads-page__lead-field">
+                            <span>{{ __('Email') }} *</span>
+                            <input type="email" name="email" required maxlength="191" autocomplete="email" value="{{ old('email') }}" placeholder="you@brand.com">
+                        </label>
+                        <label class="grimba-ads-page__lead-field">
+                            <span>{{ __('Société') }}</span>
+                            <input type="text" name="company" maxlength="191" autocomplete="organization" value="{{ old('company') }}" placeholder="{{ __('Nom de votre marque') }}">
+                        </label>
+                    </div>
+                    <div class="grimba-ads-page__lead-row">
+                        <label class="grimba-ads-page__lead-field">
+                            <span>{{ __('Budget mensuel') }}</span>
+                            <select name="budget_band">
+                                <option value="">{{ __('— Choisir —') }}</option>
+                                <option value="under-1k"  @selected(old('budget_band') === 'under-1k')>{{ __('< 1k €') }}</option>
+                                <option value="1k-5k"     @selected(old('budget_band') === '1k-5k')>{{ __('1k – 5k €') }}</option>
+                                <option value="5k-25k"    @selected(old('budget_band') === '5k-25k')>{{ __('5k – 25k €') }}</option>
+                                <option value="25k-plus"  @selected(old('budget_band') === '25k-plus')>{{ __('25k €+') }}</option>
+                                <option value="unknown"   @selected(old('budget_band') === 'unknown')>{{ __('À discuter') }}</option>
+                            </select>
+                        </label>
+                    </div>
+                    <label class="grimba-ads-page__lead-field grimba-ads-page__lead-field--full">
+                        <span>{{ __('Vos objectifs (optionnel)') }}</span>
+                        <textarea name="goals" rows="3" maxlength="2000" placeholder="{{ __('Ex. : campagne de notoriété auprès des lecteurs francophones, conversions vers une landing produit, sponsoring d’une rubrique…') }}">{{ old('goals') }}</textarea>
+                    </label>
+                    <div class="grimba-ads-page__lead-actions">
+                        <button type="submit" class="grimba-ads-page__login-cta">
+                            {{ __("Demander un accès anticipé") }}
+                        </button>
+                        <small style="opacity: .7;">{{ __("Réponse sous un jour ouvré. Aucune carte requise.") }}</small>
+                    </div>
+                </form>
             </div>
-            <a href="{{ $mailto }}" class="grimba-ads-page__login-cta">
-                {{ __("Réserver une démo") }}
-            </a>
         </section>
     </section>
