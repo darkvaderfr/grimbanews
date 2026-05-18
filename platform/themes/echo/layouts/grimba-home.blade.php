@@ -81,6 +81,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    {{-- S-MODE-09 (Vader 2026-05-18) — FOUC guard MUST run before
+         any body element parses so dark-mode users never see a
+         white flash on nav. Inline script, no network round-trip. --}}
+    @include(Theme::getThemeNamespace('partials.theme-fouc-guard'))
+
     @include(Theme::getThemeNamespace('partials.font-preloads'))
     {!! BaseHelper::googleFonts('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Public+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap') !!}
 
