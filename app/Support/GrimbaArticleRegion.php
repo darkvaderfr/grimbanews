@@ -182,8 +182,33 @@ class GrimbaArticleRegion
      * Detect the strongest topical region from the article's text.
      * Returns the region key when one region wins by the required
      * margin; null when the text is too thin or two regions tie.
+     *
+     * Use `detectAllFromText()` to get the secondary region for
+     * cross-region stories (S-LSAT-18 — e.g. "Macron meets
+     * Zelensky in Kigali" pings africa + europe).
      */
     public static function detectFromText(string $title, string $description = '', string $summary = ''): ?string
+    {
+        $all = self::detectAllFromText($title, $description, $summary);
+        return $all['primary'] ?? null;
+    }
+
+    /**
+     * S-LSAT-18 (Vader 2026-05-18) — multi-tag region detection.
+     *
+     * Returns an array with `primary` (string|null) and
+     * `secondary` (string|null) keys:
+     *   - `primary` follows the same 3-point + 2× margin contract
+     *     as `detectFromText()`. Stays null when the text is thin.
+     *   - `secondary` fires when the runner-up has ≥ 3 points AND
+     *     is within 1.3× of the winner. Captures stories that
+     *     genuinely span two regions (e.g. Macron-meets-Zelensky-in-
+     *     Kigali pings europe + africa). Stays null when one
+     *     region clearly dominates.
+     *
+     * @return array{primary: ?string, secondary: ?string}
+     */
+    public static function detectAllFromText(string $title, string $description = '', string $summary = ''): array
     {
         $normalized = self::normalized();
 
@@ -210,17 +235,45 @@ class GrimbaArticleRegion
         $regions = array_keys($scores);
         $top = $regions[0];
         $topScore = $scores[$top];
-        $runnerUp = $scores[$regions[1]] ?? 0;
+        $runnerUp = $regions[1] ?? null;
+        $runnerUpScore = $runnerUp !== null ? $scores[$runnerUp] : 0;
 
-        // Need 3+ weighted points AND 2× margin over runner-up.
+        // Floor: title must carry SOME signal.
         if ($topScore < 3) {
-            return null;
-        }
-        if ($runnerUp > 0 && $topScore < $runnerUp * 2) {
-            return null;
+            return ['primary' => null, 'secondary' => null];
         }
 
-        return $top;
+        // Three branches based on the runner-up's strength:
+        //
+        // 1. Runner-up < 3 points:
+        //    Top clearly dominates. primary = top, no secondary.
+        //
+        // 2. Runner-up >= 3 AND topScore < runnerUp * 1.3:
+        //    Genuinely tied (within 30%). Neither region clearly
+        //    leads. primary = null (preserves original "no dominant
+        //    region" behavior). No secondary.
+        //
+        // 3. Runner-up >= 3 AND topScore >= runnerUp * 1.3:
+        //    Top leads with a real margin AND the runner-up has
+        //    real signal of its own. This is the cross-region
+        //    story case Vader cited ("Macron meets Zelensky in
+        //    Kigali"). primary = top, secondary = runnerUp.
+        //
+        // The old 2× margin rule was too conservative: it rejected
+        // cases like 8 vs 5 (ratio 1.6) as "no primary", losing the
+        // dominant region. The new 1.3× rule + multi-tag handle
+        // that case more usefully.
+
+        if ($runnerUpScore < 3) {
+            return ['primary' => $top, 'secondary' => null];
+        }
+
+        if ($topScore < $runnerUpScore * 1.3) {
+            // Genuinely tied — don't pick a primary.
+            return ['primary' => null, 'secondary' => null];
+        }
+
+        return ['primary' => $top, 'secondary' => $runnerUp];
     }
 
     private static function normalize(string $s): string
