@@ -133,6 +133,21 @@ class GrimbaLanguageSettingsTest extends TestCase
         $this->assertSame(['africa'], GrimbaLanguageSettings::forceBothRegions());
     }
 
+    public function test_force_both_regions_none_sentinel_disables_rule(): void
+    {
+        // Zen audit fix 2026-05-18: operators can disable the
+        // forced-region rule by setting the value to `none`.
+        setting()->set('grimba_lang_region_force_both', 'none');
+        setting()->save();
+        GrimbaLanguageSettings::flush();
+
+        $this->assertSame([], GrimbaLanguageSettings::forceBothRegions());
+
+        // Africa post → uses default (non-Africa) threshold when no
+        // region is in the force-both list.
+        $this->assertSame(500, GrimbaLanguageSettings::effectivePopularityThreshold('africa'));
+    }
+
     public function test_boolean_coercion_handles_string_truthy_values(): void
     {
         foreach (['1', 'true', 'yes', 'on'] as $truthy) {

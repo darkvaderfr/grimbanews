@@ -53,6 +53,10 @@ class BreakingStreamTest extends TestCase
             'is_blindspot' => 0,
             'source_name' => 'Test Wire',
             'source_id' => 1,
+            // S-LSAT-04: the strict-locale filter on breaking() now
+            // drops NULL-language posts. The test fixture lives in the
+            // EN locale because its title is EN, so tag it explicitly.
+            'original_language' => 'en',
             'published_at' => $now->copy()->subMinutes(30),
             'created_at' => $now->copy()->subMinutes(30),
             'updated_at' => $now->copy()->subMinutes(30),
@@ -60,6 +64,10 @@ class BreakingStreamTest extends TestCase
         ]);
 
         Cache::flush();
+        // Switch the reader locale to EN to match the fixture's
+        // original_language so the strict filter accepts it.
+        app()->setLocale('en');
+        request()->merge(['lang' => 'en']);
         $bundle = GrimbaHomeFeed::breaking(18);
 
         $this->assertSame('real', $bundle['mode'], 'breaking() must report mode=real when a strict-phrase match exists');

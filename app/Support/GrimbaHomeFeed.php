@@ -152,8 +152,37 @@ class GrimbaHomeFeed
      * Latest stream — Phase D-02. Symmetric sibling to breaking().
      * Returns the freshest N posts for the active region + locale, no
      * exclusions, configurable count. Cached separately so home rails,
-     * /latest route, and any future surface share one result without
-     * each running its own query.
+     * S-LSAT-04 — resolve the active reader locale BEFORE the layout
+     * runs. Order: `?lang=` query → `grimba_lang` cookie → framework
+     * default. Always returns one of `fr` or `en`.
+     *
+     * Zen audit fix 2026-05-18: `request()->query('lang')` returns an
+     * ARRAY when the URL contains `?lang[]=fr&lang[]=en` (Symfony
+     * parses bracket-syntax automatically); `(string) [...]` would
+     * throw `Array to string conversion`. Same risk for a multi-value
+     * cookie header. `is_string()` guard makes the cast safe.
+     */
+    public static function resolveReaderLocale(): string
+    {
+        $rawQuery = request()->query('lang', '');
+        $query = is_string($rawQuery) ? strtolower($rawQuery) : '';
+        if ($query === 'fr' || $query === 'en') {
+            return $query;
+        }
+        $rawCookie = request()->cookie('grimba_lang', '');
+        $cookie = is_string($rawCookie) ? strtolower($rawCookie) : '';
+        if ($cookie === 'fr' || $cookie === 'en') {
+            return $cookie;
+        }
+        $fallback = strtolower(substr(app()->getLocale() ?: 'fr', 0, 2));
+        return in_array($fallback, ['fr', 'en'], true) ? $fallback : 'fr';
+    }
+
+    /**
+     * Cached "latest" stream used by the hero rail, /latest route,
+     * and any future surface. Strict mode (S-LSAT-04) drops posts
+     * that have neither a native locale match nor a translation
+     * available in the reader's locale.
      *
      * @return Collection<int, Post>
      */
@@ -161,21 +190,39 @@ class GrimbaHomeFeed
     {
         $count = max(1, min(60, $count));
         $region = self::resolveRegionKey();
-        $locale = app()->getLocale();
+        // S-LSAT-04 (Vader 2026-05-18): resolve the reader locale
+        // BEFORE the layout runs. `app()->getLocale()` returns the
+        // framework default (`fr`) at this stage; the `?lang=` query
+        // param + `grimba_lang` cookie are the load-bearing signals
+        // for reader-language surfacing.
+        $locale = self::resolveReaderLocale();
+        $strict = GrimbaLanguageSettings::strictForLatest();
+        $bucket = $strict ? 'strict' : 'soft';
 
         return Cache::remember(
-            'grimba_latest_stream_v1:' . $locale . ':' . $region . ':' . $count,
+            'grimba_latest_stream_v2:' . $locale . ':' . $region . ':' . $bucket . ':' . $count,
             60,
-            function () use ($count): Collection {
+            function () use ($count, $strict, $locale): Collection {
                 $cols = ['id','name','translated_name','translated_description','translated_to','original_language','description','content','summary_nobuai','source_name','source_id','bias_rating','published_at','created_at','image','editorial_region'];
 
-                $posts = Post::query()
+                $query = Post::query()
                     ->where('status', 'published')
                     ->whereNotNull('source_name')
-                    ->with(['slugable', 'categories'])
-                    ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
-                    ->limit($count)
-                    ->get($cols);
+                    ->with(['slugable', 'categories']);
+
+                if ($strict) {
+                    // Strict mode = native target locale OR has a target
+                    // translation. Drops wrong-locale-no-translation +
+                    // unclassified content. We pass the resolved reader
+                    // locale explicitly because `app()->getLocale()` is
+                    // still the framework default at this stage.
+                    GrimbaTranslationPresenter::filterForTargetLocale($query, $locale);
+                    GrimbaTranslationPresenter::orderForTargetLocale($query, $locale);
+                } else {
+                    GrimbaTranslationPresenter::orderForTargetLocale($query, $locale);
+                }
+
+                $posts = $query->limit($count)->get($cols);
 
                 GrimbaTranslationPresenter::warm($posts);
 
@@ -202,11 +249,13 @@ class GrimbaHomeFeed
     {
         $windowHours = max(1, min(72, $windowHours));
         $region = self::resolveRegionKey();
-        $locale = app()->getLocale();
+        $locale = self::resolveReaderLocale();
+        $strict = GrimbaLanguageSettings::strictForBreaking();
+        $bucket = $strict ? 'strict' : 'soft';
 
-        $cacheKey = 'grimba_breaking_v1:' . $locale . ':' . $region . ':' . $windowHours;
+        $cacheKey = 'grimba_breaking_v2:' . $locale . ':' . $region . ':' . $bucket . ':' . $windowHours;
 
-        return Cache::remember($cacheKey, 45, function () use ($windowHours): array {
+        return Cache::remember($cacheKey, 45, function () use ($windowHours, $strict, $locale): array {
             $cols = ['id','name','translated_name','translated_description','translated_to','original_language','description','content','summary_nobuai','source_name','source_id','bias_rating','published_at','created_at','image','editorial_region'];
 
             $keywords = self::breakingKeywords();
@@ -227,6 +276,13 @@ class GrimbaHomeFeed
                 })
                 ->with('slugable');
 
+            // S-LSAT-04 — strict mode hides wrong-locale-no-translation
+            // posts so a FR reader doesn't see EN-origin headlines (and
+            // vice versa) on the breaking ticker.
+            if ($strict) {
+                GrimbaTranslationPresenter::filterForTargetLocale($candidatesQuery, $locale);
+            }
+
             GrimbaPostRecency::wherePublishedSince($candidatesQuery, now()->subHours(24));
             GrimbaPostRecency::orderByPublished($candidatesQuery);
 
@@ -243,11 +299,17 @@ class GrimbaHomeFeed
                 return ['mode' => 'real', 'posts' => $breaking->values()];
             }
 
-            // Fallback: freshest posts in the window so the rail still moves.
+            // Fallback: freshest posts in the window so the rail still
+            // moves. Strict mode applies here too so the fallback
+            // doesn't silently undo the locale filter when breaking
+            // matches are empty.
             $recent = Post::query()
                 ->where('status', 'published')
                 ->whereNotNull('source_name')
                 ->with('slugable');
+            if ($strict) {
+                GrimbaTranslationPresenter::filterForTargetLocale($recent);
+            }
             GrimbaPostRecency::wherePublishedSince($recent, now()->subHours($windowHours));
             GrimbaPostRecency::orderByPublished($recent);
 

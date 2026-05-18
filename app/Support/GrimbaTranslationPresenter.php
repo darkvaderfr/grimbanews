@@ -249,11 +249,14 @@ class GrimbaTranslationPresenter
      *
      * @param mixed   $query       Eloquent or Query Builder instance.
      * @param ?string $target      Override the locale; defaults to active reader locale.
-     * @param bool    $applyOrder  When true (default), also applies the soft ranker
-     *                             so within the filtered set, native-locale posts
-     *                             still come before translated ones.
+     * @param bool    $applyOrder  When true, ALSO applies the soft ranker so within
+     *                             the filtered set, native-locale posts still come
+     *                             before translated ones. Default false (Zen audit
+     *                             2026-05-18) so we don't double-order when callers
+     *                             already tap `orderForTargetLocale` themselves —
+     *                             callers must opt in explicitly when they want it.
      */
-    public static function filterForTargetLocale(mixed $query, ?string $target = null, bool $applyOrder = true): mixed
+    public static function filterForTargetLocale(mixed $query, ?string $target = null, bool $applyOrder = false): mixed
     {
         $target = strtolower(substr($target ?: self::targetLocale(), 0, 2));
         if (! in_array($target, ['fr', 'en'], true)) {

@@ -136,6 +136,14 @@ class GrimbaLanguageSettings
     public static function forceBothRegions(): array
     {
         $raw = (string) (self::all()['region_force_both'] ?? 'africa');
+        // Zen audit fix 2026-05-18 — operators can disable the
+        // forced-region rule by setting the value to the literal
+        // string `none` (admin form helper text documents this).
+        // An empty string still falls back to default via coerce(),
+        // so accidental wipes don't disable the rule silently.
+        if (strtolower(trim($raw)) === 'none') {
+            return [];
+        }
         return array_values(array_filter(array_map('trim', array_map('strtolower', explode(',', $raw)))));
     }
 

@@ -92,6 +92,35 @@ class GrimbaFilterForTargetLocaleTest extends TestCase
         $this->assertContains($enWithFrJoinRow, $ids, 'Join-table-only translation must satisfy strict filter.');
     }
 
+    /**
+     * Zen audit add-on (2026-05-18): explicitly assert the join-table
+     * branch satisfies the filter EVEN WHEN the in-row `translated_to`
+     * column is NULL. Catches a future regression where someone
+     * mistakenly ANDs the branches together.
+     */
+    public function test_join_table_only_satisfies_filter_when_in_row_markers_are_null(): void
+    {
+        if (! DB::getSchemaBuilder()->hasTable('grimba_post_translations')) {
+            $this->markTestSkipped('grimba_post_translations table not migrated.');
+        }
+
+        $post = $this->insertPost('en', null);
+        // Explicitly NULL in-row markers so only the join-table row
+        // can satisfy the filter.
+        DB::table('posts')->where('id', $post)->update([
+            'translated_to' => null,
+            'translated_name' => null,
+        ]);
+        $this->insertJoinTranslation($post, 'fr');
+
+        $ids = $this->runFilter('fr');
+        $this->assertContains(
+            $post,
+            $ids,
+            'Filter must accept post when ONLY the join-table row carries the translation.'
+        );
+    }
+
     public function test_empty_translated_name_does_not_satisfy_filter(): void
     {
         // Half-rolled-back state: in-row marker says `translated_to=fr`
