@@ -94,7 +94,7 @@
                             @forelse($leads as $lead)
                                 <tr>
                                     <td>
-                                        <a href="mailto:{{ $lead->email }}" style="color: var(--gn-left); text-decoration: underline;">{{ $lead->email }}</a>
+                                        <a href="{{ route('grimba.advertiser-leads.show', $lead->id) }}" style="color: var(--gn-left); text-decoration: underline; font-weight: 600;">{{ $lead->email }}</a>
                                         @if($lead->source_slot)
                                             <div style="font-size: 11px; opacity: .6;">slot: {{ $lead->source_slot }}</div>
                                         @endif
@@ -129,6 +129,7 @@
                                         </form>
                                     </td>
                                     <td class="text-end">
+                                        <a href="{{ route('grimba.advertiser-leads.show', $lead->id) }}" class="btn btn-sm btn-outline-primary">Voir</a>
                                         <form method="POST" action="{{ route('grimba.advertiser-leads.destroy', $lead->id) }}" class="d-inline" onsubmit="return confirm('Supprimer ce lead ?');">
                                             @csrf
                                             @method('DELETE')

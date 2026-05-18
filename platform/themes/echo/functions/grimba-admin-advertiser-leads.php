@@ -55,6 +55,42 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             ));
         })->name('advertiser-leads.index');
 
+        Route::get('advertiser-leads/{id}', function (int $id) {
+            $lead = DB::table('grimba_advertiser_leads')->where('id', $id)->first();
+            abort_if(! $lead, 404);
+
+            $prevId = DB::table('grimba_advertiser_leads')
+                ->where('id', '<', $id)
+                ->orderByDesc('id')
+                ->value('id');
+            $nextId = DB::table('grimba_advertiser_leads')
+                ->where('id', '>', $id)
+                ->orderBy('id')
+                ->value('id');
+
+            return view('grimba-admin.advertiser-leads.detail', compact('lead', 'prevId', 'nextId'));
+        })->name('advertiser-leads.show');
+
+        Route::post('advertiser-leads/{id}/notes', function (Request $request, int $id) {
+            $row = DB::table('grimba_advertiser_leads')->where('id', $id)->first();
+            abort_if(! $row, 404);
+
+            $notes = (string) $request->input('admin_notes', '');
+            if (strlen($notes) > 8000) {
+                $notes = substr($notes, 0, 8000);
+            }
+
+            DB::table('grimba_advertiser_leads')
+                ->where('id', $id)
+                ->update([
+                    'admin_notes' => $notes !== '' ? $notes : null,
+                    'last_admin_action_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+            return back()->with('success_msg', 'Notes mises à jour.');
+        })->name('advertiser-leads.notes');
+
         Route::post('advertiser-leads/{id}/status', function (Request $request, int $id) {
             $next = (string) $request->input('status', 'new');
             if (! in_array($next, ['new', 'contacted', 'won', 'closed', 'spam'], true)) {
@@ -65,7 +101,11 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
 
             DB::table('grimba_advertiser_leads')
                 ->where('id', $id)
-                ->update(['status' => $next, 'updated_at' => now()]);
+                ->update([
+                    'status' => $next,
+                    'last_admin_action_at' => now(),
+                    'updated_at' => now(),
+                ]);
 
             return back()->with('success_msg', 'Statut mis à jour.');
         })->name('advertiser-leads.status');
