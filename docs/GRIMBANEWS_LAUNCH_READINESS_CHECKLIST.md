@@ -107,7 +107,7 @@ This is the durable launch-go/no-go checklist for GrimbaNews. Every line is eith
 
 | Item | Status | Notes |
 |---|---|---|
-| Feature + Unit suite | ✅ | 270 OK · 22 incomplete (documented legacy debt) |
+| Feature + Unit suite | ✅ | 289 OK · 20 incomplete (legacy markup debt, 2 paid down 2026-05-18 per Wave PP) |
 | Atomicity invariants | ✅ | S-LANG-15 — 4 assertions |
 | Language detector | ✅ | 26 unit fixtures |
 | Schedule cron registry | ✅ | `AutomationScheduleTest` covers all 14 jobs |

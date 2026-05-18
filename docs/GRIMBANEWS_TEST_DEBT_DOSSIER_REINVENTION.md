@@ -7,10 +7,14 @@ canonical article-hero-card) deliberately removed several legacy markup
 surfaces. Tests written against those surfaces still assert against the
 old class names / data attributes / partials and fail accordingly.
 
-**Suite state (2026-05-16 ~15:35):**
-- Total: 226 tests
-- Passing: 204 (90%)
-- Failing: 22 (all legacy-markup expectations)
+**Suite state (2026-05-18 closeout):**
+- Total: 309 tests (+83 since first logged — Wave J/M/L/W/X/AA/JJ/LL/MM coverage added)
+- Passing: 289 (94%)
+- Incomplete (legacy markup debt): **20** (was 22 — 2 paid down 2026-05-18 per Wave PP)
+
+**Paid-down (no longer in this debt pile):**
+- `AdRevenueSurfaceTest::test_advertise_page_is_public_sales_surface` — rewritten against the B2B-rebrand copy ("Toucher les lecteurs / Reach readers"). Commit `6af7ab24`.
+- `AllSidesRailTest::test_all_sides_cards_link_to_cluster_comparison_not_blog_index` — dropped the retired `-webkit-text-fill-color` assertion; keeps the load-bearing link-to-comparatif + class checks. Commit `6af7ab24`.
 
 ## Failing tests and the legacy markup they expect
 

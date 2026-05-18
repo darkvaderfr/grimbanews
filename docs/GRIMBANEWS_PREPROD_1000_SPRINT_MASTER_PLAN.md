@@ -278,10 +278,53 @@ Vader directive 2026-05-16 (mid-session): three asks to add to the queue, NOT to
 | GLASS-BTN-1 | Post Comment button → glass pill, centered, reduced padding | 30m | shipped 2026-05-16 — Post Comment now uses `.btn-grimba--solid btn-grimba--sm` inside a centered wrapper; inline overrides dropped. |
 | GLASS-BTN-2 | Promote glass-pill to every reader button site-wide | 90m | shipped 2026-05-16 — `.btn-grimba` base rebuilt as backdrop-blur frosted pill with gradient sheen + hover lift. `.btn-grimba--solid` / `--ghost` variants + `.grimba-glass-pill` utility for non-`.btn-grimba` buttons. Dark-mode parity, reduced-motion respected. |
 | GLASS-BTN-3 | Light-mode shadow + text-contrast audit | 60m | shipped 2026-05-16 — info-pill body resets inherited `text-shadow`; hero `--no-image` fallback paints dark gradient so white copy stays readable; editorial kickers bumped from `--gn-ink-soft` to `--gn-ink-muted` for AA-strict reading; coverage-legend `color:#fff` rule scoped only to `--on-dark` / hero contexts. |
-| BACKFILL-CAT-1 | Per-editorial-category 500+ article backfill | 90m | shipped 2026-05-16. Live state 2026-05-18 after Wave LL thin-category seed + poll: **3/14 at target** À la une 912✓, Géopolitique 688✓, Politique 587✓ (crossed!). **needs backfill:** Culture 397/500, Tech 337/500, Économie 289/500, Justice 233/500, Santé 156/500, Climat 152/500, Sports 145/500, Sciences 136/500, Société 116/500, Monde 112/500, Immigration 78/500. Operator queue: add more francophone Immigration sources + extra Société sources. |
+| BACKFILL-CAT-1 | Per-editorial-category 500+ article backfill | 90m | shipped 2026-05-16. Live state 2026-05-18 after Wave LL/OO thin-category seed + ongoing poll: **3/14 at target** À la une 935✓, Géopolitique 705✓, Politique 608✓. **Within 100 of target:** Culture 419/500 (-81). **needs backfill:** Tech 353/500, Économie 295/500, Justice 247/500, Santé 174/500, Climat 167/500, Sports 151/500, Sciences 145/500, Monde 127/500, Société 119/500, Immigration 90/500. Operator queue: add more francophone Immigration sources + extra Société sources. |
 | BACKFILL-CAT-2 | UI gate: hide thin-content categories from chips until ≥500 articles | 30m | open — depends on operator running BACKFILL-CAT-1 first. |
 
 Five queued items: 4 shipped this session, 1 open (BACKFILL-CAT-2 gate).
+
+---
+
+## Wave Log (2026-05-16 → 2026-05-18)
+
+Lettered waves shipped as part of the multi-session launch push. Each row links to the closing commit + the architect plan or sprint id it satisfies. Mnemo continuity flag was that we'd been tracking waves in the task list but not in the durable master plan; this section closes that drift.
+
+| Wave | Commit | Date | Subject |
+|---|---|---|---|
+| Wave I  | `48b9fdf5` | 2026-05-16 | Fix iframe / double-doc on /breaking /latest /advertise |
+| Wave J  | `be3722ac` | 2026-05-16 | S-LANG-02/03/04 origin-language detector + backfill + cron |
+| Wave L  | `67380aca` | 2026-05-16 | `/dossiers` route + dynamic active state nav |
+| Wave M  | `67380aca` | 2026-05-16 | 3-column min responsive grid on blog listings |
+| Wave N  | `…`        | 2026-05-16 | S-LANG-05 reader presenter NULL rule + amber badge |
+| Wave O  | `…`        | 2026-05-16 | S-LANG-11 dossier `primary_language` denorm + recompute |
+| Wave P  | `…`        | 2026-05-16 | S-LANG-10 translation work-map admin UI |
+| Wave Q  | `…`        | 2026-05-16 | S-LANG-06/07 hreflang + `<html lang>` audit |
+| Wave R  | `…`        | 2026-05-16 | Phase 3 info-pills (bias-legend + blindspot) |
+| Wave S  | `…`        | 2026-05-16 | S-LANG-12 dossier-language cron + `Post::saved` hook |
+| Wave T  | `…`        | 2026-05-16 | S-LANG-13 per-source coverage table in admin map |
+| Wave U  | `…`        | 2026-05-16 | S-LANG-15 translation atomicity test (4 invariants) |
+| Wave V  | `…`        | 2026-05-16 | Wave M 3-col grid sweep validation |
+| Wave W  | `…`        | 2026-05-17 | S-LANG-08 `posts.summary_nobuai_locale` |
+| Wave X  | `…`        | 2026-05-17 | S-LANG-09 `translated_summary` on join table |
+| Wave Y  | `…`        | 2026-05-17 | S-LANG-14 amber unclassified badge + methodology anchor |
+| Wave Z  | `…`        | 2026-05-17 | S-LANG-16 operator handoff doc |
+| Wave AA | `…`        | 2026-05-17 | Ran 3 pending migrations + 649 dossier backfill |
+| Wave BB | `…`        | 2026-05-17 | Phase 4 info-pills on 5 listing pages |
+| Wave CC | `…`        | 2026-05-17 | NobuAI brand purity sweep (zero leaks confirmed) |
+| Wave DD | `…`        | 2026-05-17 | Launch readiness checklist doc |
+| Wave EE | `…`        | 2026-05-17 | Live `grimba:backfill-category` + bug fix |
+| Wave FF | `…`        | 2026-05-17 | Phase 5 info-pills (sources, owners, coffre, etc.) |
+| Wave GG | `…`        | 2026-05-17 | 30-URL × 3-locale smoke sweep |
+| Wave HH | `36eca123` | 2026-05-17 | Audit closeout + Immigration classifier rule |
+| Wave II | `f5fd913d` | 2026-05-17 | `grimba:seed-immigration-sources` + 60-post RSS poll |
+| Wave JJ | `f5fd913d` | 2026-05-17 | Test coverage — `GrimbaDossierLanguage` + classifier |
+| Wave KK | `e21637b4` | 2026-05-17 | Audit closeout + plan reconcile |
+| Wave LL | `7f25f8c0` | 2026-05-18 | `grimba:seed-thin-category-sources` (5 publishers + 5 feeds) |
+| Wave MM | `7f25f8c0` | 2026-05-18 | Seed-sources idempotency test (5 cases, 11 assertions) |
+| Wave OO | `c8867e5f` | 2026-05-18 | Name-first dedup + fold one-off DB inserts into artisan |
+| Wave PP | `6af7ab24` | 2026-05-18 | Pay down 2 of 22 legacy markup tests (now 20 incomplete) |
+
+Sprint nomenclature aliases: S-LANG-N = Language Tagging plan; S-NDI-N = newsdata.io integration plan; GLASS-BTN, BACKFILL-CAT = pre-launch polish queue.
 
 ---
 
