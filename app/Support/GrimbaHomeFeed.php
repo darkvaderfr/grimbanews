@@ -445,7 +445,7 @@ class GrimbaHomeFeed
             }
 
             $candidates = $query
-                ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+                ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit($perRegion * 4)
                 ->get();
 
@@ -507,7 +507,7 @@ class GrimbaHomeFeed
         $lead = Post::query()
             ->where('story_cluster_id', $clusterId)
             ->where('status', 'published')
-            ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+            ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
             ->first();
 
         if (! $lead) {
@@ -554,7 +554,7 @@ class GrimbaHomeFeed
         $posts = Post::query()
             ->whereIn('story_cluster_id', $clusterIds)
             ->where('status', 'published')
-            ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+            ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
             ->get(['id', 'name', 'translated_name', 'translated_description', 'translated_to', 'original_language', 'story_cluster_id', 'bias_rating', 'image', 'source_id', 'source_name']);
 
         GrimbaTranslationPresenter::warm($posts);
@@ -640,7 +640,7 @@ class GrimbaHomeFeed
         }
 
         return $state->firstAvailable(
-            $query->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))->limit(15)->get()
+            $query->tap(fn ($q) => self::applyHomeRailSurfacing($q))->limit(15)->get()
         );
     }
 
@@ -652,7 +652,7 @@ class GrimbaHomeFeed
         }
 
         return $state->firstAvailable(
-            $query->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))->limit(20)->get()
+            $query->tap(fn ($q) => self::applyHomeRailSurfacing($q))->limit(20)->get()
         );
     }
 
@@ -667,7 +667,7 @@ class GrimbaHomeFeed
                 ->whereIn('story_cluster_id', $balancedClusters)
                 ->whereNotIn('id', $state->shownIds() ?: [0])
                 ->with('categories')
-                ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+                ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit($count * 4)
                 ->get();
 
@@ -686,7 +686,7 @@ class GrimbaHomeFeed
                 ->where('status', 'published')
                 ->whereNotIn('id', $state->shownIds() ?: [0])
                 ->with('categories')
-                ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+                ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit(($count - $picked->count()) * 4)
                 ->get();
 
@@ -710,7 +710,7 @@ class GrimbaHomeFeed
             ->where('is_blindspot', true)
             ->whereNotIn('id', $state->shownIds() ?: [0])
             ->with('categories')
-            ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+            ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
             ->limit($count * 4)
             ->get();
 
@@ -733,7 +733,7 @@ class GrimbaHomeFeed
         return Post::query()
             ->where('status', 'published')
             ->with('categories')
-            ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+            ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
             ->limit($count)
             ->get();
     }
@@ -786,7 +786,7 @@ class GrimbaHomeFeed
                 ->whereIn('story_cluster_id', $balancedClusters)
                 ->whereNotIn('id', $state->shownIds() ?: [0])
                 ->with('categories')
-                ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+                ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit($count * 4)
                 ->get();
 
@@ -805,7 +805,7 @@ class GrimbaHomeFeed
                 ->where('status', 'published')
                 ->whereNotIn('id', $state->shownIds() ?: [0])
                 ->with('categories')
-                ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+                ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit(($count - $picked->count()) * 4)
                 ->get();
 
@@ -835,7 +835,7 @@ class GrimbaHomeFeed
                 ->whereHas('categories', fn ($q) => $q->where('categories.id', $cat->id))
                 ->where('status', 'published')
                 ->whereNotIn('id', $state->shownIds() ?: [0])
-                ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+                ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit(8)
                 ->get();
 
@@ -852,7 +852,7 @@ class GrimbaHomeFeed
                 ->where('status', 'published')
                 ->where('is_blindspot', true)
                 ->whereNotIn('id', $state->shownIds() ?: [0])
-                ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+                ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit(6)
                 ->get();
 
@@ -871,7 +871,7 @@ class GrimbaHomeFeed
                     ->where('status', 'published')
                     ->where('is_blindspot', true)
                     ->whereNotIn('id', $state->shownIds() ?: [0])
-                    ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+                    ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                     ->limit(6)
                     ->get();
 
@@ -903,7 +903,7 @@ class GrimbaHomeFeed
             ->where('status', 'published')
             ->whereNotIn('id', $state->shownIds() ?: [0])
             ->with('categories')
-            ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+            ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
             ->limit($count * 3)
             ->get();
 
@@ -927,7 +927,7 @@ class GrimbaHomeFeed
                 ->where('status', 'published')
                 ->whereNotIn('id', $state->shownIds() ?: [0])
                 ->with('categories')
-                ->tap(fn ($q) => GrimbaTranslationPresenter::orderForTargetLocale($q))
+                ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit(($count - $picked->count()) * 3)
                 ->get();
 
@@ -958,15 +958,42 @@ class GrimbaHomeFeed
             ->pluck('story_cluster_id');
     }
 
+    /**
+     * S-LSAT-04 phase 2 (Vader 2026-05-18): every home rail that
+     * touches a Post query goes through this single helper. When
+     * `strict_home` is on (default), we apply the WHERE filter that
+     * drops wrong-locale-no-translation rows. Either way, we apply
+     * the soft ranker last so within the surviving set, native-locale
+     * posts come before translated ones.
+     *
+     * Pass the resolved reader locale explicitly: `app()->getLocale()`
+     * still returns the framework default at this stage.
+     */
+    public static function applyHomeRailSurfacing(mixed $query): mixed
+    {
+        $locale = self::resolveReaderLocale();
+        if (GrimbaLanguageSettings::strictForHome()) {
+            GrimbaTranslationPresenter::filterForTargetLocale($query, $locale);
+        }
+        return GrimbaTranslationPresenter::orderForTargetLocale($query, $locale);
+    }
+
     private static function cacheKey(): string
     {
         // Region selection lives in a cookie. Without it in the key, the
         // first request poisons the cache for every region for the
         // duration of the TTL — readers selecting Africa would see
         // whoever's region landed first.
+        //
+        // S-LSAT-04 phase 2 bump v1 → v2: now keyed on the resolved
+        // reader locale (?lang= → cookie → fallback) AND the strict
+        // bucket, so flipping `grimba_lang_strict_home` toggles the
+        // bucket and prior soft results don't bleed in.
         $region = self::resolveRegionKey();
+        $locale = self::resolveReaderLocale();
+        $bucket = GrimbaLanguageSettings::strictForHome() ? 'strict' : 'soft';
 
-        return 'grimba_home_feed_v1_' . app()->getLocale() . '_' . $region;
+        return 'grimba_home_feed_v2_' . $locale . '_' . $region . '_' . $bucket;
     }
 
     private static function resolveRegionKey(): string
