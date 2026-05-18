@@ -31,9 +31,11 @@
                 @endif
                 <div class="grimba-topnews__body">
                     <span class="grimba-topnews__kicker">
-                        @if($p->categories->first())
-                            {{ __($p->categories->first()->name) }}
-                        @endif
+                        {{-- S-CAT-02 — swap from first-attached to
+                             primaryTopicFor() so regional bins +
+                             housekeeping buckets don't leak into the
+                             kicker. --}}
+                        @include(Theme::getThemeNamespace('partials.cards.category-badge'), ['post' => $p, 'size' => 'sm'])
                         @if($p->source_name)
                             <span class="opacity-50">·</span> {{ $p->source_name }}
                         @endif

@@ -27,9 +27,8 @@
                     <li class="grimba-latest__item">
                         <div class="grimba-latest__body">
                             <span class="grimba-latest__kicker">
-                                @if($p->categories->first())
-                                    {{ __($p->categories->first()->name) }}
-                                @endif
+                                {{-- S-CAT-02 — primaryTopicFor() badge --}}
+                                @include(Theme::getThemeNamespace('partials.cards.category-badge'), ['post' => $p, 'size' => 'sm'])
                                 @if($p->source_name)
                                     <span class="opacity-50">·</span> {{ $p->source_name }}
                                 @endif
