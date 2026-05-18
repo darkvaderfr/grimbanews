@@ -108,17 +108,29 @@ class GrimbaSeedImmigrationSources extends Command
         $added = $skipped = $feedsAdded = 0;
         $report = [];
 
+        // Zen audit 2026-05-18: name-first dedup with normalised-host
+        // fallback. The substring `LIKE` pattern previously collided
+        // BBC News + BBC Sport (same host, different names) and missed
+        // www-vs-no-www DB rows. See GrimbaSeedThinCategorySources for
+        // the canonical implementation.
+        $nameIndex = DB::table('news_sources')->pluck('id', 'name')->toArray();
+        $hostIndex = [];
+        foreach (DB::table('news_sources')->select('id', 'website')->get() as $row) {
+            $h = self::normaliseHost((string) $row->website);
+            if ($h !== '' && ! isset($hostIndex[$h])) {
+                $hostIndex[$h] = (int) $row->id;
+            }
+        }
+
         foreach ($publishers as $p) {
-            $host = parse_url($p['website'], PHP_URL_HOST);
+            $host = self::normaliseHost($p['website']);
             if (! $host) {
                 $report[] = [$p['name'], 'invalid_website', 0];
                 continue;
             }
 
-            $existing = DB::table('news_sources')
-                ->whereRaw('LOWER(website) LIKE ?', ['%' . strtolower($host) . '%'])
-                ->orWhere('name', $p['name'])
-                ->first();
+            $existingId = $nameIndex[$p['name']] ?? ($hostIndex[$host] ?? null);
+            $existing = $existingId ? (object) ['id' => $existingId] : null;
 
             if ($existing) {
                 $report[] = [$p['name'], 'already_exists (#' . $existing->id . ')', 0];
@@ -182,5 +194,26 @@ class GrimbaSeedImmigrationSources extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Normalise any URL-like string to a comparable host token. Strips
+     * scheme, leading `www.`, port, path. Lowercases. Returns '' when
+     * the input has no usable host. Mirrors the canonical impl in
+     * GrimbaSeedThinCategorySources.
+     */
+    public static function normaliseHost(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '') return '';
+        if (! preg_match('#^[a-z]+://#i', $url)) {
+            $url = 'https://' . $url;
+        }
+        $host = (string) parse_url($url, PHP_URL_HOST);
+        $host = strtolower($host);
+        if (str_starts_with($host, 'www.')) {
+            $host = substr($host, 4);
+        }
+        return $host;
     }
 }
