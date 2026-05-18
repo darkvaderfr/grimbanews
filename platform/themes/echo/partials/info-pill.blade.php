@@ -37,14 +37,28 @@
     if ($tone === 'soft')   $classes .= ' grimba-info-pill--soft';
 @endphp
 
+@php
+    // S-PILL-07 a11y: every pill body needs an id the summary can
+    // reference via aria-controls. Reuse the user-supplied $id when
+    // present; otherwise generate a stable per-render id.
+    $bodyId = ($id ? $id . '__body' : 'grimba-info-pill-body-' . substr(md5(uniqid('', true)), 0, 8));
+@endphp
 <details class="{{ $classes }}" @if($id) id="{{ $id }}" @endif data-grimba-info-pill>
-    <summary aria-label="{{ $label ? __('Plus d’infos sur :label', ['label' => strip_tags($label)]) : __('Plus d’infos') }}">
+    <summary
+        aria-label="{{ $label ? __('Plus d’infos sur :label', ['label' => strip_tags($label)]) : __('Plus d’infos') }}"
+        aria-expanded="false"
+        aria-controls="{{ $bodyId }}">
         <span class="grimba-info-pill__btn" aria-hidden="true">i</span>
         @if($label)
             <span class="grimba-info-pill__label">{{ $label }}</span>
         @endif
     </summary>
-    <div class="grimba-info-pill__body" data-grimba-info-pill-body>
+    <div class="grimba-info-pill__body"
+         data-grimba-info-pill-body
+         id="{{ $bodyId }}"
+         role="region"
+         aria-label="{{ $label ? __('Détails — :label', ['label' => strip_tags($label)]) : __('Détails') }}"
+         tabindex="-1">
         @if($bodyIsHtml)
             {!! $body !!}
         @else
@@ -154,13 +168,16 @@
             // Smooth close — fade the body out, then drop the open attr.
             const closeWithAnim = (details) => {
                 const body = details.querySelector('[data-grimba-info-pill-body]');
+                const summary = details.querySelector('summary');
                 if (!body) {
                     details.removeAttribute('open');
+                    if (summary) summary.setAttribute('aria-expanded', 'false');
                     return;
                 }
                 // Respect reduced motion — drop immediately.
                 if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
                     details.removeAttribute('open');
+                    if (summary) summary.setAttribute('aria-expanded', 'false');
                     showBackdrop(false);
                     return;
                 }
@@ -170,6 +187,7 @@
                     : 'translateY(-6px) scale(.98)';
                 setTimeout(() => {
                     details.removeAttribute('open');
+                    if (summary) summary.setAttribute('aria-expanded', 'false');
                     body.style.opacity = '';
                     body.style.transform = '';
                     // Backdrop is per-page, not per-pill — only hide
@@ -186,12 +204,34 @@
                 });
             };
 
+            // S-PILL-07 a11y helper: reflect open-state on the
+            // summary's aria-expanded so screen readers announce the
+            // pill correctly when toggled.
+            const syncAriaExpanded = (details) => {
+                const summary = details.querySelector('summary');
+                if (summary) {
+                    summary.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+                }
+            };
+
             document.addEventListener('toggle', (e) => {
                 const t = e.target;
                 if (!(t instanceof Element) || !t.matches('[data-grimba-info-pill]')) return;
+                syncAriaExpanded(t);
                 if (t.open) {
                     closeOthers(t);
                     positionBody(t);
+                    // Move focus to the body so the SR reads the
+                    // newly-revealed content. tabindex="-1" makes
+                    // the div programmatically focusable without
+                    // adding it to the tab order.
+                    const body = t.querySelector('[data-grimba-info-pill-body]');
+                    if (body) {
+                        // Defer so the layout settles before focus.
+                        setTimeout(() => {
+                            try { body.focus({ preventScroll: true }); } catch (_) { /* noop */ }
+                        }, 30);
+                    }
                 } else if (!document.querySelector('[data-grimba-info-pill][open]')) {
                     showBackdrop(false);
                 }

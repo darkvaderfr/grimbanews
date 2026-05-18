@@ -53,16 +53,16 @@ class GrimbaInfoPillTest extends TestCase
     {
         $html = $this->renderPill('Body text', label: 'Topics');
         // The summary aria-label includes the label text so screen
-        // readers announce the trigger meaningfully.
-        $this->assertMatchesRegularExpression('/<summary aria-label="[^"]*Topics[^"]*"/', $html);
+        // readers announce the trigger meaningfully. After Wave ZZZ
+        // the summary attrs span multiple lines, so we match against
+        // the rendered HTML across whitespace boundaries.
+        $this->assertMatchesRegularExpression('/<summary\s[^>]*aria-label="[^"]*Topics[^"]*"/s', $html);
     }
 
     public function test_summary_has_fallback_accessible_label_without_explicit_label(): void
     {
-        // No `label` param. The fallback "Plus d'infos" still
-        // satisfies the SR contract.
         $html = $this->renderPill('Body text');
-        $this->assertMatchesRegularExpression('/<summary aria-label="[^"]+"/', $html);
+        $this->assertMatchesRegularExpression('/<summary\s[^>]*aria-label="[^"]+"/s', $html);
     }
 
     public function test_pill_escapes_body_text_by_default(): void
@@ -121,6 +121,46 @@ class GrimbaInfoPillTest extends TestCase
             'align' => 'right',
         ])->render();
         $this->assertStringContainsString('grimba-info-pill--right', $html);
+    }
+
+    public function test_summary_carries_aria_expanded_and_aria_controls(): void
+    {
+        // S-PILL-07 a11y — summary must declare aria-expanded
+        // (synced to open-state by the JS controller) AND
+        // aria-controls pointing at the body's id.
+        $html = $this->renderPill('Body', label: 'Topics');
+        $this->assertStringContainsString('aria-expanded="false"', $html);
+        $this->assertMatchesRegularExpression(
+            '/aria-controls="grimba-info-pill-body-[a-f0-9]{8}"/',
+            $html,
+            'aria-controls must reference a generated body id.',
+        );
+    }
+
+    public function test_body_carries_role_region_and_label_for_screen_readers(): void
+    {
+        // The body needs role="region" + aria-label so screen
+        // readers announce it as a discrete landmark when focus
+        // moves to it on pill open.
+        $html = $this->renderPill('Body', label: 'Topics');
+        $this->assertStringContainsString('role="region"', $html);
+        $this->assertStringContainsString('aria-label="Détails — Topics"', $html);
+        // tabindex="-1" — programmatically focusable, not in tab order.
+        $this->assertStringContainsString('tabindex="-1"', $html);
+    }
+
+    public function test_pill_with_explicit_id_uses_it_for_body_aria_link(): void
+    {
+        // When the caller passes an `id`, the generated body id
+        // should be that id + '__body' so the linkage is stable
+        // across renders (e.g. for a deep-link in the URL hash).
+        $html = view('theme.echo::partials.info-pill', [
+            'body' => 'Body',
+            'id' => 'my-pill',
+        ])->render();
+        $this->assertStringContainsString('id="my-pill"', $html);
+        $this->assertStringContainsString('id="my-pill__body"', $html);
+        $this->assertStringContainsString('aria-controls="my-pill__body"', $html);
     }
 
     public function test_breaking_page_renders_pill_with_full_contract(): void
