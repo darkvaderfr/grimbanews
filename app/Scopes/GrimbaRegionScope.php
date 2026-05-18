@@ -60,8 +60,21 @@ class GrimbaRegionScope implements Scope
         // pattern (no subquery), reflects the editorial intent of the
         // post directly, and lets editors override the region on a
         // case-by-case basis without changing source records.
+        //
+        // S-LSAT-18b — when the secondary column exists, OR-include
+        // it so cross-region stories show up on BOTH regions' pages.
+        // ("Macron meets Zelensky in Kigali" — primary=europe,
+        // secondary=africa — visible on /europe AND /africa.)
         if (Schema::hasColumn($table, 'editorial_region')) {
-            $builder->where($table . '.editorial_region', $region);
+            $hasSecondary = Schema::hasColumn($table, 'editorial_secondary_region');
+            if ($hasSecondary) {
+                $builder->where(function ($w) use ($table, $region) {
+                    $w->where($table . '.editorial_region', $region)
+                      ->orWhere($table . '.editorial_secondary_region', $region);
+                });
+            } else {
+                $builder->where($table . '.editorial_region', $region);
+            }
 
             return;
         }

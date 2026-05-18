@@ -80,13 +80,29 @@ class AppServiceProvider extends ServiceProvider
             // article's title + description has strong region anchors
             // (e.g. Le Monde covering Senegal), tag by what it's
             // ABOUT rather than who published it.
-            $topical = \App\Support\GrimbaArticleRegion::detectFromText(
+            //
+            // S-LSAT-18b — use detectAllFromText so cross-region
+            // stories also populate `editorial_secondary_region`
+            // (Macron-meets-Zelensky-in-Kigali → primary=europe,
+            // secondary=africa).
+            $topical = \App\Support\GrimbaArticleRegion::detectAllFromText(
                 (string) ($post->name ?? ''),
                 (string) ($post->description ?? ''),
                 (string) ($post->summary_nobuai ?? ''),
             );
-            if ($topical !== null) {
-                $post->editorial_region = $topical;
+            if (($topical['primary'] ?? null) !== null) {
+                $post->editorial_region = $topical['primary'];
+                $hasSecondaryCol = Schema::hasColumn('posts', 'editorial_secondary_region');
+                if ($hasSecondaryCol) {
+                    // Only assign secondary when it's NOT the same
+                    // as primary (defense-in-depth — the detector
+                    // already guards but the DB column is the
+                    // load-bearing read).
+                    $secondary = $topical['secondary'] ?? null;
+                    if ($secondary !== null && $secondary !== $topical['primary']) {
+                        $post->editorial_secondary_region = $secondary;
+                    }
+                }
                 return;
             }
             // Fallback: source-country region (the legacy path).
