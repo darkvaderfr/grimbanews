@@ -88,6 +88,12 @@ class AdminChromeAssetsTest extends TestCase
             if (! $file->isFile() || ! str_ends_with($file->getFilename(), '.blade.php')) {
                 continue;
             }
+            // Blade partials (filenames starting with `_`) are
+            // fragments included into pages — they don't carry the
+            // shell themselves, so they're exempt from this check.
+            if (str_starts_with($file->getFilename(), '_')) {
+                continue;
+            }
 
             $contents = file_get_contents($file->getPathname());
             $this->assertMatchesRegularExpression(
