@@ -14,7 +14,7 @@ This is the durable launch-go/no-go checklist for GrimbaNews. Every line is eith
 | Origin-language tagged on 99% of posts | ✅ | After Wave J: 36 NULL out of 3,461 = 1.04% — within Vader's tolerance |
 | 649 dossiers with primary_language denorm | ✅ | Wave AA: 340 FR · 300 EN · 9 unknown |
 | Editorial categories ≥500 articles each | 🟡 | 2 of 14 OK (À la une 748, Géopolitique 538). 12 categories need backfill via `php artisan grimba:backfill-category`. Run when launch-ready. |
-| Immigration category — 0 articles | 🟡 | Specifically blocking the Immigration nav surface. Same backfill command. |
+| Immigration category — 73 articles (was 0) | 🟡 | 2026-05-17: classifier fix moved 46 keyword-matching posts in; `grimba:seed-immigration-sources` + RSS poll added 27 more from La Cimade + Refugees International + Financial Afrik. Still short of 500. Operator can re-poll with corrected feed URLs for the 4 sources that 404'd (TNH, MPI, France terre d'asile, UNHCR). |
 | Bias / factuality / ownership classified on sources | ✅ | Coverage by `news_sources.bias_rating` / `factuality_score` / `ownership_type` |
 | Story clusters formed via `GrimbaRssPoller::findOrFormCluster()` | ✅ | 649 dossiers active |
 | NobuAI summaries (145 posts, all FR) | 🟡 | Coverage is thin (~4% of posts). Run `php artisan grimba:generate-nobuai-summaries` to widen before launch. |
