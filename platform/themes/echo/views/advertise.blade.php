@@ -307,6 +307,165 @@
             border-color: transparent;
         }
 
+        /* S-ADS-05b — visual placement preview cards. */
+        .grimba-ads-page__preview-title {
+            margin: 28px 0 4px;
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 800;
+            font-size: 19px;
+            letter-spacing: -0.01em;
+            color: var(--gn-ink, #14110d);
+        }
+        .grimba-ads-page__preview-lede {
+            margin: 0 0 16px;
+            font-size: 13.5px;
+            line-height: 1.55;
+            color: rgba(20, 17, 13, .68);
+        }
+        .grimba-ads-page__previews {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        @media (max-width: 760px) {
+            .grimba-ads-page__previews {
+                grid-template-columns: 1fr;
+            }
+        }
+        .grimba-ads-page__preview {
+            background: rgba(255, 250, 241, .68);
+            border: 1px solid rgba(192, 57, 43, .14);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .grimba-ads-page__preview-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 14px;
+            background: rgba(26, 23, 19, .04);
+            border-bottom: 1px solid rgba(192, 57, 43, .14);
+        }
+        .grimba-ads-page__preview-head h4 {
+            margin: 0;
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-weight: 800;
+            font-size: 13.5px;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--gn-ink, #14110d);
+        }
+        .grimba-ads-page__preview-head span {
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 11px;
+            color: rgba(20, 17, 13, .56);
+        }
+        .grimba-ads-page__preview-mock {
+            padding: 12px;
+            display: grid;
+            gap: 6px;
+        }
+        .grimba-ads-page__preview-mock--two-col {
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+        }
+        .grimba-ads-page__mock-main,
+        .grimba-ads-page__mock-aside {
+            display: grid;
+            gap: 6px;
+        }
+        .grimba-ads-page__mock-nav,
+        .grimba-ads-page__mock-hero,
+        .grimba-ads-page__mock-headline,
+        .grimba-ads-page__mock-body,
+        .grimba-ads-page__mock-rail,
+        .grimba-ads-page__mock-footer {
+            background: rgba(26, 23, 19, .08);
+            border: 1px solid rgba(26, 23, 19, .08);
+            border-radius: 6px;
+            padding: 6px 8px;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 10.5px;
+            line-height: 1.4;
+            color: rgba(20, 17, 13, .58);
+        }
+        .grimba-ads-page__mock-hero,
+        .grimba-ads-page__mock-headline {
+            background: rgba(26, 23, 19, .12);
+            color: rgba(20, 17, 13, .78);
+            font-weight: 600;
+            padding: 10px 10px;
+        }
+        .grimba-ads-page__mock-nav {
+            background: rgba(26, 23, 19, .14);
+            color: rgba(20, 17, 13, .84);
+        }
+        .grimba-ads-page__mock-footer {
+            background: rgba(26, 23, 19, .14);
+            color: rgba(20, 17, 13, .56);
+        }
+        /* Ad slot — high-contrast red so the operator's eye snaps to
+           the placement at a glance. Native format uses a softer
+           gradient to hint at editorial integration. */
+        .grimba-ads-page__mock-ad {
+            background: linear-gradient(135deg, rgba(192, 57, 43, .92), rgba(168, 49, 38, .88));
+            color: #fffaf1;
+            border: 1px solid rgba(192, 57, 43, .92);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-family: 'Public Sans', system-ui, sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(192, 57, 43, .22);
+        }
+        .grimba-ads-page__mock-ad[data-type="native"] {
+            background: linear-gradient(135deg, rgba(192, 57, 43, .42), rgba(26, 23, 19, .82));
+        }
+        [data-bs-theme="dark"] .grimba-ads-page__preview-title,
+        body[data-theme="dark"] .grimba-ads-page__preview-title {
+            color: #fffaf1;
+        }
+        [data-bs-theme="dark"] .grimba-ads-page__preview-lede,
+        body[data-theme="dark"] .grimba-ads-page__preview-lede {
+            color: rgba(255, 250, 241, .68);
+        }
+        [data-bs-theme="dark"] .grimba-ads-page__preview,
+        body[data-theme="dark"] .grimba-ads-page__preview {
+            background: rgba(28, 24, 17, .68);
+            border-color: rgba(255, 250, 240, .14);
+        }
+        [data-bs-theme="dark"] .grimba-ads-page__preview-head,
+        body[data-theme="dark"] .grimba-ads-page__preview-head {
+            background: rgba(40, 35, 28, .56);
+            border-bottom-color: rgba(255, 250, 240, .14);
+        }
+        [data-bs-theme="dark"] .grimba-ads-page__preview-head h4,
+        body[data-theme="dark"] .grimba-ads-page__preview-head h4,
+        [data-bs-theme="dark"] .grimba-ads-page__preview-head span,
+        body[data-theme="dark"] .grimba-ads-page__preview-head span {
+            color: #fffaf1;
+        }
+        [data-bs-theme="dark"] .grimba-ads-page__mock-nav,
+        body[data-theme="dark"] .grimba-ads-page__mock-nav,
+        [data-bs-theme="dark"] .grimba-ads-page__mock-hero,
+        body[data-theme="dark"] .grimba-ads-page__mock-hero,
+        [data-bs-theme="dark"] .grimba-ads-page__mock-headline,
+        body[data-theme="dark"] .grimba-ads-page__mock-headline,
+        [data-bs-theme="dark"] .grimba-ads-page__mock-body,
+        body[data-theme="dark"] .grimba-ads-page__mock-body,
+        [data-bs-theme="dark"] .grimba-ads-page__mock-rail,
+        body[data-theme="dark"] .grimba-ads-page__mock-rail,
+        [data-bs-theme="dark"] .grimba-ads-page__mock-footer,
+        body[data-theme="dark"] .grimba-ads-page__mock-footer {
+            background: rgba(255, 250, 240, .06);
+            border-color: rgba(255, 250, 240, .08);
+            color: rgba(255, 250, 240, .68);
+        }
+
         .grimba-ads-page__packs {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -837,6 +996,100 @@
                 ] as $key => $label)
                     <span class="grimba-ads-page__slot {{ $key === $slot ? 'grimba-ads-page__slot--active' : '' }}">{{ $label }}</span>
                 @endforeach
+            </div>
+
+            {{-- S-ADS-05b (Vader 2026-05-18) — visual placement
+                 preview. Four mini-page-layout cards show WHERE
+                 each slot lives in the rendered page, so an
+                 operator picks emplacements with full context
+                 (not just abstract labels). Each card is a vertical
+                 schematic of the actual route, ad slots highlighted
+                 in red. --}}
+            <h3 class="grimba-ads-page__preview-title">{{ __('Aperçu visuel des emplacements') }}</h3>
+            <p class="grimba-ads-page__preview-lede">{{ __('Schémas simplifiés des pages où vos formats peuvent apparaître.') }}</p>
+            <div class="grimba-ads-page__previews" aria-label="{{ __('Aperçu des emplacements publicitaires par page') }}">
+
+                {{-- Home --}}
+                <article class="grimba-ads-page__preview" aria-labelledby="grimba-ads-page__preview-home-title">
+                    <header class="grimba-ads-page__preview-head">
+                        <h4 id="grimba-ads-page__preview-home-title">{{ __('Page d\'accueil') }}</h4>
+                        <span>{{ __('grimbanews.com/') }}</span>
+                    </header>
+                    <div class="grimba-ads-page__preview-mock">
+                        <div class="grimba-ads-page__mock-nav">nav · search · login</div>
+                        <div class="grimba-ads-page__mock-ad" data-slot="home-top">home-top</div>
+                        <div class="grimba-ads-page__mock-hero">Hero · lead story</div>
+                        <div class="grimba-ads-page__mock-rail">briefing · all-sides</div>
+                        <div class="grimba-ads-page__mock-ad" data-slot="home-mid">home-mid</div>
+                        <div class="grimba-ads-page__mock-rail">most-read · top news</div>
+                        <div class="grimba-ads-page__mock-ad" data-slot="home-native" data-type="native">home-native (native)</div>
+                        <div class="grimba-ads-page__mock-rail">section blocks · latest</div>
+                        <div class="grimba-ads-page__mock-footer">footer</div>
+                    </div>
+                </article>
+
+                {{-- Article --}}
+                <article class="grimba-ads-page__preview" aria-labelledby="grimba-ads-page__preview-article-title">
+                    <header class="grimba-ads-page__preview-head">
+                        <h4 id="grimba-ads-page__preview-article-title">{{ __('Article') }}</h4>
+                        <span>{{ __('grimbanews.com/blog/&hellip;') }}</span>
+                    </header>
+                    <div class="grimba-ads-page__preview-mock">
+                        <div class="grimba-ads-page__mock-nav">nav · search · login</div>
+                        <div class="grimba-ads-page__mock-ad" data-slot="page-top">page-top</div>
+                        <div class="grimba-ads-page__mock-headline">article headline + byline</div>
+                        <div class="grimba-ads-page__mock-ad" data-slot="article-top">article-top</div>
+                        <div class="grimba-ads-page__mock-body">article body · paragraph 1</div>
+                        <div class="grimba-ads-page__mock-body">article body · paragraph 2</div>
+                        <div class="grimba-ads-page__mock-ad" data-slot="article-mid">article-mid</div>
+                        <div class="grimba-ads-page__mock-body">article body · continued</div>
+                        <div class="grimba-ads-page__mock-rail">related stories</div>
+                        <div class="grimba-ads-page__mock-ad" data-slot="page-bottom">page-bottom</div>
+                        <div class="grimba-ads-page__mock-footer">footer</div>
+                    </div>
+                </article>
+
+                {{-- Dossier (story-cluster comparison view) --}}
+                <article class="grimba-ads-page__preview" aria-labelledby="grimba-ads-page__preview-dossier-title">
+                    <header class="grimba-ads-page__preview-head">
+                        <h4 id="grimba-ads-page__preview-dossier-title">{{ __('Dossier') }}</h4>
+                        <span>{{ __('grimbanews.com/comparatif/&hellip;') }}</span>
+                    </header>
+                    <div class="grimba-ads-page__preview-mock grimba-ads-page__preview-mock--two-col">
+                        <div class="grimba-ads-page__mock-main">
+                            <div class="grimba-ads-page__mock-nav">nav · search · login</div>
+                            <div class="grimba-ads-page__mock-headline">dossier header · 3-side coverage</div>
+                            <div class="grimba-ads-page__mock-ad" data-slot="story-after-hero">story-after-hero</div>
+                            <div class="grimba-ads-page__mock-body">left view · 4 sources</div>
+                            <div class="grimba-ads-page__mock-body">center view · 6 sources</div>
+                            <div class="grimba-ads-page__mock-ad" data-slot="story-mid">story-mid</div>
+                            <div class="grimba-ads-page__mock-body">right view · 3 sources</div>
+                            <div class="grimba-ads-page__mock-footer">footer</div>
+                        </div>
+                        <aside class="grimba-ads-page__mock-aside">
+                            <div class="grimba-ads-page__mock-rail">timeline</div>
+                            <div class="grimba-ads-page__mock-ad" data-slot="story-sidebar">story-sidebar</div>
+                            <div class="grimba-ads-page__mock-rail">similar dossiers</div>
+                        </aside>
+                    </div>
+                </article>
+
+                {{-- Sources directory --}}
+                <article class="grimba-ads-page__preview" aria-labelledby="grimba-ads-page__preview-sources-title">
+                    <header class="grimba-ads-page__preview-head">
+                        <h4 id="grimba-ads-page__preview-sources-title">{{ __('Sources') }}</h4>
+                        <span>{{ __('grimbanews.com/sources') }}</span>
+                    </header>
+                    <div class="grimba-ads-page__preview-mock">
+                        <div class="grimba-ads-page__mock-nav">nav · search · login</div>
+                        <div class="grimba-ads-page__mock-ad" data-slot="sources-top">sources-top</div>
+                        <div class="grimba-ads-page__mock-rail">source list · A–E</div>
+                        <div class="grimba-ads-page__mock-rail">source list · F–M</div>
+                        <div class="grimba-ads-page__mock-ad" data-slot="sources-mid">sources-mid</div>
+                        <div class="grimba-ads-page__mock-rail">source list · N–Z</div>
+                        <div class="grimba-ads-page__mock-footer">footer</div>
+                    </div>
+                </article>
             </div>
         </section>
 
