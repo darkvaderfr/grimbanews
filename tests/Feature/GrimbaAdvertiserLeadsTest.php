@@ -141,6 +141,53 @@ class GrimbaAdvertiserLeadsTest extends TestCase
         $this->assertNotNull(DB::table('grimba_advertiser_leads')->where('email', $email)->first());
     }
 
+    public function test_sales_mailbox_handoff_queues_when_recipient_configured(): void
+    {
+        // S-ADS-10 — when the sales mailbox is configured (via
+        // setting or env), creating a lead must queue a notification
+        // email. Without a recipient, the dispatch is silently
+        // skipped (dev/local behavior).
+        \Illuminate\Support\Facades\Mail::fake();
+
+        // Configure a recipient via the setting store.
+        setting()->set('grimba_advertiser_leads_sales_mailbox', 'sales-test@example.com');
+        setting()->save();
+
+        try {
+            $email = self::EMAIL_PREFIX . 'mail@example.com';
+            $this->post('/advertise/leads', [
+                'email' => $email,
+                'company' => 'Mail Co',
+                'budget_band' => '5k-25k',
+            ])->assertRedirect();
+
+            \Illuminate\Support\Facades\Mail::assertQueued(
+                \App\Mail\GrimbaAdvertiserLeadNotification::class,
+                function ($mail) {
+                    return $mail->leadEmail === self::EMAIL_PREFIX . 'mail@example.com'
+                        && $mail->leadCompany === 'Mail Co'
+                        && $mail->leadBudgetBand === '5k-25k'
+                        && $mail->hasTo('sales-test@example.com');
+                }
+            );
+        } finally {
+            setting()->set('grimba_advertiser_leads_sales_mailbox', '');
+            setting()->save();
+        }
+    }
+
+    public function test_no_mail_queued_when_sales_mailbox_unset(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+        setting()->set('grimba_advertiser_leads_sales_mailbox', '');
+        setting()->save();
+
+        $email = self::EMAIL_PREFIX . 'nomail@example.com';
+        $this->post('/advertise/leads', ['email' => $email])->assertRedirect();
+
+        \Illuminate\Support\Facades\Mail::assertNothingQueued();
+    }
+
     // ---------------------------------------------------------------
     // Admin workflow
     // ---------------------------------------------------------------
