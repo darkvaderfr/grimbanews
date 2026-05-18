@@ -57,7 +57,16 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             $data = $request->validate([
                 'grimba_advertiser_leads_sales_mailbox' => ['nullable', 'string', 'max:191'],
                 'ads_google_adsense_unit_client_id' => ['nullable', 'regex:/^ca-pub-\d{16}$/', 'max:191'],
-                'grimba_ads_direct_url' => ['nullable', 'url', 'max:255'],
+                // Direct URL accepts the `{placement}` substitution
+                // placeholder, so we can't use Laravel's built-in
+                // `url` rule (it rejects the curly braces). Custom
+                // regex: must start with http(s):// and contain only
+                // URL-safe chars + the `{placement}` token.
+                'grimba_ads_direct_url' => [
+                    'nullable',
+                    'regex:/^https?:\/\/[A-Za-z0-9._~%\-\/?#\[\]@!$&\'()*+,;=:{}]+$/',
+                    'max:255',
+                ],
                 'slots' => ['nullable', 'array'],
                 'slots.*' => ['nullable', 'string', 'regex:/^\d{4,}$/', 'max:24'],
             ]);
