@@ -1022,6 +1022,46 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_theme_only_sitemap_covers_static_editorial_routes(): void
+    {
+        // Wave UUUUUUU (Vader 2026-05-19) — Botble's pages.xml only
+        // covers CMS-registered Pages. Theme-only routes
+        // (/methodologie, /comprendre-le-barometre, /breaking,
+        // /latest, /dossiers, /angles-morts) had no CMS row and
+        // never made it into Botble's sitemap. We ship a hand-
+        // curated sitemap-grimba.xml at public/ to backfill that
+        // gap; this lock-test asserts it exists, parses as XML,
+        // and lists each canonical theme route.
+        $path = public_path('sitemap-grimba.xml');
+        $this->assertFileExists($path, 'sitemap-grimba.xml must exist at public/sitemap-grimba.xml.');
+        $body = file_get_contents($path);
+        $this->assertStringStartsWith('<?xml', $body, 'sitemap-grimba.xml must start with an XML declaration.');
+        $expected = ['/methodologie', '/comprendre-le-barometre', '/breaking', '/latest', '/dossiers', '/angles-morts'];
+        foreach ($expected as $path) {
+            $this->assertStringContainsString(
+                "<loc>https://grimbanews.com{$path}</loc>",
+                $body,
+                "sitemap-grimba.xml must list https://grimbanews.com{$path}",
+            );
+        }
+        // Validates as well-formed XML (no malformed tags).
+        $prev = libxml_use_internal_errors(true);
+        $doc = simplexml_load_string($body);
+        $this->assertNotFalse($doc, 'sitemap-grimba.xml must parse as well-formed XML.');
+        libxml_use_internal_errors($prev);
+    }
+
+    public function test_robots_txt_advertises_both_sitemaps(): void
+    {
+        // Wave UUUUUUU — assert robots.txt points to BOTH sitemaps.
+        // Crawlers will pick up multiple Sitemap: directives. If
+        // either one drops, theme routes or CMS pages quietly stop
+        // getting recrawled.
+        $body = file_get_contents(public_path('robots.txt'));
+        $this->assertStringContainsString('Sitemap: https://grimbanews.com/sitemap.xml', $body, 'robots.txt must advertise Botble sitemap.');
+        $this->assertStringContainsString('Sitemap: https://grimbanews.com/sitemap-grimba.xml', $body, 'robots.txt must advertise theme-only sitemap.');
+    }
+
     public function test_advertise_page_does_not_get_public_cached(): void
     {
         // Wave TTTTTTT — /advertise has an @csrf token and a form;

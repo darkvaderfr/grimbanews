@@ -8,3 +8,4 @@ User-agent: *
 Disallow:
 
 Sitemap: https://grimbanews.com/sitemap.xml
+Sitemap: https://grimbanews.com/sitemap-grimba.xml

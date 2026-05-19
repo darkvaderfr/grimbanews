@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  GrimbaNews — hand-curated sitemap for theme-only routes.
+
+  Botble's /sitemap.xml + /pages.xml only cover CMS-registered Pages
+  (those backed by Botble's `pages` table). Routes defined directly
+  in platform/themes/echo/routes/web.php (e.g. /methodologie,
+  /comprendre-le-barometre, /breaking, /latest, /dossiers,
+  /angles-morts) are theme routes — they have no CMS row, so they
+  never make it into pages.xml.
+
+  This file lists those theme routes so crawlers index them. We
+  advertise it from public/robots.txt via a `Sitemap:` line; Google,
+  Bing and Yandex all accept multiple Sitemap directives.
+
+  Wave UUUUUUU (Vader 2026-05-19) — backfilled the discoverability
+  gap blocking /methodologie + /comprendre-le-barometre from ranking
+  on "comment marche grimbanews", "barometre biais média", etc.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://grimbanews.com/methodologie</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://grimbanews.com/comprendre-le-barometre</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://grimbanews.com/breaking</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>hourly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://grimbanews.com/latest</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>hourly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://grimbanews.com/dossiers</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://grimbanews.com/angles-morts</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://grimbanews.com/feed.xml</loc>
+        <lastmod>2026-05-19</lastmod>
+        <changefreq>hourly</changefreq>
+        <priority>0.6</priority>
+    </url>
+</urlset>
