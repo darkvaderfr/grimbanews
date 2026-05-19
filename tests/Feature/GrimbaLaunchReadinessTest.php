@@ -1042,20 +1042,27 @@ class GrimbaLaunchReadinessTest extends TestCase
         // covers CMS-registered Pages. Theme-only routes
         // (/methodologie, /comprendre-le-barometre, /breaking,
         // /latest, /dossiers, /angles-morts) had no CMS row and
-        // never made it into Botble's sitemap. We ship a hand-
-        // curated sitemap-grimba.xml at public/ to backfill that
-        // gap; this lock-test asserts it exists, parses as XML,
-        // and lists each canonical theme route.
-        $path = public_path('sitemap-grimba.xml');
-        $this->assertFileExists($path, 'sitemap-grimba.xml must exist at public/sitemap-grimba.xml.');
-        $body = file_get_contents($path);
+        // never made it into Botble's sitemap.
+        //
+        // Wave AAAAAAAA (2026-05-19) — converted from a static file
+        // at public/sitemap-grimba.xml to a dynamic route handler
+        // so lastmod tracks real content changes (Zen audit LOW).
+        // Crawlers down-weight sitemaps whose lastmod doesn't move.
+        $response = $this->get('/sitemap-grimba.xml');
+        $response->assertOk();
+        $this->assertStringContainsString(
+            'application/xml',
+            (string) $response->headers->get('Content-Type'),
+            'sitemap-grimba.xml must serve application/xml content-type.',
+        );
+        $body = $response->getContent();
         $this->assertStringStartsWith('<?xml', $body, 'sitemap-grimba.xml must start with an XML declaration.');
         $expected = ['/methodologie', '/comprendre-le-barometre', '/breaking', '/latest', '/dossiers', '/angles-morts'];
         foreach ($expected as $path) {
             $this->assertStringContainsString(
-                "<loc>https://grimbanews.com{$path}</loc>",
+                "{$path}</loc>",
                 $body,
-                "sitemap-grimba.xml must list https://grimbanews.com{$path}",
+                "sitemap-grimba.xml must list {$path}",
             );
         }
         // Validates as well-formed XML (no malformed tags).
@@ -1063,6 +1070,36 @@ class GrimbaLaunchReadinessTest extends TestCase
         $doc = simplexml_load_string($body);
         $this->assertNotFalse($doc, 'sitemap-grimba.xml must parse as well-formed XML.');
         libxml_use_internal_errors($prev);
+        // Wave AAAAAAAA — sitemap is publicly cacheable (no per-
+        // session content). Caching wins are real here because
+        // crawlers hit it frequently.
+        $cc = (string) $response->headers->get('Cache-Control', '');
+        $this->assertStringContainsString('public', $cc, 'sitemap should ship public Cache-Control for CDN.');
+    }
+
+    public function test_theme_only_sitemap_lastmod_reflects_real_content_age(): void
+    {
+        // Wave AAAAAAAA (Vader 2026-05-19, Zen LOW) — lastmod
+        // freshness. /breaking and /latest lastmod must equal the
+        // most-recent published post timestamp (NOT a hardcoded
+        // date). If a future regression hardcodes lastmod again,
+        // the assertion below fails because the actual newest
+        // post's date won't match the hardcoded value.
+        $newestPost = \Illuminate\Support\Facades\DB::table('posts')
+            ->where('status', 'published')
+            ->selectRaw('max(' . \App\Support\GrimbaPostRecency::expression() . ') as latest_at')
+            ->first();
+        $this->assertNotNull($newestPost->latest_at ?? null, 'Fixture must have at least one published post.');
+        $expectedIso = substr(\Carbon\Carbon::parse($newestPost->latest_at)->toAtomString(), 0, 10);
+        $body = $this->get('/sitemap-grimba.xml')->assertOk()->getContent();
+        // The /breaking entry's lastmod should begin with the same
+        // date as the newest post. (Use date-prefix match to avoid
+        // tz-flake on second precision.)
+        $this->assertMatchesRegularExpression(
+            '#<loc>[^<]*/breaking</loc>\s*<lastmod>' . preg_quote($expectedIso, '#') . '#i',
+            $body,
+            "/breaking lastmod should start with the newest-post date {$expectedIso}.",
+        );
     }
 
     public function test_robots_txt_advertises_both_sitemaps(): void

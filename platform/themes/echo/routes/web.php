@@ -333,6 +333,77 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('feed.xml', $feedHandler)->name('public.feed');
         Route::get('feed',     $feedHandler)->name('public.feed.alt');
 
+        // Wave AAAAAAAA (Vader 2026-05-19) — dynamic sitemap for
+        // theme-only routes (replaces the prior static
+        // public/sitemap-grimba.xml). Zen audit LOW: hand-curated
+        // lastmod dates go stale fast and crawlers down-weight
+        // sitemaps that don't track real content changes. This
+        // handler queries the actual most-recent-post timestamp
+        // for /breaking, /latest, and /dossiers so lastmod stays
+        // honest. Editorial pages stay on a fixed launch-date
+        // anchor since their copy genuinely changes ~monthly.
+        $sitemapGrimbaHandler = function () {
+            // One query for the freshest signal — most recent
+            // published post timestamp drives /breaking + /latest
+            // + /feed.xml lastmod (all three reflect "newest news").
+            // GrimbaPostRecency::expression() returns a raw SQL
+            // COALESCE(...) expression, NOT a column name, so we
+            // wrap via DB::raw + selectRaw rather than ->max().
+            $newestPostRow = DB::table('posts')
+                ->where('status', 'published')
+                ->selectRaw('max(' . GrimbaPostRecency::expression() . ') as latest_at')
+                ->first();
+            $newestPostAt = $newestPostRow->latest_at ?? null;
+            $newestPostIso = $newestPostAt
+                ? \Carbon\Carbon::parse($newestPostAt)->toAtomString()
+                : now()->toAtomString();
+            // Most-recently-updated cluster drives /dossiers lastmod.
+            $newestClusterRow = DB::table('posts')
+                ->where('status', 'published')
+                ->whereNotNull('story_cluster_id')
+                ->selectRaw('max(' . GrimbaPostRecency::expression() . ') as latest_at')
+                ->first();
+            $newestClusterAt = $newestClusterRow->latest_at ?? null;
+            $newestClusterIso = $newestClusterAt
+                ? \Carbon\Carbon::parse($newestClusterAt)->toAtomString()
+                : $newestPostIso;
+            // Editorial copy changes infrequently; anchor to the
+            // last-known-edit date. Update by hand when these
+            // pages get a real copy-pass — but staleness here
+            // is honest staleness, not pretend freshness.
+            $editorialIso = '2026-05-19T00:00:00+00:00';
+
+            $entries = [
+                ['url' => url('/methodologie'),               'lastmod' => $editorialIso,    'changefreq' => 'monthly', 'priority' => '0.8'],
+                ['url' => url('/comprendre-le-barometre'),    'lastmod' => $editorialIso,    'changefreq' => 'monthly', 'priority' => '0.7'],
+                ['url' => url('/breaking'),                   'lastmod' => $newestPostIso,   'changefreq' => 'hourly',  'priority' => '0.9'],
+                ['url' => url('/latest'),                     'lastmod' => $newestPostIso,   'changefreq' => 'hourly',  'priority' => '0.9'],
+                ['url' => url('/dossiers'),                   'lastmod' => $newestClusterIso,'changefreq' => 'daily',   'priority' => '0.8'],
+                ['url' => url('/angles-morts'),               'lastmod' => $newestPostIso,   'changefreq' => 'daily',   'priority' => '0.7'],
+                ['url' => url('/feed.xml'),                   'lastmod' => $newestPostIso,   'changefreq' => 'hourly',  'priority' => '0.6'],
+            ];
+
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+            foreach ($entries as $e) {
+                $xml .= "  <url>\n";
+                $xml .= '    <loc>' . htmlspecialchars($e['url'], ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</loc>\n";
+                $xml .= "    <lastmod>{$e['lastmod']}</lastmod>\n";
+                $xml .= "    <changefreq>{$e['changefreq']}</changefreq>\n";
+                $xml .= "    <priority>{$e['priority']}</priority>\n";
+                $xml .= "  </url>\n";
+            }
+            $xml .= '</urlset>' . "\n";
+
+            // Cache 1h browser, 6h CDN. No per-session content —
+            // sitemap is purely public data, safe to share-cache.
+            return response($xml, 200)
+                ->header('Content-Type', 'application/xml; charset=UTF-8')
+                ->header('Cache-Control', 'public, max-age=3600, s-maxage=21600');
+        };
+        Route::get('sitemap-grimba.xml', $sitemapGrimbaHandler)->name('public.sitemap.grimba');
+        Route::get('sitemap-grimba',     $sitemapGrimbaHandler)->name('public.sitemap.grimba.alt');
+
         // Wave RRRRR (Vader 2026-05-19) — /health endpoint for
         // uptime monitors. Returns a small JSON payload with the app
         // version + DB connection check + the most recent published
