@@ -236,21 +236,29 @@
                     return;
                 }
                 // Step 1: hide before measurement so the user never
-                // sees the unpositioned flash.
+                // sees the unpositioned flash. Initial transform is
+                // direction-agnostic — positionBody() will measure
+                // first and set data-pill-flipped if the body had to
+                // flip above the summary.
                 body.style.opacity = '0';
-                body.style.transform = 'translateY(-6px) scale(.98)';
+                body.style.transform = 'scale(.98)';
                 body.style.transition = 'none';
                 positionBody(details);
+                // Wave EEEEE — now that positionBody has resolved
+                // flipped state, set the directional start transform
+                // so the body animates in FROM the side closer to
+                // the pill button (toward, not away from, the caret).
+                const flipped = body.getAttribute('data-pill-flipped') === 'up';
+                body.style.transform = flipped
+                    ? 'translateY(6px) scale(.98)'
+                    : 'translateY(-6px) scale(.98)';
                 // Step 2: in the NEXT frame, swap to the open easing
                 // and let the browser animate to the rest state.
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
-                        const flipped = body.getAttribute('data-pill-flipped') === 'up';
                         body.style.transition = 'opacity .22s cubic-bezier(.2,.85,.3,1), transform .22s cubic-bezier(.2,.85,.3,1)';
                         body.style.opacity = '1';
-                        body.style.transform = flipped
-                            ? 'translateY(0) scale(1)'
-                            : 'translateY(0) scale(1)';
+                        body.style.transform = 'translateY(0) scale(1)';
                     });
                 });
             };
