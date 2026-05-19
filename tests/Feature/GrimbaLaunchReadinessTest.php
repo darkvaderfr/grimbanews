@@ -120,6 +120,46 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_home_ships_website_jsonld_with_searchaction(): void
+    {
+        // Wave KKKKK (Vader 2026-05-19) — home page emits a WebSite
+        // + NewsMediaOrganization @graph JSON-LD with a SearchAction
+        // for Google sitelinks. The schema.org `@context` / `@graph`
+        // keys are a Blade trap (they look like directives); the
+        // grimba-home layout builds the JSON in @php so Blade can't
+        // mistake them. This test catches a regression where a
+        // refactor silently re-introduces the @context-as-directive
+        // bug — the rendered output would have `<?php` PHP code
+        // embedded INSIDE the JSON dictionary key, which is what we
+        // had before the fix.
+        $html = $this->get('/')->assertOk()->getContent();
+
+        // The JSON-LD <script> must be present.
+        $this->assertStringContainsString('application/ld+json', $html);
+
+        // The @graph WebSite + Organization block must be there.
+        // String search rather than JSON-parse because the body has
+        // multiple JSON-LD blocks and we only care about ours.
+        $this->assertStringContainsString('"@graph"', $html);
+        $this->assertStringContainsString('"WebSite"', $html);
+        $this->assertStringContainsString('"NewsMediaOrganization"', $html);
+        $this->assertStringContainsString('"SearchAction"', $html);
+
+        // Regression guard: a re-introduced Blade-directive parse of
+        // `@context` would compile into `<?php` source code inside
+        // the JSON dictionary key. Hunt for that specific signature.
+        $this->assertStringNotContainsString(
+            '{"<?php',
+            $html,
+            'JSON-LD body contains a PHP open tag — the @context Blade-directive trap has re-emerged. See Wave KKKKK comments in grimba-home.blade.php.'
+        );
+        $this->assertStringNotContainsString(
+            '\\n$value = context()->get',
+            $html,
+            'JSON-LD has the Laravel 11 context()-directive expansion. Build the JSON in a @php block and emit via {!! !!}.'
+        );
+    }
+
     public function test_body_tag_has_exactly_one_class_attribute(): void
     {
         // Wave UUUU (Vader 2026-05-18) — every reader surface must emit
