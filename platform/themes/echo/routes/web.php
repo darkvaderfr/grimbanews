@@ -1310,11 +1310,15 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Méthodologie'), url('/methodologie'));
 
-            // Wave SSSSSSS — static editorial page, copy changes ~never.
-            // Default Laravel response is `no-cache, private`; cache
-            // publicly for 1h + 6h on CDN.
-            return response(Theme::scope('methodology', [])->render(), 200)
-                ->header('Cache-Control', 'public, max-age=3600, s-maxage=21600');
+            // Wave YYYYYYY (Vader 2026-05-19) — REVERT Wave SSSSSSS.
+            // Public-caching breaks the per-session `<meta
+            // name="csrf-token">` rendered by grimba-chrome layout
+            // (Zen audit CRITICAL): a CDN would serve one visitor's
+            // token to every subsequent visitor for 6h, breaking
+            // any AJAX POST (cookie consent, language toggle) and
+            // creating a CSRF-bypass vector if a future form lands
+            // on these pages. Default `no-cache, private` is safe.
+            return Theme::scope('methodology', [])->render();
         })->name('public.methodology');
 
         // S317 — About page.
@@ -1349,9 +1353,8 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add(__('Accueil'), url('/'))
                 ->add(__('À propos'), url('/a-propos'));
 
-            // Wave SSSSSSS — static editorial, cache publicly 1h + 6h CDN.
-            return response(Theme::scope('about', [])->render(), 200)
-                ->header('Cache-Control', 'public, max-age=3600, s-maxage=21600');
+            // Wave YYYYYYY — REVERT Wave SSSSSSS (csrf-token leak via CDN).
+            return Theme::scope('about', [])->render();
         })->name('public.about');
 
         // S318 — FAQ page.
@@ -1363,9 +1366,8 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add(__('Accueil'), url('/'))
                 ->add(__('FAQ'), url('/faq'));
 
-            // Wave SSSSSSS — static editorial, cache publicly 1h + 6h CDN.
-            return response(Theme::scope('faq', [])->render(), 200)
-                ->header('Cache-Control', 'public, max-age=3600, s-maxage=21600');
+            // Wave YYYYYYY — REVERT Wave SSSSSSS (csrf-token leak via CDN).
+            return Theme::scope('faq', [])->render();
         })->name('public.faq');
 
         // S350 — per-page OG image generator for static editorial pages.
@@ -1400,9 +1402,8 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Comprendre le baromètre'), url('/comprendre-le-barometre'));
 
-            // Wave SSSSSSS — static editorial, cache publicly 1h + 6h CDN.
-            return response(Theme::scope('explainer-bias-bar', [])->render(), 200)
-                ->header('Cache-Control', 'public, max-age=3600, s-maxage=21600');
+            // Wave YYYYYYY — REVERT Wave SSSSSSS (csrf-token leak via CDN).
+            return Theme::scope('explainer-bias-bar', [])->render();
         })->name('public.bias-bar-explainer');
 
         // S168 — member dashboard hijack. Botble Member plugin's

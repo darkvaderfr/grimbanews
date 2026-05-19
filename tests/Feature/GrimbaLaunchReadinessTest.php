@@ -1003,22 +1003,36 @@ class GrimbaLaunchReadinessTest extends TestCase
         );
     }
 
-    public function test_static_editorial_pages_ship_public_cache(): void
+    public function test_static_editorial_pages_must_not_public_cache(): void
     {
-        // Wave TTTTTTT — lock the Cache-Control posture shipped by
-        // Wave SSSSSSS so /methodologie, /a-propos, /faq, and
-        // /comprendre-le-barometre stay public-cacheable for CDN
-        // efficiency. If someone reverts the response() wrapping
-        // back to a default view() call, Laravel's `no-cache,
-        // private` default returns and CDN hit-rate collapses.
-        $surfaces = ['/methodologie', '/a-propos', '/faq', '/comprendre-le-barometre'];
+        // Wave YYYYYYY (Vader 2026-05-19) — REVERSED Wave TTTTTTT/SSSSSSS.
+        // Wave SSSSSSS public-cached /methodologie, /a-propos, /faq,
+        // /comprendre-le-barometre with `Cache-Control: public,
+        // max-age=3600, s-maxage=21600`. Zen audit caught the CRITICAL
+        // hazard: grimba-chrome layout renders a per-session
+        // `<meta name="csrf-token">` on line 83. A CDN honoring those
+        // headers would serve one visitor's CSRF token to every
+        // subsequent visitor for 6h — breaking any AJAX POST and
+        // creating a CSRF-bypass vector if a future form lands on
+        // these pages.
+        //
+        // This test enforces the safe posture: these pages must NOT
+        // ship public cache headers. If someone re-introduces Wave
+        // SSSSSSS without first stripping csrf-token from the
+        // chrome layout, this test fails loudly.
+        $surfaces = ['/methodologie', '/a-propos', '/faq', '/comprendre-le-barometre', '/advertise'];
         foreach ($surfaces as $url) {
             $cc = (string) $this->get($url)->headers->get('Cache-Control', '');
-            $this->assertStringContainsString('public', $cc, "{$url} must ship public Cache-Control (currently `{$cc}`).");
-            $this->assertStringContainsString('max-age=', $cc, "{$url} must ship max-age directive (currently `{$cc}`).");
-            $this->assertStringContainsString('s-maxage=', $cc, "{$url} must ship s-maxage CDN directive (currently `{$cc}`).");
-            $this->assertStringNotContainsString('private', $cc, "{$url} must NOT ship `private` (would defeat shared CDN cache).");
-            $this->assertStringNotContainsString('no-cache', $cc, "{$url} must NOT ship `no-cache` (would defeat shared CDN cache).");
+            $this->assertStringNotContainsString(
+                'public',
+                $cc,
+                "{$url} must NOT ship `public` Cache-Control. The chrome layout renders a per-session csrf-token meta; CDN caching would leak tokens across visitors. (currently `{$cc}`)",
+            );
+            $this->assertStringNotContainsString(
+                's-maxage=',
+                $cc,
+                "{$url} must NOT ship `s-maxage` Cache-Control. (currently `{$cc}`)",
+            );
         }
     }
 
@@ -1138,6 +1152,19 @@ class GrimbaLaunchReadinessTest extends TestCase
                     $decoded['@context'] ?? null,
                     "{$url} block #{$i} must declare @context: https://schema.org.",
                 );
+                // Wave YYYYYYY (Mnemo audit gap) — also assert the
+                // OOOOOOO contract: no literal `</script>` substring
+                // inside the JSON-LD block. The JSON_HEX_TAG flag
+                // emits `<\/script>` instead, defending
+                // against the stored-reflected XSS vector. Without
+                // this, a future regression dropping JSON_HEX_TAG
+                // would still produce valid JSON (just with a raw
+                // `</script>`) and pass the validity check above.
+                $this->assertStringNotContainsStringIgnoringCase(
+                    '</script>',
+                    $jsonText,
+                    "{$url} block #{$i} must NOT contain literal `</script>`. JSON_HEX_TAG flag is what escapes it; absence means the flag was dropped.",
+                );
                 $totalBlocks++;
             }
         }
@@ -1192,11 +1219,13 @@ class GrimbaLaunchReadinessTest extends TestCase
 
     public function test_advertise_page_does_not_get_public_cached(): void
     {
-        // Wave TTTTTTT — /advertise has an @csrf token and a form;
-        // public-caching it would leak one user's CSRF token to
-        // another (any subsequent submit would 419). Confirm it
-        // does NOT get the public Cache-Control we apply to the
-        // other static editorial pages.
+        // Wave TTTTTTT / Wave YYYYYYY — /advertise has an @csrf token
+        // and a form; public-caching it would leak one user's CSRF
+        // token to another (any subsequent submit would 419). Covered
+        // also by test_static_editorial_pages_must_not_public_cache;
+        // keep this here as a redundancy guard since /advertise's
+        // public-cache risk is specifically called out in the
+        // editorial-page route handler's comment.
         $cc = (string) $this->get('/advertise')->headers->get('Cache-Control', '');
         $this->assertStringNotContainsString(
             's-maxage=21600',
