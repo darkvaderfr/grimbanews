@@ -171,6 +171,69 @@ class GrimbaLaunchReadinessTest extends TestCase
         );
     }
 
+    public function test_category_dossier_source_pages_ship_jsonld(): void
+    {
+        // Wave XXXXX (Vader 2026-05-19) — extend the JSON-LD coverage
+        // contract from Wave PPPPP to the 3 surfaces added in
+        // UUUUU/VVVVV/WWWWW. These are dynamic URLs so we have to
+        // pick a sample at runtime instead of hardcoding paths.
+        $samples = [];
+
+        // Sample category slug — any category with a slug row.
+        $categorySlug = \Botble\Slug\Models\Slug::query()
+            ->where('reference_type', \Botble\Blog\Models\Category::class)
+            ->where('prefix', 'blog')
+            ->orderBy('id')
+            ->value('key');
+        if ($categorySlug) {
+            $samples['/blog/' . $categorySlug] = 'CollectionPage';
+        }
+
+        // Sample source slug — any active source with published posts.
+        $sourceSlug = \Illuminate\Support\Facades\DB::table('news_sources')
+            ->whereIn('id', \Illuminate\Support\Facades\DB::table('posts')
+                ->where('status', 'published')
+                ->whereNotNull('source_id')
+                ->distinct()
+                ->pluck('source_id'))
+            ->orderBy('name')
+            ->value('slug');
+        if ($sourceSlug) {
+            $samples['/sources/' . $sourceSlug] = 'NewsMediaOrganization';
+        }
+
+        // Sample cluster id — any published cluster.
+        $clusterId = \Illuminate\Support\Facades\DB::table('posts')
+            ->where('status', 'published')
+            ->whereNotNull('story_cluster_id')
+            ->orderByDesc('story_cluster_id')
+            ->value('story_cluster_id');
+        if ($clusterId) {
+            $samples['/comparatif/' . $clusterId] = 'CollectionPage';
+        }
+
+        if (empty($samples)) {
+            $this->markTestSkipped(
+                'No category/source/cluster sample available in the test corpus.'
+            );
+        }
+
+        foreach ($samples as $path => $expectedType) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $count = substr_count($html, 'application/ld+json');
+            $this->assertGreaterThanOrEqual(
+                3,
+                $count,
+                "{$path} ships only {$count} JSON-LD blocks (expected ≥ 3 after Wave UUUUU/VVVVV/WWWWW)."
+            );
+            $this->assertStringContainsString(
+                '"' . $expectedType . '"',
+                $html,
+                "{$path} JSON-LD missing the expected @type \"{$expectedType}\"."
+            );
+        }
+    }
+
     public function test_every_reader_surface_ships_3_jsonld_blocks(): void
     {
         // Wave PPPPP (Vader 2026-05-19) — JSON-LD coverage contract.
