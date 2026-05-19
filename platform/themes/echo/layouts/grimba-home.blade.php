@@ -118,6 +118,45 @@
     {!! Theme::header() !!}
     @include(Theme::getThemeNamespace('partials.ads.head'))
     @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
+    {{-- Wave KKKKK — home JSON-LD. Build in PHP so schema-org `at`-prefixed keys don't trip Blade directives. --}}
+    @php
+        $__grimbaHomeJsonLd = json_encode([
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'WebSite',
+                    '@id' => url('/#website'),
+                    'url' => url('/'),
+                    'name' => 'GrimbaNews',
+                    'description' => __("L'actualité internationale lue depuis chaque camp."),
+                    'inLanguage' => app()->getLocale(),
+                    'publisher' => ['@id' => url('/#organization')],
+                    'potentialAction' => [
+                        '@type' => 'SearchAction',
+                        'target' => [
+                            '@type' => 'EntryPoint',
+                            'urlTemplate' => url('/search?q={search_term_string}'),
+                        ],
+                        'query-input' => 'required name=search_term_string',
+                    ],
+                ],
+                [
+                    '@type' => 'NewsMediaOrganization',
+                    '@id' => url('/#organization'),
+                    'name' => 'GrimbaNews',
+                    'url' => url('/'),
+                    'logo' => [
+                        '@type' => 'ImageObject',
+                        'url' => url('/img/grimbanews-logo.png'),
+                        'width' => 512,
+                        'height' => 512,
+                    ],
+                    'sameAs' => [],
+                ],
+            ],
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    @endphp
+    <script type="application/ld+json">{!! $__grimbaHomeJsonLd !!}</script>
 </head>
 {{-- Wave UUUU (Vader 2026-05-18) — merge layout-specific class into
      Theme::addBodyAttributes() so the renderer emits a single
