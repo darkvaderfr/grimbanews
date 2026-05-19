@@ -7828,3 +7828,94 @@ body[data-theme="dark"] .grimba-related-dossiers__media {
     .grimba-related-dossiers__card-title { font-size: 13.5px; }
 }
 
+
+/* ============================================================
+   Wave DDDDDDD — print stylesheet for article reading.
+
+   Article + cluster pages are printable for offline reading + research.
+   Hide all interactive chrome (search bar, share kit, ads, sidebar
+   rails, navigation, comments). Keep the editorial body + bias panel
+   + share targets visible (as inline URLs) so the printed page stays
+   usable as a research artifact.
+   ============================================================ */
+@media print {
+    /* Drop all interactive chrome. */
+    .grimba-header,
+    .grimba-sub-header,
+    .grimba-reading-progress,
+    .grimba-share-kit,
+    .grimba-newsletter-modal,
+    #grimba-newsletter-modal,
+    #grimba-info-pill-backdrop,
+    .grimba-skip-link,
+    [data-grimba-info-pill] summary,
+    .grimba-related-dossiers,
+    .echo-financial-area,
+    .echo-more-news-area,
+    .grimba-cookie-banner,
+    .ad-slot,
+    .grimba-ad-slot,
+    .grimba-footer,
+    footer,
+    nav {
+        display: none !important;
+    }
+
+    /* Force a clean page: light background, ink-black text, no glass. */
+    html, body {
+        background: #fff !important;
+        color: #14110d !important;
+    }
+
+    /* Expand all info-pill bodies so research notes survive printing. */
+    [data-grimba-info-pill] .grimba-info-pill__body {
+        display: block !important;
+        position: static !important;
+        box-shadow: none !important;
+        border: 1px solid #999 !important;
+        padding: 8px 12px !important;
+        margin: 8px 0 !important;
+        background: #fafafa !important;
+        max-width: 100% !important;
+    }
+
+    /* Add the article URL after the headline for offline reference. */
+    .grimba-article-card__title::after {
+        content: " — " attr(data-print-url);
+        display: block;
+        font-size: 11px;
+        font-weight: 400;
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        color: #555;
+        margin-top: 8px;
+        word-break: break-all;
+    }
+
+    /* Print page break controls — don't break headings or short lists. */
+    h1, h2, h3, .grimba-article-card__title {
+        page-break-after: avoid;
+    }
+    .grimba-story-distribution,
+    .grimba-related-dossiers,
+    blockquote {
+        page-break-inside: avoid;
+    }
+
+    /* Re-show category/bias chips as clean inline text. */
+    .grimba-cat-badge,
+    .grimba-bias-chip {
+        background: transparent !important;
+        border: 1px solid #888 !important;
+        color: #14110d !important;
+        padding: 1px 6px !important;
+    }
+
+    /* Killed: backdrop-filter blur won't print, dark gradients waste ink. */
+    .glass-panel,
+    .glass-card {
+        background: #fff !important;
+        backdrop-filter: none !important;
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+}
