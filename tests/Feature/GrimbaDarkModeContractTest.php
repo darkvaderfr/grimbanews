@@ -88,4 +88,74 @@ class GrimbaDarkModeContractTest extends TestCase
 
         $this->assertStringContainsString("localStorage.getItem('echo-theme')", $html, "$path must inline the FOUC guard.");
     }
+
+    /**
+     * Wave CCCCC (Vader 2026-05-18) — assert each reader surface in
+     * dark mode has NO hardcoded white-ish inline backgrounds that
+     * would create a "cream paper card floating on dark canvas"
+     * visual bug. The audit caught 3 such cases on home before
+     * Waves VVVV/WWWW/XXXX/ZZZZ/AAAAA flipped them.
+     *
+     * @dataProvider readerSurfaces
+     */
+    public function test_surface_has_no_hardcoded_white_inline_backgrounds_in_dark(string $path): void
+    {
+        $html = $this->withUnencryptedCookies(['grimba_theme' => 'dark'])
+            ->get($path)
+            ->assertOk()
+            ->getContent();
+
+        // Strip out the legitimate-by-design dark-canvas overlays
+        // where `#fff` is the FOREGROUND, not background — primarily
+        // the `color: #fff` cases on always-dark (.grimba-blind-card,
+        // .grimba-hero overlays) and the breaking ticker eyebrow.
+        // We're specifically hunting inline `style="...background...
+        // #fff..."` reachable on a real reader surface.
+        preg_match_all(
+            '/style="[^"]*background[^;"]*(?:#fffaf[0-1]|#fff7e8|#fffff[a-f0-9]?)[^"]*"/i',
+            $html,
+            $hits,
+        );
+
+        // Filter out hits where the same style includes `color:#000`
+        // or `data-on-dark` — those are intentional dark-canvas
+        // overlays that USE light backgrounds for high-contrast CTAs
+        // (e.g. the breaking page CTA in WAVE VVVV).
+        $real = array_filter($hits[0] ?? [], function (string $s): bool {
+            return ! str_contains($s, 'color: #000')
+                && ! str_contains($s, '#14110d')
+                && ! str_contains($s, '#1a1713');
+        });
+
+        $this->assertSame(
+            [],
+            array_values($real),
+            "{$path} in dark mode renders unbacked light-cream inline backgrounds. Wave VVVV/WWWW pattern: flip these to dark via a [data-bs-theme=\"dark\"] override. Hits: " . implode(' | ', $real)
+        );
+    }
+
+    /**
+     * Wave CCCCC — verify the duplicate-body-class fix from UUUU
+     * hasn't regressed under the dark-cookie path. Browsers silently
+     * drop the second `class=` attr, so any reintroduction would
+     * make the dark-mode body class unreachable.
+     *
+     * @dataProvider readerSurfaces
+     */
+    public function test_dark_cookie_path_emits_single_body_class(string $path): void
+    {
+        $html = $this->withUnencryptedCookies(['grimba_theme' => 'dark'])
+            ->get($path)
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/<body[^>]*>/i', $html, $m);
+        $this->assertNotEmpty($m, "{$path}: missing <body> tag");
+        $count = substr_count($m[0], 'class=');
+        $this->assertSame(
+            1,
+            $count,
+            "{$path} (dark cookie) has {$count} class= attributes on <body> — Wave UUUU regression."
+        );
+    }
 }
