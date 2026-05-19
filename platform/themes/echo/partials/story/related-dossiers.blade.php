@@ -39,14 +39,33 @@
             ->all();
 
         if (! empty($__rdClusterIds)) {
-            // Per-cluster representative post + per-cluster source count
-            // for the "5 sources" footer chip.
+            // Per-cluster source count for the footer chip.
             $__rdCounts = DB::table('posts')
                 ->whereIn('story_cluster_id', $__rdClusterIds)
                 ->where('status', 'published')
                 ->groupBy('story_cluster_id')
                 ->select('story_cluster_id', DB::raw('COUNT(*) as c'))
                 ->pluck('c', 'story_cluster_id');
+
+            // Wave OOOOOO (Mnemo audit) — per-cluster MAJORITY bias.
+            // Showing the entry-post's bias on the card was misleading:
+            // a reader could think the whole dossier is right/left when
+            // it's just the representative article's slot. Compute the
+            // cluster's plurality bias instead — that's the editorially
+            // honest signal that previews what they'll see if they
+            // click into the bias-comparison view.
+            $__rdBiasCounts = DB::table('posts')
+                ->whereIn('story_cluster_id', $__rdClusterIds)
+                ->where('status', 'published')
+                ->whereIn('bias_rating', ['left', 'center', 'right'])
+                ->groupBy('story_cluster_id', 'bias_rating')
+                ->select('story_cluster_id', 'bias_rating', DB::raw('COUNT(*) as c'))
+                ->get()
+                ->groupBy('story_cluster_id');
+            $__rdMajorityBias = collect();
+            foreach ($__rdBiasCounts as $__cid => $__rows) {
+                $__rdMajorityBias->put((int) $__cid, $__rows->sortByDesc('c')->first()->bias_rating ?? 'unknown');
+            }
 
             $__rdCards = Post::query()
                 ->whereIn('story_cluster_id', $__rdClusterIds)
@@ -84,7 +103,10 @@
             @foreach ($__rdCards as $__rd)
                 @php
                     $__rdTitle = GnTr::title($__rd);
-                    $__rdBias = $__rd->bias_rating ?? 'unknown';
+                    // Wave OOOOOO — chip reflects cluster MAJORITY bias,
+                    // not entry-post bias. When all bias entries are
+                    // null/unknown, fall through to 'unknown' (no chip).
+                    $__rdBias = $__rdMajorityBias->get((int) $__rd->story_cluster_id, $__rd->bias_rating ?? 'unknown');
                     $__rdBiasColor = $__rdBiasMeta[$__rdBias]['color'] ?? '#6b6459';
                     $__rdBiasLabel = $__rdBiasMeta[$__rdBias]['label'] ?? __('Non classé');
                     $__rdCount = (int) ($__rdCounts[$__rd->story_cluster_id] ?? 1);
