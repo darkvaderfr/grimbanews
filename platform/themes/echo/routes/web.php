@@ -248,6 +248,30 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             SeoHelper::setTitle(__('Comparaison des sources') . ' — ' . $storyTitle)
                 ->setDescription(__('Comparez comment les médias couvrent la même histoire.'));
 
+            // Wave UUUUU (Vader 2026-05-19) — CollectionPage schema
+            // for the single-dossier comparison view. Each dossier is
+            // a cluster of source-articles covering the same story;
+            // CollectionPage with ItemList(NewsArticle) lets Google
+            // render the dossier as a story-cluster card in the SERP.
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => __('Comparaison des sources') . ' — ' . $storyTitle,
+                'description' => __('Comparez comment les médias couvrent la même histoire.'),
+                'url' => url('/comparatif/' . $clusterId),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'mainEntity' => [
+                    '@type' => 'ItemList',
+                    'numberOfItems' => $posts->count(),
+                    'itemListElement' => 'NewsArticle',
+                ],
+                'headline' => $storyTitle,
+                'about' => [
+                    '@type' => 'Thing',
+                    'name' => $storyTitle,
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Comparaison'), url('/comparatif/' . $clusterId));
@@ -1537,6 +1561,39 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Sources'), url('/sources'))
                 ->add($source->name, url('/sources/' . $source->slug));
+
+            // Wave VVVVV (Vader 2026-05-19) — NewsMediaOrganization
+            // JSON-LD for the per-source page. Helps Google attribute
+            // articles to the right publisher in the SERP. Includes
+            // bias_rating as additionalType so the schema mirrors what
+            // we display on the page chrome.
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'NewsMediaOrganization',
+                'name' => $source->name,
+                'url' => url('/sources/' . $source->slug),
+                'description' => __(':source — biais déclaré :bias. Couverture archivée par GrimbaNews.', [
+                    'source' => $source->name,
+                    'bias' => $source->bias_rating ?? __('non classé'),
+                ]),
+                'sameAs' => array_values(array_filter([
+                    $source->website_url ?? null,
+                ])),
+                'subjectOf' => [
+                    '@type' => 'WebSite',
+                    'name' => 'GrimbaNews',
+                    'url' => url('/'),
+                ],
+                'mainEntityOfPage' => [
+                    '@type' => 'CollectionPage',
+                    'name' => $source->name . ' — ' . __('Couverture archivée'),
+                    'url' => url('/sources/' . $source->slug),
+                    'mainEntity' => [
+                        '@type' => 'ItemList',
+                        'numberOfItems' => $stats['total'],
+                    ],
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
             return Theme::scope('source', [
                 'source' => $source,
