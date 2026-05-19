@@ -158,6 +158,32 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_og_type_matches_surface_role(): void
+    {
+        // Wave HHHHHH (Vader 2026-05-19) — og:type must reflect the
+        // page role. Botble's blog plugin defaulted home to 'article'
+        // (since technically the blog index sits at /); the OG spec
+        // says homepages should be 'website'. Listing pages (/breaking,
+        // /latest, /dossiers, etc.) should also be 'website'. Article
+        // pages stay 'article'.
+        $expectations = [
+            '/' => 'website',
+            '/breaking' => 'website',
+            '/latest' => 'website',
+            '/dossiers' => 'website',
+            '/sources' => 'website',
+            '/advertise' => 'website',
+        ];
+        foreach ($expectations as $path => $expected) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $this->assertMatchesRegularExpression(
+                '/<meta property="og:type" content="' . preg_quote($expected, '/') . '"/i',
+                $html,
+                "{$path} should declare og:type={$expected}."
+            );
+        }
+    }
+
     public function test_twitter_card_and_image_emit_exactly_once(): void
     {
         // Wave GGGGGG (Vader 2026-05-19) — twitter:card + twitter:image

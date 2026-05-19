@@ -118,6 +118,11 @@
         \Botble\SeoHelper\Facades\SeoHelper::setImage(url('/og/home.png'));
         \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:width', '1200');
         \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:height', '630');
+        // Wave HHHHHH — Botble's blog plugin sets og:type=article on the
+        // home listing page (since it's the blog index). The OG spec
+        // says the homepage type should be 'website', not 'article'.
+        // Override explicitly here.
+        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->setType('website');
         // Wave GGGGGG — only set card type; SeoHelper does NOT auto-derive
         // twitter:image, so we emit it manually below to avoid the
         // singleton-accumulation pitfall of SeoHelper::twitter()->addImage().
