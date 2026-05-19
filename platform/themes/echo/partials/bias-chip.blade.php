@@ -30,6 +30,28 @@
 
     $tag = $href ? 'a' : 'span';
 @endphp
+
+@once
+    <style>
+        /* Wave ZZZZ (Vader 2026-05-18) — boost bias-chip visibility in
+           dark mode. The inline `style` block on each chip uses
+           `{color}1f` (12% opacity) for the chip background — that
+           reads fine on the cream canvas but is barely perceptible on
+           the dark canvas. Layer a stronger backdrop ring + slightly
+           lift the text saturation so the chip still reads at a glance
+           in dark mode. The bias-color text + dot stay the same so
+           the chip's identity (left/center/right) remains obvious. */
+        [data-bs-theme="dark"] .grimba-bias-chip,
+        body[data-theme="dark"] .grimba-bias-chip {
+            backdrop-filter: blur(1px);
+            -webkit-backdrop-filter: blur(1px);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 250, 240, .08),
+                0 2px 8px rgba(0, 0, 0, .28);
+        }
+    </style>
+@endonce
+
 <{{ $tag }}
     @if($href) href="{{ $href }}" @endif
     class="grimba-bias-chip grimba-bias-chip--{{ str_replace('_', '-', $tier) }} grimba-bias-chip--{{ $size }}"
