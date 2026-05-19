@@ -1264,6 +1264,27 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             SeoHelper::setTitle(__('Méthodologie') . ' — GrimbaNews')
                 ->setDescription(__('Comment GrimbaNews classe les biais, repère les angles morts et note la crédibilité des sources.'));
 
+            // Wave FFFFFFF — TechArticle JSON-LD for the methodology
+            // page. Surfaces in SERP "how it works" rich results.
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'TechArticle',
+                'headline' => __('Méthodologie') . ' — GrimbaNews',
+                'description' => __('Comment GrimbaNews classe les biais, repère les angles morts et note la crédibilité des sources.'),
+                'url' => url('/methodologie'),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'publisher' => [
+                    '@type' => 'NewsMediaOrganization',
+                    'name' => 'GrimbaNews',
+                    'url' => url('/'),
+                ],
+                'inLanguage' => app()->getLocale(),
+                'about' => [
+                    '@type' => 'Thing',
+                    'name' => __('Classification du biais éditorial et détection des angles morts'),
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Méthodologie'), url('/methodologie'));
@@ -1275,6 +1296,29 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('a-propos', function () {
             SeoHelper::setTitle(__('À propos') . ' — GrimbaNews')
                 ->setDescription(__('GrimbaNews est une plateforme francophone qui rend visible le biais éditorial et les angles morts de l\'actualité.'));
+
+            // Wave FFFFFFF — AboutPage JSON-LD: SERP surfaces "About"
+            // rich results when search query targets the brand.
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'AboutPage',
+                'name' => __('À propos') . ' — GrimbaNews',
+                'description' => __('GrimbaNews est une plateforme francophone qui rend visible le biais éditorial et les angles morts de l\'actualité.'),
+                'url' => url('/a-propos'),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'mainEntity' => [
+                    '@type' => 'NewsMediaOrganization',
+                    'name' => 'GrimbaNews',
+                    'url' => url('/'),
+                    'description' => __('Une plateforme francophone qui rend visible le biais éditorial et les angles morts de l\'actualité.'),
+                    'logo' => [
+                        '@type' => 'ImageObject',
+                        'url' => url('/og/home.png'),
+                        'width' => 1200,
+                        'height' => 630,
+                    ],
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
