@@ -144,6 +144,76 @@ class GrimbaCategoryBadgeSmokeTest extends TestCase
         );
     }
 
+    /**
+     * Wave RRRR (Vader 2026-05-18) — `$topic->url ?? ''` shorted to
+     * empty string via Eloquent's `__isset` (which routes through
+     * `getAttribute()` and bypasses the MacroableModels macro). The
+     * fix reads `$topic->url` directly, letting `__get` fire the
+     * macro chain. Lock the contract: every rendered category badge
+     * on home / breaking / latest carries a real `http(s)://…` href,
+     * not the empty-string regression.
+     */
+    public function test_home_clickable_badges_have_real_hrefs(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+        // Strict badge count: class="grimba-cat-badge…" appears
+        // exactly once per rendered badge tag (not in the JS literal).
+        preg_match_all('#class="grimba-cat-badge#', $html, $badges);
+        $totalBadges = count($badges[0]);
+        $this->assertGreaterThan(
+            0,
+            $totalBadges,
+            'Home must render at least one badge for this contract to be meaningful.'
+        );
+        // Count badges with a resolved http(s) href, and verify
+        // none of them link to the bare homepage (which the macro
+        // returns as a fallback when slug is missing — would be a
+        // misleading clickable badge).
+        preg_match_all('#data-grimba-cat-badge-href="([^"]+)"#', $html, $hrefs);
+        $homeUrl = rtrim((string) \Botble\Base\Facades\BaseHelper::getHomepageUrl(), '/');
+        $realCategoryLinks = array_filter(
+            $hrefs[1] ?? [],
+            fn (string $url): bool => rtrim($url, '/') !== $homeUrl
+        );
+        $this->assertSame(
+            $totalBadges,
+            count($realCategoryLinks),
+            "Wave RRRR regression: home rendered {$totalBadges} badges but only " . count($realCategoryLinks) . " had real category URLs. The `??` operator on Eloquent macro-backed attributes is the usual culprit; the no-slug homepage fallback is the second."
+        );
+    }
+
+    public function test_breaking_clickable_badges_have_real_hrefs(): void
+    {
+        $html = $this->get('/breaking')->assertOk()->getContent();
+        preg_match_all('#class="grimba-cat-badge#', $html, $badges);
+        $totalBadges = count($badges[0]);
+        if ($totalBadges === 0) {
+            $this->markTestSkipped('/breaking surface has no badges this run.');
+        }
+        preg_match_all('#data-grimba-cat-badge-href="https?://#', $html, $hrefs);
+        $this->assertSame(
+            $totalBadges,
+            count($hrefs[0]),
+            "/breaking rendered {$totalBadges} badges but " . count($hrefs[0]) . " were clickable."
+        );
+    }
+
+    public function test_latest_clickable_badges_have_real_hrefs(): void
+    {
+        $html = $this->get('/latest')->assertOk()->getContent();
+        preg_match_all('#class="grimba-cat-badge#', $html, $badges);
+        $totalBadges = count($badges[0]);
+        if ($totalBadges === 0) {
+            $this->markTestSkipped('/latest surface has no badges this run.');
+        }
+        preg_match_all('#data-grimba-cat-badge-href="https?://#', $html, $hrefs);
+        $this->assertSame(
+            $totalBadges,
+            count($hrefs[0]),
+            "/latest rendered {$totalBadges} badges but " . count($hrefs[0]) . " were clickable."
+        );
+    }
+
     public function test_article_detail_page_carries_primary_topic_pill(): void
     {
         // Wave PPPP (S-CAT-02d) — the article detail page's hero

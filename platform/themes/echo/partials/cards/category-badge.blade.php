@@ -44,23 +44,44 @@
     // handlers so the badge navigates without violating HTML5's
     // "no nested <a>" rule on surfaces where the parent card is
     // already a link (hero, briefing, breaking row, dossier card).
+    // S-CAT-07 / Wave RRRR (Vader 2026-05-18) — Eloquent's `__isset`
+    // routes through `getAttribute()`, which does NOT fire the
+    // MacroableModels `getUrlAttribute` macro. That means
+    // `$topic->url ?? ''` short-circuits to the default before
+    // `__get` ever runs — returns an empty string even though the
+    // accessor would have returned the real URL. We read the
+    // property without null-coalescing so PHP goes straight to
+    // `__get` → BaseModel → macro → real URL.
+    //
+    // Gate: when a category has no slug row, the macro falls back
+    // to `BaseHelper::getHomepageUrl()` — clicking "Sports" should
+    // NOT navigate the reader to the site root. Treat that fallback
+    // as "no link" so the badge renders as a static span instead.
     $catUrl = null;
     try {
         if (is_array($topic)) {
-            $catUrl = $topic['url'] ?? null;
+            $rawUrl = (string) ($topic['url'] ?? '');
         } elseif ($topic instanceof \Botble\Blog\Models\Category) {
-            // Ensure slugable is loaded before reading the URL
-            // accessor. primaryTopicFor() loads it, but a defensive
-            // re-load here covers callers that bypass the helper.
+            // Defensive slug warm for callers that bypass primaryTopicFor.
             if (! $topic->relationLoaded('slugable')) {
                 try { $topic->load('slugable'); } catch (\Throwable $e) {}
             }
-            $rawUrl = (string) ($topic->url ?? '');
-            $catUrl = $rawUrl !== '' ? $rawUrl : null;
+            $slug = $topic->slugable;
+            // Only resolve the URL when there's a real slug row.
+            // No slug = no clickable badge (otherwise homepage URL leak).
+            $rawUrl = ($slug && (string) ($slug->key ?? '') !== '')
+                ? (string) $topic->url
+                : '';
         } else {
-            $rawUrl = (string) ($topic->url ?? '');
-            $catUrl = $rawUrl !== '' ? $rawUrl : null;
+            $rawUrl = (string) $topic->url;
         }
+        // Final guard: if the macro fell through to homepage URL
+        // anyway (other no-slug edge cases), don't render a link.
+        $homeUrl = rtrim((string) \Botble\Base\Facades\BaseHelper::getHomepageUrl(), '/');
+        if ($rawUrl !== '' && rtrim($rawUrl, '/') === $homeUrl) {
+            $rawUrl = '';
+        }
+        $catUrl = $rawUrl !== '' ? $rawUrl : null;
     } catch (\Throwable $e) {
         // Synthesized topic objects (dossier majority-vote) carry
         // only id + name. Accessor lookup fails — non-clickable.
@@ -68,6 +89,7 @@
     }
     $catName = (string) $topic->name;
 @endphp
+
 
 <span
     class="{{ $classes }}"

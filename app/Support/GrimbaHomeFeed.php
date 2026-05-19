@@ -208,7 +208,7 @@ class GrimbaHomeFeed
                 $query = Post::query()
                     ->where('status', 'published')
                     ->whereNotNull('source_name')
-                    ->with(['slugable', 'categories']);
+                    ->with(['slugable', 'categories.slugable']);
 
                 if ($strict) {
                     // Strict mode = native target locale OR has a target
@@ -472,7 +472,7 @@ class GrimbaHomeFeed
                 ->withoutGlobalScope('grimba_region')
                 ->where('status', 'published')
                 ->whereNotIn('id', $state->shownIds() ?: [0])
-                ->with('categories');
+                ->with('categories.slugable');
 
             if ($hasColumn) {
                 $query->where('editorial_region', $region);
@@ -711,7 +711,7 @@ class GrimbaHomeFeed
                 ->where('status', 'published')
                 ->whereIn('story_cluster_id', $balancedClusters)
                 ->whereNotIn('id', $state->shownIds() ?: [0])
-                ->with('categories')
+                ->with('categories.slugable')
                 ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit($count * 4)
                 ->get();
@@ -730,7 +730,7 @@ class GrimbaHomeFeed
             $fill = Post::query()
                 ->where('status', 'published')
                 ->whereNotIn('id', $state->shownIds() ?: [0])
-                ->with('categories')
+                ->with('categories.slugable')
                 ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit(($count - $picked->count()) * 4)
                 ->get();
@@ -754,7 +754,7 @@ class GrimbaHomeFeed
             ->where('status', 'published')
             ->where('is_blindspot', true)
             ->whereNotIn('id', $state->shownIds() ?: [0])
-            ->with('categories')
+            ->with('categories.slugable')
             ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
             ->limit($count * 4)
             ->get();
@@ -777,7 +777,7 @@ class GrimbaHomeFeed
         // Counter values only — does NOT consume from the shown set.
         return Post::query()
             ->where('status', 'published')
-            ->with('categories')
+            ->with('categories.slugable')
             ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
             ->limit($count)
             ->get();
@@ -795,7 +795,7 @@ class GrimbaHomeFeed
                 ->where('bias_rating', $bias)
                 ->where('views', '>', 0)
                 ->whereNotIn('id', $state->shownIds() ?: [0])
-                ->with('categories')
+                ->with('categories.slugable')
                 ->orderByDesc('views')
                 ->tap(fn ($q) => GrimbaPostRecency::orderByPublished($q))
                 ->limit($perBias * 4)
@@ -830,7 +830,7 @@ class GrimbaHomeFeed
                 })
                 ->whereIn('story_cluster_id', $balancedClusters)
                 ->whereNotIn('id', $state->shownIds() ?: [0])
-                ->with('categories')
+                ->with('categories.slugable')
                 ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit($count * 4)
                 ->get();
@@ -849,7 +849,7 @@ class GrimbaHomeFeed
             $pad = Post::query()
                 ->where('status', 'published')
                 ->whereNotIn('id', $state->shownIds() ?: [0])
-                ->with('categories')
+                ->with('categories.slugable')
                 ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit(($count - $picked->count()) * 4)
                 ->get();
@@ -947,7 +947,7 @@ class GrimbaHomeFeed
         $candidates = Post::query()
             ->where('status', 'published')
             ->whereNotIn('id', $state->shownIds() ?: [0])
-            ->with('categories')
+            ->with('categories.slugable')
             ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
             ->limit($count * 3)
             ->get();
@@ -971,7 +971,7 @@ class GrimbaHomeFeed
             $pad = Post::query()
                 ->where('status', 'published')
                 ->whereNotIn('id', $state->shownIds() ?: [0])
-                ->with('categories')
+                ->with('categories.slugable')
                 ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
                 ->limit(($count - $picked->count()) * 3)
                 ->get();
