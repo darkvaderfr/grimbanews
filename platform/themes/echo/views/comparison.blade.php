@@ -28,6 +28,21 @@
                 'posts'      => $posts,
                 'storyTitle' => $storyTitle,
             ]) !!}
+
+            {{-- Wave NNNNNN — Grimba-native "Other dossiers" rail
+                 mirrors the article detail page. The cluster's first
+                 post (bias-sorted) often lacks a proper topic category,
+                 so we scan for the first post that DOES have a topic
+                 and feed THAT to the partial. Falls back to the first
+                 post if no member of the cluster has a topic — the
+                 partial then bails cleanly. --}}
+            @php
+                $__rdSeed = $posts->first(function ($__p) {
+                    $__p->loadMissing('categories');
+                    return \App\Support\GrimbaEditorialCategories::primaryTopicFor($__p) !== null;
+                }) ?? $posts->first();
+            @endphp
+            @include(Theme::getThemeNamespace('partials.story.related-dossiers'), ['post' => $__rdSeed])
         @endif
     </div>
 </section>
