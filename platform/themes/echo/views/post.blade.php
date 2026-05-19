@@ -46,6 +46,16 @@
     SeoHelper::openGraph()->setImage($ogUrl);
     SeoHelper::openGraph()->addProperty('image:width', '1200');
     SeoHelper::openGraph()->addProperty('image:height', '630');
+    // Wave UUUUUU — article-specific Open Graph meta. The OG protocol
+    // (https://ogp.me/#type_article) defines `article:author`,
+    // `article:published_time`, `article:modified_time` — bare prefix,
+    // NOT `og:article:...`. Botble's openGraph()->addProperty() auto-
+    // prefixes with `og:`, so route the values through Theme::set()
+    // and emit raw <meta> tags from the chrome layout's seo-meta-tail
+    // partial (which already handles twitter:image the same way).
+    Theme::set('grimba_article_published_time', $__gnPublishedAt?->toAtomString());
+    Theme::set('grimba_article_modified_time', $post->updated_at?->toAtomString());
+    Theme::set('grimba_article_author', $post->source_name ?: null);
 
     $__gnClean = static fn ($value) => trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags((string) $value), ENT_QUOTES, 'UTF-8')));
     $__gnArticleUrl = $post->url;
