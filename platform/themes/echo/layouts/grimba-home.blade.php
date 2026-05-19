@@ -123,6 +123,13 @@
         // says the homepage type should be 'website', not 'article'.
         // Override explicitly here.
         \Botble\SeoHelper\Facades\SeoHelper::openGraph()->setType('website');
+        // Wave IIIIII — emit og:locale + alternate so OG crawlers know
+        // this page exists in FR and EN. Format is `<lang>_<region>`.
+        $__grimbaCurLocale = app()->getLocale();
+        $__grimbaOgLocale = $__grimbaCurLocale === 'en' ? 'en_US' : 'fr_FR';
+        $__grimbaOgLocaleAlt = $__grimbaCurLocale === 'en' ? 'fr_FR' : 'en_US';
+        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('locale', $__grimbaOgLocale);
+        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('locale:alternate', $__grimbaOgLocaleAlt);
         // Wave GGGGGG — only set card type; SeoHelper does NOT auto-derive
         // twitter:image, so we emit it manually below to avoid the
         // singleton-accumulation pitfall of SeoHelper::twitter()->addImage().

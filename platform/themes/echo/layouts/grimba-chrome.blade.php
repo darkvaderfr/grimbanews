@@ -119,6 +119,13 @@
         // pin the card style. Avoid addImage() — it accumulates across
         // requests in the singleton and would emit twitter:image{0}+{1}.
         \Botble\SeoHelper\Facades\SeoHelper::twitter()->setType('summary_large_image');
+        // Wave IIIIII — og:locale + alternate so crawlers know FR+EN
+        // versions exist for this page (matches hreflang above).
+        $__grimbaCurLocale = app()->getLocale();
+        $__grimbaOgLocale = $__grimbaCurLocale === 'en' ? 'en_US' : 'fr_FR';
+        $__grimbaOgLocaleAlt = $__grimbaCurLocale === 'en' ? 'fr_FR' : 'en_US';
+        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('locale', $__grimbaOgLocale);
+        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('locale:alternate', $__grimbaOgLocaleAlt);
     @endphp
     {{-- S-LANG-06 — explicit per-locale URLs so search engines index
          FR and EN versions distinctly. x-default falls back to FR

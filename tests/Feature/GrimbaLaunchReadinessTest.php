@@ -158,6 +158,34 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_og_locale_and_alternate_emit_per_request_locale(): void
+    {
+        // Wave IIIIII (Vader 2026-05-19) — every reader surface declares
+        // og:locale matching its rendered locale + og:locale:alternate
+        // for the OTHER supported locale. Crawlers (Facebook/LinkedIn)
+        // use these to surface the right language version in unfurls
+        // and to know multi-locale alternates exist.
+        $cases = [
+            ['/', 'fr_FR', 'en_US'],
+            ['/?lang=en', 'en_US', 'fr_FR'],
+            ['/breaking', 'fr_FR', 'en_US'],
+            ['/breaking?lang=en', 'en_US', 'fr_FR'],
+        ];
+        foreach ($cases as [$path, $locale, $alt]) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $this->assertStringContainsString(
+                '<meta property="og:locale" content="' . $locale . '">',
+                $html,
+                "{$path} should declare og:locale={$locale}."
+            );
+            $this->assertStringContainsString(
+                '<meta property="og:locale:alternate" content="' . $alt . '">',
+                $html,
+                "{$path} should declare og:locale:alternate={$alt}."
+            );
+        }
+    }
+
     public function test_og_type_matches_surface_role(): void
     {
         // Wave HHHHHH (Vader 2026-05-19) — og:type must reflect the
