@@ -44,4 +44,35 @@ class SecurityHeadersTest extends TestCase
             (string) $response->headers->get('Content-Security-Policy')
         );
     }
+
+    public function test_hsts_emitted_on_https_requests_only(): void
+    {
+        // Wave ZZZZZ (Vader 2026-05-19) — HSTS lock. The middleware
+        // only emits Strict-Transport-Security when the request is
+        // already secure (`$request->isSecure()`). This test covers
+        // both branches:
+
+        // 1. HTTP request → NO HSTS header (meaningless on plaintext
+        //    + misleading to MITM tooling).
+        $http = $this->get('http://localhost/');
+        $http->assertOk();
+        $this->assertNull(
+            $http->headers->get('Strict-Transport-Security'),
+            'HSTS must NOT be emitted over plaintext HTTP.'
+        );
+
+        // 2. HTTPS request → HSTS with documented max-age +
+        //    includeSubDomains, NO preload.
+        $https = $this->get('https://localhost/');
+        $https->assertOk();
+        $hsts = (string) $https->headers->get('Strict-Transport-Security');
+        $this->assertNotSame('', $hsts, 'HSTS must be emitted over HTTPS.');
+        $this->assertStringContainsString('max-age=15552000', $hsts);
+        $this->assertStringContainsString('includeSubDomains', $hsts);
+        $this->assertStringNotContainsString(
+            'preload',
+            $hsts,
+            'Do not set HSTS preload until permanent-HTTPS commitment is explicit.'
+        );
+    }
 }

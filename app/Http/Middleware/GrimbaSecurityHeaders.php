@@ -21,6 +21,21 @@ class GrimbaSecurityHeaders
         $this->setMissing($response, 'Referrer-Policy', 'strict-origin-when-cross-origin');
         $this->setMissing($response, 'Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
 
+        // Wave ZZZZZ (Vader 2026-05-19) — HSTS for HTTPS requests.
+        // Only emit when the connection is already secure (otherwise
+        // HSTS is meaningless and gives MITM tooling a misleading
+        // signal). Mozilla Observatory minimum: max-age=15552000
+        // (180 days) + includeSubDomains. We don't set `preload`
+        // until we're absolutely committed to permanent HTTPS — it's
+        // hard to back out of the browser preload list.
+        if ($request->isSecure()) {
+            $this->setMissing(
+                $response,
+                'Strict-Transport-Security',
+                'max-age=15552000; includeSubDomains'
+            );
+        }
+
         return $response;
     }
 
