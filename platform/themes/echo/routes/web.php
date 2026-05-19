@@ -205,6 +205,22 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             SeoHelper::setTitle(__('Dossiers') . ' — GrimbaNews')
                 ->setDescription(__("Tous les dossiers en cours — chaque histoire vue sous plusieurs angles."));
 
+            // Wave LLLLL (Vader 2026-05-19) — CollectionPage JSON-LD
+            // for the dossiers index. /breaking and /latest already
+            // ship this; /dossiers was missing structured data.
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => __('Dossiers') . ' — GrimbaNews',
+                'description' => __("Tous les dossiers en cours — chaque histoire vue sous plusieurs angles."),
+                'url' => url('/dossiers'),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'mainEntity' => [
+                    '@type' => 'ItemList',
+                    'numberOfItems' => $totalCount,
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Dossiers'), url('/dossiers'));
