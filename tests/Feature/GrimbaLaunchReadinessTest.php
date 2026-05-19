@@ -288,6 +288,33 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_article_and_cluster_pages_carry_share_kit(): void
+    {
+        // Wave WWWWWW (Vader 2026-05-19) — share-kit lives on both
+        // article detail pages AND cluster (/comparatif/{id}) pages.
+        // Cluster pages were missing it pre-WWWWWW, even though they're
+        // the most-shareable surface (the multi-source bias comparison
+        // is GrimbaNews's unique value prop).
+        foreach ($this->sampleStoryUrls() as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+            $this->assertStringContainsString(
+                'grimba-share-kit',
+                $html,
+                "{$url} should include the share-kit aside."
+            );
+            // At least 6 of the 7 channels must render (the absent one
+            // would indicate an URL-encoding or partial-include bug).
+            $networks = ['x', 'bluesky', 'facebook', 'whatsapp', 'linkedin', 'email'];
+            foreach ($networks as $n) {
+                $this->assertStringContainsString(
+                    'data-network="' . $n . '"',
+                    $html,
+                    "{$url} share-kit missing the {$n} channel."
+                );
+            }
+        }
+    }
+
     public function test_article_pages_carry_open_graph_article_meta(): void
     {
         // Wave UUUUUU (Vader 2026-05-19) — article detail pages must
