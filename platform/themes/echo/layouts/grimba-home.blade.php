@@ -110,12 +110,15 @@
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Flux RSS') }}" href="{{ url('/feed.xml') }}">
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Breaking news') }}" href="{{ url('/feed.breaking.xml') }}">
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Latest') }}" href="{{ url('/feed.latest.xml') }}">
-    {{-- Wave AAAAAA — push OG image into Botble SeoHelper before Theme::header() so the auto-emitted og:image points at our 1200×630 PNG, not the default SVG. --}}
+    {{-- Wave AAAAAA — push OG image into Botble SeoHelper before Theme::header() so the auto-emitted og:image points at our 1200×630 PNG, not the default SVG.
+         Wave FFFFFF — drop the manual og:image:width/height pair here; Theme::header()
+         emits its own paired dimensions tags adjacent to its og:image, and the
+         orphan pair was creating an OG-spec adjacency mismatch. --}}
     @php
         \Botble\SeoHelper\Facades\SeoHelper::setImage(url('/og/home.png'));
+        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:width', '1200');
+        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:height', '630');
     @endphp
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="{{ url('/og/home.png') }}">
     {!! Theme::header() !!}

@@ -140,6 +140,24 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_og_image_dimensions_are_paired_with_og_image(): void
+    {
+        // Wave FFFFFF (Vader 2026-05-19) — og:image:width/height MUST
+        // appear exactly once each on every reader surface, paired
+        // with og:image. Previously the layout emitted them BEFORE
+        // Theme::header() (creating an orphan pair) AND SeoHelper
+        // emitted them AGAIN for article pages (creating duplicates).
+        // Fix: emit through SeoHelper so they land adjacent to og:image.
+        $surfaces = ['/', '/breaking', '/latest', '/dossiers', '/advertise', '/sources'];
+        foreach ($surfaces as $path) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $w = substr_count($html, 'property="og:image:width"');
+            $h = substr_count($html, 'property="og:image:height"');
+            $this->assertSame(1, $w, "{$path} ships {$w} og:image:width tags (expected 1).");
+            $this->assertSame(1, $h, "{$path} ships {$h} og:image:height tags (expected 1).");
+        }
+    }
+
     public function test_health_endpoint_returns_json_with_required_fields(): void
     {
         // Wave RRRRR (Vader 2026-05-19) — /health for uptime monitors.

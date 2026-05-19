@@ -110,6 +110,10 @@
     @php
         $__grimbaOgImage = Theme::get('grimba_og_image') ?: url('/og/home.png');
         \Botble\SeoHelper\Facades\SeoHelper::setImage($__grimbaOgImage);
+        // Wave FFFFFF — emit OG image dimensions via SeoHelper so they land
+        // adjacent to og:image in Theme::header() output (Open Graph spec).
+        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:width', '1200');
+        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:height', '630');
     @endphp
     {{-- S-LANG-06 — explicit per-locale URLs so search engines index
          FR and EN versions distinctly. x-default falls back to FR
@@ -122,8 +126,10 @@
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Flux RSS') }}" href="{{ url('/feed.xml') }}">
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Breaking news') }}" href="{{ url('/feed.breaking.xml') }}">
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Latest') }}" href="{{ url('/feed.latest.xml') }}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
+    {{-- Wave FFFFFF — drop manual og:image:width/height. SeoHelper::setImage()
+         already emits the og:image + dimensions pair via Theme::header() below.
+         Emitting them here too created an orphan pair (no og:image right
+         after) which violates the Open Graph spec adjacency rule. --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="{{ $__grimbaOgImage }}">
     @if($jsonLd = Theme::get('grimbaJsonLd'))
