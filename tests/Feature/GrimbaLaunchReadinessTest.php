@@ -1101,6 +1101,49 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_every_jsonld_block_parses_as_valid_json(): void
+    {
+        // Wave XXXXXXX (Vader 2026-05-19) — sister to Wave OOOOOOO.
+        // The XSS-escape flags (JSON_HEX_TAG etc.) on json_encode
+        // emit unicode escapes for `<`, `>`, `&`, `'`, `"`. These
+        // remain valid JSON, but any future change to the encode
+        // call site — flag omission, manual string concat, post-
+        // hoc HTML-escaping — could break syntax silently. Google's
+        // structured-data parser silently DROPS blocks with JSON
+        // errors instead of flagging them, so an invalid JSON-LD
+        // block costs SEO without showing up in any error log.
+        //
+        // This test extracts every JSON-LD block from key surfaces
+        // and asserts json_decode succeeds + the decoded payload
+        // has a recognized @context.
+        $surfaces = ['/', '/breaking', '/latest', '/dossiers', '/a-propos', '/methodologie', '/faq', '/advertise', '/angles-morts', '/comprendre-le-barometre'];
+        $totalBlocks = 0;
+        foreach ($surfaces as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+            preg_match_all(
+                '#<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>#is',
+                $html,
+                $m,
+            );
+            $blocks = $m[1];
+            $this->assertNotEmpty($blocks, "{$url} must ship at least 1 application/ld+json block.");
+            foreach ($blocks as $i => $jsonText) {
+                $decoded = json_decode(trim($jsonText), true);
+                $this->assertIsArray(
+                    $decoded,
+                    "{$url} block #{$i} must parse as valid JSON. json_last_error_msg: " . json_last_error_msg(),
+                );
+                $this->assertSame(
+                    'https://schema.org',
+                    $decoded['@context'] ?? null,
+                    "{$url} block #{$i} must declare @context: https://schema.org.",
+                );
+                $totalBlocks++;
+            }
+        }
+        $this->assertGreaterThan(20, $totalBlocks, 'Expected >20 JSON-LD blocks across these 10 surfaces; got ' . $totalBlocks);
+    }
+
     public function test_404_view_sets_grimba_is_404_flag_for_seo_partial(): void
     {
         // Wave WWWWWWW (Vader 2026-05-19) — 404 pages were shipping
