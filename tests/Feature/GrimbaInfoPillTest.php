@@ -111,6 +111,50 @@ class GrimbaInfoPillTest extends TestCase
         $this->assertStringContainsString('prefers-reduced-motion', $html);
     }
 
+    public function test_open_animation_respects_flipped_state(): void
+    {
+        // Wave EEEEE — the open animation now reads data-pill-flipped
+        // and starts the translate from the side closer to the pill
+        // button (so the body appears to emerge from the button, not
+        // arrive from away). Lock the conditional so a refactor that
+        // collapses both branches doesn't silently break the visual.
+        $html = $this->renderPill('Body');
+        $this->assertStringContainsString("'translateY(6px) scale(.98)'", $html);
+        $this->assertStringContainsString("'translateY(-6px) scale(.98)'", $html);
+    }
+
+    public function test_release_smoke_contract_present_across_partial(): void
+    {
+        // Wave HHHHH (Vader 2026-05-18) — S-PILL-10 release smoke.
+        // A single render must carry every load-bearing pill primitive
+        // we shipped this band. If any one of these vanishes from a
+        // future refactor, the corresponding visual feature breaks.
+        $html = $this->renderPill('Release smoke body');
+
+        // S-PILL-03/04: data-attributes for the JS controller delegation.
+        $this->assertStringContainsString('data-grimba-info-pill', $html, 'Pill must carry the data-grimba-info-pill attribute.');
+        $this->assertStringContainsString('data-grimba-info-pill-body', $html, 'Body must carry the data-grimba-info-pill-body attribute.');
+
+        // S-PILL-05: open + close animations.
+        $this->assertStringContainsString('openWithAnim', $html);
+        $this->assertStringContainsString('closeWithAnim', $html);
+
+        // S-PILL-07: a11y contract.
+        $this->assertStringContainsString('aria-expanded=', $html);
+        $this->assertStringContainsString('aria-controls=', $html);
+        $this->assertStringContainsString('role="region"', $html);
+        $this->assertStringContainsString('tabindex="-1"', $html);
+
+        // S-PILL-04: viewport-clamp + outside-click close.
+        $this->assertStringContainsString('positionBody', $html);
+        $this->assertStringContainsString('closeOthers', $html);
+        $this->assertStringContainsString("e.key === 'Escape'", $html);
+
+        // S-PILL-08: mobile bottom-sheet pattern.
+        $this->assertStringContainsString('grimba-info-pill-backdrop', $html);
+        $this->assertStringContainsString('MOBILE_BP', $html);
+    }
+
     public function test_size_variant_modifier_applied(): void
     {
         $html = view('theme.echo::partials.info-pill', [
