@@ -337,6 +337,31 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_sitemap_xml_returns_valid_sitemap_index(): void
+    {
+        // Wave JJJJJJJ (Vader 2026-05-19) — /sitemap.xml must return
+        // 200 + xml content-type + a non-empty sitemap or sitemapindex
+        // document. Google reads this for crawl discovery.
+        $response = $this->get('/sitemap.xml');
+        $response->assertOk();
+        $this->assertStringContainsString(
+            'text/xml',
+            (string) $response->headers->get('content-type'),
+            '/sitemap.xml must return text/xml content-type.'
+        );
+        $body = $response->getContent();
+        $this->assertStringContainsString('<?xml', $body, '/sitemap.xml must start with an XML prolog.');
+        // Either a sitemap index (Botble's default for paginated feeds)
+        // or a flat sitemap with <urlset> works — both are valid SiteMap
+        // protocol responses.
+        $hasIndex = str_contains($body, '<sitemapindex');
+        $hasUrlset = str_contains($body, '<urlset');
+        $this->assertTrue(
+            $hasIndex || $hasUrlset,
+            '/sitemap.xml must contain either <sitemapindex> or <urlset> root element.'
+        );
+    }
+
     public function test_rss_feeds_return_xml_with_content(): void
     {
         // Wave BBBBBBB (Vader 2026-05-19) — three RSS feeds power
