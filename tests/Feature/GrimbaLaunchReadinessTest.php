@@ -337,6 +337,21 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_security_txt_meets_rfc_9116_minimum(): void
+    {
+        // Wave PPPPPPP (Vader 2026-05-19) — lock the security.txt
+        // shape. RFC 9116 requires Contact and Expires; if the file
+        // gets stripped or the Contact endpoint moves, researchers
+        // lose the disclosure channel. PHP's dev server serves it
+        // as a static file under public/.well-known/security.txt.
+        $path = public_path('.well-known/security.txt');
+        $this->assertFileExists($path, 'security.txt must exist at public/.well-known/security.txt.');
+        $body = (string) file_get_contents($path);
+        $this->assertMatchesRegularExpression('/^Contact:\s+\S+/m', $body, 'security.txt must have a Contact field.');
+        $this->assertMatchesRegularExpression('/^Expires:\s+\d{4}-\d{2}-\d{2}/m', $body, 'security.txt must have an Expires field with an ISO date.');
+        $this->assertStringContainsString('@grimbanews.com', $body, 'security.txt Contact should target a grimbanews.com mailbox.');
+    }
+
     public function test_search_jsonld_escapes_script_close_in_user_query(): void
     {
         // Wave OOOOOOO (Vader 2026-05-19) — STORED-REFLECTED XSS guard.
