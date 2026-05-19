@@ -1208,6 +1208,23 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             SeoHelper::setTitle(__('Comprendre le baromètre de couverture') . ' — GrimbaNews')
                 ->setDescription(__('Comment lire le baromètre de couverture (gauche/centre/droite), pourquoi nous gardons la convention francophone et comment nous traitons les cas limites.'));
 
+            // Wave OOOOO — AboutPage JSON-LD for the methodology
+            // explainer. Helps the SERP card surface "About GrimbaNews"
+            // methodology callout instead of generic page.
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'AboutPage',
+                'name' => __('Comprendre le baromètre de couverture') . ' — GrimbaNews',
+                'description' => __('Comment lire le baromètre de couverture (gauche/centre/droite), pourquoi nous gardons la convention francophone et comment nous traitons les cas limites.'),
+                'url' => url('/comprendre-le-barometre'),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'about' => [
+                    '@type' => 'Thing',
+                    'name' => 'Editorial bias methodology',
+                    'description' => __('Three-segment coverage bar grouping sources by Gauche/Centre/Droite.'),
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Comprendre le baromètre'), url('/comprendre-le-barometre'));
@@ -1406,6 +1423,23 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             SeoHelper::setTitle(__('Sources classées') . ' — GrimbaNews')
                 ->setDescription(__('Biais, propriété, crédibilité et origine des sources suivies.'));
+
+            // Wave OOOOO (Vader 2026-05-19) — CollectionPage JSON-LD
+            // for the sources directory. /breaking, /latest, /dossiers
+            // all ship CollectionPage; /sources was missing it.
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => __('Sources classées') . ' — GrimbaNews',
+                'description' => __('Biais, propriété, crédibilité et origine des sources suivies.'),
+                'url' => url('/sources'),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'mainEntity' => [
+                    '@type' => 'ItemList',
+                    'numberOfItems' => $rows->count(),
+                    'itemListElement' => 'NewsMediaOrganization',
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
