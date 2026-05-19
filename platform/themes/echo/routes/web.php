@@ -1310,7 +1310,11 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Méthodologie'), url('/methodologie'));
 
-            return Theme::scope('methodology', [])->render();
+            // Wave SSSSSSS — static editorial page, copy changes ~never.
+            // Default Laravel response is `no-cache, private`; cache
+            // publicly for 1h + 6h on CDN.
+            return response(Theme::scope('methodology', [])->render(), 200)
+                ->header('Cache-Control', 'public, max-age=3600, s-maxage=21600');
         })->name('public.methodology');
 
         // S317 — About page.
@@ -1345,7 +1349,9 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add(__('Accueil'), url('/'))
                 ->add(__('À propos'), url('/a-propos'));
 
-            return Theme::scope('about', [])->render();
+            // Wave SSSSSSS — static editorial, cache publicly 1h + 6h CDN.
+            return response(Theme::scope('about', [])->render(), 200)
+                ->header('Cache-Control', 'public, max-age=3600, s-maxage=21600');
         })->name('public.about');
 
         // S318 — FAQ page.
@@ -1357,7 +1363,9 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add(__('Accueil'), url('/'))
                 ->add(__('FAQ'), url('/faq'));
 
-            return Theme::scope('faq', [])->render();
+            // Wave SSSSSSS — static editorial, cache publicly 1h + 6h CDN.
+            return response(Theme::scope('faq', [])->render(), 200)
+                ->header('Cache-Control', 'public, max-age=3600, s-maxage=21600');
         })->name('public.faq');
 
         // S350 — per-page OG image generator for static editorial pages.
@@ -1392,7 +1400,9 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Comprendre le baromètre'), url('/comprendre-le-barometre'));
 
-            return Theme::scope('explainer-bias-bar', [])->render();
+            // Wave SSSSSSS — static editorial, cache publicly 1h + 6h CDN.
+            return response(Theme::scope('explainer-bias-bar', [])->render(), 200)
+                ->header('Cache-Control', 'public, max-age=3600, s-maxage=21600');
         })->name('public.bias-bar-explainer');
 
         // S168 — member dashboard hijack. Botble Member plugin's
