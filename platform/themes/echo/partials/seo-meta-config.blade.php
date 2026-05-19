@@ -37,4 +37,14 @@
     $__grimbaOgLocaleAlt = $__grimbaCurLocale === 'en' ? 'fr_FR' : 'en_US';
     \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('locale', $__grimbaOgLocale);
     \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('locale:alternate', $__grimbaOgLocaleAlt);
+
+    // Wave RRRRRR (Vader 2026-05-19) — canonical URL. Botble's SeoHelper
+    // only emits rel=canonical when SeoHelper::meta()->setUrl() has been
+    // called. Post pages get it from the blog plugin; custom routes
+    // (/breaking, /latest, /comparatif/{id}, /sources, /advertise, etc.)
+    // didn't, so they shipped without canonical — Google relies on it.
+    // Always set to the current path (query stripped) — overwriting the
+    // blog plugin's per-post canonical is a no-op since $post->url
+    // resolves to the same path.
+    \Botble\SeoHelper\Facades\SeoHelper::meta()->setUrl(url()->current());
 @endphp

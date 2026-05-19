@@ -288,6 +288,31 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_every_surface_ships_canonical_link(): void
+    {
+        // Wave RRRRRR (Vader 2026-05-19) — every reader + story surface
+        // must emit `<link rel="canonical" href="...">`. Before this
+        // wave, custom routes (/breaking, /latest, /comparatif/{id},
+        // /sources, /advertise, /search, /dossiers) shipped WITHOUT
+        // canonical because they didn't call SeoHelper::meta()->setUrl().
+        // The shared seo-meta-config partial now always sets canonical
+        // from url()->current() so Botble's MiscTags::addCanonical fires.
+        // Query params get stripped by SeoHelper's stripQueryParameters.
+        $surfaces = array_merge(
+            ['/', '/breaking', '/latest', '/dossiers', '/advertise', '/sources', '/search?q=mayotte'],
+            $this->sampleStoryUrls()
+        );
+        foreach ($surfaces as $path) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $count = preg_match_all('/<link\s[^>]*rel=["\']canonical["\']/i', $html);
+            $this->assertSame(
+                1,
+                $count,
+                "{$path} should emit exactly one <link rel=\"canonical\"> (got {$count})."
+            );
+        }
+    }
+
     public function test_twitter_card_and_image_emit_exactly_once(): void
     {
         // Wave GGGGGG (Vader 2026-05-19) — twitter:card + twitter:image
