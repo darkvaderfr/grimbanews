@@ -315,6 +315,28 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_static_pages_carry_correct_jsonld_schema(): void
+    {
+        // Wave HHHHHHH (Vader 2026-05-19) — lock the JSON-LD @type
+        // per static-page surface. /a-propos → AboutPage, /methodologie
+        // → TechArticle, /faq → FAQPage, /angles-morts → CollectionPage.
+        // SERP rich results depend on these exact types being present.
+        $expectations = [
+            '/a-propos' => 'AboutPage',
+            '/methodologie' => 'TechArticle',
+            '/faq' => 'FAQPage',
+            '/angles-morts' => 'CollectionPage',
+        ];
+        foreach ($expectations as $path => $type) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $this->assertStringContainsString(
+                '"@type":"' . $type . '"',
+                $html,
+                "{$path} should ship JSON-LD with @type=\"{$type}\"."
+            );
+        }
+    }
+
     public function test_rss_feeds_return_xml_with_content(): void
     {
         // Wave BBBBBBB (Vader 2026-05-19) — three RSS feeds power
