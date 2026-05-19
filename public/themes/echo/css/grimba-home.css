@@ -7504,24 +7504,60 @@ body[data-theme="dark"] .grimba-info-pill__body[data-pill-flipped="up"]::after {
 body[data-theme="dark"] .grimba-info-pill__body::before {
     background: linear-gradient(90deg, transparent, rgba(255, 154, 138, 0.62), rgba(132, 175, 255, 0.52), transparent);
 }
-/* Mobile — make the popover roughly viewport-wide and align to
-   the start of the row instead of the pill button so it never
-   clips off-screen. */
+/* Mobile bottom-sheet — Wave GGGGG (Vader 2026-05-18) — S-PILL-08.
+   The popover docks to the bottom edge of the viewport on small
+   screens so the reader never has to scroll-find a pill body that
+   appeared off-screen. Safe-area-inset adapts for iOS home indicator. */
 @media (max-width: 600px) {
     .grimba-info-pill__body {
         position: fixed;
         top: auto;
         left: 16px;
         right: 16px;
-        bottom: 16px;
+        bottom: calc(16px + env(safe-area-inset-bottom));
         max-width: none;
         width: auto;
         min-width: 0;
         z-index: 9999;
+        padding-top: 22px;
+        font-size: 0.88rem;
+        line-height: 1.55;
+        /* Drag handle visual — a small horizontal bar at the top
+           edge that signals "swipe / tap-outside to close". Pure CSS,
+           no extra DOM. */
+        background-image:
+            linear-gradient(to bottom, transparent 0, transparent 6px,
+                            rgba(0, 0, 0, 0.18) 6px, rgba(0, 0, 0, 0.18) 9px,
+                            transparent 9px),
+            linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(246, 241, 232, 0.86));
+        background-repeat: no-repeat;
+        background-size: 44px 9px, 100% 100%;
+        background-position: top center, 0 0;
     }
     .grimba-info-pill--right > .grimba-info-pill__body {
         left: 16px;
         right: 16px;
+    }
+    /* Suppress the caret on mobile — bottom sheet has no anchor
+       relationship to the pill button (it docks to the viewport
+       edge), so a stray arrow at the top makes no visual sense. */
+    .grimba-info-pill__body::after,
+    .grimba-info-pill__body::before {
+        display: none;
+    }
+}
+@media (max-width: 600px) {
+    /* Mobile dark-mode — adjust the drag-handle visual contrast. */
+    [data-bs-theme="dark"] .grimba-info-pill__body,
+    body[data-theme="dark"] .grimba-info-pill__body {
+        background-image:
+            linear-gradient(to bottom, transparent 0, transparent 6px,
+                            rgba(255, 250, 240, 0.32) 6px, rgba(255, 250, 240, 0.32) 9px,
+                            transparent 9px),
+            linear-gradient(135deg, rgba(28, 24, 17, 0.88), rgba(40, 35, 28, 0.74));
+        background-repeat: no-repeat;
+        background-size: 44px 9px, 100% 100%;
+        background-position: top center, 0 0;
     }
 }
 /* Wave FFFFF (Vader 2026-05-18) — dark-mode parity is now driven
@@ -7540,12 +7576,9 @@ body[data-theme="dark"] .grimba-info-pill__body {
     .grimba-info-pill__body { animation: none; }
     .grimba-info-pill__btn { transition: none; }
 }
-@media (max-width: 600px) {
-    .grimba-info-pill__body {
-        max-width: calc(100vw - 32px);
-        font-size: 0.84rem;
-    }
-}
+/* (Mobile rule consolidated into the bottom-sheet block above —
+   Wave GGGGG; left this comment so the line numbers in older
+   commit messages still anchor correctly.) */
 
 /* ------------------------------------------------------------
    Light-mode contrast hardening — Vader 2026-05-16 GLASS-BTN-3.
