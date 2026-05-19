@@ -337,6 +337,54 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_no_open_redirect_via_query_params(): void
+    {
+        // Wave QQQQQQQ (Vader 2026-05-19) — verify no open-redirect
+        // vector via the obvious `?next=`, `?redirect=`, `?return=`
+        // patterns. Open redirects let attackers craft phishing URLs
+        // that look like grimbanews.com but bounce to evil.com.
+        $probed = 0;
+        foreach (['/', '/comparatif/1703', '/breaking', '/dossiers'] as $path) {
+            foreach (['next', 'redirect', 'return', 'url', 'goto', 'r'] as $param) {
+                $response = $this->get($path . '?' . $param . '=https://evil.example.com');
+                $probed++;
+                // Either a real 2xx render (no honoring) or a redirect
+                // pointing OFF-DOMAIN must NOT happen. Same-origin
+                // redirects are fine.
+                if ($response->status() >= 300 && $response->status() < 400) {
+                    $loc = (string) $response->headers->get('location', '');
+                    $this->assertStringNotContainsString(
+                        'evil.example.com',
+                        $loc,
+                        "Open redirect: {$path}?{$param}=… leaked the attacker URL into Location header."
+                    );
+                }
+            }
+        }
+        $this->assertSame(24, $probed, 'Probe count drift — open-redirect coverage shrank.');
+    }
+
+    public function test_img_proxy_rejects_ssrf_targets(): void
+    {
+        // Wave QQQQQQQ — img-proxy SSRF guard. The allowlist already
+        // excludes AWS metadata (169.254.169.254), file:// schemes,
+        // and arbitrary external hosts. Lock this so a future allowlist
+        // misconfig can't silently open the SSRF window.
+        $blocked = [
+            '/img-proxy?u=http://169.254.169.254/latest/meta-data/&provider=article-hero',
+            '/img-proxy?u=file:///etc/passwd&provider=article-hero',
+            '/img-proxy?u=https://evil.example.com/x.png&provider=article-hero',
+        ];
+        foreach ($blocked as $url) {
+            $response = $this->get($url);
+            $this->assertNotEquals(
+                200,
+                $response->status(),
+                "img-proxy MUST NOT proxy {$url} — SSRF risk."
+            );
+        }
+    }
+
     public function test_security_txt_meets_rfc_9116_minimum(): void
     {
         // Wave PPPPPPP (Vader 2026-05-19) — lock the security.txt
