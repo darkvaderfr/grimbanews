@@ -1,2 +1,10 @@
+# GrimbaNews robots.txt
+# Wave QQQQQ (Vader 2026-05-19) — added Sitemap directive so search
+# engines discover the sitemap without us having to manually submit it.
+# Admin/account routes (/admin, /coffre, /member-*) are gated by auth
+# server-side; no need to repeat that here. Default is wide-open.
+
 User-agent: *
 Disallow:
+
+Sitemap: https://grimbanews.com/sitemap.xml
