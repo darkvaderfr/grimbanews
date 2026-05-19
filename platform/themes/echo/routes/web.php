@@ -552,6 +552,20 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             };
             $isArticleHero = $provider === 'article-hero';
 
+            // Wave SSSSS (Vader 2026-05-19) — same-origin bypass.
+            // When the URL host matches this app's host (typical for
+            // seeded posts pointing at /storage/...), there's no
+            // reason to route through the proxy: the asset is already
+            // on our domain. Redirect directly to the asset and skip
+            // both the allowlist check and the cache layer. Fixes the
+            // dev-mode 404s on seed cluster images and any production
+            // case where the seeder uses local /storage paths.
+            $appHost = strtolower((string) parse_url((string) config('app.url'), PHP_URL_HOST));
+            $appHostWithPort = strtolower((string) (parse_url(request()->getSchemeAndHttpHost(), PHP_URL_HOST) ?: ''));
+            if ($host !== '' && in_array($host, array_filter([$appHost, $appHostWithPort, '127.0.0.1', 'localhost']), true)) {
+                return redirect()->away($url, 302);
+            }
+
             abort_unless(
                 in_array($parts['scheme'] ?? '', ['http', 'https'], true)
                 && in_array($host, $allowedHosts, true),

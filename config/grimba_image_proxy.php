@@ -58,6 +58,7 @@ return [
         'people.com',
         'platform.theverge.com',
         'prod.cdn-medias.jeuneafrique.com',
+        'reporterre.net', // Wave SSSSS — seeded article uses this host
         's.france24.com',
         's.hdnux.com',
         's.rfi.fr',
