@@ -18,29 +18,37 @@
         $__theme = 'light';
     }
 @endphp
+{{-- Wave NNNNN part 2 (Vader 2026-05-19) — when $__eager is set,
+     also emit fetchpriority="high" so the browser prioritizes this
+     hero in the network queue (LCP win on home + post pages). The
+     `loading` + `decoding` already mirror `$__eager`; `fetchpriority`
+     is the third leg of the same hint. --}}
 @if($__isExternal)
     <img
         src="{{ route('public.img-proxy', ['provider' => 'article-hero', 'pid' => $post->id, 'theme' => $__theme, 'u' => $__resolved]) }}"
         alt="{{ $__alt }}"
         loading="{{ $__eager ? 'eager' : 'lazy' }}"
         decoding="{{ $__eager ? 'sync' : 'async' }}"
+        @if($__eager) fetchpriority="high" @endif
         width="1200" height="630"
         data-grimba-post-id="{{ $post->id }}"
     />
 @elseif($__hasUsableImg)
-    {!! \Botble\Media\Facades\RvMedia::image($post->image, $__alt, $__size, attributes: [
+    {!! \Botble\Media\Facades\RvMedia::image($post->image, $__alt, $__size, attributes: array_filter([
         'loading' => $__eager ? 'eager' : 'lazy',
         'decoding' => $__eager ? 'sync' : 'async',
+        'fetchpriority' => $__eager ? 'high' : null,
         'width' => 1200,
         'height' => 630,
         'data-grimba-post-id' => (string) $post->id,
-    ]) !!}
+    ], fn ($v) => $v !== null)) !!}
 @else
     <img
         src="{{ route('public.og.placeholder', ['id' => $post->id]) }}"
         alt="{{ $__alt }}"
         loading="{{ $__eager ? 'eager' : 'lazy' }}"
         decoding="{{ $__eager ? 'sync' : 'async' }}"
+        @if($__eager) fetchpriority="high" @endif
         width="1200" height="630"
         class="gn-placeholder"
         data-grimba-post-id="{{ $post->id }}"
