@@ -243,6 +243,13 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->orderByRaw("CASE bias_rating WHEN 'left' THEN 1 WHEN 'center' THEN 2 WHEN 'right' THEN 3 ELSE 4 END")
                 ->get();
 
+            // Wave KKKKKKK (Vader 2026-05-19) — 404 on missing cluster
+            // rather than rendering an "Aucune source n'a été trouvée"
+            // shell. Lets the 404 page show real next-steps (search +
+            // recent posts) AND prevents Google from indexing thin-
+            // content empty cluster URLs.
+            abort_if($posts->isEmpty(), 404);
+
             $storyTitle = $posts->first()->name ?? ('Dossier #' . $clusterId);
 
             SeoHelper::setTitle(__('Comparaison des sources') . ' — ' . $storyTitle)

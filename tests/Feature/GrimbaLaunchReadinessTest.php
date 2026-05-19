@@ -337,6 +337,19 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_missing_cluster_id_returns_404_not_thin_shell(): void
+    {
+        // Wave KKKKKKK (Vader 2026-05-19) — /comparatif/{nonexistent_id}
+        // must 404. Before this wave, the route rendered a "Aucune
+        // source n'a été trouvée" empty shell with HTTP 200, which:
+        //   (a) signals to crawlers there's thin content here, hurting
+        //       SEO authority distribution
+        //   (b) misleads users (looks like a real cluster with no data
+        //       vs a not-found page)
+        // 404 routes through the real 404 page with search + recent.
+        $this->get('/comparatif/9999999999')->assertStatus(404);
+    }
+
     public function test_sitemap_xml_returns_valid_sitemap_index(): void
     {
         // Wave JJJJJJJ (Vader 2026-05-19) — /sitemap.xml must return
