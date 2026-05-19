@@ -110,7 +110,10 @@
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Flux RSS') }}" href="{{ url('/feed.xml') }}">
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Breaking news') }}" href="{{ url('/feed.breaking.xml') }}">
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Latest') }}" href="{{ url('/feed.latest.xml') }}">
-    <meta property="og:image" content="{{ url('/og/home.png') }}">
+    {{-- Wave AAAAAA — push OG image into Botble SeoHelper before Theme::header() so the auto-emitted og:image points at our 1200×630 PNG, not the default SVG. --}}
+    @php
+        \Botble\SeoHelper\Facades\SeoHelper::setImage(url('/og/home.png'));
+    @endphp
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
