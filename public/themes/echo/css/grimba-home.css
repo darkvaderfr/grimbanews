@@ -3992,7 +3992,27 @@ html.grimba-home-html[data-bs-theme="dark"] .grimba-owner-source-card .opacity-6
 }
 [data-bs-theme="dark"] .grimba-comparison-index__card:hover {
     background: rgba(255, 255, 255, 0.08);
-    border-color: var(--gn-ink);
+    border-color: rgba(255, 250, 240, 0.32);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.32);
+}
+/* Wave VVVV part 3 (Vader 2026-05-18) — extend /dossiers dark-mode
+   coverage for the remaining sub-elements that were inheriting their
+   light-mode colors via `inherit` or `--gn-ink-muted`. */
+[data-bs-theme="dark"] .grimba-comparison-index__dossier,
+body[data-theme="dark"] .grimba-comparison-index__dossier {
+    color: rgba(255, 250, 240, 0.58);
+}
+[data-bs-theme="dark"] .grimba-comparison-index__title,
+body[data-theme="dark"] .grimba-comparison-index__title {
+    color: #fffaf0;
+}
+[data-bs-theme="dark"] .grimba-comparison-index__lede,
+body[data-theme="dark"] .grimba-comparison-index__lede {
+    color: rgba(255, 250, 240, 0.72);
+}
+[data-bs-theme="dark"] .grimba-comparison-index__bar,
+body[data-theme="dark"] .grimba-comparison-index__bar {
+    background: rgba(255, 250, 240, 0.08);
 }
 
 /* ------------------------------------------------------------

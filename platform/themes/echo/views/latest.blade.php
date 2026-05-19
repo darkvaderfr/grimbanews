@@ -259,4 +259,56 @@
         body[data-theme="dark"] .grimba-latest-page__item {
             border-bottom-color: rgba(255, 250, 240, .10);
         }
+        /* Wave VVVV part 2 — extend dark-mode to the rest of /latest. */
+        [data-bs-theme="dark"] .grimba-latest-page__head,
+        body[data-theme="dark"] .grimba-latest-page__head {
+            background:
+                linear-gradient(135deg, rgba(40, 35, 28, .82), rgba(28, 24, 17, .68)),
+                rgba(28, 24, 17, .56);
+            border-color: rgba(255, 250, 240, .12);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 250, 240, .06),
+                0 20px 52px rgba(0, 0, 0, .32);
+        }
+        [data-bs-theme="dark"] .grimba-latest-page__kicker,
+        body[data-theme="dark"] .grimba-latest-page__kicker {
+            background: rgba(255, 250, 240, .08);
+            border-color: rgba(255, 250, 240, .14);
+            color: rgba(255, 250, 240, .72);
+        }
+        [data-bs-theme="dark"] .grimba-latest-page__lede,
+        body[data-theme="dark"] .grimba-latest-page__lede,
+        [data-bs-theme="dark"] .grimba-latest-page__excerpt,
+        body[data-theme="dark"] .grimba-latest-page__excerpt {
+            color: rgba(255, 250, 240, .72);
+        }
+        [data-bs-theme="dark"] .grimba-latest-page__rank,
+        body[data-theme="dark"] .grimba-latest-page__rank {
+            color: rgba(255, 250, 240, .42);
+        }
+        [data-bs-theme="dark"] .grimba-latest-page__meta,
+        body[data-theme="dark"] .grimba-latest-page__meta {
+            color: rgba(255, 250, 240, .62);
+        }
+        [data-bs-theme="dark"] .grimba-latest-page__category,
+        body[data-theme="dark"] .grimba-latest-page__category {
+            background: rgba(255, 154, 138, .14);
+            color: #ff9a8a;
+        }
+        [data-bs-theme="dark"] .grimba-latest-page__category:hover,
+        body[data-theme="dark"] .grimba-latest-page__category:hover {
+            background: rgba(255, 154, 138, .26);
+            color: #ff9a8a;
+        }
+        [data-bs-theme="dark"] .grimba-latest-page__empty,
+        body[data-theme="dark"] .grimba-latest-page__empty {
+            background: rgba(28, 24, 17, .48);
+            border-color: rgba(255, 250, 240, .14);
+            color: rgba(255, 250, 240, .72);
+        }
+        [data-bs-theme="dark"] .grimba-latest-page__cta,
+        body[data-theme="dark"] .grimba-latest-page__cta {
+            background: #fffaf1;
+            color: #14110d;
+        }
     </style>
