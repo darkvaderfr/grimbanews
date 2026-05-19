@@ -287,4 +287,31 @@ class GrimbaInfoPillTest extends TestCase
         $this->assertGreaterThan(0, $count);
         $this->assertLessThan(5, $count, 'Script block must not balloon per pill.');
     }
+
+    public function test_bias_distribution_panel_has_exactly_one_pill(): void
+    {
+        // Vader 2026-05-19 directive: "the i pill is not working and
+        // they are too many. We only need one and it should condense
+        // the rest into that one pill." Wave CCCCCC consolidated four
+        // panel-specific pills (Distribution / Signal / Origines /
+        // Spectre) into a single panel-level pill with a <dl> body.
+        // Lock the contract so a future edit can't reintroduce extras.
+        $partial = file_get_contents(
+            base_path('platform/themes/echo/partials/story/bias-distribution.blade.php')
+        );
+        $this->assertIsString($partial);
+        $count = preg_match_all('/@include\([^)]*partials\.info-pill[^)]*\)/', $partial);
+        $this->assertSame(
+            1,
+            $count,
+            'bias-distribution panel must include partials.info-pill exactly once (Vader 2026-05-19 directive).'
+        );
+        // The consolidated body must use the <dl> shape so all four
+        // sections render together — anything else means a regression.
+        $this->assertStringContainsString('grimba-info-pill__dl', $partial);
+        $this->assertStringContainsString('Distribution des biais', $partial);
+        $this->assertStringContainsString('Signal', $partial);
+        $this->assertStringContainsString('Origines éditoriales', $partial);
+        $this->assertStringContainsString('Spectre politique', $partial);
+    }
 }
