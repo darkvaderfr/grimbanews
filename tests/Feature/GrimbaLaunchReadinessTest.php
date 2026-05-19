@@ -288,6 +288,41 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_article_pages_carry_open_graph_article_meta(): void
+    {
+        // Wave UUUUUU (Vader 2026-05-19) — article detail pages must
+        // emit `article:published_time`, `article:modified_time`, and
+        // `article:author` per the OG protocol spec (bare prefix, NOT
+        // `og:article:*` — Botble's addProperty auto-prefix bug routes
+        // around this via Theme::set + raw <meta> in the tail partial).
+        // Listing surfaces (home, /breaking) must NOT carry these.
+        $articleUrls = array_filter(
+            $this->sampleStoryUrls(),
+            fn (string $u) => str_starts_with($u, '/article/')
+        );
+        if (empty($articleUrls)) {
+            $this->markTestSkipped('No article URL available in test corpus.');
+            return;
+        }
+        foreach ($articleUrls as $path) {
+            $html = $this->get($path)->assertOk()->getContent();
+            foreach (['article:published_time', 'article:modified_time', 'article:author'] as $prop) {
+                $this->assertMatchesRegularExpression(
+                    '/<meta\s[^>]*property=["\']' . preg_quote($prop, '/') . '["\']/i',
+                    $html,
+                    "{$path} should emit <meta property=\"{$prop}\">."
+                );
+            }
+        }
+        // Listing surface should NOT carry article:* metas.
+        $homeHtml = $this->get('/')->getContent();
+        $this->assertDoesNotMatchRegularExpression(
+            '/<meta\s[^>]*property=["\']article:published_time["\']/i',
+            $homeHtml,
+            'Home page should not carry article:* OG meta.'
+        );
+    }
+
     public function test_robots_meta_indexes_reader_surfaces_and_skips_search(): void
     {
         // Wave TTTTTT (Vader 2026-05-19) — every reader/story surface
