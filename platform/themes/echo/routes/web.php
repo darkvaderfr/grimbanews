@@ -316,7 +316,15 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ])->render();
 
             return response($xml, 200)
-                ->header('Content-Type', 'application/rss+xml; charset=UTF-8');
+                ->header('Content-Type', 'application/rss+xml; charset=UTF-8')
+                // Wave RRRRRRR — cache the RSS for 10 min publicly + 30
+                // min on a CDN. Default Laravel response is no-cache,
+                // private — which forces every RSS reader (Feedly,
+                // Inoreader, NetNewsWire) to refetch on every poll
+                // cycle, hammering the server. RSS content updates on
+                // RSS ingest cadence (~10 min), so a 10-min max-age
+                // matches reality.
+                ->header('Cache-Control', 'public, max-age=600, s-maxage=1800');
         };
 
         // Both paths exposed: /feed.xml is the canonical public URL
