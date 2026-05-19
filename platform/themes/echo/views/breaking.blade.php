@@ -307,6 +307,10 @@
             border-right-color: rgba(255, 250, 240, .08);
             border-bottom-color: rgba(255, 250, 240, .08);
         }
+        [data-bs-theme="dark"] .grimba-breaking-page__item:hover,
+        body[data-theme="dark"] .grimba-breaking-page__item:hover {
+            box-shadow: 0 12px 32px rgba(0, 0, 0, .32);
+        }
         [data-bs-theme="dark"] .grimba-breaking-page__title,
         body[data-theme="dark"] .grimba-breaking-page__title,
         [data-bs-theme="dark"] .grimba-breaking-page__headline,
@@ -314,5 +318,66 @@
         [data-bs-theme="dark"] .grimba-breaking-page__link,
         body[data-theme="dark"] .grimba-breaking-page__link {
             color: #fffaf0;
+        }
+        /* Wave VVVV (Vader 2026-05-18) — extend dark-mode to the rest of
+           the /breaking surface. The light-mode rules use cream backgrounds
+           and dark-ink text colors that would otherwise paint as
+           near-invisible greys on the dark page canvas. */
+        [data-bs-theme="dark"] .grimba-breaking-page__head,
+        body[data-theme="dark"] .grimba-breaking-page__head {
+            background:
+                linear-gradient(135deg, rgba(40, 35, 28, .82), rgba(28, 24, 17, .68)),
+                rgba(28, 24, 17, .56);
+            border-color: rgba(255, 250, 240, .12);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 250, 240, .06),
+                0 20px 52px rgba(0, 0, 0, .32);
+        }
+        [data-bs-theme="dark"] .grimba-breaking-page__lede,
+        body[data-theme="dark"] .grimba-breaking-page__lede,
+        [data-bs-theme="dark"] .grimba-breaking-page__excerpt,
+        body[data-theme="dark"] .grimba-breaking-page__excerpt {
+            color: rgba(255, 250, 240, .72);
+        }
+        [data-bs-theme="dark"] .grimba-breaking-page__meta,
+        body[data-theme="dark"] .grimba-breaking-page__meta {
+            color: rgba(255, 250, 240, .58);
+        }
+        [data-bs-theme="dark"] .grimba-breaking-page__source,
+        body[data-theme="dark"] .grimba-breaking-page__source {
+            color: var(--bp-color, #ff9a8a);
+        }
+        [data-bs-theme="dark"] .grimba-breaking-page__time,
+        body[data-theme="dark"] .grimba-breaking-page__time {
+            color: rgba(255, 250, 240, .62);
+        }
+        [data-bs-theme="dark"] .grimba-breaking-page__kicker--latest,
+        body[data-theme="dark"] .grimba-breaking-page__kicker--latest {
+            background: rgba(255, 250, 240, .08);
+            color: rgba(255, 250, 240, .88);
+            border-color: rgba(255, 250, 240, .14);
+        }
+        [data-bs-theme="dark"] .grimba-breaking-page__empty,
+        body[data-theme="dark"] .grimba-breaking-page__empty {
+            background: rgba(28, 24, 17, .48);
+            border-color: rgba(255, 250, 240, .14);
+        }
+        [data-bs-theme="dark"] .grimba-breaking-page__empty-mark,
+        body[data-theme="dark"] .grimba-breaking-page__empty-mark {
+            color: rgba(255, 250, 240, .28);
+        }
+        [data-bs-theme="dark"] .grimba-breaking-page__empty p,
+        body[data-theme="dark"] .grimba-breaking-page__empty p {
+            color: rgba(255, 250, 240, .68);
+        }
+        [data-bs-theme="dark"] .grimba-breaking-page__cta,
+        body[data-theme="dark"] .grimba-breaking-page__cta {
+            background: #fffaf1;
+            color: #14110d;
+        }
+        [data-bs-theme="dark"] .grimba-breaking-page__cta:hover,
+        body[data-theme="dark"] .grimba-breaking-page__cta:hover {
+            color: #14110d;
+            filter: brightness(.96);
         }
     </style>
