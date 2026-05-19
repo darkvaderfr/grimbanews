@@ -7524,20 +7524,12 @@ body[data-theme="dark"] .grimba-info-pill__body::before {
         right: 16px;
     }
 }
-/* Dark-mode parity. */
-[data-bs-theme="dark"] .grimba-info-pill__btn,
-body[data-theme="dark"] .grimba-info-pill__btn {
-    background: rgba(255, 154, 138, 0.16);
-    color: #ff9a8a;
-    box-shadow: inset 0 0 0 1px rgba(255, 154, 138, 0.30);
-}
-[data-bs-theme="dark"] .grimba-info-pill[open] > summary .grimba-info-pill__btn,
-body[data-theme="dark"] .grimba-info-pill[open] > summary .grimba-info-pill__btn,
-[data-bs-theme="dark"] .grimba-info-pill > summary:hover .grimba-info-pill__btn,
-body[data-theme="dark"] .grimba-info-pill > summary:hover .grimba-info-pill__btn {
-    background: #ff9a8a;
-    color: #14110d;
-}
+/* Wave FFFFF (Vader 2026-05-18) — dark-mode parity is now driven
+   by the token cascade (--gn-pill-* flips in :root for dark mode).
+   The pill __btn no longer needs explicit dark overrides since
+   `var(--gn-pill-bg-soft)` etc. resolve to the dark token in dark
+   mode automatically. The __body still needs the linear-gradient +
+   border + color flip because those layers aren't tokenized yet. */
 [data-bs-theme="dark"] .grimba-info-pill__body,
 body[data-theme="dark"] .grimba-info-pill__body {
     background: linear-gradient(135deg, rgba(28, 24, 17, 0.88), rgba(40, 35, 28, 0.74));
