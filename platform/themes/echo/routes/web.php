@@ -285,6 +285,38 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('feed.xml', $feedHandler)->name('public.feed');
         Route::get('feed',     $feedHandler)->name('public.feed.alt');
 
+        // Wave RRRRR (Vader 2026-05-19) — /health endpoint for
+        // uptime monitors. Returns a small JSON payload with the app
+        // version + DB connection check + the most recent published
+        // post timestamp (proxy for "feed is fresh"). Public — no auth
+        // gate. Designed so an external monitor can hit it every 60s
+        // without poisoning analytics.
+        Route::get('health', function () {
+            $dbOk = false;
+            $lastPublishedAt = null;
+            try {
+                $dbOk = \Illuminate\Support\Facades\DB::connection()->getPdo() !== null;
+                if ($dbOk && \Illuminate\Support\Facades\Schema::hasTable('posts')) {
+                    $lastPublishedAt = (string) (\Illuminate\Support\Facades\DB::table('posts')
+                        ->where('status', 'published')
+                        ->orderByDesc('created_at')
+                        ->value('created_at') ?? '');
+                }
+            } catch (\Throwable $e) {
+                $dbOk = false;
+            }
+            return response()->json([
+                'status' => $dbOk ? 'ok' : 'degraded',
+                'service' => 'grimbanews',
+                'time' => now()->utc()->toIso8601String(),
+                'db' => $dbOk ? 'up' : 'down',
+                'last_post_at' => $lastPublishedAt ?: null,
+            ], $dbOk ? 200 : 503, [
+                'Cache-Control' => 'no-store, max-age=0',
+                'X-Robots-Tag' => 'noindex',
+            ]);
+        })->name('public.health');
+
         // Phase D-09 — per-stream RSS feeds. /feed.breaking.xml
         // surfaces every post that matched the strict breaking-news
         // keyword pool in the active region + locale; /feed.latest.xml

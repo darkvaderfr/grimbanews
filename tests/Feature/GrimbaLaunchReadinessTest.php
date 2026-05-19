@@ -120,6 +120,57 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_health_endpoint_returns_json_with_required_fields(): void
+    {
+        // Wave RRRRR (Vader 2026-05-19) — /health for uptime monitors.
+        // The endpoint must return JSON with status/service/time/db so
+        // external monitoring tools can parse a consistent payload.
+        // A refactor that breaks the JSON shape would silently break
+        // every monitor pointing at this URL.
+        $response = $this->get('/health');
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'application/json')
+            ->assertHeader('X-Robots-Tag', 'noindex')
+            ->assertJsonStructure([
+                'status',
+                'service',
+                'time',
+                'db',
+                'last_post_at',
+            ])
+            ->assertJson([
+                'service' => 'grimbanews',
+                'status' => 'ok',
+                'db' => 'up',
+            ]);
+        // Cache-Control is set by the handler but the framework
+        // normalizes the directive order + adds `private`. Assert
+        // the substring instead of an exact match.
+        $this->assertStringContainsString(
+            'no-store',
+            (string) $response->headers->get('Cache-Control'),
+            '/health response must be no-store to prevent monitor coalescing.'
+        );
+    }
+
+    public function test_robots_txt_advertises_sitemap(): void
+    {
+        // Wave QQQQQ — robots.txt must include a Sitemap directive so
+        // Google can discover the sitemap without manual submission.
+        // Note: robots.txt is a static file in public/, served by the
+        // web server — NOT by Laravel's router. The test client only
+        // invokes Laravel routes, so we read the file from disk
+        // directly.
+        $path = public_path('robots.txt');
+        $this->assertFileExists($path);
+        $body = (string) file_get_contents($path);
+        $this->assertMatchesRegularExpression(
+            '/^Sitemap:\s+https?:\/\/[^\s]+\/sitemap\.xml\s*$/m',
+            $body,
+            'public/robots.txt must include a `Sitemap: <url>/sitemap.xml` directive (case-sensitive).'
+        );
+    }
+
     public function test_every_reader_surface_ships_3_jsonld_blocks(): void
     {
         // Wave PPPPP (Vader 2026-05-19) — JSON-LD coverage contract.
