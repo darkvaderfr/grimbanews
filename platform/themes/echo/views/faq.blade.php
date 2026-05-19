@@ -85,6 +85,24 @@
             ],
         ],
     ];
+
+    // Wave GGGGGGG — FAQPage JSON-LD. Google can surface FAQ rich
+    // results in SERP when the page declares the canonical FAQPage
+    // schema with Question + acceptedAnswer entities. We build this
+    // from the same $sections array so copy stays single-sourced.
+    $__faqJsonLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'FAQPage',
+        'mainEntity' => collect($sections)->flatMap(fn ($s) => $s['items'])->map(fn ($item) => [
+            '@type' => 'Question',
+            'name' => $item['q'],
+            'acceptedAnswer' => [
+                '@type' => 'Answer',
+                'text' => $item['a'],
+            ],
+        ])->values()->all(),
+    ];
+    Theme::set('grimbaJsonLd', json_encode($__faqJsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 @endphp
 
 <section class="grimba-faq py-5">
