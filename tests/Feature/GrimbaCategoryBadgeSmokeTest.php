@@ -273,4 +273,69 @@ class GrimbaCategoryBadgeSmokeTest extends TestCase
             'Article hero card must render a topic-category pill (Wave PPPP).',
         );
     }
+
+    public function test_article_detail_page_ships_full_news_article_schema(): void
+    {
+        // Wave TTTTT (Vader 2026-05-19) — article detail page is the
+        // highest-traffic surface after home. Its NewsArticle schema
+        // is what Google uses to pick the article for News results
+        // + Top Stories carousel. Lock the contract so a future
+        // refactor doesn't silently strip a required field.
+        $slug = \Botble\Slug\Models\Slug::query()
+            ->where('reference_type', \Botble\Blog\Models\Post::class)
+            ->orderByDesc('id')
+            ->value('key');
+        if (! $slug) {
+            $this->markTestSkipped('No published post slug available in the corpus.');
+        }
+        $response = $this->get('/blog/' . $slug);
+        $hops = 0;
+        while ($response->isRedirect() && $hops < 3) {
+            $hops++;
+            $loc = $response->headers->get('Location');
+            if (! $loc) break;
+            $parsed = parse_url($loc);
+            $path = ($parsed['path'] ?? '/') . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
+            $response = $this->get($path);
+        }
+        $response->assertOk();
+        $html = $response->getContent();
+
+        // Required: at least one NewsArticle JSON-LD block.
+        $this->assertStringContainsString(
+            '"NewsArticle"',
+            $html,
+            'Article page must ship NewsArticle JSON-LD (drives Google News + Top Stories).',
+        );
+
+        // Required schema fields per https://schema.org/NewsArticle
+        // (Google's minimum for News rich results).
+        foreach (['"datePublished"', '"dateModified"', '"headline"', '"mainEntityOfPage"'] as $required) {
+            $this->assertStringContainsString(
+                $required,
+                $html,
+                "Article NewsArticle schema missing {$required}."
+            );
+        }
+
+        // Author + publisher refs needed for the byline attribution
+        // card in Google News.
+        $this->assertMatchesRegularExpression(
+            '/"author"\s*:\s*[{\[]/',
+            $html,
+            'Article NewsArticle must carry an author block.'
+        );
+        $this->assertMatchesRegularExpression(
+            '/"publisher"\s*:\s*[{\[]/',
+            $html,
+            'Article NewsArticle must carry a publisher block.'
+        );
+
+        // BreadcrumbList for the breadcrumb-card SERP layout.
+        $this->assertStringContainsString(
+            '"BreadcrumbList"',
+            $html,
+            'Article page must ship BreadcrumbList JSON-LD.'
+        );
+    }
 }
