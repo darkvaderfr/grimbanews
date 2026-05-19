@@ -28,6 +28,14 @@
     \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:height', '630');
     \Botble\SeoHelper\Facades\SeoHelper::twitter()->setType('summary_large_image');
 
+    // Wave YYYYYY — og:site_name should be just the brand, not the
+    // full title+tagline. Botble defaulted to the page title which
+    // bloats Facebook/LinkedIn unfurls ("Grimba News — Voyez chaque
+    // angle de chaque histoire" instead of "GrimbaNews"). The brand
+    // name is "GrimbaNews" per Iboga's brand guide. setSiteName
+    // overrides the OG-spec og:site_name value.
+    \Botble\SeoHelper\Facades\SeoHelper::openGraph()->setSiteName('GrimbaNews');
+
     if ($__isHomeLayout) {
         \Botble\SeoHelper\Facades\SeoHelper::openGraph()->setType('website');
     }
