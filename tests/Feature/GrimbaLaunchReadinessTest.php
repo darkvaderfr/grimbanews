@@ -1207,13 +1207,20 @@ class GrimbaLaunchReadinessTest extends TestCase
             $metaPartial,
             'seo-meta-config noindex predicate must include the 404 flag.',
         );
-        // Cleanup also wired so Theme::set state doesn't leak between
-        // shared-kernel requests.
+        // Cleanup wired so Theme::set state doesn't leak between
+        // shared-kernel requests. Wave ZZZZZZZ moved the primary
+        // cleanup into seo-meta-config (single-owner) per Zen audit
+        // MEDIUM — the tail partial keeps a defense-in-depth clear.
+        $this->assertStringContainsString(
+            "Theme::set('grimba_is_404', null)",
+            $metaPartial,
+            'seo-meta-config must clear grimba_is_404 after its own read (single-owner state lifecycle).',
+        );
         $cleanupPartial = file_get_contents(base_path('platform/themes/echo/partials/seo-meta-twitter-image.blade.php'));
         $this->assertStringContainsString(
             "Theme::set('grimba_is_404', null)",
             $cleanupPartial,
-            'seo-meta-twitter-image must clear grimba_is_404 after emission.',
+            'seo-meta-twitter-image must also clear grimba_is_404 (defense in depth across early-return / exception view paths).',
         );
     }
 

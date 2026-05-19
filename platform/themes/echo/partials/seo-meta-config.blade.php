@@ -94,4 +94,14 @@
         'robots',
         $__grimbaNoindex ? 'noindex, follow' : 'index, follow'
     );
+
+    // Wave ZZZZZZZ (Zen audit MEDIUM) — clear the 404 flag here, in
+    // the partial that owns it. Don't rely on `seo-meta-twitter-image`
+    // running downstream; if a future layout includes
+    // `seo-meta-config` but not the tail partial (or if an
+    // early-return / exception path skips the tail), the flag would
+    // persist into the next request in a shared-kernel test
+    // process (Octane, PHPUnit single-process). Single owner,
+    // single clear.
+    Theme::set('grimba_is_404', null);
 @endphp
