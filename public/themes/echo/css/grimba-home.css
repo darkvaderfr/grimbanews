@@ -2986,6 +2986,27 @@ body[data-theme="dark"] .grimba-glass-pill {
     color: var(--gn-ink);
     margin-top: 0.25rem;
 }
+/* Wave XXXX (Vader 2026-05-18) — dark-mode for the blindspot rail
+   sidecar copy. The cards themselves are always-dark by design
+   (.grimba-blind-card { background: #17140f }) so they need no flip;
+   the rail's surrounding kicker/desc/link were styled with --gn-ink
+   which paints as invisible dark text on the dark canvas. */
+html.grimba-home-html[data-bs-theme="dark"] .grimba-blindspot-rail__desc,
+body[data-theme="dark"] .grimba-blindspot-rail__desc {
+    color: rgba(255, 250, 240, .72);
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-blindspot-rail__desc a,
+body[data-theme="dark"] .grimba-blindspot-rail__desc a {
+    color: #fffaf0;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-blindspot-rail__more,
+body[data-theme="dark"] .grimba-blindspot-rail__more {
+    color: #ff9a8a;
+}
+html.grimba-home-html[data-bs-theme="dark"] .grimba-blindspot-rail__more:hover,
+body[data-theme="dark"] .grimba-blindspot-rail__more:hover {
+    color: #fffaf0;
+}
 
 .blindspot-badge--ghost {
     background: transparent;
