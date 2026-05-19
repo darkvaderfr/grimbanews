@@ -219,7 +219,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     '@type' => 'ItemList',
                     'numberOfItems' => $totalCount,
                 ],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
@@ -286,7 +286,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     '@type' => 'Thing',
                     'name' => $storyTitle,
                 ],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
@@ -441,7 +441,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     '@type' => 'ItemList',
                     'numberOfItems' => $posts->count(),
                 ],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
@@ -471,7 +471,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     '@type' => 'ItemList',
                     'numberOfItems' => $posts->count(),
                 ],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
@@ -502,7 +502,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     'serviceType' => 'Editorial sponsorship',
                     'areaServed' => ['@type' => 'Country', 'name' => 'France', 'sameAs' => 'https://en.wikipedia.org/wiki/France'],
                 ],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
@@ -794,6 +794,12 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             // (distinct from a normal CollectionPage). When q is empty,
             // emit the generic search-form page; when set, emit the
             // resolved query.
+            //
+            // Wave OOOOOOO — JSON_HEX_TAG flag escapes < and > to <
+            // and >. CRITICAL: without it, a user query containing
+            // `</script>` would break out of the <script type=
+            // "application/ld+json"> block and execute arbitrary JS in
+            // the HTML context after the close tag (stored-reflected XSS).
             Theme::set('grimbaJsonLd', json_encode([
                 '@context' => 'https://schema.org',
                 '@type' => 'SearchResultsPage',
@@ -806,7 +812,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     'numberOfItems' => method_exists($posts, 'total') ? $posts->total() : (is_countable($posts) ? count($posts) : null),
                 ],
                 'query' => $q !== '' ? $q : null,
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
@@ -1290,7 +1296,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     '@type' => 'Thing',
                     'name' => __('Classification du biais éditorial et détection des angles morts'),
                 ],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
@@ -1325,7 +1331,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                         'height' => 630,
                     ],
                 ],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
@@ -1372,7 +1378,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     'name' => 'Editorial bias methodology',
                     'description' => __('Three-segment coverage bar grouping sources by Gauche/Centre/Droite.'),
                 ],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
@@ -1588,7 +1594,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     'numberOfItems' => $rows->count(),
                     'itemListElement' => 'NewsMediaOrganization',
                 ],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
@@ -1672,7 +1678,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                         'numberOfItems' => $stats['total'],
                     ],
                 ],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             return Theme::scope('source', [
                 'source' => $source,
@@ -1919,7 +1925,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     '@type' => 'Thing',
                     'name' => __('Biais éditorial et angles morts dans la presse francophone'),
                 ],
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))

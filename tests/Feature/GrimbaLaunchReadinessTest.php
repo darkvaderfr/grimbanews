@@ -337,6 +337,34 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_search_jsonld_escapes_script_close_in_user_query(): void
+    {
+        // Wave OOOOOOO (Vader 2026-05-19) — STORED-REFLECTED XSS guard.
+        // Before this wave, /search?q=<script>... emitted the literal
+        // </script> inside the application/ld+json block, breaking out
+        // of the script tag and executing arbitrary JS in HTML context.
+        // Fix: JSON_HEX_TAG flag on every json_encode that produces
+        // content rendered inside <script>...</script> in HTML.
+        $payload = "<script>alert('xss')</script>";
+        $html = $this->get('/search?q=' . urlencode($payload))->assertOk()->getContent();
+        // The literal </script> MUST NOT appear inside the JSON-LD
+        // block. Extract the script bodies and assert none contain the
+        // close-tag sequence.
+        preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $html, $matches);
+        foreach ($matches[1] as $body) {
+            $this->assertStringNotContainsString(
+                '</script>',
+                $body,
+                'JSON-LD body must not contain literal </script> sequence — XSS vector.'
+            );
+            $this->assertStringNotContainsString(
+                '<script>',
+                $body,
+                'JSON-LD body must not contain literal <script> sequence — XSS vector.'
+            );
+        }
+    }
+
     public function test_non_numeric_cluster_id_returns_404_not_500(): void
     {
         // Wave MMMMMMM (Vader 2026-05-19) — /comparatif/abc returned

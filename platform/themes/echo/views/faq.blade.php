@@ -102,7 +102,7 @@
             ],
         ])->values()->all(),
     ];
-    Theme::set('grimbaJsonLd', json_encode($__faqJsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+    Theme::set('grimbaJsonLd', json_encode($__faqJsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 @endphp
 
 <section class="grimba-faq py-5">
