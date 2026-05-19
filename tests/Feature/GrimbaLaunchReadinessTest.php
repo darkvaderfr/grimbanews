@@ -120,6 +120,26 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_every_reader_surface_has_exactly_one_og_image(): void
+    {
+        // Wave AAAAAA (Vader 2026-05-19) — every reader surface must
+        // emit exactly 1 `<meta property="og:image">`. Before this
+        // wave, Botble's SeoHelper auto-emitted a fallback /storage
+        // SVG og:image AFTER our layout emitted a manual PNG one,
+        // resulting in 2 og:image tags per page. Crawlers picked the
+        // first, but LinkedIn caches the second — which is wrong.
+        $surfaces = ['/', '/breaking', '/latest', '/dossiers', '/advertise', '/sources'];
+        foreach ($surfaces as $path) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $count = substr_count($html, 'property="og:image"');
+            $this->assertSame(
+                1,
+                $count,
+                "{$path} ships {$count} og:image tags (expected exactly 1). The duplicate-og:image regression has come back — check that the layout calls SeoHelper::setImage() before Theme::header() instead of emitting a manual <meta>."
+            );
+        }
+    }
+
     public function test_health_endpoint_returns_json_with_required_fields(): void
     {
         // Wave RRRRR (Vader 2026-05-19) — /health for uptime monitors.

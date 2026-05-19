@@ -102,7 +102,15 @@
     @include(Theme::getThemeNamespace('partials.pwa-head'))
     @include(Theme::getThemeNamespace('partials.home.ad-styles'))
 
-    @php($__grimbaOgImage = Theme::get('grimba_og_image') ?: url('/og/home.png'))
+    {{-- Wave AAAAAA — fold the OG-image var-set AND the SeoHelper
+         push into one @php block. The Blade `@php(expr)` shorthand
+         miscompiles when the expression contains an `=` assignment
+         + the result is used later in the file — we fix that by
+         switching to the explicit @php @endphp block form. --}}
+    @php
+        $__grimbaOgImage = Theme::get('grimba_og_image') ?: url('/og/home.png');
+        \Botble\SeoHelper\Facades\SeoHelper::setImage($__grimbaOgImage);
+    @endphp
     {{-- S-LANG-06 — explicit per-locale URLs so search engines index
          FR and EN versions distinctly. x-default falls back to FR
          (GrimbaNews's primary locale per editorial policy). --}}
@@ -114,7 +122,6 @@
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Flux RSS') }}" href="{{ url('/feed.xml') }}">
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Breaking news') }}" href="{{ url('/feed.breaking.xml') }}">
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Latest') }}" href="{{ url('/feed.latest.xml') }}">
-    <meta property="og:image" content="{{ $__grimbaOgImage }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
