@@ -59,6 +59,27 @@
     // as "no link" so the badge renders as a static span instead.
     $catUrl = null;
     try {
+        // Wave PPPPPP (Mnemo audit 2026-05-19) — when the caller passes
+        // a synthesized stdClass topic (dossier majority-vote helper
+        // returns these), look up the real Botble Category by name.
+        // Resolving here gives /dossiers the same clickable badges as
+        // /breaking + /latest had under Wave RRRR. Without this lookup,
+        // the dossier listing reads as "23 broken links" to launch QA.
+        if (! is_array($topic)
+            && ! ($topic instanceof \Botble\Blog\Models\Category)
+            && is_object($topic)
+            && isset($topic->name)
+            && (string) $topic->name !== ''
+        ) {
+            $resolved = \Botble\Blog\Models\Category::query()
+                ->where('name', (string) $topic->name)
+                ->with('slugable')
+                ->first();
+            if ($resolved) {
+                $topic = $resolved;
+            }
+        }
+
         if (is_array($topic)) {
             $rawUrl = (string) ($topic['url'] ?? '');
         } elseif ($topic instanceof \Botble\Blog\Models\Category) {
