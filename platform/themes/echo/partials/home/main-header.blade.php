@@ -171,8 +171,20 @@
         const THEME_COLORS = { light: '#f6f1e8', dark: '#121007' };
 
         function syncThemeColor(pref) {
-            const meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) meta.setAttribute('content', THEME_COLORS[pref] || THEME_COLORS.light);
+            // Wave BBBBBB (Vader 2026-05-19) — there are now TWO
+            // theme-color metas with prefers-color-scheme media
+            // queries (light + dark). When the user explicitly
+            // toggles, override BOTH so the chosen color wins over
+            // the OS preference. Setting only the first one leaves
+            // the second stale and the browser picks the wrong one
+            // when the OS preference points the other way.
+            const color = THEME_COLORS[pref] || THEME_COLORS.light;
+            document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
+                m.setAttribute('content', color);
+                // Drop the media gate so the chosen color applies
+                // regardless of OS preference.
+                m.removeAttribute('media');
+            });
         }
 
         function refresh() {
