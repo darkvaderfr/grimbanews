@@ -7435,6 +7435,29 @@ body[data-theme="dark"] .grimba-toggle-arrow.is-open {
     left: auto;
     right: 0;
 }
+/* Wave AAAAA (Vader 2026-05-18) — match the pill caret border color
+   to the body's dark-mode border color, so the arrow blends with the
+   body shape in dark mode. The caret's `background: inherit` already
+   adapts via the body's gradient flip; only the border colors needed
+   a manual flip. */
+[data-bs-theme="dark"] .grimba-info-pill__body::after,
+body[data-theme="dark"] .grimba-info-pill__body::after {
+    border-left-color: rgba(255, 154, 138, 0.22);
+    border-top-color: rgba(255, 154, 138, 0.22);
+}
+[data-bs-theme="dark"] .grimba-info-pill__body[data-pill-flipped="up"]::after,
+body[data-theme="dark"] .grimba-info-pill__body[data-pill-flipped="up"]::after {
+    border-left-color: transparent;
+    border-top-color: transparent;
+    border-right-color: rgba(255, 154, 138, 0.22);
+    border-bottom-color: rgba(255, 154, 138, 0.22);
+}
+/* Accent line gradient on the body top edge — flip to dark-mode
+   accent palette (amber→indigo→amber, lower opacity). */
+[data-bs-theme="dark"] .grimba-info-pill__body::before,
+body[data-theme="dark"] .grimba-info-pill__body::before {
+    background: linear-gradient(90deg, transparent, rgba(255, 154, 138, 0.62), rgba(132, 175, 255, 0.52), transparent);
+}
 /* Mobile — make the popover roughly viewport-wide and align to
    the start of the row instead of the pill button so it never
    clips off-screen. */
