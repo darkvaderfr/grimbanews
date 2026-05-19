@@ -123,6 +123,56 @@ class GrimbaInfoPillTest extends TestCase
         $this->assertStringContainsString("'translateY(-6px) scale(.98)'", $html);
     }
 
+    public function test_pill_button_css_resolves_through_gn_pill_tokens(): void
+    {
+        // Wave IIIII (Vader 2026-05-18) — Mnemo audit follow-up to
+        // Wave FFFFF. The token cascade is the only thing flipping
+        // the pill button to dark mode now (the old explicit
+        // [data-bs-theme="dark"] .grimba-info-pill__btn rule was
+        // removed in the FFFFF cleanup). If a future "simplification"
+        // refactor re-introduces raw hex on .grimba-info-pill__btn,
+        // dark mode breaks silently because the override is gone.
+        //
+        // This test reads the served CSS bundle and asserts the pill
+        // button rule resolves through `var(--gn-pill-*)` and not
+        // through the legacy raw `#c0392b`.
+        $cssPath = dirname(__DIR__, 2) . '/public/themes/echo/css/grimba-home.css';
+        $this->assertFileExists($cssPath);
+        $css = (string) file_get_contents($cssPath);
+
+        // Token defs must exist in :root and the dark cascade.
+        $this->assertMatchesRegularExpression(
+            '/:root\s*\{[^}]*--gn-pill-bg-soft:/s',
+            $css,
+            'Token defs must live in :root (light defaults).'
+        );
+        $this->assertMatchesRegularExpression(
+            '/html\.grimba-home-html\[data-bs-theme="dark"\]\s*\{[^}]*--gn-pill-bg-soft:/s',
+            $css,
+            'Token defs must be overridden in dark cascade.'
+        );
+
+        // The pill button rule must reference at least the bg-soft
+        // and fg tokens.
+        $this->assertMatchesRegularExpression(
+            '/\.grimba-info-pill__btn\s*\{[^}]*var\(--gn-pill-bg-soft\)/s',
+            $css,
+            'Pill button must resolve background through var(--gn-pill-bg-soft).'
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.grimba-info-pill__btn\s*\{[^}]*var\(--gn-pill-fg\)/s',
+            $css,
+            'Pill button must resolve color through var(--gn-pill-fg).'
+        );
+
+        // Hover/focus + [open] rules must use the active tokens.
+        $this->assertMatchesRegularExpression(
+            '/\.grimba-info-pill\[open\] > summary \.grimba-info-pill__btn[^{]*\{[^}]*var\(--gn-pill-bg-solid\)/s',
+            $css,
+            '[open] pill button must resolve through var(--gn-pill-bg-solid).'
+        );
+    }
+
     public function test_release_smoke_contract_present_across_partial(): void
     {
         // Wave HHHHH (Vader 2026-05-18) — S-PILL-10 release smoke.
