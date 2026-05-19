@@ -37,12 +37,15 @@
     $ogUrl = ($post->story_cluster_id && $__gnOgClusterCount >= 2)
         ? url('/og/story/' . $post->story_cluster_id . '.png')
         : url('/og/post/' . $post->id . '.png');
+    // Wave GGGGGG — only set the OG image + dimensions here. The chrome
+    // layout reads Theme::get('grimba_og_image') and pushes a single
+    // og:image + twitter:image pair through SeoHelper, so calling
+    // SeoHelper::twitter()->addImage() here would compound and emit
+    // twitter:image{0}+{1} instead of a single twitter:image tag.
     Theme::set('grimba_og_image', $ogUrl);
     SeoHelper::openGraph()->setImage($ogUrl);
     SeoHelper::openGraph()->addProperty('image:width', '1200');
     SeoHelper::openGraph()->addProperty('image:height', '630');
-    SeoHelper::twitter()->setType('summary_large_image');
-    SeoHelper::twitter()->addImage($ogUrl);
 
     $__gnClean = static fn ($value) => trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags((string) $value), ENT_QUOTES, 'UTF-8')));
     $__gnArticleUrl = $post->url;

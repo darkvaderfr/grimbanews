@@ -114,6 +114,11 @@
         // adjacent to og:image in Theme::header() output (Open Graph spec).
         \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:width', '1200');
         \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:height', '630');
+        // Wave GGGGGG — set twitter card type. Botble's SeoHelper auto-emits
+        // twitter:image from the og:image we just set, so we only need to
+        // pin the card style. Avoid addImage() — it accumulates across
+        // requests in the singleton and would emit twitter:image{0}+{1}.
+        \Botble\SeoHelper\Facades\SeoHelper::twitter()->setType('summary_large_image');
     @endphp
     {{-- S-LANG-06 — explicit per-locale URLs so search engines index
          FR and EN versions distinctly. x-default falls back to FR
@@ -128,14 +133,16 @@
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Latest') }}" href="{{ url('/feed.latest.xml') }}">
     {{-- Wave FFFFFF — drop manual og:image:width/height. SeoHelper::setImage()
          already emits the og:image + dimensions pair via Theme::header() below.
-         Emitting them here too created an orphan pair (no og:image right
-         after) which violates the Open Graph spec adjacency rule. --}}
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="{{ $__grimbaOgImage }}">
+         Wave GGGGGG — twitter:card flows through SeoHelper::twitter() in
+         the @php block above. twitter:image is emitted manually AFTER
+         Theme::header() (see below) because SeoHelper doesn't auto-emit
+         it from og:image, and its own addImage() accumulates in the
+         singleton across requests. --}}
     @if($jsonLd = Theme::get('grimbaJsonLd'))
         <script type="application/ld+json">{!! $jsonLd !!}</script>
     @endif
     {!! Theme::header() !!}
+    <meta name="twitter:image" content="{{ $__grimbaOgImage }}">
     @include(Theme::getThemeNamespace('partials.ads.head'))
     @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
 </head>

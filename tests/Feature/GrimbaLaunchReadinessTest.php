@@ -158,6 +158,29 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_twitter_card_and_image_emit_exactly_once(): void
+    {
+        // Wave GGGGGG (Vader 2026-05-19) — twitter:card + twitter:image
+        // must emit exactly once per reader surface. Before this wave,
+        // post.blade pushed its own twitter image via SeoHelper, and
+        // the chrome layout pushed home.png — SeoHelper saw 2 images
+        // and switched render mode to twitter:image{0}+twitter:image{1},
+        // which Twitter cards do NOT honor.
+        $surfaces = ['/', '/breaking', '/latest', '/dossiers', '/advertise', '/sources'];
+        foreach ($surfaces as $path) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $card = substr_count($html, 'name="twitter:card"');
+            $image = substr_count($html, 'name="twitter:image"');
+            // The bad-state pattern `twitter:image{0}` would not match
+            // the exact substring above — assert that nothing leaked
+            // into the numbered form either.
+            $numbered = substr_count($html, 'name="twitter:image{');
+            $this->assertSame(1, $card, "{$path} ships {$card} twitter:card tags (expected 1).");
+            $this->assertSame(1, $image, "{$path} ships {$image} twitter:image tags (expected 1).");
+            $this->assertSame(0, $numbered, "{$path} emitted numbered twitter:image{N} variants — SeoHelper is receiving multiple addImage() calls.");
+        }
+    }
+
     public function test_health_endpoint_returns_json_with_required_fields(): void
     {
         // Wave RRRRR (Vader 2026-05-19) — /health for uptime monitors.

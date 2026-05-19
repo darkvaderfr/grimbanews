@@ -118,10 +118,13 @@
         \Botble\SeoHelper\Facades\SeoHelper::setImage(url('/og/home.png'));
         \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:width', '1200');
         \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:height', '630');
+        // Wave GGGGGG — only set card type; SeoHelper does NOT auto-derive
+        // twitter:image, so we emit it manually below to avoid the
+        // singleton-accumulation pitfall of SeoHelper::twitter()->addImage().
+        \Botble\SeoHelper\Facades\SeoHelper::twitter()->setType('summary_large_image');
     @endphp
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="{{ url('/og/home.png') }}">
     {!! Theme::header() !!}
+    <meta name="twitter:image" content="{{ url('/og/home.png') }}">
     @include(Theme::getThemeNamespace('partials.ads.head'))
     @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
     {{-- Wave KKKKK — home JSON-LD. Build in PHP so schema-org `at`-prefixed keys don't trip Blade directives. --}}
