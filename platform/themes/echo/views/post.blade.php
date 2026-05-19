@@ -875,6 +875,65 @@
                             body[data-theme="dark"] .grimba-insights-panel__foot {
                                 border-color: rgba(255, 250, 240, .18);
                             }
+                            /* Wave WWWW (Vader 2026-05-18) — fill in the
+                               sub-elements that were inheriting their
+                               light palette via opacity/var-fallback. */
+                            [data-bs-theme="dark"] .grimba-insights-panel__head,
+                            body[data-theme="dark"] .grimba-insights-panel__head {
+                                color: rgba(255, 250, 240, .78);
+                            }
+                            [data-bs-theme="dark"] .grimba-insights-panel__row-source,
+                            body[data-theme="dark"] .grimba-insights-panel__row-source {
+                                color: rgba(255, 250, 240, .58);
+                            }
+                            [data-bs-theme="dark"] .grimba-insights-panel__row-dot,
+                            body[data-theme="dark"] .grimba-insights-panel__row-dot {
+                                box-shadow:
+                                    0 0 0 2px rgba(28, 24, 17, .42),
+                                    0 0 10px color-mix(in srgb, var(--insight-tone, #a8a8a8) 60%, transparent);
+                            }
+                            [data-bs-theme="dark"] .grimba-insights-panel__card-icon,
+                            body[data-theme="dark"] .grimba-insights-panel__card-icon {
+                                background: color-mix(in srgb, var(--insight-tone, #fffaf0) 24%, rgba(28, 24, 17, .85));
+                                color: var(--insight-tone, #fffaf0);
+                                box-shadow: 0 4px 12px color-mix(in srgb, var(--insight-tone, #a8a8a8) 35%, transparent);
+                            }
+                            [data-bs-theme="dark"] .grimba-insights-panel__card-label,
+                            body[data-theme="dark"] .grimba-insights-panel__card-label {
+                                color: rgba(255, 250, 240, .72);
+                            }
+                            [data-bs-theme="dark"] .grimba-insights-panel__card-body,
+                            body[data-theme="dark"] .grimba-insights-panel__card-body {
+                                color: #fffaf0;
+                            }
+                            [data-bs-theme="dark"] .grimba-insights-panel__foot-note,
+                            body[data-theme="dark"] .grimba-insights-panel__foot-note {
+                                color: rgba(255, 250, 240, .58);
+                            }
+                            [data-bs-theme="dark"] .grimba-insights-panel__foot-link,
+                            body[data-theme="dark"] .grimba-insights-panel__foot-link {
+                                color: #ff9a8a;
+                            }
+                            [data-bs-theme="dark"] .grimba-insights-panel__foot-link:hover,
+                            body[data-theme="dark"] .grimba-insights-panel__foot-link:hover,
+                            [data-bs-theme="dark"] .grimba-insights-panel__foot-link:focus-visible,
+                            body[data-theme="dark"] .grimba-insights-panel__foot-link:focus-visible {
+                                color: #fffaf0;
+                            }
+                            [data-bs-theme="dark"] .grimba-story-page__bar-actions,
+                            body[data-theme="dark"] .grimba-story-page__bar-actions {
+                                color: rgba(255, 250, 240, .78);
+                            }
+                            [data-bs-theme="dark"] .grimba-story-page__bar-pill,
+                            body[data-theme="dark"] .grimba-story-page__bar-pill {
+                                background: rgba(255, 250, 240, .08);
+                                color: rgba(255, 250, 240, .78);
+                                border-color: rgba(255, 250, 240, .14);
+                            }
+                            [data-bs-theme="dark"] .grimba-story-page__bar-stat-label,
+                            body[data-theme="dark"] .grimba-story-page__bar-stat-label {
+                                color: rgba(255, 250, 240, .62);
+                            }
 
                             /* Legacy alias block — preserved as a no-op until the
                                next deploy clears old cached views. */
