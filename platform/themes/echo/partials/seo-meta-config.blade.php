@@ -66,14 +66,17 @@
     //   - /coffre — saved-article vault (per-cookie, empty for crawlers)
     //   - /coffre-share — shared-vault URLs (one-off per recipient)
     //   - /account — auth surface
-    //   - /for-you — personalized feed (per-cookie history)
+    //   - /pour-vous — personalized feed (per-cookie history)
     //   - /local — geo-personalized (per-IP city detection)
-    //   - /search* — search results (already noindex above)
+    // Wave LLLLLLL — the previous noindex predicate looked for 'for-you'
+    // but that route doesn't exist; FR canonical is /pour-vous. Update
+    // to match the actual path so the personalized feed actually gets
+    // tagged noindex.
     $__grimbaPath = request()->path();
     $__grimbaNoindex = str_starts_with($__grimbaPath, 'search')
         || str_starts_with($__grimbaPath, 'coffre')
         || str_starts_with($__grimbaPath, 'account')
-        || str_starts_with($__grimbaPath, 'for-you')
+        || str_starts_with($__grimbaPath, 'pour-vous')
         || str_starts_with($__grimbaPath, 'local');
     \Botble\SeoHelper\Facades\SeoHelper::meta()->addMeta(
         'robots',
