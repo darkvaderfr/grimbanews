@@ -29,6 +29,17 @@
                 'storyTitle' => $storyTitle,
             ]) !!}
 
+            {{-- Wave WWWWWW (Vader 2026-05-19) — share-kit on cluster
+                 page. Cluster pages are the "see how every side covers
+                 this" surface, the unique GrimbaNews value prop, and
+                 the highest-leverage share target. Article pages already
+                 carry the share-kit; cluster pages didn't. Same partial,
+                 same 7 channels (X / Bluesky / Facebook / WhatsApp /
+                 LinkedIn / Email / copy-link). --}}
+            @include(Theme::getThemeNamespace('partials.story.share-kit'), [
+                'title' => $storyTitle,
+            ])
+
             {{-- Wave NNNNNN — Grimba-native "Other dossiers" rail
                  mirrors the article detail page. The cluster's first
                  post (bias-sorted) often lacks a proper topic category,
