@@ -101,6 +101,14 @@
     if ($__gnJsonLd['inLanguage'] === null) {
         unset($__gnJsonLd['inLanguage']);
     }
+    // Wave ZZZZZZ — articleSection from primary topic. Tells Google
+    // News + SERP rich results which editorial section this story
+    // belongs to (Politique / Économie / etc.), driving better topical
+    // clustering in the Discover feed.
+    $__gnPrimaryTopic = \App\Support\GrimbaEditorialCategories::primaryTopicFor($post);
+    if ($__gnPrimaryTopic) {
+        $__gnJsonLd['articleSection'] = (string) $__gnPrimaryTopic->name;
+    }
 
     if ($post->relationLoaded('categories') || method_exists($post, 'categories')) {
         $section = optional($post->categories->first())->name;
