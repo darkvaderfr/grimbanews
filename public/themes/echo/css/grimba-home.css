@@ -7474,6 +7474,33 @@ body[data-theme="dark"] .grimba-info-pill__body:focus-visible {
     from { opacity: 0; transform: translateY(6px) scale(.98); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+/* Wave CCCCCC (Vader 2026-05-19) — consolidated info-pill body
+   styling. When the pill body carries a `<dl>` (definition list),
+   format the term/desc pairs so the multi-section explainer reads
+   as a tidy mini-FAQ instead of a wall of text. */
+.grimba-info-pill__body .grimba-info-pill__dl {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+.grimba-info-pill__body .grimba-info-pill__dl dt {
+    font-family: 'Public Sans', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gn-pill-fg, #c0392b);
+    margin: 4px 0 0;
+}
+.grimba-info-pill__body .grimba-info-pill__dl dt:first-child {
+    margin-top: 0;
+}
+.grimba-info-pill__body .grimba-info-pill__dl dd {
+    margin: 2px 0 0;
+    font-size: 13.5px;
+    line-height: 1.5;
+}
 /* When the pill is anchored at the right edge of a row, flip the
    popover so it hangs from the right side and doesn't overflow the
    viewport. */

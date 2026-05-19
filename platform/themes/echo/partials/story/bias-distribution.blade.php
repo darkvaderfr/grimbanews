@@ -619,24 +619,46 @@
             }
         </style>
 
+        @php
+            // Wave CCCCCC (Vader 2026-05-19) — one consolidated info-pill
+            // for the whole bias-distribution panel. Previously there
+            // were FOUR separate "i" pills clustered on the panel
+            // (Distribution / Signal / Origines / Spectre). Vader's
+            // directive: "the i pill is not working and they are too
+            // many. We only need one and it should condense the rest."
+            // Build the body as a single HTML block with labeled sections
+            // so the reader can scan the four explanations in one open.
+            $__biasPanelInfo = '<dl class="grimba-info-pill__dl">'
+                . '<dt>' . e(__('Distribution des biais')) . '</dt>'
+                . '<dd>' . e(__("Pourcentage de sources par camp parmi les sources classées de ce dossier. Les sources non classées sont exclues du calcul pour ne pas fausser la lecture.")) . '</dd>'
+                . '<dt>' . e(__('Signal')) . '</dt>'
+                . '<dd>' . e(__('Le score Signal va de 0 à 100. 0 = un seul camp couvre. 100 = équilibre parfait Gauche / Centre / Droite. Plus le score est haut, plus le dossier est multi-perspectives.')) . '</dd>'
+                . '<dt>' . e(__('Origines éditoriales')) . '</dt>'
+                . '<dd>' . e(__("D'où viennent géographiquement les sources qui couvrent ce dossier. Aide à repérer si l'histoire est rapportée surtout en local, en région, ou internationalement.")) . '</dd>'
+                . '<dt>' . e(__('Spectre politique')) . '</dt>'
+                . '<dd>' . e(__("Chaque pastille est une source placée sur l'axe politique (gauche à droite). Tap une pastille pour ne garder que les articles de cette source dans la liste en bas.")) . '</dd>'
+                . '</dl>';
+        @endphp
+
         <header class="grimba-story-distribution__top">
             <div>
-                <span class="grimba-story-distribution__kicker">{{ __('Sources classées') }}</span>
-                <h2 class="grimba-story-distribution__title">
-                    {{ __('Distribution des biais') }}
+                <span class="grimba-story-distribution__kicker d-inline-flex align-items-center gap-1">
+                    {{ __('Sources classées') }}
                     @include(Theme::getThemeNamespace('partials.info-pill'), [
                         'size' => 'sm',
-                        'body' => __("Pourcentage de sources par camp parmi les sources classées de ce dossier. Les sources non classées sont exclues du calcul pour ne pas fausser la lecture."),
+                        'tone' => 'soft',
+                        'body' => $__biasPanelInfo,
+                        'html' => true,
+                        'label' => __("À propos de ce panneau"),
                     ])
+                </span>
+                <h2 class="grimba-story-distribution__title">
+                    {{ __('Distribution des biais') }}
                 </h2>
             </div>
             <div class="grimba-story-distribution__score">
                 <strong>{{ $balanceScore }}</strong>
                 <span>{{ __('Signal') }}</span>
-                @include(Theme::getThemeNamespace('partials.info-pill'), [
-                    'size' => 'sm',
-                    'body' => __('Le score Signal va de 0 à 100. 0 = un seul camp couvre. 100 = équilibre parfait Gauche / Centre / Droite. Plus le score est haut, plus le dossier est multi-perspectives.'),
-                ])
             </div>
         </header>
 
@@ -671,13 +693,9 @@
 
         @if($originBuckets->isNotEmpty())
             <section class="grimba-story-distribution__origin" aria-label="{{ __('Origine des sources classées') }}">
-                <span class="grimba-story-distribution__label d-inline-flex align-items-center gap-1">
+                {{-- Wave CCCCCC — pill removed; consolidated into the panel-level pill at the top of bias-distribution. --}}
+                <span class="grimba-story-distribution__label">
                     {{ __('Origines éditoriales') }}
-                    @include(Theme::getThemeNamespace('partials.info-pill'), [
-                        'size' => 'sm',
-                        'tone' => 'soft',
-                        'body' => __("D'où viennent géographiquement les sources qui couvrent ce dossier. Aide à repérer si l'histoire est rapportée surtout en local, en région, ou internationalement."),
-                    ])
                 </span>
                 <div class="grimba-story-distribution__origin-bar">
                     @foreach($originBuckets as $bucket)
@@ -701,13 +719,7 @@
         @endif
 
         @if(! empty($spectrumChips))
-            <div class="d-flex justify-content-end mb-1">
-                @include(Theme::getThemeNamespace('partials.info-pill'), [
-                    'size' => 'sm',
-                    'tone' => 'soft',
-                    'body' => __("Chaque pastille est une source placée sur l'axe politique (gauche à droite). Tap une pastille pour ne garder que les articles de cette source dans la liste en bas."),
-                ])
-            </div>
+            {{-- Wave CCCCCC — spectrum pill removed; consolidated into panel-level pill. --}}
             <section class="grimba-story-spectrum"
                      aria-label="{{ __('Distribution des sources sur le spectre politique') }}"
                      data-grimba-spectrum-field>
