@@ -164,21 +164,33 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     ->orderByDesc('c')
                     ->get();
 
-                $topByCluster = [];
+                // Wave SSSS (Vader 2026-05-18) — first pass collects
+                // winning catid per cluster. Second pass fetches the
+                // real Category models (with slugable eager-loaded)
+                // so the badge partial can render a clickable href
+                // on dossier cards too. Wave RRRR's stdClass shape
+                // here meant 0/23 dossier badges were clickable —
+                // every other reader surface is 100%, so dossiers
+                // shouldn't be the outlier.
+                $winnerCatIdByCluster = [];
                 foreach ($catCounts as $row) {
                     $cid = (int) $row->cid;
-                    // First (highest-count) hit wins. orderByDesc
-                    // above already sorted, so we skip any cluster
-                    // that's already filled.
-                    if (! isset($topByCluster[$cid])) {
-                        $topByCluster[$cid] = (object) [
-                            'id'   => (int) $row->catid,
-                            'name' => $row->catname,
-                        ];
+                    if (! isset($winnerCatIdByCluster[$cid])) {
+                        $winnerCatIdByCluster[$cid] = (int) $row->catid;
                     }
                 }
-                $clusters = $clusters->map(function ($c) use ($topByCluster) {
-                    $c->primary_topic = $topByCluster[(int) $c->id] ?? null;
+                $catIds = array_values(array_unique($winnerCatIdByCluster));
+                $catsById = collect();
+                if (! empty($catIds)) {
+                    $catsById = \Botble\Blog\Models\Category::query()
+                        ->with('slugable')
+                        ->whereIn('id', $catIds)
+                        ->get()
+                        ->keyBy('id');
+                }
+                $clusters = $clusters->map(function ($c) use ($winnerCatIdByCluster, $catsById) {
+                    $catId = $winnerCatIdByCluster[(int) $c->id] ?? null;
+                    $c->primary_topic = $catId ? ($catsById->get($catId) ?: null) : null;
                     return $c;
                 });
             }

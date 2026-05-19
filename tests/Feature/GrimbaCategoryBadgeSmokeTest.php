@@ -198,6 +198,32 @@ class GrimbaCategoryBadgeSmokeTest extends TestCase
         );
     }
 
+    public function test_dossiers_clickable_badges_have_real_hrefs(): void
+    {
+        // Wave SSSS (Vader 2026-05-18) — dossier majority-vote helper
+        // now passes a real Botble\Blog\Models\Category with slugable
+        // eager-loaded (vs the synthesized stdClass from Wave IIII).
+        // Every dossier card badge should be clickable to the category
+        // listing, consistent with home / breaking / latest.
+        $html = $this->get('/dossiers')->assertOk()->getContent();
+        preg_match_all('#class="grimba-cat-badge#', $html, $badges);
+        $totalBadges = count($badges[0]);
+        if ($totalBadges === 0) {
+            $this->markTestSkipped('/dossiers surface has no badges this run.');
+        }
+        preg_match_all('#data-grimba-cat-badge-href="([^"]+)"#', $html, $hrefs);
+        $homeUrl = rtrim((string) \Botble\Base\Facades\BaseHelper::getHomepageUrl(), '/');
+        $realCategoryLinks = array_filter(
+            $hrefs[1] ?? [],
+            fn (string $url): bool => rtrim($url, '/') !== $homeUrl
+        );
+        $this->assertSame(
+            $totalBadges,
+            count($realCategoryLinks),
+            "/dossiers rendered {$totalBadges} badges but only " . count($realCategoryLinks) . " were clickable. Wave SSSS regression."
+        );
+    }
+
     public function test_latest_clickable_badges_have_real_hrefs(): void
     {
         $html = $this->get('/latest')->assertOk()->getContent();
