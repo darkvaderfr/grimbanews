@@ -139,9 +139,15 @@
 <section class="grimba-article-card" aria-labelledby="grimba-article-card-title">
     @if($__heroUrl)
         <figure class="grimba-article-card__hero">
+            {{-- Wave NNNNN (Vader 2026-05-19) — fetchpriority="high"
+                 on the hero image so the browser prioritizes it in
+                 the network queue. LCP element on every article page;
+                 the hint can knock 200-400ms off Largest Contentful
+                 Paint on slow connections. --}}
             <img src="{{ $__heroUrl }}"
                  alt="{{ $__title }}"
                  loading="eager"
+                 fetchpriority="high"
                  decoding="sync"
                  width="1200"
                  height="630"
