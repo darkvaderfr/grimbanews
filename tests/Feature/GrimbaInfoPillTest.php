@@ -99,6 +99,18 @@ class GrimbaInfoPillTest extends TestCase
         $this->assertStringContainsString('grimba-info-pill-backdrop', $html);
     }
 
+    public function test_open_animation_handler_present(): void
+    {
+        // Wave TTTT (Vader 2026-05-18) — explicit open animation
+        // hides the body, positions it, then fades + slides into view
+        // in a single rAF. Lock the function name so a future refactor
+        // that removes it gets caught.
+        $html = $this->renderPill('Body');
+        $this->assertStringContainsString('openWithAnim', $html);
+        $this->assertStringContainsString('requestAnimationFrame', $html);
+        $this->assertStringContainsString('prefers-reduced-motion', $html);
+    }
+
     public function test_size_variant_modifier_applied(): void
     {
         $html = view('theme.echo::partials.info-pill', [

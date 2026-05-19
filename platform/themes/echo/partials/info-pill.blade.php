@@ -214,13 +214,54 @@
                 }
             };
 
+            // Wave TTTT (Vader 2026-05-18) — explicit OPEN animation.
+            // Without this, the body just snaps into view at whatever
+            // position CSS chose, then JS shifts it via positionBody.
+            // That caused a "pill not working" feel — visually it
+            // looked like an unstyled flash. Now we (1) hide the body
+            // before positioning, (2) position it, then (3) fade +
+            // slide it into view with a single rAF so paint and
+            // animation start at the same time.
+            const openWithAnim = (details) => {
+                const body = details.querySelector('[data-grimba-info-pill-body]');
+                if (!body) {
+                    positionBody(details);
+                    return;
+                }
+                const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                if (reduced) {
+                    positionBody(details);
+                    body.style.opacity = '';
+                    body.style.transform = '';
+                    return;
+                }
+                // Step 1: hide before measurement so the user never
+                // sees the unpositioned flash.
+                body.style.opacity = '0';
+                body.style.transform = 'translateY(-6px) scale(.98)';
+                body.style.transition = 'none';
+                positionBody(details);
+                // Step 2: in the NEXT frame, swap to the open easing
+                // and let the browser animate to the rest state.
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        const flipped = body.getAttribute('data-pill-flipped') === 'up';
+                        body.style.transition = 'opacity .22s cubic-bezier(.2,.85,.3,1), transform .22s cubic-bezier(.2,.85,.3,1)';
+                        body.style.opacity = '1';
+                        body.style.transform = flipped
+                            ? 'translateY(0) scale(1)'
+                            : 'translateY(0) scale(1)';
+                    });
+                });
+            };
+
             document.addEventListener('toggle', (e) => {
                 const t = e.target;
                 if (!(t instanceof Element) || !t.matches('[data-grimba-info-pill]')) return;
                 syncAriaExpanded(t);
                 if (t.open) {
                     closeOthers(t);
-                    positionBody(t);
+                    openWithAnim(t);
                     // Move focus to the body so the SR reads the
                     // newly-revealed content. tabindex="-1" makes
                     // the div programmatically focusable without
