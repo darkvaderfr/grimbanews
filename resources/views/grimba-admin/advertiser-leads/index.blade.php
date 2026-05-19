@@ -48,6 +48,38 @@
             </div>
         </div>
 
+        {{-- Wave BBBBB (Vader 2026-05-18) — pack-tier appeal + conversion
+             funnel. The pack tiles surface which sponsor product readers
+             gravitate to so ops can refine the /advertise pricing /
+             positioning of the underperforming tier. Conversion rate
+             excludes spam + brand-new (undecided) from the denominator. --}}
+        @if(! empty($packTiers) || $convRate > 0)
+            <div class="row g-3 mb-3">
+                <div class="col-md-3 col-6">
+                    <div class="grimba-admin-stat rounded-3 p-3 h-100 text-center" style="background: rgba(22, 101, 52, 0.06);">
+                        <div class="grimba-admin-metric-value" style="color:#166534;">{{ $convRate }}%</div>
+                        <div class="grimba-admin-metric-label">Taux conversion (gagnés / traités)</div>
+                    </div>
+                </div>
+                @foreach($packTiers as $tier => $count)
+                    <div class="col-md-3 col-6">
+                        <div class="grimba-admin-stat rounded-3 p-3 h-100 text-center">
+                            <div class="grimba-admin-metric-value">{{ $count }}</div>
+                            <div class="grimba-admin-metric-label">Pack: {{ ucfirst((string) $tier) }}</div>
+                        </div>
+                    </div>
+                @endforeach
+                @if($spamCount > 0)
+                    <div class="col-md-3 col-6">
+                        <div class="grimba-admin-stat rounded-3 p-3 h-100 text-center" style="background: rgba(192, 57, 43, 0.06);">
+                            <div class="grimba-admin-metric-value" style="color:#c0392b;">{{ $spamCount }}</div>
+                            <div class="grimba-admin-metric-label">Spam (filtré)</div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        @endif
+
         <x-core::card>
             <x-core::card.header class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <x-core::card.title>Leads annonceurs</x-core::card.title>

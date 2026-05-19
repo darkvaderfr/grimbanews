@@ -50,8 +50,26 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->where('created_at', '>=', now()->subDays(7))
                 ->count();
 
+            // Wave BBBBB (Vader 2026-05-18) — pack-tier breakdown so ops can
+            // see which sponsor product readers gravitate to. Excludes
+            // spam + closed so the signal isn't poisoned by junk submissions.
+            // Conversion rate is won / (total - spam - new) which excludes
+            // both junk and "not yet decided" rows from the denominator.
+            $packTiers = DB::table('grimba_advertiser_leads')
+                ->whereNotNull('source_pack_tier')
+                ->whereNotIn('status', ['spam'])
+                ->select('source_pack_tier', DB::raw('count(*) as c'))
+                ->groupBy('source_pack_tier')
+                ->orderByDesc('c')
+                ->pluck('c', 'source_pack_tier')
+                ->all();
+            $spamCount   = DB::table('grimba_advertiser_leads')->where('status', 'spam')->count();
+            $convDenom   = max(0, $total - $spamCount - $newCount);
+            $convRate    = $convDenom > 0 ? round(($won / $convDenom) * 100, 1) : 0.0;
+
             return view('grimba-admin.advertiser-leads.index', compact(
-                'leads', 'q', 'status', 'total', 'newCount', 'contacted', 'won', 'last7d'
+                'leads', 'q', 'status', 'total', 'newCount', 'contacted', 'won', 'last7d',
+                'packTiers', 'convRate', 'spamCount'
             ));
         })->name('advertiser-leads.index');
 
