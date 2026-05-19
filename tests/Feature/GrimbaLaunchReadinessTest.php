@@ -120,6 +120,40 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_every_reader_surface_ships_3_jsonld_blocks(): void
+    {
+        // Wave PPPPP (Vader 2026-05-19) — JSON-LD coverage contract.
+        // After Wave KKKKK/LLLLL/OOOOO, every reader surface ships at
+        // least 3 JSON-LD blocks: Botble's WebSite + Organization
+        // (chrome-level) plus a surface-specific schema (CollectionPage,
+        // AboutPage, WebPage/Service, or the home @graph). Lock the
+        // contract so a route refactor that drops `Theme::set('grimbaJsonLd', …)`
+        // breaks the test loudly.
+        $surfaces = [
+            '/'                          => 'WebSite',          // KKKKK @graph + Botble
+            '/breaking'                  => 'CollectionPage',
+            '/latest'                    => 'CollectionPage',
+            '/dossiers'                  => 'CollectionPage',   // LLLLL
+            '/advertise'                 => 'Service',          // LLLLL pt 2
+            '/sources'                   => 'CollectionPage',   // OOOOO
+            '/comprendre-le-barometre'   => 'AboutPage',        // OOOOO
+        ];
+        foreach ($surfaces as $path => $expectedType) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $count = substr_count($html, 'application/ld+json');
+            $this->assertGreaterThanOrEqual(
+                3,
+                $count,
+                "{$path} ships only {$count} JSON-LD blocks (expected ≥ 3). The surface-specific Theme::set('grimbaJsonLd', …) call may have been dropped."
+            );
+            $this->assertStringContainsString(
+                '"' . $expectedType . '"',
+                $html,
+                "{$path} JSON-LD missing the expected @type \"{$expectedType}\"."
+            );
+        }
+    }
+
     public function test_home_ships_website_jsonld_with_searchaction(): void
     {
         // Wave KKKKK (Vader 2026-05-19) — home page emits a WebSite
