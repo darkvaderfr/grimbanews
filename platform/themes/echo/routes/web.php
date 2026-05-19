@@ -297,7 +297,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 'storyTitle' => $storyTitle,
                 'clusterId'  => $clusterId,
             ])->render();
-        })->name('public.comparison');
+        })->where('clusterId', '[0-9]+')->name('public.comparison');
 
         $feedHandler = function () {
             $posts = Post::withoutGlobalScope('grimba_region')

@@ -337,6 +337,22 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_non_numeric_cluster_id_returns_404_not_500(): void
+    {
+        // Wave MMMMMMM (Vader 2026-05-19) — /comparatif/abc returned
+        // 500 (PHP 8 TypeError: int param + string arg) before this
+        // wave because the route lacked a numeric where() constraint.
+        // Crawlers + malicious probes hitting non-numeric variants
+        // would trigger 500s and pollute error logs.
+        // Constraint: `->where('clusterId', '[0-9]+')` makes Laravel
+        // 404 the route before the handler runs.
+        $this->get('/comparatif/abc')->assertStatus(404);
+        $this->get('/comparatif/foo-bar')->assertStatus(404);
+        // Real numeric clusters still 404 if missing (Wave KKKKKKK),
+        // OR 200 if found.
+        $this->get('/comparatif/9999999999')->assertStatus(404);
+    }
+
     public function test_missing_cluster_id_returns_404_not_thin_shell(): void
     {
         // Wave KKKKKKK (Vader 2026-05-19) — /comparatif/{nonexistent_id}
