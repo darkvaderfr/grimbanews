@@ -1,0 +1,12 @@
+# Wave NNNNNNN (Vader 2026-05-19) — RFC 9116 security.txt
+# https://www.rfc-editor.org/rfc/rfc9116
+#
+# Responsible-disclosure entry point for GrimbaNews. Researchers
+# finding security issues should email security@grimbanews.com with
+# a description, reproduction steps, and (ideally) a suggested fix.
+
+Contact: mailto:security@grimbanews.com
+Expires: 2027-05-19T00:00:00.000Z
+Preferred-Languages: fr, en
+Canonical: https://grimbanews.com/.well-known/security.txt
+Policy: https://grimbanews.com/a-propos
