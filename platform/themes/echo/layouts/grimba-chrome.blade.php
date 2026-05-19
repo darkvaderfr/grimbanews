@@ -126,7 +126,11 @@
     @include(Theme::getThemeNamespace('partials.ads.head'))
     @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
 </head>
-<body class="grimba-home grimba-subpage" {!! Theme::bodyAttributes() !!}>
+{{-- Wave UUUU (Vader 2026-05-18) — merge layout-specific class into
+     Theme::addBodyAttributes() so the renderer emits a single
+     class= attribute (browsers silently drop the second one). --}}
+@php(Theme::addBodyAttributes(['class' => trim('grimba-home grimba-subpage ' . (Theme::getBodyAttribute('class') ?? ''))]))
+<body {!! Theme::bodyAttributes() !!}>
     @include(Theme::getThemeNamespace('partials.home.front-body-hooks'))
     <a class="grimba-skip-link" href="#grimba-main-content">{{ __('Aller au contenu principal') }}</a>
     @include(Theme::getThemeNamespace('partials.focus-manager'))
