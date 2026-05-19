@@ -7371,6 +7371,29 @@ body[data-theme="dark"] .grimba-toggle-arrow.is-open {
     transition: transform .18s ease-out, opacity .18s ease-out;
     transform-origin: top left;
 }
+/* Wave DDDDD (Vader 2026-05-18) — focus-visible state for the info-pill
+   body. `tabindex="-1"` programmatic focus normally renders no visible
+   indicator, so keyboard users who Tab past a pill or trigger the JS-
+   driven body.focus() after open get no perceptible feedback. Add a
+   subtle accent ring that pulses in for ~120ms after focus, plus a
+   dark-mode variant so the focus state reads on both canvases. */
+.grimba-info-pill__body:focus,
+.grimba-info-pill__body:focus-visible {
+    outline: none;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.42),
+        0 0 0 2px rgba(192, 57, 43, 0.32),
+        0 22px 52px rgba(26, 23, 19, 0.22);
+}
+[data-bs-theme="dark"] .grimba-info-pill__body:focus,
+[data-bs-theme="dark"] .grimba-info-pill__body:focus-visible,
+body[data-theme="dark"] .grimba-info-pill__body:focus,
+body[data-theme="dark"] .grimba-info-pill__body:focus-visible {
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 250, 240, 0.10),
+        0 0 0 2px rgba(255, 154, 138, 0.42),
+        0 22px 52px rgba(0, 0, 0, 0.42);
+}
 /* Caret pointing to the pill button — Vader 2026-05-18 polish.
    Sits at the body's top-left edge by default; the `--right` modifier
    flips to top-right. JS hides this entirely when the body is flipped
