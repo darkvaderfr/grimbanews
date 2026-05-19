@@ -1,11 +1,28 @@
 # GrimbaNews robots.txt
-# Wave QQQQQ (Vader 2026-05-19) — added Sitemap directive so search
-# engines discover the sitemap without us having to manually submit it.
-# Admin/account routes (/admin, /coffre, /member-*) are gated by auth
-# server-side; no need to repeat that here. Default is wide-open.
+# Wave QQQQQ — added Sitemap directive.
+# Wave VVVVVVV (Vader 2026-05-19) — added explicit Disallow lines for
+# auth-gated paths to save crawler budget. Pages that we want noindex
+# but still want crawled (so robots see the `<meta name="robots">`
+# directive) stay wide-open, e.g. /search, /pour-vous, /local.
 
 User-agent: *
-Disallow:
+
+# Auth-gated surfaces — no SEO value, server-side auth already blocks
+# anonymous access, but listing here cuts wasted crawl requests.
+Disallow: /admin
+Disallow: /admin/
+Disallow: /coffre
+Disallow: /coffre/
+Disallow: /account
+Disallow: /account/
+Disallow: /member
+Disallow: /member/
+
+# Static asset junk that occasionally ends up in search indexes.
+Disallow: /vendor/
+Disallow: /storage/framework/
+Disallow: /core/
+Disallow: /cache/
 
 Sitemap: https://grimbanews.com/sitemap.xml
 Sitemap: https://grimbanews.com/sitemap-grimba.xml

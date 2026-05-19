@@ -1062,6 +1062,45 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('Sitemap: https://grimbanews.com/sitemap-grimba.xml', $body, 'robots.txt must advertise theme-only sitemap.');
     }
 
+    public function test_robots_txt_disallows_auth_gated_paths(): void
+    {
+        // Wave VVVVVVV (Vader 2026-05-19) — auth-gated paths
+        // (/admin, /coffre, /account, /member) have no SEO value
+        // and waste crawler budget. Explicit Disallow saves crawl
+        // budget for the surfaces that matter. Server-side auth
+        // is still the actual gate; this is purely a hint to
+        // well-behaved crawlers.
+        $body = file_get_contents(public_path('robots.txt'));
+        $authGated = ['/admin', '/coffre', '/account', '/member'];
+        foreach ($authGated as $path) {
+            $this->assertMatchesRegularExpression(
+                '/^Disallow:\s*' . preg_quote($path, '/') . '/m',
+                $body,
+                "robots.txt must Disallow {$path} (auth-gated, no SEO value).",
+            );
+        }
+    }
+
+    public function test_robots_txt_does_not_disallow_noindex_crawlable_paths(): void
+    {
+        // Wave VVVVVVV — pages we want excluded from the index
+        // but still want CRAWLED (so the bot sees the
+        // `<meta name="robots" content="noindex">` directive) must
+        // NOT be Disallowed in robots.txt. Disallow + noindex is
+        // the worst of both worlds: Google can't crawl to see the
+        // noindex meta, so a referring backlink can still cause
+        // the URL to surface as a bare result.
+        $body = file_get_contents(public_path('robots.txt'));
+        $crawlable = ['/search', '/pour-vous', '/local', '/feed.xml'];
+        foreach ($crawlable as $path) {
+            $this->assertDoesNotMatchRegularExpression(
+                '/^Disallow:\s*' . preg_quote($path, '/') . '\s*$/m',
+                $body,
+                "robots.txt must NOT Disallow {$path} (kept crawlable so robots see the noindex meta).",
+            );
+        }
+    }
+
     public function test_advertise_page_does_not_get_public_cached(): void
     {
         // Wave TTTTTTT — /advertise has an @csrf token and a form;
