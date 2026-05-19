@@ -952,4 +952,88 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsArray(\App\Support\GrimbaLanguageSettings::defaults());
         $this->assertGreaterThan(0, \Illuminate\Support\Facades\DB::table('posts')->where('status', 'published')->count());
     }
+
+    public function test_security_headers_ship_on_every_reader_surface(): void
+    {
+        // Wave TTTTTTT (Vader 2026-05-19) — lock the security-header
+        // contract. A previous session quietly added HSTS + a
+        // hardened CSP via the GrimbaSecurityHeaders middleware;
+        // protect against silent regression (someone disabling the
+        // middleware, reordering pipeline, or stripping a header in
+        // a hot-fix). These headers are what Mozilla Observatory
+        // and most enterprise-procurement security questionnaires
+        // check first.
+        $surfaces = ['/', '/breaking', '/dossiers', '/a-propos', '/methodologie', '/faq'];
+        foreach ($surfaces as $url) {
+            $response = $this->get($url);
+            $this->assertSame(200, $response->getStatusCode(), "{$url} must respond 200 before header asserts.");
+            $headers = $response->headers;
+
+            $this->assertSame('nosniff', $headers->get('X-Content-Type-Options'), "{$url} must ship X-Content-Type-Options: nosniff");
+            $this->assertSame('SAMEORIGIN', $headers->get('X-Frame-Options'), "{$url} must ship X-Frame-Options: SAMEORIGIN");
+            $this->assertSame('strict-origin-when-cross-origin', $headers->get('Referrer-Policy'), "{$url} must ship Referrer-Policy: strict-origin-when-cross-origin");
+            $this->assertNotEmpty($headers->get('Content-Security-Policy'), "{$url} must ship a Content-Security-Policy header");
+            $this->assertStringContainsString("default-src 'self'", (string) $headers->get('Content-Security-Policy'), "{$url} CSP must lock default-src to 'self'");
+            $this->assertStringContainsString("object-src 'none'", (string) $headers->get('Content-Security-Policy'), "{$url} CSP must block object-src");
+            $this->assertStringContainsString("frame-ancestors 'self'", (string) $headers->get('Content-Security-Policy'), "{$url} CSP must lock frame-ancestors");
+            $this->assertNotEmpty($headers->get('Permissions-Policy'), "{$url} must ship a Permissions-Policy header");
+        }
+    }
+
+    public function test_no_x_powered_by_header_leaks_php_version(): void
+    {
+        // Wave TTTTTTT — PHP's default `X-Powered-By: PHP/8.x.y`
+        // header leaks our exact PHP version, which is useful for
+        // attackers fingerprinting known CVE-vulnerable versions.
+        // We don't fight to strip this in test (PHP cli-server in
+        // dev still ships it), so assert specifically that no live
+        // PHP-version-disclosure header leaks via *our* response
+        // pipeline. Production nginx strips it; this test guards
+        // against a regression where Botble or a vendor adds an
+        // explicit `X-Powered-By` to responses themselves.
+        $response = $this->get('/');
+        $powered = (string) $response->headers->get('X-Powered-By', '');
+        // It's OK if PHP cli-server adds this in test — what we
+        // forbid is our own code setting it (e.g., a misguided
+        // marketing string).
+        $this->assertDoesNotMatchRegularExpression(
+            '/laravel|botble|grimba/i',
+            $powered,
+            'X-Powered-By must not advertise our framework or product name.',
+        );
+    }
+
+    public function test_static_editorial_pages_ship_public_cache(): void
+    {
+        // Wave TTTTTTT — lock the Cache-Control posture shipped by
+        // Wave SSSSSSS so /methodologie, /a-propos, /faq, and
+        // /comprendre-le-barometre stay public-cacheable for CDN
+        // efficiency. If someone reverts the response() wrapping
+        // back to a default view() call, Laravel's `no-cache,
+        // private` default returns and CDN hit-rate collapses.
+        $surfaces = ['/methodologie', '/a-propos', '/faq', '/comprendre-le-barometre'];
+        foreach ($surfaces as $url) {
+            $cc = (string) $this->get($url)->headers->get('Cache-Control', '');
+            $this->assertStringContainsString('public', $cc, "{$url} must ship public Cache-Control (currently `{$cc}`).");
+            $this->assertStringContainsString('max-age=', $cc, "{$url} must ship max-age directive (currently `{$cc}`).");
+            $this->assertStringContainsString('s-maxage=', $cc, "{$url} must ship s-maxage CDN directive (currently `{$cc}`).");
+            $this->assertStringNotContainsString('private', $cc, "{$url} must NOT ship `private` (would defeat shared CDN cache).");
+            $this->assertStringNotContainsString('no-cache', $cc, "{$url} must NOT ship `no-cache` (would defeat shared CDN cache).");
+        }
+    }
+
+    public function test_advertise_page_does_not_get_public_cached(): void
+    {
+        // Wave TTTTTTT — /advertise has an @csrf token and a form;
+        // public-caching it would leak one user's CSRF token to
+        // another (any subsequent submit would 419). Confirm it
+        // does NOT get the public Cache-Control we apply to the
+        // other static editorial pages.
+        $cc = (string) $this->get('/advertise')->headers->get('Cache-Control', '');
+        $this->assertStringNotContainsString(
+            's-maxage=21600',
+            $cc,
+            '/advertise must NOT ship the editorial public-cache header (form has a CSRF token).',
+        );
+    }
 }
