@@ -773,6 +773,25 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             SeoHelper::setTitle(($q !== '' ? __('Recherche : :query', ['query' => $q]) : __('Recherche')) . ' — GrimbaNews')
                 ->setDescription(__('Explorez les articles, sources et dossiers de GrimbaNews.'));
 
+            // Wave YYYYY (Vader 2026-05-19) — SearchResultsPage JSON-LD
+            // so Google can mark this surface as a search-results page
+            // (distinct from a normal CollectionPage). When q is empty,
+            // emit the generic search-form page; when set, emit the
+            // resolved query.
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'SearchResultsPage',
+                'name' => ($q !== '' ? __('Recherche : :query', ['query' => $q]) : __('Recherche')) . ' — GrimbaNews',
+                'description' => __('Explorez les articles, sources et dossiers de GrimbaNews.'),
+                'url' => url('/search' . ($q !== '' ? '?q=' . rawurlencode($q) : '')),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'mainEntity' => [
+                    '@type' => 'ItemList',
+                    'numberOfItems' => method_exists($posts, 'total') ? $posts->total() : (is_countable($posts) ? count($posts) : null),
+                ],
+                'query' => $q !== '' ? $q : null,
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Recherche'), url('/search'));
