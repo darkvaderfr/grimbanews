@@ -315,6 +315,36 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_article_jsonld_carries_article_section(): void
+    {
+        // Wave ZZZZZZ (Vader 2026-05-19) — NewsArticle JSON-LD must
+        // include `articleSection` so Google News / Discover can
+        // cluster the story by editorial topic. Source: post's primary
+        // topic category via GrimbaEditorialCategories::primaryTopicFor.
+        $articleUrls = array_filter(
+            $this->sampleStoryUrls(),
+            fn (string $u) => str_starts_with($u, '/article/')
+        );
+        if (empty($articleUrls)) {
+            $this->markTestSkipped('No article URL available.');
+            return;
+        }
+        foreach ($articleUrls as $path) {
+            $html = $this->get($path)->assertOk()->getContent();
+            preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $html, $matches);
+            $found = false;
+            foreach ($matches[1] as $body) {
+                $data = json_decode(trim($body), true);
+                if (! is_array($data)) continue;
+                if (($data['@type'] ?? null) === 'NewsArticle' && ! empty($data['articleSection'])) {
+                    $found = true;
+                    break;
+                }
+            }
+            $this->assertTrue($found, "{$path} should ship a NewsArticle JSON-LD block with articleSection.");
+        }
+    }
+
     public function test_article_pages_carry_open_graph_article_meta(): void
     {
         // Wave UUUUUU (Vader 2026-05-19) — article detail pages must
