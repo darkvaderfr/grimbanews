@@ -1848,6 +1848,28 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             SeoHelper::setTitle(__('Angles morts') . ' — GrimbaNews')
                 ->setDescription(__("Les histoires qu'un seul camp couvre."));
 
+            // Wave EEEEEEE — CollectionPage JSON-LD for the blindspots
+            // listing. Flagship page for GrimbaNews's editorial mission
+            // ("show what one side ignores"); deserves structured-data
+            // surfacing in SERP just like /breaking, /latest, /dossiers.
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => __('Angles morts') . ' — GrimbaNews',
+                'description' => __("Les histoires qu'un seul camp couvre."),
+                'url' => url('/angles-morts'),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'mainEntity' => [
+                    '@type' => 'ItemList',
+                    'numberOfItems' => $posts->total(),
+                    'itemListElement' => 'NewsArticle',
+                ],
+                'about' => [
+                    '@type' => 'Thing',
+                    'name' => __('Biais éditorial et angles morts dans la presse francophone'),
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Angles morts'), url('/angles-morts'));
