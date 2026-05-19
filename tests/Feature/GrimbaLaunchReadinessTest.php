@@ -246,8 +246,10 @@ class GrimbaLaunchReadinessTest extends TestCase
             '/advertise' => 'website',
         ];
         // Wave JJJJJJ — article pages should declare og:type=article.
+        // Wave LLLLLL — cluster pages (/comparatif/{id}) too, since
+        // they're per-story aggregations not multi-story listings.
         foreach ($this->sampleStoryUrls() as $url) {
-            if (str_starts_with($url, '/article/')) {
+            if (str_starts_with($url, '/article/') || str_starts_with($url, '/comparatif/')) {
                 $expectations[$url] = 'article';
             }
         }
