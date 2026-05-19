@@ -412,6 +412,26 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             SeoHelper::setTitle(__('Advertise') . ' — GrimbaNews')
                 ->setDescription(__('Sponsor GrimbaNews coverage across source comparison, bias analysis, and daily briefings.'));
 
+            // Wave LLLLL — Service + Offer JSON-LD so the sponsor page
+            // shows up as a structured Service in Google's knowledge
+            // graph. Helps the SERP card surface "Sponsor GrimbaNews"
+            // as a callable action.
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'WebPage',
+                'name' => __('Advertise') . ' — GrimbaNews',
+                'description' => __('Sponsor GrimbaNews coverage across source comparison, bias analysis, and daily briefings.'),
+                'url' => url('/advertise'),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'mainEntity' => [
+                    '@type' => 'Service',
+                    'name' => 'GrimbaNews Sponsor Inventory',
+                    'provider' => ['@type' => 'NewsMediaOrganization', 'name' => 'GrimbaNews', 'url' => url('/')],
+                    'serviceType' => 'Editorial sponsorship',
+                    'areaServed' => ['@type' => 'Country', 'name' => 'France', 'sameAs' => 'https://en.wikipedia.org/wiki/France'],
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Advertise'), url('/advertise'));
