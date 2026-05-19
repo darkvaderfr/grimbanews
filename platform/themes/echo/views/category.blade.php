@@ -3,6 +3,23 @@
     Theme::set('grimbaCategoryPage', true);
     Theme::layout('grimba-chrome');
 
+    // Wave WWWWW (Vader 2026-05-19) — CollectionPage JSON-LD for
+    // category pages (/blog/{category-slug}). These are landing pages
+    // the clickable badges (Wave RRRR/SSSS) route to, so they're real
+    // SERP entry points — they deserve structured data.
+    Theme::set('grimbaJsonLd', json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'CollectionPage',
+        'name' => $category->name . ' — GrimbaNews',
+        'description' => (string) ($category->description ?? ''),
+        'url' => url('/blog/' . ($category->slugable->key ?? '')),
+        'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+        'about' => [
+            '@type' => 'Thing',
+            'name' => $category->name,
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
     $rawFollow = (string) request()->cookie('grimba_follow', '');
     $followedIds = array_filter(array_map('intval', explode(',', $rawFollow)));
     $isFollowed = in_array($category->id, $followedIds, true);
