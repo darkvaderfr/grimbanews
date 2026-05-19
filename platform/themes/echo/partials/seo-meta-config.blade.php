@@ -47,4 +47,17 @@
     // blog plugin's per-post canonical is a no-op since $post->url
     // resolves to the same path.
     \Botble\SeoHelper\Facades\SeoHelper::meta()->setUrl(url()->current());
+
+    // Wave TTTTTT (Vader 2026-05-19) — robots meta. Botble's blog
+    // plugin auto-emits "index, follow" on post listings but not on
+    // our custom routes. Without an explicit meta, crawlers default
+    // to "index, follow" anyway — but being explicit signals intent.
+    // Search results (/search?q=...) are noindex'd: they're duplicate
+    // content (same articles surfaced via the underlying corpus) and
+    // shouldn't compete with the canonical article URLs in Google.
+    $__grimbaIsSearchPage = str_starts_with(request()->path(), 'search');
+    \Botble\SeoHelper\Facades\SeoHelper::meta()->addMeta(
+        'robots',
+        $__grimbaIsSearchPage ? 'noindex, follow' : 'index, follow'
+    );
 @endphp

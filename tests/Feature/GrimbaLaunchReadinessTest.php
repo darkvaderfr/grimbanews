@@ -288,6 +288,34 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_robots_meta_indexes_reader_surfaces_and_skips_search(): void
+    {
+        // Wave TTTTTT (Vader 2026-05-19) — every reader/story surface
+        // declares "index, follow" so crawlers attribute editorial
+        // authority. /search?q=... gets noindex,follow — search results
+        // are duplicate-content surfaces of the underlying articles.
+        $indexable = array_merge(
+            ['/', '/breaking', '/latest', '/dossiers', '/advertise', '/sources'],
+            $this->sampleStoryUrls()
+        );
+        foreach ($indexable as $path) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $this->assertMatchesRegularExpression(
+                '/<meta\s[^>]*name=["\']robots["\']\s+content=["\']index,\s*follow["\']/i',
+                $html,
+                "{$path} should ship robots=index,follow."
+            );
+        }
+        foreach (['/search', '/search?q=mayotte'] as $searchPath) {
+            $html = $this->get($searchPath)->assertOk()->getContent();
+            $this->assertMatchesRegularExpression(
+                '/<meta\s[^>]*name=["\']robots["\']\s+content=["\']noindex,\s*follow["\']/i',
+                $html,
+                "{$searchPath} should ship robots=noindex,follow."
+            );
+        }
+    }
+
     public function test_every_surface_ships_canonical_link(): void
     {
         // Wave RRRRRR (Vader 2026-05-19) — every reader + story surface
