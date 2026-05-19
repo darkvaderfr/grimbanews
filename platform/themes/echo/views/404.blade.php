@@ -2,6 +2,13 @@
     SeoHelper::setTitle(__('404 — Page introuvable'));
     Theme::fireEventGlobalAssets();
 
+    // Wave WWWWWWW (Vader 2026-05-19) — tells seo-meta-config to skip
+    // canonical emission and force `noindex, follow`. A 404 page with
+    // a canonical to the broken URL gives search engines contradictory
+    // signals ("this URL is canonical to itself, but also doesn't
+    // exist"). Cleanest fix: no canonical, plus explicit noindex.
+    Theme::set('grimba_is_404', true);
+
     // S337 — recent stories rail as a safety-net escape hatch.
     use App\Support\GrimbaTranslationPresenter as GnTr;
     $__recentPosts = \Botble\Blog\Models\Post::query()
@@ -39,7 +46,9 @@
 
                 <div class="d-flex gap-2 flex-wrap justify-content-center">
                     <a href="{{ url('/') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __("Retour à l'accueil") }}</a>
-                    <a href="{{ url('/comparatif') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Tous les dossiers') }}</a>
+                    {{-- Wave WWWWWWW — point directly at /dossiers to
+                         skip the 301 redirect hop /comparatif → /dossiers. --}}
+                    <a href="{{ url('/dossiers') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Tous les dossiers') }}</a>
                     <a href="{{ url('/angles-morts') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Angles morts') }}</a>
                     <a href="{{ url('/methodologie') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Méthodologie') }}</a>
                 </div>

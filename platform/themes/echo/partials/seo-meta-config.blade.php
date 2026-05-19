@@ -54,7 +54,17 @@
     // Always set to the current path (query stripped) — overwriting the
     // blog plugin's per-post canonical is a no-op since $post->url
     // resolves to the same path.
-    \Botble\SeoHelper\Facades\SeoHelper::meta()->setUrl(url()->current());
+    //
+    // Wave WWWWWWW (Vader 2026-05-19) — exception: 404 pages must NOT
+    // ship a canonical pointing at the broken URL. Search engines
+    // interpret rel=canonical on a 404 as a contradictory signal
+    // ("this URL is canonical to itself, but also doesn't exist").
+    // The 404 view sets Theme::set('grimba_is_404', true); skip
+    // canonical emission when that flag is set.
+    $__grimbaIs404 = (bool) Theme::get('grimba_is_404');
+    if (! $__grimbaIs404) {
+        \Botble\SeoHelper\Facades\SeoHelper::meta()->setUrl(url()->current());
+    }
 
     // Wave TTTTTT + IIIIIII (Vader 2026-05-19) — robots meta. Botble's
     // blog plugin auto-emits "index, follow" on post listings but not
@@ -68,12 +78,14 @@
     //   - /account — auth surface
     //   - /pour-vous — personalized feed (per-cookie history)
     //   - /local — geo-personalized (per-IP city detection)
+    //   - 404 errors — Wave WWWWWWW; broken URLs shouldn't be indexed
     // Wave LLLLLLL — the previous noindex predicate looked for 'for-you'
     // but that route doesn't exist; FR canonical is /pour-vous. Update
     // to match the actual path so the personalized feed actually gets
     // tagged noindex.
     $__grimbaPath = request()->path();
-    $__grimbaNoindex = str_starts_with($__grimbaPath, 'search')
+    $__grimbaNoindex = $__grimbaIs404
+        || str_starts_with($__grimbaPath, 'search')
         || str_starts_with($__grimbaPath, 'coffre')
         || str_starts_with($__grimbaPath, 'account')
         || str_starts_with($__grimbaPath, 'pour-vous')

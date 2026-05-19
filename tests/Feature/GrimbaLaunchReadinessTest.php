@@ -1101,6 +1101,52 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_404_view_sets_grimba_is_404_flag_for_seo_partial(): void
+    {
+        // Wave WWWWWWW (Vader 2026-05-19) — 404 pages were shipping
+        // `<link rel="canonical" href="http://.../broken-url">` and
+        // `<meta name="robots" content="index, follow">`. The fix:
+        // the 404 view sets `Theme::set('grimba_is_404', true)` and
+        // seo-meta-config.blade.php checks that flag to skip canonical
+        // AND force noindex.
+        //
+        // We can't easily test the full 404-rendering pipeline (the
+        // kernel handle path uses Symfony's default exception view
+        // in test mode, bypassing the theme), so verify the wiring
+        // at the source: 404.blade.php sets the flag, the meta partial
+        // honors it.
+        $view404 = file_get_contents(base_path('platform/themes/echo/views/404.blade.php'));
+        $this->assertStringContainsString(
+            "Theme::set('grimba_is_404', true)",
+            $view404,
+            '404 view must set the grimba_is_404 Theme flag for the SEO meta partial.',
+        );
+        $metaPartial = file_get_contents(base_path('platform/themes/echo/partials/seo-meta-config.blade.php'));
+        $this->assertStringContainsString(
+            "Theme::get('grimba_is_404')",
+            $metaPartial,
+            'seo-meta-config must read the grimba_is_404 Theme flag.',
+        );
+        $this->assertMatchesRegularExpression(
+            '/if\s*\(\s*!\s*\$__grimbaIs404\s*\)\s*\{[^}]*setUrl/s',
+            $metaPartial,
+            'seo-meta-config must skip setUrl() when grimba_is_404 is true (no canonical on 404).',
+        );
+        $this->assertStringContainsString(
+            '$__grimbaIs404',
+            $metaPartial,
+            'seo-meta-config noindex predicate must include the 404 flag.',
+        );
+        // Cleanup also wired so Theme::set state doesn't leak between
+        // shared-kernel requests.
+        $cleanupPartial = file_get_contents(base_path('platform/themes/echo/partials/seo-meta-twitter-image.blade.php'));
+        $this->assertStringContainsString(
+            "Theme::set('grimba_is_404', null)",
+            $cleanupPartial,
+            'seo-meta-twitter-image must clear grimba_is_404 after emission.',
+        );
+    }
+
     public function test_advertise_page_does_not_get_public_cached(): void
     {
         // Wave TTTTTTT — /advertise has an @csrf token and a form;

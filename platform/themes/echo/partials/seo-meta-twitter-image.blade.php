@@ -30,4 +30,8 @@
     Theme::set('grimba_article_published_time', null);
     Theme::set('grimba_article_modified_time', null);
     Theme::set('grimba_article_author', null);
+    // Wave WWWWWWW (Vader 2026-05-19) — clear 404 flag too so a 404
+    // followed by a 200 in a shared-kernel test process doesn't
+    // leak the noindex/no-canonical state into the next request.
+    Theme::set('grimba_is_404', null);
 @endphp
