@@ -56,16 +56,27 @@
     // resolves to the same path.
     \Botble\SeoHelper\Facades\SeoHelper::meta()->setUrl(url()->current());
 
-    // Wave TTTTTT (Vader 2026-05-19) — robots meta. Botble's blog
-    // plugin auto-emits "index, follow" on post listings but not on
-    // our custom routes. Without an explicit meta, crawlers default
+    // Wave TTTTTT + IIIIIII (Vader 2026-05-19) — robots meta. Botble's
+    // blog plugin auto-emits "index, follow" on post listings but not
+    // on our custom routes. Without an explicit meta, crawlers default
     // to "index, follow" anyway — but being explicit signals intent.
-    // Search results (/search?q=...) are noindex'd: they're duplicate
-    // content (same articles surfaced via the underlying corpus) and
-    // shouldn't compete with the canonical article URLs in Google.
-    $__grimbaIsSearchPage = str_starts_with(request()->path(), 'search');
+    //
+    // noindex on personalized / duplicate-content surfaces:
+    //   - /search?q=... — duplicate content of underlying articles
+    //   - /coffre — saved-article vault (per-cookie, empty for crawlers)
+    //   - /coffre-share — shared-vault URLs (one-off per recipient)
+    //   - /account — auth surface
+    //   - /for-you — personalized feed (per-cookie history)
+    //   - /local — geo-personalized (per-IP city detection)
+    //   - /search* — search results (already noindex above)
+    $__grimbaPath = request()->path();
+    $__grimbaNoindex = str_starts_with($__grimbaPath, 'search')
+        || str_starts_with($__grimbaPath, 'coffre')
+        || str_starts_with($__grimbaPath, 'account')
+        || str_starts_with($__grimbaPath, 'for-you')
+        || str_starts_with($__grimbaPath, 'local');
     \Botble\SeoHelper\Facades\SeoHelper::meta()->addMeta(
         'robots',
-        $__grimbaIsSearchPage ? 'noindex, follow' : 'index, follow'
+        $__grimbaNoindex ? 'noindex, follow' : 'index, follow'
     );
 @endphp
