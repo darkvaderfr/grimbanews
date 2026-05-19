@@ -34,6 +34,40 @@ class GrimbaLaunchReadinessTest extends TestCase
         return $user;
     }
 
+    /**
+     * Wave JJJJJJ — sample article + cluster URLs so the OG/Twitter
+     * lock tests actually exercise the page where the originating
+     * regressions lived (post.blade ran its own SeoHelper::twitter()
+     * additions; that's where twitter:image{0}+{1} surfaced). Listing-
+     * surface-only locks would have passed green even with the bug.
+     *
+     * @return array<string>
+     */
+    private function sampleStoryUrls(): array
+    {
+        $urls = [];
+
+        $articleSlug = \Botble\Slug\Models\Slug::query()
+            ->where('reference_type', \Botble\Blog\Models\Post::class)
+            ->where('prefix', 'article')
+            ->orderByDesc('id')
+            ->value('key');
+        if ($articleSlug) {
+            $urls[] = '/article/' . $articleSlug;
+        }
+
+        $clusterId = \Illuminate\Support\Facades\DB::table('posts')
+            ->where('status', 'published')
+            ->whereNotNull('story_cluster_id')
+            ->orderByDesc('story_cluster_id')
+            ->value('story_cluster_id');
+        if ($clusterId) {
+            $urls[] = '/comparatif/' . $clusterId;
+        }
+
+        return $urls;
+    }
+
     public function test_every_reader_surface_returns_200(): void
     {
         $surfaces = [
@@ -128,10 +162,15 @@ class GrimbaLaunchReadinessTest extends TestCase
         // SVG og:image AFTER our layout emitted a manual PNG one,
         // resulting in 2 og:image tags per page. Crawlers picked the
         // first, but LinkedIn caches the second — which is wrong.
-        $surfaces = ['/', '/breaking', '/latest', '/dossiers', '/advertise', '/sources'];
+        // Wave JJJJJJ — extend to article + cluster URLs where the
+        // post.blade SeoHelper duplication actually originated.
+        $surfaces = array_merge(
+            ['/', '/breaking', '/latest', '/dossiers', '/advertise', '/sources'],
+            $this->sampleStoryUrls()
+        );
         foreach ($surfaces as $path) {
             $html = $this->get($path)->assertOk()->getContent();
-            $count = substr_count($html, 'property="og:image"');
+            $count = preg_match_all('/<meta\s[^>]*property=["\']og:image["\']/i', $html);
             $this->assertSame(
                 1,
                 $count,
@@ -148,11 +187,15 @@ class GrimbaLaunchReadinessTest extends TestCase
         // Theme::header() (creating an orphan pair) AND SeoHelper
         // emitted them AGAIN for article pages (creating duplicates).
         // Fix: emit through SeoHelper so they land adjacent to og:image.
-        $surfaces = ['/', '/breaking', '/latest', '/dossiers', '/advertise', '/sources'];
+        // Wave JJJJJJ — extend to article + cluster URLs.
+        $surfaces = array_merge(
+            ['/', '/breaking', '/latest', '/dossiers', '/advertise', '/sources'],
+            $this->sampleStoryUrls()
+        );
         foreach ($surfaces as $path) {
             $html = $this->get($path)->assertOk()->getContent();
-            $w = substr_count($html, 'property="og:image:width"');
-            $h = substr_count($html, 'property="og:image:height"');
+            $w = preg_match_all('/<meta\s[^>]*property=["\']og:image:width["\']/i', $html);
+            $h = preg_match_all('/<meta\s[^>]*property=["\']og:image:height["\']/i', $html);
             $this->assertSame(1, $w, "{$path} ships {$w} og:image:width tags (expected 1).");
             $this->assertSame(1, $h, "{$path} ships {$h} og:image:height tags (expected 1).");
         }
@@ -202,10 +245,16 @@ class GrimbaLaunchReadinessTest extends TestCase
             '/sources' => 'website',
             '/advertise' => 'website',
         ];
+        // Wave JJJJJJ — article pages should declare og:type=article.
+        foreach ($this->sampleStoryUrls() as $url) {
+            if (str_starts_with($url, '/article/')) {
+                $expectations[$url] = 'article';
+            }
+        }
         foreach ($expectations as $path => $expected) {
             $html = $this->get($path)->assertOk()->getContent();
             $this->assertMatchesRegularExpression(
-                '/<meta property="og:type" content="' . preg_quote($expected, '/') . '"/i',
+                '/<meta\s[^>]*property=["\']og:type["\']\s+content=["\']' . preg_quote($expected, '/') . '["\']/i',
                 $html,
                 "{$path} should declare og:type={$expected}."
             );
@@ -220,15 +269,21 @@ class GrimbaLaunchReadinessTest extends TestCase
         // the chrome layout pushed home.png — SeoHelper saw 2 images
         // and switched render mode to twitter:image{0}+twitter:image{1},
         // which Twitter cards do NOT honor.
-        $surfaces = ['/', '/breaking', '/latest', '/dossiers', '/advertise', '/sources'];
+        // Wave JJJJJJ — extend to article + cluster URLs where the
+        // original bug lived. The listing-surface-only lock would have
+        // passed green even with post.blade's duplicate SeoHelper::twitter()
+        // call still in place.
+        $surfaces = array_merge(
+            ['/', '/breaking', '/latest', '/dossiers', '/advertise', '/sources'],
+            $this->sampleStoryUrls()
+        );
         foreach ($surfaces as $path) {
             $html = $this->get($path)->assertOk()->getContent();
-            $card = substr_count($html, 'name="twitter:card"');
-            $image = substr_count($html, 'name="twitter:image"');
-            // The bad-state pattern `twitter:image{0}` would not match
-            // the exact substring above — assert that nothing leaked
-            // into the numbered form either.
-            $numbered = substr_count($html, 'name="twitter:image{');
+            $card = preg_match_all('/<meta\s[^>]*name=["\']twitter:card["\']/i', $html);
+            $image = preg_match_all('/<meta\s[^>]*name=["\']twitter:image["\'][^>]/i', $html);
+            // The bad-state pattern `twitter:image{0}` is the literal
+            // SeoHelper Card::loadImages() emission when count(images)>1.
+            $numbered = preg_match_all('/name=["\']twitter:image\{/i', $html);
             $this->assertSame(1, $card, "{$path} ships {$card} twitter:card tags (expected 1).");
             $this->assertSame(1, $image, "{$path} ships {$image} twitter:image tags (expected 1).");
             $this->assertSame(0, $numbered, "{$path} emitted numbered twitter:image{N} variants — SeoHelper is receiving multiple addImage() calls.");
