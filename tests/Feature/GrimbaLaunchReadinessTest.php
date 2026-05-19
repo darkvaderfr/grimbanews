@@ -120,6 +120,38 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_body_tag_has_exactly_one_class_attribute(): void
+    {
+        // Wave UUUU (Vader 2026-05-18) — every reader surface must emit
+        // a single `class=` attribute on <body>. Two `class=` attrs is
+        // valid HTML5 (warning-only), but browsers silently keep only
+        // the first one, so any class added via Theme::addBodyAttributes
+        // would be unreachable. Regression test for the
+        // grimba-home.blade.php / grimba-chrome.blade.php fix.
+        $surfaces = ['/', '/breaking', '/latest', '/dossiers', '/advertise', '/sources'];
+        foreach ($surfaces as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+            // Extract just the <body ...> opening tag (no children).
+            preg_match('/<body[^>]*>/i', $html, $m);
+            $this->assertNotEmpty($m, "{$url}: missing <body> tag");
+            $bodyTag = $m[0];
+            // Count `class=` attributes inside the tag (not the closing >).
+            $count = substr_count($bodyTag, 'class=');
+            $this->assertSame(
+                1,
+                $count,
+                "{$url} has {$count} class= attributes on <body>. Browsers keep only the first; the others are silently dropped. Fix: route layout-specific classes through Theme::addBodyAttributes instead of hardcoding them next to {!! Theme::bodyAttributes() !!}. Body tag: {$bodyTag}"
+            );
+            // Also verify the merged result contains the layout class
+            // (grimba-home or grimba-home grimba-subpage).
+            $this->assertMatchesRegularExpression(
+                '/class="[^"]*grimba-home[^"]*"/',
+                $bodyTag,
+                "{$url}: body class missing grimba-home"
+            );
+        }
+    }
+
     public function test_category_badges_render_across_all_4_strict_surfaces(): void
     {
         $surfaces = ['/', '/breaking', '/latest', '/dossiers'];
