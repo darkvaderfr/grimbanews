@@ -110,33 +110,12 @@
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Flux RSS') }}" href="{{ url('/feed.xml') }}">
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Breaking news') }}" href="{{ url('/feed.breaking.xml') }}">
     <link rel="alternate" type="application/rss+xml" title="{{ __('GrimbaNews — Latest') }}" href="{{ url('/feed.latest.xml') }}">
-    {{-- Wave AAAAAA — push OG image into Botble SeoHelper before Theme::header() so the auto-emitted og:image points at our 1200×630 PNG, not the default SVG.
-         Wave FFFFFF — drop the manual og:image:width/height pair here; Theme::header()
-         emits its own paired dimensions tags adjacent to its og:image, and the
-         orphan pair was creating an OG-spec adjacency mismatch. --}}
-    @php
-        \Botble\SeoHelper\Facades\SeoHelper::setImage(url('/og/home.png'));
-        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:width', '1200');
-        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:height', '630');
-        // Wave HHHHHH — Botble's blog plugin sets og:type=article on the
-        // home listing page (since it's the blog index). The OG spec
-        // says the homepage type should be 'website', not 'article'.
-        // Override explicitly here.
-        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->setType('website');
-        // Wave IIIIII — emit og:locale + alternate so OG crawlers know
-        // this page exists in FR and EN. Format is `<lang>_<region>`.
-        $__grimbaCurLocale = app()->getLocale();
-        $__grimbaOgLocale = $__grimbaCurLocale === 'en' ? 'en_US' : 'fr_FR';
-        $__grimbaOgLocaleAlt = $__grimbaCurLocale === 'en' ? 'fr_FR' : 'en_US';
-        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('locale', $__grimbaOgLocale);
-        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('locale:alternate', $__grimbaOgLocaleAlt);
-        // Wave GGGGGG — only set card type; SeoHelper does NOT auto-derive
-        // twitter:image, so we emit it manually below to avoid the
-        // singleton-accumulation pitfall of SeoHelper::twitter()->addImage().
-        \Botble\SeoHelper\Facades\SeoHelper::twitter()->setType('summary_large_image');
-    @endphp
+    {{-- Wave KKKKKK — SEO meta setup extracted to shared partial.
+         is_home=true tells the partial to override og:type to 'website'
+         (Botble's blog plugin would otherwise default home to 'article'). --}}
+    @include(Theme::getThemeNamespace('partials.seo-meta-config'), ['is_home' => true])
     {!! Theme::header() !!}
-    <meta name="twitter:image" content="{{ url('/og/home.png') }}">
+    @include(Theme::getThemeNamespace('partials.seo-meta-twitter-image'))
     @include(Theme::getThemeNamespace('partials.ads.head'))
     @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
     {{-- Wave KKKKK — home JSON-LD. Build in PHP so schema-org `at`-prefixed keys don't trip Blade directives. --}}

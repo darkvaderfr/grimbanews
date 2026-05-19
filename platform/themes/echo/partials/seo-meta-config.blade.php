@@ -1,0 +1,40 @@
+{{-- Wave KKKKKK (Vader 2026-05-19) — single source of truth for the
+     SEO meta setup that BOTH grimba-home and grimba-chrome layouts
+     used to duplicate. Runs BEFORE Theme::header() so Botble's
+     SeoHelper has a chance to merge our overrides into its own
+     emission. Reads `grimba_og_image` from Theme::set() (post.blade
+     sets it per article) and falls back to /og/home.png.
+
+     Emits, via SeoHelper:
+       - og:image (= Theme::get('grimba_og_image') ?: /og/home.png)
+       - og:image:width / og:image:height (paired adjacent to og:image)
+       - twitter:card type
+       - og:locale + og:locale:alternate (FR ↔ EN swap)
+       - og:type=website on home (Botble blog plugin defaults to article)
+
+     Sets a Theme::set('__grimba_og_image_resolved') flag so the
+     partials.seo-meta-twitter-image partial can emit twitter:image
+     against the same URL without re-resolving.
+
+     Layouts pass `is_home => true` if they're the home-layout entry
+     (so we know to override og:type to 'website'). --}}
+@php
+    $__isHomeLayout = (bool) ($is_home ?? false);
+    $__grimbaOgImageResolved = Theme::get('grimba_og_image') ?: url('/og/home.png');
+    Theme::set('__grimba_og_image_resolved', $__grimbaOgImageResolved);
+
+    \Botble\SeoHelper\Facades\SeoHelper::setImage($__grimbaOgImageResolved);
+    \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:width', '1200');
+    \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:height', '630');
+    \Botble\SeoHelper\Facades\SeoHelper::twitter()->setType('summary_large_image');
+
+    if ($__isHomeLayout) {
+        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->setType('website');
+    }
+
+    $__grimbaCurLocale = app()->getLocale();
+    $__grimbaOgLocale = $__grimbaCurLocale === 'en' ? 'en_US' : 'fr_FR';
+    $__grimbaOgLocaleAlt = $__grimbaCurLocale === 'en' ? 'fr_FR' : 'en_US';
+    \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('locale', $__grimbaOgLocale);
+    \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('locale:alternate', $__grimbaOgLocaleAlt);
+@endphp

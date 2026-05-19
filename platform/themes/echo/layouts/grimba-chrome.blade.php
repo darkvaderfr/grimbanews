@@ -107,26 +107,8 @@
          miscompiles when the expression contains an `=` assignment
          + the result is used later in the file — we fix that by
          switching to the explicit @php @endphp block form. --}}
-    @php
-        $__grimbaOgImage = Theme::get('grimba_og_image') ?: url('/og/home.png');
-        \Botble\SeoHelper\Facades\SeoHelper::setImage($__grimbaOgImage);
-        // Wave FFFFFF — emit OG image dimensions via SeoHelper so they land
-        // adjacent to og:image in Theme::header() output (Open Graph spec).
-        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:width', '1200');
-        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('image:height', '630');
-        // Wave GGGGGG — set twitter card type. Botble's SeoHelper auto-emits
-        // twitter:image from the og:image we just set, so we only need to
-        // pin the card style. Avoid addImage() — it accumulates across
-        // requests in the singleton and would emit twitter:image{0}+{1}.
-        \Botble\SeoHelper\Facades\SeoHelper::twitter()->setType('summary_large_image');
-        // Wave IIIIII — og:locale + alternate so crawlers know FR+EN
-        // versions exist for this page (matches hreflang above).
-        $__grimbaCurLocale = app()->getLocale();
-        $__grimbaOgLocale = $__grimbaCurLocale === 'en' ? 'en_US' : 'fr_FR';
-        $__grimbaOgLocaleAlt = $__grimbaCurLocale === 'en' ? 'fr_FR' : 'en_US';
-        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('locale', $__grimbaOgLocale);
-        \Botble\SeoHelper\Facades\SeoHelper::openGraph()->addProperty('locale:alternate', $__grimbaOgLocaleAlt);
-    @endphp
+    {{-- Wave KKKKKK — SEO meta setup extracted to shared partial. --}}
+    @include(Theme::getThemeNamespace('partials.seo-meta-config'))
     {{-- S-LANG-06 — explicit per-locale URLs so search engines index
          FR and EN versions distinctly. x-default falls back to FR
          (GrimbaNews's primary locale per editorial policy). --}}
@@ -149,7 +131,7 @@
         <script type="application/ld+json">{!! $jsonLd !!}</script>
     @endif
     {!! Theme::header() !!}
-    <meta name="twitter:image" content="{{ $__grimbaOgImage }}">
+    @include(Theme::getThemeNamespace('partials.seo-meta-twitter-image'))
     @include(Theme::getThemeNamespace('partials.ads.head'))
     @include(Theme::getThemeNamespace('partials.home.contrast-styles'))
 </head>
