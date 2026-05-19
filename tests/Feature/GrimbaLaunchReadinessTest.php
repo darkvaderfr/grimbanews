@@ -315,6 +315,27 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_rss_feeds_return_xml_with_content(): void
+    {
+        // Wave BBBBBBB (Vader 2026-05-19) — three RSS feeds power
+        // syndication for /feed.xml (full corpus), /feed.breaking.xml
+        // (breaking), /feed.latest.xml (latest). All three must return
+        // 200 + application/rss+xml + a non-empty <rss> document.
+        $feeds = ['/feed.xml', '/feed.breaking.xml', '/feed.latest.xml'];
+        foreach ($feeds as $feed) {
+            $response = $this->get($feed);
+            $response->assertOk();
+            $this->assertStringContainsString(
+                'application/rss+xml',
+                (string) $response->headers->get('content-type'),
+                "{$feed} must return application/rss+xml content-type."
+            );
+            $body = $response->getContent();
+            $this->assertStringContainsString('<rss', $body, "{$feed} body must contain an <rss> element.");
+            $this->assertStringContainsString('</rss>', $body, "{$feed} body must be a closed RSS doc.");
+        }
+    }
+
     public function test_article_jsonld_carries_article_section(): void
     {
         // Wave ZZZZZZ (Vader 2026-05-19) — NewsArticle JSON-LD must
