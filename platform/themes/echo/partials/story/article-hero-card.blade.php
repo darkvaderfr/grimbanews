@@ -163,7 +163,10 @@
         @endif
         @if($__readAtTime)
             <span class="grimba-article-card__sep" aria-hidden="true">·</span>
-            <span class="grimba-article-card__meta-time">{{ $__readAtTime }}</span>
+            {{-- Wave CCCCCCC — semantic <time datetime="..."> so crawlers,
+                 screen-readers, and Reader-mode tools can parse the
+                 publish timestamp machine-cleanly. --}}
+            <time class="grimba-article-card__meta-time" datetime="{{ $__publishedAt->toAtomString() }}">{{ $__readAtTime }}</time>
         @endif
         <span class="grimba-article-card__readmin" title="{{ trans_choice(':count minute de lecture estimée|:count minutes de lecture estimées', $__readMin, ['count' => $__readMin]) }}">
             <span aria-hidden="true">⏱</span>
