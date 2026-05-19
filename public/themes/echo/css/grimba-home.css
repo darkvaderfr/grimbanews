@@ -7671,3 +7671,160 @@ body[data-theme="dark"] .grimba-info-pill__body {
         inset 0 0 0 1px rgba(255, 255, 255, 0.14),
         0 12px 28px rgba(26, 23, 19, 0.34) !important;
 }
+
+/* ============================================================
+   Wave MMMMMM — Related Dossiers rail (article page bottom).
+   ============================================================ */
+.grimba-related-dossiers {
+    --gn-rd-ink: var(--gn-ink, #1a1713);
+    --gn-rd-muted: rgba(26, 23, 19, .66);
+    --gn-rd-line: rgba(26, 23, 19, .12);
+    --gn-rd-card: rgba(255, 255, 255, .76);
+    margin: 32px 0 24px;
+    color: var(--gn-rd-ink);
+}
+
+[data-bs-theme="dark"] .grimba-related-dossiers,
+body[data-theme="dark"] .grimba-related-dossiers {
+    --gn-rd-ink: #fffaf0;
+    --gn-rd-muted: rgba(255, 250, 240, .74);
+    --gn-rd-line: rgba(255, 250, 240, .16);
+    --gn-rd-card: rgba(24, 22, 17, .76);
+}
+
+.grimba-related-dossiers__head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--gn-rd-line);
+}
+
+.grimba-related-dossiers__kicker {
+    grid-column: 1 / -1;
+    font-family: 'Public Sans', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: var(--gn-rd-muted);
+    text-transform: uppercase;
+}
+
+.grimba-related-dossiers__title {
+    margin: 4px 0 0;
+    font: 800 22px/1.1 "Fraunces", Georgia, serif;
+    color: var(--gn-rd-ink);
+    letter-spacing: -0.01em;
+}
+
+.grimba-related-dossiers__more {
+    align-self: end;
+    font-family: 'Public Sans', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--gn-brand-red, #c0392b);
+    white-space: nowrap;
+}
+
+.grimba-related-dossiers__more:hover { text-decoration: underline; }
+
+.grimba-related-dossiers__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.grimba-related-dossiers__card {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    border: 1px solid var(--gn-rd-line);
+    border-radius: 14px;
+    background: var(--gn-rd-card);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.grimba-related-dossiers__card:hover,
+.grimba-related-dossiers__card:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(26, 23, 19, .14);
+    border-color: rgba(192, 57, 43, .42);
+    text-decoration: none;
+    outline: none;
+}
+
+.grimba-related-dossiers__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: rgba(26, 23, 19, .06);
+}
+
+[data-bs-theme="dark"] .grimba-related-dossiers__media,
+body[data-theme="dark"] .grimba-related-dossiers__media {
+    background: rgba(255, 250, 240, .06);
+}
+
+.grimba-related-dossiers__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .3s ease;
+}
+
+.grimba-related-dossiers__card:hover .grimba-related-dossiers__media img {
+    transform: scale(1.04);
+}
+
+.grimba-related-dossiers__bias-chip {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    display: inline-flex;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--rd-bias, #6b6459) 90%, transparent);
+    color: #fff;
+    font-family: 'Public Sans', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .22);
+}
+
+.grimba-related-dossiers__body {
+    padding: 12px 14px 14px;
+    display: grid;
+    gap: 6px;
+    align-content: start;
+}
+
+.grimba-related-dossiers__card-title {
+    margin: 0;
+    font: 700 15px/1.25 "Fraunces", Georgia, serif;
+    color: var(--gn-rd-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.grimba-related-dossiers__card-meta {
+    font-family: 'Public Sans', system-ui, sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--gn-rd-muted);
+    letter-spacing: 0.02em;
+}
+
+@media (max-width: 575.98px) {
+    .grimba-related-dossiers__grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grimba-related-dossiers__card-title { font-size: 13.5px; }
+}
+

@@ -49,7 +49,7 @@ class GrimbaLaunchReadinessTest extends TestCase
 
         $articleSlug = \Botble\Slug\Models\Slug::query()
             ->where('reference_type', \Botble\Blog\Models\Post::class)
-            ->where('prefix', 'article')
+            ->whereIn('prefix', ['article', 'blog'])
             ->orderByDesc('id')
             ->value('key');
         if ($articleSlug) {
@@ -199,6 +199,31 @@ class GrimbaLaunchReadinessTest extends TestCase
             $this->assertSame(1, $w, "{$path} ships {$w} og:image:width tags (expected 1).");
             $this->assertSame(1, $h, "{$path} ships {$h} og:image:height tags (expected 1).");
         }
+    }
+
+    public function test_article_pages_carry_related_dossiers_rail(): void
+    {
+        // Wave MMMMMM (Vader 2026-05-19) — article detail pages render
+        // the topic-relevant "Autres dossiers" rail after the article
+        // body. Drives session depth + cross-dossier navigation.
+        // The partial bails when primaryTopicFor() returns null, so we
+        // probe an article that DOES carry a topic category.
+        $url = $this->sampleStoryUrls()[0] ?? null;
+        if ($url === null || ! str_starts_with($url, '/article/')) {
+            $this->markTestSkipped('No sample article URL available.');
+            return;
+        }
+        $html = $this->get($url)->assertOk()->getContent();
+        // The rail's section landmark + ARIA id must be present.
+        $this->assertStringContainsString('data-grimba-related-dossiers', $html);
+        $this->assertStringContainsString('id="grimba-related-dossiers-title"', $html);
+        $this->assertStringContainsString('grimba-related-dossiers__card', $html);
+        // Cards must link to /comparatif/{id} (cluster page).
+        $this->assertMatchesRegularExpression(
+            '#href="[^"]*?/comparatif/\d+"#',
+            $html,
+            'Related-dossiers rail must link to per-cluster pages.'
+        );
     }
 
     public function test_og_locale_and_alternate_emit_per_request_locale(): void

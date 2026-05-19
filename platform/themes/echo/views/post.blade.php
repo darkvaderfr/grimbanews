@@ -1200,6 +1200,11 @@
                                 </div>
                             </div>
                         @endif
+                        {{-- Wave MMMMMM — Grimba-native "Other dossiers in this
+                             topic" rail, ABOVE Botble's legacy random pairing
+                             so the editorial signal lands first. --}}
+                        @include(Theme::getThemeNamespace('partials.story.related-dossiers'), ['post' => $post])
+
                         @if (($posts = get_related_posts($post->id, 2)) && $posts->isNotEmpty())
                             <div class="echo-more-news-area">
                                 <div class="inner">
