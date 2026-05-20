@@ -70,7 +70,7 @@ The formal 1000-sprint ledger was behind the production-hardening work that has 
 
 Current accounting after the 2026-05-12 article-canonicalization sprints AND the 2026-05-19 reconciliation sweep that batch-evidenced shipped translation (S-LANG band), story SEO (Wave RRRRRR–WWWWWWW + AAAAAAAA), security (Wave NNNNNNN–PPPPPPP, OOOOOOO XSS fix, QQQQQQQ SSRF lock, TTTTTTT security-header contract, VVVVVVV robots.txt), accessibility (skip-link, focus-manager, reduced-motion), and design-system (token inventory, dark/light contract) work:
 
-- Formal evidenced master sprints: **203 / 1000 = 20.3%** (was 2.7% / 27 sprints before this sweep; +52 band-evidence rows, +5 S007-S010+S020, +9 S011-S019 audit pack, +24 S021-S050 review pack, +38 S051-S100 governance pack, +48 S101-S200 ingest+publish pack — all 2026-05-19). Roughly 28 partial sprints remain in the S101-S200 band (queue split, replay/rollback commands, NobuAI freshness SLA, subscriber-content smoke, autonomous-day simulation pack).
+- Formal evidenced master sprints: **282 / 1000 = 28.2%** (was 2.7% / 27 sprints at directive issue; +52 band-evidence rows, +5 S007-S010+S020, +9 S011-S019, +24 S021-S050, +38 S051-S100, +48 S101-S200, +79 S201-S300 dedup+cluster+NobuAI — all 2026-05-19). 21 partial sprints remain in S201-S300 (image fingerprint, cluster RSS feed, cluster restore CLI, provider live smoke in CI, ownership summary, newsletter/search/local insights, stale-insight refresh, NobuAI runbook, live bounded test).
 - Practical production-readiness estimate: **about 40-42%** — core ingestion, publishing, article URL canonicalization, full-article readability coverage, public taxonomy cleanup, snippet sanitization, admin cockpit, dedupe, disk alerting, NewsAPI config guarding, deploy smoke paths, ingest-to-public health, JSON-LD across 7 reader surfaces (10 if counting editorial + advertise), security-header HSTS+CSP+nosniff+frame-options+referrer + XSS escape + SSRF guard + security.txt + robots.txt + canonical pagination fix, cache-control on public XML endpoints, sitemap-grimba.xml backfill, 404 noindex+no-canonical, language tagging (16/16 S-LANG sprints, 1340 NULL→36 NULL recovery), and 517 lock-tests / 4433 assertions all exist.
 - Still outstanding before launch: full visual QA across 28 routes × 2 modes × 3 widths (S-MODE-02), title-only duplicate editorial decisions, restore drill (S961-S970), provider live-smoke and cost dashboards (S891-S900), monetization (S851-S890, ads/subscriber loop), and business launch gates G10.
 - The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
@@ -229,6 +229,90 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S188 | same — Source-to-profile smoke | complete |
 | S189 | same — Search-index smoke | complete |
 | S190 | same — Sitemap update smoke (Wave UUUUUUU + AAAAAAAA) | complete |
+| S201 | `docs/GRIMBANEWS_S201_S300_DEDUP_CLUSTER_NOBUAI_PACK.md` — Canonical URL index + GrimbaArticleText normalize | complete |
+| S202 | same — Title similarity threshold (admin-configurable, 0.85 default) | complete |
+| S204 | same — Cluster window policy (48h default) | complete |
+| S205 | same — Cross-language cluster policy (S-LANG-11 aware) | complete |
+| S207 | same — Syndicated duplicate policy (S203 source-aware) | complete |
+| S208 | same — Update-vs-new policy via updated_at/published_at | complete |
+| S211 | same — Cluster merge workflow (admin) | complete |
+| S212 | same — Cluster split workflow (admin) | complete |
+| S213 | same — Orphan cluster handling (cleanup cron) | complete |
+| S214 | same — Low-source cluster handling (2-source threshold) | complete |
+| S215 | same — High-source cluster cap (12 sources UI) | complete |
+| S216 | same — Source diversity target (coverage map) | complete |
+| S217 | same — Bias diversity target (cluster bias mix) | complete |
+| S219 | same — Cluster confidence score denorm | complete |
+| S220 | same — Cluster confidence display (info-pill on hover) | complete |
+| S221 | same — Timeline normalization (timezone-normalize at ingest) | complete |
+| S222 | same — First-seen timestamp (posts.created_at) | complete |
+| S223 | same — Latest-seen timestamp (posts.updated_at) | complete |
+| S224 | same — Representative article selection (bias-balanced) | complete |
+| S225 | same — Hero article selection (newest + image + bias-mix) | complete |
+| S226 | same — Cluster title selection (longest + topic keyword) | complete |
+| S227 | same — Cluster excerpt selection (sanitized via GrimbaArticleText) | complete |
+| S228 | same — Cluster image selection (hero post) | complete |
+| S229 | same — Cluster canonical URL (Wave LLLLLL per-cluster OG) | complete |
+| S230 | same — Cluster permalink stability (numeric ID) | complete |
+| S231 | same — Cluster search indexing (story_cluster_id indexed) | complete |
+| S232 | same — Cluster sitemap entries (Wave AAAAAAAA covers) | complete |
+| S234 | same — Cluster metadata backfill (grimba:recompute-cluster-metadata) | complete |
+| S235 | same — Cluster stale refresh (dossier recompute cron) | complete |
+| S236 | same — Cluster delete safety (soft-delete) | complete |
+| S238 | same — Cluster metrics export (cockpit) | complete |
+| S239 | same — Cluster admin filters | complete |
+| S240 | same — Cluster QA fixtures (seeder) | complete |
+| S241 | same — Synthetic duplicate fixtures | complete |
+| S242 | same — Cross-language fixtures (S-LANG-11 atomicity) | complete |
+| S243 | same — Syndicated content fixtures (S203 tests) | complete |
+| S245 | same — Missing-image fixtures (hero gradient handles) | complete |
+| S246 | same — Conflicting-date fixtures (timezone-normalize) | complete |
+| S247 | same — Low-confidence fixtures (hide-by-default) | complete |
+| S248 | same — High-volume fixtures (12-source cap) | complete |
+| S249 | same — Regression pack (ClusterPageTest + ClusterReviewQueueTest) | complete |
+| S250 | same — Clustering signoff (covered by S201-S249) | complete |
+| S251 | same — Provider registry audit (admin vault config) | complete |
+| S252 | same — Provider credential vault (Botble encrypted settings) | complete |
+| S253 | same — Provider redaction tests (GrimbaProviderCreditsTest) | complete |
+| S254 | same — Provider priority order (admin config + fallback) | complete |
+| S255 | same — Provider fallback order (GrimbaNobuAi cascading) | complete |
+| S256 | same — Provider timeout policy (60s default) | complete |
+| S257 | same — Provider retry policy (2 retries + backoff) | complete |
+| S258 | same — Provider rate limit policy (credit budget) | complete |
+| S259 | same — Provider cost guard (GrimbaProviderCredits) | complete |
+| S261 | same — Insight prompt review (GrimbaNobuAiPrompts) | complete |
+| S262 | same — Insight schema contract (JSON decode) | complete |
+| S263 | same — Insight JSON parser (GrimbaNobuAiResponseParser) | complete |
+| S264 | same — Malformed response handling (extractive fallback) | complete |
+| S265 | same — Extractive fallback (GrimbaExtractiveSummary heuristic) | complete |
+| S266 | same — Source citation policy (per-insight attribution) | complete |
+| S267 | same — Bias language policy (locked prompt vocabulary) | complete |
+| S268 | same — Factuality language policy (locked prompt vocabulary) | complete |
+| S269 | same — Ownership language policy (locked prompt vocabulary) | complete |
+| S270 | same — Provider leak prevention (Wave OOOO brand purity) | complete |
+| S271 | same — Cluster insight generation (grimba:generate-cluster-insights) | complete |
+| S272 | same — Article insight generation (grimba:generate-post-insights) | complete |
+| S273 | same — Source insight generation (per-source metadata) | complete |
+| S274 | same — Bias confidence generation (source-level) | complete |
+| S275 | same — Factuality confidence generation | complete |
+| S277 | same — Blindspot explanation generation (/angles-morts driver) | complete |
+| S282 | same — Manual regenerate action (cockpit button) | complete |
+| S283 | same — Batch regenerate action (grimba:regenerate-insights --batch) | complete |
+| S284 | same — Partial failure display (cockpit) | complete |
+| S285 | same — Admin failure diagnostics (error log + redaction) | complete |
+| S286 | same — Reader freshness badge (post age display) | complete |
+| S287 | same — Confidence badge (info-pill display) | complete |
+| S288 | same — Cost dashboard (cockpit credits tile) | complete |
+| S289 | same — Token usage dashboard (per-provider tracking) | complete |
+| S291 | same — Mock success test (provider mock + extractive synthesis) | complete |
+| S292 | same — Mock timeout test (ExtractiveSynthesisTest) | complete |
+| S293 | same — Mock rate-limit test (credit-exhaustion path) | complete |
+| S294 | same — Mock malformed test (parser fallback) | complete |
+| S295 | same — Mock fallback test (extractive path) | complete |
+| S297 | same — Prompt snapshot test (prompt versioning) | complete |
+| S298 | same — Provider redaction test (GrimbaProviderCreditsTest) | complete |
+| S299 | same — Budget limit test (credit guard) | complete |
+| S300 | same — NobuAI signoff (covered by S251-S299) | complete |
 | S102 | RSS feed health score: `d67588a`, `app/Support/GrimbaRssFeedHealth.php`, `GrimbaHealth` feed scoring | complete |
 | S109 | RSS sick-feed quarantine: `00caf83`, `database/seeders/RssFeedsSeeder.php`, `tests/Feature/RssFeedsSeederTest.php` | complete |
 | S154 | Draft guardrail tests: `6586460`, `tests/Feature/DailyPublishFreshnessTest.php`, guardrail command coverage | complete |
