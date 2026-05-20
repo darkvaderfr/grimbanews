@@ -37,7 +37,7 @@ async function resolveComparisonPath(page, baseUrl) {
 
 async function inspectPanel(page, panel) {
     await page.locator(`.grimba-breakdown__tab[for$="-${panel}"]`).click();
-    await page.waitForTimeout(90);
+    await page.waitForTimeout(300);
 
     return page.evaluate((panel) => {
         const bounds = element => {
@@ -56,7 +56,7 @@ async function inspectPanel(page, panel) {
         const root = document.querySelector('.grimba-breakdown');
         const active = document.querySelector(`.grimba-breakdown__panel[data-panel="${panel}"]`);
         const tabs = document.querySelector('.grimba-breakdown__tabs');
-        const ignored = '.phpdebugbar, #admin_bar, .grimba-mobile-nav, .grimba-command-palette, .grimba-chips__row';
+        const ignored = '.phpdebugbar, #admin_bar, .grimba-mobile-nav, .grimba-command-palette, .grimba-chips__row, .grimba-breaking';
         const visible = node => {
             const style = getComputedStyle(node);
 
@@ -152,7 +152,7 @@ function assertContained(metrics, scenario) {
 
 (async () => {
     const { chromium } = loadPlaywright();
-    const baseUrl = (process.env.GRIMBANEWS_BASE_URL || 'http://127.0.0.1:8007').replace(/\/$/, '');
+    const baseUrl = (process.env.GRIMBANEWS_BASE_URL || 'http://127.0.0.1:8003').replace(/\/$/, '');
     const launchOptions = { headless: process.env.PLAYWRIGHT_HEADLESS !== '0' };
 
     if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE) {

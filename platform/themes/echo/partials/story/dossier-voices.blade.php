@@ -68,7 +68,7 @@
         + ($voices['totals']['unknown'] ?? 0);
 @endphp
 
-<section class="grimba-voices" aria-labelledby="grimba-voices-title">
+<section class="grimba-voices" aria-labelledby="grimba-voices-title" data-grimba-voices>
     <header class="grimba-voices__head">
         <span class="grimba-voices__kicker">{{ __('Trois angles, une histoire') }}</span>
         <h2 id="grimba-voices-title" class="grimba-voices__title">
@@ -92,6 +92,8 @@
                 $sideCount = (int) ($voices['totals'][$side] ?? 0);
             @endphp
             <article class="grimba-voices__panel grimba-voices__panel--{{ $side }}"
+                     data-grimba-voices-panel
+                     data-bias="{{ $side }}"
                      style="--voice-color: {{ $sideColor }};">
                 <header class="grimba-voices__panel-head">
                     <span class="grimba-voices__side-dot" aria-hidden="true"></span>
@@ -177,7 +179,10 @@
                         }
                         $sourceLabel = trim((string) ($other->source_name ?? '')) ?: __('Source');
                     @endphp
-                    <li class="grimba-voices__row" style="--row-color: {{ $color }};">
+                    <li class="grimba-voices__row"
+                        data-grimba-voices-row
+                        data-bias="{{ $bucket }}"
+                        style="--row-color: {{ $color }};">
                         <span class="grimba-voices__row-bias" title="{{ $label }}" aria-label="{{ $label }}"></span>
                         <span class="grimba-voices__row-source">{{ $sourceLabel }}</span>
                         @if($country)
@@ -640,3 +645,50 @@
         }
     }
 </style>
+
+<script>
+    (function () {
+        const root = document.querySelector('[data-grimba-voices]');
+        if (!root) return;
+
+        const panels = Array.from(root.querySelectorAll('[data-grimba-voices-panel]'));
+        const rows = Array.from(root.querySelectorAll('[data-grimba-voices-row]'));
+        const scrollTarget = root.querySelector('.grimba-voices__table-wrap') || root;
+        const validSides = new Set(['all', ...panels.map(panel => panel.dataset.bias), ...rows.map(row => row.dataset.bias)]);
+
+        function normalize(side) {
+            const requested = side || 'all';
+            return validSides.has(requested) ? requested : 'all';
+        }
+
+        function setVisibility(node, visible) {
+            node.hidden = !visible;
+            node.setAttribute('aria-hidden', String(!visible));
+            node.style.display = visible ? '' : 'none';
+        }
+
+        function activate(side, options = {}) {
+            const selected = normalize(side);
+            const visibleFor = node => selected === 'all' || node.dataset.bias === selected;
+
+            panels.forEach(panel => setVisibility(panel, visibleFor(panel)));
+            rows.forEach(row => setVisibility(row, visibleFor(row)));
+            root.dataset.activeBias = selected;
+
+            if (options.scroll) {
+                scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            document.dispatchEvent(new CustomEvent('grimba:cluster-filtered', {
+                detail: { side: selected }
+            }));
+        }
+
+        root.dataset.activeBias = 'all';
+        document.addEventListener('grimba:cluster-filter', event => {
+            activate(event.detail?.side || event.detail?.filter || 'all', {
+                scroll: Boolean(event.detail?.scroll)
+            });
+        });
+    })();
+</script>

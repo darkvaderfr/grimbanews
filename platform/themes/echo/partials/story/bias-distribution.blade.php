@@ -777,6 +777,7 @@
         (function () {
             const segments = document.querySelectorAll('[data-grimba-bar-side]');
             const chips = document.querySelectorAll('[data-grimba-spectrum-chip]');
+            let currentSide = 'all';
 
             // All chips start active (no filter applied).
             chips.forEach(chip => chip.setAttribute('data-bias-active', 'true'));
@@ -798,7 +799,8 @@
 
             segments.forEach(segment => {
                 segment.addEventListener('click', () => {
-                    const side = segment.dataset.grimbaBarSide;
+                    const side = currentSide === segment.dataset.grimbaBarSide ? 'all' : segment.dataset.grimbaBarSide;
+                    currentSide = side;
                     syncBar(side);
                     syncChips(side);
                     document.dispatchEvent(new CustomEvent('grimba:cluster-filter', {
@@ -809,7 +811,8 @@
 
             chips.forEach(chip => {
                 chip.addEventListener('click', () => {
-                    const side = chip.dataset.bias;
+                    const side = currentSide === chip.dataset.bias ? 'all' : chip.dataset.bias;
+                    currentSide = side;
                     syncBar(side);
                     syncChips(side);
                     document.dispatchEvent(new CustomEvent('grimba:cluster-filter', {
@@ -820,6 +823,7 @@
 
             document.addEventListener('grimba:cluster-filtered', event => {
                 const side = event.detail?.side || 'all';
+                currentSide = side;
                 syncBar(side);
                 syncChips(side);
             });

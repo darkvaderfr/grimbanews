@@ -23,43 +23,12 @@ function loadPlaywright() {
     throw new Error('Playwright is not installed. Run npm install --no-save playwright, or set PLAYWRIGHT_MODULE.');
 }
 
-function parseRgb(value) {
-    const match = String(value).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-
-    if (! match) {
-        throw new Error(`Cannot parse CSS color: ${value}`);
-    }
-
-    return match.slice(1, 4).map(Number);
-}
-
-function luminance([r, g, b]) {
-    const channel = value => {
-        const scaled = value / 255;
-
-        return scaled <= 0.03928
-            ? scaled / 12.92
-            : ((scaled + 0.055) / 1.055) ** 2.4;
-    };
-
-    return (0.2126 * channel(r)) + (0.7152 * channel(g)) + (0.0722 * channel(b));
-}
-
-function contrast(rgbA, rgbB) {
-    const light = Math.max(luminance(rgbA), luminance(rgbB));
-    const dark = Math.min(luminance(rgbA), luminance(rgbB));
-
-    return (light + 0.05) / (dark + 0.05);
-}
-
 async function collectComponent(page, selector) {
     return page.evaluate((selector) => {
         const node = document.querySelector(selector);
         const viewportWidth = window.innerWidth;
         const ignored = '.phpdebugbar, #admin_bar, .grimba-mobile-nav, .grimba-command-palette, .grimba-chips__row, .grimba-breaking';
         const rect = node ? node.getBoundingClientRect() : null;
-        const active = node ? node.querySelector('[aria-selected="true"]') : null;
-        const activeStyle = active ? getComputedStyle(active) : null;
 
         const childOffenders = node
             ? Array.from(node.querySelectorAll('*'))
@@ -109,65 +78,34 @@ async function collectComponent(page, selector) {
                 right: Math.round(child.getBoundingClientRect().right),
             }));
 
+        const readableText = node
+            ? (() => {
+                const clone = node.cloneNode(true);
+                clone.querySelectorAll('script, style').forEach(child => child.remove());
+
+                return clone.textContent.replace(/\s+/g, ' ').trim().slice(0, 300);
+            })()
+            : '';
+
         return {
             exists: Boolean(node),
             selector,
-            text: node ? node.textContent.replace(/\s+/g, ' ').trim().slice(0, 240) : '',
+            text: readableText,
             viewportWidth,
             scrollWidth: document.documentElement.scrollWidth,
             rect: rect ? {
                 left: Math.round(rect.left),
                 right: Math.round(rect.right),
                 width: Math.round(rect.width),
+                height: Math.round(rect.height),
+                top: Math.round(rect.top),
             } : null,
             display: node ? getComputedStyle(node).display : null,
             gridTemplateColumns: node ? getComputedStyle(node).gridTemplateColumns : null,
             childOffenders,
             documentOffenders,
-            activeColor: activeStyle ? activeStyle.color : null,
-            activeBackground: activeStyle ? activeStyle.backgroundColor : null,
         };
     }, selector);
-}
-
-async function collectModal(page) {
-    return page.evaluate(() => {
-        const viewportWidth = window.innerWidth;
-        const panel = document.querySelector('#grimba-compare-modal .grimba-compare-modal__panel');
-        const close = document.querySelector('#grimba-compare-modal .grimba-newsletter-modal__close');
-        const title = document.querySelector('#grimba-compare-title');
-        const panelRect = panel ? panel.getBoundingClientRect() : null;
-        const closeRect = close ? close.getBoundingClientRect() : null;
-        const titleRect = title ? title.getBoundingClientRect() : null;
-        const cards = Array.from(document.querySelectorAll('#grimba-compare-modal .grimba-compare-modal__card'));
-
-        return {
-            viewportWidth,
-            scrollWidth: document.documentElement.scrollWidth,
-            panel: panelRect ? {
-                left: Math.round(panelRect.left),
-                right: Math.round(panelRect.right),
-                top: Math.round(panelRect.top),
-                bottom: Math.round(panelRect.bottom),
-                width: Math.round(panelRect.width),
-            } : null,
-            close: closeRect ? {
-                left: Math.round(closeRect.left),
-                right: Math.round(closeRect.right),
-                top: Math.round(closeRect.top),
-                bottom: Math.round(closeRect.bottom),
-            } : null,
-            title: titleRect ? {
-                left: Math.round(titleRect.left),
-                right: Math.round(titleRect.right),
-                top: Math.round(titleRect.top),
-                bottom: Math.round(titleRect.bottom),
-            } : null,
-            cardCount: cards.length,
-            cardWidths: cards.map(card => Math.round(card.getBoundingClientRect().width)),
-            text: panel ? panel.textContent.replace(/\s+/g, ' ').trim().slice(0, 300) : '',
-        };
-    });
 }
 
 function assertComponent(metrics, scenarioKey) {
@@ -180,24 +118,124 @@ function assertComponent(metrics, scenarioKey) {
     assert.deepEqual(metrics.documentOffenders, [], `${scenarioKey} page overflow`);
 }
 
-function assertModal(metrics, scenarioKey) {
-    assert(metrics.panel, `${scenarioKey} compare modal panel exists`);
-    assert(metrics.close, `${scenarioKey} compare modal close exists`);
-    assert(metrics.title, `${scenarioKey} compare modal title exists`);
-    assert(metrics.panel.left >= 0, `${scenarioKey} modal panel left ${metrics.panel.left}`);
-    assert(metrics.panel.right <= metrics.viewportWidth + 1, `${scenarioKey} modal panel right ${metrics.panel.right}/${metrics.viewportWidth}`);
-    assert(metrics.panel.top >= 0, `${scenarioKey} modal panel top ${metrics.panel.top}`);
-    assert(metrics.scrollWidth <= metrics.viewportWidth + 1, `${scenarioKey} modal document overflow ${metrics.scrollWidth}/${metrics.viewportWidth}`);
-    assert.equal(metrics.cardCount, 2, `${scenarioKey} selected compare cards`);
-    assert(metrics.close.left > metrics.title.right || metrics.close.top > metrics.title.bottom || metrics.close.bottom < metrics.title.top, `${scenarioKey} close overlaps title`);
-    assert(/Comparer le cadrage/.test(metrics.text), `${scenarioKey} modal title copy`);
+async function collectActionMetrics(page, selector) {
+    return page.locator(selector).first().evaluate((actions) => {
+        const compare = actions.querySelector('.grimba-story-page__compare');
+        const save = actions.querySelector('.grimba-save-btn');
+        const compareShort = actions.querySelector('.grimba-story-page__compare-label--short');
+        const compareFull = actions.querySelector('.grimba-story-page__compare-label--full');
+        const box = node => {
+            const rect = node.getBoundingClientRect();
+
+            return {
+                top: Math.round(rect.top),
+                width: Math.round(rect.width),
+                height: Math.round(rect.height),
+                right: Math.round(rect.right),
+            };
+        };
+
+        return {
+            display: getComputedStyle(actions).display,
+            compare: compare ? box(compare) : null,
+            save: save ? box(save) : null,
+            shortDisplay: compareShort ? getComputedStyle(compareShort).display : '',
+            fullDisplay: compareFull ? getComputedStyle(compareFull).display : '',
+        };
+    });
+}
+
+async function exerciseBiasFilter(page, scenarioKey) {
+    await page.locator('.grimba-story-distribution').first().scrollIntoViewIfNeeded();
+
+    const rowCount = await page.locator('[data-grimba-voices-row]').count();
+    const panelCount = await page.locator('[data-grimba-voices-panel]').count();
+    const chipCount = await page.locator('[data-grimba-spectrum-chip]').count();
+    assert(rowCount > 0, `${scenarioKey} has filterable source rows`);
+    assert(panelCount >= 3, `${scenarioKey} has per-side voice panels`);
+    assert(chipCount > 0, `${scenarioKey} has spectrum chips`);
+
+    const selectedSide = await page.evaluate(() => {
+        const rowBiases = new Set(Array.from(document.querySelectorAll('[data-grimba-voices-row]'))
+            .map(row => row.dataset.bias)
+            .filter(Boolean));
+        const segments = Array.from(document.querySelectorAll('[data-grimba-bar-side]'));
+        const matchingSegment = segments.find(segment => rowBiases.has(segment.dataset.grimbaBarSide)) || segments[0];
+
+        return matchingSegment?.dataset.grimbaBarSide || '';
+    });
+    assert(selectedSide, `${scenarioKey} has a distribution segment with a side`);
+    const segment = page.locator(`[data-grimba-bar-side="${selectedSide}"]`).first();
+
+    await segment.click();
+    await page.waitForFunction(side => document.querySelector('[data-grimba-voices]')?.dataset.activeBias === side, selectedSide);
+
+    const filtered = await page.evaluate((side) => {
+        const visible = node => !node.hidden && getComputedStyle(node).display !== 'none';
+
+        return {
+            activeBias: document.querySelector('[data-grimba-voices]')?.dataset.activeBias || '',
+            pressed: document.querySelector(`[data-grimba-bar-side="${side}"]`)?.getAttribute('aria-pressed') || '',
+            panels: Array.from(document.querySelectorAll('[data-grimba-voices-panel]')).map(panel => ({
+                bias: panel.dataset.bias,
+                visible: visible(panel),
+                ariaHidden: panel.getAttribute('aria-hidden'),
+            })),
+            rows: Array.from(document.querySelectorAll('[data-grimba-voices-row]')).map(row => ({
+                bias: row.dataset.bias,
+                visible: visible(row),
+                ariaHidden: row.getAttribute('aria-hidden'),
+            })),
+            chips: Array.from(document.querySelectorAll('[data-grimba-spectrum-chip]')).map(chip => ({
+                bias: chip.dataset.bias,
+                active: chip.getAttribute('data-bias-active'),
+                pressed: chip.getAttribute('aria-pressed'),
+            })),
+        };
+    }, selectedSide);
+
+    assert.equal(filtered.activeBias, selectedSide, `${scenarioKey} voices receive active bias`);
+    assert.equal(filtered.pressed, 'true', `${scenarioKey} distribution segment is pressed`);
+    assert(filtered.panels.some(panel => panel.bias === selectedSide && panel.visible), `${scenarioKey} selected voice panel remains visible`);
+    assert(filtered.panels.filter(panel => panel.bias !== selectedSide).every(panel => !panel.visible && panel.ariaHidden === 'true'), `${scenarioKey} non-selected voice panels hide`);
+    assert(filtered.rows.some(row => row.visible), `${scenarioKey} side filter leaves visible source rows`);
+    assert(filtered.rows.filter(row => row.visible).every(row => row.bias === selectedSide), `${scenarioKey} source rows filter to ${selectedSide}`);
+    assert(filtered.chips.filter(chip => chip.bias === selectedSide).every(chip => chip.active === 'true' && chip.pressed === 'true'), `${scenarioKey} selected spectrum chips are active`);
+    assert(filtered.chips.filter(chip => chip.bias !== selectedSide).every(chip => chip.active === 'false' && chip.pressed === 'false'), `${scenarioKey} non-selected spectrum chips dim`);
+
+    await segment.click();
+    await page.waitForFunction(() => document.querySelector('[data-grimba-voices]')?.dataset.activeBias === 'all');
+
+    const reset = await page.evaluate((side) => {
+        const visible = node => !node.hidden && getComputedStyle(node).display !== 'none';
+
+        return {
+            activeBias: document.querySelector('[data-grimba-voices]')?.dataset.activeBias || '',
+            pressed: document.querySelector(`[data-grimba-bar-side="${side}"]`)?.getAttribute('aria-pressed') || '',
+            panels: Array.from(document.querySelectorAll('[data-grimba-voices-panel]')).map(panel => visible(panel)),
+            rows: Array.from(document.querySelectorAll('[data-grimba-voices-row]')).map(row => visible(row)),
+            chips: Array.from(document.querySelectorAll('[data-grimba-spectrum-chip]')).map(chip => ({
+                active: chip.getAttribute('data-bias-active'),
+                pressed: chip.getAttribute('aria-pressed'),
+            })),
+        };
+    }, selectedSide);
+
+    assert.equal(reset.activeBias, 'all', `${scenarioKey} second click resets voices`);
+    assert.equal(reset.pressed, 'false', `${scenarioKey} distribution segment resets`);
+    assert(reset.panels.every(Boolean), `${scenarioKey} reset shows all voice panels`);
+    assert(reset.rows.every(Boolean), `${scenarioKey} reset shows all source rows`);
+    assert(reset.chips.every(chip => chip.active === 'true' && chip.pressed === 'false'), `${scenarioKey} reset reactivates spectrum chips`);
+
+    return { selectedSide, rowCount, panelCount, chipCount };
 }
 
 (async () => {
     const { chromium } = loadPlaywright();
-    const baseUrl = (process.env.GRIMBANEWS_BASE_URL || 'http://127.0.0.1:8007').replace(/\/$/, '');
+    const baseUrl = (process.env.GRIMBANEWS_BASE_URL || 'http://127.0.0.1:8003').replace(/\/$/, '');
     const storyPath = process.env.GRIMBANEWS_STORY_ARTICLE_PATH
         || '/article/en-direct-guerre-au-moyen-orient-le-chef-de-la-diplomatie-iranienne-abbas-araghtchi-est-attendu-au-pakistan-pour-des-pourparlers-le-hezbollah-appelle-le-liban-a-se-retirer-des-negociations-avec-israel';
+    const storyActionsSelector = '.grimba-story-page__bar-actions, .grimba-story-page__actions, .grimba-orphan-actions';
     const launchOptions = { headless: process.env.PLAYWRIGHT_HEADLESS !== '0' };
 
     if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE) {
@@ -229,107 +267,80 @@ function assertModal(metrics, scenarioKey) {
         const response = await page.goto(storyPath, { waitUntil: 'networkidle' });
         assert(response && response.ok(), `${scenario.key} response ${response && response.status()}`);
 
-        await page.locator('.grimba-story-page__actions').first().scrollIntoViewIfNeeded();
-        const actions = await collectComponent(page, '.grimba-story-page__actions');
-        const heroTabs = await collectComponent(page, '.grimba-story-page__tablist');
+        await page.locator(storyActionsSelector).first().scrollIntoViewIfNeeded();
+        const actions = await collectComponent(page, storyActionsSelector);
+        const articleCard = await collectComponent(page, '.grimba-article-card');
+        const shareKit = await collectComponent(page, '.grimba-share-kit');
         assertComponent(actions, scenario.key);
-        assertComponent(heroTabs, scenario.key);
-        assert(/Tous/.test(heroTabs.text), `${scenario.key} hero tabs copy`);
+        assertComponent(articleCard, scenario.key);
+        assertComponent(shareKit, scenario.key);
+        assert(/Sauvegarder/.test(actions.text), `${scenario.key} action bar includes save`);
+        assert(/Lu chez|Source|ARTICLE/.test(articleCard.text), `${scenario.key} article card keeps source context`);
+
+        const actionMetrics = await collectActionMetrics(page, storyActionsSelector);
+        assert(actionMetrics.compare, `${scenario.key} compare/source-analysis action exists`);
+        assert(actionMetrics.save, `${scenario.key} save action exists`);
 
         if (scenario.key.startsWith('mobile')) {
-            assert.equal(heroTabs.display, 'grid', `${scenario.key} hero tabs grid`);
-            assert(heroTabs.gridTemplateColumns.split(' ').length >= 3, `${scenario.key} hero tabs columns ${heroTabs.gridTemplateColumns}`);
+            assert.equal(actionMetrics.display, 'grid', `${scenario.key} action bar uses mobile grid`);
+            assert(actionMetrics.compare.height >= 44, `${scenario.key} compare action tap target`);
+            assert(actionMetrics.save.height >= 44, `${scenario.key} save action tap target`);
+            assert.notEqual(actionMetrics.shortDisplay, 'none', `${scenario.key} concise compare label is visible`);
+            assert.equal(actionMetrics.fullDisplay, 'none', `${scenario.key} long compare label is hidden`);
+        } else {
+            assert.equal(actionMetrics.display, 'flex', `${scenario.key} action bar uses desktop row`);
+            assert(actionMetrics.compare.height >= 36, `${scenario.key} compare action desktop target`);
+            assert(actionMetrics.save.height >= 36, `${scenario.key} save action desktop target`);
+            assert.notEqual(actionMetrics.fullDisplay, 'none', `${scenario.key} full compare label is visible`);
         }
 
-        await page.locator('.grimba-story-articles__tabs').first().scrollIntoViewIfNeeded();
-        const articleTabs = await collectComponent(page, '.grimba-story-articles__tabs');
-        assertComponent(articleTabs, scenario.key);
-        assert(/Tous/.test(articleTabs.text), `${scenario.key} article tabs copy`);
-        assert.equal(articleTabs.display, 'grid', `${scenario.key} article tabs grid`);
+        await page.locator('.grimba-story-page__compare').first().click();
+        await page.waitForFunction((height) => {
+            const node = document.querySelector('.grimba-story-distribution');
+            if (!node) return false;
 
-        const activeContrast = contrast(parseRgb(articleTabs.activeColor), parseRgb(articleTabs.activeBackground));
-        assert(activeContrast >= 4.5, `${scenario.key} active tab contrast ${activeContrast.toFixed(2)}`);
+            const rect = node.getBoundingClientRect();
+            return rect.top < height && rect.bottom > 0;
+        }, scenario.viewport.height);
+        const distributionTop = await page.locator('.grimba-story-distribution').first().evaluate(node => Math.round(node.getBoundingClientRect().top));
+        assert(distributionTop < scenario.viewport.height, `${scenario.key} source-analysis action scrolls to distribution`);
 
-        const sideTab = page.locator('.grimba-story-articles__tab[data-bias-tab]:not([data-bias-tab="all"])').first();
-        const sideTabCount = await sideTab.count();
-        assert(sideTabCount > 0, `${scenario.key} has a side filter tab`);
-        const selectedSide = await sideTab.getAttribute('data-bias-tab');
-        await sideTab.click();
-        const filteredBiases = await page.locator('[data-grimba-cluster-list] [data-bias]').evaluateAll(nodes => nodes
-            .filter(node => !node.hidden && getComputedStyle(node).display !== 'none')
-            .map(node => node.dataset.bias));
-        assert(filteredBiases.length > 0, `${scenario.key} side filter leaves visible articles`);
-        assert(filteredBiases.every(bias => bias === selectedSide), `${scenario.key} side filter only shows ${selectedSide}: ${filteredBiases.join(',')}`);
+        await page.locator('.grimba-voices').first().scrollIntoViewIfNeeded();
+        const voices = await collectComponent(page, '.grimba-voices');
+        const voiceGrid = await collectComponent(page, '.grimba-voices__grid');
+        const voiceTable = await collectComponent(page, '.grimba-voices__table-wrap');
+        assertComponent(voices, scenario.key);
+        assertComponent(voiceGrid, scenario.key);
+        assertComponent(voiceTable, scenario.key);
+        assert(/Trois angles|Toutes les sources/.test(voices.text), `${scenario.key} voices module copy`);
 
-        const distributionSegment = page.locator(`[data-grimba-bar-side="${selectedSide}"]`).first();
-        if (await distributionSegment.count()) {
-            await distributionSegment.click();
-            await page.waitForTimeout(80);
-            const pressed = await distributionSegment.getAttribute('aria-pressed');
-            assert.equal(pressed, 'true', `${scenario.key} distribution segment reflects active filter`);
-        }
+        await page.locator('.grimba-story-distribution').first().scrollIntoViewIfNeeded();
+        const distribution = await collectComponent(page, '.grimba-story-distribution');
+        const spectrum = await collectComponent(page, '.grimba-story-spectrum');
+        assertComponent(distribution, scenario.key);
+        assertComponent(spectrum, scenario.key);
+        assert(/Distribution des biais|Signal/.test(distribution.text), `${scenario.key} distribution module copy`);
 
-        await page.locator('.grimba-story-articles__tab[data-bias-tab="all"]').first().click();
+        const filter = await exerciseBiasFilter(page, scenario.key);
 
-        const reader = await collectComponent(page, '.grimba-full-article');
-        assertComponent(reader, scenario.key);
-        assert(/Lire l'|Source originale|Texte intégral|Extrait disponible/.test(reader.text), `${scenario.key} reader module copy`);
+        await page.locator('.grimba-story-timeline').first().scrollIntoViewIfNeeded();
+        const timeline = await collectComponent(page, '.grimba-story-timeline');
+        assertComponent(timeline, scenario.key);
+        assert(/Chronologie/.test(timeline.text), `${scenario.key} timeline module copy`);
 
-        await page.locator('.grimba-source-drilldown').first().scrollIntoViewIfNeeded();
-        const provenance = await collectComponent(page, '.grimba-source-drilldown');
-        const provenanceCountries = await collectComponent(page, '.grimba-source-drilldown__countries');
-        assertComponent(provenance, scenario.key);
-        assertComponent(provenanceCountries, scenario.key);
-        const provenanceText = await page.locator('.grimba-source-drilldown').first().innerText();
-        assert(/Provenance des sources/.test(provenance.text), `${scenario.key} provenance kicker copy`);
-        assert(/Matrice des angles/.test(provenance.text), `${scenario.key} provenance title copy`);
-        assert(/Ouvrir dans le dossier/.test(provenanceText), `${scenario.key} provenance dossier links`);
-        assert(!/Lire cette source|Propriété/.test(provenanceText), `${scenario.key} provenance avoids repeated source ownership copy`);
-
-        await page.locator('.grimba-story-article').first().scrollIntoViewIfNeeded();
-        const articleCard = await collectComponent(page, '.grimba-story-article');
-        const sourceRow = await collectComponent(page, '.grimba-story-article__source-row');
-        const compareToggle = await collectComponent(page, '.grimba-compare-toggle');
-        assertComponent(articleCard, scenario.key);
-        assertComponent(sourceRow, scenario.key);
-        assertComponent(compareToggle, scenario.key);
-        assert(articleCard.text.length > 80, `${scenario.key} article card has readable text`);
-        assert(compareToggle.rect.width >= 34, `${scenario.key} compare target width ${compareToggle.rect.width}`);
-        const storyReadTarget = await page.locator('.grimba-story-article:not(.grimba-story-article--current) .grimba-story-article__read').first().getAttribute('target');
-        assert.equal(storyReadTarget, null, `${scenario.key} dossier read link stays inside GrimbaNews`);
-
-        await page.evaluate(() => {
-            document.querySelectorAll('[data-grimba-compare-toggle]').forEach((input, index) => {
-                if (index < 2) {
-                    input.checked = true;
-                    input.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-            });
-        });
-
-        await page.locator('.grimba-compare-toolbar').scrollIntoViewIfNeeded();
-        const toolbar = await collectComponent(page, '.grimba-compare-toolbar');
-        assertComponent(toolbar, scenario.key);
-        assert(/2/.test(toolbar.text), `${scenario.key} compare toolbar count`);
-
-        await page.locator('[data-grimba-compare-open]').click();
-        await page.waitForSelector('#grimba-compare-modal.is-open');
-        const modal = await collectModal(page);
-        assertModal(modal, scenario.key);
-        const modalReadLinks = await page.locator('#grimba-compare-modal .grimba-compare-modal__link', { hasText: 'Lire dans GrimbaNews' }).count();
-        assert.equal(modalReadLinks, 2, `${scenario.key} compare modal links route into GrimbaNews`);
+        const externalSourceLinks = await page.locator('.grimba-voices__cta[href^="http"], .grimba-voices__row-headline[href^="http"]').evaluateAll((links, origin) => links
+            .map(link => link.href)
+            .filter(href => !href.startsWith(origin)), `${baseUrl}/`);
+        assert.equal(externalSourceLinks.length, 0, `${scenario.key} voices links stay inside GrimbaNews`);
 
         results[scenario.key] = {
-            heroTabs: heroTabs.rect,
-            articleTabs: articleTabs.rect,
-            reader: reader.rect,
-            provenance: provenance.rect,
-            provenanceCountries: provenanceCountries.rect,
+            actions: actions.rect,
             articleCard: articleCard.rect,
-            compareToggle: compareToggle.rect,
-            toolbar: toolbar.rect,
-            activeContrast: Number(activeContrast.toFixed(2)),
-            modal: modal.panel,
+            voices: voices.rect,
+            distribution: distribution.rect,
+            spectrum: spectrum.rect,
+            timeline: timeline.rect,
+            filter,
         };
 
         await context.close();

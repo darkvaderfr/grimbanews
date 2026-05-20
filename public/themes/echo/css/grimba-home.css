@@ -2194,6 +2194,33 @@ html.grimba-header-shrunk .grimba-header__main .py-3 {
         min-width: min(14rem, calc(100vw - 1.5rem));
     }
 }
+@media (max-width: 575.98px) {
+    .grimba-header__tools .grimba-edition-toggle {
+        max-width: 3.75rem;
+        overflow: hidden;
+    }
+    .grimba-edition-picker__trigger {
+        width: 3.75rem;
+        max-width: 3.75rem;
+        min-width: 0;
+        gap: 0.28rem;
+        padding-inline: 0.48rem 0.32rem;
+    }
+    .grimba-edition-picker__label {
+        max-width: calc(100% - 24px);
+        font-size: 0.74rem;
+    }
+    .grimba-edition-picker__chevron {
+        width: 16px;
+        height: 16px;
+        flex: 0 0 16px;
+    }
+}
+@media (max-width: 359.98px) {
+    .grimba-header__tools .grimba-edition-toggle {
+        display: none;
+    }
+}
 
 /* S83 masthead — editorial serif, mixed case, accent-red "News".
    Paired with the ^opsz display axis so the wordmark gains density
@@ -7418,6 +7445,12 @@ html.grimba-home-html[data-bs-theme="dark"] {
        removing the attribute. This transition is the receiver. */
     transition: transform .18s ease-out, opacity .18s ease-out;
     transform-origin: top left;
+}
+/* Closed details bodies are invisible, but Chromium still lays them
+   out once our custom absolute popover styles apply. Keep them out of
+   scroll-width until the pill is actually opened. */
+[data-grimba-info-pill]:not([open]) > .grimba-info-pill__body {
+    display: none;
 }
 /* Wave DDDDD (Vader 2026-05-18) — focus-visible state for the info-pill
    body. `tabindex="-1"` programmatic focus normally renders no visible
