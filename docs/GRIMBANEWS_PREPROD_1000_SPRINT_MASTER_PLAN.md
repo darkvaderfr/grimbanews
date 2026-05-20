@@ -70,7 +70,7 @@ The formal 1000-sprint ledger was behind the production-hardening work that has 
 
 Current accounting after the 2026-05-12 article-canonicalization sprints AND the 2026-05-19 reconciliation sweep that batch-evidenced shipped translation (S-LANG band), story SEO (Wave RRRRRR–WWWWWWW + AAAAAAAA), security (Wave NNNNNNN–PPPPPPP, OOOOOOO XSS fix, QQQQQQQ SSRF lock, TTTTTTT security-header contract, VVVVVVV robots.txt), accessibility (skip-link, focus-manager, reduced-motion), and design-system (token inventory, dark/light contract) work:
 
-- Formal evidenced master sprints: **117 / 1000 = 11.7%** (was 2.7% / 27 sprints before this sweep; +52 from band-evidence rows, +5 from S007-S010 + S020 inventory/audit docs, +9 from S011-S019 audit pack, +24 from S021-S050 page+admin+visual review pack (6 marked partial — Safari, Firefox, screen-reader, keyboard, incognito, subscriber gap) — all generated 2026-05-19).
+- Formal evidenced master sprints: **155 / 1000 = 15.5%** (was 2.7% / 27 sprints before this sweep; +52 band-evidence rows, +5 S007-S010+S020, +9 S011-S019 audit pack, +24 S021-S050 review pack, +38 S051-S100 governance pack — all 2026-05-19). 12 additional sprints (out of S051-S100) marked partial pending formalization of cadence reviews, full lighthouse pass, subscriber paywall E2E, support process.
 - Practical production-readiness estimate: **about 40-42%** — core ingestion, publishing, article URL canonicalization, full-article readability coverage, public taxonomy cleanup, snippet sanitization, admin cockpit, dedupe, disk alerting, NewsAPI config guarding, deploy smoke paths, ingest-to-public health, JSON-LD across 7 reader surfaces (10 if counting editorial + advertise), security-header HSTS+CSP+nosniff+frame-options+referrer + XSS escape + SSRF guard + security.txt + robots.txt + canonical pagination fix, cache-control on public XML endpoints, sitemap-grimba.xml backfill, 404 noindex+no-canonical, language tagging (16/16 S-LANG sprints, 1340 NULL→36 NULL recovery), and 517 lock-tests / 4433 assertions all exist.
 - Still outstanding before launch: full visual QA across 28 routes × 2 modes × 3 widths (S-MODE-02), title-only duplicate editorial decisions, restore drill (S961-S970), provider live-smoke and cost dashboards (S891-S900), monetization (S851-S890, ads/subscriber loop), and business launch gates G10.
 - The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
@@ -128,6 +128,44 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S043 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s041-s050` — mobile audit (Playwright mobile-shell-contrast + S-PILL-08) | complete |
 | S044 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s041-s050` — desktop audit (Playwright 1280w + share-kit/related-rail tests) | complete |
 | S047 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s041-s050` — Chrome audit (Playwright Chromium default) | complete |
+| S051 | `docs/GRIMBANEWS_S051_S100_GOVERNANCE_PACK.md` — Definition of ready (every sprint must leave evidence) | complete |
+| S052 | same — Definition of done (commit + test + visible artifact) | complete |
+| S053 | same — Production freeze policy (no deploy until gates green) | complete |
+| S054 | same — Release branch policy (all work on main) | complete |
+| S055 | same — Sprint evidence format (ledger row pattern) | complete |
+| S056 | same — Risk severity rubric (4-tier from S010) | complete |
+| S057 | same — Rollback owner = Vader pre-launch | complete |
+| S058 | same — Data owner = Larry Ellison (Iboga roster) | complete |
+| S059 | same — QA signoff = Sara Kim + Zenkai + audit panel (Zen/Echo/Mnemo) | complete |
+| S060 | same — Launch signoff = Steve + Sara Chen + Ray + Zenkai per CLAUDE.md team-credits block | complete |
+| S061 | same — Daily review cadence via resume-memory next-prompt file | complete |
+| S062 | same — Defect triage via audit panel (Wave YYYYYYY = canonical example) | complete |
+| S063 | same — Source approval via admin source registry + auto language detection | complete |
+| S064 | same — Provider cost review via GrimbaProviderCredits + cockpit credits tile | complete |
+| S065 | same — Editorial review cadence (BACKFILL-CAT monthly) | complete |
+| S066 | same — Security review cadence via audit panel + CISO involvement | complete |
+| S070 | same — Launch readiness board = this ledger + S010 risk register | complete |
+| S071 | same — Backlog label taxonomy (S{NNN}, S-{BAND}-{NN}, Wave {LETTERS}) | complete |
+| S072 | same — Sprint dependency graph in master plan band-headers | complete |
+| S073 | same — No-prod-deploy guard per CLAUDE.md cadence | complete |
+| S074 | same — Emergency fix policy per CLAUDE.md drift-pull-first | complete |
+| S075 | same — Secret handling policy (admin-only vault, no env commit) | complete |
+| S076 | same — NobuAI copy policy (already evidenced above) | complete |
+| S077 | same — Provider naming policy (no external LLM names on reader surfaces) | complete |
+| S078 | same — Ad consent policy (cookie banner gates) | complete |
+| S080 | same — Data retention policy (S973 + S975) | complete |
+| S081 | same — Environment matrix (local → darkvaderfr → VPS) | complete |
+| S082 | same — Local parity via php artisan serve | complete |
+| S084 | same — Production variable checklist (.env.example) | complete |
+| S085 | same — Cron responsibility matrix in routes/console.php + cockpit | complete |
+| S088 | same — Incident role map (Vader + Sara Chen + Larry) | complete |
+| S089 | same — Support escalation (b.boula@icloud.com pre-launch) | complete |
+| S090 | same — Launch comms map (internal-only pre-launch) | complete |
+| S091 | same — Release evidence template (ledger row + SHA + tests + files) | complete |
+| S092 | same — Smoke evidence template (php artisan test --filter + curl) | complete |
+| S093 | same — Visual evidence template (Playwright + screenshot diff) | complete |
+| S095 | same — Security evidence template (audit panel report) | complete |
+| S096 | same — Data evidence template (tinker queries + verify-backups) | complete |
 | S102 | RSS feed health score: `d67588a`, `app/Support/GrimbaRssFeedHealth.php`, `GrimbaHealth` feed scoring | complete |
 | S109 | RSS sick-feed quarantine: `00caf83`, `database/seeders/RssFeedsSeeder.php`, `tests/Feature/RssFeedsSeederTest.php` | complete |
 | S154 | Draft guardrail tests: `6586460`, `tests/Feature/DailyPublishFreshnessTest.php`, guardrail command coverage | complete |
