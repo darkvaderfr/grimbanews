@@ -160,6 +160,10 @@ class GrimbaReleaseSmoke extends Command
             return $this->runSecurityHeaderCheck($response);
         }
 
+        if ($label === 'product health endpoint') {
+            return $this->runProductHealthPayloadCheck($response);
+        }
+
         return false;
     }
 
@@ -195,6 +199,45 @@ class GrimbaReleaseSmoke extends Command
 
         $this->recordCheck('homepage security headers', 'headers', 'passed', 'CSP enforced with frame/content/referrer protections');
         $this->info('✓ homepage security headers passed');
+
+        return false;
+    }
+
+    private function runProductHealthPayloadCheck(\Illuminate\Http\Client\Response $response): bool
+    {
+        $payload = $response->json();
+        $failures = [];
+
+        if (! is_array($payload)) {
+            $failures[] = 'response body is not JSON';
+        } else {
+            if (($payload['service'] ?? null) !== 'grimbanews') {
+                $failures[] = 'service must be grimbanews';
+            }
+
+            if (($payload['status'] ?? null) !== 'ok') {
+                $failures[] = 'status must be ok';
+            }
+
+            if (($payload['db'] ?? null) !== 'up') {
+                $failures[] = 'db must be up';
+            }
+
+            if (! array_key_exists('last_post_at', $payload)) {
+                $failures[] = 'last_post_at field missing';
+            }
+        }
+
+        if ($failures !== []) {
+            $detail = implode('; ', $failures);
+            $this->recordCheck('product health payload', 'json', 'failed', $detail);
+            $this->error('✗ product health payload failed: ' . $detail);
+
+            return true;
+        }
+
+        $this->recordCheck('product health payload', 'json', 'passed', 'status ok, db up, service grimbanews');
+        $this->info('✓ product health payload passed');
 
         return false;
     }
