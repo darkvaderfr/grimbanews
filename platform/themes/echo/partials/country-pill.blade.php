@@ -23,13 +23,25 @@
         $__resolveCountry = trim((string) $country);
     } elseif (isset($post) && $post) {
         if (! empty($post->source_id)) {
-            $__resolveCountry = \Illuminate\Support\Facades\Cache::remember(
-                'grimba_country_for_source_v1:' . (int) $post->source_id,
-                3600,
-                fn () => \Illuminate\Support\Facades\DB::table('news_sources')
+            // Wave TTTTTTTT — graceful degradation if cache backend
+            // can't write (e.g. root-owned cache file from a prior
+            // session, disk full). Without this guard, every article
+            // card on the page 500s. Per-source lookup is cheap;
+            // cache loss is a perf hit, not a correctness hit.
+            try {
+                $__resolveCountry = \Illuminate\Support\Facades\Cache::remember(
+                    'grimba_country_for_source_v1:' . (int) $post->source_id,
+                    3600,
+                    fn () => \Illuminate\Support\Facades\DB::table('news_sources')
+                        ->where('id', $post->source_id)
+                        ->value('country')
+                );
+            } catch (\Throwable $e) {
+                report($e);
+                $__resolveCountry = \Illuminate\Support\Facades\DB::table('news_sources')
                     ->where('id', $post->source_id)
-                    ->value('country')
-            );
+                    ->value('country');
+            }
         }
         if (! $__resolveCountry && ! empty($post->country)) {
             $__resolveCountry = $post->country;

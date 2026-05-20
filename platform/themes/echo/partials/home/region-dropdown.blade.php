@@ -27,7 +27,11 @@
         ],
     ];
 
-    $editionCounts = \Illuminate\Support\Facades\Cache::remember('grimba_edition_counts_v3', 60, function () {
+    // Wave TTTTTTTT — graceful cache-write degradation. The edition
+    // counts power chrome chips; if the cache backend can't write,
+    // serve fresh-but-uncached. The whole site must never 500 because
+    // the cache misbehaved.
+    $__editionCountsCompute = function () {
         $counts = [
             'africa'        => 0,
             'europe'        => 0,
@@ -87,7 +91,13 @@
             ->count();
 
         return $counts;
-    });
+    };
+    try {
+        $editionCounts = \Illuminate\Support\Facades\Cache::remember('grimba_edition_counts_v3', 60, $__editionCountsCompute);
+    } catch (\Throwable $e) {
+        report($e);
+        $editionCounts = $__editionCountsCompute();
+    }
     $activeEdition = $editions[$currentRegion] ?? $editions['international'];
     $activeCount = (int) ($editionCounts[$currentRegion] ?? 0);
 @endphp

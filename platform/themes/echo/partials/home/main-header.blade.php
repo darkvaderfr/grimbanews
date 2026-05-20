@@ -19,28 +19,37 @@
     $__pulseRegion = \App\Ground\Regions::migrate(
         (string) request()->cookie(\App\Scopes\GrimbaRegionScope::COOKIE_NAME, 'international')
     );
-    $pulse = \Illuminate\Support\Facades\Cache::remember(
-        'grimba_header_pulse_v3:' . $__pulseRegion,
-        300,
-        function (): array {
-            $morning = now()->setTime(6, 0);
-            return [
-                'new' => \App\Support\GrimbaPostRecency::wherePublishedSince(
-                    \Botble\Blog\Models\Post::query()->where('status', 'published'),
-                    $morning
-                )->count(),
-                'blindspots' => \Botble\Blog\Models\Post::query()
-                    ->where('status', 'published')
-                    ->where('is_blindspot', true)
-                    ->count(),
-                'clusters' => \Botble\Blog\Models\Post::query()
-                    ->where('status', 'published')
-                    ->whereNotNull('story_cluster_id')
-                    ->distinct('story_cluster_id')
-                    ->count('story_cluster_id'),
-            ];
-        }
-    );
+    // Wave TTTTTTTT — graceful cache-write degradation. The pulse
+    // is display-only chrome; if the cache backend can't write, we
+    // serve fresh-but-uncached. Page must never 500 on cache hiccup.
+    $__pulseCompute = function (): array {
+        $morning = now()->setTime(6, 0);
+        return [
+            'new' => \App\Support\GrimbaPostRecency::wherePublishedSince(
+                \Botble\Blog\Models\Post::query()->where('status', 'published'),
+                $morning
+            )->count(),
+            'blindspots' => \Botble\Blog\Models\Post::query()
+                ->where('status', 'published')
+                ->where('is_blindspot', true)
+                ->count(),
+            'clusters' => \Botble\Blog\Models\Post::query()
+                ->where('status', 'published')
+                ->whereNotNull('story_cluster_id')
+                ->distinct('story_cluster_id')
+                ->count('story_cluster_id'),
+        ];
+    };
+    try {
+        $pulse = \Illuminate\Support\Facades\Cache::remember(
+            'grimba_header_pulse_v3:' . $__pulseRegion,
+            300,
+            $__pulseCompute
+        );
+    } catch (\Throwable $e) {
+        report($e);
+        $pulse = $__pulseCompute();
+    }
 @endphp
 <header class="grimba-header">
     <div class="grimba-header__meta">

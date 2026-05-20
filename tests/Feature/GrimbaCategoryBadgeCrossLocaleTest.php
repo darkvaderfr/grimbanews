@@ -29,47 +29,45 @@ use Tests\TestCase;
 #[PreserveGlobalState(false)]
 class GrimbaCategoryBadgeCrossLocaleTest extends TestCase
 {
-    /** @return array<int, array{0: string}> */
-    public static function readerSurfaces(): array
+    /** @return list<string> */
+    private static function readerSurfaces(): array
     {
         return [
-            ['/'],
-            ['/breaking'],
-            ['/latest'],
-            ['/dossiers'],
+            '/',
+            '/breaking',
+            '/latest',
+            '/dossiers',
         ];
     }
 
-    /**
-     * @dataProvider readerSurfaces
-     */
-    public function test_surface_renders_badges_in_french(string $path): void
+    public function test_surface_renders_badges_in_french(): void
     {
-        $html = $this->get($path . (str_contains($path, '?') ? '&' : '?') . 'lang=fr')
-            ->assertOk()
-            ->getContent();
+        foreach (self::readerSurfaces() as $path) {
+            $html = $this->get($path . (str_contains($path, '?') ? '&' : '?') . 'lang=fr')
+                ->assertOk()
+                ->getContent();
 
-        $this->assertStringContainsString(
-            'data-grimba-cat-badge',
-            $html,
-            "{$path}?lang=fr must render at least one category badge.",
-        );
+            $this->assertStringContainsString(
+                'data-grimba-cat-badge',
+                $html,
+                "{$path}?lang=fr must render at least one category badge.",
+            );
+        }
     }
 
-    /**
-     * @dataProvider readerSurfaces
-     */
-    public function test_surface_renders_badges_in_english(string $path): void
+    public function test_surface_renders_badges_in_english(): void
     {
-        $html = $this->get($path . (str_contains($path, '?') ? '&' : '?') . 'lang=en')
-            ->assertOk()
-            ->getContent();
+        foreach (self::readerSurfaces() as $path) {
+            $html = $this->get($path . (str_contains($path, '?') ? '&' : '?') . 'lang=en')
+                ->assertOk()
+                ->getContent();
 
-        $this->assertStringContainsString(
-            'data-grimba-cat-badge',
-            $html,
-            "{$path}?lang=en must render at least one category badge.",
-        );
+            $this->assertStringContainsString(
+                'data-grimba-cat-badge',
+                $html,
+                "{$path}?lang=en must render at least one category badge.",
+            );
+        }
     }
 
     public function test_band_release_smoke_no_skip_list_leaks_anywhere(): void
