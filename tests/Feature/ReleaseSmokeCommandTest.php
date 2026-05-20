@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Services\GrimbaNewsApiFetcher;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+use PDO;
 use Tests\TestCase;
 
 class ReleaseSmokeCommandTest extends TestCase
@@ -126,6 +128,43 @@ class ReleaseSmokeCommandTest extends TestCase
             ->assertFailed();
     }
 
+    public function test_release_smoke_accepts_backup_dir_for_restore_smoke(): void
+    {
+        $backupDir = storage_path('framework/testing/release-smoke-backups-' . Str::lower(Str::random(8)));
+        File::ensureDirectoryExists($backupDir);
+        $evidencePath = storage_path('framework/testing/release-smoke-backup-dir.md');
+        File::delete($evidencePath);
+
+        try {
+            $this->writeSqliteBackup($backupDir . '/grimbanews.20260520120000.sqlite.gz');
+
+            Http::fake([
+                'http://grimbanews.test/' => Http::response('<html>ok</html>', 200, $this->securityHeaders()),
+                'http://grimbanews.test/up' => Http::response('ok', 200),
+                'http://grimbanews.test/health' => Http::response($this->healthyPayload(), 200),
+                'http://grimbanews.test/feed.xml' => Http::response('<rss></rss>', 200),
+            ]);
+
+            $this->artisan('grimba:release-smoke', [
+                '--base-url' => 'http://grimbanews.test',
+                '--backup-dir' => $backupDir,
+                '--evidence-path' => $evidencePath,
+                '--skip-health' => true,
+                '--skip-cache' => true,
+            ])
+                ->expectsOutputToContain('backup restore smoke passed')
+                ->expectsOutputToContain('Release smoke passed')
+                ->assertSuccessful();
+
+            $report = (string) File::get($evidencePath);
+            $this->assertStringContainsString('Backup dir: ' . $backupDir, $report);
+            $this->assertStringContainsString('| backup restore smoke | artisan | passed | grimba:verify-backups exited 0 |', $report);
+        } finally {
+            File::deleteDirectory($backupDir);
+            File::delete($evidencePath);
+        }
+    }
+
     public function test_release_smoke_can_require_newsapi_readiness(): void
     {
         $this->app->bind(GrimbaNewsApiFetcher::class, fn () => new class extends GrimbaNewsApiFetcher {
@@ -171,6 +210,23 @@ class ReleaseSmokeCommandTest extends TestCase
             'db' => 'up',
             'last_post_at' => '2026-05-20 00:00:00',
         ];
+    }
+
+    private function writeSqliteBackup(string $gzPath): void
+    {
+        $sqlitePath = $gzPath . '.tmp';
+        $pdo = new PDO('sqlite:' . $sqlitePath);
+        $pdo->exec('CREATE TABLE backup_smoke (id INTEGER PRIMARY KEY, payload BLOB)');
+        $pdo->exec('INSERT INTO backup_smoke (payload) VALUES (randomblob(1200000))');
+        $pdo = null;
+
+        $raw = file_get_contents($sqlitePath);
+        $this->assertIsString($raw);
+
+        $encoded = gzencode($raw, 9);
+        $this->assertIsString($encoded);
+        file_put_contents($gzPath, $encoded);
+        @unlink($sqlitePath);
     }
 
     /**

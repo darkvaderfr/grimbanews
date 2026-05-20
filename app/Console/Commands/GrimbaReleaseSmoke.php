@@ -19,6 +19,7 @@ class GrimbaReleaseSmoke extends Command
         {--max-feed-ms=3000 : maximum acceptable feed response time}
         {--min-free-mb=2048 : minimum free disk floor passed to grimba:health}
         {--min-full-content-coverage=70 : minimum full article coverage passed to grimba:health}
+        {--backup-dir= : database backup directory for health/restore smoke; defaults to database/backups}
         {--evidence : write a markdown release evidence report under storage/app/grimba-release-evidence}
         {--evidence-path= : explicit markdown release evidence output path}
         {--require-newsapi : fail unless NewsAPI readiness passes}
@@ -38,19 +39,30 @@ class GrimbaReleaseSmoke extends Command
     public function handle(): int
     {
         $failed = false;
+        $backupDir = trim((string) $this->option('backup-dir'));
 
         if (! (bool) $this->option('skip-health')) {
-            $failed = $this->runArtisanCheck('health guard', 'grimba:health', [
+            $healthParameters = [
                 '--fail-on-risk' => true,
                 '--min-full-content-coverage' => (int) $this->option('min-full-content-coverage'),
                 '--min-free-mb' => (int) $this->option('min-free-mb'),
-            ]) || $failed;
+            ];
+            if ($backupDir !== '') {
+                $healthParameters['--backup-dir'] = $backupDir;
+            }
+
+            $failed = $this->runArtisanCheck('health guard', 'grimba:health', $healthParameters) || $failed;
         }
 
         if (! (bool) $this->option('skip-backups')) {
-            $failed = $this->runArtisanCheck('backup restore smoke', 'grimba:verify-backups', [
+            $backupParameters = [
                 '--min' => 1,
-            ]) || $failed;
+            ];
+            if ($backupDir !== '') {
+                $backupParameters['--backup-dir'] = $backupDir;
+            }
+
+            $failed = $this->runArtisanCheck('backup restore smoke', 'grimba:verify-backups', $backupParameters) || $failed;
         }
 
         if (! (bool) $this->option('skip-cache')) {
@@ -292,6 +304,7 @@ class GrimbaReleaseSmoke extends Command
             'Result: ' . ($failed ? 'failed' : 'passed'),
             'Base URL: ' . $baseUrl,
             'Host header: ' . ($hostHeader !== '' ? $hostHeader : 'none'),
+            'Backup dir: ' . (trim((string) $this->option('backup-dir')) !== '' ? trim((string) $this->option('backup-dir')) : 'default'),
             'Disk floor: ' . (int) $this->option('min-free-mb') . 'MB',
             'Full-content coverage floor: ' . (int) $this->option('min-full-content-coverage') . '%',
             '',
