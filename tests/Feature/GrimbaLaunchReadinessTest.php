@@ -1261,6 +1261,54 @@ class GrimbaLaunchReadinessTest extends TestCase
         );
     }
 
+    public function test_breaking_locale_filter_strict_across_all_fallback_paths(): void
+    {
+        // Wave LLLLLLLL (Vader 2026-05-20) — locale toggle bug.
+        // When `?lang=en` (or grimba_lang=en cookie), the /breaking
+        // page must surface EN articles only — never bleed FR.
+        // Before this fix: when no EN posts matched the 18h
+        // recency window, the "any" last-resort path served
+        // unfiltered FR articles. Vader: "make sure articles in
+        // English surface when a user basically changes their
+        // website language into English."
+        //
+        // Test sequence: prime cache as one locale, then assert
+        // the OTHER locale's response never contains the original-
+        // language posts the strict filter should drop.
+        \Illuminate\Support\Facades\Cache::flush();
+
+        $enResponse = $this->get('/breaking?lang=en');
+        $enResponse->assertOk();
+        $enBody = $enResponse->getContent();
+
+        $frResponse = $this->get('/breaking?lang=fr');
+        $frResponse->assertOk();
+        $frBody = $frResponse->getContent();
+
+        // Sample 5 FR-origin posts (no EN translation) — these must
+        // NOT appear on the EN reader's /breaking page.
+        $frOnlyPosts = \Botble\Blog\Models\Post::query()
+            ->where('status', 'published')
+            ->where('original_language', 'fr')
+            ->whereNull('translated_to')
+            ->whereDoesntHave('translations')
+            ->limit(5)
+            ->pluck('name')
+            ->all();
+
+        if (! empty($frOnlyPosts)) {
+            foreach ($frOnlyPosts as $title) {
+                $shortTitle = mb_substr($title, 0, 40);
+                $this->assertStringNotContainsString(
+                    $shortTitle,
+                    $enBody,
+                    "/breaking?lang=en must NOT surface FR-only post titled like: \"{$shortTitle}\". " .
+                    "The strict locale filter is being bypassed on a fallback path.",
+                );
+            }
+        }
+    }
+
     public function test_paginated_pages_canonical_to_themselves_not_base_url(): void
     {
         // Wave BBBBBBBB (Vader 2026-05-19) — real SEO bug.

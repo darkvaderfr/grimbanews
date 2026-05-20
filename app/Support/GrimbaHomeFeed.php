@@ -322,9 +322,22 @@ class GrimbaHomeFeed
             }
 
             // Last-resort fill: drop the recency window entirely.
+            //
+            // Wave LLLLLLLL (Vader 2026-05-20) — keep strict locale
+            // filter applied. Before this fix, EN readers would see
+            // FR posts on /breaking when no fresh EN content matched
+            // the window — directly contradicting the locale toggle.
+            // If even the unbounded EN-eligible set is empty, return
+            // an empty collection; the view renders "La couverture
+            // est calme dans cette édition." which is the honest
+            // signal (EN ingest stalled) — not pollute EN readers
+            // with FR articles.
             $any = Post::query()
                 ->where('status', 'published')
                 ->with('slugable');
+            if ($strict) {
+                GrimbaTranslationPresenter::filterForTargetLocale($any, $locale);
+            }
             GrimbaPostRecency::orderByPublished($any);
 
             return ['mode' => 'latest', 'posts' => $any->limit(10)->get($cols)];
