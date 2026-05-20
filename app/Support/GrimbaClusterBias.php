@@ -1,0 +1,79 @@
+<?php
+
+namespace App\Support;
+
+/**
+ * GrimbaClusterBias
+ *
+ * Resolves the majority-bias label for a cluster (or any bias-count
+ * tally). The big subtle case is the L-R tie: when left and right
+ * each get the same count AND that tie is the highest count, neither
+ * "Gauche" nor "Droite" tells the truth — the coverage is balanced.
+ *
+ * Vader directive 2026-05-20: "For articles that are combined and
+ * have a fifty fifty left right breakdown, we want to make sure that
+ * we are not saying it's left or it's right. We want to instead call
+ * that Middle Ground. And in French, Juste Milieu."
+ *
+ * Center-only majority is NOT Middle Ground — that's still "Centre"
+ * (the editorial-bias position). Middle Ground specifically means
+ * "covered equally from both extremes" — a different signal.
+ */
+class GrimbaClusterBias
+{
+    /**
+     * Resolve majority-bias key + label + color from a bias-count array.
+     *
+     * @param array<string, int> $counts e.g. ['left' => 3, 'center' => 1, 'right' => 3]
+     * @return array{key: string, label: string, color: string}
+     */
+    public static function resolve(array $counts): array
+    {
+        $left = (int) ($counts['left'] ?? 0);
+        $center = (int) ($counts['center'] ?? 0);
+        $right = (int) ($counts['right'] ?? 0);
+
+        // Nothing classified → unknown
+        if ($left + $center + $right <= 0) {
+            return ['key' => 'unknown', 'label' => __('Non classé'), 'color' => '#6b6459'];
+        }
+
+        // The Middle Ground case: left and right tied AND that tie
+        // is at least the highest. If center happens to equal the
+        // L=R tie, prefer "Middle Ground" because it tells the
+        // reader the bigger story — coverage spans both sides.
+        if ($left > 0 && $left === $right && $left >= $center) {
+            return [
+                'key' => 'middle_ground',
+                'label' => __('Juste milieu'),
+                'color' => '#a855f7',
+            ];
+        }
+
+        // Otherwise, the single highest bucket wins.
+        $top = max($left, $center, $right);
+        if ($top === $left) {
+            return ['key' => 'left', 'label' => __('Gauche'), 'color' => '#3b82f6'];
+        }
+        if ($top === $right) {
+            return ['key' => 'right', 'label' => __('Droite'), 'color' => '#e84c3d'];
+        }
+        return ['key' => 'center', 'label' => __('Centre'), 'color' => '#a8a8a8'];
+    }
+
+    /**
+     * Convenience: just the label string (translated to current locale).
+     */
+    public static function label(array $counts): string
+    {
+        return self::resolve($counts)['label'];
+    }
+
+    /**
+     * Convenience: just the chip color hex.
+     */
+    public static function color(array $counts): string
+    {
+        return self::resolve($counts)['color'];
+    }
+}

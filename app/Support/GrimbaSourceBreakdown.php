@@ -337,6 +337,16 @@ class GrimbaSourceBreakdown
                             'pct' => (int) round($count * 100 / max(1, $items->count())),
                         ];
                     });
+                // Wave MMMMMMMM (Vader 2026-05-20) — when left+right
+                // are tied in this country bucket, label as "Juste
+                // milieu" / "Middle Ground" instead of arbitrary
+                // sortByDesc winner.
+                $__counts = [
+                    'left' => (int) ($bias->firstWhere('key', 'left')->count ?? 0),
+                    'center' => (int) ($bias->firstWhere('key', 'center')->count ?? 0),
+                    'right' => (int) ($bias->firstWhere('key', 'right')->count ?? 0),
+                ];
+                $resolvedDominant = \App\Support\GrimbaClusterBias::resolve($__counts);
                 $dominant = $bias->sortByDesc('count')->first();
 
                 return (object) [
@@ -348,7 +358,8 @@ class GrimbaSourceBreakdown
                     'items' => $items->values(),
                     'count' => $items->count(),
                     'bias' => $bias,
-                    'dominant_bias' => $dominant?->label ?? __('Non classé'),
+                    'dominant_bias' => $resolvedDominant['label'],
+                    'dominant_bias_key' => $resolvedDominant['key'],
                     'dominant_pct' => $dominant ? (int) $dominant->pct : 0,
                 ];
             })

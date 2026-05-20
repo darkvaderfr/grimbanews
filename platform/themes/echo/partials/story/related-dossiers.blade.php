@@ -62,9 +62,20 @@
                 ->select('story_cluster_id', 'bias_rating', DB::raw('COUNT(*) as c'))
                 ->get()
                 ->groupBy('story_cluster_id');
+            // Wave MMMMMMMM (Vader 2026-05-20) — when left and right
+            // are tied (50/50 coverage), the cluster majority is
+            // "Middle Ground" / "Juste milieu", not whichever side
+            // sortByDesc picked first. Route through
+            // GrimbaClusterBias which encodes the tie rule.
             $__rdMajorityBias = collect();
             foreach ($__rdBiasCounts as $__cid => $__rows) {
-                $__rdMajorityBias->put((int) $__cid, $__rows->sortByDesc('c')->first()->bias_rating ?? 'unknown');
+                $__counts = [
+                    'left' => (int) ($__rows->firstWhere('bias_rating', 'left')->c ?? 0),
+                    'center' => (int) ($__rows->firstWhere('bias_rating', 'center')->c ?? 0),
+                    'right' => (int) ($__rows->firstWhere('bias_rating', 'right')->c ?? 0),
+                ];
+                $__resolved = \App\Support\GrimbaClusterBias::resolve($__counts);
+                $__rdMajorityBias->put((int) $__cid, $__resolved);
             }
 
             $__rdCards = Post::query()
@@ -79,10 +90,15 @@
         }
     }
 
+    // Wave MMMMMMMM — bias meta is now resolved via
+    // GrimbaClusterBias::resolve() (includes the middle_ground key).
+    // Kept here only for the per-entry-post fallback when cluster
+    // counts haven't been computed (single-source clusters).
     $__rdBiasMeta = [
         'left' => ['label' => __('Gauche'), 'color' => '#3b82f6'],
         'center' => ['label' => __('Centre'), 'color' => '#a8a8a8'],
         'right' => ['label' => __('Droite'), 'color' => '#e84c3d'],
+        'middle_ground' => ['label' => __('Juste milieu'), 'color' => '#a855f7'],
     ];
 @endphp
 
@@ -104,11 +120,19 @@
                 @php
                     $__rdTitle = GnTr::title($__rd);
                     // Wave OOOOOO — chip reflects cluster MAJORITY bias,
-                    // not entry-post bias. When all bias entries are
-                    // null/unknown, fall through to 'unknown' (no chip).
-                    $__rdBias = $__rdMajorityBias->get((int) $__rd->story_cluster_id, $__rd->bias_rating ?? 'unknown');
-                    $__rdBiasColor = $__rdBiasMeta[$__rdBias]['color'] ?? '#6b6459';
-                    $__rdBiasLabel = $__rdBiasMeta[$__rdBias]['label'] ?? __('Non classé');
+                    // not entry-post bias. Wave MMMMMMMM (Vader
+                    // 2026-05-20) — when L+R are tied, the chip now
+                    // says "Juste milieu" via GrimbaClusterBias.
+                    $__rdResolved = $__rdMajorityBias->get((int) $__rd->story_cluster_id);
+                    if (is_array($__rdResolved)) {
+                        $__rdBiasColor = $__rdResolved['color'];
+                        $__rdBiasLabel = $__rdResolved['label'];
+                    } else {
+                        // Single-source cluster — fall back to entry-post bias.
+                        $__rdBias = $__rd->bias_rating ?? 'unknown';
+                        $__rdBiasColor = $__rdBiasMeta[$__rdBias]['color'] ?? '#6b6459';
+                        $__rdBiasLabel = $__rdBiasMeta[$__rdBias]['label'] ?? __('Non classé');
+                    }
                     $__rdCount = (int) ($__rdCounts[$__rd->story_cluster_id] ?? 1);
                     $__rdHref = url('/comparatif/' . $__rd->story_cluster_id);
                 @endphp
