@@ -1272,40 +1272,59 @@ class GrimbaLaunchReadinessTest extends TestCase
         // English surface when a user basically changes their
         // website language into English."
         //
-        // Test sequence: prime cache as one locale, then assert
-        // the OTHER locale's response never contains the original-
-        // language posts the strict filter should drop.
-        \Illuminate\Support\Facades\Cache::flush();
+        // Wave OOOOOOOO (Zen audit follow-up): seed an FR-only post
+        // inline so the assertion ALWAYS runs — the prior version
+        // had `if (! empty($frOnlyPosts))` which silently skipped
+        // on a clean test DB, letting future regressions pass green.
+        // YYYYYYY taught us: lock tests that conditionally no-op
+        // give false confidence.
+        $sentinelTitle = 'Sentinel FR-only post — locale guard ' . uniqid();
+        $sentinelId = \Illuminate\Support\Facades\DB::table('posts')->insertGetId([
+            'name' => $sentinelTitle,
+            'status' => 'published',
+            'original_language' => 'fr',
+            'translated_to' => null,
+            'translated_name' => null,
+            'source_name' => 'Sentinel Source',
+            'author_id' => 1,
+            'author_type' => 'Botble\\ACL\\Models\\User',
+            'created_at' => now()->subMinutes(10),
+            'updated_at' => now()->subMinutes(10),
+            'published_at' => now()->subMinutes(10),
+        ]);
 
-        $enResponse = $this->get('/breaking?lang=en');
-        $enResponse->assertOk();
-        $enBody = $enResponse->getContent();
+        try {
+            \Illuminate\Support\Facades\Cache::flush();
 
-        $frResponse = $this->get('/breaking?lang=fr');
-        $frResponse->assertOk();
-        $frBody = $frResponse->getContent();
+            $enResponse = $this->get('/breaking?lang=en');
+            $enResponse->assertOk();
+            $enBody = $enResponse->getContent();
 
-        // Sample 5 FR-origin posts (no EN translation) — these must
-        // NOT appear on the EN reader's /breaking page.
-        $frOnlyPosts = \Botble\Blog\Models\Post::query()
-            ->where('status', 'published')
-            ->where('original_language', 'fr')
-            ->whereNull('translated_to')
-            ->whereDoesntHave('translations')
-            ->limit(5)
-            ->pluck('name')
-            ->all();
+            // The hazard: the EN response must NOT contain our
+            // freshly-seeded FR-only sentinel headline. If it does,
+            // the strict locale filter is being bypassed on a
+            // fallback path — exactly the bug Wave LLLLLLLL fixed.
+            $this->assertStringNotContainsString(
+                $sentinelTitle,
+                $enBody,
+                "/breaking?lang=en must NOT surface this FR-only sentinel post. " .
+                "The strict locale filter is being bypassed on a fallback path.",
+            );
 
-        if (! empty($frOnlyPosts)) {
-            foreach ($frOnlyPosts as $title) {
-                $shortTitle = mb_substr($title, 0, 40);
-                $this->assertStringNotContainsString(
-                    $shortTitle,
-                    $enBody,
-                    "/breaking?lang=en must NOT surface FR-only post titled like: \"{$shortTitle}\". " .
-                    "The strict locale filter is being bypassed on a fallback path.",
-                );
-            }
+            // Sanity: the same sentinel SHOULD appear on /breaking?lang=fr
+            // — it's a fresh FR post and FR is the brand-canonical locale,
+            // so the recency window picks it up first.
+            \Illuminate\Support\Facades\Cache::flush();
+            $frBody = $this->get('/breaking?lang=fr')->assertOk()->getContent();
+            $this->assertStringContainsString(
+                $sentinelTitle,
+                $frBody,
+                "/breaking?lang=fr should pick up a fresh FR post. If this fails, the FR " .
+                "path is also broken, or the recency window is mis-configured.",
+            );
+        } finally {
+            \Illuminate\Support\Facades\DB::table('posts')->where('id', $sentinelId)->delete();
+            \Illuminate\Support\Facades\Cache::flush();
         }
     }
 

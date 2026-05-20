@@ -45,17 +45,18 @@ class GrimbaClusterBiasTest extends TestCase
         $this->assertSame('middle_ground', $resolved['key']);
     }
 
-    public function test_center_higher_than_tied_extremes_still_middle_ground(): void
+    public function test_center_dominant_over_tied_extremes_resolves_to_center(): void
     {
-        // L=2, R=2, C=5 — center dominates BUT extremes are still
-        // tied. Vader's directive: when L=R, label is Middle Ground
-        // because the bigger story is "covered from both sides".
-        // Even though center has more, the extremes-tied signal is
-        // what readers need.
+        // Edge case: L=2, R=2, C=5 — extremes are tied, but center
+        // has more than either single extreme. Helper rule (per
+        // GrimbaClusterBias.php) is "L==R AND L>=C" → Middle Ground.
+        // Here L=R=2, C=5, so C > L=R; center wins.
         //
-        // (Edge case — could be argued either way. The helper rule
-        // is "L==R AND L>=C-ish" → Middle Ground; this case L=R=2,
-        // C=5 means C > L=R, so center wins.)
+        // The trade-off: Middle Ground signals "covered from both
+        // sides" — true here. Centre signals "the dominant editorial
+        // position is centrist" — also true here. We pick Centre
+        // because the count gap is decisive (5 vs 2). A future call
+        // from Vader could flip this rule; ping him if uncertain.
         $resolved = GrimbaClusterBias::resolve(['left' => 2, 'center' => 5, 'right' => 2]);
         $this->assertSame('center', $resolved['key']);
     }

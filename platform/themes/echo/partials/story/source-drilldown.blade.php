@@ -119,7 +119,7 @@
                                 @endif
                             @endforeach
                         </div>
-                        <small>{{ __('Dominant') }}: {{ $country->dominant_bias }} · {{ $country->dominant_pct }}%</small>
+                        <small @if(($country->dominant_bias_key ?? null) === 'middle_ground') style="color: {{ $country->dominant_bias_color }}; font-weight: 600;" @endif>{{ __('Dominant') }}: {{ $country->dominant_bias }} · {{ $country->dominant_pct }}%</small>
                     </article>
                 @endforeach
             </div>

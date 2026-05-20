@@ -349,6 +349,20 @@ class GrimbaSourceBreakdown
                 $resolvedDominant = \App\Support\GrimbaClusterBias::resolve($__counts);
                 $dominant = $bias->sortByDesc('count')->first();
 
+                // Zen audit follow-up (Wave OOOOOOOO 2026-05-20) — when
+                // the dominant key is middle_ground, the truthful "pct"
+                // figure is left% + right% (the combined extremes share),
+                // not whichever single side's pct sortByDesc picked.
+                // Otherwise the UI shows "Middle Ground · 50%" when the
+                // actual extremes-coverage signal is 100% of the bucket.
+                if ($resolvedDominant['key'] === 'middle_ground') {
+                    $leftPct = (int) ($bias->firstWhere('key', 'left')->pct ?? 0);
+                    $rightPct = (int) ($bias->firstWhere('key', 'right')->pct ?? 0);
+                    $dominantPct = $leftPct + $rightPct;
+                } else {
+                    $dominantPct = $dominant ? (int) $dominant->pct : 0;
+                }
+
                 return (object) [
                     'key' => $code,
                     'label' => $code === 'unknown' ? __('Non renseigné') : self::countryLabel($code),
@@ -360,7 +374,8 @@ class GrimbaSourceBreakdown
                     'bias' => $bias,
                     'dominant_bias' => $resolvedDominant['label'],
                     'dominant_bias_key' => $resolvedDominant['key'],
-                    'dominant_pct' => $dominant ? (int) $dominant->pct : 0,
+                    'dominant_bias_color' => $resolvedDominant['color'],
+                    'dominant_pct' => $dominantPct,
                 ];
             })
             ->sortByDesc('count')
