@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Services\GrimbaNewsApiFetcher;
+use App\Services\GrimbaNobuAi;
+use App\Services\GrimbaTranslator;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -196,6 +198,46 @@ class ReleaseSmokeCommandTest extends TestCase
             ->expectsOutputToContain('NewsAPI readiness failed: grimba:newsapi-readiness')
             ->expectsOutputToContain('Release smoke failed')
             ->assertFailed();
+    }
+
+    public function test_release_smoke_can_require_live_nobuai_readiness(): void
+    {
+        $this->app->bind(GrimbaNobuAi::class, fn () => new class extends GrimbaNobuAi {
+            public function configuredDrivers(): array
+            {
+                return ['openai'];
+            }
+
+            public function complete(string $prompt, ?string $system = null): ?array
+            {
+                return ['text' => 'OK', 'driver' => 'openai'];
+            }
+        });
+
+        $this->app->bind(GrimbaTranslator::class, fn () => new class extends GrimbaTranslator {
+            public function configuredDrivers(): array
+            {
+                return ['deepl'];
+            }
+        });
+
+        Http::fake([
+            'http://grimbanews.test/' => Http::response('<html>ok</html>', 200, $this->securityHeaders()),
+            'http://grimbanews.test/up' => Http::response('ok', 200),
+            'http://grimbanews.test/health' => Http::response($this->healthyPayload(), 200),
+            'http://grimbanews.test/feed.xml' => Http::response('<rss></rss>', 200),
+        ]);
+
+        $this->artisan('grimba:release-smoke', [
+            '--base-url' => 'http://grimbanews.test',
+            '--require-nobuai-live' => true,
+            '--skip-health' => true,
+            '--skip-backups' => true,
+            '--skip-cache' => true,
+        ])
+            ->expectsOutputToContain('NobuAI live readiness passed')
+            ->expectsOutputToContain('Release smoke passed')
+            ->assertSuccessful();
     }
 
     /**

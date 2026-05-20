@@ -24,6 +24,7 @@ class GrimbaReleaseSmoke extends Command
         {--evidence-path= : explicit markdown release evidence output path}
         {--require-newsapi : fail unless NewsAPI readiness passes}
         {--newsapi-recent-hours=0 : require a successful NewsAPI run within this many hours when --require-newsapi is used}
+        {--require-nobuai-live : fail unless a bounded live NobuAI provider call succeeds}
         {--skip-security-headers : skip homepage security header assertions}
         {--skip-health : skip grimba:health}
         {--skip-backups : skip grimba:verify-backups}
@@ -75,6 +76,13 @@ class GrimbaReleaseSmoke extends Command
         if ((bool) $this->option('require-newsapi')) {
             $failed = $this->runArtisanCheck('NewsAPI readiness', 'grimba:newsapi-readiness', [
                 '--recent-hours' => (int) $this->option('newsapi-recent-hours'),
+            ]) || $failed;
+        }
+
+        if ((bool) $this->option('require-nobuai-live')) {
+            $failed = $this->runArtisanCheck('NobuAI live readiness', 'grimba:nobuai-health', [
+                '--live' => true,
+                '--prompt' => 'Return exactly OK.',
             ]) || $failed;
         }
 
