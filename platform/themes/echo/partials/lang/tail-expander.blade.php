@@ -50,7 +50,13 @@
         $hours,
     );
 
-    $tailCount = (int) Cache::remember($cacheKey, 60, function () use ($opposite, $readerLocale, $hours) {
+    // Wave SSSSSSSS (Vader 2026-05-20) — graceful degradation when
+    // the cache writer can't write (e.g. file-cache dir owned by a
+    // prior root user, disk full, permission revoked). Without this
+    // try/catch, a single bad cache file took the whole /dossiers
+    // page to 500. Caller surfaces are display-only; if we can't
+    // cache, we compute fresh.
+    $__tailComputeFresh = function () use ($opposite, $readerLocale, $hours) {
         $query = DB::table('posts')
             ->where('status', 'published')
             ->where('original_language', $opposite)
@@ -75,7 +81,16 @@
         });
 
         return $query->count();
-    });
+    };
+
+    // Try cached path first; fall through to fresh compute on any
+    // cache backend failure. Display surfaces never block on cache.
+    try {
+        $tailCount = (int) Cache::remember($cacheKey, 60, $__tailComputeFresh);
+    } catch (\Throwable $e) {
+        report($e);
+        $tailCount = (int) $__tailComputeFresh();
+    }
 
     if ($tailCount === 0) {
         return;
