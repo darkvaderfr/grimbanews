@@ -2,6 +2,7 @@
     /** S166 — Steve-styled register page (mirrors login). */
     Theme::layout('grimba-chrome');
     Theme::set('pageTitle', __('Inscription'));
+    Theme::set('grimbaChromeAds', false);
 @endphp
 
 <section class="grimba-auth py-5">

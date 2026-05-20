@@ -268,6 +268,7 @@ class PwaShellTest extends TestCase
         $registerView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/member/auth/register.blade.php');
         $resetEmailView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/member/auth/passwords/email.blade.php');
         $resetView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/member/auth/passwords/reset.blade.php');
+        $chromeLayout = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/layouts/grimba-chrome.blade.php');
         $authWordmark = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/partials/auth-wordmark.blade.php');
         $localView = file_get_contents(dirname(__DIR__, 2) . '/platform/themes/echo/views/local.blade.php');
 
@@ -286,6 +287,8 @@ class PwaShellTest extends TestCase
         $this->assertStringContainsString('class="grimba-form-pill mb-3"', $loginView);
         $this->assertStringContainsString('grimba-auth__switch', $loginView);
         $this->assertStringContainsString('grimba-auth__lede', $loginView . $registerView . $resetEmailView . $resetView);
+        $this->assertStringContainsString("Theme::set('grimbaChromeAds', false);", $loginView . $registerView . $resetEmailView . $resetView);
+        $this->assertStringContainsString("Theme::get('grimbaChromeAds', true) !== false", $chromeLayout);
         $this->assertStringContainsString('auth-wordmark', $loginView . $registerView . $resetEmailView . $resetView);
         $this->assertStringContainsString('grimba-auth__wordmark', $authWordmark);
         $this->assertStringContainsString('class="grimba-auth-grid"', $registerView);

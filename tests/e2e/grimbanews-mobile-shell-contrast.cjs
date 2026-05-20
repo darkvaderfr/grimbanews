@@ -237,6 +237,7 @@ async function inspectFormControl(page, path, selector, label) {
 async function inspectSubpagePolish(page) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/search?q=afrique', { waitUntil: 'networkidle' });
+    await page.locator('.grimba-search-page .grimba-saved-search__inner .btn-grimba').scrollIntoViewIfNeeded();
 
     const search = await page.evaluate(() => {
         const title = document.querySelector('.grimba-search-page .grimba-methodology__title');
@@ -519,7 +520,7 @@ async function inspectCategoryPage(page, width) {
             for (const edition of ['Europe', 'Afrique', 'Am\u00e9riques', 'International']) {
                 assert.ok(! chipTexts.has(edition), `${edition} edition chip is not duplicated in the topic rail at ${width}px`);
             }
-            for (const topic of ['Politique', '\u00c9conomie', 'Monde']) {
+            for (const topic of ['Politics', 'Economy', 'World']) {
                 assert.ok(chipTexts.has(topic), `${topic} topic chip renders at ${width}px`);
             }
             for (const chip of snapshot.topicChips) {
@@ -648,7 +649,7 @@ async function inspectCategoryPage(page, width) {
             storyLink.click(),
         ]);
 
-        const storyTitle = await firstVisible(page.locator('.grimba-story-page__title'), 'article story title');
+        const storyTitle = await firstVisible(page.locator('.grimba-story-page__title, .grimba-article-card__title'), 'article story title');
         const storyTitleMetrics = await storyTitle.evaluate(element => {
             const style = getComputedStyle(element);
             const bounds = element.getBoundingClientRect();
@@ -665,9 +666,9 @@ async function inspectCategoryPage(page, width) {
         assert.ok(storyTitleMetrics.right <= storyTitleMetrics.viewportWidth + 1, 'mobile article title stays inside the viewport');
 
         const articleActionMetrics = await page.evaluate(() => {
-            const actions = document.querySelector('.grimba-story-page__actions');
-            const compare = document.querySelector('.grimba-story-page__compare');
-            const save = document.querySelector('.grimba-story-page__actions .grimba-save-btn');
+            const actions = document.querySelector('.grimba-story-page__actions, .grimba-story-page__bar-actions, .grimba-orphan-actions');
+            const compare = actions?.querySelector('.grimba-story-page__compare') || document.querySelector('.grimba-story-page__compare');
+            const save = actions?.querySelector('.grimba-save-btn') || document.querySelector('.grimba-save-btn');
             const compareShort = document.querySelector('.grimba-story-page__compare-label--short');
             const compareFull = document.querySelector('.grimba-story-page__compare-label--full');
             const bounds = node => {
@@ -761,9 +762,9 @@ async function inspectCategoryPage(page, width) {
         await page.setViewportSize({ width: 1440, height: 1000 });
         await page.reload({ waitUntil: 'networkidle' });
         const desktopArticlePolish = await page.evaluate(() => {
-            const actions = document.querySelector('.grimba-story-page__actions');
-            const compare = document.querySelector('.grimba-story-page__compare');
-            const save = document.querySelector('.grimba-story-page__actions .grimba-save-btn');
+            const actions = document.querySelector('.grimba-story-page__actions, .grimba-story-page__bar-actions, .grimba-orphan-actions');
+            const compare = actions?.querySelector('.grimba-story-page__compare') || document.querySelector('.grimba-story-page__compare');
+            const save = actions?.querySelector('.grimba-save-btn') || document.querySelector('.grimba-save-btn');
             const compareShort = document.querySelector('.grimba-story-page__compare-label--short');
             const compareFull = document.querySelector('.grimba-story-page__compare-label--full');
             const sidebarCopy = document.querySelector('.grimba-story-distribution .opacity-75, .grimba-story-timeline .opacity-75');

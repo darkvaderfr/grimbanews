@@ -148,10 +148,12 @@
     @include(Theme::getThemeNamespace('partials.home.main-header'))
     @include(Theme::getThemeNamespace('partials.home.topic-chips'))
     @include(Theme::getThemeNamespace('partials.home.translation-note'))
-    @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
-        'location' => 'grimba_chrome_top',
-        'class' => 'grimba-ad-slot--billboard container-xxl',
-    ])
+    @if(Theme::get('grimbaChromeAds', true) !== false)
+        @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+            'location' => 'grimba_chrome_top',
+            'class' => 'grimba-ad-slot--billboard container-xxl',
+        ])
+    @endif
 
     <main class="grimba-sub-main" id="grimba-main-content" tabindex="-1">
         <div class="container-xxl py-4">
@@ -162,10 +164,12 @@
             @endif
         </div>
     </main>
-    @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
-        'location' => 'grimba_chrome_bottom',
-        'class' => 'grimba-ad-slot--leaderboard container-xxl',
-    ])
+    @if(Theme::get('grimbaChromeAds', true) !== false)
+        @include(Theme::getThemeNamespace('partials.home.ad-slot'), [
+            'location' => 'grimba_chrome_bottom',
+            'class' => 'grimba-ad-slot--leaderboard container-xxl',
+        ])
+    @endif
 
     @include(Theme::getThemeNamespace('partials.home.vault-fab'))
     @include(Theme::getThemeNamespace('partials.home.mobile-bottom-nav'))

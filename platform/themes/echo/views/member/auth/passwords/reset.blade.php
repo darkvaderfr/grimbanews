@@ -2,6 +2,7 @@
     /** S166 — Steve-styled reset-password (set new password from token). */
     Theme::layout('grimba-chrome');
     Theme::set('pageTitle', __('Nouveau mot de passe'));
+    Theme::set('grimbaChromeAds', false);
     $token = request()->route('token') ?? request()->input('token');
     $email = request()->input('email') ?? old('email');
 @endphp

@@ -414,6 +414,10 @@
                             gap: 8px;
                             flex-shrink: 0;
                         }
+                        .grimba-story-page__bar-actions .grimba-story-page__compare,
+                        .grimba-story-page__bar-actions .grimba-save-btn {
+                            min-height: 36px !important;
+                        }
                         [data-bs-theme="dark"] .grimba-story-page__bar,
                         body[data-theme="dark"] .grimba-story-page__bar {
                             background: rgba(28, 24, 17, .58);
@@ -425,8 +429,19 @@
                         }
                         @media (max-width: 575.98px) {
                             .grimba-story-page__bar-actions {
+                                display: grid;
+                                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                                align-items: stretch;
+                                gap: 8px;
                                 width: 100%;
-                                justify-content: flex-start;
+                            }
+                            .grimba-story-page__bar-actions .grimba-story-page__compare,
+                            .grimba-story-page__bar-actions .grimba-save-btn {
+                                justify-content: center;
+                                width: 100%;
+                                min-height: 44px !important;
+                                margin-left: 0;
+                                padding-inline: 0.75rem;
                             }
                         }
                     </style>

@@ -2,6 +2,7 @@
     /** S166 — Steve-styled forgot-password (request reset link). */
     Theme::layout('grimba-chrome');
     Theme::set('pageTitle', __('Mot de passe oublié'));
+    Theme::set('grimbaChromeAds', false);
 @endphp
 
 <section class="grimba-auth py-5">

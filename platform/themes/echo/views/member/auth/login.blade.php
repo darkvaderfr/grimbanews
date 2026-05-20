@@ -11,6 +11,7 @@
      */
     Theme::layout('grimba-chrome');
     Theme::set('pageTitle', __('Connexion'));
+    Theme::set('grimbaChromeAds', false);
 @endphp
 
 <section class="grimba-auth py-5">
