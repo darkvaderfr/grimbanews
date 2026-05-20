@@ -15,6 +15,28 @@ class PwaShellTest extends TestCase
             ->assertSee('apple-mobile-web-app-title');
     }
 
+    public function test_service_worker_avoids_private_paths_and_non_cacheable_responses(): void
+    {
+        // Wave DDDDDDDD — cache discipline. The service worker owns an
+        // origin-wide cache, so it must never intercept account/admin/
+        // vault/member routes and must not store no-store/private
+        // asset responses. This keeps the offline shell useful without
+        // creating a shared-device privacy leak.
+        $sw = file_get_contents(public_path('grimba-sw.js'));
+
+        foreach (["'/admin'", "'/account'", "'/member'", "'/coffre'", "'/coffre-share'"] as $privatePrefix) {
+            $this->assertStringContainsString($privatePrefix, $sw);
+        }
+
+        $this->assertStringContainsString('function isPrivatePath(pathname)', $sw);
+        $this->assertStringContainsString('PRIVATE_PATH_PREFIXES.some', $sw);
+        $this->assertStringContainsString('isPrivatePath(url.pathname)', $sw);
+        $this->assertStringContainsString('function canCacheResponse(response)', $sw);
+        $this->assertStringContainsString("response.headers.get('Cache-Control')", $sw);
+        $this->assertStringContainsString('no-store|private', $sw);
+        $this->assertStringContainsString('!canCacheResponse(response)', $sw);
+    }
+
     public function test_edition_picker_is_solid_and_exposes_4_canonical_regions(): void
     {
         // Fleet K (2026-05-05) — picker now exposes 4 regions:

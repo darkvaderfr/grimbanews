@@ -7,6 +7,29 @@ const PRECACHE_URLS = [
     '/favicon-32x32.png',
     '/apple-touch-icon.png'
 ];
+const PRIVATE_PATH_PREFIXES = [
+    '/admin',
+    '/account',
+    '/member',
+    '/coffre',
+    '/coffre-share'
+];
+
+function isPrivatePath(pathname) {
+    return PRIVATE_PATH_PREFIXES.some((prefix) => (
+        pathname === prefix || pathname.startsWith(`${prefix}/`)
+    ));
+}
+
+function canCacheResponse(response) {
+    if (!response || response.status !== 200 || response.type !== 'basic') {
+        return false;
+    }
+
+    const cacheControl = response.headers.get('Cache-Control') || '';
+
+    return !/no-store|private/i.test(cacheControl);
+}
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -35,7 +58,7 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(request.url);
 
-    if (url.origin !== self.location.origin || url.pathname.startsWith('/admin')) {
+    if (url.origin !== self.location.origin || isPrivatePath(url.pathname)) {
         return;
     }
 
@@ -47,7 +70,7 @@ self.addEventListener('fetch', (event) => {
     if (['style', 'script', 'image', 'font'].includes(request.destination)) {
         event.respondWith(
             caches.match(request).then((cached) => cached || fetch(request).then((response) => {
-                if (!response || response.status !== 200 || response.type !== 'basic') {
+                if (!canCacheResponse(response)) {
                     return response;
                 }
 
