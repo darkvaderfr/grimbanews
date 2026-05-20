@@ -70,7 +70,7 @@ The formal 1000-sprint ledger was behind the production-hardening work that has 
 
 Current accounting after the 2026-05-12 article-canonicalization sprints AND the 2026-05-19 reconciliation sweep that batch-evidenced shipped translation (S-LANG band), story SEO (Wave RRRRRR–WWWWWWW + AAAAAAAA), security (Wave NNNNNNN–PPPPPPP, OOOOOOO XSS fix, QQQQQQQ SSRF lock, TTTTTTT security-header contract, VVVVVVV robots.txt), accessibility (skip-link, focus-manager, reduced-motion), and design-system (token inventory, dark/light contract) work:
 
-- Formal evidenced master sprints: **79 / 1000 = 7.9%** (was 2.7% / 27 sprints before this sweep).
+- Formal evidenced master sprints: **84 / 1000 = 8.4%** (was 2.7% / 27 sprints before this sweep; +52 from band-evidence rows, +5 from S007-S010 + S020 inventory/audit docs generated 2026-05-19).
 - Practical production-readiness estimate: **about 40-42%** — core ingestion, publishing, article URL canonicalization, full-article readability coverage, public taxonomy cleanup, snippet sanitization, admin cockpit, dedupe, disk alerting, NewsAPI config guarding, deploy smoke paths, ingest-to-public health, JSON-LD across 7 reader surfaces (10 if counting editorial + advertise), security-header HSTS+CSP+nosniff+frame-options+referrer + XSS escape + SSRF guard + security.txt + robots.txt + canonical pagination fix, cache-control on public XML endpoints, sitemap-grimba.xml backfill, 404 noindex+no-canonical, language tagging (16/16 S-LANG sprints, 1340 NULL→36 NULL recovery), and 517 lock-tests / 4433 assertions all exist.
 - Still outstanding before launch: full visual QA across 28 routes × 2 modes × 3 widths (S-MODE-02), title-only duplicate editorial decisions, restore drill (S961-S970), provider live-smoke and cost dashboards (S891-S900), monetization (S851-S890, ads/subscriber loop), and business launch gates G10.
 - The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
@@ -90,6 +90,11 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S004 | `docs/GRIMBANEWS_S004_SCHEDULER_INVENTORY.md` | complete |
 | S005 | `docs/GRIMBANEWS_S005_MODEL_INVENTORY.md` | complete |
 | S006 | `docs/GRIMBANEWS_S006_MIGRATION_INVENTORY.md` | complete |
+| S007 | `docs/GRIMBANEWS_S007_PUBLIC_SURFACE_INVENTORY.md` — 191 public routes mapped + SEO posture recap | complete |
+| S008 | `docs/GRIMBANEWS_S008_ADMIN_SURFACE_INVENTORY.md` — 407 admin routes mapped + auth posture + cockpit board | complete |
+| S009 | `docs/GRIMBANEWS_S009_SHIPPED_COMMIT_MAP.md` — 633 commits in history; latest 20-wave SEO+security block mapped | complete |
+| S010 | `docs/GRIMBANEWS_S010_UNRESOLVED_RISK_REGISTER.md` — 20 risks tracked; 2 CRITICAL closed this session, 3 High open | complete |
+| S020 | `docs/GRIMBANEWS_S020_TEST_COVERAGE_AUDIT.md` — 517 pass / 4433 assertions / 85 test files mapped to sprints | complete |
 | S102 | RSS feed health score: `d67588a`, `app/Support/GrimbaRssFeedHealth.php`, `GrimbaHealth` feed scoring | complete |
 | S109 | RSS sick-feed quarantine: `00caf83`, `database/seeders/RssFeedsSeeder.php`, `tests/Feature/RssFeedsSeederTest.php` | complete |
 | S154 | Draft guardrail tests: `6586460`, `tests/Feature/DailyPublishFreshnessTest.php`, guardrail command coverage | complete |
