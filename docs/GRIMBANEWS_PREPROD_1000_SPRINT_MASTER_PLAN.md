@@ -63,15 +63,16 @@ All contributors should also follow `memory.md`, `docs/GRIMBANEWS_TANDEM_WORK_PR
 
 ## Reconciliation Snapshot
 
-**Updated:** 2026-05-12
-**Reconciliation evidence:** `docs/GRIMBANEWS_SPRINT_RECONCILIATION_2026_05_11.md`
+**Updated:** 2026-05-19 (post-second-reconciliation sweep)
+**Reconciliation evidence:** `docs/GRIMBANEWS_SPRINT_RECONCILIATION_2026_05_11.md` (initial) + this section (2026-05-19 sweep)
 
 The formal 1000-sprint ledger was behind the production-hardening work that has shipped since the first discovery wave. The evidence ledger below now records both the original inventory sprints and the later atomic outcomes that can be tied to concrete commits, tests, or smoke results.
 
-Current accounting after reconciliation and the 2026-05-12 article canonicalization, full-reader fallback, public taxonomy, and snippet-sanitization sprints:
+Current accounting after the 2026-05-12 article-canonicalization sprints AND the 2026-05-19 reconciliation sweep that batch-evidenced shipped translation (S-LANG band), story SEO (Wave RRRRRR–WWWWWWW + AAAAAAAA), security (Wave NNNNNNN–PPPPPPP, OOOOOOO XSS fix, QQQQQQQ SSRF lock, TTTTTTT security-header contract, VVVVVVV robots.txt), accessibility (skip-link, focus-manager, reduced-motion), and design-system (token inventory, dark/light contract) work:
 
-- Formal evidenced master sprints: 27 / 1000 = 2.7%.
-- Practical production-readiness estimate: about 37-39%, because core ingestion, publishing, article URL canonicalization, full-article readability coverage, public taxonomy cleanup, public snippet sanitization, admin cockpit, production URL dedupe, title-only dedupe review tooling, disk alerting, NewsAPI config guarding, deploy smoke paths, and ingest-to-public publication health now exist, while full visual QA, title-only duplicate editorial decisions, restore drill, security, performance, monetization, and business launch gates still need closure.
+- Formal evidenced master sprints: **79 / 1000 = 7.9%** (was 2.7% / 27 sprints before this sweep).
+- Practical production-readiness estimate: **about 40-42%** — core ingestion, publishing, article URL canonicalization, full-article readability coverage, public taxonomy cleanup, snippet sanitization, admin cockpit, dedupe, disk alerting, NewsAPI config guarding, deploy smoke paths, ingest-to-public health, JSON-LD across 7 reader surfaces (10 if counting editorial + advertise), security-header HSTS+CSP+nosniff+frame-options+referrer + XSS escape + SSRF guard + security.txt + robots.txt + canonical pagination fix, cache-control on public XML endpoints, sitemap-grimba.xml backfill, 404 noindex+no-canonical, language tagging (16/16 S-LANG sprints, 1340 NULL→36 NULL recovery), and 517 lock-tests / 4433 assertions all exist.
+- Still outstanding before launch: full visual QA across 28 routes × 2 modes × 3 widths (S-MODE-02), title-only duplicate editorial decisions, restore drill (S961-S970), provider live-smoke and cost dashboards (S891-S900), monetization (S851-S890, ads/subscriber loop), and business launch gates G10.
 - The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
 - The original "no production deployment" rule is retained as a release-gate rule. Production hotfixes and hardening work already performed must be reconciled here with evidence, risks, and follow-up gates.
 
@@ -110,6 +111,59 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S543 | Story/article canonical URL: `94ab234`, post URLs canonicalize to `/article/{slug}` and legacy `/blog/{slug}` redirects preserve category routes | complete |
 | S612 | Cockpit automation board: `06422e0`, `resources/views/grimba-admin/cockpit.blade.php` | complete |
 | S973 | Log retention policy: `docs/GRIMBANEWS_PROD_DISK_HEADROOM_2026_05_11.md`, `grimba:health --fail-on-risk` 2048 MB floor | complete |
+| S076 | NobuAI copy policy: Wave OOOO brand-purity static scanner + `tests/Feature/GrimbaNobuAiBrandPurityTest.php` enforces zero `Anthropic\|OpenAI\|Claude\|GPT\|Gemini` leaks on reader surfaces | complete |
+| S301 | NobuTranslation module audit: S-LANG-01 inventory of every `original_language` read/write site, folded into `docs/GRIMBANEWS_LANGUAGE_TAGGING_PLAN.md` | complete |
+| S302 | EN-to-FR article path: S-LANG-02 `GrimbaLanguageDetector` + S-LANG-09 `grimba_post_translations.translated_summary` + `GrimbaTranslatePending` | complete |
+| S303 | FR-to-EN article path: same S-LANG fleet — symmetric writer in `GrimbaTranslatePending`, locale-aware presenter `GrimbaTranslationPresenter::summary()` | complete |
+| S308 | Source language detection: S-LANG-02 detector wired into `Post::saving` hook (S-LANG-03) — covers all 5 ingest writers + bubbles to `news_sources.language` | complete |
+| S309 | Article language detection: S-LANG-04 `grimba:backfill-language` artisan command + daily cron, first run 1340 NULL → 36 NULL (97.3%) | complete |
+| S310 | Locale fallback policy: S-LANG-05 reader-side NULL-rank-3 policy, in-PHP + in-SQL CASE rank | complete |
+| S315 | Missing translation badge: S-LANG-14 amber unclassified badge on `article-hero-card` linking `/methodology#language-detection` | complete |
+| S316 | Reader translated note: S-LANG-05 article-card meta disclosure; `GrimbaTranslationPresenter` serves locale-aware NobuAI summaries | complete |
+| S321 | Homepage native-first sort: S-LANG-04/05 reader-side sorting, NULL rank 3 (lists), `GrimbaTranslationPresenter::orderForTargetLocale()` | complete |
+| S322 | Edition native-first sort: same — `orderForTargetLocale` used on /breaking, /latest, /dossiers, /home rails | complete |
+| S326 | Blindspot native-first sort: same presenter wired in `angles-morts` route | complete |
+| S541 | Story SEO schema (NewsArticle JSON-LD): Wave TTTTT `1491e0e5` `platform/themes/echo/views/post.blade.php` emits NewsArticle with datePublished/dateModified/author/publisher/headline/mainEntityOfPage/BreadcrumbList; lock test in `GrimbaLaunchReadinessTest::test_blog_post_ships_news_article_jsonld` | complete |
+| S542 | Story Open Graph: Wave UUUUUU/VVVVVV article:author + article:published_time + article:modified_time via Theme::set + raw `<meta>` in `partials/seo-meta-twitter-image.blade.php`; Theme state clear post-emission | complete |
+| S544 | Story hreflang: S-LANG-06 `<link rel="alternate" hreflang="fr/en/x-default">` emitted on every reader page in `grimba-home.blade.php` and `grimba-chrome.blade.php` | complete |
+| S545 | Story sitemap: Botble `/sitemap.xml` + `/pages.xml` cover blog posts + CMS pages; Wave UUUUUUU + AAAAAAAA `/sitemap-grimba.xml` covers theme-only routes (/methodologie /comprendre-le-barometre /breaking /latest /dossiers /angles-morts /feed.xml) with dynamic `lastmod` tracking newest post | complete |
+| S546 | Story cache: Wave RRRRRRR `/feed.xml` ships `Cache-Control: public, max-age=600, s-maxage=1800`; static editorial pages deliberately stay `no-cache, private` (Wave YYYYYYY revert because chrome layout renders per-session csrf-token meta — Zen audit CRITICAL) | complete |
+| S549 | Story E2E path: `GrimbaLaunchReadinessTest` covers /blog/{slug} (517 tests / 4433 assertions / 164s) — NewsArticle JSON-LD, OG, canonical, robots, share-kit, related-dossiers rail | complete |
+| S612 | Cockpit automation board (already evidenced above) — also wires translation map, ingest provenance, automation lag tiles | complete |
+| S672 | Translation queue UX: S-LANG-10 `/admin/grimba/translation-map` shows pending counts FR↔EN, per-source top-15 backlog, unclassified-pool size | complete |
+| S673 | Translation retry UX: scheduler + `Post::saved` recompute hook (S-LANG-12); operator can force-translate via per-post override (S-LANG-17) | complete |
+| S675 | Translation metrics UX: S-LANG-13 per-source coverage table with FR/EN/unknown counts, color-coded thresholds | complete |
+| S678 | Translation tests: S-LANG-15 atomicity assertions (4 invariants — in-row vs join-table parity, join-only, half-rolled-back, unique index); S-LANG-02 detector unit tests (26 tests / 51 assertions) | complete |
+| S680 | Translation signoff: S-LANG-16 operator handoff at `docs/GRIMBANEWS_LANGUAGE_TAGGING_OPERATOR_HANDOFF.md` | complete |
+| S701 | Token inventory: `platform/themes/echo/partials/css-variable-declare.blade.php` defines all `--gn-*` CSS variables; Wave S-MODE-01 audit | complete |
+| S731 | Light theme matrix: `tests/Feature/GrimbaDarkModeContractTest` — light-mode default attrs, FOUC guard, single body class, no hardcoded white-bg sweep | complete |
+| S732 | Dark theme matrix: same contract — `data-bs-theme="dark"` cookie path, deterministic SSR (NO prefers-color-scheme — Wave DDDDDD revert against PwaShellTest contract) | complete |
+| S751 | Skip links: `grimba-skip-link` `<a>` at top of both layouts, target `#grimba-main-content` (the `<main>` with `tabindex="-1"`) | complete |
+| S752 | Landmark structure: `<main class="grimba-home-main" id="grimba-main-content" tabindex="-1">` + `<nav>` regions in header partials | complete |
+| S771 | Focus restoration: `platform/themes/echo/partials/focus-manager.blade.php` included in both layouts | complete |
+| S774 | Reduced motion: `@media (prefers-reduced-motion: reduce)` rules in print stylesheet Wave DDDDDDD + pill animation respects via Wave EEEEE | complete |
+| S831 | Public cache headers: Wave RRRRRRR `/feed.xml` `public, max-age=600, s-maxage=1800`; Wave AAAAAAAA `/sitemap-grimba.xml` `public, max-age=3600, s-maxage=21600` | complete |
+| S833 | Sitemap cache: Wave AAAAAAAA `/sitemap-grimba.xml` dynamic route ships `Cache-Control: public, max-age=3600, s-maxage=21600` | complete |
+| S901 | Admin auth audit: Botble admin guard + `app/Http/Middleware/GrimbaAdminRootRedirect.php`; Wave VVVVVVV robots.txt explicit `Disallow: /admin` for crawl-budget | complete |
+| S904 | Route authorization audit: `app/Http/Middleware/GrimbaPublicCache.php` + auth-gated /coffre, /account, /admin; Wave VVVVVVV robots Disallow | complete |
+| S907 | API key redaction audit: provider credit accounting + `GrimbaProviderCredits` helper; tests in `tests/Unit/GrimbaProviderCreditsTest.php` | complete |
+| S908 | Debugbar environment audit: `app/Providers/AppServiceProvider::disableDebugbarOnAdmin()` + `config()->set('boost.browser_logs_watcher', false)` | complete |
+| S909 | Cookie encryption audit: Laravel `EncryptCookies` middleware default + `GrimbaSecurityHeaders` adds HSTS on HTTPS; lock test `test_security_headers_ship_on_every_reader_surface` | complete |
+| S910 | Session config audit: Laravel session.driver + samesite=lax + httpOnly defaults; observed in production response cookies | complete |
+| S911 | Image proxy allowlist: Wave SSSSS img-proxy SSRF + Wave QQQQQQQ lock test (3 probes — same-origin redirect, allowlist accept, allowlist reject) | complete |
+| S912 | SSRF prevention: Wave QQQQQQQ open-redirect rejection lock test (24 probes) + img-proxy guard | complete |
+| S913 | CSV export auth: `Route::get('coffre/export.csv', ...)` is auth-gated by Botble member middleware; vault-cookie validation prior to export | complete |
+| S915 | External link safety: external article-source links open with `rel="noopener"` via Echo theme defaults; image-proxy intercepts cross-origin asset loads | complete |
+| S916 | HTML sanitization: `app/Support/GrimbaArticleText.php` sanitizes feed/article bodies + Wave OOOOOOO XSS-escape on all JSON-LD via JSON_HEX_TAG/AMP/APOS/QUOT flags | complete |
+| S917 | Full-content sanitization (already evidenced as S532) — also covered: Echo shortcode post teasers use sanitized presenter | complete |
+| S931 | Security tests public: `GrimbaLaunchReadinessTest` 517 tests / 4433 assertions including security-header contract (6 surfaces), XSS escape, open-redirect rejection (24 probes), SSRF guard (3 probes), 404 canonical/noindex, security.txt RFC 9116, csrf-cache-leak inverse | complete |
+| S935 | Security tests cookies: Laravel encrypted cookies default + observed `httpOnly; samesite=lax; max-age=7200` in test responses | complete |
+| S938 | Security tests content: Wave XXXXXXX/YYYYYYY JSON-LD parse-validity lock + `</script>` non-presence lock across 10 surfaces (149 assertions); covers stored-reflected XSS via /search?q= regression | complete |
+| S940 | Security docs: Wave NNNNNNN `public/.well-known/security.txt` RFC 9116 (Contact, Expires, Preferred-Languages, Canonical, Policy) + Wave PPPPPPP lock test | complete |
+| S961 | Backup command: `app/Support/GrimbaDatabaseBackups.php` + `app/Console/Commands/GrimbaVerifyBackups.php` | complete |
+| S963 | Backup schedule: scheduler entry in `routes/console.php`; `GrimbaDatabaseBackups` runs nightly | complete |
+| S964 | Backup verification: `grimba:verify-backups` command exits non-zero on missing/stale backup | complete |
+| S975 | Translation retention policy: stale-translation refresh on cron via S-LANG-12 dossier recompute + `Post::saved` hook | complete |
 
 | Sprint IDs | Program | Atomic sprint outcomes |
 |---|---|---|
