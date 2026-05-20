@@ -311,7 +311,14 @@ class GrimbaHomeFeed
                 ->whereNotNull('source_name')
                 ->with('slugable');
             if ($strict) {
-                GrimbaTranslationPresenter::filterForTargetLocale($recent);
+                // Wave RRRRRRRR (Vader 2026-05-20) — pass $locale
+                // explicitly (was relying on the implicit
+                // targetLocale() request lookup, which works under
+                // a normal HTTP request but drifts inside background
+                // jobs or queue workers that warm this cache from a
+                // request-less context. Wave LLLLLLLL's line 339
+                // already used the explicit pattern; mirror it here.
+                GrimbaTranslationPresenter::filterForTargetLocale($recent, $locale);
             }
             GrimbaPostRecency::wherePublishedSince($recent, now()->subHours($windowHours));
             GrimbaPostRecency::orderByPublished($recent);
