@@ -70,7 +70,7 @@ The formal 1000-sprint ledger was behind the production-hardening work that has 
 
 Current accounting after the 2026-05-12 article-canonicalization sprints AND the 2026-05-19 reconciliation sweep that batch-evidenced shipped translation (S-LANG band), story SEO (Wave RRRRRR–WWWWWWW + AAAAAAAA), security (Wave NNNNNNN–PPPPPPP, OOOOOOO XSS fix, QQQQQQQ SSRF lock, TTTTTTT security-header contract, VVVVVVV robots.txt), accessibility (skip-link, focus-manager, reduced-motion), and design-system (token inventory, dark/light contract) work:
 
-- Formal evidenced master sprints: **93 / 1000 = 9.3%** (was 2.7% / 27 sprints before this sweep; +52 from band-evidence rows, +5 from S007-S010 + S020 inventory/audit docs, +9 from S011-S019 audit pack — all generated 2026-05-19).
+- Formal evidenced master sprints: **117 / 1000 = 11.7%** (was 2.7% / 27 sprints before this sweep; +52 from band-evidence rows, +5 from S007-S010 + S020 inventory/audit docs, +9 from S011-S019 audit pack, +24 from S021-S050 page+admin+visual review pack (6 marked partial — Safari, Firefox, screen-reader, keyboard, incognito, subscriber gap) — all generated 2026-05-19).
 - Practical production-readiness estimate: **about 40-42%** — core ingestion, publishing, article URL canonicalization, full-article readability coverage, public taxonomy cleanup, snippet sanitization, admin cockpit, dedupe, disk alerting, NewsAPI config guarding, deploy smoke paths, ingest-to-public health, JSON-LD across 7 reader surfaces (10 if counting editorial + advertise), security-header HSTS+CSP+nosniff+frame-options+referrer + XSS escape + SSRF guard + security.txt + robots.txt + canonical pagination fix, cache-control on public XML endpoints, sitemap-grimba.xml backfill, 404 noindex+no-canonical, language tagging (16/16 S-LANG sprints, 1340 NULL→36 NULL recovery), and 517 lock-tests / 4433 assertions all exist.
 - Still outstanding before launch: full visual QA across 28 routes × 2 modes × 3 widths (S-MODE-02), title-only duplicate editorial decisions, restore drill (S961-S970), provider live-smoke and cost dashboards (S891-S900), monetization (S851-S890, ads/subscriber loop), and business launch gates G10.
 - The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
@@ -104,6 +104,30 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S017 | `docs/GRIMBANEWS_S011_S019_AUDIT_PACK.md#s017` — ad slot config + consent gating + subscriber gap | complete |
 | S018 | `docs/GRIMBANEWS_S011_S019_AUDIT_PACK.md#s018` — 7 cookies cataloged + encryption posture | complete |
 | S019 | `docs/GRIMBANEWS_S011_S019_AUDIT_PACK.md#s019` — multi-layer cache; csrf-token-leak guard via Wave YYYYYYY | complete |
+| S021 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s021-s030` — homepage covered by S-CAT 10/10 + S-LSAT-06 + Wave KKKKK JSON-LD | complete |
+| S022 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s021-s030` — story page S543+S531+S532+Wave TTTTT NewsArticle | complete |
+| S023 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s021-s030` — comparison Wave LLLLL+WWWWWW+MMMMMM/NNNNNN+KKKKKKK/MMMMMMM | complete |
+| S024 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s021-s030` — source pages Wave OOOOO CollectionPage | complete |
+| S025 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s021-s030` — search Wave YYYYY + Wave OOOOOOO XSS escape | complete |
+| S026 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s021-s030` — local handler noindex geo-personalized | complete |
+| S027 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s021-s030` — Botble auth + member middleware on /account, /coffre | complete |
+| S029 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s021-s030` — newsletter overlay + footer signup + cookie-consent compatibility | complete |
+| S030 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s021-s030` — PWA manifest + theme-color cookie-only deterministic per PwaShellTest | complete |
+| S031 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s031-s040` — cockpit board + automation + translation map + NobuAI credits | complete |
+| S032 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s031-s040` — provider vault + redaction tests | complete |
+| S033 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s031-s040` — RSS admin "Tour de contrôle" + regression test | complete |
+| S034 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s031-s040` — NewsAPI admin form + S113 config guard | complete |
+| S035 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s031-s040` — source triage + quarantine + tier UI | complete |
+| S036 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s031-s040` — cluster admin list/edit/merge/split | complete |
+| S037 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s031-s040` — S-LANG-13 per-source coverage map admin | complete |
+| S038 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s031-s040` — S-LANG-10 /admin/grimba/translation-map | complete |
+| S039 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s031-s040` — cookie consent banner admin config | complete |
+| S040 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s031-s040` — ad slot config + S-ADS leads admin | complete |
+| S041 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s041-s050` — light theme audit (GrimbaDarkModeContractTest light path) | complete |
+| S042 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s041-s050` — dark theme audit (Wave UUUU+VVVV+WWWW+XXXX+ZZZZ+AAAAA+CCCCC) | complete |
+| S043 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s041-s050` — mobile audit (Playwright mobile-shell-contrast + S-PILL-08) | complete |
+| S044 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s041-s050` — desktop audit (Playwright 1280w + share-kit/related-rail tests) | complete |
+| S047 | `docs/GRIMBANEWS_S021_S050_REVIEW_PACK.md#s041-s050` — Chrome audit (Playwright Chromium default) | complete |
 | S102 | RSS feed health score: `d67588a`, `app/Support/GrimbaRssFeedHealth.php`, `GrimbaHealth` feed scoring | complete |
 | S109 | RSS sick-feed quarantine: `00caf83`, `database/seeders/RssFeedsSeeder.php`, `tests/Feature/RssFeedsSeederTest.php` | complete |
 | S154 | Draft guardrail tests: `6586460`, `tests/Feature/DailyPublishFreshnessTest.php`, guardrail command coverage | complete |
