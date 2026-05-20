@@ -64,7 +64,7 @@ class GrimbaLiveNewsFetcher
      */
     public function providers(): array
     {
-        $raw = (string) setting('grimba_breaking_providers', 'google-news,gdelt,webz,mediastack');
+        $raw = (string) setting('grimba_breaking_providers', 'google-news,gdelt,webz,mediastack,newsdata-io');
 
         return collect(explode(',', str_replace("\n", ',', $raw)))
             ->map(fn (string $provider): string => mb_strtolower(trim($provider)))

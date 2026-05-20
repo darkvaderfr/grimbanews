@@ -16,6 +16,7 @@ class AutomationScheduleTest extends TestCase
         $output = Artisan::output();
 
         $this->assertStringContainsString('grimba:poll-feeds', $output);
+        $this->assertStringContainsString('grimba:fetch-breaking --provider=newsdata-io', $output);
         $this->assertStringContainsString('grimba:publish-trusted', $output);
         $this->assertStringContainsString('grimba:publish-guardrail-categories', $output);
         $this->assertStringContainsString('grimba:ensure-daily-publish --min=12 --window-hours=24 --per-category-min=3', $output);

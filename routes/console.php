@@ -97,6 +97,19 @@ grimba_schedule_command('breaking_live', 'grimba:fetch-breaking')
     ->runInBackground()
     ->when(fn () => (bool) setting('grimba_breaking_active', true));
 
+// GrimbaNews — dedicated newsdata.io lane. Off by default because the
+// shared breaking_live cron already invokes newsdata.io through the
+// provider list. Enable only when the free daily credit budget should
+// be used more aggressively without increasing other provider calls.
+grimba_schedule_command('breaking_newsdata', 'grimba:fetch-breaking --provider=newsdata-io')
+    ->cron('*/8 * * * *')
+    ->onOneServer()
+    ->withoutOverlapping(8)
+    ->runInBackground()
+    ->when(fn () => (bool) setting('grimba_newsdata_io_dedicated_cron', false)
+        && (bool) setting('grimba_breaking_active', true)
+        && (bool) setting('grimba_newsdata_io_active', false));
+
 // GrimbaNews — translation of un-translated posts. French and English
 // queues run separately so the public language switch can serve both
 // English-source articles in French and French-source articles in English.

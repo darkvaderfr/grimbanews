@@ -26,6 +26,11 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:fetch-breaking',
                 'expected_minutes' => 15,
             ],
+            'breaking_newsdata' => [
+                'label' => 'newsdata.io live lane',
+                'command' => 'grimba:fetch-breaking --provider=newsdata-io',
+                'expected_minutes' => 15,
+            ],
             'translate_fr' => [
                 'label' => 'Translate to FR',
                 'command' => 'grimba:translate-pending --to=fr --limit=50',

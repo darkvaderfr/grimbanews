@@ -124,6 +124,31 @@ class LiveNewsProviderTest extends TestCase
         ]);
     }
 
+    public function test_default_breaking_provider_list_includes_newsdata_io(): void
+    {
+        $store = app(SettingStore::class);
+        $hadOriginal = $store->has('grimba_breaking_providers');
+        $original = $hadOriginal ? (string) setting('grimba_breaking_providers') : null;
+
+        try {
+            $store->forget('grimba_breaking_providers')->save();
+
+            $providers = app(GrimbaLiveNewsFetcher::class)->providers();
+
+            $this->assertContains('google-news', $providers);
+            $this->assertContains('gdelt', $providers);
+            $this->assertContains('webz', $providers);
+            $this->assertContains('mediastack', $providers);
+            $this->assertContains('newsdata-io', $providers);
+        } finally {
+            if ($hadOriginal) {
+                $store->set('grimba_breaking_providers', $original)->save();
+            } else {
+                $store->forget('grimba_breaking_providers')->save();
+            }
+        }
+    }
+
     private function setting(string $key, string $value): void
     {
         $store = app(SettingStore::class);
