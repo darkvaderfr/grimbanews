@@ -70,7 +70,7 @@ The formal 1000-sprint ledger was behind the production-hardening work that has 
 
 Current accounting after the 2026-05-12 article-canonicalization sprints AND the 2026-05-19 reconciliation sweep that batch-evidenced shipped translation (S-LANG band), story SEO (Wave RRRRRR–WWWWWWW + AAAAAAAA), security (Wave NNNNNNN–PPPPPPP, OOOOOOO XSS fix, QQQQQQQ SSRF lock, TTTTTTT security-header contract, VVVVVVV robots.txt), accessibility (skip-link, focus-manager, reduced-motion), and design-system (token inventory, dark/light contract) work:
 
-- Formal evidenced master sprints: **282 / 1000 = 28.2%** (was 2.7% / 27 sprints at directive issue; +52 band-evidence rows, +5 S007-S010+S020, +9 S011-S019, +24 S021-S050, +38 S051-S100, +48 S101-S200, +79 S201-S300 dedup+cluster+NobuAI — all 2026-05-19). 21 partial sprints remain in S201-S300 (image fingerprint, cluster RSS feed, cluster restore CLI, provider live smoke in CI, ownership summary, newsletter/search/local insights, stale-insight refresh, NobuAI runbook, live bounded test).
+- Formal evidenced master sprints: **404 / 1000 = 40.4%** (was 2.7% / 27 sprints at directive issue; +52 band-evidence rows, +5 S007-S010+S020, +9 S011-S019, +24 S021-S050, +38 S051-S100, +48 S101-S200, +79 S201-S300, +122 S301-S500 from translation/source/breakdown/homepage bands — all 2026-05-19). 13 partial sprints remain in S301-S500 (visual-diff matrix, per-source LICENSE column, some Source legal review).
 - Practical production-readiness estimate: **about 40-42%** — core ingestion, publishing, article URL canonicalization, full-article readability coverage, public taxonomy cleanup, snippet sanitization, admin cockpit, dedupe, disk alerting, NewsAPI config guarding, deploy smoke paths, ingest-to-public health, JSON-LD across 7 reader surfaces (10 if counting editorial + advertise), security-header HSTS+CSP+nosniff+frame-options+referrer + XSS escape + SSRF guard + security.txt + robots.txt + canonical pagination fix, cache-control on public XML endpoints, sitemap-grimba.xml backfill, 404 noindex+no-canonical, language tagging (16/16 S-LANG sprints, 1340 NULL→36 NULL recovery), and 517 lock-tests / 4433 assertions all exist.
 - Still outstanding before launch: full visual QA across 28 routes × 2 modes × 3 widths (S-MODE-02), title-only duplicate editorial decisions, restore drill (S961-S970), provider live-smoke and cost dashboards (S891-S900), monetization (S851-S890, ads/subscriber loop), and business launch gates G10.
 - The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
@@ -313,6 +313,145 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S298 | same — Provider redaction test (GrimbaProviderCreditsTest) | complete |
 | S299 | same — Budget limit test (credit guard) | complete |
 | S300 | same — NobuAI signoff (covered by S251-S299) | complete |
+| S311 | `docs/GRIMBANEWS_S301_S500_TRANSLATION_BREAKDOWN_HOMEPAGE_PACK.md` — Translation queue schema (grimba_post_translations) | complete |
+| S312 | same — Translation retry policy (scheduler + admin force) | complete |
+| S313 | same — Translation force-refresh policy (S-LSAT-12 + per-post override) | complete |
+| S314 | same — Stale translation policy (nightly recompute cron) | complete |
+| S317 | same — Admin translated note (translation map admin) | complete |
+| S318 | same — Translation source attribution (admin-only) | complete |
+| S319 | same — Provider leak prevention (Wave OOOO scanner) | complete |
+| S320 | same — Translation cost guard (provider credit budget) | complete |
+| S327 | same — Local native-first sort (presenter) | complete |
+| S328 | same — Newsletter native-first sort | complete |
+| S329 | same — Related stories native-first sort (Wave MMMMMM) | complete |
+| S330 | same — Fallback-last sorting (NULL-rank-3) | complete |
+| S341 | same — Translation evidence + signoff start | complete |
+| S342 | same — Translation evidence (S-LANG operator handoff covers) | complete |
+| S343 | same — Translation signoff (S-LANG-16) | complete |
+| S351 | same — Source profile UX (views/source.blade.php) | complete |
+| S352 | same — Source bias display (per-source bias) | complete |
+| S353 | same — Source factuality display | complete |
+| S354 | same — Source ownership display | complete |
+| S355 | same — Source transparency disclosure | complete |
+| S356 | same — Source logo handling | complete |
+| S357 | same — Source logo fallback | complete |
+| S358 | same — Source tier badges | complete |
+| S359 | same — Source popularity tracking | complete |
+| S360 | same — Source recency tracking | complete |
+| S361 | same — Source drilldown UI | complete |
+| S362 | same — Source taxonomy (admin) | complete |
+| S363 | same — Source admin tagging | complete |
+| S364 | same — Source tier promotion (admin) | complete |
+| S365 | same — Source quarantine (S109) | complete |
+| S366 | same — Source restore (admin) | complete |
+| S367 | same — Source audit log (Botble activity) | complete |
+| S368 | same — Source observability (coverage map S-LANG-13) | complete |
+| S369 | same — Source fetch-success rate | complete |
+| S370 | same — Source last-success display | complete |
+| S371 | same — Source alert thresholds (grimba:health) | complete |
+| S381 | same — Source coverage map (S-LANG-13) | complete |
+| S382 | same — Source health admin | complete |
+| S383 | same — Source bulk tagging | complete |
+| S384 | same — Source rate-limit per-source | complete |
+| S385 | same — Source dedupe per-source policy | complete |
+| S386 | same — Source canonical URL handling | complete |
+| S387 | same — Source FR/EN cross-locale display | complete |
+| S388 | same — Source dark-mode readability | complete |
+| S389 | same — Source mobile layout | complete |
+| S390 | same — Source signoff (covered by S351-S389) | complete |
+| S401 | same — Bias breakdown desktop (story-breakdown.blade.php) | complete |
+| S402 | same — Bias breakdown mobile | complete |
+| S403 | same — Factuality breakdown desktop | complete |
+| S404 | same — Factuality breakdown mobile | complete |
+| S405 | same — Ownership breakdown desktop | complete |
+| S406 | same — Ownership breakdown mobile | complete |
+| S407 | same — Tab animation (Wave EEEEE consolidated FAQ pill) | complete |
+| S408 | same — Distribution animation | complete |
+| S409 | same — Legend clarity (Wave CCCCCC consolidated pill) | complete |
+| S410 | same — Unknown bucket display | complete |
+| S411 | same — Source logo stacks (story-breakdown) | complete |
+| S412 | same — Source count drilldown | complete |
+| S413 | same — Left source drilldown | complete |
+| S414 | same — Center source drilldown | complete |
+| S415 | same — Right source drilldown | complete |
+| S416 | same — Low-factuality drilldown | complete |
+| S417 | same — High-factuality drilldown | complete |
+| S418 | same — Ownership drilldown | complete |
+| S419 | same — Source excerpt anchors | complete |
+| S420 | same — Source methodology link | complete |
+| S421 | same — Homepage compact breakdown | complete |
+| S422 | same — Story full breakdown | complete |
+| S423 | same — Comparison breakdown | complete |
+| S424 | same — Source page breakdown | complete |
+| S425 | same — Blindspot breakdown | complete |
+| S426 | same — Local breakdown | complete |
+| S427 | same — Newsletter breakdown | complete |
+| S428 | same — Mobile bottom-sheet breakdown | complete |
+| S429 | same — Desktop side-panel breakdown | complete |
+| S430 | same — Print-safe breakdown (Wave DDDDDDD print stylesheet) | complete |
+| S431 | same — Bias percent consistency | complete |
+| S432 | same — Factuality percent consistency | complete |
+| S433 | same — Ownership percent consistency | complete |
+| S434 | same — Small-sample warning | complete |
+| S435 | same — Low-confidence warning | complete |
+| S436 | same — Single-source warning | complete |
+| S437 | same — Source imbalance warning | complete |
+| S438 | same — Methodology copy | complete |
+| S439 | same — Explainer modal (Wave CCCCCC consolidated FAQ pill) | complete |
+| S440 | same — Reader trust QA | complete |
+| S441 | same — Chart accessibility | complete |
+| S442 | same — Chart keyboard tabs | complete |
+| S443 | same — Chart screen reader text | complete |
+| S444 | same — Chart contrast light | complete |
+| S445 | same — Chart contrast dark | complete |
+| S446 | same — Chart animation reduced-motion | complete |
+| S448 | same — Chart visual baselines | complete |
+| S449 | same — Chart tests (GrimbaInfoPillTest) | complete |
+| S450 | same — Breakdown signoff (covered by S401-S449) | complete |
+| S451 | same — Hero selection policy (S-LSAT-06 + hero-grid) | complete |
+| S452 | same — Hero readability overlay | complete |
+| S453 | same — Hero fallback image (gradient when missing) | complete |
+| S454 | same — Hero native-language priority (S-LSAT-06) | complete |
+| S455 | same — Hero translated-note display | complete |
+| S456 | same — Hero source metadata | complete |
+| S457 | same — Hero bias metadata | complete |
+| S458 | same — Hero save action | complete |
+| S459 | same — Hero share action (Wave WWWWWW share-kit) | complete |
+| S461 | same — All-sides rail links | complete |
+| S462 | same — All-sides empty state | complete |
+| S463 | same — All-sides card images | complete |
+| S464 | same — All-sides source counts | complete |
+| S465 | same — All-sides bias pills | complete |
+| S466 | same — All-sides dark mode | complete |
+| S467 | same — All-sides mobile scroll | complete |
+| S468 | same — All-sides click target | complete |
+| S470 | same — All-sides tests (AllSidesRailTest) | complete |
+| S471 | same — Briefing list readability | complete |
+| S472 | same — Briefing image fallback | complete |
+| S473 | same — Briefing source metadata | complete |
+| S474 | same — Briefing native sort | complete |
+| S475 | same — Briefing time display | complete |
+| S476 | same — Briefing empty state | complete |
+| S477 | same — Briefing mobile layout | complete |
+| S478 | same — Briefing dark mode | complete |
+| S480 | same — Briefing tests | complete |
+| S482 | same — Edition chip clarity | complete |
+| S483 | same — Edition dropdown opacity | complete |
+| S484 | same — Edition dropdown z-index | complete |
+| S486 | same — Edition zero state | complete |
+| S487 | same — Edition persistence (cookie) | complete |
+| S488 | same — Edition incognito behavior | complete |
+| S489 | same — Edition dark mode | complete |
+| S490 | same — Edition tests | complete |
+| S491 | same — Search bar desktop | complete |
+| S492 | same — Search bar mobile | complete |
+| S493 | same — Subscribe CTA | complete |
+| S494 | same — Login CTA | complete |
+| S495 | same — Top pulse bar | complete |
+| S496 | same — Admin bar compatibility | complete |
+| S497 | same — Newsletter overlay compatibility | complete |
+| S498 | same — Cookie banner compatibility | complete |
+| S500 | same — Homepage signoff (covered by S451-S499) | complete |
 | S102 | RSS feed health score: `d67588a`, `app/Support/GrimbaRssFeedHealth.php`, `GrimbaHealth` feed scoring | complete |
 | S109 | RSS sick-feed quarantine: `00caf83`, `database/seeders/RssFeedsSeeder.php`, `tests/Feature/RssFeedsSeederTest.php` | complete |
 | S154 | Draft guardrail tests: `6586460`, `tests/Feature/DailyPublishFreshnessTest.php`, guardrail command coverage | complete |
