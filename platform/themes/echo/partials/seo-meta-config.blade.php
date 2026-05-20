@@ -61,6 +61,12 @@
     // ("this URL is canonical to itself, but also doesn't exist").
     // The 404 view sets Theme::set('grimba_is_404', true); skip
     // canonical emission when that flag is set.
+    //
+    // Wave BBBBBBBB (Vader 2026-05-19) — `?page=N` preservation on
+    // paginated canonicals is handled by an add_filter() callback
+    // in AppServiceProvider::canonicalizeArticleUrls (hooks into
+    // `core_seo_canonical`). Botble's SeoHelper strips ALL queries
+    // here unconditionally; the filter re-adds page=N when N>1.
     $__grimbaIs404 = (bool) Theme::get('grimba_is_404');
     if (! $__grimbaIs404) {
         \Botble\SeoHelper\Facades\SeoHelper::meta()->setUrl(url()->current());

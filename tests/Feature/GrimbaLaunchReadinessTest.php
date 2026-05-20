@@ -1261,6 +1261,40 @@ class GrimbaLaunchReadinessTest extends TestCase
         );
     }
 
+    public function test_paginated_pages_canonical_to_themselves_not_base_url(): void
+    {
+        // Wave BBBBBBBB (Vader 2026-05-19) — real SEO bug.
+        // /breaking?page=2 was canonicaling to /breaking (no query),
+        // telling Google to ignore pages 2+ as duplicates of page 1.
+        // Every article living on page 2+ was blocked from indexing.
+        //
+        // Fix: AppServiceProvider::preservePaginationInCanonical
+        // hooks into Botble's `core_seo_canonical` filter to
+        // re-append `?page=N` when N>1. Tracking params (utm_*,
+        // fbclid, gclid) are still stripped — only `page` survives.
+        $cases = [
+            ['/breaking',                       '/breaking'],
+            ['/breaking?page=2',                '/breaking?page=2'],
+            ['/breaking?page=2&utm_source=fb',  '/breaking?page=2'],
+            ['/latest?page=3',                  '/latest?page=3'],
+            ['/dossiers?page=2',                '/dossiers?page=2'],
+            // page=1 is treated as base URL — Google's standard
+            // pagination convention treats first page == bare URL.
+            ['/breaking?page=1',                '/breaking'],
+        ];
+        foreach ($cases as [$url, $expectedCanonicalSuffix]) {
+            $html = $this->get($url)->getContent();
+            preg_match('#<link\s+rel="canonical"\s+href="([^"]+)"#i', $html, $m);
+            $this->assertNotEmpty($m, "{$url} must emit a <link rel=canonical>.");
+            $actual = $m[1];
+            $this->assertStringEndsWith(
+                $expectedCanonicalSuffix,
+                $actual,
+                "{$url} canonical should end with `{$expectedCanonicalSuffix}` (got `{$actual}`).",
+            );
+        }
+    }
+
     public function test_advertise_page_does_not_get_public_cached(): void
     {
         // Wave TTTTTTT / Wave YYYYYYY — /advertise has an @csrf token

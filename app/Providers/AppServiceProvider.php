@@ -25,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->disableDebugbarOnAdmin();
         $this->canonicalizeArticleUrls();
+        $this->preservePaginationInCanonical();
 
         // Flip the app locale from the grimba_lang cookie right before
         // any view renders. This wins over Botble's Language plugin
@@ -147,6 +148,51 @@ class AppServiceProvider extends ServiceProvider
 
             return $this->buildUrlFromParts($parts);
         }, 99);
+    }
+
+    /**
+     * Wave BBBBBBBB (Vader 2026-05-19) — preserve `?page=N` (N>1) in
+     * the rel=canonical URL. Botble's SeoHelper unconditionally
+     * strips ALL query params before emitting the canonical, so
+     * /breaking?page=2 ended up canonicaling to /breaking — telling
+     * Google to ignore pages 2+ as duplicates. That blocks every
+     * article on page 2+ from getting indexed.
+     *
+     * Google's official guidance (post-2019 rel=prev/next deprecation):
+     * each paginated page should canonical to itself. So
+     * /breaking?page=2 → canonical /breaking?page=2. We do NOT
+     * canonical ?page=1 to itself (treat that as the same content
+     * as the bare URL — Google's standard pagination convention).
+     *
+     * Tracking params (utm_*, fbclid, gclid) are still stripped —
+     * only `page` is preserved.
+     */
+    private function preservePaginationInCanonical(): void
+    {
+        if (! function_exists('add_filter')) {
+            return;
+        }
+
+        add_filter('core_seo_canonical', function (string $canonicalUrl): string {
+            $page = (int) request()->query('page', 1);
+            if ($page <= 1) {
+                return $canonicalUrl;
+            }
+            // Append page=N. Use parse_url to handle URLs that
+            // already have a fragment (#section); fragment must
+            // come after the query.
+            $parts = parse_url($canonicalUrl);
+            $base = ($parts['scheme'] ?? 'https') . '://' . ($parts['host'] ?? '');
+            if (isset($parts['port'])) {
+                $base .= ':' . $parts['port'];
+            }
+            $base .= $parts['path'] ?? '';
+            $base .= '?page=' . $page;
+            if (isset($parts['fragment'])) {
+                $base .= '#' . $parts['fragment'];
+            }
+            return $base;
+        }, 50);
     }
 
     /**
