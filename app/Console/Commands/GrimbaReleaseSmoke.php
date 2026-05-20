@@ -15,6 +15,7 @@ class GrimbaReleaseSmoke extends Command
         {--host-header= : optional Host header for IP-based production smoke}
         {--max-home-ms=3000 : maximum acceptable homepage response time}
         {--max-up-ms=1500 : maximum acceptable /up response time}
+        {--max-health-ms=1500 : maximum acceptable /health response time}
         {--max-feed-ms=3000 : maximum acceptable feed response time}
         {--min-free-mb=2048 : minimum free disk floor passed to grimba:health}
         {--min-full-content-coverage=70 : minimum full article coverage passed to grimba:health}
@@ -74,7 +75,8 @@ class GrimbaReleaseSmoke extends Command
 
         foreach ([
             ['label' => 'homepage', 'path' => '/', 'budget' => (int) $this->option('max-home-ms')],
-            ['label' => 'health endpoint', 'path' => '/up', 'budget' => (int) $this->option('max-up-ms')],
+            ['label' => 'platform liveness endpoint', 'path' => '/up', 'budget' => (int) $this->option('max-up-ms')],
+            ['label' => 'product health endpoint', 'path' => '/health', 'budget' => (int) $this->option('max-health-ms')],
             ['label' => 'public feed', 'path' => '/feed.xml', 'budget' => (int) $this->option('max-feed-ms')],
         ] as $check) {
             $failed = $this->runHttpCheck($baseUrl, $headers, $check['label'], $check['path'], $check['budget']) || $failed;

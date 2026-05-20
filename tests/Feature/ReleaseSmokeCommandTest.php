@@ -17,6 +17,7 @@ class ReleaseSmokeCommandTest extends TestCase
         Http::fake([
             'http://grimbanews.test/' => Http::response('<html>ok</html>', 200, $this->securityHeaders()),
             'http://grimbanews.test/up' => Http::response('ok', 200),
+            'http://grimbanews.test/health' => Http::response(['status' => 'ok'], 200),
             'http://grimbanews.test/feed.xml' => Http::response('<rss></rss>', 200),
         ]);
 
@@ -30,19 +31,21 @@ class ReleaseSmokeCommandTest extends TestCase
         ])
             ->expectsOutputToContain('homepage HTTP 200')
             ->expectsOutputToContain('homepage security headers passed')
-            ->expectsOutputToContain('health endpoint HTTP 200')
+            ->expectsOutputToContain('platform liveness endpoint HTTP 200')
+            ->expectsOutputToContain('product health endpoint HTTP 200')
             ->expectsOutputToContain('public feed HTTP 200')
             ->expectsOutputToContain('release evidence written')
             ->expectsOutputToContain('Release smoke passed')
             ->assertSuccessful();
 
-        Http::assertSentCount(3);
+        Http::assertSentCount(4);
         $this->assertFileExists($evidencePath);
         $report = (string) File::get($evidencePath);
         $this->assertStringContainsString('# GrimbaNews Release Evidence', $report);
         $this->assertStringContainsString('Result: passed', $report);
         $this->assertStringContainsString('Host header: grimbanews.test', $report);
         $this->assertStringContainsString('| homepage | http | passed | HTTP 200', $report);
+        $this->assertStringContainsString('| product health endpoint | http | passed | HTTP 200', $report);
         $this->assertStringContainsString('| homepage security headers | headers | passed | CSP enforced', $report);
     }
 
@@ -54,6 +57,7 @@ class ReleaseSmokeCommandTest extends TestCase
         Http::fake([
             'http://grimbanews.test/' => Http::response('error', 500),
             'http://grimbanews.test/up' => Http::response('ok', 200),
+            'http://grimbanews.test/health' => Http::response(['status' => 'ok'], 200),
             'http://grimbanews.test/feed.xml' => Http::response('<rss></rss>', 200),
         ]);
 
@@ -80,6 +84,7 @@ class ReleaseSmokeCommandTest extends TestCase
         Http::fake([
             'http://grimbanews.test/' => Http::response('<html>ok</html>', 200),
             'http://grimbanews.test/up' => Http::response('ok', 200),
+            'http://grimbanews.test/health' => Http::response(['status' => 'ok'], 200),
             'http://grimbanews.test/feed.xml' => Http::response('<rss></rss>', 200),
         ]);
 
@@ -110,6 +115,7 @@ class ReleaseSmokeCommandTest extends TestCase
         Http::fake([
             'http://grimbanews.test/' => Http::response('<html>ok</html>', 200, $this->securityHeaders()),
             'http://grimbanews.test/up' => Http::response('ok', 200),
+            'http://grimbanews.test/health' => Http::response(['status' => 'ok'], 200),
             'http://grimbanews.test/feed.xml' => Http::response('<rss></rss>', 200),
         ]);
 
