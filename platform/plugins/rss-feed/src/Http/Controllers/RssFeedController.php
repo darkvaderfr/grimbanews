@@ -47,7 +47,13 @@ class RssFeedController extends PublicController
                         ->summary(BaseHelper::clean($item->description ?: $item->name))
                         ->updated($item->updated_at)
                         ->enclosure($imageURL)
-                        ->enclosureType(RvMedia::getMimeType(RvMedia::getRealPath($item->image ?: RvMedia::getDefaultImage())))
+                        // Wave UUUUUUUU (Vader 2026-05-20) — RvMedia::getMimeType
+                        // returns null when the image path can't be resolved
+                        // (broken upstream, missing S3, deleted file).
+                        // FeedItem::enclosureType() type-hints string-only,
+                        // so null cascaded into a 500 on /feed/posts and 4
+                        // other feed routes. Fallback to image/jpeg.
+                        ->enclosureType(RvMedia::getMimeType(RvMedia::getRealPath($item->image ?: RvMedia::getDefaultImage())) ?: 'image/jpeg')
                         ->enclosureLength(RssFeed::remoteFilesize($imageURL))
                         ->when($category, fn (FeedItem $feedItem) => $feedItem->category($category))
                         ->link((string) $item->url)
@@ -85,7 +91,13 @@ class RssFeedController extends PublicController
                         ->summary(clean($item->description))
                         ->updated($item->updated_at)
                         ->enclosure($imageURL)
-                        ->enclosureType(RvMedia::getMimeType(RvMedia::getRealPath($item->image ?: RvMedia::getDefaultImage())))
+                        // Wave UUUUUUUU (Vader 2026-05-20) — RvMedia::getMimeType
+                        // returns null when the image path can't be resolved
+                        // (broken upstream, missing S3, deleted file).
+                        // FeedItem::enclosureType() type-hints string-only,
+                        // so null cascaded into a 500 on /feed/posts and 4
+                        // other feed routes. Fallback to image/jpeg.
+                        ->enclosureType(RvMedia::getMimeType(RvMedia::getRealPath($item->image ?: RvMedia::getDefaultImage())) ?: 'image/jpeg')
                         ->enclosureLength(RssFeed::remoteFilesize($imageURL))
                         ->link((string) $item->url);
 
@@ -123,7 +135,13 @@ class RssFeedController extends PublicController
                         ->summary(BaseHelper::clean($item->description))
                         ->updated($item->updated_at)
                         ->enclosure($imageURL)
-                        ->enclosureType(RvMedia::getMimeType(RvMedia::getRealPath($item->image ?: RvMedia::getDefaultImage())))
+                        // Wave UUUUUUUU (Vader 2026-05-20) — RvMedia::getMimeType
+                        // returns null when the image path can't be resolved
+                        // (broken upstream, missing S3, deleted file).
+                        // FeedItem::enclosureType() type-hints string-only,
+                        // so null cascaded into a 500 on /feed/posts and 4
+                        // other feed routes. Fallback to image/jpeg.
+                        ->enclosureType(RvMedia::getMimeType(RvMedia::getRealPath($item->image ?: RvMedia::getDefaultImage())) ?: 'image/jpeg')
                         ->enclosureLength(RssFeed::remoteFilesize($imageURL))
                         ->category((string) $item->category->name)
                         ->link((string) $item->url);
@@ -163,7 +181,13 @@ class RssFeedController extends PublicController
                         ->summary(BaseHelper::clean($item->description))
                         ->updated($item->updated_at)
                         ->enclosure($imageURL)
-                        ->enclosureType(RvMedia::getMimeType(RvMedia::getRealPath($item->image ?: RvMedia::getDefaultImage())))
+                        // Wave UUUUUUUU (Vader 2026-05-20) — RvMedia::getMimeType
+                        // returns null when the image path can't be resolved
+                        // (broken upstream, missing S3, deleted file).
+                        // FeedItem::enclosureType() type-hints string-only,
+                        // so null cascaded into a 500 on /feed/posts and 4
+                        // other feed routes. Fallback to image/jpeg.
+                        ->enclosureType(RvMedia::getMimeType(RvMedia::getRealPath($item->image ?: RvMedia::getDefaultImage())) ?: 'image/jpeg')
                         ->enclosureLength(RssFeed::remoteFilesize($imageURL))
                         ->category((string) $item->category->name)
                         ->link((string) $item->url);
@@ -200,7 +224,13 @@ class RssFeedController extends PublicController
                         ->summary(BaseHelper::clean($item->description))
                         ->updated($item->updated_at)
                         ->enclosure($imageURL)
-                        ->enclosureType(RvMedia::getMimeType(RvMedia::getRealPath($item->image ?: RvMedia::getDefaultImage())))
+                        // Wave UUUUUUUU (Vader 2026-05-20) — RvMedia::getMimeType
+                        // returns null when the image path can't be resolved
+                        // (broken upstream, missing S3, deleted file).
+                        // FeedItem::enclosureType() type-hints string-only,
+                        // so null cascaded into a 500 on /feed/posts and 4
+                        // other feed routes. Fallback to image/jpeg.
+                        ->enclosureType(RvMedia::getMimeType(RvMedia::getRealPath($item->image ?: RvMedia::getDefaultImage())) ?: 'image/jpeg')
                         ->enclosureLength(RssFeed::remoteFilesize($imageURL))
                         ->category((string) $item->categories->first()?->name)
                         ->link((string) $item->url)
