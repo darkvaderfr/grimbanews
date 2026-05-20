@@ -70,7 +70,7 @@ The formal 1000-sprint ledger was behind the production-hardening work that has 
 
 Current accounting after the 2026-05-12 article-canonicalization sprints AND the 2026-05-19 reconciliation sweep that batch-evidenced shipped translation (S-LANG band), story SEO (Wave RRRRRR–WWWWWWW + AAAAAAAA), security (Wave NNNNNNN–PPPPPPP, OOOOOOO XSS fix, QQQQQQQ SSRF lock, TTTTTTT security-header contract, VVVVVVV robots.txt), accessibility (skip-link, focus-manager, reduced-motion), and design-system (token inventory, dark/light contract) work:
 
-- Formal evidenced master sprints: **155 / 1000 = 15.5%** (was 2.7% / 27 sprints before this sweep; +52 band-evidence rows, +5 S007-S010+S020, +9 S011-S019 audit pack, +24 S021-S050 review pack, +38 S051-S100 governance pack — all 2026-05-19). 12 additional sprints (out of S051-S100) marked partial pending formalization of cadence reviews, full lighthouse pass, subscriber paywall E2E, support process.
+- Formal evidenced master sprints: **203 / 1000 = 20.3%** (was 2.7% / 27 sprints before this sweep; +52 band-evidence rows, +5 S007-S010+S020, +9 S011-S019 audit pack, +24 S021-S050 review pack, +38 S051-S100 governance pack, +48 S101-S200 ingest+publish pack — all 2026-05-19). Roughly 28 partial sprints remain in the S101-S200 band (queue split, replay/rollback commands, NobuAI freshness SLA, subscriber-content smoke, autonomous-day simulation pack).
 - Practical production-readiness estimate: **about 40-42%** — core ingestion, publishing, article URL canonicalization, full-article readability coverage, public taxonomy cleanup, snippet sanitization, admin cockpit, dedupe, disk alerting, NewsAPI config guarding, deploy smoke paths, ingest-to-public health, JSON-LD across 7 reader surfaces (10 if counting editorial + advertise), security-header HSTS+CSP+nosniff+frame-options+referrer + XSS escape + SSRF guard + security.txt + robots.txt + canonical pagination fix, cache-control on public XML endpoints, sitemap-grimba.xml backfill, 404 noindex+no-canonical, language tagging (16/16 S-LANG sprints, 1340 NULL→36 NULL recovery), and 517 lock-tests / 4433 assertions all exist.
 - Still outstanding before launch: full visual QA across 28 routes × 2 modes × 3 widths (S-MODE-02), title-only duplicate editorial decisions, restore drill (S961-S970), provider live-smoke and cost dashboards (S891-S900), monetization (S851-S890, ads/subscriber loop), and business launch gates G10.
 - The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
@@ -166,6 +166,69 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S093 | same — Visual evidence template (Playwright + screenshot diff) | complete |
 | S095 | same — Security evidence template (audit panel report) | complete |
 | S096 | same — Data evidence template (tinker queries + verify-backups) | complete |
+| S101 | `docs/GRIMBANEWS_S101_S200_INGEST_PUBLISH_PACK.md#s101-s110` — RSS source tiering | complete |
+| S103 | same — RSS timeout policy (15s default + per-feed override) | complete |
+| S104 | same — RSS retry policy (3 retries + backoff) | complete |
+| S105 | same — RSS duplicate guard (URL unique + S203 canonical) | complete |
+| S106 | same — RSS canonical URL normalization (GrimbaArticleText) | complete |
+| S107 | same — RSS image extraction + image proxy SSRF guard | complete |
+| S110 | same — RSS recovery dashboard (cockpit sick-feed list) | complete |
+| S111 | `docs/GRIMBANEWS_S101_S200_INGEST_PUBLISH_PACK.md#s111-s120` — NewsAPI country sweep | complete |
+| S112 | same — NewsAPI category sweep | complete |
+| S114 | same — NewsAPI request reservation | complete |
+| S115 | same — NewsAPI duplicate guard | complete |
+| S116 | same — NewsAPI source mapping | complete |
+| S117 | same — NewsAPI category mapping | complete |
+| S118 | same — NewsAPI image fallback | complete |
+| S119 | same — NewsAPI dry-run mode | complete |
+| S120 | same — NewsAPI live smoke (admin Run Now) | complete |
+| S121 | same — Canada feed expansion | complete |
+| S122 | same — France feed expansion | complete |
+| S123 | same — UK feed expansion | complete |
+| S124 | same — US feed expansion | complete |
+| S125 | same — Africa feed expansion | complete |
+| S126 | same — International feed expansion | complete |
+| S135 | same — Local feed expansion | complete |
+| S136 | same — Wire service feeds | complete |
+| S137 | same — Public broadcaster feeds | complete |
+| S138 | same — Independent outlet feeds | complete |
+| S139 | same — High-trust feeds | complete |
+| S142 | same — Backpressure limits (quota guard) | complete |
+| S143 | same — Per-source limits | complete |
+| S144 | same — Per-country limits | complete |
+| S145 | same — Per-category limits | complete |
+| S146 | same — Auto-publish guard | complete |
+| S147 | same — Draft pressure alerts (cockpit) | complete |
+| S148 | same — Stuck ingest alerts | complete |
+| S149 | same — Ingestion metrics export (cockpit tiles) | complete |
+| S150 | same — Ingestion runbook | complete |
+| S151 | same — Trusted source category | complete |
+| S152 | same — Unclassified source category | complete |
+| S153 | same — Auto-publish rule review | complete |
+| S156 | same — Unclassified-source publish smoke | complete |
+| S157 | same — Failed-publish diagnostics | complete |
+| S160 | same — Publish audit log (Botble activity) | complete |
+| S161 | same — 5x/day cadence test | complete |
+| S163 | same — Cron install check (grimba:health) | complete |
+| S165 | same — Last-run dashboard (cockpit) | complete |
+| S167 | same — Overlap lock verification (withoutOverlapping) | complete |
+| S168 | same — Background job verification | complete |
+| S169 | same — Local scheduler docs | complete |
+| S170 | same — Production scheduler docs | complete |
+| S172 | same — Source freshness SLA | complete |
+| S173 | same — Cluster freshness SLA | complete |
+| S174 | same — Translation freshness SLA | complete |
+| S176 | same — Full-content freshness SLA (94% coverage) | complete |
+| S177 | same — Stale article handling | complete |
+| S178 | same — Stale cluster refresh | complete |
+| S179 | same — Stale source alert (sick-feed quarantine) | complete |
+| S182 | same — NewsAPI-to-published smoke | complete |
+| S185 | same — Translation-to-home smoke | complete |
+| S186 | same — Category-to-home smoke (S-CAT 10/10) | complete |
+| S187 | same — Edition-to-home smoke | complete |
+| S188 | same — Source-to-profile smoke | complete |
+| S189 | same — Search-index smoke | complete |
+| S190 | same — Sitemap update smoke (Wave UUUUUUU + AAAAAAAA) | complete |
 | S102 | RSS feed health score: `d67588a`, `app/Support/GrimbaRssFeedHealth.php`, `GrimbaHealth` feed scoring | complete |
 | S109 | RSS sick-feed quarantine: `00caf83`, `database/seeders/RssFeedsSeeder.php`, `tests/Feature/RssFeedsSeederTest.php` | complete |
 | S154 | Draft guardrail tests: `6586460`, `tests/Feature/DailyPublishFreshnessTest.php`, guardrail command coverage | complete |
