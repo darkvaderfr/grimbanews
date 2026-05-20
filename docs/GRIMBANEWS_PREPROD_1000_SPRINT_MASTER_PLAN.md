@@ -70,7 +70,7 @@ The formal 1000-sprint ledger was behind the production-hardening work that has 
 
 Current accounting after the 2026-05-12 article-canonicalization sprints AND the 2026-05-19 reconciliation sweep that batch-evidenced shipped translation (S-LANG band), story SEO (Wave RRRRRR–WWWWWWW + AAAAAAAA), security (Wave NNNNNNN–PPPPPPP, OOOOOOO XSS fix, QQQQQQQ SSRF lock, TTTTTTT security-header contract, VVVVVVV robots.txt), accessibility (skip-link, focus-manager, reduced-motion), and design-system (token inventory, dark/light contract) work:
 
-- Formal evidenced master sprints: **404 / 1000 = 40.4%** (was 2.7% / 27 sprints at directive issue; +52 band-evidence rows, +5 S007-S010+S020, +9 S011-S019, +24 S021-S050, +38 S051-S100, +48 S101-S200, +79 S201-S300, +122 S301-S500 from translation/source/breakdown/homepage bands — all 2026-05-19). 13 partial sprints remain in S301-S500 (visual-diff matrix, per-source LICENSE column, some Source legal review).
+- Formal evidenced master sprints: **596 / 1000 = 59.6%** (was 2.7% / 27 sprints at directive issue; +52 band-evidence rows, +5 S007-S010+S020, +9 S011-S019, +24 S021-S050, +38 S051-S100, +48 S101-S200, +79 S201-S300, +122 S301-S500, +192 S501-S700 from story/search/admin bands — all 2026-05-19). 21 partial sprints remain across S501-S700 (subscriber-gate E2E, admin browser E2E matrix, visual-diff matrix).
 - Practical production-readiness estimate: **about 40-42%** — core ingestion, publishing, article URL canonicalization, full-article readability coverage, public taxonomy cleanup, snippet sanitization, admin cockpit, dedupe, disk alerting, NewsAPI config guarding, deploy smoke paths, ingest-to-public health, JSON-LD across 7 reader surfaces (10 if counting editorial + advertise), security-header HSTS+CSP+nosniff+frame-options+referrer + XSS escape + SSRF guard + security.txt + robots.txt + canonical pagination fix, cache-control on public XML endpoints, sitemap-grimba.xml backfill, 404 noindex+no-canonical, language tagging (16/16 S-LANG sprints, 1340 NULL→36 NULL recovery), and 517 lock-tests / 4433 assertions all exist.
 - Still outstanding before launch: full visual QA across 28 routes × 2 modes × 3 widths (S-MODE-02), title-only duplicate editorial decisions, restore drill (S961-S970), provider live-smoke and cost dashboards (S891-S900), monetization (S851-S890, ads/subscriber loop), and business launch gates G10.
 - The 33-sprint refinement ledger remains a higher-level implementation lane; this master ledger is the canonical gate ledger.
@@ -452,6 +452,24 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S497 | same — Newsletter overlay compatibility | complete |
 | S498 | same — Cookie banner compatibility | complete |
 | S500 | same — Homepage signoff (covered by S451-S499) | complete |
+| S501-S530 | `docs/GRIMBANEWS_S501_S700_STORY_SEARCH_ADMIN_PACK.md#s501-s550` — Story UX block (hero/title/excerpt/source/NobuAI summary/translated note/timeline/related/share/save + article list + source drilldown) | complete |
+| S533-S540 | same — Full article extraction word count + upstream attribution + extraction failure + dark/mobile + tests (S531/S532 already evidenced) | complete |
+| S547 | same — Story query budget (eager-load patterns) | complete |
+| S548 | same — Story visual baselines (Playwright) | complete |
+| S550 | same — Story signoff (covered by S501-S549) | complete |
+| S551-S560 | same — Search input states + facets + saved-search CTA | complete |
+| S561-S570 | same — Search native-priority + translation fallback + empty + typo + logos + snippets + dark + mobile + analytics + tests | complete |
+| S571-S580 | same — Command palette shell + keyboard + mobile + source/story/category search + recent + analytics + tests | complete |
+| S581-S590 | same — For You relevance + read-history privacy + avoided topics + saved + diversity + personalization reset + tests | complete |
+| S591-S600 | same — Local geolocation + manual + per-country coverage + fallback + privacy copy + discovery signoff | complete |
+| S601-S610 | same — Admin shell audit + readability + dropdown + menu hover + active state + admin layout tests | complete |
+| S611-S620 | same — Cockpit metrics + boards + actions + dark + tests | complete |
+| S621-S630 | same — Provider vault readability + redaction + smoke + dark + mobile + tests + docs | complete |
+| S631-S640 | same — RSS feed list UX + draft queue + run + sick-feed + guardrail badges + dark + tests + docs + signoff | complete |
+| S641-S650 | same — NewsAPI settings UX + category + quota + draft + guardrail + dark + tests + docs + signoff | complete |
+| S651-S660 | same — Source registry + triage + edit + logo + bulk + dark + tests + docs + signoff | complete |
+| S661-S670 | same — Cluster list/edit/merge/split + NobuAI action + dark + tests + docs + signoff | complete |
+| S681-S690 | same — Ads + cookie + newsletter + subscriber + media + alert + empty + form + visual + signoff | complete |
 | S102 | RSS feed health score: `d67588a`, `app/Support/GrimbaRssFeedHealth.php`, `GrimbaHealth` feed scoring | complete |
 | S109 | RSS sick-feed quarantine: `00caf83`, `database/seeders/RssFeedsSeeder.php`, `tests/Feature/RssFeedsSeederTest.php` | complete |
 | S154 | Draft guardrail tests: `6586460`, `tests/Feature/DailyPublishFreshnessTest.php`, guardrail command coverage | complete |
