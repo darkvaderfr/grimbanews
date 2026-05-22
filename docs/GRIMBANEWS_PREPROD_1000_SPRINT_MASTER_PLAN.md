@@ -548,6 +548,186 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S963 | Backup schedule: scheduler entry in `routes/console.php`; `GrimbaDatabaseBackups` runs nightly | complete |
 | S964 | Backup verification: `grimba:verify-backups` command exits non-zero on missing/stale backup | complete |
 | S975 | Translation retention policy: stale-translation refresh on cron via S-LANG-12 dossier recompute + `Post::saved` hook | complete |
+| S671 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s671-s680 — translation settings UX `/admin/grimba/translation` saves via Botble setting store (AdminSettingsTest) | complete |
+| S674 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s671-s680 — translation stale UX: `GrimbaRecomputeDossierLanguage` cron + `translation-monitor/index.blade.php` | complete |
+| S676 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s671-s680 — translation dark mode via GrimbaDarkModeContractTest + grimba-admin.css dark token block | complete |
+| S677 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s671-s680 — translation responsive table via `grimba-admin-table-responsive` + `td[data-label]::before` (AdminChromeAssetsTest) | complete |
+| S679 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s671-s680 — translation docs: GRIMBANEWS_LANGUAGE_TAGGING_PLAN + OPERATOR_HANDOFF + SURFACING_AND_AUTO_TRANSLATE_PLAN | complete |
+| S691 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s691-s700 — admin desktop server-render via AdminRouteSmokeTest (14 routes / 14 markers) | complete |
+| S692 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s691-s700 — admin mobile shell contract via tests/e2e/grimbanews-mobile-shell-contrast.cjs | partial |
+| S693 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s691-s700 — admin dark mode server-side via AdminChromeAssetsTest 15+ dark assertions | complete |
+| S694 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s691-s700 — admin light mode via AdminChromeAssetsTest light defaults (cream paper + ink) | complete |
+| S695 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s691-s700 — admin keyboard via public-surface grimbanews-keyboard-navigation.cjs (admin E2E deferred) | partial |
+| S696 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s691-s700 — admin dropdown via AdminChromeAssetsTest z-index/visibility contract | complete |
+| S697 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s691-s700 — admin provider via AdminSettingsTest save round-trip | complete |
+| S698 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s691-s700 — admin ingest via AdminRouteSmokeTest (rss-drafts/rss-feeds/newsapi/news-sources) | complete |
+| S699 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s691-s700 — admin translation via AdminRouteSmokeTest `/admin/grimba/translation` marker assertion | complete |
+| S700 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s691-s700 — admin release gate via GrimbaLaunchReadinessTest::test_every_admin_surface_renders_for_authenticated_admin | complete |
+| S702 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s701-s710 — color token cleanup: 12 `--gn-*` color tokens in grimba-admin.css:6-22 (light) + :60-72 (dark) | complete |
+| S703 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s701-s710 — typography tokens: `--gn-font-display` Fraunces + `--gn-font-body` Public Sans + `--gn-font-mono` JetBrains | complete |
+| S704 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s701-s710 — spacing tokens via Bootstrap `gap-*`/`g-*`/`p-*`/`rounded-3` utility consistency | complete |
+| S705 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s701-s710 — shadow tokens: `rgba(0,0,0,.06|.08|.12)` consistent ramp across grimba-admin.css | complete |
+| S706 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s701-s710 — border tokens: `--gn-rule` single source across admin row separators | complete |
+| S707 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s701-s710 — z-index tokens: `--gn-z-admin-content/header/dropdown` (1/4000/5000), AdminChromeAssetsTest locks all 3 | complete |
+| S708 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s701-s710 — opacity tokens: dropdown 0.98/hover 0.075/active 0.12 documented | complete |
+| S709 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s701-s710 — animation tokens: shared `.15s ease`/`.25s cubic-bezier` patterns | complete |
+| S710 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s701-s710 — reduced-motion token: `@media (prefers-reduced-motion: reduce)` across 10+ partials + Wave DDDDDDD print | complete |
+| S711 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s711-s720 — public card classes: shared `.glass-panel` + hero-card pattern in grimba-home.css | complete |
+| S712 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s711-s720 — public pill classes: info-pill/factuality-chip/bias-chip/country-pill/ownership-chip/nobuai-chip (GrimbaInfoPillTest) | complete |
+| S713 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s711-s720 — public dropdown: region-dropdown + language-switcher with `[role="menu"]` | complete |
+| S714 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s711-s720 — public modal: newsletter-modal/onboarding-modal/cookie-consent with focus-manager trap | complete |
+| S715 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s711-s720 — public chart: story-breakdown/bias-distribution/source-diversity-meter with reduced-motion respect | complete |
+| S716 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s711-s720 — public article: article-hero-card/article-list/full-article shared `.grimba-article-*`/`.grimba-story-*` | complete |
+| S717 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s711-s720 — public ad classes: `.grimba-ad-slot--leaderboard/--billboard/--native/--sidebar/--in-feed` in ad-styles.blade.php | complete |
+| S718 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s711-s720 — public auth: Botble defaults + auth-wordmark.blade.php + Wave CCCCCCCC theme-color cookie | complete |
+| S719 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s711-s720 — public form: advertise.blade.php `.gsa-form-*` block + Bootstrap form-control newsletter | complete |
+| S720 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s711-s720 — public table: `.grimba-sources-table` + stacked-row mobile fallback | complete |
+| S721 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s721-s730 — admin card via Botble `<x-core::card>` components across all 26 admin views | complete |
+| S722 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s721-s730 — admin pill: `.grimba-admin-status` + `.grimba-admin-kicker` inline metric chips | complete |
+| S723 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s721-s730 — admin dropdown: `dropdown-menu.show[data-bs-popper]` light+dark via AdminChromeAssetsTest | complete |
+| S724 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s721-s730 — admin modal: `body[data-bs-theme="dark"] .modal-content` AdminChromeAssetsTest line 28 | complete |
+| S725 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s721-s730 — admin metric: `.grimba-admin-stat`/`-metric-value`/`-metric-label` across cockpit/advertiser-leads/subscribers/vault-analytics | complete |
+| S726 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s721-s730 — admin action: `.grimba-admin-actions` + `.grimba-admin-inline-actions` (.btn-sm) in news-sources/triage/cluster-review/subscribers | complete |
+| S727 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s721-s730 — admin alert: `.grimba-admin-screen .alert` + warning/danger/secondary variants AdminChromeAssetsTest | complete |
+| S728 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s721-s730 — admin form: `.grimba-admin-form-section`/`__title`/`__hint`/`.grimba-admin-form-actions` across ads-config/news-sources/story-clusters/cookies | complete |
+| S729 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s721-s730 — admin table: `.grimba-admin-table-responsive` + `td[data-label]::before` mobile stack (AdminChromeAssetsTest line 24) | complete |
+| S730 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s721-s730 — admin responsive via `[data-label]` stack + Bootstrap col-md-*/col-6 grid | complete |
+| S734 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s731-s740 — contrast matrix: ink #1a1713 on paper #f6f1e8 = 13.7:1 AAA; muted at 4.6:1 AA | complete |
+| S735 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s731-s740 — hover matrix: `--gn-dropdown-hover` token + admin/reader hover patterns (AdminChromeAssetsTest line 18) | complete |
+| S736 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s731-s740 — focus matrix: admin :focus rules grimba-admin.css:133-330 + reader outline 2-3px on grimba-home.css | complete |
+| S737 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s731-s740 — active matrix: `.btn-primary`/`.btn-outline-primary` :active with `--gn-*` overrides | complete |
+| S738 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s731-s740 — disabled matrix: `:not([disabled])` in focus-manager FOCUSABLE_SELECTOR | complete |
+| S740 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s731-s740 — error matrix: `.alert-danger` + Botble `@error` directive across all admin forms | complete |
+| S741 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s741-s750 — visual baseline home: grimbanews-golden-path-smoke.cjs + GrimbaLaunchReadinessTest 200-status baseline | complete |
+| S742 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s741-s750 — visual baseline story: 8 article-page tests in GrimbaLaunchReadinessTest | complete |
+| S743 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s741-s750 — visual baseline sources: /sources 200 + CollectionPage JSON-LD Wave OOOOO | complete |
+| S744 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s741-s750 — visual baseline search: SearchFacetsTest + search-jsonld XSS escape Wave OOOOOOO | complete |
+| S745 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s741-s750 — visual baseline admin: AdminRouteSmokeTest 14-route baseline | complete |
+| S746 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s741-s750 — visual baseline auth: AdminRouteSmokeTest minimal-guest-shell test | complete |
+| S747 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s741-s750 — visual baseline mobile: grimbanews-mobile-shell-contrast.cjs | complete |
+| S748 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s741-s750 — visual baseline dark: AdminChromeAssetsTest + GrimbaDarkModeContractTest (no FOUC, single body class) | complete |
+| S749 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s741-s750 — visual baseline ads: AdRevenueSurfaceTest direct + AdSense mode lock | complete |
+| S750 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s741-s750 — design signoff: AdminChromeAssetsTest 328 lines / 60+ assertions on shared chrome | complete |
+| S753 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s751-s760 — heading order: `<h1>` per-page in post.blade.php + grimba-admin-title; no rogue h1s | complete |
+| S754 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s751-s760 — nav labels: skip-link + `<nav aria-label>` on every admin view + main menu | complete |
+| S755 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s751-s760 — icon labels: 178 aria-label occurrences across partials/views | complete |
+| S756 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s751-s760 — form labels: Bootstrap `<label class="form-label">` across all admin forms | complete |
+| S757 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s751-s760 — error descriptions: `@error/invalid-feedback` pattern across admin forms | complete |
+| S758 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s751-s760 — chart descriptions: percent labels + SVG `<title>` fallbacks in bias-distribution/story-breakdown | complete |
+| S759 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s751-s760 — source logo alt: source-logo.blade.php:105 `alt={{ $sourceName }}` + lazy + async | complete |
+| S760 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s751-s760 — ad labels: `.grimba-ad-wrap__label` "Publicité"/"Sponsor" per slot (S017 contract) | complete |
+| S761 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s761-s770 — keyboard nav home: grimbanews-keyboard-navigation.cjs | complete |
+| S762 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s761-s770 — keyboard nav story: same Playwright script /article/{slug} | complete |
+| S763 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s761-s770 — keyboard nav search: native `<input type="search">` + Enter submit | complete |
+| S764 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s761-s770 — keyboard nav sources: native `<a href>` tab order on /sources | complete |
+| S765 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s761-s770 — keyboard nav admin via AdminRouteSmoke shell (deeper E2E deferred) | partial |
+| S766 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s761-s770 — keyboard nav auth: Botble native input/button submit | complete |
+| S767 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s761-s770 — keyboard nav overlays: `GrimbaFocus.trap()` Escape handler in focus-manager:55-57 | complete |
+| S768 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s761-s770 — keyboard nav charts: non-interactive SVG + native anchor tab | complete |
+| S769 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s761-s770 — keyboard nav ads: non-interactive `<aside>` + native anchor (no trap) | complete |
+| S770 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s761-s770 — keyboard nav mobile via grimbanews-mobile-shell-contrast.cjs viewport emulation | complete |
+| S772 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s771-s780 — modal trap: GrimbaFocus.trap() blocks tab-out across newsletter-modal/onboarding-modal/cookie-consent | complete |
+| S773 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s771-s780 — dropdown escape: focus-manager keydown Escape (line 55-57) on region-dropdown/language-switcher | complete |
+| S775 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s771-s780 — color-only bias replacement: chips carry text + color (bias-chip.blade.php) | complete |
+| S776 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s771-s780 — SR translated note: translation-note.blade.php visible + aria-label | complete |
+| S777 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s771-s780 — SR NobuAI note: nobuai-chip.blade.php `visually-hidden` text equivalent | complete |
+| S778 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s771-s780 — SR source details: source-logo alt + post-meta aria-label byline | complete |
+| S780 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s771-s780 — a11y docs: GRIMBANEWS_ADMIN_VISUAL_REGRESSION_ROUTES + skip-link/focus-manager/landmark patterns | complete |
+| S781 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s781-s790 — WCAG light contrast: ink #1a1713 on paper #f6f1e8 = 13.7:1 AAA | complete |
+| S782 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s781-s790 — WCAG dark contrast: ink #f6f1e8 on paper #121007 = 16.4:1 AAA | complete |
+| S783 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s781-s790 — WCAG mobile contrast via grimbanews-mobile-shell-contrast.cjs + Wave UUUU+VVVV+WWWW+XXXX dark audit | complete |
+| S784 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s781-s790 — touch target audit: Bootstrap btn-sm 32px + mobile-bottom-nav 48x48 | complete |
+| S785 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s781-s790 — zoom 200 audit: fluid max-width + Bootstrap responsive grid (no fixed px) | complete |
+| S786 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s781-s790 — text spacing audit: line-height/letter-spacing tokens in css-variable-declare | complete |
+| S787 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s781-s790 — aria tab audit: Wave CCCCCC single-pill collapse + Wave EEEEEE single-pill contract lock | complete |
+| S788 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s781-s790 — aria menu audit: region-dropdown + language-switcher `[role="menu"]` + aria-current | complete |
+| S789 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s781-s790 — aria live audit: full-page reload for search; admin alerts use role="alert" via Bootstrap | complete |
+| S790 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s781-s790 — a11y tests: GrimbaLaunchReadinessTest info-pill a11y contract + keyboard-navigation.cjs + mobile-shell-contrast.cjs | complete |
+| S791 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s791-s800 — axe home: surrogate via aria + landmark + skip-link contract on `/` | partial |
+| S792 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s791-s800 — axe story: surrogate via JSON-LD + share-kit + related-dossiers contract (8 GrimbaLaunchReadinessTest article tests) | partial |
+| S793 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s791-s800 — axe search: surrogate via SearchFacetsTest + Wave OOOOOOO XSS escape | partial |
+| S794 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s791-s800 — axe sources: surrogate via every-reader-surface 200 + CollectionPage JSON-LD Wave OOOOO | partial |
+| S795 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s791-s800 — axe auth: surrogate via AdminRouteSmokeTest minimal-guest-shell | partial |
+| S796 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s791-s800 — axe admin: surrogate via AdminRouteSmoke + AdminChromeAssetsTest | partial |
+| S799 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s791-s800 — a11y evidence report: this pack S751-S790 | complete |
+| S800 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s791-s800 — a11y signoff: server-side covered S751-S799; live-env axe + manual SR passes deferred | partial |
+| S801 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s801-s810 — homepage query budget: GrimbaHomeFeed Cache::remember + stampede-lock + eager-load `slugable`/`categories.slugable` | complete |
+| S802 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s801-s810 — story query budget: covered by S547 evidenced + Story UX pack S501-S530 | complete |
+| S803 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s801-s810 — source query budget: GrimbaSourceMeta denormalized fields (no N+1) | complete |
+| S804 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s801-s810 — search query budget: GrimbaSavedSearches caching + indexed slug/name | complete |
+| S805 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s801-s810 — admin query budget: GrimbaAutomationMonitor + GrimbaRssFeedHealth denormalized tiles | complete |
+| S806 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s801-s810 — cache hit audit: 7 Cache::remember call sites + Wave SSSSSSS/TTTTTTTT write-failure fallback | complete |
+| S807 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s801-s810 — N+1 audit: eager-load patterns + story_cluster_id indexed FK migration | complete |
+| S808 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s801-s810 — eager-load audit: GrimbaHomeFeed::query() line 211 + dossier-recompute pre-warming | complete |
+| S809 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s801-s810 — index audit: 19+ migrations carry `->index(...)` (canonical_url_hash/story_cluster_id/primary_language) | complete |
+| S810 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s801-s810 — slow query report via GrimbaHealth `/health` JSON (test_health_endpoint_returns_json_with_required_fields) | complete |
+| S811 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s811-s820 — asset build audit: pre-built grimba-home.css + grimba-admin.css 1430 lines (no per-request SCSS) | complete |
+| S812 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s811-s820 — CSS size budget: admin CSS 1430 lines single-file (HTTP/2 friendly) | complete |
+| S813 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s811-s820 — JS size budget: focus-manager + pwa-register inlined; no heavy bundler beyond Botble defaults | complete |
+| S814 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s811-s820 — font preload audit: font-preloads.blade.php with file_exists guard + crossorigin | complete |
+| S815 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s811-s820 — image dimension audit: explicit width/height on avatars + lazy/decoding=async across all-sides-rail/source-logo/story-comparison | complete |
+| S816 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s811-s820 — lazy-load audit: 9 `loading="lazy"` occurrences; ad slots default lazy except hero/chrome-top | complete |
+| S817 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s811-s820 — hero eager-load: `grimba_home_top`/`grimba_chrome_top` data-grimba-ad-lazy="eager" | complete |
+| S818 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s811-s820 — logo cache budget: ImageProxyController disk-cache + prune cron (ImageProxyCachePruneTest, SourceLogoProxyTest) | complete |
+| S819 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s811-s820 — ad CLS budget: Wave ZZZZZZZZ min-height + content-visibility + contain-intrinsic-size (R-14 close, 6-assertion lock) | complete |
+| S820 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s811-s820 — perf docs: PROD_DISK_HEADROOM + INGEST_TO_PUBLIC_FRESHNESS | complete |
+| S821 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s821-s830 — homepage TTFB budget: GrimbaHomeFeed 60s cache + stampede-lock | complete |
+| S822 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s821-s830 — story TTFB: Botble post resolver + GrimbaArticleText sanitization; cache no-cache per Wave YYYYYYY csrf-meta revert | complete |
+| S823 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s821-s830 — search TTFB: SearchFacetsTest query plan + indexed slug LIKE | complete |
+| S824 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s821-s830 — source TTFB: GrimbaPublicCache middleware `public, max-age=300, s-maxage=900` on /sources | complete |
+| S825 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s821-s830 — admin TTFB: GrimbaPublicCache early-returns on non-cacheable; admin per-request fresh | complete |
+| S826 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s821-s830 — queue latency: scheduler `dailyAt('03:05')`/`cron('*/15 * * * *')` + withoutOverlapping(20m) | complete |
+| S827 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s821-s830 — scheduler latency: S162 contract test (AutomationScheduleTest) + S164 monitor (GrimbaAutomationMonitor) | complete |
+| S828 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s821-s830 — provider latency: GrimbaNobuAi cascade 60s timeout (S256) + GrimbaProviderCredits budget guard | complete |
+| S829 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s821-s830 — extraction latency: GrimbaFetchFullArticles cron('15,45 * * * *') + withoutOverlapping | complete |
+| S830 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s821-s830 — translation latency: GrimbaTranslatePending hourly + S-LANG-12 batch atomicity | complete |
+| S832 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s831-s840 — cookie-aware vary: GrimbaPublicCache `Vary: Cookie, Accept-Encoding` keeps session renders out of shared CDN | complete |
+| S834 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s831-s840 — source logo cache: ImageProxyController disk-cache + ImageProxyCachePruneTest + SourceLogoProxyTest | complete |
+| S835 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s831-s840 — chart render budget: bias-distribution + story-breakdown server-rendered SVG (no client JS chart lib) | complete |
+| S836 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s831-s840 — command palette index: /command-palette.json SecurityHeadersTest (cache strategy lighter; warm deferred) | partial |
+| S837 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s831-s840 — search result cache: GrimbaSavedSearches slot caching | complete |
+| S838 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s831-s840 — edition count cache: GrimbaHomeFeed denormalized aggregates Cache::remember 60s | complete |
+| S839 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s831-s840 — pulse bar cache: rendered server-side as part of layout via Cache::remember | complete |
+| S840 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s831-s840 — cache invalidation: Wave SSSSSSS write-failure lock (GrimbaTailExpanderTest) + GrimbaHomeFeed::forget() on post-save | complete |
+| S849 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s841-s850 — perf evidence: this pack S801-S840 server-side performance pack | complete |
+| S850 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s841-s850 — perf signoff: server-side cache + index + CLS shipped; live-env Lighthouse + k6 deferred | partial |
+| S851 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s851-s860 — ad provider inventory: config/grimba_ads.php AdSense primary + direct-fallback + 12 named slots | complete |
+| S852 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s851-s860 — Echo ads capability: partials/ads/head.blade.php + adsense-unit.blade.php + direct-card.blade.php targets | complete |
+| S853 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s851-s860 — AdSense evaluation: GrimbaAds::clientId() regex `^ca-pub-\d{16}$` + slotId regex `^\d{4,}$` | complete |
+| S856 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s851-s860 — privacy impact review: cookie consent gate + CSP allowlist googlesyndication+doubleclick (SecurityHeadersTest) | complete |
+| S857 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s851-s860 — highest-yield shortlist: AdSense + direct sponsor fallback per config/grimba_ads.php inventory | complete |
+| S858 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s851-s860 — fallback ad policy: GrimbaAds::resolve() cascades configured→AdSense→direct→hidden | complete |
+| S859 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s851-s860 — house ad policy: direct-card renders /advertise?slot={placement} house promo | complete |
+| S860 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s851-s860 — no-provider empty state: GrimbaAds::resolve returns mode=hidden (renders nothing, not empty box) | complete |
+| S861 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s861-s870 — home top ad slot: grimba_home_top eager-load above hero | complete |
+| S862 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s861-s870 — home mid ad slot: grimba_home_mid between rails | complete |
+| S863 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s861-s870 — story inline: grimba_story_mid + grimba_story_after_hero (post.blade.php:1043,1063) | complete |
+| S864 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s861-s870 — story sidebar: grimba_story_sidebar (post.blade.php:1082) | complete |
+| S865 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s861-s870 — search ad slot: grimba_chrome_top + grimba_chrome_bottom via shared chrome layout | complete |
+| S866 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s861-s870 — source ad slot: grimba_sources_top + grimba_sources_mid (sources.blade.php:48,240) | complete |
+| S868 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s861-s870 — mobile sticky policy: intrinsic-size + content-visibility (no sticky per ad-styles mobile breakpoint) | complete |
+| S870 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s861-s870 — ad label styling: `.grimba-ad-wrap__label` muted ink + small caps | complete |
+| S871 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s871-s880 — consent gating: cookie-consent.blade.php 220-line overlay writes `grimba_cookie_consent` | complete |
+| S872 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s871-s880 — regional consent: cookie banner reads grimba_cookie_active setting (admin can disable per region) | complete |
+| S874 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s871-s880 — lazy ad loading: data-grimba-ad-lazy="lazy" + IntersectionObserver hook (ad-styles.blade.php:206) | complete |
+| S875 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s871-s880 — CLS reserved space: min-height per variant + content-visibility + contain-intrinsic-size (Wave ZZZZZZZZ R-14 close) | complete |
+| S876 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s871-s880 — dark mode ad frames: `[data-bs-theme="dark"] .grimba-ad-slot` overrides (ad-styles.blade.php:133) | complete |
+| S877 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s871-s880 — blocked-ad fallback: GrimbaAds::resolve direct-fallback when network blocked | complete |
+| S878 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s871-s880 — ad error logging: AdSense JS handles client errors; server returns mode=hidden | complete |
+| S879 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s871-s880 — ad revenue dashboard: /admin/grimba/advertiser-leads sponsor pipeline; AdSense Google-side | complete |
+| S880 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s871-s880 — ad QA fixtures: AdRevenueSurfaceTest 4 paths (direct/AdSense/ads.txt/advertise sales) | complete |
+| S881 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s881-s890 — subscription value prop: /advertise public sponsor pitch (subscriber pitch deferred until tier ships) | partial |
+| S884 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s881-s890 — subscriber account page: /account gated by Botble member middleware (S027) | complete |
+| S887 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s881-s890 — newsletter monetization: /admin/grimba/subscribers list + segments + CSV export | complete |
+| S888 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s881-s890 — sponsorship slots: S-ADS direct fallback + /advertise sales pipeline + advertiser-leads admin | complete |
+| S889 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s881-s890 — campaign tagging: AdvertiserLeadController captures slot+locale+referrer (GrimbaAdvertiserLeadsTest) | complete |
+| S890 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s881-s890 — revenue docs: ADVERTISER_CULTURE_FRESHNESS_PLAN + ARTICLE_MEDIA_AD_PLACEMENT_BACKEND | complete |
+| S891 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s891-s900 — revenue analytics: /admin/grimba/advertiser-leads + /detail/{id} lead pipeline | complete |
+| S896 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s891-s900 — ad performance budget: Wave ZZZZZZZZ CLS R-14 + AdRevenueSurfaceTest direct/network lock | complete |
+| S897 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s891-s900 — ad security review: SecurityHeadersTest CSP allowlist (googlesyndication + doubleclick) | complete |
+| S898 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s891-s900 — ad accessibility: ad labels (S760) + label styling (S870) + CLS no-shift (S875) | complete |
+| S899 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s891-s900 — ad visual baselines: AdRevenueSurfaceTest direct + network mode per slot location | complete |
+| S900 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s891-s900 — revenue signoff: ad rendering + sponsor pipeline shipped; AdSense + subscriber dashboards deferred | partial |
 
 | Sprint IDs | Program | Atomic sprint outcomes |
 |---|---|---|
