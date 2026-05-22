@@ -1649,8 +1649,13 @@ class GrimbaLaunchReadinessTest extends TestCase
         ];
         foreach ($paths as $path) {
             $resp = $this->get($path);
-            if ($resp->getStatusCode() !== 200) {
-                continue; // route not active in test env
+            $status = $resp->getStatusCode();
+            // Wave NNNNNNNNN (Zen audit follow-up): explicitly assert no 5xx.
+            // Earlier version `continue`d on non-200 — a future 500 would
+            // silently pass this test.
+            $this->assertLessThan(500, $status, "{$path} must not 500 — got {$status}.");
+            if ($status !== 200) {
+                continue; // route not active in test env (304/302/404 OK to skip)
             }
             $html = $resp->getContent();
             preg_match('/<head[^>]*>(.*?)<\/head>/is', $html, $hm);
@@ -1663,6 +1668,40 @@ class GrimbaLaunchReadinessTest extends TestCase
                 );
             }
         }
+    }
+
+    public function test_breadcrumb_partial_emits_h2_not_h1_to_prevent_double_h1(): void
+    {
+        // Wave NNNNNNNNN (Zen audit follow-up — 2026-05-22).
+        //
+        // Wave KKKKKKKKK fixed the duplicate-H1 bug by downgrading
+        // `<h1 class="title">` → `<h2 class="title">` in
+        // `partials/breadcrumbs.blade.php`. The KKKKKKKKK lock test
+        // (`test_every_reader_surface_has_exactly_one_h1`) catches
+        // most regression paths, but Zen flagged that if a future
+        // refactor moves the partial into a layout that already gets
+        // 1 H1 from the page content, the test catches it via the
+        // count assertion — but if the regression re-introduces
+        // `<h1 class="title">` AND removes a content H1, the count
+        // still equals 1 and the regression slips through.
+        //
+        // This direct contract test renders the partial in isolation
+        // and asserts it never emits an <h1> tag.
+        \Theme::set('pageTitle', 'Test Page Title');
+        \Theme::set('isDetailPage', false);
+        $rendered = view(\Theme::getThemeNamespace('partials.breadcrumbs'))->render();
+        $this->assertDoesNotMatchRegularExpression(
+            '/<h1\b/i',
+            $rendered,
+            'partials/breadcrumbs.blade.php must NEVER emit <h1> (page content owns the H1). Use <h2 class="title"> with the same `.title` CSS class so visual styling is unchanged.',
+        );
+        $this->assertMatchesRegularExpression(
+            '/<h2[^>]*\bclass="[^"]*\btitle\b/i',
+            $rendered,
+            'partials/breadcrumbs.blade.php must emit <h2 class="title"> for the page title — visual styling is driven by the `.title` class.',
+        );
+        // Clean up shared Theme state for downstream tests.
+        \Theme::set('pageTitle', null);
     }
 
     public function test_static_editorial_pages_title_flips_per_locale(): void
