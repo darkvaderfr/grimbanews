@@ -1362,6 +1362,39 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_home_title_and_og_title_flip_per_locale(): void
+    {
+        // Wave CCCCCCCCC (Vader 2026-05-22) — same bug class as
+        // BBBBBBBBB but for `<title>` + `og:title` + `twitter:title`.
+        // Botble's theme-echo-site_title is FR-only; EN readers and
+        // Google's EN crawler got "Grimba News — Voyez chaque angle
+        // de chaque histoire" on /?lang=en. Fix: SeoHelper::setTitle
+        // with __() in grimba-home.blade.php.
+        $en = $this->get('/?lang=en')->getContent();
+        $fr = $this->get('/?lang=fr')->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<title>[^<]*See every side of every story/i',
+            $en,
+            'EN homepage <title> must be the EN brand line.',
+        );
+        $this->assertMatchesRegularExpression(
+            '/<title>[^<]*Voyez chaque angle/i',
+            $fr,
+            'FR homepage <title> must be the FR brand line.',
+        );
+        $this->assertMatchesRegularExpression(
+            '/<meta\s+property="og:title"\s+content="[^"]*See every side of every story/i',
+            $en,
+            'EN homepage og:title must be the EN brand line.',
+        );
+        $this->assertMatchesRegularExpression(
+            '/<meta\s+property="og:title"\s+content="[^"]*Voyez chaque angle/i',
+            $fr,
+            'FR homepage og:title must be the FR brand line.',
+        );
+    }
+
     public function test_home_meta_description_flips_per_locale(): void
     {
         // Wave BBBBBBBBB (Vader 2026-05-22) — meta description bug:

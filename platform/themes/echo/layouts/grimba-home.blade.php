@@ -124,6 +124,14 @@
         \Botble\SeoHelper\Facades\SeoHelper::setDescription(__(
             'GrimbaNews classifies editorial bias, surfaces blindspots, and compares sources side by side — French-canonical, English-ready.'
         ));
+
+        // Wave CCCCCCCCC (Vader 2026-05-22) — same fix for the site
+        // title. Botble's theme-echo-site_title is FR-only ("Grimba
+        // News — Voyez chaque angle de chaque histoire"); EN
+        // og:title and twitter:title were bleeding French.
+        \Botble\SeoHelper\Facades\SeoHelper::setTitle(__(
+            'GrimbaNews — See every side of every story'
+        ));
     @endphp
     @include(Theme::getThemeNamespace('partials.seo-meta-config'), ['is_home' => true])
     {!! Theme::header() !!}
