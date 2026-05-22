@@ -124,6 +124,61 @@ class LiveNewsProviderTest extends TestCase
         ]);
     }
 
+    public function test_provider_item_id_carries_provider_prefix(): void
+    {
+        // Wave XXXXXXXX (S-NDI-16 close 2026-05-22) — every normaliser
+        // must emit a `provider_item_id` prefixed with its provider
+        // name so a sha1 collision between providers (theoretically
+        // possible — they'd have to return the same URL) can never
+        // dedupe one provider's article OUT against another.
+        //
+        // Verifies by reflecting into the private normalisers and
+        // calling them with a sentinel URL. Asserts the expected
+        // prefix appears in the returned dict.
+        $fetcher = app(GrimbaLiveNewsFetcher::class);
+        $ref = new \ReflectionClass($fetcher);
+        $url = 'https://prefix-sentinel.example.com/article-' . \Illuminate\Support\Str::random(8);
+
+        $cases = [
+            'normaliseGdeltArticle' => ['gdelt:', ['url' => $url, 'title' => 'sentinel', 'description' => 'desc']],
+            'normaliseMediastackArticle' => ['mediastack:', ['url' => $url, 'title' => 'sentinel']],
+            'normaliseWebzArticle' => ['webz:', ['url' => $url, 'title' => 'sentinel', 'text' => 'sentinel body']],
+        ];
+
+        foreach ($cases as $method => [$expectedPrefix, $article]) {
+            $reflMethod = $ref->getMethod($method);
+            $reflMethod->setAccessible(true);
+            $normalised = $reflMethod->invoke($fetcher, $article);
+
+            $this->assertNotNull(
+                $normalised['provider_item_id'],
+                "{$method} must produce a non-null provider_item_id for a valid URL."
+            );
+            $this->assertStringStartsWith(
+                $expectedPrefix,
+                (string) $normalised['provider_item_id'],
+                "{$method} provider_item_id must start with `{$expectedPrefix}` so cross-provider dedupe collisions are impossible."
+            );
+        }
+
+        // GoogleNews comes through parseGoogleNewsRss → assert via
+        // a hand-crafted RSS fixture.
+        $rssXml = '<?xml version="1.0"?><rss><channel><item>'
+            . '<title>Sentinel</title>'
+            . '<link>' . htmlspecialchars($url, ENT_XML1) . '</link>'
+            . '<pubDate>' . now()->toRssString() . '</pubDate>'
+            . '</item></channel></rss>';
+        $reflMethod = $ref->getMethod('parseGoogleNewsRss');
+        $reflMethod->setAccessible(true);
+        $items = $reflMethod->invoke($fetcher, $rssXml);
+        $this->assertNotEmpty($items, 'parseGoogleNewsRss should produce at least one item.');
+        $this->assertStringStartsWith(
+            'google-news:',
+            (string) $items[0]['provider_item_id'],
+            'Google News parser must prefix provider_item_id with `google-news:`.'
+        );
+    }
+
     public function test_default_breaking_provider_list_includes_newsdata_io(): void
     {
         $store = app(SettingStore::class);

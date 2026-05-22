@@ -272,8 +272,13 @@ class GrimbaLiveNewsFetcher
                 $title = preg_replace('/\s+-\s+' . preg_quote($sourceName, '/') . '$/u', '', $title) ?: $title;
             }
 
+            // Wave XXXXXXXX (S-NDI-16 close 2026-05-22) — provider-
+            // prefixed provider_item_id so a sha1 collision between
+            // two providers (theoretically possible — they happen
+            // to return URLs whose sha1 hashes match) can never
+            // dedupe an article OUT across provider boundaries.
             $items[] = [
-                'provider_item_id' => $link !== '' ? sha1($link) : null,
+                'provider_item_id' => $link !== '' ? 'google-news:' . sha1($link) : null,
                 'url' => $link,
                 'title' => $title,
                 'description' => $description,
@@ -882,7 +887,9 @@ class GrimbaLiveNewsFetcher
         $domain = (string) ($article['domain'] ?? '');
 
         return [
-            'provider_item_id' => $url !== '' ? sha1($url) : null,
+            // Wave XXXXXXXX (S-NDI-16) — gdelt: prefix prevents
+            // cross-provider sha1 collision.
+            'provider_item_id' => $url !== '' ? 'gdelt:' . sha1($url) : null,
             'url' => $url,
             'title' => (string) ($article['title'] ?? ''),
             'description' => (string) ($article['description'] ?? ''),
@@ -924,8 +931,11 @@ class GrimbaLiveNewsFetcher
             ?: Str::limit(strip_tags($text), 600, '')
         );
 
+        // Wave XXXXXXXX (S-NDI-16) — webz: prefix on whichever id we
+        // resolve (uuid from webz itself OR sha1(url) fallback).
+        $__webzId = (string) (data_get($article, 'uuid') ?: data_get($article, 'thread.uuid') ?: ($url !== '' ? sha1($url) : ''));
         return [
-            'provider_item_id' => (string) (data_get($article, 'uuid') ?: data_get($article, 'thread.uuid') ?: ($url !== '' ? sha1($url) : '')),
+            'provider_item_id' => $__webzId !== '' ? 'webz:' . $__webzId : null,
             'url' => $url,
             'title' => (string) (data_get($article, 'title') ?: data_get($article, 'thread.title') ?: ''),
             'description' => $description,
@@ -950,7 +960,8 @@ class GrimbaLiveNewsFetcher
         $url = (string) ($article['url'] ?? '');
 
         return [
-            'provider_item_id' => $url !== '' ? sha1($url) : null,
+            // Wave XXXXXXXX (S-NDI-16) — mediastack: prefix.
+            'provider_item_id' => $url !== '' ? 'mediastack:' . sha1($url) : null,
             'url' => $url,
             'title' => (string) ($article['title'] ?? ''),
             'description' => (string) ($article['description'] ?? ''),
