@@ -1071,6 +1071,16 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S323 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Story native-first sort: GrimbaTranslationPresenter::orderForTargetLocale() applied in views/post.blade.php related-rail — complete. | complete |
 | S324 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Search native-first sort: presenter applied in SearchFacetsTest query — complete. | complete |
 | S325 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Source native-first sort: presenter applied in views/source.blade.php story rail — complete. | complete |
+| S331 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Static page FR snapshot: GrimbaLaunchReadinessTest FR cookie path; full visual-diff partial | partial |
+| S332 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Static page EN snapshot: same EN cookie path; visual-diff partial | partial |
+| S333 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Homepage FR snapshot: GrimbaLaunchReadinessTest FR cookie path; visual-diff partial | partial |
+| S334 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Homepage EN snapshot: same EN path; visual-diff partial | partial |
+| S335 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Story FR snapshot: GrimbaLaunchReadinessTest FR cookie path; visual-diff partial | partial |
+| S336 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Story EN snapshot: same EN path; visual-diff partial | partial |
+| S337 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Search FR snapshot: GrimbaLaunchReadinessTest FR cookie path; visual-diff partial | partial |
+| S338 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Search EN snapshot: same EN path; visual-diff partial | partial |
+| S339 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Auth FR snapshot: GrimbaLaunchReadinessTest FR cookie path; visual-diff partial | partial |
+| S340 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Auth EN snapshot: same EN path; visual-diff partial | partial |
 | S344 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Translation replay command: app/Console/Commands/GrimbaTranslatePending.php + per-post force via --respect-rule-cap — complete. | complete |
 | S345 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Translation purge command: covered by GrimbaCleanupSlugs cascading delete on stale translations — partial. | partial |
 | S346 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Translation cache policy: presenter caches per-locale lookup; no separate translation Cache::remember — partial. | partial |
