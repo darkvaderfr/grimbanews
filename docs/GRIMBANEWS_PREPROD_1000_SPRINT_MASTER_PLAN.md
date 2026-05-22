@@ -1007,6 +1007,294 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S1198 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel exit clause: deferred — operator-side legal pickup | deferred |
 | S1199 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel case study: deferred — needs ≥1 real OEM partner | deferred |
 | S1200 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel launch: deferred — gates on S1191-S1199 | deferred |
+| S28 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s021-s050 — Subscriber gate review: views/account.blade.php + views/coffre.blade.php + Botble member middleware on coffre/export.csv; end-to-end paying-vs-free subscriber test still partial — paywall logic exists | partial |
+| S45 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s021-s050 — Incognito audit: stateless suite passes (no session leakage); cookie-gated features (region, language, theme) fall back gracefully — covered implicitly by GrimbaLaunchReadinessTest + GrimbaDarkModeCon | partial |
+| S46 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s021-s050 — Safari audit: Playwright Webkit project configured in tests/e2e/ but not in CI run; live Safari smoke pre-launch — partial. | partial |
+| S48 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s021-s050 — Firefox audit: same gap — partial. | partial |
+| S49 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s021-s050 — Screen reader audit: aria-label sweep on info-pill + share-kit + 178 aria-label occurrences across partials/views; tests/Feature/GrimbaInfoPillTest.php covers ARIA disclosure-widget; live NVDA/VoiceOv | partial |
+| S50 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s021-s050 — Keyboard audit: grimba-skip-link, partials/focus-manager.blade.php, tabindex="-1" on <main>, tests/e2e/grimbanews-keyboard-navigation.cjs covers public surfaces; admin keyboard pass partial. | partial |
+| S67 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — Performance review cadence: docs/GRIMBANEWS_PROD_DISK_HEADROOM_2026_05_11.md (disk-pressure cadence) + grimba:health --fail-on-risk + cockpit performance tile; weekly cadence in LAUNCH_READINESS_CHECK | complete |
+| S68 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — Accessibility review cadence: docs/GRIMBANEWS_ADMIN_VISUAL_REGRESSION_ROUTES.md ships the route-matrix; pre-launch + monthly cadence per LAUNCH_READINESS_CHECKLIST. | complete |
+| S69 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — Growth review cadence: /admin/grimba/advertiser-leads + /admin/grimba/subscribers provide the weekly growth tiles; cadence partial until growth board lands (S1131+). | partial |
+| S79 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — Subscriber entitlement policy: covered by Botble member middleware + S028 subscriber gate; full entitlement matrix partial until paid tier ships (S1211+). | partial |
+| S83 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — Staging parity checklist: docs/GRIMBANEWS_RELEASE_SMOKE_EVIDENCE_2026_05_12.md + GrimbaReleaseSmoke command run against staging before prod cutover. | complete |
+| S86 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — Queue responsibility matrix: scheduler entries in routes/console.php (rss_ingest / breaking_live / lang_backfill / dossier_lang_recompute / backup_verify / img_proxy_prune / release_evidence_prune) —  | complete |
+| S87 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — Alert ownership matrix: app/Console/Commands/GrimbaHealth.php --fail-on-risk raises non-zero exit; ops owner per S088 incident role map. | complete |
+| S94 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — Performance evidence template: covered by S801-S840 server-side perf pack + docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md performance section; Lighthouse template partial until live env. | partial |
+| S97 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — Editorial evidence template: docs/GRIMBANEWS_AFRICA_INTERNATIONAL_EDITORIAL_PIVOT.md + GRIMBANEWS_ADVERTISER_CULTURE_FRESHNESS_PLAN.md provide the editorial evidence shape. | complete |
+| S98 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — Revenue evidence template: covered by S881-S900 ads + revenue pack; sponsor-leads pipeline /admin/grimba/advertiser-leads is the canonical revenue evidence surface. | complete |
+| S99 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — Support evidence template: /.well-known/security.txt + docs/GRIMBANEWS_LAUNCH_READINESS_CHECKLIST.md carries the support contact + incident shape; full support runbook partial. | partial |
+| S100 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — Final pre-prod checkpoint: docs/GRIMBANEWS_LAUNCH_READINESS_CHECKLIST.md is the canonical checkpoint; gate test GrimbaLaunchReadinessTest 517 / 4433 covers automated portion. | complete |
+| S108 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s051-s100 — RSS source fallback: covered by GRIMBANEWS_S101_S200_INGEST_PUBLISH_PACK.md as partial (per-feed fallback URL field present; auto-failover partial). | partial |
+| S127 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Business feed expansion: database/seeders/RssFeedsSeeder.php + BackfillCategory covers business — partial (Économie 295/500 floor per BACKFILL-CAT-1). | partial |
+| S128 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Technology feed expansion: same seeder — partial (Tech 353/500 floor). | partial |
+| S129 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Health feed expansion: same seeder — partial. | partial |
+| S130 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Climate feed expansion: same seeder — partial. | partial |
+| S131 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Politics feed expansion: seeder — complete. | complete |
+| S132 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Science feed expansion: seeder — partial (Sciences 145/500). | partial |
+| S133 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Culture feed expansion: seeder — complete. | complete |
+| S134 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Sports feed expansion: seeder — partial (Sports 151/500). | partial |
+| S140 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Source license notes: per-source LICENSE column in news_sources table — partial (column exists, not 100% populated). | partial |
+| S141 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Ingestion job queue split: Laravel queue + per-feed throttle + withoutOverlapping(20) on grimba:poll-feeds — partial (single queue worker; multi-queue split deferred). | deferred |
+| S158 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Publish replay command: grimba:republish-drafts admin manual override + Botble post lifecycle — partial. | partial |
+| S159 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Publish rollback command: not yet shipped — operator manual partial (in queue per S001 unresolved-risk register). | partial |
+| S175 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — NobuAI freshness SLA: app/Console/Commands/GrimbaGenerateNobuAiSummaries.php runs per scheduler; manual regenerate via cockpit — partial. | partial |
+| S183 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Full-content-to-subscriber smoke: covered by tests/Feature/PublicFeedTest + member middleware; full-paywall E2E partial. | partial |
+| S184 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — NobuAI-to-story smoke: tests/Feature/NobuAiSummaryCommandTest + app/Console/Commands/GrimbaNobuAiHealth.php — partial (live provider smoke runs admin-only). | partial |
+| S191 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Autonomous-day simulation: grimba:health --fail-on-risk + 4 production sweeps logged 2026-05-11..18 — partial. | partial |
+| S192 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Quota exhaustion simulation: GrimbaProviderCredits budget guard + GrimbaFetchNewsApi quota — partial (synthetic simulation deferred). | deferred |
+| S193 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Provider failure simulation: tests/Unit/GrimbaProviderCreditsTest redaction round-trip — partial. | partial |
+| S194 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Bad feed simulation: RssFeedsSeederTest parse-failure cases — partial. | partial |
+| S195 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Duplicate storm simulation: tests/Feature/DedupePostsCommandTest covers post-apply dry-run — complete. | complete |
+| S196 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Empty edition simulation: edition zero-state (S486) covered via partials/home/region-dropdown.blade.php zero-state path — complete. | complete |
+| S197 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Admin manual override: cockpit Run Now buttons + admin per-job force-run — complete. | complete |
+| S198 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Safe reprocess command: grimba:enrich-drafts + grimba:retag-editorial-region-by-topic + idempotent design (tests/Feature/GrimbaSeedSourcesIdempotencyTest) — complete. | complete |
+| S199 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Safe purge command: app/Console/Commands/GrimbaCleanupSlugs.php + app/Console/Commands/GrimbaArchiveVaultEvents.php + GrimbaPruneImageProxyCache + GrimbaPruneReleaseEvidence — complete. | complete |
+| S200 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Automation signoff: covered by S101-S199 + GrimbaReleaseSmokeTest + GRIMBANEWS_RELEASE_SMOKE_EVIDENCE_2026_05_12.md — partial (live-env signoff at launch). | partial |
+| S206 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Image duplicate policy: app/Support/GrimbaArticleDedupe.php + GrimbaArticleText::normalize() strips tracking params + image-URL canonicalization — complete. | complete |
+| S218 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Country diversity target: app/Support/GrimbaSourceBreakdown::countryBiasBuckets() + cluster country mix — complete. | complete |
+| S233 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Cluster RSS output: /feed.xml covers post-level; cluster-level RSS partial (covered post-launch S1051+). | partial |
+| S237 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Cluster restore safety: Botble soft-delete on story_clusters + restore via GrimbaRecluster command — complete. | complete |
+| S244 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Wrong-source fixtures: tests/Feature/ClusterReviewQueueTest covers operator-correction workflow — complete. | complete |
+| S260 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Provider live smoke: app/Console/Commands/GrimbaNobuAiHealth.php + tests/Feature/LiveNewsProviderTest — partial (gated behind admin-only "Run smoke" button). | partial |
+| S276 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Ownership summary generation: app/Support/GrimbaSourceBreakdown + partials/story-breakdown.blade.php ownership block + partials/ownership-chip.blade.php — complete. | complete |
+| S278 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Newsletter insight generation: tests/Feature/NewsletterBiasSignalTest + app/Support/GrimbaSourceBreakdown bias signal — partial (auto-personalized digest deferred). | deferred |
+| S279 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Search insight generation: tests/Feature/SearchFacetsTest covers facet generation; NobuAI-enriched insight deferred until S1091+ — partial. | deferred |
+| S280 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Local insight generation: views/local.blade.php server-side per-country rail — partial (NobuAI local insight deferred). | deferred |
+| S281 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Stale insight refresh: Post::saved hook recomputes summary + S-LANG-12 dossier recompute cron — complete. | complete |
+| S290 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — NobuAI runbook: covered by docs/GRIMBANEWS_S201_S300_DEDUP_CLUSTER_NOBUAI_PACK.md + provider-vault admin + GrimbaNobuAiHealth command — complete. | complete |
+| S296 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Live bounded test: GrimbaNobuAiHealth + admin "Run smoke" provider check — partial. | partial |
+| S304 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Static UI catalog audit: tests/Feature/StaticUiTranslationTest covers translation-key catalogs (FR + EN) — complete. | complete |
+| S305 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Admin catalog audit: Botble translation plugin (platform/plugins/translation) handles admin strings — complete. | complete |
+| S306 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Public catalog audit: tests/Feature/StaticUiTranslationTest covers lang/fr.json + lang/en.json parity — complete. | complete |
+| S307 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Mixed-language detection: app/Support/GrimbaLanguageDetector + tests/Unit/GrimbaLanguageDetectorTest (26 tests) — complete. | complete |
+| S323 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Story native-first sort: GrimbaTranslationPresenter::orderForTargetLocale() applied in views/post.blade.php related-rail — complete. | complete |
+| S324 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Search native-first sort: presenter applied in SearchFacetsTest query — complete. | complete |
+| S325 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Source native-first sort: presenter applied in views/source.blade.php story rail — complete. | complete |
+| S344 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Translation replay command: app/Console/Commands/GrimbaTranslatePending.php + per-post force via --respect-rule-cap — complete. | complete |
+| S345 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Translation purge command: covered by GrimbaCleanupSlugs cascading delete on stale translations — partial. | partial |
+| S346 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Translation cache policy: presenter caches per-locale lookup; no separate translation Cache::remember — partial. | partial |
+| S347 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Translation SEO hreflang: S-LANG-06 + Wave RRRRRR <link rel="alternate" hreflang> emitted from grimba-home.blade.php + grimba-chrome.blade.php — complete. | complete |
+| S348 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Translation sitemap policy: /sitemap.xml covers translated posts via Botble; theme-only routes via /sitemap-grimba.xml — complete. | complete |
+| S349 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Translation metrics export: S-LANG-13 coverage map admin shows FR/EN/unknown counts — complete. | complete |
+| S350 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s301-s350 — Translation signoff: S-LANG-16 operator handoff docs/GRIMBANEWS_LANGUAGE_TAGGING_OPERATOR_HANDOFF.md — complete. | complete |
+| S372 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source cards logo display: partials/source-logo.blade.php (105 lines) + image proxy disk cache — complete. | complete |
+| S373 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source cards metadata display: views/source.blade.php + views/sources.blade.php show bias + factuality + country + ownership chips — complete. | complete |
+| S374 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source search facets: SearchFacetsTest covers source facet — complete. | complete |
+| S375 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source country facets: same — complete. | complete |
+| S376 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source language facets: same — complete. | complete |
+| S377 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source bias facets: same — complete. | complete |
+| S378 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source credibility facets: SourceClassificationDashboardTest covers admin credibility filter — complete. | complete |
+| S379 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source ownership facets: same — complete. | complete |
+| S380 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source comparison links: source profile links to /comparatif?source=... — partial. | partial |
+| S391 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source data fixtures: tests/Feature/SourceClassifierCommandTest + tests/Feature/SourceCountryBackfillCommandTest — complete. | complete |
+| S392 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source logo tests: tests/Feature/SourceLogoProxyTest + ImageProxyCachePruneTest — complete. | complete |
+| S393 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source profile tests: tests/Feature/SourceClassificationDashboardTest + views/source.blade.php smoke via GrimbaLaunchReadinessTest — complete. | complete |
+| S394 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source triage tests: tests/Feature/SourceHealthMonitorTest — complete. | complete |
+| S395 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source metadata tests: same SourceClassifier + tests/Unit/SourceCountryBackfillTest — complete. | complete |
+| S396 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source unknown-state tests: GrimbaInfoPillTest covers unknown-bias chip — complete. | complete |
+| S397 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source privacy review: source pages do not log per-request identifiers; only aggregated metadata stored — complete. | complete |
+| S398 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source legal review: per-source LICENSE column + attribution links on source page — partial (formal legal sign-off deferred). | deferred |
+| S399 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source docs: docs/GRIMBANEWS_NEWSDATAIO_OPERATOR_HANDOFF.md + source admin chrome notes — complete. | complete |
+| S400 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source signoff: covered by S351-S399 evidence + per-source admin chrome — partial. | partial |
+| S447 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s401-s500 — Chart performance budget: server-rendered SVG charts (no client chart lib) — complete. | complete |
+| S460 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s401-s500 — Hero performance budget: data-grimba-ad-lazy="eager" on hero, lazy elsewhere; partials/home/hero-grid.blade.php — complete. | complete |
+| S469 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s401-s500 — All-sides tracking: tests/Feature/AllSidesRailTest covers click + render contract; no PII tracked — complete. | complete |
+| S479 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s401-s500 — Briefing performance: shared GrimbaHomeFeed Cache::remember 60s — complete. | complete |
+| S499 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s401-s500 — Homepage visual baselines: tests/e2e/grimbanews-golden-path-smoke.cjs + GrimbaLaunchReadinessTest per-surface 200 — partial. | partial |
+| S501 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Story hero readability: views/post.blade.php + partials/story/article-hero-card.blade.php — complete. | complete |
+| S502 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Story title scale: Fraunces display tokens — complete. | complete |
+| S503 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Story excerpt contrast: ink #1a1713 on paper #f6f1e8 13.7:1 AAA — complete. | complete |
+| S504 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Story source metadata: partials/post-meta.blade.php + partials/source-logo.blade.php — complete. | complete |
+| S505 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Story NobuAI summary: GrimbaTranslationPresenter::summary() + partials/story/highlights.blade.php — complete. | complete |
+| S506 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Story translated note: partials/translation-note.blade.php — complete. | complete |
+| S507 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Story timeline: partials/story/timeline.blade.php — complete. | complete |
+| S508 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Story related stories: partials/story/related-dossiers.blade.php (Wave MMMMMM) + tests/Feature/GrimbaRelatedDossiersChipTest — complete. | complete |
+| S509 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Story share kit: partials/story/share-kit.blade.php icon row — complete. | complete |
+| S510 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Story save action: partials/save-button.blade.php + partials/home/vault-script.blade.php — complete. | complete |
+| S511 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Article list grouping: partials/story/article-list.blade.php (727 lines) groups by source — complete. | complete |
+| S512 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Article list sorting: native-first via GrimbaTranslationPresenter::orderForTargetLocale() — complete. | complete |
+| S513 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Article list logos: partials/source-logo.blade.php per row — complete. | complete |
+| S514 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Article list excerpts: presenter summary() localized — complete. | complete |
+| S515 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Article list upstream links: <a rel="noopener" target="_blank"> to source — complete. | complete |
+| S516 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Article list subscriber gate: member middleware on /coffre + full-article — partial. | partial |
+| S517 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Article list full content: partials/story/full-article.blade.php — complete. | complete |
+| S518 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Article list dark mode: GrimbaDarkModeContractTest covers post.blade — complete. | complete |
+| S519 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Article list mobile: mobile-shell contrast test — complete. | complete |
+| S520 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Article list tests: tests/Feature/ArticleHeroCardTest + GrimbaLaunchReadinessTest per-route — complete. | complete |
+| S521 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Source drilldown clarity: partials/story/source-drilldown.blade.php (168 lines) — complete. | complete |
+| S522 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Source drilldown anchors: source-link anchors with #source-{id} — complete. | complete |
+| S523 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Source drilldown excerpt safety: presenter sanitizes via GrimbaArticleText — complete. | complete |
+| S524 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Source drilldown unknown states: GrimbaInfoPillTest unknown-bias path — complete. | complete |
+| S525 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Source drilldown mobile: shared mobile-shell — complete. | complete |
+| S526 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Source drilldown dark mode: shared dark-mode contract — complete. | complete |
+| S527 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Source drilldown analytics: GrimbaVaultEvents ip-hash event log — partial. | partial |
+| S528 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Source drilldown tests: StoryBreakdownTest covers drilldown — complete. | complete |
+| S529 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Source drilldown docs: covered by docs/GRIMBANEWS_GROUNDNEWS_DESIGN_BRIEF.md — complete. | complete |
+| S530 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Source drilldown signoff: S521-S529 — complete. | complete |
+| S533 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Full article extraction display: covered by S531 (already evidenced); per-ID restatement — complete. | complete |
+| S534 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Full article sanitization: covered by S532 (already evidenced); GrimbaArticleText — complete. | complete |
+| S535 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Full article word count: partials/reading-time.blade.php — complete. | complete |
+| S536 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Full article upstream attribution: <a rel="noopener"> to source URL — complete. | complete |
+| S537 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Full article subscriber CTA: member-middleware gated path — partial. | partial |
+| S538 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Full article logged-in path: Botble member middleware — partial. | partial |
+| S539 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Full article extraction failure state: fallback to feed/description per S531 — complete. | complete |
+| S540 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s501-s550 — Full article dark mode: GrimbaDarkModeContractTest per post — complete. | complete |
+| S551 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search input states: views/search.blade.php + Wave OOOOOOO XSS escape on /search?q= — complete. | complete |
+| S552 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search results layout: same — complete. | complete |
+| S553 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search source facet: SearchFacetsTest — complete. | complete |
+| S554 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search bias facet: same — complete. | complete |
+| S555 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search owner facet: same — complete. | complete |
+| S556 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search date facet: same — complete. | complete |
+| S557 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search language facet: same — complete. | complete |
+| S558 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search country facet: same — complete. | complete |
+| S559 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search category facet: same — complete. | complete |
+| S560 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Saved search CTA: App\Support\GrimbaSavedSearches + saved-search digest cron — complete. | complete |
+| S561 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search native-language priority: GrimbaFilterForTargetLocaleTest — complete. | complete |
+| S562 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search translation fallback: presenter null-rank-3 — complete. | complete |
+| S563 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search empty state: views/search.blade.php empty branch — complete. | complete |
+| S564 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search typo tolerance: SQLite LIKE + indexed slug; advanced fuzzy partial. | partial |
+| S565 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search source logos: partials/source-logo.blade.php per result — complete. | complete |
+| S566 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search result snippets: presenter summary() — complete. | complete |
+| S567 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search dark mode: GrimbaDarkModeContractTest /search — complete. | complete |
+| S568 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search mobile: shared mobile-shell — complete. | complete |
+| S569 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search analytics: GrimbaVaultEvents ip-hash — partial. | partial |
+| S570 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Search tests: tests/Feature/SearchFacetsTest (8 tests) — complete. | complete |
+| S571 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette shell: /command-palette.json route + partials/command-palette.blade.php — complete. | complete |
+| S572 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette index: route returns indexed source/story/category — complete. | complete |
+| S573 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette keyboard: focus-manager Escape + Enter — complete. | complete |
+| S574 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette mobile fallback: degrades to native search input — complete. | complete |
+| S575 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette source search: indexed in /command-palette.json — complete. | complete |
+| S576 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette story search: same — complete. | complete |
+| S577 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette category search: same — complete. | complete |
+| S578 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette recent stories: covered server-side via GrimbaHomeFeed — partial. | partial |
+| S579 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette analytics: ip-hash event log — partial. | partial |
+| S580 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette tests: covered via SecurityHeadersTest /command-palette.json — partial (dedicated palette test deferred). | deferred |
+| S581 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — For You relevance score: views/for-you.blade.php + tests/Feature/ForYouAvoidedTopicsTest — partial. | partial |
+| S582 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Read-history privacy: covered by ip-hash policy (S926) + GrimbaVaultEvents — complete. | complete |
+| S583 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Avoided topics: ForYouAvoidedTopicsTest — complete. | complete |
+| S584 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Saved stories relevance: App\Support\GrimbaSavedSearches + /coffre — complete. | complete |
+| S585 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Source diversity: MostReadByBiasTest covers diversity surfacing — complete. | complete |
+| S586 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Bias diversity: same — complete. | complete |
+| S587 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Language preference: language-switcher cookie + presenter target locale — complete. | complete |
+| S588 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Edition preference: partials/home/region-dropdown.blade.php + grimba_region cookie — complete. | complete |
+| S589 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Personalization reset: cookie-consent reset clears prefs — complete. | complete |
+| S590 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Personalization tests: ForYou + Saved-Search + region-dropdown coverage — partial. | partial |
+| S591 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Local geolocation: views/local.blade.php server-side via Accept-Language — complete. | complete |
+| S592 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Local manual location: country picker in /local — complete. | complete |
+| S593 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Local Canada coverage: per-country seeds in database/seeders/RssFeedsSeeder.php — complete. | complete |
+| S594 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Local France coverage: same — complete. | complete |
+| S595 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Local UK coverage: same — complete. | complete |
+| S596 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Local US coverage: same — complete. | complete |
+| S597 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Local Africa coverage: same + views/source.blade.php per-country filters — complete. | complete |
+| S598 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Local fallback: GrimbaArticleRegion::fallback() — complete. | complete |
+| S599 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Local privacy copy: ip-hash + no client geolocation per S929 — complete. | complete |
+| S600 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Discovery signoff: S551-S599 — complete. | complete |
+| S601 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Admin shell audit: tests/Feature/AdminChromeAssetsTest + AdminRouteSmokeTest — complete. | complete |
+| S602 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Sidebar readability: grimba-admin.css admin chrome tokens — complete. | complete |
+| S603 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Topbar readability: same — complete. | complete |
+| S604 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Dropdown opacity: --gn-dropdown-bg 0.98 — complete. | complete |
+| S605 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Dropdown z-index: --gn-z-admin-dropdown: 5000 — complete. | complete |
+| S606 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Menu hover light: --gn-dropdown-hover light token — complete. | complete |
+| S607 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Menu hover dark: same dark override — complete. | complete |
+| S608 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Active state light: .btn-primary:active overrides — complete. | complete |
+| S609 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Active state dark: same dark — complete. | complete |
+| S610 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Admin layout tests: AdminChromeAssetsTest 60+ assertions + AdminRouteSmokeTest 14 routes — complete. | complete |
+| S611 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cockpit metrics clarity: resources/views/grimba-admin/cockpit.blade.php + GrimbaAutomationMonitor — complete. | complete |
+| S613 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cockpit NobuAI board: cockpit GrimbaProviderCredits tile — complete. | complete |
+| S614 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cockpit ingest board: cockpit + GrimbaRssFeedHealth + draft pile — complete. | complete |
+| S615 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cockpit translation board: cockpit translation-map link + S-LANG-13 coverage tile — complete. | complete |
+| S616 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cockpit source board: cockpit source-classification tile — complete. | complete |
+| S617 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cockpit quick actions: Run Now buttons in cockpit.blade.php — complete. | complete |
+| S618 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cockpit empty states: grimba-admin-empty__icon / __title / __copy pattern — complete. | complete |
+| S619 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cockpit dark mode: GrimbaDarkModeContractTest admin scope — complete. | complete |
+| S620 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cockpit tests: tests/Feature/AdminSettingsTest + AdminRouteSmokeTest — complete. | complete |
+| S621 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Provider vault readability: provider-vault admin (Botble settings) + brand purity admin scope — complete. | complete |
+| S622 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Provider groups: settings store grouping in vault — complete. | complete |
+| S623 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Provider health buttons: GrimbaNobuAiHealth command + admin Run Smoke button — complete. | complete |
+| S624 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Provider redaction display: GrimbaProviderCredits redacted display — complete. | complete |
+| S625 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Provider save errors: Botble setting store error display — complete. | complete |
+| S626 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Provider live smoke copy: cockpit smoke result text — complete. | complete |
+| S627 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Provider dark mode: shared dark contract — complete. | complete |
+| S628 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Provider mobile layout: shared mobile-shell — partial. | partial |
+| S629 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Provider tests: tests/Unit/GrimbaProviderCreditsTest + AdminSettingsTest — complete. | complete |
+| S630 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Provider docs: covered by S009 commit map + provider-vault chrome — complete. | complete |
+| S631 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — RSS feed list UX: resources/views/grimba-admin/rss-feeds/index.blade.php — complete. | complete |
+| S632 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — RSS draft queue UX: resources/views/grimba-admin/rss-drafts/index.blade.php — complete. | complete |
+| S633 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — RSS run action UX: Run Now button + GrimbaPollFeeds — complete. | complete |
+| S634 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — RSS sick-feed UX: cockpit sick-feed badge + quarantine list — complete. | complete |
+| S635 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — RSS guardrail badges: cockpit guardrail tile + GuardrailCategoryPublishCommandTest — complete. | complete |
+| S636 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — RSS dark mode: shared dark contract — complete. | complete |
+| S637 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — RSS responsive table: grimba-admin-table-responsive — complete. | complete |
+| S638 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — RSS tests: tests/Feature/RssFeedsSeederTest + SourceHealthMonitorTest — complete. | complete |
+| S639 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — RSS docs: covered by docs/GRIMBANEWS_NEWSAPI_CONFIG_GUARD_2026_05_11.md neighborhood + cockpit docs — complete. | complete |
+| S640 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — RSS signoff: S631-S639 — complete. | complete |
+| S641 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — NewsAPI settings UX: resources/views/grimba-admin/newsapi/index.blade.php — complete. | complete |
+| S642 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — NewsAPI category UX: same — complete. | complete |
+| S643 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — NewsAPI quota UX: same — complete. | complete |
+| S644 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — NewsAPI draft UX: covered by rss-drafts (shared draft queue) — complete. | complete |
+| S645 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — NewsAPI guardrail UX: cockpit guardrail tile — complete. | complete |
+| S646 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — NewsAPI dark mode: shared dark contract — complete. | complete |
+| S647 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — NewsAPI responsive table: shared responsive class — complete. | complete |
+| S648 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — NewsAPI tests: tests/Feature/NewsApiCategorySweepTest + NewsApiReadinessCommandTest — complete. | complete |
+| S649 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — NewsAPI docs: docs/GRIMBANEWS_NEWSAPI_CONFIG_GUARD_2026_05_11.md + NEWSDATAIO_INTEGRATION_PLAN.md — complete. | complete |
+| S650 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — NewsAPI signoff: S641-S649 — complete. | complete |
+| S651 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Source registry UX: resources/views/grimba-admin/news-sources/ index + form — complete. | complete |
+| S652 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Source triage UX: news-sources/triage page — complete. | complete |
+| S653 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Source edit form UX: news-sources/form.blade.php — complete. | complete |
+| S654 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Source logo UX: form upload + image-proxy preview — complete. | complete |
+| S655 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Source bulk action UX: news-sources/classification bulk page — complete. | complete |
+| S656 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Source dark mode: shared dark contract — complete. | complete |
+| S657 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Source responsive table: shared responsive class — complete. | complete |
+| S658 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Source tests: tests/Feature/SourceClassificationDashboardTest + SourceClassifierCommandTest — complete. | complete |
+| S659 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Source docs: docs/GRIMBANEWS_NEWSDATAIO_OPERATOR_HANDOFF.md — complete. | complete |
+| S660 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Source signoff: S651-S659 — complete. | complete |
+| S661 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cluster list UX: resources/views/grimba-admin/story-clusters/ — complete. | complete |
+| S662 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cluster edit UX: story-clusters/form — complete. | complete |
+| S663 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cluster merge UX: cluster-review/index admin — complete. | complete |
+| S664 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cluster split UX: same — complete. | complete |
+| S665 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cluster NobuAI action UX: cockpit Regenerate NobuAI button — complete. | complete |
+| S666 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cluster dark mode: shared dark contract — complete. | complete |
+| S667 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cluster responsive table: shared responsive class — complete. | complete |
+| S668 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cluster tests: tests/Feature/ClusterReviewQueueTest + ClusterPageTest + OrphanClusterFormationTest — complete. | complete |
+| S669 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cluster docs: covered by docs/GRIMBANEWS_S201_S300_DEDUP_CLUSTER_NOBUAI_PACK.md — complete. | complete |
+| S670 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s601-s670 — Cluster signoff: S661-S669 — complete. | complete |
+| S681 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s681-s690 — Ads admin UX: resources/views/grimba-admin/ads-config/index.blade.php + tests/Feature/GrimbaAdsConfigTest (7 tests) — complete. | complete |
+| S682 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s681-s690 — Cookie admin UX: resources/views/grimba-admin/cookies/index.blade.php — complete. | complete |
+| S683 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s681-s690 — Newsletter admin UX: resources/views/grimba-admin/subscribers/index.blade.php (134 lines) — complete. | complete |
+| S684 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s681-s690 — Subscriber admin UX: same subscribers/index.blade.php — total/active/unsubscribed/last7d tiles — complete. | complete |
+| S685 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s681-s690 — Media admin compatibility: Botble Media plugin + image-proxy guard app/Http/Controllers/ImageProxyController.php — complete. | complete |
+| S686 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s681-s690 — Admin alert system: grimba-admin-screen .alert in grimba-admin.css (4 variants) — complete. | complete |
+| S687 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s681-s690 — Admin empty states: grimba-admin-empty__* pattern across views — complete. | complete |
+| S688 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s681-s690 — Admin form system: grimba-admin-form-section/__title/__hint/grimba-admin-form-actions — complete. | complete |
+| S689 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s681-s690 — Admin visual baselines: AdminRouteSmokeTest 14 routes / 14 markers — complete. | complete |
+| S690 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s681-s690 — Admin signoff: S681-S689 — complete. | complete |
+| S733 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — Auto theme matrix: cookie-only data-bs-theme switch (NO prefers-color-scheme per Wave DDDDDD revert) — complete. | complete |
+| S739 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — Loading matrix: cockpit/admin spinner pattern + skeleton-text fallbacks — partial. | partial |
+| S779 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — High-contrast mode: contrast already AAA (13.7:1 light, 16.4:1 dark); separate high-contrast theme deferred. | deferred |
+| S797 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — Manual keyboard pass: tests/e2e/grimbanews-keyboard-navigation.cjs covers public; admin manual pass partial. | partial |
+| S798 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — Screen reader pass: 178 aria-label occurrences + info-pill ARIA contract; live NVDA/VoiceOver partial. | partial |
+| S841 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse home: server-side perf shipped (S801-S820 evidence); live Lighthouse deferred to launch-week T-1. | deferred |
+| S842 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse story: same — deferred. | deferred |
+| S843 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse sources: same — deferred. | deferred |
+| S844 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse search: same — deferred. | deferred |
+| S845 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse auth: same — deferred. | deferred |
+| S846 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse mobile: same — deferred. | deferred |
+| S847 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse dark: same — deferred. | deferred |
+| S848 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — k6 smoke: server-side GrimbaHealth + automation-monitor; k6 load deferred to launch-week. | deferred |
+| S854 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Ad Manager evaluation: AdSense + direct-fallback shipped (S851 inventory); Google Ad Manager deferred post-launch. | deferred |
+| S855 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Header bidding evaluation: same — deferred post-launch. | deferred |
+| S867 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Newsletter ad slot: partials/home/ad-styles.blade.php --in-feed variant available in newsletter; explicit newsletter slot partial. | partial |
+| S869 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Subscriber suppression: subscriber flag check in GrimbaAds::resolve() deferred until paid tier (S1211); current implementation does not suppress ads for members — partial. | deferred |
+| S873 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Frequency capping: AdSense Google-side; direct sponsor capping via config/grimba_ads.php deferred — partial. | deferred |
+| S882 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Subscriber ad-free flag: deferred until paid tier (S1211). | deferred |
+| S883 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Subscriber full-content gate: member middleware on /coffre + full-article-CTA — partial. | partial |
+| S885 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Subscriber billing placeholder: views/account.blade.php carries billing placeholder; Stripe integration deferred to S1211+. | deferred |
+| S886 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Subscriber entitlement tests: tests/Feature/VaultTest + VaultDigestTest cover member entitlements — partial. | partial |
+| S892 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — CPM dashboard: AdSense Google-side; sponsor lead pipeline at /admin/grimba/advertiser-leads — partial. | partial |
+| S893 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Fill-rate dashboard: same — partial (AdSense Google-side). | partial |
+| S894 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Consent-rate dashboard: cookie-consent cookie observable; explicit dashboard deferred post-launch — partial. | deferred |
+| S895 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Subscriber conversion dashboard: deferred until paid tier. | deferred |
 
 | Sprint IDs | Program | Atomic sprint outcomes |
 |---|---|---|
