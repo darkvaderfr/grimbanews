@@ -1476,6 +1476,68 @@ class GrimbaLaunchReadinessTest extends TestCase
         );
     }
 
+    public function test_en_reader_surfaces_have_no_fr_string_in_head(): void
+    {
+        // Wave FFFFFFFFF (Vader 2026-05-22) — broad locale-bleed sweep.
+        //
+        // Bug class: FR-keyed strings used with __() but missing from
+        // lang/en.json fall back to the raw FR key when locale=en.
+        // For body copy this is annoying; for HEAD content (meta
+        // description, og:title, JSON-LD entity names, breadcrumb
+        // names) it actively poisons SERP rich results because Google
+        // ingests structured data verbatim.
+        //
+        // Bug round 1: missing translations for FAQ Q/A pairs and
+        // about-page descriptions (13 + 5 strings).
+        // Bug round 2: missing translations for "Classification du
+        // biais éditorial et détection des angles morts" (about/Thing
+        // in TechArticle JSON-LD on /methodologie) and "Comprendre le
+        // baromètre" (breadcrumb second item in JSON-LD on
+        // /comprendre-le-barometre).
+        $frPhrases = [
+            'Foire aux questions',
+            'Dernières nouvelles',
+            'Dernières dépêches',
+            'Voyez chaque angle',
+            'Comprendre le baromètre',
+            'Classification du biais éditorial',
+            'Questions fréquentes sur GrimbaNews',
+            'Comment lire le baromètre',
+            'GrimbaNews est une plateforme francophone',
+            'Une plateforme francophone qui rend visible',
+        ];
+        $paths = [
+            '/?lang=en',
+            '/breaking?lang=en',
+            '/latest?lang=en',
+            '/dossiers?lang=en',
+            '/a-propos?lang=en',
+            '/faq?lang=en',
+            '/methodologie?lang=en',
+            '/pour-vous?lang=en',
+            '/sources?lang=en',
+            '/advertise?lang=en',
+            '/local?lang=en',
+            '/comprendre-le-barometre?lang=en',
+        ];
+        foreach ($paths as $path) {
+            $resp = $this->get($path);
+            if ($resp->getStatusCode() !== 200) {
+                continue; // route not active in test env
+            }
+            $html = $resp->getContent();
+            preg_match('/<head[^>]*>(.*?)<\/head>/is', $html, $hm);
+            $head = $hm[1] ?? '';
+            foreach ($frPhrases as $fr) {
+                $this->assertStringNotContainsString(
+                    $fr,
+                    $head,
+                    "{$path} <head> must NOT contain the FR phrase '{$fr}' (catches missing EN translation in meta/og/twitter/JSON-LD).",
+                );
+            }
+        }
+    }
+
     public function test_static_editorial_pages_title_flips_per_locale(): void
     {
         // Wave EEEEEEEEE (Vader 2026-05-22) — caught by post-DDDDDDDDD
