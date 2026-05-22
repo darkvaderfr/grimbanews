@@ -701,7 +701,7 @@ Vader directive 2026-05-16 — third programmatic breaking-news provider next to
 | S-NDI-17 | (Optional) Same-day cross-provider title-similarity guard | 60m | deferred |
 | S-NDI-18 | Integration test (`Http::fake` fixture) | 75m | **closed (verified Wave WWWWWWWW 2026-05-22)** — `tests/Feature/GrimbaNewsdataIoFetcherTest.php` ships 9 tests / 29 assertions via `Http::fake()`: skipped-when-not-active, skipped-when-no-key, skipped-when-budget-reached, status-error-payload counts as failed, HTTP 500 counts as failed, empty results = successful zero, normalise extracts canonical fields, language normalisation (ISO2 + full names), credit counter bumps on success. |
 | S-NDI-19 | Credit-budget E2E test | 60m | **closed (verified Wave WWWWWWWW)** — covered by `test_skipped_when_daily_budget_reached` + `test_credit_counter_bumps_on_successful_call` in the same suite. Budget-exhausted → no-call. Successful call → counter increments. Both run via Http::fake. |
-| S-NDI-20 | Docs + resume-memory handoff | 45m | open |
+| S-NDI-20 | Docs + resume-memory handoff | 45m | **closed Wave YYYYYYYY 2026-05-22** — `docs/GRIMBANEWS_NEWSDATAIO_OPERATOR_HANDOFF.md` covers day-one setup, budgeting, scheduler integration, dedupe/prefix contract, troubleshooting table, lock-tested contracts, what's still open. |
 
 **Sprint 30 closeout 2026-05-16:** S-NDI-06 / 07 / 08 / 11 / 12 / 13 / 14 all shipped on commit `c8d7f95a`. Remaining ~12h. Next pickup = **S-NDI-09** (verify scheduler picks up `newsdata-io` arm on the shared `breaking_live` cron) once an upstream API key is provisioned.
 
