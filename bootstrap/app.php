@@ -41,9 +41,18 @@ return Application::configure(basePath: dirname(__DIR__))
             'grimba_vault',
         ]);
 
-        // Apply our locale-from-cookie switch on every web request.
+        // Wave OOOOOOOOO (Vader 2026-05-22) — removed redundant
+        // GrimbaLocale middleware. It ran for every web request but
+        // its locale flip was OVERWRITTEN by Botble's
+        // LocaleSessionRedirect (which Botble appends to the public
+        // route group via filter priority 958). The actual fix is
+        // GrimbaLocaleEnforce, attached via the same filter at
+        // priority 999 in AppServiceProvider — that runs AFTER
+        // Botble's locale reset and wins on every public read.
+        // Keeping GrimbaLocale in the web group was pure dead weight
+        // + a misleading source of "why does the locale not stick?"
+        // for future maintainers.
         $middleware->web(append: [
-            \App\Http\Middleware\GrimbaLocale::class,
             \App\Http\Middleware\GrimbaPublicCache::class,
             \App\Http\Middleware\GrimbaSecurityHeaders::class,
         ]);

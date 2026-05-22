@@ -8,7 +8,6 @@ use Botble\Blog\Models\Post;
 use Botble\Slug\Models\Slug;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,50 +28,83 @@ class AppServiceProvider extends ServiceProvider
 
         // Wave IIIIIIIII (Vader 2026-05-22) — kill Botble's
         // auto-emitted NewsArticle JSON-LD on single article pages.
+        // Wave PPPPPPPPP (Vader 2026-05-22) — Octane-safe rewrite.
         //
-        // The Blog plugin's HookServiceProvider (line 134) hooks
-        // BASE_ACTION_PUBLIC_RENDER_SINGLE to emit a NewsArticle
-        // schema with publisher.name = Theme::getSiteTitle(), which
-        // resolves to the FR-only "Grimba News — Voyez chaque angle
-        // de chaque histoire". For EN readers this poisoned Google's
-        // article rich-result publisher metadata.
+        // The Blog plugin's HookServiceProvider hooks
+        // BASE_ACTION_PUBLIC_RENDER_SINGLE → THEME_FRONT_HEADER at
+        // priority 35 to emit a NewsArticle schema with
+        // publisher.name = Theme::getSiteTitle() ("Grimba News —
+        // Voyez chaque angle..." — FR-only). post.blade.php already
+        // emits its own richer NewsArticle JSON-LD with the correct
+        // 'publisher' => ['name' => 'GrimbaNews']. So Botble's
+        // emission is pure duplicate + FR bleed.
         //
-        // post.blade.php already emits its OWN richer NewsArticle
-        // JSON-LD with the correct `'publisher' => ['name' => 'GrimbaNews']`
-        // (line 82-92), so Botble's auto-emission is pure duplicate +
-        // FR bleed. Forcing the setting to false in-memory (no DB
-        // save) kills the duplicate on every request.
-        if (function_exists('setting')) {
-            setting()->set('blog_post_schema_enabled', false);
+        // The previous fix (`setting()->set('blog_post_schema_enabled',
+        // false)`) mutated the SettingStore singleton. Under stock
+        // PHP-FPM that's safe (fresh container per request), but
+        // under Octane/Swoole/RoadRunner the override would persist
+        // across requests AND poison the admin BlogSettingForm
+        // toggle default — if an admin saved any other field on the
+        // settings page, `false` would land in DB permanently.
+        //
+        // Octane-safe fix: hook THEME_FRONT_HEADER at priority 100
+        // (after Botble's 35) and STRIP any auto-emitted NewsArticle
+        // JSON-LD `<script>` block that contains the Theme site
+        // title — the signature of Botble's emission. post.blade.php's
+        // own emission lives in the body, not in THEME_FRONT_HEADER,
+        // so it survives untouched.
+        if (function_exists('add_filter') && defined('THEME_FRONT_HEADER')) {
+            add_filter(THEME_FRONT_HEADER, function (?string $html): ?string {
+                if (! is_string($html) || $html === '') {
+                    return $html;
+                }
+                // Quick reject: no JSON-LD = nothing to strip.
+                if (stripos($html, 'application/ld+json') === false) {
+                    return $html;
+                }
+                // Botble's signature: <script type="application/ld+json">
+                // emits a NewsArticle with publisher.name = the Theme
+                // site title (the FR string). Strip any such block.
+                $siteTitle = function_exists('theme_option')
+                    ? (string) theme_option('site_title', '')
+                    : '';
+                if ($siteTitle === '') {
+                    return $html;
+                }
+                // Build a regex that matches a JSON-LD script tag
+                // containing both "NewsArticle" and the FR site title
+                // (json_encode wraps it in escaped quotes inside JSON).
+                $needle = preg_quote(json_encode($siteTitle, JSON_UNESCAPED_UNICODE), '/');
+                // Strip the leading quotes from the encoded literal so
+                // we match the inner string ("…value…") regardless of
+                // surrounding whitespace.
+                $needleInner = trim($needle, '\\"');
+                $pattern = '/<script\s+type=("|\')application\/ld\+json\1[^>]*>(?:(?!<\/script>)[\s\S])*?NewsArticle(?:(?!<\/script>)[\s\S])*?'
+                    . $needleInner
+                    . '(?:(?!<\/script>)[\s\S])*?<\/script>/i';
+                $stripped = preg_replace($pattern, '', $html);
+                return is_string($stripped) ? $stripped : $html;
+            }, 100);
         }
 
         // Wave DDDDDDDDD (Vader 2026-05-22) — locale-override fix.
+        // Wave OOOOOOOOO (Vader 2026-05-22) — consolidated from 4
+        // redundant hooks (web-group middleware, route alias,
+        // RouteMatched listener, View::composer) down to this single
+        // filter-attached middleware. Zen audit found the other 3
+        // were dead weight because this one already wins definitively.
         //
         // EN reader hits `/breaking?lang=en`. Route closure calls
         // `SeoHelper::setTitle(__('Breaking news') . ' — GrimbaNews')`.
-        // Without this fix, the page <title> rendered as the FR string
-        // "Dernières nouvelles — GrimbaNews" because Botble's
-        // LocaleSessionRedirect + LocalizationRedirectFilter middleware
-        // were pushed to the `web` group AFTER our GrimbaLocale and
-        // reset the app locale to config('app.locale') = 'fr' before
-        // the closure ran. __() then returned the FR translation and
-        // setTitle stored the FR string permanently.
+        // Without this fix, the page <title> rendered as FR because
+        // Botble's LocaleSessionRedirect (appended to the public route
+        // group at filter priority 958) called App::setLocale($session)
+        // BEFORE the route closure, resetting the locale to FR.
         //
-        // Fix: register GrimbaLocaleEnforce both as a route-level alias
-        // AND push it to the `web` middleware group from
-        // `$this->app->booted()`. booted() fires AFTER every service
-        // provider's boot(), so this push lands at the END of the
-        // `web` group — AFTER all Botble pushes — and wins the race.
-        $this->app->booted(function () {
-            $router = $this->app['router'];
-            $router->aliasMiddleware('grimba.locale.enforce', \App\Http\Middleware\GrimbaLocaleEnforce::class);
-        });
-
-        // Hook Botble's public-route filter at priority 999 — runs
-        // AFTER Botble's own LanguageServiceProvider hook at priority
-        // 958 which appends `localeSessionRedirect` +
-        // `localizationRedirect`. We append our middleware LAST so it
-        // gets the final word on the locale before the route closure.
+        // Fix: hook BASE_FILTER_GROUP_PUBLIC_ROUTE at priority 999 —
+        // runs AFTER Botble's 958 — and append `GrimbaLocaleEnforce`
+        // to the route-group middleware array. That lands it LAST in
+        // the middleware chain, right before the route closure runs.
         if (function_exists('add_filter') && defined('BASE_FILTER_GROUP_PUBLIC_ROUTE')) {
             add_filter(BASE_FILTER_GROUP_PUBLIC_ROUTE, function (array $data): array {
                 $data['middleware'] = array_merge(
@@ -83,26 +115,6 @@ class AppServiceProvider extends ServiceProvider
                 return $data;
             }, 999);
         }
-
-        $flipFromRequest = static function (): void {
-            $request = request();
-            if (! $request) return;
-            // Wave JJJJJJJJJ (Vader 2026-05-22) — case-insensitive lang.
-            $query = strtolower((string) $request->query('lang', ''));
-            if ($query === 'en' || $query === 'fr') {
-                app()->setLocale($query);
-                return;
-            }
-            $preferred = strtolower((string) $request->cookie('grimba_lang', ''));
-            if ($preferred === 'en' || $preferred === 'fr') {
-                app()->setLocale($preferred);
-            }
-        };
-        \Illuminate\Support\Facades\Event::listen(
-            \Illuminate\Routing\Events\RouteMatched::class,
-            fn () => $flipFromRequest(),
-        );
-        View::composer('*', fn () => $flipFromRequest());
 
         // S147 — region scope. Filters reader-facing Post queries by
         // the visitor's grimba_region cookie. Self-bypassed on admin
