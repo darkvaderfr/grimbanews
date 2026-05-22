@@ -22,7 +22,7 @@ This is the master pre-production risk register. Each row maps to a gate or spri
 | R-11 | NewsAPI quota exhaustion silently masked | Medium | Closed | S113 NewsAPI config guard `docs/GRIMBANEWS_NEWSAPI_CONFIG_GUARD_2026_05_11.md` | S113 |
 | R-12 | Title-only dedupe destroys legitimate articles | Medium | Mitigated | S203/S209/S210 review-only mode + per-source policy; full --include-title-groups apply remains operator-gated | S203, S209, S210 |
 | R-13 | Disk-full cascade silently breaks scheduler + breaks backups + breaks ingest | Medium | Mitigated | S973 + `grimba:health --fail-on-risk` 2048 MB floor + cockpit warning | S973 |
-| R-14 | Ad CLS pushes Lighthouse below acceptable score | Medium | Open | CLS reserved space planned in S874; not yet implemented | S874 |
+| R-14 | Ad CLS pushes Lighthouse below acceptable score | Medium | Closed | Wave ZZZZZZZZ 2026-05-22 — `content-visibility: auto` + `contain-intrinsic-size` per ad-slot variant + per-variant `min-height` (92/112/180/270 px). Sidebar bumped 250→270 to fit 300×250 + padding without Safari clipping. Lock-tested via `test_ad_slots_reserve_cls_safe_box_via_min_height_and_intrinsic_size` (6 assertions). | Wave ZZZZZZZZ |
 | R-15 | Subscriber entitlement misroute (paying user sees ads) | Medium | Open | Wired but lacks end-to-end test coverage | S884-S889 |
 | R-16 | Schema.org JSON-LD malformed silently dropped by Google | Medium | Closed | Wave XXXXXXX + YYYYYYY parse-validity + `</script>` lock; 99→149 assertions | Wave XXXXXXX/YYYYYYY |
 | R-17 | 404 surface emitting `<meta name="robots" content="index, follow">` + canonical-to-broken-URL — confuses crawler | Medium | Closed | Wave WWWWWWW Theme::set('grimba_is_404') gating; lock test verifies wiring | Wave WWWWWWW |
@@ -32,9 +32,9 @@ This is the master pre-production risk register. Each row maps to a gate or spri
 
 ## Risk burndown summary
 
-- **CRITICAL:** 0 open. 2 closed in this session (R-05, R-06).
-- **High:** 4 open. 3 closed (R-07, R-08, plus pre-existing).
-- **Medium:** 4 open. 8 closed.
+- **CRITICAL:** 0 open. 2 closed (R-05, R-06).
+- **High:** 4 open (R-01, R-03, R-04, plus one). 3 closed (R-07, R-08, plus pre-existing).
+- **Medium:** 3 open. 9 closed (added R-14 closure via Wave ZZZZZZZZ 2026-05-22).
 - **Low:** 0 open. 2 closed.
 
 ## Top-3 launch blockers (per Mnemo/Zen audits)
