@@ -1395,14 +1395,14 @@
                                     const composer = document.createElement('div');
                                     composer.className = 'gn-comments-composer';
                                     composer.innerHTML = [
-                                        '<div class="gn-comments-composer__toolbar" role="toolbar" aria-label="Mise en forme du commentaire">',
-                                        '<button type="button" data-gn-format="bold" aria-label="Gras"><strong>B</strong></button>',
-                                        '<button type="button" data-gn-format="italic" aria-label="Italique"><em>I</em></button>',
-                                        '<button type="button" data-gn-format="quote" aria-label="Citation">"</button>',
-                                        '<button type="button" data-gn-format="bullet" aria-label="Liste">•</button>',
+                                        '<div class="gn-comments-composer__toolbar" role="toolbar" aria-label="{{ __('Mise en forme du commentaire') }}">',
+                                        '<button type="button" data-gn-format="bold" aria-label="{{ __('Gras') }}"><strong>B</strong></button>',
+                                        '<button type="button" data-gn-format="italic" aria-label="{{ __('Italique') }}"><em>I</em></button>',
+                                        '<button type="button" data-gn-format="quote" aria-label="{{ __('Citation') }}">"</button>',
+                                        '<button type="button" data-gn-format="bullet" aria-label="{{ __('Liste') }}">•</button>',
                                         '</div>',
-                                        '<div class="gn-comments-composer__editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Ajoutez une lecture nuancée, une source ou une question..."></div>',
-                                        '<div class="gn-comments-composer__meta"><span>Texte léger, liens inclus si utiles.</span><span data-gn-count>0/1000</span></div>',
+                                        '<div class="gn-comments-composer__editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="{{ __('Ajoutez une lecture nuancée, une source ou une question...') }}"></div>',
+                                        '<div class="gn-comments-composer__meta"><span>{{ __('Texte léger, liens inclus si utiles.') }}</span><span data-gn-count>0/1000</span></div>',
                                     ].join('');
 
                                     textarea.insertAdjacentElement('beforebegin', composer);
