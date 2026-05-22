@@ -73,7 +73,7 @@
         @endif
 
         @if($post->is_blindspot)
-            <span class="blindspot-badge">Angle mort</span>
+            <span class="blindspot-badge">{{ __('Angle mort') }}</span>
         @endif
 
         @if($source?->ownership_type)

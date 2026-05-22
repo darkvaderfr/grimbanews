@@ -32,13 +32,18 @@
         return;
     }
 
-    $title  = (string) setting('grimba_cookie_title',  'Cookies');
+    // Wave BBBBBBBBBB (Vader 2026-05-22) — defaults now run through
+    // __() so EN readers see EN copy when the admin hasn't customized
+    // the setting (setting() returns the FR default only when no row
+    // exists; that fallback is what we wrap). Admin override still
+    // wins as-is.
+    $title  = (string) setting('grimba_cookie_title',  __('Cookies'));
     $body   = (string) setting('grimba_cookie_body',
-        "GrimbaNews utilise des cookies essentiels pour le fonctionnement du site (préférences linguistiques, mode de lecture, historique de lecture local) et, avec votre accord, des cookies de mesure d'audience anonymisée. Vous pouvez changer d'avis à tout moment depuis la page de confidentialité."
+        __("GrimbaNews utilise des cookies essentiels pour le fonctionnement du site (préférences linguistiques, mode de lecture, historique de lecture local) et, avec votre accord, des cookies de mesure d'audience anonymisée. Vous pouvez changer d'avis à tout moment depuis la page de confidentialité.")
     );
-    $accept = (string) setting('grimba_cookie_accept_label', 'Accepter');
-    $reject = (string) setting('grimba_cookie_reject_label', 'Refuser les non-essentiels');
-    $more   = (string) setting('grimba_cookie_more_label',   'En savoir plus');
+    $accept = (string) setting('grimba_cookie_accept_label', __('Accepter'));
+    $reject = (string) setting('grimba_cookie_reject_label', __('Refuser les non-essentiels'));
+    $more   = (string) setting('grimba_cookie_more_label',   __('En savoir plus'));
     $moreUrl = (string) setting('grimba_cookie_more_url', '/confidentialite');
 @endphp
 
