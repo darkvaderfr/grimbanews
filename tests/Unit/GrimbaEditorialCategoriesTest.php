@@ -85,4 +85,42 @@ class GrimbaEditorialCategoriesTest extends TestCase
         $t = GrimbaEditorialCategories::primaryTopicFor($post);
         $this->assertSame('Sports', $t->name);
     }
+
+    public function test_chip_min_articles_default_is_ungated_for_safety(): void
+    {
+        // BACKFILL-CAT-2 (Vader 2026-05-16) — code-shipped chip gate.
+        // Default is 0 (ungated) so the gate doesn't accidentally
+        // hide everything on a fresh install. Operator flips to 500
+        // pre-launch once `grimba:backfill-category` has populated
+        // all chosen categories. Defaulting to gated could surprise
+        // a new operator with an empty homepage rail.
+        $this->assertSame(0, GrimbaEditorialCategories::chipMinArticles());
+    }
+
+    public function test_chip_min_articles_reads_setting_when_present(): void
+    {
+        // Wave VVVVVVVV (BACKFILL-CAT-2 close) — when operator flips
+        // `grimba_chip_min_articles` to 500, chipMinArticles() must
+        // return 500 so homepageChips() filters thin categories out.
+        if (! function_exists('setting')) {
+            $this->markTestSkipped('Botble setting() helper not available.');
+        }
+        $prev = setting('grimba_chip_min_articles', 0);
+        try {
+            setting()->set(['grimba_chip_min_articles' => '500'])->save();
+            $this->assertSame(500, GrimbaEditorialCategories::chipMinArticles());
+
+            setting()->set(['grimba_chip_min_articles' => '100'])->save();
+            $this->assertSame(100, GrimbaEditorialCategories::chipMinArticles());
+
+            // Negative or non-numeric coerces to 0 (safe-fallback).
+            setting()->set(['grimba_chip_min_articles' => '-50'])->save();
+            $this->assertSame(0, GrimbaEditorialCategories::chipMinArticles());
+
+            setting()->set(['grimba_chip_min_articles' => 'oops'])->save();
+            $this->assertSame(0, GrimbaEditorialCategories::chipMinArticles());
+        } finally {
+            setting()->set(['grimba_chip_min_articles' => (string) $prev])->save();
+        }
+    }
 }
