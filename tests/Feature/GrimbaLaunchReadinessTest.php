@@ -1433,6 +1433,49 @@ class GrimbaLaunchReadinessTest extends TestCase
         );
     }
 
+    public function test_breaking_route_title_flips_per_locale_after_botble_locale_middleware(): void
+    {
+        // Wave DDDDDDDDD (Vader 2026-05-22) — locale-enforce middleware.
+        //
+        // Bug: EN reader hits `/breaking?lang=en`. The route closure
+        // calls `SeoHelper::setTitle(__('Breaking news') . ' — ...')`.
+        // Without the locale-enforce middleware, Botble's
+        // LocaleMiddleware (in the `core` group, registered AFTER our
+        // GrimbaLocale middleware) resets the locale to FR before the
+        // route closure runs → __() returns FR string → page <title>
+        // is "Dernières infos — GrimbaNews" on an EN URL.
+        //
+        // Fix: `grimba.locale.enforce` middleware on the public route
+        // group, registered via $this->app->booted() in
+        // AppServiceProvider so it lands AFTER Botble's `core` group.
+        $en = $this->get('/breaking?lang=en')->getContent();
+        $fr = $this->get('/breaking?lang=fr')->getContent();
+
+        // EN <title> must contain the EN word "Breaking" (not the FR
+        // "Dernières infos"). Cross-pollination guard ensures the
+        // bug class doesn't regress.
+        $this->assertMatchesRegularExpression(
+            '/<title>[^<]*Breaking news[^<]*<\/title>/i',
+            $en,
+            '/breaking?lang=en <title> must be EN (catches Botble LocaleMiddleware reset bug).',
+        );
+        $this->assertMatchesRegularExpression(
+            '/<title>[^<]*Dernières nouvelles[^<]*<\/title>/i',
+            $fr,
+            '/breaking?lang=fr <title> must be FR.',
+        );
+        $this->assertStringNotContainsString(
+            'Dernières nouvelles',
+            preg_match('/<title>([^<]+)<\/title>/i', $en, $m) ? $m[1] : '',
+            'EN <title> must not contain the FR string.',
+        );
+        $this->assertStringNotContainsString(
+            'Breaking news',
+            preg_match('/<title>([^<]+)<\/title>/i', $fr, $m) ? $m[1] : '',
+            'FR <title> must not contain the EN string.',
+        );
+    }
+
     public function test_ad_slots_reserve_cls_safe_box_via_min_height_and_intrinsic_size(): void
     {
         // Wave ZZZZZZZZ (R-14 close, Vader 2026-05-22) — Lighthouse

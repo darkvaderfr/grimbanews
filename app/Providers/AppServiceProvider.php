@@ -27,18 +27,62 @@ class AppServiceProvider extends ServiceProvider
         $this->canonicalizeArticleUrls();
         $this->preservePaginationInCanonical();
 
-        // Flip the app locale from the grimba_lang cookie right before
-        // any view renders. This wins over Botble's Language plugin
-        // because view composers run after every middleware.
-        View::composer('*', function () {
+        // Wave DDDDDDDDD (Vader 2026-05-22) — locale-override fix.
+        //
+        // EN reader hits `/breaking?lang=en`. Route closure calls
+        // `SeoHelper::setTitle(__('Breaking news') . ' — GrimbaNews')`.
+        // Without this fix, the page <title> rendered as the FR string
+        // "Dernières nouvelles — GrimbaNews" because Botble's
+        // LocaleSessionRedirect + LocalizationRedirectFilter middleware
+        // were pushed to the `web` group AFTER our GrimbaLocale and
+        // reset the app locale to config('app.locale') = 'fr' before
+        // the closure ran. __() then returned the FR translation and
+        // setTitle stored the FR string permanently.
+        //
+        // Fix: register GrimbaLocaleEnforce both as a route-level alias
+        // AND push it to the `web` middleware group from
+        // `$this->app->booted()`. booted() fires AFTER every service
+        // provider's boot(), so this push lands at the END of the
+        // `web` group — AFTER all Botble pushes — and wins the race.
+        $this->app->booted(function () {
+            $router = $this->app['router'];
+            $router->aliasMiddleware('grimba.locale.enforce', \App\Http\Middleware\GrimbaLocaleEnforce::class);
+        });
+
+        // Hook Botble's public-route filter at priority 999 — runs
+        // AFTER Botble's own LanguageServiceProvider hook at priority
+        // 958 which appends `localeSessionRedirect` +
+        // `localizationRedirect`. We append our middleware LAST so it
+        // gets the final word on the locale before the route closure.
+        if (function_exists('add_filter') && defined('BASE_FILTER_GROUP_PUBLIC_ROUTE')) {
+            add_filter(BASE_FILTER_GROUP_PUBLIC_ROUTE, function (array $data): array {
+                $data['middleware'] = array_merge(
+                    \Illuminate\Support\Arr::get($data, 'middleware', []),
+                    [\App\Http\Middleware\GrimbaLocaleEnforce::class],
+                );
+                $data['middleware'] = array_unique($data['middleware']);
+                return $data;
+            }, 999);
+        }
+
+        $flipFromRequest = static function (): void {
             $request = request();
             if (! $request) return;
-
+            $query = (string) $request->query('lang', '');
+            if ($query === 'en' || $query === 'fr') {
+                app()->setLocale($query);
+                return;
+            }
             $preferred = (string) $request->cookie('grimba_lang', '');
             if ($preferred === 'en' || $preferred === 'fr') {
                 app()->setLocale($preferred);
             }
-        });
+        };
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Routing\Events\RouteMatched::class,
+            fn () => $flipFromRequest(),
+        );
+        View::composer('*', fn () => $flipFromRequest());
 
         // S147 — region scope. Filters reader-facing Post queries by
         // the visitor's grimba_region cookie. Self-bypassed on admin
