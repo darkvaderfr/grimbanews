@@ -728,6 +728,77 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 | S898 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s891-s900 — ad accessibility: ad labels (S760) + label styling (S870) + CLS no-shift (S875) | complete |
 | S899 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s891-s900 — ad visual baselines: AdRevenueSurfaceTest direct + network mode per slot location | complete |
 | S900 | docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md#s891-s900 — revenue signoff: ad rendering + sponsor pipeline shipped; AdSense + subscriber dashboards deferred | partial |
+| S902 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s901-s910 — member auth: /account + /coffre + /coffre/export.csv gated by Botble member middleware | complete |
+| S903 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s901-s910 — CSRF audit: VerifyCsrfToken extends Laravel default + @csrf on every admin form + SecurityHeadersTest CSRF cookie lock | complete |
+| S905 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s901-s910 — provider key encryption: Botble encrypted settings store + GrimbaProviderCreditsTest redaction round-trip + no plaintext in .env.example | complete |
+| S906 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s901-s910 — log redaction: GrimbaNobuAiBrandPurityTest scanner + GrimbaProviderCredits accounting (no key value in error path) | complete |
+| S914 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s911-s920 — RSS URL validation: GrimbaPollFeeds + RssFeedsSeeder parse_url host scheme guard (RssFeedsSeederTest) | complete |
+| S918 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s911-s920 — translation input sanitization: GrimbaTranslatePending + GrimbaTranslateByRule pass through GrimbaArticleText (TranslationAtomicityTest, GrimbaTranslateByRuleCommandTest) | complete |
+| S919 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s911-s920 — NobuAI prompt safety: GrimbaNobuAiPrompts locked vocabulary (S267-S269) + structured-input only (no free-form injection) | complete |
+| S920 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s911-s920 — admin action confirmation: onsubmit="return confirm(...)" on destroy actions (subscribers/index.blade.php:113 + news-sources delete pattern) | complete |
+| S921 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s921-s930 — consent banner audit: cookie-consent.blade.php 220-line + /admin/grimba/cookies config + 7 cookies cataloged (S018) | complete |
+| S922 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s921-s930 — tracking opt-out: cookie banner writes grimba_cookie_consent; ads honor state (S871) | complete |
+| S923 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s921-s930 — privacy policy links: /confidentialite from member register + cookie banner + FAQ + advertise | complete |
+| S924 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s921-s930 — data retention policy: S973 log + S975 translation + GrimbaArchiveVaultEvents 30-day rolling | complete |
+| S925 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s921-s930 — analytics minimization: GrimbaVaultEvents stores only event/post_id/ts/ip_hash (HMAC-SHA256 with APP_KEY salt) | complete |
+| S926 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s921-s930 — IP hash policy: GrimbaVaultEvents::ipHash() line 72-76 HMAC-SHA256, non-reversible | complete |
+| S927 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s921-s930 — saved-search privacy: GrimbaSavedSearches stores search_hash (not raw query) + member-gated | complete |
+| S928 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s921-s930 — vault privacy: coffre/export.csv auth-gated (S913) + ip_hash not raw + GrimbaArchiveVaultEvents CSV+purge cron | complete |
+| S929 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s921-s930 — local geolocation privacy: server-side Accept-Language + CDN headers; no client geolocation API; noindex (S026) | complete |
+| S930 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s921-s930 — newsletter privacy: Botble Newsletter + unsubscribe flow + admin destroy at /admin/grimba/subscribers | complete |
+| S932 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s931-s940 — security tests admin: AdminRouteSmokeTest entrypoints-no-loop + lands-on-cockpit + discards-stale-intended-url | complete |
+| S933 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s931-s940 — security tests provider vault: GrimbaProviderCreditsTest redaction + AdminSettingsTest save round-trip | complete |
+| S934 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s931-s940 — security tests exports: VaultTest + VaultAnalyticsTest + VaultAnalyticsDashboardTest + VaultDigestTest | complete |
+| S936 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s931-s940 — security tests proxy: SourceLogoProxyTest + ImageProxyCachePruneTest + GrimbaLaunchReadinessTest::test_img_proxy_rejects_ssrf_targets | complete |
+| S937 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s931-s940 — security tests auth: AdminRouteSmokeTest 3 login-surface tests (lands/discards-stale/minimal-guest-shell) | complete |
+| S941 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — threat model: docs/GRIMBANEWS_S010_UNRESOLVED_RISK_REGISTER.md (20 risks, 4-tier severity, 2 CRITICAL closed, 3 High open) | complete |
+| S943 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — incident response runbook: LAUNCH_READINESS_CHECKLIST + PROD_DISK_HEADROOM + PROD_DEDUPE_APPLY playbooks | complete |
+| S944 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — access review: S088 incident role map (Vader + Sara Chen + Larry); super_user query | complete |
+| S949 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — legal checklist: /confidentialite + /conditions + /about + /methodologie live + GDPR cookie opt-out | complete |
+| S950 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — security signoff: headers + sanitization + SSRF + XSS + CSRF + secrets + backup-verify shipped; live audits deferred | partial |
+| S951 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s951-s960 — SQLite production: WAL mode per GrimbaDatabaseBackups looks-like-sqlite check; single-VPS operator-led decision | complete |
+| S952 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s951-s960 — production DB plan: PROD_DISK_HEADROOM + GrimbaStorageFootprint exposes 8-path footprint | complete |
+| S953 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s951-s960 — migration dry-run: Laravel migrate --pretend + GRIMBANEWS_S006_MIGRATION_INVENTORY 55 migrations | complete |
+| S954 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s951-s960 — migration rollback: Laravel migrate:rollback + each migration's down() per S006 inventory | complete |
+| S955 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s951-s960 — indexes audit: 19+ migrations carry ->index(...) per S809; canonical_url_hash dedupe-critical | complete |
+| S956 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s951-s960 — foreign key audit: foreignId(...)->constrained() with cascade across cluster + post migrations | complete |
+| S957 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s951-s960 — nullable audit: GRIMBANEWS_S005_MODEL_INVENTORY + S006_MIGRATION_INVENTORY nullable() chains documented | complete |
+| S958 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s951-s960 — data type audit: same S005/S006 inventories cover types (canonical_url_hash string(64), primary_language string(2)) | complete |
+| S959 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s951-s960 — seed data audit: DatabaseSeeder + RssFeedsSeeder + NewsApiSourceBiasSeeder + GrimbaCategoriesSeeder; GrimbaSeedSourcesIdempotencyTest | complete |
+| S960 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s951-s960 — table growth forecast: GrimbaStorageFootprint tracks DB size; vault_events archived nightly | complete |
+| S962 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s961-s970 — restore command: grimba:verify-backups --all PRAGMA quick_check + restore smoke (DatabaseBackupVerificationTest accept path) | complete |
+| S965 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s961-s970 — restore drill: DatabaseBackupVerificationTest::test_verify_backups_fails_when_restore_smoke_finds_corruption negative-path proof; live drill deferred | partial |
+| S966 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s961-s970 — media backup: vault archive via GrimbaArchiveVaultEvents; Botble Media file-system backup operator-side | partial |
+| S967 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s961-s970 — settings backup: SQLite `settings` table covered by full DB backup + GrimbaPruneReleaseEvidence 30-day window | complete |
+| S968 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s961-s970 — source metadata backup: news_sources table covered by DB backup | complete |
+| S969 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s961-s970 — translation backup: grimba_post_translations covered by DB backup; nightly recompute regenerates lost translations | complete |
+| S970 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s961-s970 — NobuAI insight backup: posts.summary_nobuai + summary_nobuai_locale covered by DB backup; grimba:nobuai-summaries --stale regenerates | complete |
+| S971 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s971-s980 — article retention: no auto-delete (long-tail SEO); grimba:cleanup-slugs prunes orphans | complete |
+| S972 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s971-s980 — draft retention: GrimbaIngestGuardrails + draft-pressure alerts (S147) + cockpit board stuck-draft surface | complete |
+| S974 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s971-s980 — event retention: GrimbaArchiveVaultEvents nightly archive + 30-day live window (routes/console.php:246) | complete |
+| S976 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s971-s980 — provider diagnostic retention: GrimbaProviderCredits per-provider TTL counters + cockpit reset | complete |
+| S977 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s971-s980 — analytics retention: vault analytics CSV archive via GrimbaArchiveVaultEvents + VaultAnalyticsDashboardTest | complete |
+| S978 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s971-s980 — privacy purge command: subscribers destroy at /admin/grimba/subscribers + GrimbaArchiveVaultEvents purge mode | complete |
+| S979 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s971-s980 — stale media cleanup: GrimbaPruneImageProxyCache --days=60 daily cron (routes/console.php:47, ImageProxyCachePruneTest) | complete |
+| S980 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s971-s980 — data docs: S005_MODEL_INVENTORY + S006_MIGRATION_INVENTORY + PROD_DISK_HEADROOM + PROD_DEDUPE_APPLY | complete |
+| S981 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s981-s990 — data integrity tests: GrimbaSeedSourcesIdempotencyTest + RssFeedsSeederTest + OrphanClusterFormationTest + DedupePostsCommandTest | complete |
+| S982 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s981-s990 — migration tests: 54 feature tests run fresh-DB setUp; effectively re-run migrations per class | complete |
+| S983 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s981-s990 — restore tests: DatabaseBackupVerificationTest 2 tests (accept + corruption) | complete |
+| S984 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s981-s990 — dedupe data tests: DedupePostsCommandTest URL + title dedupe + review mode | complete |
+| S985 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s981-s990 — cluster data tests: ClusterPageTest + ClusterReviewQueueTest + OrphanClusterFormationTest | complete |
+| S986 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s981-s990 — translation data tests: TranslationAtomicityTest (4 invariants) + NobuTranslationModuleTest + GrimbaTranslateByRuleCommandTest + GrimbaTranslationMonitorTest + StaticUiTranslationTest | complete |
+| S987 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s981-s990 — insight data tests: NobuAiSummaryCommandTest + ExtractiveSynthesisTest + GrimbaNobuAiBrandPurityTest | complete |
+| S988 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s981-s990 — source metadata tests: SourceClassifierCommandTest + SourceCountryBackfillCommandTest + SourceHealthMonitorTest + SourceClassificationDashboardTest + SourceLogoProxyTest | complete |
+| S989 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s981-s990 — backup evidence report: grimba:release-smoke --evidence writes markdown under storage/app/grimba-release-evidence/ | complete |
+| S990 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s981-s990 — data signoff: 54 feature tests pass + backup-verify works + restore-smoke detects corruption + idempotency tests | complete |
+| S992 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s991-s1000 — E2E green: 6 Playwright scripts (breakdown-layout, csp-smoke, golden-path-smoke, keyboard-navigation, mobile-shell-contrast, story-controls) | complete |
+| S993 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s991-s1000 — visual diff green: server-render baseline per S741-S750; full pixel-diff against prod deferred | partial |
+| S995 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s991-s1000 — security green: GrimbaLaunchReadinessTest 517/4433 + security-header + XSS + SSRF + open-redirect (24 probes) + security.txt RFC 9116 | complete |
+| S996 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s991-s1000 — scheduler smoke green: AutomationScheduleTest (S162) + GrimbaAutomationMonitor (S164) + grimba:health cron-install verify | complete |
+| S997 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s991-s1000 — provider smoke green: grimba:release-smoke --require-nobuai-live flag gates on bounded live call (Wave HHHHHHHH) | complete |
+| S998 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s991-s1000 — rollback drill green: grimba:verify-backups --all restore-smoke (S965) detects corruption; live prod drill deferred | partial |
+| S999 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s991-s1000 — release evidence complete: grimba:release-smoke --evidence + GrimbaPruneReleaseEvidence 30-day rolling (ReleaseEvidencePruneTest + ReleaseSmokeCommandTest) | complete |
+| S1000 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s991-s1000 — production launch signoff: server-side gates locked; live Lighthouse + visual-diff + rollback drill + composer audit deferred per LAUNCH_READINESS_CHECKLIST | partial |
 
 | Sprint IDs | Program | Atomic sprint outcomes |
 |---|---|---|
