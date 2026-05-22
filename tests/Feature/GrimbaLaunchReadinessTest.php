@@ -1362,6 +1362,44 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_home_meta_description_flips_per_locale(): void
+    {
+        // Wave BBBBBBBBB (Vader 2026-05-22) — meta description bug:
+        // EN readers (and Google's EN crawler) were getting the FR
+        // description on the homepage because Botble's default
+        // theme-echo-seo_description setting is FR-only. That hurts
+        // EN SERP click-through.
+        //
+        // Fix: grimba-home.blade.php now calls SeoHelper::setDescription
+        // with an __()-wrapped key BEFORE Theme::header() runs, so the
+        // locale-aware string wins over the Botble setting.
+        $en = $this->get('/?lang=en')->getContent();
+        $fr = $this->get('/?lang=fr')->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<meta\s+name="description"\s+content="[^"]*classifies editorial bias/i',
+            $en,
+            'EN homepage must serve the EN description (catches the FR-locale-bleed bug).',
+        );
+        $this->assertMatchesRegularExpression(
+            '/<meta\s+name="description"\s+content="[^"]*classe les biais/i',
+            $fr,
+            'FR homepage must keep the FR description.',
+        );
+        // Cross-pollination guard: EN body must not contain the FR
+        // string and vice versa.
+        $this->assertStringNotContainsString(
+            'classe les biais éditoriaux',
+            preg_match('/<meta\s+name="description"\s+content="([^"]+)"/i', $en, $m) ? $m[1] : '',
+            'EN meta description must not contain the FR string.',
+        );
+        $this->assertStringNotContainsString(
+            'classifies editorial bias',
+            preg_match('/<meta\s+name="description"\s+content="([^"]+)"/i', $fr, $m) ? $m[1] : '',
+            'FR meta description must not contain the EN string.',
+        );
+    }
+
     public function test_ad_slots_reserve_cls_safe_box_via_min_height_and_intrinsic_size(): void
     {
         // Wave ZZZZZZZZ (R-14 close, Vader 2026-05-22) — Lighthouse

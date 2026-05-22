@@ -113,6 +113,18 @@
     {{-- Wave KKKKKK — SEO meta setup extracted to shared partial.
          is_home=true tells the partial to override og:type to 'website'
          (Botble's blog plugin would otherwise default home to 'article'). --}}
+    @php
+        // Wave BBBBBBBBB (Vader 2026-05-22) — locale-aware meta
+        // description override. Botble's default theme-echo-seo_description
+        // setting is FR-only, so EN readers (Google EN crawler too)
+        // were seeing the FR description on the homepage. That hurts
+        // EN SERP click-through. Route through __() so Laravel's
+        // translation system flips it to the EN locale string when
+        // ?lang=en or grimba_lang=en.
+        \Botble\SeoHelper\Facades\SeoHelper::setDescription(__(
+            'GrimbaNews classifies editorial bias, surfaces blindspots, and compares sources side by side — French-canonical, English-ready.'
+        ));
+    @endphp
     @include(Theme::getThemeNamespace('partials.seo-meta-config'), ['is_home' => true])
     {!! Theme::header() !!}
     @include(Theme::getThemeNamespace('partials.seo-meta-twitter-image'))
