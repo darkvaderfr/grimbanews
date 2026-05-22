@@ -11,12 +11,15 @@
     <div class="container">
 
         <header class="grimba-methodology__hero glass-panel grimba-editorial-ribbon p-4 p-md-5 mb-5">
-            <span class="grimba-methodology__kicker">Méthodologie</span>
-            <h1 class="grimba-methodology__title">Comment GrimbaNews classe l'information</h1>
+            {{-- Wave LLLLLLLLL (Vader 2026-05-22) — hero strings were
+                hardcoded FR; EN readers landing on /methodologie?lang=en
+                saw FR despite the locale-enforce middleware delivering
+                the correct locale. Now wrapped in __() with EN
+                translations in lang/en.json. --}}
+            <span class="grimba-methodology__kicker">{{ __('Méthodologie') }}</span>
+            <h1 class="grimba-methodology__title">{{ __("Comment GrimbaNews classe l'information") }}</h1>
             <p class="grimba-methodology__lede">
-                Nous évaluons le biais éditorial des sources, repérons les angles morts,
-                notons la crédibilité et gouvernons la liste des médias suivis.
-                La méthode reste ouverte, révisable et contestable.
+                {{ __("Nous évaluons le biais éditorial des sources, repérons les angles morts, notons la crédibilité et gouvernons la liste des médias suivis. La méthode reste ouverte, révisable et contestable.") }}
             </p>
             <div class="d-flex gap-2 flex-wrap mt-3">
                 <a href="{{ url('/sources') }}" class="btn-grimba btn-grimba--solid btn-grimba--sm">Voir les sources classées</a>

@@ -481,5 +481,10 @@
     "Questions fréquentes sur GrimbaNews : méthodologie, biais, NobuAI, vie privée et abonnement.": "Frequently asked questions about GrimbaNews: methodology, bias, NobuAI, privacy, and subscription.",
     "Comment lire le baromètre de couverture (gauche/centre/droite), pourquoi nous gardons la convention francophone et comment nous traitons les cas limites.": "How to read the coverage barometer (left/center/right), why we keep the Francophone convention, and how we handle edge cases.",
     "Comprendre le baromètre": "Understanding the barometer",
-    "Classification du biais éditorial et détection des angles morts": "Editorial bias classification and blindspot detection"
+    "Classification du biais éditorial et détection des angles morts": "Editorial bias classification and blindspot detection",
+    ":count résultat|:count résultats": ":count result|:count results",
+    "Aucun résultat": "No results",
+    "Comment GrimbaNews classe l'information": "How GrimbaNews classifies the news",
+    "Le baromètre de couverture, segment par segment": "The coverage barometer, segment by segment",
+    "Nous évaluons le biais éditorial des sources, repérons les angles morts, notons la crédibilité et gouvernons la liste des médias suivis. La méthode reste ouverte, révisable et contestable.": "We rate source editorial bias, surface blindspots, score credibility, and govern the list of tracked outlets. The method is open, revisable, and challengeable."
 }
