@@ -1476,6 +1476,55 @@ class GrimbaLaunchReadinessTest extends TestCase
         );
     }
 
+    public function test_article_emits_single_newsarticle_jsonld_with_correct_publisher(): void
+    {
+        // Wave IIIIIIIII (Vader 2026-05-22) — kill Botble's
+        // auto-emitted NewsArticle JSON-LD duplicate. Bug: article
+        // pages shipped TWO NewsArticle JSON-LD blocks — Botble's
+        // own emission (publisher.name = FR site title) and our
+        // post.blade.php emission (publisher.name = "GrimbaNews").
+        // Google's article rich result indexer ingests structured
+        // data verbatim and conflicting blocks confuse it; also the
+        // FR-leaking publisher poisoned EN SERP.
+        //
+        // Fix: in-memory `setting()->set('blog_post_schema_enabled', false)`
+        // in AppServiceProvider::boot() — kills Botble's emission
+        // without persisting to DB or touching plugin code.
+        $post = \Botble\Blog\Models\Post::where('status', 'published')->latest()->first();
+        $this->assertNotNull($post, 'Need at least one published post for this test.');
+        $slug = $post->slugable->key ?? null;
+        $this->assertNotNull($slug, 'Latest published post must have a slug.');
+
+        foreach (['/article/' . $slug . '?lang=en', '/article/' . $slug . '?lang=fr'] as $url) {
+            $html = $this->get($url)->getContent();
+            preg_match_all('/<script type="application\/ld\+json">(.*?)<\/script>/s', $html, $m);
+            $newsArticleCount = 0;
+            $publishers = [];
+            foreach ($m[1] as $json) {
+                $data = json_decode($json, true);
+                if (! is_array($data)) continue;
+                $type = $data['@type'] ?? '';
+                if (in_array($type, ['NewsArticle', 'News', 'Article', 'BlogPosting'], true)) {
+                    $newsArticleCount++;
+                    if (isset($data['publisher']['name'])) {
+                        $publishers[] = $data['publisher']['name'];
+                    }
+                }
+            }
+            $this->assertSame(
+                1,
+                $newsArticleCount,
+                "{$url} must emit exactly 1 NewsArticle JSON-LD (catches Botble duplicate-emission regression). Got {$newsArticleCount}.",
+            );
+            $this->assertNotEmpty($publishers, "{$url} NewsArticle must declare a publisher.");
+            $this->assertSame(
+                'GrimbaNews',
+                $publishers[0],
+                "{$url} NewsArticle publisher.name must be 'GrimbaNews' (catches Botble FR site-title leak).",
+            );
+        }
+    }
+
     public function test_en_reader_surfaces_have_no_fr_string_in_head(): void
     {
         // Wave FFFFFFFFF (Vader 2026-05-22) — broad locale-bleed sweep.

@@ -27,6 +27,25 @@ class AppServiceProvider extends ServiceProvider
         $this->canonicalizeArticleUrls();
         $this->preservePaginationInCanonical();
 
+        // Wave IIIIIIIII (Vader 2026-05-22) — kill Botble's
+        // auto-emitted NewsArticle JSON-LD on single article pages.
+        //
+        // The Blog plugin's HookServiceProvider (line 134) hooks
+        // BASE_ACTION_PUBLIC_RENDER_SINGLE to emit a NewsArticle
+        // schema with publisher.name = Theme::getSiteTitle(), which
+        // resolves to the FR-only "Grimba News — Voyez chaque angle
+        // de chaque histoire". For EN readers this poisoned Google's
+        // article rich-result publisher metadata.
+        //
+        // post.blade.php already emits its OWN richer NewsArticle
+        // JSON-LD with the correct `'publisher' => ['name' => 'GrimbaNews']`
+        // (line 82-92), so Botble's auto-emission is pure duplicate +
+        // FR bleed. Forcing the setting to false in-memory (no DB
+        // save) kills the duplicate on every request.
+        if (function_exists('setting')) {
+            setting()->set('blog_post_schema_enabled', false);
+        }
+
         // Wave DDDDDDDDD (Vader 2026-05-22) — locale-override fix.
         //
         // EN reader hits `/breaking?lang=en`. Route closure calls
