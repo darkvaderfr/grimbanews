@@ -1362,6 +1362,53 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_ad_slots_reserve_cls_safe_box_via_min_height_and_intrinsic_size(): void
+    {
+        // Wave ZZZZZZZZ (R-14 close, Vader 2026-05-22) — Lighthouse
+        // CLS defense for AdSense slots. The home rail ships 3 ad
+        // slots (top billboard, mid leaderboard, native in-feed)
+        // before any AdSense JS is even loaded; without a layout
+        // reservation, the ads load asynchronously and shove
+        // content down, blowing Lighthouse CLS scores.
+        //
+        // The fix lives in `partials/home/ad-styles.blade.php`:
+        //   - `min-height` per variant (92 / 112 / 180 / 270 px)
+        //   - `content-visibility: auto` for off-viewport skip
+        //   - `contain-intrinsic-size: auto Xpx` matched to
+        //     min-height so the browser reserves the right box
+        //     even when content-visibility:auto skips paint.
+        //
+        // This test asserts the home page actually ships those
+        // rules (catches any future regression that strips
+        // content-visibility or shrinks min-height).
+        $html = $this->get('/')->getContent();
+
+        // The home rail definitely includes ad-styles partial; if
+        // these classes aren't in the HTML, the partial broke.
+        $this->assertStringContainsString('.grimba-ad-slot', $html, 'Home must include the ad-styles partial.');
+        $this->assertStringContainsString('content-visibility: auto', $html, 'Ad slots must use content-visibility:auto for off-viewport CLS skip.');
+        $this->assertStringContainsString('contain-intrinsic-size', $html, 'Ad slots must declare contain-intrinsic-size for placeholder reservation.');
+
+        // Lock the specific min-heights per variant (don't let
+        // someone "simplify" the matrix and break the leaderboard
+        // or sidebar reservation):
+        $this->assertMatchesRegularExpression(
+            '/\.grimba-ad-slot\s*\{[^}]*min-height:\s*92px/i',
+            $html,
+            'Base ad-slot min-height must be 92px (matches 320×50 mobile leaderboard + padding).',
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.grimba-ad-slot--(?:billboard|leaderboard)[^{]*\{[^}]*min-height:\s*112px/i',
+            $html,
+            'Billboard/leaderboard min-height must be 112px (728×90 desktop + padding).',
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.grimba-ad-slot--sidebar[^{]*\{[^}]*min-height:\s*270px/i',
+            $html,
+            'Sidebar min-height must be 270px (300×250 medium-rectangle + container padding).',
+        );
+    }
+
     public function test_advertise_page_does_not_get_public_cached(): void
     {
         // Wave TTTTTTT / Wave YYYYYYY — /advertise has an @csrf token

@@ -29,21 +29,39 @@
         box-shadow: 0 18px 44px rgba(26, 23, 19, .06);
         overflow: hidden;
         width: 100%;
+        /* Wave ZZZZZZZZ (R-14 — Vader 2026-05-22) — Lighthouse CLS
+           defense. content-visibility:auto lets the browser skip
+           layout + render for off-viewport ads until they near
+           the viewport, while contain-intrinsic-size guarantees
+           the placeholder size for layout reservation. Eliminates
+           the "ad loads and pushes content down" CLS pattern that
+           kills Lighthouse mobile scores. */
+        content-visibility: auto;
+        contain-intrinsic-size: auto 92px;
     }
 
     .grimba-ad-slot--billboard,
     .grimba-ad-slot--leaderboard {
         min-height: 112px;
+        /* Wave ZZZZZZZZ — leaderboards are 728x90 + padding =
+           112px; lock the intrinsic-size hint to that. */
+        contain-intrinsic-size: auto 112px;
     }
 
     .grimba-ad-slot--native {
         min-height: 180px;
         border-style: dashed;
+        contain-intrinsic-size: auto 180px;
     }
 
     .grimba-ad-slot--sidebar {
-        min-height: 250px;
+        /* Wave ZZZZZZZZ — bumped from 250px to 270px to account
+           for the AdSense 300x250 medium-rectangle + container
+           padding. 250px was clipping the 1px-2px below the ad
+           on Safari. */
+        min-height: 270px;
         align-items: flex-start;
+        contain-intrinsic-size: auto 270px;
     }
 
     .grimba-ad-slot ins.adsbygoogle {
