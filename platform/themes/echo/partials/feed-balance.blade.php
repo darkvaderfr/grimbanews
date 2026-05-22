@@ -37,11 +37,14 @@
         <div style="width: {{ $pct['right'] }}%;background:#ef4444;"></div>
     </div>
     <div class="d-flex justify-content-between small mt-2 opacity-85">
-        <span>Gauche {{ $counts['left'] }}</span>
-        <span>Centre {{ $counts['center'] }}</span>
-        <span>Droite {{ $counts['right'] }}</span>
+        {{-- Wave TTTTTTTTT (Vader 2026-05-22) — bias-bucket labels were
+            hardcoded FR; EN readers saw "Gauche / Centre / Droite /
+            Non classés" on the home + cluster bias bars. --}}
+        <span>{{ __('Gauche') }} {{ $counts['left'] }}</span>
+        <span>{{ __('Centre') }} {{ $counts['center'] }}</span>
+        <span>{{ __('Droite') }} {{ $counts['right'] }}</span>
         @if($counts['unknown'] > 0)
-            <span class="opacity-50">Non classés {{ $counts['unknown'] }}</span>
+            <span class="opacity-50">{{ __('Non classés') }} {{ $counts['unknown'] }}</span>
         @endif
     </div>
 </div>

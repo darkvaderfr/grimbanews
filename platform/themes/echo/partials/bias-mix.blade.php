@@ -96,7 +96,7 @@
             <span style="color:#e84c3d;font-weight:600;">{{ __('Droite') }} {{ $pct['right'] }}%</span>
         </div>
     @else
-        <a href="{{ url('/blog') }}" class="small text-decoration-underline mt-2 d-inline-block">Commencer à lire</a>
+        <a href="{{ url('/blog') }}" class="small text-decoration-underline mt-2 d-inline-block">{{ __('Commencer à lire') }}</a>
     @endif
 
     @if($variant === 'full' && $readTotal > 0)

@@ -20,9 +20,9 @@
 @if($siblings->isNotEmpty())
     <section class="grimba-other-angles">
         <header class="grimba-other-angles__head">
-            <h2 class="grimba-other-angles__title">Autres angles sur la même histoire</h2>
+            <h2 class="grimba-other-angles__title">{{ __('Autres angles sur la même histoire') }}</h2>
             <a href="{{ url('/comparatif/' . $post->story_cluster_id) }}" class="grimba-other-angles__all">
-                Voir la comparaison complète →
+                {{ __('Voir la comparaison complète') }} →
             </a>
         </header>
 

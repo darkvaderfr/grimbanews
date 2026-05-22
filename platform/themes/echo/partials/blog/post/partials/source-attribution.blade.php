@@ -86,7 +86,7 @@
     @if($credScore !== null)
         <div class="grimba-post-attribution__cred">
             <div class="d-flex justify-content-between small mb-1">
-                <span class="opacity-75">Crédibilité de la source</span>
+                <span class="opacity-75">{{ __('Crédibilité de la source') }}</span>
                 <strong>{{ $credScore }}/100</strong>
             </div>
             <div class="grimba-post-attribution__cred-bar">
