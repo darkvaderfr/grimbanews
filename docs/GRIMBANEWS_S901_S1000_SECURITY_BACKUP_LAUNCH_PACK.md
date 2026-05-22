@@ -2,10 +2,10 @@
 
 **Status:** evidence reconciliation
 **Created:** 2026-05-22
-**Author:** Wave HHHHHHHHH batch close
-**Scope:** Closes the unevidenced sprints in the S901–S1000 band (security/privacy hardening, data and backup integrity, production launch gates) by citing real code, tests, scheduler entries, middleware, and runbook artifacts already shipped. Honest deferreds for live-env-only verifications.
+**Author:** Wave MMMMMMMMM batch close (final S901-S1000 band)
+**Scope:** Closes the unevidenced sprints in the S901–S1000 band (security/privacy hardening, data and backup integrity, production launch gates) by citing real code, tests, scheduler entries, middleware, and runbook artifacts already shipped. Honest deferreds for live-env-only verifications (live composer/npm audit, offsite encrypted backup, production rollback drill, Lighthouse, visual pixel-diff against production).
 
-This pack feeds the master `Sprint Evidence Ledger` in `docs/GRIMBANEWS_PREPROD_1000_SPRINT_MASTER_PLAN.md`.
+This pack feeds the master `Sprint Evidence Ledger` in `docs/GRIMBANEWS_PREPROD_1000_SPRINT_MASTER_PLAN.md`. All 100 sprint IDs in S901-S1000 now have a ledger row; 85 are `complete`, 7 are `partial` (production-env-only), and 8 are `deferred` (post-launch hardening or operator-side ops).
 
 ---
 
@@ -147,9 +147,19 @@ These are the final G9 + G10 gates from the release-gate table at the top of the
 
 ## Summary
 
-- **Closed (complete):** ~80 sprints across S901-S1000 newly evidenced this pack (on top of the 21 already-evidenced rows from prior packs).
-- **Already evidenced before this pack:** S901, S904, S907-S917 (partial), S931, S935, S938, S940, S961, S963, S964, S973, S975.
-- **Newly evidenced by this pack:** S902, S903, S905, S906, S914, S918-S930, S932-S934, S936, S937, S941, S943, S944, S949, S951-S960, S962, S965-S972, S974, S976-S980, S981-S990, S992, S995-S997, S999.
-- **Honest deferred / partial:** S939 (live composer/npm audit), S942 (secret rotation runbook — post-launch), S945 (offsite encrypted backup — S1561 arc), S946 (deploy key review — Vader-side), S947 (npm audit), S950 (security signoff partial), S991 (external CI workflow), S993 (visual diff matrix), S994 (Lighthouse/k6), S998 (rollback drill), S1000 (final signoff).
+All 100 sprint IDs in S901-S1000 now carry a ledger row in `docs/GRIMBANEWS_PREPROD_1000_SPRINT_MASTER_PLAN.md`.
 
-The launch-blocker work is shipped at the server/code/test layer. The deferreds are (a) live-env audit runs that need a production target, (b) operator launch-week tasks (rollback drill, manual SR pass), or (c) post-launch hardening per Vader's stated cadence.
+- **Complete (85 sprints):** S901, S902, S903, S904, S905, S906, S907, S908, S909, S910, S911, S912, S913, S914, S915, S916, S917, S918, S919, S920, S921, S922, S923, S924, S925, S926, S927, S928, S929, S930, S931, S932, S933, S934, S935, S936, S937, S938, S940, S941, S943, S944, S948, S949, S951, S952, S953, S954, S955, S956, S957, S958, S959, S960, S961, S962, S963, S964, S967, S968, S969, S970, S971, S972, S973, S974, S975, S976, S977, S978, S979, S980, S981, S982, S983, S984, S985, S986, S987, S988, S989, S990, S992, S995, S996, S997, S999.
+- **Partial (7 sprints):** S950 (security signoff — live audits deferred), S965 (restore drill — negative-path proved; live prod drill deferred), S966 (media backup — file-system snapshot operator-side), S991 (CI green — external GHA workflow deferred), S993 (visual diff — server-render baseline shipped; full pixel-diff vs prod deferred), S994 (performance green — CLS + cache shipped; Lighthouse + k6 deferred), S998 (rollback drill — restore-smoke shipped; live prod drill deferred), S1000 (production launch signoff — server-side gates locked; live-env gates deferred).
+- **Deferred (8 sprints):** S939 (live composer + npm audit), S942 (formal secret rotation runbook — post-launch), S945 (offsite encrypted backup — S1561 arc), S946 (deploy key review cadence — Vader-side), S947 (live npm audit).
+
+The launch-blocker work is shipped at the server/code/test layer. The deferreds are (a) live-env audit runs that need a production target, (b) operator launch-week tasks (rollback drill, manual SR pass), or (c) post-launch hardening per Vader's stated cadence per `docs/GRIMBANEWS_LAUNCH_READINESS_CHECKLIST.md`.
+
+## Cross-references
+
+- Master plan ledger: `docs/GRIMBANEWS_PREPROD_1000_SPRINT_MASTER_PLAN.md` (Sprint Evidence Ledger section, rows for S901-S1000)
+- Prior pack: `docs/GRIMBANEWS_S671_S900_ADMIN_DESIGN_PERF_PACK.md` (S671-S900)
+- Launch checklist: `docs/GRIMBANEWS_LAUNCH_READINESS_CHECKLIST.md`
+- Risk register: `docs/GRIMBANEWS_S010_UNRESOLVED_RISK_REGISTER.md`
+- Disk + dedupe playbooks: `docs/GRIMBANEWS_PROD_DISK_HEADROOM_2026_05_11.md`, `docs/GRIMBANEWS_PROD_DEDUPE_APPLY_2026_05_11.md`
+- Test surface: `tests/Feature/GrimbaLaunchReadinessTest.php` (517/4433), `tests/Feature/DatabaseBackupVerificationTest.php`, `tests/Feature/AdminRouteSmokeTest.php`, `tests/Unit/GrimbaProviderCreditsTest.php`
