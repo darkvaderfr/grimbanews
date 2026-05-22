@@ -1476,6 +1476,32 @@ class GrimbaLaunchReadinessTest extends TestCase
         );
     }
 
+    public function test_static_editorial_pages_title_flips_per_locale(): void
+    {
+        // Wave EEEEEEEEE (Vader 2026-05-22) — caught by post-DDDDDDDDD
+        // 20-URL smoke. `/faq?lang=en` rendered "Foire aux questions —
+        // GrimbaNews" and `/comprendre-le-barometre?lang=en` rendered
+        // "Comprendre le baromètre de couverture — GrimbaNews" because
+        // both FR-keyed strings had no EN translation in lang/en.json
+        // — Laravel's __() falls back to the raw key when no translation
+        // exists, so EN readers saw FR titles even though the
+        // locale-enforce middleware was correctly setting locale=en.
+        //
+        // Fix: added the two missing EN translations to lang/en.json.
+        $cases = [
+            ['/faq?lang=en', 'FAQ — GrimbaNews', '/faq?lang=fr', 'Foire aux questions — GrimbaNews'],
+            ['/comprendre-le-barometre?lang=en', 'Understanding the coverage barometer — GrimbaNews', '/comprendre-le-barometre?lang=fr', 'Comprendre le baromètre de couverture — GrimbaNews'],
+        ];
+        foreach ($cases as [$enUrl, $enTitle, $frUrl, $frTitle]) {
+            $enHtml = $this->get($enUrl)->getContent();
+            $frHtml = $this->get($frUrl)->getContent();
+            preg_match('/<title>([^<]+)<\/title>/i', $enHtml, $em);
+            preg_match('/<title>([^<]+)<\/title>/i', $frHtml, $fm);
+            $this->assertSame($enTitle, trim($em[1] ?? ''), "{$enUrl} <title> must match EN translation.");
+            $this->assertSame($frTitle, trim($fm[1] ?? ''), "{$frUrl} <title> must match FR original.");
+        }
+    }
+
     public function test_ad_slots_reserve_cls_safe_box_via_min_height_and_intrinsic_size(): void
     {
         // Wave ZZZZZZZZ (R-14 close, Vader 2026-05-22) — Lighthouse

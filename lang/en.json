@@ -442,5 +442,7 @@
     "Plus dans :topic": "More in :topic",
     "Voir tout le sujet": "See the full topic",
     "Lire le dossier : :title": "Read the dossier: :title",
-    ":count source contributrice|:count sources contributrices": ":count contributing source|:count contributing sources"
+    ":count source contributrice|:count sources contributrices": ":count contributing source|:count contributing sources",
+    "Foire aux questions": "FAQ",
+    "Comprendre le baromètre de couverture": "Understanding the coverage barometer"
 }
