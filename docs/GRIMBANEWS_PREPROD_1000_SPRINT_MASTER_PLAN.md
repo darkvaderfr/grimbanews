@@ -82,6 +82,18 @@ Each row below contains 10 atomic sprint IDs. The row is not a single epic; the 
 
 ## Sprint Evidence Ledger
 
+### Schema policy (Wave IIIIIIIIII — Zen MEDIUM follow-up, 2026-05-22)
+
+This ledger is a **flat per-ID rolling registry**. Conventions:
+
+- **One canonical row per sprint ID.** If a sprint is re-evidenced (addendum, rework, regression close), the new row OVERWRITES the prior one. The dedup pass (`/tmp/dedup_ledger.php`) keeps last-occurrence per `| S### |` line.
+- **Historical evidence is preserved in pack docs**, not in the master ledger. The pack file path in column 2 is the durable evidence trail; the pack itself can grow per-sprint sub-sections with date stamps when needed.
+- **Addendum sections.** When you want to record that S705 was re-worked or extended without losing the original evidence row, add an `### Addendum YYYY-MM-DD` section IN THE PACK DOC (not in this ledger) and pin the master-ledger row to point at the addendum anchor (`docs/PACK.md#s705-addendum-2026-05-22`).
+- **Range rows are allowed** for governance / process bands where per-ID detail would be padding (e.g. "S051 same — Definition of ready" repeats across 10 rows). The dedup pass treats them as distinct IDs.
+- **Status taxonomy:** `complete` (server-side evidence exists and is contract-locked), `partial` (server-side surrogate exists, full surface needs paid-tier / live-env / third-party-account / post-launch operator work), `deferred` (no shipped evidence, gated on a known external dependency — honest "not built" with a reason).
+
+This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDDD is destructive by design." It is — but the destruction is intentional and recoverable via pack-doc addenda. The ledger is a snapshot of CURRENT canonical evidence per ID; the per-pack docs are the history.
+
 | Sprint | Evidence | Status |
 |---|---|---|
 | S001 | `docs/GRIMBANEWS_S001_ROUTE_INVENTORY.md` | complete |
