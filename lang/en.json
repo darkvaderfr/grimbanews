@@ -486,5 +486,16 @@
     "Aucun résultat": "No results",
     "Comment GrimbaNews classe l'information": "How GrimbaNews classifies the news",
     "Le baromètre de couverture, segment par segment": "The coverage barometer, segment by segment",
-    "Nous évaluons le biais éditorial des sources, repérons les angles morts, notons la crédibilité et gouvernons la liste des médias suivis. La méthode reste ouverte, révisable et contestable.": "We rate source editorial bias, surface blindspots, score credibility, and govern the list of tracked outlets. The method is open, revisable, and challengeable."
+    "Nous évaluons le biais éditorial des sources, repérons les angles morts, notons la crédibilité et gouvernons la liste des médias suivis. La méthode reste ouverte, révisable et contestable.": "We rate source editorial bias, surface blindspots, score credibility, and govern the list of tracked outlets. The method is open, revisable, and challengeable.",
+    "Coffre local": "Local vault",
+    "Partager votre sélection": "Share your selection",
+    "Votre coffre est vide. Sauvegardez quelques articles avec l'étoile, puis revenez créer un lien.": "Your vault is empty. Save some articles with the star, then come back to create a link.",
+    "Retour à l'accueil": "Back to home",
+    "Ce lien contient :count article|Ce lien contient :count articles dans le fragment du navigateur. Rien n'est enregistré sur le serveur.": "This link holds :count article|This link holds :count articles in the browser fragment. Nothing is stored on the server.",
+    "Copier le lien": "Copy link",
+    "Tester l'import": "Test the import",
+    "Importer un coffre partagé": "Import a shared vault",
+    "Lecture du lien partagé...": "Reading the shared link…",
+    "Importer dans mon coffre": "Import into my vault",
+    "Voir mon coffre": "View my vault"
 }

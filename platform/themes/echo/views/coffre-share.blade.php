@@ -10,45 +10,48 @@
      */
 @endphp
 
+{{-- Wave SSSSSSSSS (Vader 2026-05-22) — coffre-share strings were
+    hardcoded FR. EN readers landing on /coffre/share?lang=en or
+    /coffre/import?lang=en saw FR copy. Wrapped in __() with EN
+    translations in lang/en.json. --}}
 <section class="grimba-coffre-share py-5">
     <div class="container" style="max-width:860px;">
         <header class="glass-panel p-4 p-md-5 text-center">
-            <span class="grimba-methodology__kicker">Coffre local</span>
+            <span class="grimba-methodology__kicker">{{ __('Coffre local') }}</span>
 
             @if($mode === 'share')
-                <h1 class="grimba-methodology__title mt-2 mb-3">Partager votre sélection</h1>
+                <h1 class="grimba-methodology__title mt-2 mb-3">{{ __('Partager votre sélection') }}</h1>
                 @if($count === 0)
                     <p class="opacity-80 mb-4">
-                        Votre coffre est vide. Sauvegardez quelques articles avec l'étoile, puis revenez créer un lien.
+                        {{ __("Votre coffre est vide. Sauvegardez quelques articles avec l'étoile, puis revenez créer un lien.") }}
                     </p>
-                    <a href="{{ url('/') }}" class="btn-grimba btn-grimba--solid">Retour à l'accueil</a>
+                    <a href="{{ url('/') }}" class="btn-grimba btn-grimba--solid">{{ __("Retour à l'accueil") }}</a>
                 @else
                     <p class="opacity-80 mb-4">
-                        Ce lien contient {{ $count }} {{ $count === 1 ? 'article' : 'articles' }} dans le fragment du navigateur.
-                        Rien n'est enregistré sur le serveur.
+                        {{ trans_choice('Ce lien contient :count article|Ce lien contient :count articles dans le fragment du navigateur. Rien n\'est enregistré sur le serveur.', $count, ['count' => $count]) }}
                     </p>
                     <div class="d-flex gap-2 justify-content-center flex-wrap">
                         <button type="button"
                                 class="btn-grimba btn-grimba--solid"
                                 data-grimba-copy-link="{{ $shareUrl }}">
-                            Copier le lien
+                            {{ __('Copier le lien') }}
                         </button>
                         <a href="{{ $shareUrl }}" class="btn-grimba btn-grimba--ghost">
-                            Tester l'import
+                            {{ __("Tester l'import") }}
                         </a>
                     </div>
                     <p class="small opacity-60 mt-3 mb-0" style="word-break:break-all;">{{ $shareUrl }}</p>
                 @endif
             @else
-                <h1 class="grimba-methodology__title mt-2 mb-3">Importer un coffre partagé</h1>
+                <h1 class="grimba-methodology__title mt-2 mb-3">{{ __('Importer un coffre partagé') }}</h1>
                 <p class="opacity-80 mb-4" data-grimba-vault-import-status>
-                    Lecture du lien partagé...
+                    {{ __('Lecture du lien partagé...') }}
                 </p>
                 <div class="d-flex gap-2 justify-content-center flex-wrap">
                     <button type="button" class="btn-grimba btn-grimba--solid" data-grimba-vault-import hidden>
-                        Importer dans mon coffre
+                        {{ __('Importer dans mon coffre') }}
                     </button>
-                    <a href="{{ url('/coffre') }}" class="btn-grimba btn-grimba--ghost">Voir mon coffre</a>
+                    <a href="{{ url('/coffre') }}" class="btn-grimba btn-grimba--ghost">{{ __('Voir mon coffre') }}</a>
                 </div>
             @endif
         </header>
