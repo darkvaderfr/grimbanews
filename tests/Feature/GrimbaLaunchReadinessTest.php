@@ -1433,6 +1433,35 @@ class GrimbaLaunchReadinessTest extends TestCase
         );
     }
 
+    public function test_lang_query_param_is_case_insensitive(): void
+    {
+        // Wave JJJJJJJJJ (Vader 2026-05-22) — `?lang=EN` (or En, eN)
+        // used to silently fall through to FR because the middleware
+        // only matched strict lowercase. Some social-share URL
+        // normalizers uppercase query param values.
+        //
+        // Fix: strtolower() before comparing in all 3 places
+        // (GrimbaLocaleEnforce, GrimbaLocale, AppServiceProvider helper).
+        $variants = [
+            '/breaking?lang=EN' => 'Breaking news — GrimbaNews',
+            '/breaking?lang=En' => 'Breaking news — GrimbaNews',
+            '/breaking?lang=eN' => 'Breaking news — GrimbaNews',
+            '/breaking?lang=en' => 'Breaking news — GrimbaNews',
+            '/breaking?lang=FR' => 'Dernières nouvelles — GrimbaNews',
+            '/breaking?lang=fr' => 'Dernières nouvelles — GrimbaNews',
+        ];
+        foreach ($variants as $url => $expectedTitle) {
+            $html = $this->get($url)->getContent();
+            preg_match('/<title>([^<]+)<\/title>/i', $html, $m);
+            $actual = trim($m[1] ?? '');
+            $this->assertSame(
+                $expectedTitle,
+                $actual,
+                "{$url} <title> must be '{$expectedTitle}' (catches case-sensitivity regression).",
+            );
+        }
+    }
+
     public function test_breaking_route_title_flips_per_locale_after_botble_locale_middleware(): void
     {
         // Wave DDDDDDDDD (Vader 2026-05-22) — locale-enforce middleware.

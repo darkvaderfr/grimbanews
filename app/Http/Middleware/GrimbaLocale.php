@@ -22,12 +22,13 @@ class GrimbaLocale
      */
     public function handle(Request $request, Closure $next)
     {
-        $query = (string) $request->query('lang', '');
+        // Wave JJJJJJJJJ (Vader 2026-05-22) — case-insensitive lang.
+        $query = strtolower((string) $request->query('lang', ''));
         if ($query === 'en' || $query === 'fr') {
             app()->setLocale($query);
             return $next($request);
         }
-        $preferred = (string) $request->cookie('grimba_lang', '');
+        $preferred = strtolower((string) $request->cookie('grimba_lang', ''));
         if ($preferred === 'en' || $preferred === 'fr') {
             app()->setLocale($preferred);
         }
