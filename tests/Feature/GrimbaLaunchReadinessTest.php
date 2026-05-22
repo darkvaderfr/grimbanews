@@ -1777,6 +1777,48 @@ class GrimbaLaunchReadinessTest extends TestCase
         );
     }
 
+    public function test_cookie_consent_banner_uses_locale_aware_default_when_setting_empty(): void
+    {
+        // Wave EEEEEEEEEE (Zen audit follow-up — 2026-05-22).
+        //
+        // BBBBBBBBBB wrapped cookie-consent setting() defaults in __()
+        // so EN readers see EN copy when no setting row exists. But
+        // Zen flagged: if the admin DELETES the cookie title and SAVES,
+        // setting() returns `""` (stored empty value, not missing key)
+        // and the `__()` default never fires. EN readers get a blank
+        // banner.
+        //
+        // Fix: `setting(key) ?: __()` so any falsy stored value falls
+        // through to the locale-aware default.
+        //
+        // This test simulates the admin-saved-empty case by injecting
+        // an empty setting row, then asserts the EN banner still
+        // shows EN copy.
+        if (function_exists('setting')) {
+            setting()->set('grimba_cookie_title', '');
+            setting()->set('grimba_cookie_accept_label', '');
+        }
+        $html = $this->get('/?lang=en')->getContent();
+        // EN banner must NOT be blank — assertion catches both:
+        //   - bug class A: empty setting bypasses __() default
+        //   - bug class B: __() returns the FR key as fallback
+        $this->assertStringContainsString(
+            '<h3 id="grimba-cookie-title" class="grimba-cookie-consent__title">Cookies</h3>',
+            $html,
+            'EN cookie banner title must show "Cookies" when admin saved empty.',
+        );
+        $this->assertMatchesRegularExpression(
+            '/grimba-cookie-consent__btn--accept[^>]*>\s*Accept\s*</i',
+            $html,
+            'EN cookie banner Accept button must show "Accept" when admin saved empty.',
+        );
+        // Reset state for downstream tests.
+        if (function_exists('setting')) {
+            setting()->set('grimba_cookie_title', null);
+            setting()->set('grimba_cookie_accept_label', null);
+        }
+    }
+
     public function test_advertise_page_does_not_get_public_cached(): void
     {
         // Wave TTTTTTT / Wave YYYYYYY — /advertise has an @csrf token
