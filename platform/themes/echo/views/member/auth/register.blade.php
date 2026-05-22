@@ -50,7 +50,7 @@
                 <label for="grimba-reg-email" class="grimba-auth-label">
                     {{ __('Adresse email') }} <span class="grimba-auth-label__required">*</span>
                 </label>
-                <input type="email" id="grimba-reg-email" name="email" required value="{{ old('email') }}" autocomplete="email" placeholder="vous@exemple.fr" class="grimba-form-pill mb-3">
+                <input type="email" id="grimba-reg-email" name="email" required value="{{ old('email') }}" autocomplete="email" placeholder="{{ __('vous@exemple.fr') }}" class="grimba-form-pill mb-3">
 
                 <label for="grimba-reg-password" class="grimba-auth-label">
                     {{ __('Mot de passe') }} <span class="grimba-auth-label__required">*</span>

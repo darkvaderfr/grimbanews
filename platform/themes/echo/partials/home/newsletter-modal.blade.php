@@ -25,7 +25,7 @@
             @csrf
             <input type="hidden" name="source_key" value="header_modal">
             <div class="d-flex gap-2 flex-wrap">
-                <input type="email" name="email" required placeholder="votre@email.fr"
+                <input type="email" name="email" required placeholder="{{ __('votre@email.fr') }}"
                        class="flex-grow-1" style="min-width:220px;padding:0.6rem 0.9rem;border-radius:9999px;border:1px solid rgba(0,0,0,0.12);">
                 <button type="submit" class="btn-grimba btn-grimba--solid">{{ __("S'abonner") }}</button>
             </div>

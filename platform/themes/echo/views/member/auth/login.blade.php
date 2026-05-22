@@ -59,7 +59,7 @@
                        value="{{ old('email') }}"
                        autocomplete="email"
                        required
-                       placeholder="vous@exemple.fr"
+                       placeholder="{{ __('vous@exemple.fr') }}"
                        class="grimba-form-pill mb-3">
 
                 <label for="grimba-login-password" class="grimba-auth-label">

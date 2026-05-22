@@ -33,7 +33,7 @@
                 <label for="grimba-pw-email" class="grimba-auth-label">
                     {{ __('Adresse email') }} <span class="grimba-auth-label__required">*</span>
                 </label>
-                <input type="email" id="grimba-pw-email" name="email" required value="{{ old('email') }}" autocomplete="email" placeholder="vous@exemple.fr"
+                <input type="email" id="grimba-pw-email" name="email" required value="{{ old('email') }}" autocomplete="email" placeholder="{{ __('vous@exemple.fr') }}"
                        class="grimba-form-pill mb-4">
 
                 <button type="submit" class="btn-grimba btn-grimba--solid btn-grimba--block">
