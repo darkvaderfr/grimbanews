@@ -29,7 +29,16 @@
                         </div>
 
                         @if ($pageTitle)
-                            <h1 class="title">{!! BaseHelper::clean($pageTitle) !!}</h1>
+                            {{-- Wave KKKKKKKKK (Vader 2026-05-22) — every reader
+                                surface using grimba-chrome ships its own <h1>
+                                inside the page-content section. Emitting another
+                                <h1> here = TWO H1s on one page = bad SEO and
+                                a11y violation (axe-core h1-one-per-page rule).
+                                Downgrade to <h2 class="title"> globally so the
+                                page-content H1 is always the single top heading.
+                                Visual styling unchanged (the `.title` class drives
+                                the appearance, not the tag). --}}
+                            <h2 class="title">{!! BaseHelper::clean($pageTitle) !!}</h2>
                         @endif
                     </div>
                 </div>

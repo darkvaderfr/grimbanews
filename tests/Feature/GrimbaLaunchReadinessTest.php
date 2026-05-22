@@ -1505,6 +1505,55 @@ class GrimbaLaunchReadinessTest extends TestCase
         );
     }
 
+    public function test_every_reader_surface_has_exactly_one_h1(): void
+    {
+        // Wave KKKKKKKKK (Vader 2026-05-22) — axe-core h1-one-per-page
+        // rule. Breadcrumb partial was emitting <h1 class="title">
+        // pageTitle</h1> + the page-content section emitted its own
+        // <h1>, giving every detail/section page TWO H1s. Bad SEO
+        // (Google ranks pages by the first H1; competing H1s dilute
+        // topical signal) and bad a11y (screen-reader users hear two
+        // "main heading" announcements per page).
+        //
+        // Fix: breadcrumbs.blade.php now always emits <h2 class="title">
+        // — the .title class drives the visual size so design didn't
+        // change. Single H1 per page = the page-content one.
+        $post = \Botble\Blog\Models\Post::where('status', 'published')->latest()->first();
+        $slug = $post->slugable->key ?? null;
+
+        $paths = [
+            '/?lang=en',
+            '/breaking?lang=en',
+            '/latest?lang=en',
+            '/dossiers?lang=en',
+            '/comparatif/1?lang=en',
+            '/sources?lang=en',
+            '/local?lang=en',
+            '/search?q=test&lang=en',
+            '/advertise?lang=en',
+            '/methodologie?lang=en',
+            '/a-propos?lang=en',
+            '/faq?lang=en',
+            '/pour-vous?lang=en',
+            '/angles-morts?lang=en',
+            '/comprendre-le-barometre?lang=en',
+            '/article/' . $slug . '?lang=en',
+            '/blog/uncategorized?lang=en',
+        ];
+        foreach ($paths as $path) {
+            $resp = $this->get($path);
+            if ($resp->getStatusCode() !== 200) continue;
+            $html = $resp->getContent();
+            preg_match_all('/<h1\b[^>]*>/i', $html, $m);
+            $count = count($m[0]);
+            $this->assertSame(
+                1,
+                $count,
+                "{$path} must have exactly one <h1> tag — got {$count}. (axe-core h1-one-per-page; catches breadcrumb partial regression.)",
+            );
+        }
+    }
+
     public function test_article_emits_single_newsarticle_jsonld_with_correct_publisher(): void
     {
         // Wave IIIIIIIII (Vader 2026-05-22) — kill Botble's
