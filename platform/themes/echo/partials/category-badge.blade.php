@@ -47,14 +47,19 @@
                     ? 'edition'
                     : (in_array($badgeCategory->name, $topicNames, true) ? 'topic' : 'category');
             @endphp
-            <a title="{{ $badgeCategory->name }}"
+            {{-- Wave SSSSSSSSSS (Vader 2026-05-23) — category names are stored
+                FR in the DB seed; wrap title + visible label in __() so they
+                flip to EN on lang=en. Acceptable in this code path because
+                GrimbaEditorialCategories names are also wrapped in __() in
+                topic-chips.blade.php (Wave LLLLLLLLLL). --}}
+            <a title="{{ __($badgeCategory->name) }}"
                href="{{ $badgeCategory->url }}"
                class="grimba-category-badge grimba-category-badge--{{ $role }}"
                data-grimba-category-role="{{ $role }}">
                 @if ($badgeCategory->icon)
                     <i class="{{ $badgeCategory->icon }}"></i>
                 @endif
-                <span class="content-catagory-tag">{{ $badgeCategory->name }}</span>
+                <span class="content-catagory-tag">{{ __($badgeCategory->name) }}</span>
             </a>
         @endforeach
     </span>
