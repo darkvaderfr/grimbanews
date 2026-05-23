@@ -31,6 +31,7 @@
                     <li><a href="{{ url('/local') }}">{{ __('Local') }}</a></li>
                     <li><a href="{{ url('/coffre') }}">{{ __('Mon coffre') }}</a></li>
                     <li><a href="{{ url('/angles-morts') }}">{{ __('Angles morts') }}</a></li>
+                    <li><a href="{{ url('/juste-milieu') }}">{{ __('Juste milieu') }}</a></li>
                     <li><a href="{{ url('/comparatif') }}">{{ __('Comparatif') }}</a></li>
                 </ul>
             </div>

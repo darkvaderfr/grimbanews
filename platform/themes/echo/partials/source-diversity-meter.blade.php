@@ -34,12 +34,23 @@
         1 => __('Couverture unilatérale'),
         default => __('Aucune source classée'),
     };
+
+    // Wave DDDDDDDDDDD (Vader 2026-05-23) — flag Middle Ground via the
+    // shared GrimbaClusterBias resolver. L=R tie that meets/beats
+    // center = Middle Ground (different signal from balanced).
+    $resolvedSignal = \App\Support\GrimbaClusterBias::resolve($counts);
+    $isMiddleGround = $resolvedSignal['key'] === 'middle_ground';
 @endphp
 
 <div class="diversity-meter glass-panel p-3 mb-4">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <strong class="text-uppercase small">{{ __('Diversité des sources') }}</strong>
-        <span class="small opacity-75">{{ $balanceLabel }} — {{ trans_choice(':count source|:count sources', $total, ['count' => $total]) }}</span>
+        <span class="small opacity-75">
+            {{ $balanceLabel }} — {{ trans_choice(':count source|:count sources', $total, ['count' => $total]) }}
+            @if($isMiddleGround)
+                · <span style="color:#a855f7;font-weight:600;">{{ __('Juste milieu') }}</span>
+            @endif
+        </span>
     </div>
 
     <div class="diversity-bar" style="display:flex;height:10px;border-radius:9999px;overflow:hidden;background:rgba(0,0,0,0.06);">

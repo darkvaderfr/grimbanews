@@ -787,5 +787,15 @@
     "Vous pouvez désactiver ce digest depuis Mon compte.": "You can turn off this digest from My account.",
     "Recherche suivie": "Followed search",
     "voici les nouveaux articles qui correspondent aux recherches que vous suivez.": "here are the new articles matching the searches you follow.",
-    "Vous pouvez retirer une alerte depuis Mon compte.": "You can remove an alert from My account."
+    "Vous pouvez retirer une alerte depuis Mon compte.": "You can remove an alert from My account.",
+    "Les histoires couvertes équitablement par la gauche et la droite.": "Stories covered equally from the left and the right.",
+    "Couverture éditoriale équilibrée (Juste milieu)": "Balanced editorial coverage (Middle Ground)",
+    "Les histoires couvertes des deux côtés": "Stories covered by both sides",
+    "Le Juste milieu signale les histoires où la gauche et la droite couvrent en proportions égales — un signal éditorial distinct de l'angle mort. Quand les deux camps convergent, c'est souvent que l'événement est consensuel ou qu'il transcende le clivage politique.": "Middle Ground flags stories where left and right cover them in equal proportions — an editorial signal distinct from blindspot. When both camps converge, it's often because the event is consensual or transcends the political divide.",
+    "Le Juste milieu est l'inverse de l'angle mort : au lieu d'une histoire que seul un côté du spectre couvre, c'est une histoire qui réunit les deux extrêmes en proportions égales. GrimbaNews les signale pour que vous voyiez ce qui rassemble.": "Middle Ground is the inverse of a blindspot: instead of a story that only one side of the spectrum covers, it's a story that brings both extremes together in equal proportions. GrimbaNews flags them so you see what unites.",
+    ":count cluster en Juste milieu|:count clusters en Juste milieu": ":count Middle Ground cluster|:count Middle Ground clusters",
+    "Voir aussi les angles morts": "See also blindspots",
+    "Aucune histoire « Juste milieu » identifiée pour le moment.": "No \"Middle Ground\" story identified yet.",
+    "Exécutez": "Run",
+    "pour reclassifier les clusters récents.": "to reclassify recent clusters."
 }

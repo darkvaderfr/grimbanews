@@ -380,6 +380,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ['url' => url('/latest'),                     'lastmod' => $newestPostIso,   'changefreq' => 'hourly',  'priority' => '0.9'],
                 ['url' => url('/dossiers'),                   'lastmod' => $newestClusterIso,'changefreq' => 'daily',   'priority' => '0.8'],
                 ['url' => url('/angles-morts'),               'lastmod' => $newestPostIso,   'changefreq' => 'daily',   'priority' => '0.7'],
+                ['url' => url('/juste-milieu'),               'lastmod' => $newestPostIso,   'changefreq' => 'daily',   'priority' => '0.7'],
                 ['url' => url('/feed.xml'),                   'lastmod' => $newestPostIso,   'changefreq' => 'hourly',  'priority' => '0.6'],
             ];
 
@@ -2027,6 +2028,58 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 'forFilter' => $for,
             ])->render();
         })->name('public.blindspot');
+
+        // Wave DDDDDDDDDDD (Vader 2026-05-23) — /juste-milieu listing.
+        // Mirror of /angles-morts but surfaces clusters where both
+        // extremes (left + right) cover the story equally — the
+        // Middle Ground signal classified by grimba:reclassify-clusters
+        // and tagged onto story_clusters.review_action with the 'mg_*'
+        // prefix. Renders the same listing layout as blindspots so
+        // readers get a parallel-mental-model UX.
+        Route::get('juste-milieu', function (Request $request) {
+            $clusterIds = DB::table('story_clusters')
+                ->where('review_action', 'like', 'mg_%')
+                ->orderByDesc('reviewed_at')
+                ->pluck('id');
+
+            $posts = Post::query()
+                ->whereIn('story_cluster_id', $clusterIds)
+                ->where('status', 'published')
+                ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
+                ->orderByRaw(DB::raw('CASE WHEN story_cluster_id IS NOT NULL THEN story_cluster_id END DESC'))
+                ->paginate(12)
+                ->appends([]);
+
+            SeoHelper::setTitle(__('Juste milieu') . ' — GrimbaNews')
+                ->setDescription(__('Les histoires couvertes équitablement par la gauche et la droite.'));
+
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => __('Juste milieu') . ' — GrimbaNews',
+                'description' => __('Les histoires couvertes équitablement par la gauche et la droite.'),
+                'url' => url('/juste-milieu'),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'mainEntity' => [
+                    '@type' => 'ItemList',
+                    'numberOfItems' => $posts->total(),
+                    'itemListElement' => 'NewsArticle',
+                ],
+                'about' => [
+                    '@type' => 'Thing',
+                    'name' => __('Couverture éditoriale équilibrée (Juste milieu)'),
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
+
+            Theme::breadcrumb()
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Juste milieu'), url('/juste-milieu'));
+
+            return Theme::scope('middle-ground', [
+                'posts' => $posts,
+                'middleGroundClusterCount' => $clusterIds->count(),
+            ])->render();
+        })->name('public.middle_ground');
 
         Route::group([
             'prefix' => 'ajax',

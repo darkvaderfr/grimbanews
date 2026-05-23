@@ -48,6 +48,16 @@ grimba_schedule_command('backup_verify', 'grimba:verify-backups --min=1')
     ->onOneServer()
     ->withoutOverlapping(20);
 
+// GrimbaNews — daily Middle Ground / Blindspot reclassification at
+// 03:35 UTC (Wave DDDDDDDDDDD). Walks the last 555 articles, recounts
+// L/C/R bias per cluster, persists `mg_*` tag onto
+// story_clusters.review_action so /juste-milieu listing stays fresh.
+// Idempotent on each run.
+grimba_schedule_command('reclassify_clusters', 'grimba:reclassify-clusters --limit=555 --persist')
+    ->dailyAt('03:35')
+    ->onOneServer()
+    ->withoutOverlapping(30);
+
 // GrimbaNews — nightly orphan-slug sweep so a post that got deleted
 // (or a seed re-run) never leaves /blog/{slug} → 404 behind.
 Schedule::command('grimba:cleanup-slugs')

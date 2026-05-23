@@ -14,10 +14,20 @@
                 'body' => __("Le biais éditorial classe une source comme Gauche, Centre ou Droite. Basé sur les positions historiques des éditoriaux de la source — pas sur l'article individuel. Un Angle mort signale un dossier qu'un seul camp couvre."),
             ])
         </strong>
+        {{-- Wave DDDDDDDDDDD (Vader 2026-05-23) — Middle Ground / Juste
+            milieu added as 5th chip. Distinct from Blindspot: Middle
+            Ground = covered equally from left AND right (a different
+            editorial signal — both extremes converge). Blindspot =
+            covered exclusively from ONE side. Two separate purples
+            so readers can tell them apart at a glance:
+              Middle Ground = #a855f7 (lighter purple, matches
+                GrimbaClusterBias::resolve helper)
+              Blindspot     = #8a2be2 (deeper blueviolet, pre-existing) --}}
         <div class="d-flex gap-3 small">
             <span style="color:#3b82f6;font-weight:600;">● {{ __('Gauche') }}</span>
             <span style="color:#22c55e;font-weight:600;">● {{ __('Centre') }}</span>
             <span style="color:#ef4444;font-weight:600;">● {{ __('Droite') }}</span>
+            <span style="color:#a855f7;font-weight:600;">● {{ __('Juste milieu') }}</span>
             <span style="color:#8a2be2;font-weight:600;">● {{ __('Angle mort') }}</span>
         </div>
     </div>
