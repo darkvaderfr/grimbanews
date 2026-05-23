@@ -776,5 +776,16 @@
     "Type de propriété": "Ownership type",
     "Public / gouvernement": "Public / government",
     "Télécom intégré": "Integrated telecom",
-    "Private equity": "Private equity"
+    "Private equity": "Private equity",
+    "Votre digest coffre GrimbaNews": "Your GrimbaNews vault digest",
+    "Vos alertes recherche GrimbaNews": "Your GrimbaNews search alerts",
+    "Votre digest coffre": "Your vault digest",
+    "Vos alertes recherche": "Your search alerts",
+    "Bonjour :name,": "Hello :name,",
+    "Bonjour,": "Hello,",
+    "voici les articles sauvegardés dans votre coffre GrimbaNews.": "here are the articles you saved to your GrimbaNews vault.",
+    "Vous pouvez désactiver ce digest depuis Mon compte.": "You can turn off this digest from My account.",
+    "Recherche suivie": "Followed search",
+    "voici les nouveaux articles qui correspondent aux recherches que vous suivez.": "here are the new articles matching the searches you follow.",
+    "Vous pouvez retirer une alerte depuis Mon compte.": "You can remove an alert from My account."
 }

@@ -27,9 +27,22 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-// GrimbaNews — daily backup restore smoke. Runs before the destructive
-// slug cleanup so the scheduler has recent evidence that at least one
-// SQLite backup opens and passes PRAGMA quick_check.
+// GrimbaNews — daily SQLite .backup at 02:55 UTC (Wave YYYYYYYYYY).
+// Closes the gap surfaced by the 2026-05-23 DR drill: the verifier
+// was scheduled but no scheduled CREATE step existed, leaving
+// database/backups/ empty unless an operator manually snapshotted.
+// Now each night the live DB is VACUUM-into'd to a dated artifact,
+// then the verifier runs 10 min later at 03:05 and reads it.
+// Retention: --keep=14 prunes older artifacts (each ~20 MB).
+grimba_schedule_command('backup_create', 'grimba:create-backup --keep=14')
+    ->dailyAt('02:55')
+    ->onOneServer()
+    ->withoutOverlapping(20);
+
+// GrimbaNews — daily backup restore smoke. Runs after create at 03:05
+// so the just-created artifact is available. Verifier reads + opens +
+// runs PRAGMA quick_check; alerts via GrimbaAutomationMonitor when
+// the floor breaks.
 grimba_schedule_command('backup_verify', 'grimba:verify-backups --min=1')
     ->dailyAt('03:05')
     ->onOneServer()

@@ -20,8 +20,9 @@ class GrimbaSavedSearchDigestMail extends Mailable
 
     public function build(): self
     {
+        // Wave ZZZZZZZZZZ (Vader 2026-05-23) — subject wrapped in __().
         return $this
-            ->subject('Vos alertes recherche GrimbaNews')
+            ->subject(__('Vos alertes recherche GrimbaNews'))
             ->view('emails.saved-search-digest');
     }
 }

@@ -7,22 +7,25 @@
         <p style="font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:#8d3025; margin:0 0 10px;">
             GrimbaNews
         </p>
+        {{-- Wave ZZZZZZZZZZ (Vader 2026-05-23) — wrap visible strings
+            in __() so future locale-per-recipient mailing flips
+            without view edits. --}}
         <h1 style="font-family: Georgia, serif; font-size:28px; line-height:1.15; margin:0 0 12px; color:#1a1713;">
-            Vos alertes recherche
+            {{ __('Vos alertes recherche') }}
         </h1>
         <p style="font-size:15px; line-height:1.6; color:#4a4540; margin:0 0 22px;">
             @if($firstName !== '')
-                Bonjour {{ $firstName }},
+                {{ __('Bonjour :name,', ['name' => $firstName]) }}
             @else
-                Bonjour,
+                {{ __('Bonjour,') }}
             @endif
-            voici les nouveaux articles qui correspondent aux recherches que vous suivez.
+            {{ __('voici les nouveaux articles qui correspondent aux recherches que vous suivez.') }}
         </p>
 
         @foreach($digests as $digest)
             <div style="border-top:1px solid #e8dfcf; padding:18px 0 6px;">
                 <p style="font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#8d3025; margin:0 0 6px;">
-                    Recherche suivie
+                    {{ __('Recherche suivie') }}
                 </p>
                 <h2 style="font-family: Georgia, serif; font-size:20px; line-height:1.25; margin:0 0 10px;">
                     <a href="{{ $digest['url'] }}" style="color:#1a1713; text-decoration:none;">
@@ -51,7 +54,7 @@
         @endforeach
 
         <p style="font-size:13px; line-height:1.5; color:#6b6459; margin:22px 0 0;">
-            Vous pouvez retirer une alerte depuis Mon compte.
+            {{ __('Vous pouvez retirer une alerte depuis Mon compte.') }}
         </p>
     </div>
 </div>

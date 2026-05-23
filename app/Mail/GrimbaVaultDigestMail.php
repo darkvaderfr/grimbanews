@@ -20,8 +20,13 @@ class GrimbaVaultDigestMail extends Mailable
 
     public function build(): self
     {
+        // Wave ZZZZZZZZZZ (Vader 2026-05-23) — subject wrapped in
+        // __() so a future per-recipient `app()->setLocale()` call
+        // produces locale-aware subjects without touching this
+        // class. Today's default locale (FR) preserves current
+        // behavior. EN translation in lang/en.json.
         return $this
-            ->subject('Votre digest coffre GrimbaNews')
+            ->subject(__('Votre digest coffre GrimbaNews'))
             ->view('emails.vault-digest');
     }
 }

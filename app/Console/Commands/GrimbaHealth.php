@@ -416,6 +416,7 @@ class GrimbaHealth extends Command
             foreach ($riskWarnings as $warning) {
                 $this->warn('   ⚠ ' . $warning);
             }
+            $this->notifySlackOnRisk($riskWarnings);
         }
 
         $this->newLine();
@@ -425,5 +426,43 @@ class GrimbaHealth extends Command
         return $failOnRisk && $riskWarnings !== []
             ? self::FAILURE
             : self::SUCCESS;
+    }
+
+    /**
+     * Wave YYYYYYYYYY (Vader 2026-05-23) — Slack webhook fallback.
+     *
+     * If GRIMBA_HEALTH_SLACK_WEBHOOK is set in the environment, post
+     * a summary line per failure run. Operator sets the URL in .env;
+     * no other config needed. Silent no-op if the env var is unset
+     * (preserves today's behavior). 5s timeout so a hung endpoint
+     * never blocks the hourly cron.
+     */
+    private function notifySlackOnRisk(array $warnings): void
+    {
+        $webhook = (string) env('GRIMBA_HEALTH_SLACK_WEBHOOK', '');
+        if ($webhook === '' || ! filter_var($webhook, FILTER_VALIDATE_URL)) {
+            return;
+        }
+        $payload = [
+            'text' => sprintf(
+                ":rotating_light: *GrimbaNews health: %d operating floor%s breached*\n*env:* %s · *host:* %s · *time:* %s\n%s",
+                count($warnings),
+                count($warnings) === 1 ? '' : 's',
+                (string) env('APP_ENV', 'unknown'),
+                (string) gethostname(),
+                now()->toIso8601String(),
+                implode("\n", array_map(static fn (string $w): string => '• ' . $w, $warnings))
+            ),
+        ];
+        try {
+            $resp = \Illuminate\Support\Facades\Http::timeout(5)
+                ->connectTimeout(3)
+                ->retry(0)
+                ->asJson()
+                ->post($webhook, $payload);
+            $this->line('   📡 slack-webhook POST ' . ($resp->successful() ? 'ok' : 'failed (' . $resp->status() . ')'));
+        } catch (\Throwable $e) {
+            $this->line('   📡 slack-webhook POST failed (' . substr($e->getMessage(), 0, 60) . ')');
+        }
     }
 }
