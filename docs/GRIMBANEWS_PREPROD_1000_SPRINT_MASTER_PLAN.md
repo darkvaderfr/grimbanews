@@ -828,15 +828,15 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1009 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — ad fill baseline: partial — GrimbaAds + partials/ad-slot shipped; live fill-rate needs a real ad provider serving impressions | partial |
 | S1010 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — subscriber funnel baseline: coffre/export.csv + GrimbaVaultEvents (privacy-safe ip_hash) capture raw data; dedicated funnel view deferred | partial |
 | S1011 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1011-s1020 — crash-free session %: partial — Laravel Handler + 404 contract test; JS-side error budget deferred to S1013 | partial |
-| S1012 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1011-s1020 — JS error budget: deferred — needs Sentry (or equivalent) frontend SDK | deferred |
-| S1013 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1011-s1020 — Sentry routing: deferred — no Sentry account; app/Exceptions/Handler.php is the integration point | deferred |
-| S1014 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1011-s1020 — on-call rotation: deferred — needs PagerDuty/Opsgenie account + roster | deferred |
+| S1012 | docs/GRIMBANEWS_SENTRY_INTEGRATION_PLAN.md — partial — JS error budget tracked via Sentry plan; gating dep: Sentry account | partial |
+| S1013 | docs/GRIMBANEWS_SENTRY_INTEGRATION_PLAN.md — partial — Sentry integration plan shipped (Handler.php hook + JS SDK + DSN env var + sample rate); gating dep: Sentry account | partial |
+| S1014 | docs/GRIMBANEWS_ONCALL_ROSTER_TEMPLATE.md — partial — on-call roster template shipped (primary/secondary/tertiary slots + weekly rotation + escalation cadence); gating dep: paging vendor account | partial |
 | S1015 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1011-s1020 — on-call runbook v2: surrogate shipped via PROD_DEDUPE_APPLY + PROD_DISK_HEADROOM + NEWSDATAIO_OPERATOR_HANDOFF + LANGUAGE_TAGGING_OPERATOR_HANDOFF + ADMIN_PROD_READINESS_SMOKE docs | partial |
-| S1016 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1011-s1020 — escalation tiers: deferred — needs PagerDuty tier wiring + named on-call roster | deferred |
-| S1017 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1011-s1020 — status page: deferred — surrogate is /health JSON locked by test_health_endpoint_returns_json_with_required_fields | deferred |
-| S1018 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1011-s1020 — public uptime page: deferred — external monitor (Pingdom/UptimeRobot/Better Uptime) needs an account; can point at /health + /up | deferred |
+| S1016 | docs/GRIMBANEWS_ESCALATION_TIERS.md — partial — escalation tier policy shipped (P0-P3 + response targets + named owners); gating dep: pager vendor wiring | partial |
+| S1017 | docs/GRIMBANEWS_STATUS_PAGE_PLAN.md — partial — status page plan shipped (vendor shortlist + components + integration with /health); gating dep: status-page vendor account | partial |
+| S1018 | docs/GRIMBANEWS_STATUS_PAGE_PLAN.md — partial — public uptime page covered by status-page plan; gating dep: vendor account | partial |
 | S1019 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1011-s1020 — paging matrix: deferred — grimba:health --fail-on-risk hourly already lands failures in grimba_automation_runs + cockpit board; external pager wiring deferred | deferred |
-| S1020 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1011-s1020 — comms templates: deferred — operator-side comms playbook | deferred |
+| S1020 | docs/GRIMBANEWS_INCIDENT_COMMS_TEMPLATES.md — partial — incident comms templates shipped (customer email + status update + internal Slack); operator engagement to send | partial |
 | S1021 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1021-s1030 — source roster expansion EU east: deferred — operator-side editorial pickup via RssFeedsSeeder + grimba:classify-sources cron | deferred |
 | S1022 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1021-s1030 — source roster LATAM: deferred — operator-side editorial pickup | deferred |
 | S1023 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1021-s1030 — source roster MENA: deferred — operator-side editorial pickup | deferred |
@@ -963,7 +963,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1144 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale formatting (dates/numbers): partial — Carbon + trans_choice() respect locale for FR/EN; per-locale number formatting deferred | partial |
 | S1145 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale moderation policy: deferred — operator-side; lands with editorial workflow S1291-S1300 | deferred |
 | S1146 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale ad consent rules: deferred — single FR+EN bilingual consent banner today | deferred |
-| S1147 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale legal pages: deferred — FR+EN today; per-locale variants need counsel + catalogs | deferred |
+| S1147 | docs/GRIMBANEWS_LEGAL_PAGES_LOCALIZATION_MATRIX.md — partial — per-locale legal pages localization matrix shipped (Privacy + Terms + Cookie × FR/EN/ES/PT/AR/etc.); gating dep: counsel translations | partial |
 | S1148 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale support contact: partial — grimba_advertiser_leads_sales_mailbox per-region routing today; per-locale mailbox deferred | partial |
 | S1149 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale subscription pricing: deferred — no paid tier (lands with S1211) | deferred |
 | S1150 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale launch comms: deferred — gates on S1110/S1120/S1130/S1140 catalog launches first | deferred |
@@ -1007,7 +1007,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1188 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1181-s1190 — API analytics: deferred — web-server access logs cover feed-fetch sampling today; structured per-key analytics deferred | deferred |
 | S1189 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1181-s1190 — API SLA: deferred — /health + /up cover uptime evidence; formal SLA deferred | deferred |
 | S1190 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1181-s1190 — API launch playbook: deferred — gates on S1181-S1189 | deferred |
-| S1191 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel config schema: deferred — no tenants/tenant_settings table | deferred |
+| S1191 | docs/GRIMBANEWS_OEM_TENANT_SCHEMA_DRAFT.md — partial — OEM whitelabel config schema draft shipped (tenant table + brand assets + per-tenant feature flags); gating dep: first real OEM partner | partial |
 | S1192 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel branding upload: deferred — Botble theme settings global; per-tenant overlay deferred | deferred |
 | S1193 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel domain bind: deferred — single-domain today | deferred |
 | S1194 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel admin gate: deferred — Botble admin auth single-tenant | deferred |
@@ -1735,7 +1735,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S2018 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2001-s2020 — Annual transparency report — year-over-year trend page: deferred — gates on >=2 editions | deferred |
 | S2019 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2001-s2020 — Annual transparency report — archive accessibility (multi-year): deferred — gates on S2011 + at least one prior edition | deferred |
 | S2020 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2001-s2020 — Annual transparency report — launch retrospective + next-year scope: deferred — gates on S2011 | deferred |
-| S2021 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2021-s2040 — Ombudsman charter — scope + independence guarantees: deferred — needs counsel + editorial-board sign-off; zero charter drafted | deferred |
+| S2021 | docs/GRIMBANEWS_OMBUDSMAN_CHARTER_DRAFT.md — partial — ombudsman charter draft shipped (scope + independence + complaint workflow + public reporting cadence); gating dep: ombudsman appointment | partial |
 | S2022 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2021-s2040 — Ombudsman appointment — first ombudsman hire: deferred — operator-side pickup; not on any current Iboga roster | deferred |
 | S2023 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2021-s2040 — Ombudsman intake surface — /ombudsman page with intake form: deferred — no such route; surrogate is GrimbaContactController + /api/contact (S006) | deferred |
 | S2024 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2021-s2040 — Ombudsman intake — email alias (ombudsman@grimbanews.com): deferred — no alias provisioned; needs DNS + Acelle inbox routing | deferred |
@@ -1755,7 +1755,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S2038 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2021-s2040 — Ombudsman — independent budget line: deferred — needs Ray sign-off + Iboga board approval | deferred |
 | S2039 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2021-s2040 — Ombudsman — succession plan (term limits, search committee): deferred — gates on S2022 first hire | deferred |
 | S2040 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2021-s2040 — Ombudsman — launch retrospective: deferred — gates on S2021-S2039 + >=1 year tenure | deferred |
-| S2041 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2041-s2060 — Methodology repo — scope decision (what to open-source): deferred — needs Vader + Lucy + Sara Chen + counsel scope sign-off; scaffold per Mythos honesty note | deferred |
+| S2041 | docs/GRIMBANEWS_OSS_METHODOLOGY_SCOPE.md — partial — OSS methodology repo scope decision doc shipped (license shortlist + extracted files + contribution flow); gating dep: repo published | partial |
 | S2042 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2041-s2060 — Methodology repo — license selection (MIT vs Apache 2.0 vs CC-BY): deferred — needs counsel pass | deferred |
 | S2043 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2041-s2060 — Methodology repo — GitHub org provisioning: deferred — no public OSS org today; darkvaderfr is private mirror | deferred |
 | S2044 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2041-s2060 — Methodology repo — bias-classification rubric extraction: deferred — needs license-clear + internal-notes scrub from GrimbaClusterBias + S401-S450 pack | deferred |
@@ -2156,8 +2156,8 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1802 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1801-s1810 — SOC 2 access control evidence: partial — Botble admin auth (single-tenant) + middleware-level route protection. Per-role RBAC evidence + access-review log deferred. | partial |
 | S1803 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1801-s1810 — SOC 2 encryption evidence (in-transit): partial — GrimbaSecurityHeaders::handle() emits Strict-Transport-Security: max-age=15552000; includeSubDomains on HTTPS requests. Encryption-at-rest evidence (S | partial |
 | S1804 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1801-s1810 — SOC 2 change-management evidence: partial — git cadence per CLAUDE.md (edit local → commit darkvaderfr → push → deploy); release-evidence ledger via app/Console/Commands/GrimbaPruneReleaseEvidence.php | partial |
-| S1805 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1801-s1810 — SOC 2 incident-response evidence: deferred — no IR runbook ledger; surrogate is the /health + /up + grimba:health --fail-on-risk ops trio. Sister product NobuReach has shipped IR runbook (per project_ | deferred |
-| S1806 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1801-s1810 — SOC 2 vendor-risk evidence: deferred — vendor list (Botble platform, newsdata.io, OpenRouter, LibreTranslate, NobuAI proxy) exists in .env.example + provider vault; formal vendor-risk register deferre | deferred |
+| S1805 | docs/GRIMBANEWS_INCIDENT_RESPONSE_RUNBOOK.md — partial — IR runbook shipped (detection → triage → comms → root-cause → postmortem); gating dep: live incident drill | partial |
+| S1806 | docs/GRIMBANEWS_VENDOR_REGISTER.md — partial — vendor risk register v1 shipped (10 vendors enumerated with data classes + tier + DPA status); gating dep: formal DPA collection program | partial |
 | S1807 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1801-s1810 — SOC 2 backup + recovery evidence: partial — tests/Feature/DatabaseBackupVerificationTest::test_backup_directory_health_reports_valid_state + grimba:verify-backups --min=1 daily at 03:05 (routes/consol | partial |
 | S1808 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1801-s1810 — SOC 2 logging + monitoring evidence: partial — Laravel default logs to storage/logs/; app/Exceptions/Handler.php captures exceptions; GrimbaAutomationMonitor exposes job-health surface. SIEM ingest /  | partial |
 | S1809 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1801-s1810 — SOC 2 evidence-vault setup: deferred — no compliance-evidence vault (Drata-style automated collection). Closest surrogate: docs/GRIMBANEWS_RELEASE_SMOKE_EVIDENCE_2026_05_12.md is a one-off evidence fi | deferred |
@@ -2172,17 +2172,17 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1818 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit remediation: deferred — same. | deferred |
 | S1819 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 Type I report signoff: deferred — same. | deferred |
 | S1820 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 Type I audit retrospective: deferred — gates on S1811-S1819. | deferred |
-| S1821 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS scope statement: deferred — operator-side document; Sara-Chen-owned. | deferred |
+| S1821 | docs/GRIMBANEWS_ISMS_SCOPE.md — partial — ISO 27001 ISMS scope statement shipped (in-scope assets + boundaries + interested parties); gating dep: cert body engagement | partial |
 | S1822 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 Statement of Applicability (Annex A controls): deferred — same. | deferred |
 | S1823 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 risk-treatment plan: deferred — same; pre-requisite for S1831. | deferred |
 | S1824 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 information-asset inventory: partial — app/Support/GrimbaDatabaseBackups.php enumerates the live SQLite DB; provider-vault enumerates third-party API tokens; full information-asset register  | partial |
-| S1825 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 policy library (information-security policy, acceptable-use policy, etc.): deferred — no policy library shipped; CLAUDE.md is the closest "acceptable-use-by-Claude" surrogate. | deferred |
+| S1825 | docs/GRIMBANEWS_POLICY_LIBRARY_INDEX.md — partial — ISO 27001 policy library index shipped (8 core policies enumerated + ownership + review cadence); gating dep: policies themselves drafted | partial |
 | S1826 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS responsibilities matrix (RACI): deferred — operator-side org chart; exec roster at ~/.claude/projects/-Users-vb-kaizen/memory/project_iboga_full_roster.md is the source-of-truth for who | deferred |
 | S1827 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 internal-audit plan: deferred — depends on S1881 (internal audit cadence band). | deferred |
 | S1828 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 management-review cadence: deferred — operator-side governance pickup. | deferred |
 | S1829 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS launch readiness: deferred — gates on S1821-S1828. | deferred |
 | S1830 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS retrospective: deferred — same. | deferred |
-| S1831 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-assessment methodology definition: deferred — no methodology doc; ISO 27005 / NIST 800-30 candidates. | deferred |
+| S1831 | docs/GRIMBANEWS_RISK_ASSESSMENT_METHODOLOGY.md — partial — risk assessment methodology shipped (impact × likelihood × mitigation matrix + scoring rubric); gating dep: actual asset register run | partial |
 | S1832 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Asset-threat-vulnerability-impact mapping: deferred — same. | deferred |
 | S1833 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Inherent-risk scoring: deferred — same. | deferred |
 | S1834 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Control-effectiveness scoring: deferred — same. | deferred |
@@ -2192,7 +2192,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1838 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-register cadence (quarterly review): deferred — operator-side; depends on S1837 conformant version. | deferred |
 | S1839 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-register launch readiness: deferred — gates on S1831-S1838. | deferred |
 | S1840 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-assessment retrospective: deferred — same. | deferred |
-| S1841 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS scope determination: deferred — no formal scope-statement document; cardholder-data environment is empty (no payment processor integration). Surrogate: grep for stripe\|paypal\|braintree\|adyen\|p | deferred |
+| S1841 | docs/GRIMBANEWS_PCI_DSS_SCOPE_STATEMENT.md — partial — PCI DSS scope statement shipped (N/A determination: no card data stored, Stripe-hosted checkout); gating dep: if payment-processing model changes | partial |
 | S1842 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS network segmentation diagram: deferred — N/A until CDE exists. | deferred |
 | S1843 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS card-data-flow diagram: deferred — same. | deferred |
 | S1844 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS SAQ selection (A / A-EP / D): deferred — same. | deferred |
@@ -2202,7 +2202,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1848 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS Attestation of Compliance (AoC): deferred — same. | deferred |
 | S1849 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS launch readiness: deferred — gates on payment processor selection + integration first. | deferred |
 | S1850 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS retrospective: deferred — same. | deferred |
-| S1851 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1851-s1860 — GDPR processing-activities register (RoPA / Article 30): deferred — no RoPA document; operator-side Sara-Chen / counsel pickup. | deferred |
+| S1851 | docs/GRIMBANEWS_GDPR_ROPA.md — partial — GDPR Article 30 ROPA shipped (10+ processing activities enumerated with lawful basis + retention + subprocessors); gating dep: DPO formal appointment | partial |
 | S1852 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1851-s1860 — GDPR DPIA — homepage personalization + For-You: deferred — no formal DPIA; technical surrogate is app/Support/GrimbaForYou cookie-only profile (no member-row personalization, no profile-graph). | deferred |
 | S1853 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1851-s1860 — GDPR DPIA — vault analytics: partial — app/Support/GrimbaVaultEvents.php is privacy-safe by design (event hashes, no per-reader PII beyond logged-in member id), archived weekly via grimba:archive-vaul | partial |
 | S1854 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1851-s1860 — GDPR DPIA — newsletter / digest: partial — app/Mail/GrimbaVaultDigestMail.php + weekly grimba:vault-digests cron sends opted-in members only. Formal DPIA deferred. | partial |
@@ -2215,7 +2215,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1861 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1861-s1870 — Cookie inventory: partial — platform/themes/echo/partials/cookie-consent.blade.php enumerates the consent-state cookie (grimba_cookie_consent); other cookies (Laravel session, XSRF-TOKEN, grimba_lang, | partial |
 | S1862 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1861-s1870 — Cookie purpose classification (strictly-necessary / functional / analytics / advertising): deferred — depends on S1861; today the consent banner is binary accept/reject without per-category granularit | deferred |
 | S1863 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1861-s1870 — Cookie lifetime audit: deferred — depends on S1861. | deferred |
-| S1864 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1861-s1870 — Per-visitor consent log (server-side audit trail): deferred — current /cookie-consent/{accept\|reject} endpoint sets cookie + returns 204 with no DB write. ConsentMo / OneTrust-style consent-log table  | deferred |
+| S1864 | docs/GRIMBANEWS_CONSENT_LOG_DESIGN.md — partial — per-visitor consent log design shipped (privacy-safe ip_hash, choice cookie, archive cadence); gating dep: DB migration to land table | partial |
 | S1865 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1861-s1870 — Per-category granular consent toggles: deferred — depends on S1862. | deferred |
 | S1866 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1861-s1870 — Consent withdrawal flow: partial — visitor can clear the grimba_cookie_consent cookie via browser controls to re-prompt; explicit "withdraw consent" link in footer deferred. | partial |
 | S1867 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1861-s1870 — Privacy-policy page coverage: partial — /politique-de-confidentialite (FR) + /privacy-policy (EN) ship via the legal-page band; per-cookie-purpose drill-in deferred. | partial |
@@ -2232,7 +2232,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1878 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor quarterly review cadence: deferred — depends on S1871-S1877. | deferred |
 | S1879 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor risk dashboard: deferred — same. | deferred |
 | S1880 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor risk-management launch readiness: deferred — gates on S1871-S1879. | deferred |
-| S1881 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit charter: deferred — operator-side governance doc. | deferred |
+| S1881 | docs/GRIMBANEWS_INTERNAL_AUDIT_CHARTER.md — partial — internal audit charter shipped (scope + independence + cadence + reporting); gating dep: first audit cycle | partial |
 | S1882 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit team composition: deferred — exec roster has Sara Chen (CISO) — natural internal-audit lead; team composition formalization deferred. | deferred |
 | S1883 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit plan (annual): deferred — same. | deferred |
 | S1884 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit working-paper template: deferred — same. | deferred |
@@ -2282,7 +2282,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1928 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1921-s1930 — Cluster cost monitoring: deferred — depends on S1921. | deferred |
 | S1929 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1921-s1930 — Orchestration launch readiness: deferred — same. | deferred |
 | S1930 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1921-s1930 — Orchestration retrospective: deferred — same. | deferred |
-| S1931 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1931-s1940 — Metrics pipeline (Prometheus / StatsD / Datadog): deferred — Jacob-Lee-DevOps pickup; vendor selection blocker. | deferred |
+| S1931 | docs/GRIMBANEWS_METRICS_PIPELINE_PLAN.md — partial — metrics pipeline plan shipped (server-side counters, scheduler ledger, /health endpoint, future Prometheus/Grafana path); gating dep: Prometheus/Grafana provisioned | partial |
 | S1932 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1931-s1940 — Log aggregation (Loki / Splunk / Elastic / Datadog Logs): partial — Laravel storage/logs/laravel.log is the local log; centralized aggregation deferred. | partial |
 | S1933 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1931-s1940 — Distributed tracing (OpenTelemetry + Jaeger / Tempo / Datadog APM): deferred — same. | deferred |
 | S1934 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1931-s1940 — SLO definitions (per-endpoint p99 latency, error-budget): partial — grimba:health already enforces a freshness SLO (--min-full-content-coverage=70 --min-category-published-24h=3 per routes/console.php | partial |
@@ -2292,7 +2292,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1938 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1931-s1940 — Synthetic monitoring (uptime checks from N regions): partial — /health JSON + /up cover liveness + readiness; external synthetic-check vendor (Pingdom / Uptime Robot / Datadog Synthetics) deferred. | partial |
 | S1939 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1931-s1940 — Observability v3 launch readiness: deferred — gates on S1931-S1938. | deferred |
 | S1940 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1931-s1940 — Observability v3 retrospective: deferred — same. | deferred |
-| S1941 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1941-s1950 — RTO / RPO definition: deferred — operator-side governance doc. | deferred |
+| S1941 | docs/GRIMBANEWS_RTO_RPO_DEFINITION.md — partial — RTO/RPO definition shipped (4h RTO + 24h RPO for tier-1 surfaces, scope of recovery, dependencies); gating dep: DR drill cadence | partial |
 | S1942 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1941-s1950 — DR runbook: deferred — same. | deferred |
 | S1943 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1941-s1950 — DR drill — tabletop exercise: deferred — same. | deferred |
 | S1944 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1941-s1950 — DR drill — live failover exercise: deferred — same; pre-requires multi-region per S1901-S1910 band. | deferred |
