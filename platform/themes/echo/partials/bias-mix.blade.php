@@ -110,8 +110,8 @@
             @endif
             <a href="{{ url('/pour-vous/export.csv') }}"
                class="btn-grimba btn-grimba--ghost btn-grimba--sm"
-               title="Exporter votre historique de lecture (jamais stocké côté serveur)">
-                Exporter mon historique (.csv)
+               title="{{ __('Exporter votre historique de lecture (jamais stocké côté serveur)') }}">
+                {{ __('Exporter mon historique (.csv)') }}
             </a>
         </div>
 

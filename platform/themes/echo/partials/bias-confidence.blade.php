@@ -13,14 +13,14 @@
 
     $reason = null;
     if ($cred !== null && (int) $cred < 50) {
-        $reason = 'source faible confiance';
+        $reason = __('source faible confiance');
     } elseif (! $hasLinkedSource && in_array($post->bias_rating ?? null, ['left', 'center', 'right'], true)) {
-        $reason = 'source non liée';
+        $reason = __('source non liée');
     }
 @endphp
 
 @if($reason)
-    <span class="grimba-bias-confidence" title="Biais auto-détecté · {{ $reason }}">
-        biais auto-détecté
+    <span class="grimba-bias-confidence" title="{{ __('Biais auto-détecté') }} · {{ $reason }}">
+        {{ __('biais auto-détecté') }}
     </span>
 @endif
