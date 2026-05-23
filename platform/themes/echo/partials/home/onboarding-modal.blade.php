@@ -70,7 +70,7 @@
                             class="btn-grimba btn-grimba--ghost btn-grimba--sm grimba-onboard-topic"
                             data-topic-id="{{ $topic->id }}"
                             aria-pressed="false">
-                        {{ $topic->name }}
+                        {{ __($topic->name) }}
                     </button>
                 @endforeach
             </div>
