@@ -85,11 +85,15 @@ class Regions
 
     public static function label(string $key): string
     {
+        // Wave TTTTTTTTTT (Vader 2026-05-23) — wrap in __() so EN
+        // readers see "Africa / Americas" instead of FR labels.
+        // Existing translations: lang/en.json has Amériques→Americas,
+        // Afrique→Africa.
         return match ($key) {
-            'africa'        => 'Afrique',
-            'europe'        => 'Europe',
-            'americas'      => 'Amériques',
-            'international' => 'International',
+            'africa'        => __('Afrique'),
+            'europe'        => __('Europe'),
+            'americas'      => __('Amériques'),
+            'international' => __('International'),
             default         => '—',
         };
     }
