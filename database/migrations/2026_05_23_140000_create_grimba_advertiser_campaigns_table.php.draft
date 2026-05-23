@@ -1,0 +1,114 @@
+<?php
+
+/**
+ * Wave XXXXXXXXXX (Vader 2026-05-23) — DRAFT MIGRATION (not applied).
+ *
+ * Vader CLAUDE.md rule: "no migrations without ask." This file is
+ * the schema for the next phase of B2B advertiser self-serve (live
+ * campaign creation + Stripe billing + editorial-review queue) but
+ * is NOT yet runnable — rename `.draft` → `.php` and run
+ * `php artisan migrate` once Vader has reviewed + approved.
+ *
+ * Schema rationale:
+ * - One CAMPAIGN per advertiser engagement (not per lead). An
+ *   `advertiser_lead_id` FK lets us trace a campaign back to its
+ *   initial inquiry but doesn't require lead-and-campaign to be 1:1.
+ * - `status` workflow: pending_review → approved → live → ended OR
+ *   pending_review → rejected. Editorial review is mandatory per
+ *   `docs/GRIMBANEWS_MYTHOS_S1101_S1200_*` brand-safety contract.
+ * - Stripe fields are placeholders. No Stripe wiring lives here —
+ *   that's a separate sprint with a real API key from Vader.
+ * - `creative_url` is a single uploaded asset URL today. Multi-asset
+ *   campaigns (banner + native + sponsorship) defer to S1281 in
+ *   Mythos band.
+ * - `slot_targeting` is JSON listing which `grimba_ad_slot` keys
+ *   the campaign should appear in (`home_top`, `article_inline`,
+ *   `comparatif_sidebar`, etc.).
+ * - `edition_targeting` + `topic_targeting` mirror the Mythos S1281
+ *   "Ciblage région + édition + sujet" pitch from /advertise.
+ */
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('grimba_advertiser_campaigns', function (Blueprint $table): void {
+            $table->id();
+
+            // Trace back to the original advertiser inquiry (nullable
+            // because some campaigns may be entered by admin without
+            // a prior lead row).
+            $table->foreignId('advertiser_lead_id')
+                ->nullable()
+                ->constrained('grimba_advertiser_leads')
+                ->nullOnDelete();
+
+            // Campaign identity
+            $table->string('name');                // human-readable (admin display)
+            $table->string('advertiser_email');    // primary contact
+            $table->string('company')->nullable();
+
+            // Creative
+            $table->string('creative_url')->nullable();      // asset URL (image / video)
+            $table->string('creative_alt_text')->nullable(); // accessibility
+            $table->string('click_url')->nullable();         // landing page
+
+            // Targeting (JSON arrays of slot/edition/topic keys)
+            $table->json('slot_targeting')->nullable();
+            $table->json('edition_targeting')->nullable();
+            $table->json('topic_targeting')->nullable();
+            $table->json('exclusion_keywords')->nullable();
+
+            // Scheduling
+            $table->dateTime('starts_at')->nullable();
+            $table->dateTime('ends_at')->nullable();
+            $table->unsignedInteger('daily_impression_cap')->nullable();
+            $table->unsignedInteger('lifetime_impression_cap')->nullable();
+
+            // Billing (Stripe-ready placeholders)
+            $table->string('billing_tier')->nullable();                  // 'self_serve_monthly_5k_eur', 'quarterly_invoice', etc.
+            $table->string('stripe_customer_id')->nullable();            // cus_xxx
+            $table->string('stripe_subscription_id')->nullable();        // sub_xxx
+            $table->string('stripe_payment_intent_id')->nullable();      // pi_xxx (one-shot)
+            $table->unsignedInteger('amount_cents')->nullable();         // in EUR cents
+            $table->string('currency', 3)->default('EUR');
+
+            // Workflow
+            $table->string('status')->default('pending_review');         // pending_review | approved | live | paused | ended | rejected
+            $table->dateTime('reviewed_at')->nullable();
+            $table->string('reviewed_by')->nullable();                   // admin email
+            $table->text('review_notes')->nullable();
+            $table->text('rejection_reason')->nullable();
+
+            // Telemetry roll-up (cached from per-impression event store,
+            // which is a separate sprint — S1261)
+            $table->unsignedBigInteger('impressions_count')->default(0);
+            $table->unsignedBigInteger('clicks_count')->default(0);
+            $table->unsignedBigInteger('completions_count')->default(0); // video completion
+
+            $table->timestamps();
+
+            $table->index('status');
+            $table->index('starts_at');
+            $table->index('ends_at');
+            $table->index('advertiser_email');
+        });
+
+        // Also add Stripe customer-id to the leads table so we can
+        // pre-attach a customer object when the lead converts.
+        Schema::table('grimba_advertiser_leads', function (Blueprint $table): void {
+            $table->string('stripe_customer_id')->nullable()->after('admin_notes');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('grimba_advertiser_leads', function (Blueprint $table): void {
+            $table->dropColumn('stripe_customer_id');
+        });
+        Schema::dropIfExists('grimba_advertiser_campaigns');
+    }
+};
