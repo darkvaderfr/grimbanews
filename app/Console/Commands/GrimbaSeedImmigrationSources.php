@@ -39,7 +39,9 @@ class GrimbaSeedImmigrationSources extends Command
                 'bias' => 'center',
                 'ownership' => 'nonprofit',
                 'credibility' => 92,
-                'feeds' => ['https://www.thenewhumanitarian.org/rss/all'],
+                // Wave WWWWWWWWWW (Vader 2026-05-23) — URL repaired.
+                // /rss/all was returning 404; /rss.xml works (200, real RSS).
+                'feeds' => ['https://www.thenewhumanitarian.org/rss.xml'],
                 'notes' => 'Geneva-based humanitarian-affairs newsroom (formerly IRIN). Daily coverage of displacement, migration, asylum, refugee crises.',
             ],
             [
@@ -50,7 +52,9 @@ class GrimbaSeedImmigrationSources extends Command
                 'bias' => 'center',
                 'ownership' => 'nonprofit',
                 'credibility' => 90,
-                'feeds' => ['https://www.migrationpolicy.org/rss/migration-information-source'],
+                // Wave WWWWWWWWWW — URL repaired. /rss/migration-information-source
+                // returns 403; /rss.xml works.
+                'feeds' => ['https://www.migrationpolicy.org/rss.xml'],
                 'notes' => 'Washington-based think tank; deep analysis of immigration policy + migration data.',
             ],
             [
@@ -64,27 +68,35 @@ class GrimbaSeedImmigrationSources extends Command
                 'feeds' => ['https://www.lacimade.org/feed/'],
                 'notes' => 'Association française de solidarité avec les personnes migrantes. Couverture des droits des étrangers, asile, frontières.',
             ],
+            // Wave WWWWWWWWWW — REMOVED France terre d'asile + UNHCR News.
+            // Both probed dead 2026-05-23:
+            //   - france-terre-asile.org/feed → 404 (site has no RSS)
+            //   - france-terre-asile.org/toutes-les-actualites?format=feed → 404
+            //   - unhcr.org/rss/news.xml → 403
+            //   - unhcr.org/rss.xml → 403
+            //   - unhcr.org/news/rss.xml → 403
+            // Replaced with two probed-working alternatives below.
             [
-                'name' => "France terre d'asile",
-                'website' => 'https://www.france-terre-asile.org',
-                'language' => 'fr',
-                'country' => 'FR',
-                'bias' => 'left',
-                'ownership' => 'nonprofit',
-                'credibility' => 82,
-                'feeds' => ['https://www.france-terre-asile.org/toutes-les-actualites?format=feed&type=rss'],
-                'notes' => "Association d'aide aux demandeurs d'asile et réfugiés en France.",
-            ],
-            [
-                'name' => 'UNHCR News',
-                'website' => 'https://www.unhcr.org',
+                'name' => 'ReliefWeb',
+                'website' => 'https://reliefweb.int',
                 'language' => 'en',
                 'country' => 'CH',
                 'bias' => 'center',
                 'ownership' => 'government',
-                'credibility' => 95,
-                'feeds' => ['https://www.unhcr.org/rss/news.xml'],
-                'notes' => 'UN Refugee Agency. Authoritative source on refugee policy + emergencies.',
+                'credibility' => 93,
+                'feeds' => ['https://reliefweb.int/updates/rss.xml'],
+                'notes' => 'UN OCHA humanitarian-information service. Daily updates on displacement, refugee operations, and humanitarian crises. Replaces UNHCR News (RSS blocked) for refugee/displacement coverage. Probed working 2026-05-23.',
+            ],
+            [
+                'name' => 'Amnesty International',
+                'website' => 'https://www.amnesty.org',
+                'language' => 'en',
+                'country' => 'GB',
+                'bias' => 'left',
+                'ownership' => 'nonprofit',
+                'credibility' => 87,
+                'feeds' => ['https://www.amnesty.org/en/feed/'],
+                'notes' => 'Global human-rights NGO. Frequent immigration / refugee / detention coverage. Probed working 2026-05-23.',
             ],
             [
                 'name' => 'Refugees International',
@@ -133,7 +145,40 @@ class GrimbaSeedImmigrationSources extends Command
             $existing = $existingId ? (object) ['id' => $existingId] : null;
 
             if ($existing) {
-                $report[] = [$p['name'], 'already_exists (#' . $existing->id . ')', 0];
+                // Wave WWWWWWWWWW (Vader 2026-05-23) — publisher exists,
+                // but feeds may be missing or out-of-date. Backfill any
+                // MISSING feeds; don't touch existing rows.
+                $feedsBackfilled = 0;
+                foreach ($p['feeds'] as $url) {
+                    $hasFeedRow = DB::table('rss_feeds')
+                        ->where('source_id', $existing->id)
+                        ->where('url', $url)
+                        ->exists();
+                    if ($hasFeedRow) {
+                        continue;
+                    }
+                    if ($dry) {
+                        $feedsBackfilled++;
+                        continue;
+                    }
+                    DB::table('rss_feeds')->insert([
+                        'source_id' => $existing->id,
+                        'url' => $url,
+                        'feed_format' => 'rss',
+                        'is_active' => true,
+                        'notes' => 'Backfilled by grimba:seed-immigration-sources 2026-05-23 (Wave WWWWWWWWWW URL repair)',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    $feedsBackfilled++;
+                    $feedsAdded++;
+                }
+                $report[] = [
+                    $p['name'],
+                    'already_exists (#' . $existing->id . ')'
+                        . ($feedsBackfilled > 0 ? ' · +' . $feedsBackfilled . ' feed' . ($feedsBackfilled > 1 ? 's' : '') : ''),
+                    $feedsBackfilled,
+                ];
                 $skipped++;
                 continue;
             }
