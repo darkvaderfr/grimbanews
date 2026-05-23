@@ -21,6 +21,26 @@ class GrimbaSourceBreakdown
         $biasCounts = $knownBiasBuckets->pluck('count')->map(fn ($count) => (int) $count)->values();
         $biasMax = max(1, (int) $biasCounts->max());
         $biasMin = $knownBiasTotal > 0 ? (int) $biasCounts->min() : 0;
+
+        // Wave CCCCCCCCCCC (Vader 2026-05-23 screenshot bug) — the raw
+        // `sortByDesc('count')->first()` above silently picks left on
+        // a 33/33/33 (L=C=R) tie and renders "Dominant side: Left 33%"
+        // — misleading. Resolve the honest label via GrimbaClusterBias
+        // which surfaces Middle Ground / Juste milieu on L=R ties.
+        $countsForResolver = [
+            'left' => (int) ($knownBiasBuckets->firstWhere('key', 'left')?->count ?? 0),
+            'center' => (int) ($knownBiasBuckets->firstWhere('key', 'center')?->count ?? 0),
+            'right' => (int) ($knownBiasBuckets->firstWhere('key', 'right')?->count ?? 0),
+        ];
+        $resolvedBias = GrimbaClusterBias::resolve($countsForResolver);
+        $isMiddleGround = $resolvedBias['key'] === 'middle_ground';
+        // For the panel display: if Middle Ground, replace the dominant
+        // label with the helper's translated label + purple color.
+        // dominantBiasPct is set to L+R combined % (honest reading of
+        // what "Middle Ground" means: both extremes covered equally).
+        $middleGroundPct = $knownBiasTotal > 0
+            ? (int) round(($countsForResolver['left'] + $countsForResolver['right']) * 100 / $knownBiasTotal)
+            : 0;
         $ownershipBuckets = self::ownershipBuckets($sources);
         $topOwner = $ownershipBuckets->first();
         $originBuckets = self::originBuckets($sources);
@@ -35,8 +55,18 @@ class GrimbaSourceBreakdown
             'knownBiasPct' => (int) round($knownBiasTotal * 100 / $total),
             'weakestBias' => $weakestBias,
             'weakestPct' => $weakestBias ? (int) round($weakestBias->count * 100 / $total) : 0,
-            'dominantBias' => $dominantBias,
-            'dominantBiasPct' => $dominantBias && $knownBiasTotal > 0 ? (int) round($dominantBias->count * 100 / $knownBiasTotal) : 0,
+            'dominantBias' => $isMiddleGround
+                ? (object) [
+                    'key' => 'middle_ground',
+                    'label' => $resolvedBias['label'],
+                    'color' => $resolvedBias['color'],
+                    'count' => $countsForResolver['left'] + $countsForResolver['right'],
+                ]
+                : $dominantBias,
+            'dominantBiasPct' => $isMiddleGround
+                ? $middleGroundPct
+                : ($dominantBias && $knownBiasTotal > 0 ? (int) round($dominantBias->count * 100 / $knownBiasTotal) : 0),
+            'dominantBiasIsMiddleGround' => $isMiddleGround,
             'biasBalanceScore' => $knownBiasTotal > 0 ? (int) round($biasMin * 100 / $biasMax) : 0,
             'factBuckets' => self::factBuckets($sources),
             'ownershipBuckets' => $ownershipBuckets,

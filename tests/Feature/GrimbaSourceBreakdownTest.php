@@ -45,7 +45,14 @@ class GrimbaSourceBreakdownTest extends TestCase
         $this->assertSame(3, $breakdown['total']);
         $this->assertSame(3, $breakdown['knownBiasTotal']);
         $this->assertSame(100, $breakdown['knownBiasPct']);
-        $this->assertSame(33, $breakdown['dominantBiasPct']);
+        // Wave CCCCCCCCCCC (Vader 2026-05-23 screenshot bug) — a
+        // 1/1/1 (L=C=R) split is Middle Ground per GrimbaClusterBias,
+        // not "Left 33%". dominantBiasPct now reports L+R combined %
+        // (the honest "Middle Ground" reading: both extremes covered
+        // equally). Was 33 (buggy "Left"); now 67 (L+R=2 of 3).
+        $this->assertSame(67, $breakdown['dominantBiasPct']);
+        $this->assertTrue($breakdown['dominantBiasIsMiddleGround']);
+        $this->assertSame('middle_ground', $breakdown['dominantBias']->key);
         $this->assertSame(100, $breakdown['biasBalanceScore']);
         $this->assertSame(1, $breakdown['biasBuckets']->firstWhere('key', 'left')->count);
         $this->assertSame(1, $breakdown['factBuckets']['very-high']->items->count());
