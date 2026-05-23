@@ -88,7 +88,49 @@ class GrimbaCreateBackup extends Command
         $size = GrimbaDatabaseBackups::formatBytes(filesize($artifact));
         $this->line('Created: ' . basename($artifact) . ' (' . $size . ')');
 
-        // Prune older artifacts (keep newest $keep)
+        // Wave BBBBBBBBBBB (Vader 2026-05-23, Zen MEDIUM) — partial-write
+        // sweep BEFORE retention prune. Without this, a crashed prior
+        // backup run can leave a header-only ≥1KB artifact that survives
+        // mtime-based prune for 14 days while the verifier at 03:05 only
+        // opens the LATEST artifact. Walk every artifact through PRAGMA
+        // quick_check + min-size; unlink any that fail before pruning by
+        // mtime.
+        $corrupt = 0;
+        foreach (GrimbaDatabaseBackups::files($backupDir) as $candidate) {
+            if (! is_file($candidate)) {
+                continue;
+            }
+            $artSize = (int) (@filesize($candidate) ?: 0);
+            // 1 MB floor — anything smaller can't possibly be a valid
+            // GrimbaNews DB (live DB is ~20 MB).
+            if ($artSize < 1048576) {
+                if (@unlink($candidate)) {
+                    $corrupt++;
+                }
+                continue;
+            }
+            try {
+                $db = new \PDO('sqlite:' . $candidate);
+                $db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                $stmt = $db->query('PRAGMA quick_check');
+                $ok = is_object($stmt) ? (string) $stmt->fetchColumn() : '';
+                unset($db, $stmt);
+                if ($ok !== 'ok') {
+                    if (@unlink($candidate)) {
+                        $corrupt++;
+                    }
+                }
+            } catch (\Throwable) {
+                if (@unlink($candidate)) {
+                    $corrupt++;
+                }
+            }
+        }
+        if ($corrupt > 0) {
+            $this->line('Removed ' . $corrupt . ' corrupt/partial backup artifact(s) before prune.');
+        }
+
+        // Retention prune (keep newest $keep by mtime)
         $files = GrimbaDatabaseBackups::files($backupDir);
         $excess = array_slice($files, $keep);
         $pruned = 0;

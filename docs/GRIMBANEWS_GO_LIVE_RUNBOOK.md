@@ -37,6 +37,9 @@ SSH to the VPS and confirm `.env` has all of:
 - `APP_ENV=production`
 - `APP_DEBUG=false`
 - `APP_URL=https://grimbanews.com`
+- **`APP_KEY=base64:...`** ← **CRITICAL** (without this, every encrypted cookie + session is invalid). Generate via `php artisan key:generate` IF the line is missing or blank; existing apps must preserve the original `APP_KEY` to keep current cookie/session signatures valid.
+- **`APP_LOCALE=fr`** ← Wave BBBBBBBBBBB pin (Zen HIGH catch). Without this, mail digests + console-rendered strings fall back to whatever `config('app.locale')` returns; the code default is now `fr` so this is belt-and-suspenders but cheap to set.
+- `APP_FALLBACK_LOCALE=fr`
 - `DB_DATABASE=/var/www/grimbanews/database/grimbanews.sqlite`
 - `MAIL_FROM_ADDRESS=newsletter@grimbanews.com`
 - `MAIL_FROM_NAME=GrimbaNews`
@@ -71,22 +74,45 @@ dig www.grimbanews.com +short
 # Expected: 209.74.88.135
 ```
 
-### 6. SSL cert via Let's Encrypt
+### 6. SSL cert via Let's Encrypt + HSTS header
+
 ```bash
 ssh deploy@209.74.88.135
 sudo certbot --nginx -d grimbanews.com -d www.grimbanews.com \
   --non-interactive --agree-tos --email security@grimbanews.com \
-  --redirect  # this auto-installs HTTP→HTTPS redirect with HSTS
+  --redirect  # adds HTTP→HTTPS 301 (does NOT add HSTS — added separately below)
 ```
 
-certbot will edit the nginx config in place. Cert auto-renews via the certbot timer/cron. Validate:
+certbot will edit the nginx config in place. Cert auto-renews via the certbot timer. Validate the redirect first:
+```bash
+curl -sI http://grimbanews.com | grep -E "HTTP|Location"
+# Expected: HTTP/1.1 301, Location: https://grimbanews.com/
+```
+
+**HSTS is not auto-installed by certbot --redirect.** Add it explicitly to the SSL server block in nginx:
+```nginx
+# /etc/nginx/sites-available/grimbanews.com (or wherever certbot placed it)
+server {
+    listen 443 ssl http2;
+    server_name grimbanews.com www.grimbanews.com;
+    # ... existing certbot ssl_certificate / ssl_certificate_key lines ...
+
+    # Wave BBBBBBBBBBB (Vader 2026-05-23) — explicit HSTS. Without
+    # this line, the application-level Strict-Transport-Security
+    # set by GrimbaSecurityHeaders middleware only ships on requests
+    # that hit Laravel; certbot static redirects miss it.
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    # ... rest of config ...
+}
+```
+
+Reload + validate:
 ```bash
 sudo nginx -t
 sudo systemctl reload nginx
-curl -sI https://grimbanews.com | grep -E "HTTP|strict-transport-security"
-# Expected: HTTP/2 200, strict-transport-security: max-age=...
-curl -sI http://grimbanews.com | grep -E "HTTP|Location"
-# Expected: HTTP/1.1 301, Location: https://grimbanews.com/
+curl -sI https://grimbanews.com | grep -iE "HTTP|strict-transport-security"
+# Expected: HTTP/2 200
+#           strict-transport-security: max-age=31536000; includeSubDomains
 ```
 
 ### 7. Smoke 6 surfaces
@@ -148,14 +174,25 @@ Open in a private/incognito window (no cached cookies):
 ### Plan A — DNS rollback (5 min)
 At DNS provider: flip A records back to old IP (or remove). 5 min TTL means propagation is fast.
 
-### Plan B — DB rollback (10 min)
+### Plan B — DB rollback (15 min)
 ```bash
 ssh deploy@209.74.88.135
 cd /var/www/grimbanews
-sudo systemctl stop nginx  # stop traffic
+
+# Wave BBBBBBBBBBB (Zen LOW) — stop cron first. Without this,
+# schedule:run continues firing every minute and a poller running
+# mid-rollback can write to the freshly-restored DB before nginx
+# is back up. crontab -r removes the cron line; re-add after.
+sudo systemctl stop cron       # OR `crontab -r` if no systemd cron unit
+sudo systemctl stop nginx      # stop traffic
+
+php artisan down --message="Rollback in progress" --retry=120  # serves a 503 if cron-not-stopped path executes
 cp database/backups/grimbanews.pre-cutover-<date>.sqlite database/grimbanews.sqlite
 php artisan cache:clear
+php artisan up
+
 sudo systemctl start nginx
+sudo systemctl start cron       # OR `crontab` from your saved /tmp/crontab.bak
 ```
 
 ### Plan C — code rollback (15 min)

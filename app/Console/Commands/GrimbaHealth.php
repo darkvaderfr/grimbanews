@@ -462,7 +462,11 @@ class GrimbaHealth extends Command
                 ->post($webhook, $payload);
             $this->line('   📡 slack-webhook POST ' . ($resp->successful() ? 'ok' : 'failed (' . $resp->status() . ')'));
         } catch (\Throwable $e) {
-            $this->line('   📡 slack-webhook POST failed (' . substr($e->getMessage(), 0, 60) . ')');
+            // Wave BBBBBBBBBBB (Zen LOW) — don't echo $e->getMessage() because
+            // cURL errors may include the full webhook URL (with token).
+            // Only surface the host, never the path/token.
+            $host = (string) (parse_url($webhook, PHP_URL_HOST) ?: 'unknown-host');
+            $this->line('   📡 slack-webhook POST failed (host=' . $host . ', ' . get_class($e) . ')');
         }
     }
 }

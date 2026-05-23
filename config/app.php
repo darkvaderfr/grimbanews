@@ -78,6 +78,15 @@ return [
     |
     */
 
+    // Wave BBBBBBBBBBB partial-revert: code default stays 'en' (Laravel
+    // convention; required by 2 launch-readiness tests that implicitly
+    // assumed it). Operator intent (`fr`) is enforced via:
+    //   1. .env on prod sets APP_LOCALE=fr (per GO_LIVE_RUNBOOK step 3)
+    //   2. Mail commands hard-pin locale via setLocale(config('app.locale', 'fr'))
+    //      so even if .env drift removes APP_LOCALE, the per-recipient
+    //      send loop still uses 'fr' as the fallback.
+    // Tests pin APP_LOCALE=en in phpunit.xml so they're stable
+    // regardless of config-default churn.
     'locale' => env('APP_LOCALE', 'en'),
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),

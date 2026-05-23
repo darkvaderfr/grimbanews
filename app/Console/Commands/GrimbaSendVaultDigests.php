@@ -75,8 +75,22 @@ class GrimbaSendVaultDigests extends Command
                 continue;
             }
 
-            Mail::to((string) $member->email, trim((string) (($member->first_name ?? '') . ' ' . ($member->last_name ?? ''))))
-                ->send(new GrimbaVaultDigestMail($member, $posts));
+            // Wave BBBBBBBBBBB (Vader 2026-05-23, Zen HIGH) — per-recipient
+            // locale pin. Console commands don't go through
+            // GrimbaLocaleEnforce, so they inherit whatever locale was set
+            // at boot. Pin explicitly to env('APP_LOCALE', 'fr') — the
+            // 'fr' fallback survives even if .env drift removes the env
+            // var (operator intent is FR-canonical). When the eventual
+            // `members.preferred_locale` migration lands, change to
+            // `setLocale($member->preferred_locale ?? env('APP_LOCALE', 'fr'))`.
+            $previousLocale = app()->getLocale();
+            app()->setLocale(env('APP_LOCALE', 'fr'));
+            try {
+                Mail::to((string) $member->email, trim((string) (($member->first_name ?? '') . ' ' . ($member->last_name ?? ''))))
+                    ->send(new GrimbaVaultDigestMail($member, $posts));
+            } finally {
+                app()->setLocale($previousLocale);
+            }
 
             DB::table('members')
                 ->where('id', (int) $member->id)

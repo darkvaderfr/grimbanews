@@ -124,8 +124,16 @@ class GrimbaSendSavedSearchDigests extends Command
                 continue;
             }
 
-            Mail::to((string) $member->email, trim($member->first_name . ' ' . $member->last_name))
-                ->send(new GrimbaSavedSearchDigestMail($member, $digests));
+            // Wave BBBBBBBBBBB (Vader 2026-05-23, Zen HIGH) — per-recipient
+            // locale pin (see GrimbaSendVaultDigests for full rationale).
+            $previousLocale = app()->getLocale();
+            app()->setLocale(env('APP_LOCALE', 'fr'));
+            try {
+                Mail::to((string) $member->email, trim($member->first_name . ' ' . $member->last_name))
+                    ->send(new GrimbaSavedSearchDigestMail($member, $digests));
+            } finally {
+                app()->setLocale($previousLocale);
+            }
 
             DB::table('saved_searches')
                 ->whereIn('id', $sentSearchIds)
