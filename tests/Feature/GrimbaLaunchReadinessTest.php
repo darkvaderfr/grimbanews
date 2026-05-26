@@ -2133,6 +2133,30 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_api_middle_ground_atom_returns_valid_atom_feed(): void
+    {
+        // Wave RRRR (Vader 2026-05-26) — Atom parity for the MG signal
+        // API. RSS readers + IFTTT-style automators prefer Atom over
+        // JSON. Test asserts the feed renders 200 + Atom mime type +
+        // valid <feed> document with at least the boilerplate links.
+        $response = $this->get('/api/middle-ground.atom?limit=2');
+        $response->assertStatus(200);
+        $this->assertStringStartsWith('application/atom+xml',
+            (string) $response->headers->get('content-type'));
+        $body = $response->getContent();
+        $this->assertStringContainsString('<feed xmlns="http://www.w3.org/2005/Atom">', $body,
+            'Atom feed must declare the Atom 1.0 namespace.');
+        $this->assertStringContainsString('GrimbaNews — Signal Juste milieu', $body,
+            'Atom feed title must identify the signal.');
+        $this->assertStringContainsString('rel="alternate" type="application/json"', $body,
+            'Atom feed must cross-link to the JSON sibling endpoint.');
+        $this->assertStringContainsString('rel="related" type="text/html"', $body,
+            'Atom feed must cross-link to the /juste-milieu HTML page.');
+        $this->assertStringContainsString('<rights>Open data under attribution', $body);
+        // CORS open.
+        $this->assertSame('*', $response->headers->get('access-control-allow-origin'));
+    }
+
     public function test_api_middle_ground_json_returns_valid_data_product(): void
     {
         // Wave NNNN (Vader 2026-05-26) — public read-only API for the

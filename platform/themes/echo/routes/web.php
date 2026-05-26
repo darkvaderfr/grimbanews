@@ -576,6 +576,63 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ]);
         })->name('public.api.middle_ground');
 
+        // Wave RRRR (Vader 2026-05-26) — Atom feed parity for the
+        // Middle Ground signal. RSS readers + IFTTT-style automators
+        // prefer Atom. Same data as the JSON API, different wrapper.
+        Route::get('api/middle-ground.atom', function (Request $request) {
+            $limit = max(1, min(200, (int) ($request->query('limit') ?? 50)));
+            $clusters = collect();
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('story_clusters')) {
+                    $clusters = \Illuminate\Support\Facades\DB::table('story_clusters')
+                        ->where('review_action', 'like', 'mg_%')
+                        ->orderByDesc('reviewed_at')
+                        ->limit($limit)
+                        ->get(['id', 'topic', 'review_action', 'reviewed_at']);
+                }
+            } catch (\Throwable) {
+                // Empty feed.
+            }
+            $now = now()->utc();
+            $feedUpdated = $clusters->isNotEmpty() && $clusters->first()->reviewed_at
+                ? \Carbon\Carbon::parse($clusters->first()->reviewed_at)->utc()->toIso8601String()
+                : $now->toIso8601String();
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+            $xml .= '<feed xmlns="http://www.w3.org/2005/Atom">' . "\n";
+            $xml .= '  <title>GrimbaNews — Signal Juste milieu</title>' . "\n";
+            $xml .= '  <subtitle>Clusters where the left and right cover a story in equal proportions.</subtitle>' . "\n";
+            $xml .= '  <link rel="self" type="application/atom+xml" href="' . htmlspecialchars(url('/api/middle-ground.atom'), ENT_XML1 | ENT_QUOTES, 'UTF-8') . '"/>' . "\n";
+            $xml .= '  <link rel="alternate" type="application/json" href="' . htmlspecialchars(url('/api/middle-ground.json'), ENT_XML1 | ENT_QUOTES, 'UTF-8') . '"/>' . "\n";
+            $xml .= '  <link rel="related" type="text/html" href="' . htmlspecialchars(url('/juste-milieu'), ENT_XML1 | ENT_QUOTES, 'UTF-8') . '"/>' . "\n";
+            $xml .= '  <id>' . htmlspecialchars(url('/api/middle-ground.atom'), ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</id>' . "\n";
+            $xml .= "  <updated>{$feedUpdated}</updated>\n";
+            $xml .= '  <generator uri="https://grimbanews.com" version="1.0">GrimbaNews</generator>' . "\n";
+            $xml .= '  <rights>Open data under attribution to grimbanews.com</rights>' . "\n";
+            foreach ($clusters as $c) {
+                $parts = explode('_', (string) $c->review_action);
+                $l = (int) ($parts[1] ?? 0);
+                $cc = (int) ($parts[2] ?? 0);
+                $r = (int) ($parts[3] ?? 0);
+                $dossierUrl = url('/comparatif/' . $c->id);
+                $tagged = $c->reviewed_at ? \Carbon\Carbon::parse($c->reviewed_at)->utc()->toIso8601String() : $now->toIso8601String();
+                $xml .= '  <entry>' . "\n";
+                $xml .= '    <id>' . htmlspecialchars($dossierUrl, ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</id>' . "\n";
+                $xml .= '    <title>' . htmlspecialchars((string) $c->topic, ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</title>' . "\n";
+                $xml .= '    <link rel="alternate" type="text/html" href="' . htmlspecialchars($dossierUrl, ENT_XML1 | ENT_QUOTES, 'UTF-8') . '"/>' . "\n";
+                $xml .= "    <published>{$tagged}</published>\n";
+                $xml .= "    <updated>{$tagged}</updated>\n";
+                $xml .= '    <summary>' . htmlspecialchars("Left: {$l} · Center: {$cc} · Right: {$r}", ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</summary>' . "\n";
+                $xml .= '    <category term="middle_ground" label="Juste milieu"/>' . "\n";
+                $xml .= '  </entry>' . "\n";
+            }
+            $xml .= '</feed>' . "\n";
+            return response($xml, 200, [
+                'Content-Type' => 'application/atom+xml; charset=UTF-8',
+                'Cache-Control' => 'public, max-age=900, s-maxage=1800',
+                'Access-Control-Allow-Origin' => '*',
+            ]);
+        })->name('public.api.middle_ground_atom');
+
         // Phase D-09 — per-stream RSS feeds. /feed.breaking.xml
         // surfaces every post that matched the strict breaking-news
         // keyword pool in the active region + locale; /feed.latest.xml
