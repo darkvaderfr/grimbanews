@@ -377,7 +377,14 @@
                             <div class="mt-2">
                                 @foreach($middleGroundTopSources as $src)
                                     @php
-                                        $biasColor = match($src->bias_rating ?? 'unknown') {
+                                        // Wave HHHH bugfix (Vader 2026-05-26):
+                                        // was naming this $biasColor which
+                                        // shadowed the page-level $biasColor
+                                        // ARRAY from line 4 (broke
+                                        // AdminRouteSmokeTest at line 432
+                                        // where the Active Dossiers block
+                                        // tried $biasColor['left']).
+                                        $srcBiasDotColor = match($src->bias_rating ?? 'unknown') {
                                             'left' => '#3b82f6',
                                             'center' => '#a8a8a8',
                                             'right' => '#e84c3d',
@@ -386,7 +393,7 @@
                                     @endphp
                                     <div class="grimba-provider-row">
                                         <span>
-                                            <span aria-hidden="true" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ $biasColor }};margin-right:6px;vertical-align:middle;"></span>
+                                            <span aria-hidden="true" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ $srcBiasDotColor }};margin-right:6px;vertical-align:middle;"></span>
                                             {{ $src->source_name }}
                                         </span>
                                         <strong>{{ $src->contribution_count }} {{ $src->contribution_count === 1 ? 'article' : 'articles' }}</strong>
