@@ -133,6 +133,25 @@
             </p>
         </article>
 
+        {{-- Wave OOOO (Vader 2026-05-26) — public-API discoverability.
+             Lets researchers + developers find /api/middle-ground.json
+             from the methodology page (the doc surface where they'd
+             look first). Anchor id matches the methodology TOC pattern. --}}
+        <article class="grimba-methodology__section" id="api">
+            <h2>{{ __("6 bis. API publique du signal Juste milieu") }}</h2>
+            <p>
+                {!! __("Nous publions le signal Juste milieu comme jeu de données ouvert à l'adresse <code>/api/middle-ground.json</code>. JSON, CORS ouvert, cache 15 min. Idéal pour les chercheurs, journalistes ou outils qui veulent suivre où les extrêmes convergent — sans scraper le site.") !!}
+            </p>
+            <ul>
+                <li>{!! __("<code>GET /api/middle-ground.json?limit=50</code> — jusqu'à 200 clusters") !!}</li>
+                <li>{!! __("Chaque ligne expose <code>cluster_id</code>, <code>topic</code>, <code>left_count</code>, <code>center_count</code>, <code>right_count</code>, <code>tagged_at</code>, <code>days_since_tagged</code>, <code>dossier_url</code>") !!}</li>
+                <li>{!! __("Cadence de classification : quotidienne à 03:35 UTC, par <code>grimba:reclassify-clusters</code>") !!}</li>
+            </ul>
+            <p>
+                {{ __("Le signal Juste milieu est librement réutilisable sous attribution. Nous demandons un lien retour à grimbanews.com.") }}
+            </p>
+        </article>
+
         <article class="grimba-methodology__section">
             <h2>{{ __('7. Gouvernance et financement') }}</h2>
             <p>
