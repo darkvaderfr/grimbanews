@@ -1594,22 +1594,57 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             // Wave FFFFFFF — TechArticle JSON-LD for the methodology
             // page. Surfaces in SERP "how it works" rich results.
+            // Wave SSSS (Vader 2026-05-26) — additional Schema.org
+            // Dataset block declares /api/middle-ground.json as a
+            // discoverable open dataset. Helps Google Dataset Search
+            // and academic-data crawlers (e.g. dataset.kaggle) find
+            // the MG signal API by name.
             Theme::set('grimbaJsonLd', json_encode([
                 '@context' => 'https://schema.org',
-                '@type' => 'TechArticle',
-                'headline' => __('Méthodologie') . ' — GrimbaNews',
-                'description' => __('Comment GrimbaNews classe les biais, repère les angles morts et note la crédibilité des sources.'),
-                'url' => url('/methodologie'),
-                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
-                'publisher' => [
-                    '@type' => 'NewsMediaOrganization',
-                    'name' => 'GrimbaNews',
-                    'url' => url('/'),
-                ],
-                'inLanguage' => app()->getLocale(),
-                'about' => [
-                    '@type' => 'Thing',
-                    'name' => __('Classification du biais éditorial et détection des angles morts'),
+                '@graph' => [
+                    [
+                        '@type' => 'TechArticle',
+                        'headline' => __('Méthodologie') . ' — GrimbaNews',
+                        'description' => __('Comment GrimbaNews classe les biais, repère les angles morts et note la crédibilité des sources.'),
+                        'url' => url('/methodologie'),
+                        'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                        'publisher' => [
+                            '@type' => 'NewsMediaOrganization',
+                            'name' => 'GrimbaNews',
+                            'url' => url('/'),
+                        ],
+                        'inLanguage' => app()->getLocale(),
+                        'about' => [
+                            '@type' => 'Thing',
+                            'name' => __('Classification du biais éditorial et détection des angles morts'),
+                        ],
+                    ],
+                    [
+                        '@type' => 'Dataset',
+                        'name' => 'GrimbaNews Middle Ground Signal',
+                        'description' => 'Daily-classified clusters of news stories covered in equal proportions by the political left and right — a published editorial-signal dataset distinct from blindspots (one-sided coverage).',
+                        'url' => url('/api/middle-ground.json'),
+                        'license' => 'https://creativecommons.org/licenses/by/4.0/',
+                        'creator' => [
+                            '@type' => 'NewsMediaOrganization',
+                            'name' => 'GrimbaNews',
+                            'url' => url('/'),
+                        ],
+                        'distribution' => [
+                            [
+                                '@type' => 'DataDownload',
+                                'encodingFormat' => 'application/json',
+                                'contentUrl' => url('/api/middle-ground.json'),
+                            ],
+                            [
+                                '@type' => 'DataDownload',
+                                'encodingFormat' => 'application/atom+xml',
+                                'contentUrl' => url('/api/middle-ground.atom'),
+                            ],
+                        ],
+                        'temporalCoverage' => 'P1Y',
+                        'keywords' => 'media bias, editorial signal, news clustering, left right convergence, political news classification',
+                    ],
                 ],
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
