@@ -184,7 +184,7 @@
                 <a href="{{ url('/comparatif') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Tous les dossiers') }}</a>
                 <a href="{{ url('/angles-morts') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Angles morts') }}</a>
                 {{-- Wave UUU (Vader 2026-05-26) — /juste-milieu CTA parity. --}}
-                <a href="{{ url('/juste-milieu') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm" style="border-color:#a855f7;color:#a855f7;">{{ __('Juste milieu') }}</a>
+                <a href="{{ url('/juste-milieu') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm" style="border-color:#a855f7;color:#a855f7;" aria-label="{{ __('Voir le juste milieu — stories où la gauche et la droite couvrent en proportions égales') }}">{{ __('Juste milieu') }}</a>
                 <a href="{{ url('/sources') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Sources classées') }}</a>
             </div>
         </div>

@@ -79,8 +79,9 @@
 
             {{-- Wave UUU (Vader 2026-05-26) — /juste-milieu account tile parity. --}}
             <a href="{{ url('/juste-milieu') }}" class="glass-panel p-4" style="display:block; text-decoration:none; color:var(--gn-ink,#1a1713);"
-               onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-                <div style="font-size:24px; margin-bottom:8px; color:#a855f7;">⊕</div>
+               onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''"
+               aria-label="{{ __('Tableau Juste milieu — stories couvertes équitablement par la gauche et la droite') }}">
+                <div style="font-size:24px; margin-bottom:8px; color:#a855f7;" aria-hidden="true">⊕</div>
                 <h3 style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; margin:0 0 4px;">
                     {{ __('Juste milieu') }}
                 </h3>
