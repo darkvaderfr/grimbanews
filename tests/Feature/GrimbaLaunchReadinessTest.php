@@ -1889,6 +1889,8 @@ class GrimbaLaunchReadinessTest extends TestCase
         $health->assertJsonStructure([
             'status',
             'middle_ground_clusters',
+            // Wave VVV (Vader 2026-05-26) — 24h velocity track
+            'middle_ground_clusters_24h',
             'blindspot_clusters',
         ]);
 

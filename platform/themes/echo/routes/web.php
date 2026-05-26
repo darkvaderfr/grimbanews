@@ -435,6 +435,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $dbOk = false;
             $lastPublishedAt = null;
             $middleGroundCount = null;
+            $middleGroundFresh24h = null;
             $blindspotCount = null;
             try {
                 $dbOk = \Illuminate\Support\Facades\DB::connection()->getPdo() !== null;
@@ -452,6 +453,14 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 if ($dbOk && \Illuminate\Support\Facades\Schema::hasTable('story_clusters')) {
                     $middleGroundCount = (int) \Illuminate\Support\Facades\DB::table('story_clusters')
                         ->where('review_action', 'like', 'mg_%')
+                        ->count();
+                    // Wave VVV (Vader 2026-05-26) — track Middle Ground
+                    // velocity so an external probe can detect signal
+                    // drying up (e.g. after a hot partisan cycle).
+                    // 24h window matches the daily reclassifier cron.
+                    $middleGroundFresh24h = (int) \Illuminate\Support\Facades\DB::table('story_clusters')
+                        ->where('review_action', 'like', 'mg_%')
+                        ->where('reviewed_at', '>=', now()->subDay())
                         ->count();
                 }
                 if ($dbOk && \Illuminate\Support\Facades\Schema::hasTable('posts') && \Illuminate\Support\Facades\Schema::hasColumn('posts', 'is_blindspot')) {
@@ -471,6 +480,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 'db' => $dbOk ? 'up' : 'down',
                 'last_post_at' => $lastPublishedAt ?: null,
                 'middle_ground_clusters' => $middleGroundCount,
+                'middle_ground_clusters_24h' => $middleGroundFresh24h,
                 'blindspot_clusters' => $blindspotCount,
             ], $dbOk ? 200 : 503, [
                 'Cache-Control' => 'no-store, max-age=0',
