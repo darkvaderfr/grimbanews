@@ -1915,6 +1915,141 @@ class GrimbaLaunchReadinessTest extends TestCase
             'bias-legend must include Right chip (red).');
     }
 
+    public function test_middle_ground_og_card_and_methodology_section_exist(): void
+    {
+        // Wave NNNNNNNNNNN + OOOOOOOOOOO (Vader 2026-05-26) — regression
+        // guard for the dedicated Middle Ground OG share card and the
+        // methodology §3 bis explainer. Both surfaces depend on stable
+        // route names (public.og.surface) + a static anchor id, so a
+        // route refactor that drops 'juste-milieu' from the surface
+        // allowlist or strips the heading anchor MUST fail loudly.
+
+        // 1. /og/juste-milieu.png — purple Middle Ground share card.
+        // Render and cache it, then assert it returns 1200×630 PNG.
+        $og = $this->get('/og/juste-milieu.png');
+        $og->assertStatus(200);
+        $this->assertStringStartsWith('image/png', (string) $og->headers->get('content-type'),
+            '/og/juste-milieu.png must serve image/png.');
+        $bytes = $og->getContent();
+        $this->assertTrue(strlen($bytes) > 1000,
+            '/og/juste-milieu.png must be a non-trivial PNG (>1KB).');
+
+        // 2. /juste-milieu page must reference the new OG card in its
+        //    meta tags, not fall back to /og/home.png.
+        $page = $this->get('/juste-milieu')->getContent();
+        $this->assertStringContainsString('og/juste-milieu.png', $page,
+            '/juste-milieu must advertise its dedicated OG card.');
+
+        // 3. /methodologie must carry the §3 bis "juste milieu" anchor
+        //    and explainer body so readers landing from the bias-legend
+        //    or /juste-milieu page can deep-link to the right section.
+        $methodology = $this->get('/methodologie');
+        $methodology->assertStatus(200);
+        $body = $methodology->getContent();
+        $this->assertStringContainsString('id="juste-milieu"', $body,
+            'methodology must anchor the juste-milieu section for deep-linking.');
+        $this->assertStringContainsString('GrimbaClusterBias::resolve', $body,
+            'methodology must cite the GrimbaClusterBias::resolve rule.');
+        $this->assertStringContainsString('mg_', $body,
+            'methodology must explain the mg_<L>_<C>_<R> tag prefix readers see when grepping the codebase / API.');
+    }
+
+    public function test_grimba_health_middle_ground_floor_trips_risk_warning(): void
+    {
+        // Wave MMMMMMMMMMM (Vader 2026-05-26) — operating-floor regression
+        // guard. --min-middle-ground-clusters=N pushes a $riskWarnings
+        // entry when fewer than N clusters carry the mg_ tag, which
+        // makes --fail-on-risk exit non-zero. Without this guard, a
+        // future refactor could silently strip the floor enforcement
+        // (broken-window class regression).
+        $exit = \Illuminate\Support\Facades\Artisan::call('grimba:health', [
+            '--min-middle-ground-clusters' => 999999,
+            '--fail-on-risk' => true,
+        ]);
+        $this->assertNotSame(0, $exit,
+            'grimba:health --min-middle-ground-clusters=999999 --fail-on-risk must exit non-zero because the floor can never be met (we have ~21 mg_ clusters today).');
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        $this->assertStringContainsString('Middle Ground cluster floor breached', $output,
+            'risk-warning text must mention the Middle Ground breach so an operator paging in cold can identify the cause.');
+
+        // Same flag at floor=0 (default observe-only) must NOT trip the
+        // risk path — the feature should be additive.
+        $exit0 = \Illuminate\Support\Facades\Artisan::call('grimba:health', [
+            '--min-middle-ground-clusters' => 0,
+        ]);
+        $output0 = \Illuminate\Support\Facades\Artisan::output();
+        $this->assertStringContainsString('middle ground clusters', $output0,
+            'observe-only mode must still surface the count row in the ops report.');
+        // exit code without --fail-on-risk is non-binding; we just
+        // assert the command ran end-to-end.
+        $this->assertIsInt($exit0);
+    }
+
+    public function test_bias_distribution_panel_does_not_label_tied_clusters_as_left(): void
+    {
+        // Wave RRRRRRRRRRR (Vader 2026-05-26) — the EXACT bug Vader
+        // screenshotted on 2026-05-23: a 50/0/50 (left=1, right=1)
+        // cluster rendered "Camp majoritaire: Gauche" because the
+        // old reducer (collect($pct)->sortDesc()->keys()->first())
+        // returned the first key on a tie. This test asserts that
+        // the bias-distribution panel — which is the live surface
+        // an article-page reader sees on a tied cluster — now
+        // routes through GrimbaClusterBias::resolve() and renders
+        // "Juste milieu" instead.
+        //
+        // We render the partial directly with a synthetic L=R fixture
+        // so the test doesn't depend on which posts happen to be in
+        // the test DB.
+        $synthPosts = collect([
+            (object) [
+                'bias_rating' => 'left',
+                'source_name' => 'Synthetic Left Outlet',
+                'source_id' => 90001,
+                'source_country' => 'fr',
+                'updated_at' => now(),
+                'source_meta' => null,
+            ],
+            (object) [
+                'bias_rating' => 'right',
+                'source_name' => 'Synthetic Right Outlet',
+                'source_id' => 90002,
+                'source_country' => 'fr',
+                'updated_at' => now(),
+                'source_meta' => null,
+            ],
+        ]);
+        $rendered = view(\Theme::getThemeNamespace('partials.story.bias-distribution'), [
+            'clusterPosts' => $synthPosts,
+            'sourceMeta' => [],
+        ])->render();
+
+        $this->assertStringContainsString('Juste milieu', $rendered,
+            'bias-distribution panel must label L=R tied clusters as "Juste milieu".');
+        // The dominant chip block must not say "Gauche" on a tied
+        // cluster — left and right are equal, neither is dominant.
+        // We assert the SPECIFIC dominant-block shape, not the bias-
+        // bar (which legitimately includes "Gauche" labels for the
+        // per-side breakdown).
+        $this->assertMatchesRegularExpression(
+            '#grimba-story-distribution__dominant.*?<strong>Juste milieu</strong>#s',
+            $rendered,
+            'dominant chip on a tied cluster must render "Juste milieu", not "Gauche" or "Droite".'
+        );
+        // Negative assertion: the dominant strong tag specifically must
+        // NOT say "Gauche" / "Droite" on a tie — the broken reducer
+        // used to render "<strong>Gauche</strong>" here.
+        $this->assertDoesNotMatchRegularExpression(
+            '#grimba-story-distribution__dominant.*?<strong>Gauche</strong>#s',
+            $rendered,
+            'regression: dominant chip rendered Gauche on a tied cluster — bias-distribution reducer reverted.'
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '#grimba-story-distribution__dominant.*?<strong>Droite</strong>#s',
+            $rendered,
+            'regression: dominant chip rendered Droite on a tied cluster — bias-distribution reducer reverted.'
+        );
+    }
+
     public function test_advertise_page_does_not_get_public_cached(): void
     {
         // Wave TTTTTTT / Wave YYYYYYY — /advertise has an @csrf token

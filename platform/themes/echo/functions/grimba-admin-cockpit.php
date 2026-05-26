@@ -120,13 +120,15 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
             // carry blindspot_*. We surface both so the cockpit pages
             // an editor whenever the signal mix drifts (e.g. MG drying
             // up after a hot political cycle).
-            $middleGroundClusterCount = Schema::hasTable('story_clusters')
+            // Zen nit (2026-05-26): single hasTable guard then read.
+            $hasStoryClusters = Schema::hasTable('story_clusters');
+            $middleGroundClusterCount = $hasStoryClusters
                 ? DB::table('story_clusters')->where('review_action', 'like', 'mg_%')->count()
                 : 0;
-            $blindspotClusterCount = Schema::hasTable('story_clusters')
+            $blindspotClusterCount = $hasStoryClusters
                 ? DB::table('story_clusters')->where('review_action', 'like', 'blindspot_%')->count()
                 : 0;
-            $middleGroundLatestAt = Schema::hasTable('story_clusters')
+            $middleGroundLatestAt = $hasStoryClusters
                 ? DB::table('story_clusters')->where('review_action', 'like', 'mg_%')->max('reviewed_at')
                 : null;
 

@@ -66,10 +66,26 @@
         'left' => ['label' => __('Gauche'), 'short' => 'L', 'color' => '#3b82f6'],
         'center' => ['label' => __('Centre'), 'short' => 'C', 'color' => '#a8a8a8'],
         'right' => ['label' => __('Droite'), 'short' => 'R', 'color' => '#e84c3d'],
+        // Wave RRRRRRRRRRR (Vader 2026-05-26, Echo PARTIAL escalation) —
+        // Middle Ground entry so the "Camp majoritaire" panel lookup
+        // at line 688 below can render "Juste milieu" on L=R ties.
+        // Color matches the bias-legend chip + /juste-milieu badge.
+        'middle_ground' => ['label' => __('Juste milieu'), 'short' => '⊕', 'color' => '#a855f7'],
     ];
 
-    $dominant = collect($pct)->sortDesc()->keys()->first();
-    $dominantPct = $dominant ? $pct[$dominant] : 0;
+    // Wave RRRRRRRRRRR — was: $dominant = collect($pct)->sortDesc()->keys()->first();
+    // That picked 'left' on tied clusters (PHP preserves insertion
+    // order in sortDesc, and the array starts with 'left'). On a
+    // 50/0/50 cluster the panel rendered "Camp majoritaire: Gauche"
+    // — the exact bug Vader screenshotted on 2026-05-23. Route the
+    // decision through GrimbaClusterBias::resolve() so the
+    // dominant chip stays consistent with every other MG surface
+    // (bias-legend, /juste-milieu, dossier card, breakdown chip).
+    $resolvedMajority = \App\Support\GrimbaClusterBias::resolve($counts);
+    $dominant = $resolvedMajority['key'] === 'unknown' ? null : $resolvedMajority['key'];
+    $dominantPct = $dominant === 'middle_ground'
+        ? ($known > 0 ? (int) round(($counts['left'] + $counts['right']) * 100 / $known) : 0)
+        : ($dominant ? $pct[$dominant] : 0);
     $maxCount = max(1, max($counts));
     $minCount = $known > 0 ? min($counts) : 0;
     $balanceScore = $known > 0 ? (int) round($minCount * 100 / $maxCount) : 0;

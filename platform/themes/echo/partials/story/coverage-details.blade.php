@@ -18,18 +18,29 @@
     }
     $total = array_sum($counts);
     $known = $counts['left'] + $counts['center'] + $counts['right'];
-    $dominantPct = $known > 0
-        ? max($counts['left'], $counts['center'], $counts['right']) * 100 / $known
-        : 0;
-    $dominantBias = $known > 0
-        ? array_keys($counts, max($counts['left'], $counts['center'], $counts['right']))[0]
-        : null;
-    $dominantLabel = match ($dominantBias) {
-        'left'   => __('Gauche'),
-        'center' => __('Centre'),
-        'right'  => __('Droite'),
-        default  => '—',
-    };
+    // Wave RRRRRRRRRRR (Vader 2026-05-26, Echo PARTIAL escalation) —
+    // this panel previously ran its own array_keys(max(...)) reducer,
+    // which on a 33/33/33 tied cluster always returned "33% Gauche"
+    // (PHP picks the first key on tie). That bypasses the Middle
+    // Ground resolver and is the EXACT bug Vader screenshotted on
+    // 2026-05-23. Now the panel delegates to GrimbaClusterBias::
+    // resolve() so the dominant chip stays consistent with the
+    // bias-legend chip + breakdown chip + dossier card across the
+    // site. On an L=R tie ≥ center, dominantPct sums L+R together.
+    if ($known > 0) {
+        $resolved = \App\Support\GrimbaClusterBias::resolve($counts);
+        $dominantBias = $resolved['key'];
+        $dominantLabel = $resolved['label'];
+        $dominantColor = $resolved['color'];
+        $dominantPct = $dominantBias === 'middle_ground'
+            ? ($counts['left'] + $counts['right']) * 100 / $known
+            : max($counts['left'], $counts['center'], $counts['right']) * 100 / $known;
+    } else {
+        $dominantBias = null;
+        $dominantLabel = '—';
+        $dominantColor = '#6b6459';
+        $dominantPct = 0;
+    }
 @endphp
 
 <aside class="grimba-story-coverage glass-panel p-3 mb-3">
@@ -76,7 +87,8 @@
 
         @if($known > 0)
             <dt class="opacity-75">{{ __('Distribution') }}</dt>
-            <dd class="m-0 fw-semibold">
+            <dd class="m-0 fw-semibold" style="color: {{ $dominantColor }};">
+                <span aria-hidden="true" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:{{ $dominantColor }}; margin-right:6px; vertical-align:middle;"></span>
                 {{ round($dominantPct) }}%&nbsp;{{ $dominantLabel }}
             </dd>
         @endif
