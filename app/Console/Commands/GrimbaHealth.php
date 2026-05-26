@@ -42,6 +42,7 @@ class GrimbaHealth extends Command
         {--category-freshness-scope=all : category freshness scope: all, editions, topics, or comma-separated category names}
         {--min-full-content-coverage=0 : minimum percent of recent upstream-backed posts with readable full text; 0 observes only}
         {--full-content-retry-after-hours=24 : retry window used by full article extraction health}
+        {--min-middle-ground-clusters=0 : minimum Middle Ground (mg_* tagged) cluster count; 0 observes only}
         {--backup-dir= : database backup directory to inspect; defaults to database/backups}';
     protected $description = 'One-page health summary of the GrimbaNews ingest + editorial pipeline (S153).';
 
@@ -58,6 +59,7 @@ class GrimbaHealth extends Command
         $categoryFreshnessScope = (string) $this->option('category-freshness-scope');
         $minFullContentCoverage = min(100, max(0, (int) $this->option('min-full-content-coverage')));
         $fullContentRetryAfterHours = max(0, (int) $this->option('full-content-retry-after-hours'));
+        $minMiddleGround = max(0, (int) $this->option('min-middle-ground-clusters'));
         $backupDir = (string) ($this->option('backup-dir') ?: GrimbaDatabaseBackups::defaultDir());
         $riskWarnings = [];
         $last24h = now()->subDay();
@@ -366,6 +368,30 @@ class GrimbaHealth extends Command
             $riskWarnings[] = 'invalid database backup artifacts: ' . implode(', ', $backupHealth->invalid);
         }
 
+        // Wave MMMMMMMMMMM (Vader 2026-05-26) — Middle Ground floor.
+        // Operator can set --min-middle-ground-clusters=N to alert
+        // when the corpus's editorial-balance signal dries up
+        // (e.g. all stories pulling left or right; no truly bilateral
+        // coverage). At 0 (default) only observes — printed in
+        // section 12 below.
+        $middleGroundCount = 0;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('story_clusters')) {
+                $middleGroundCount = (int) \Illuminate\Support\Facades\DB::table('story_clusters')
+                    ->where('review_action', 'like', 'mg_%')
+                    ->count();
+            }
+        } catch (\Throwable) {
+            // schema may not exist in test envs; observe-silent
+        }
+        if ($minMiddleGround > 0 && $middleGroundCount < $minMiddleGround) {
+            $riskWarnings[] = sprintf(
+                'Middle Ground cluster floor breached: %d tagged / %d minimum required',
+                $middleGroundCount,
+                $minMiddleGround
+            );
+        }
+
         $this->newLine();
         $this->line('11. Freshness + disk + backup guard');
         $this->line(sprintf('   published 24h        : %d post(s) (floor %d)', $publicationPipeline->published24, $minPublished24h));
@@ -409,6 +435,15 @@ class GrimbaHealth extends Command
                 $latestBackup
             ));
         }
+        // Wave MMMMMMMMMMM (Vader 2026-05-26) — Middle Ground editorial
+        // signal row. Floor is 0 by default (observe-only); operator
+        // sets --min-middle-ground-clusters=N to alert.
+        $this->line(sprintf(
+            '   middle ground clusters : %d tagged (floor %d%s)',
+            $middleGroundCount,
+            $minMiddleGround,
+            $minMiddleGround === 0 ? ', observe-only' : ''
+        ));
 
         if ($riskWarnings === []) {
             $this->line('   ✓ operating floors are clear');

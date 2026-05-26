@@ -714,11 +714,15 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
         Route::get('og/home.png', [\App\Http\Controllers\GrimbaOgImageController::class, 'home'])->name('public.og.home');
         Route::get('og/home',     [\App\Http\Controllers\GrimbaOgImageController::class, 'home'])->name('public.og.home.alt');
+        // Wave NNNNNNNNNNN (Vader 2026-05-26) — added 'juste-milieu' to
+        // the OG surface whitelist so /juste-milieu can claim its own
+        // share card (purple Middle Ground accent) instead of falling
+        // back to /og/home.png.
         Route::get('og/{surface}.png', [\App\Http\Controllers\GrimbaOgImageController::class, 'surface'])
-            ->where('surface', 'local|coffre')
+            ->where('surface', 'local|coffre|juste-milieu')
             ->name('public.og.surface');
         Route::get('og/{surface}', [\App\Http\Controllers\GrimbaOgImageController::class, 'surface'])
-            ->where('surface', 'local|coffre')
+            ->where('surface', 'local|coffre|juste-milieu')
             ->name('public.og.surface.alt');
 
         // S213 / B-IMG-01 — constrained image proxy for outlet logos
@@ -2128,6 +2132,10 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
 
             SeoHelper::setTitle(__('Juste milieu') . ' — GrimbaNews')
                 ->setDescription(__('Les histoires couvertes équitablement par la gauche et la droite.'));
+
+            // Wave NNNNNNNNNNN (Vader 2026-05-26) — claim the dedicated
+            // /og/juste-milieu.png share card instead of the home fallback.
+            Theme::set('grimba_og_image', url('/og/juste-milieu.png'));
 
             Theme::set('grimbaJsonLd', json_encode([
                 '@context' => 'https://schema.org',

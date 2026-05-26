@@ -65,7 +65,10 @@ class GrimbaOgImageController
 
     public function surface(string $surface): Response
     {
-        abort_unless(in_array($surface, ['local', 'coffre'], true), 404);
+        // Wave NNNNNNNNNNN (Vader 2026-05-26) — Middle Ground card joins
+        // the surface whitelist. Stored as 'juste-milieu.png' so the
+        // file system mirrors the public URL.
+        abort_unless(in_array($surface, ['local', 'coffre', 'juste-milieu'], true), 404);
 
         $cachePath = storage_path('app/public/og/' . $surface . '.png');
 
@@ -171,6 +174,16 @@ class GrimbaOgImageController
                 'title' => "Votre veille, prête à reprendre",
                 'lines' => ['Articles sauvegardés. Biais filtrables.', 'Export CSV pour garder vos lectures utiles.'],
                 'accent' => [59, 130, 246],
+            ],
+            // Wave NNNNNNNNNNN (Vader 2026-05-26) — Middle Ground share
+            // card. Purple accent matches the bias-legend chip + signal
+            // tags across the site so the social preview reads as
+            // unmistakably "juste milieu".
+            'juste-milieu' => [
+                'kicker' => 'JUSTE MILIEU',
+                'title' => 'Quand la gauche et la droite couvrent la même histoire',
+                'lines' => ['Le signal éditorial calculé chaque nuit.', 'Vous voyez où le consensus se forme — sans qu’on vous le dicte.'],
+                'accent' => [168, 85, 247],
             ],
         ][$surface];
 
