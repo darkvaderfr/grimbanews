@@ -55,9 +55,20 @@
         'left' => __('Gauche'),
         'center' => __('Centre'),
         'right' => __('Droite'),
+        // Wave TTTTTTTTTTT (Vader 2026-05-26) — pattern-sweep continuation
+        // of Wave RRR. /categorie/{slug} ran the same broken reducer
+        // (collect->sortDesc->keys->first picks 'left' on ties). On a
+        // tied topic — e.g. immigration if L=R coverage — readers saw
+        // "Couverture: 33% Gauche" on the category header. Now routes
+        // through GrimbaClusterBias::resolve() like the bias-distribution
+        // panel + dossier card + bias-legend chip.
+        'middle_ground' => __('Juste milieu'),
     ];
-    $catDominantKey = collect($catPct)->sortDesc()->keys()->first();
-    $catDominantLabel = $catKnown ? ($catBiasLabels[$catDominantKey] ?? __('Non classé')) : __('Non classé');
+    $catResolved = $catKnown > 0
+        ? \App\Support\GrimbaClusterBias::resolve($catBias)
+        : ['key' => 'unknown', 'label' => __('Non classé'), 'color' => '#6b6459'];
+    $catDominantKey = $catResolved['key'];
+    $catDominantLabel = $catResolved['label'];
     $catFresh24 = Post::query()
         ->whereHas('categories', fn ($q) => $q->where('categories.id', $category->id))
         ->where('status', 'published')

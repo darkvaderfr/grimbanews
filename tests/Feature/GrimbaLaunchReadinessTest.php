@@ -1985,6 +1985,53 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsInt($exit0);
     }
 
+    public function test_grimba_cluster_bias_resolve_handles_three_way_tie_as_middle_ground(): void
+    {
+        // Wave TTTTTTTTTTT (Vader 2026-05-26) — pattern-sweep extension
+        // of Wave RRR. The 33/33/33 case Vader screenshotted needs to
+        // be locked at the resolver level so EVERY consumer downstream
+        // (bias-distribution, category page, dossier card, breakdown
+        // chip, /juste-milieu listing, /health JSON, anywhere new in
+        // the future) inherits the right behavior automatically.
+        //
+        // Three-way ties + L=R tied-with-zero-center cases all must
+        // resolve to middle_ground, NOT alphabetical-first (which would
+        // pick left and reproduce the screenshot bug).
+        $cases = [
+            ['L=1, C=0, R=1 → middle_ground', ['left' => 1, 'center' => 0, 'right' => 1], 'middle_ground'],
+            ['L=3, C=0, R=3 → middle_ground', ['left' => 3, 'center' => 0, 'right' => 3], 'middle_ground'],
+            ['L=2, C=2, R=2 → middle_ground (L=R, both ≥ C)', ['left' => 2, 'center' => 2, 'right' => 2], 'middle_ground'],
+            ['L=5, C=1, R=5 → middle_ground', ['left' => 5, 'center' => 1, 'right' => 5], 'middle_ground'],
+            ['L=10, C=0, R=0 → left', ['left' => 10, 'center' => 0, 'right' => 0], 'left'],
+            ['L=0, C=10, R=0 → center', ['left' => 0, 'center' => 10, 'right' => 0], 'center'],
+            ['L=0, C=0, R=10 → right', ['left' => 0, 'center' => 0, 'right' => 10], 'right'],
+            ['empty → unknown', ['left' => 0, 'center' => 0, 'right' => 0], 'unknown'],
+            ['L=3, C=5, R=3 → center (L=R but center wins)', ['left' => 3, 'center' => 5, 'right' => 3], 'center'],
+        ];
+        foreach ($cases as [$label, $counts, $expected]) {
+            $resolved = \App\Support\GrimbaClusterBias::resolve($counts);
+            $this->assertSame($expected, $resolved['key'], "{$label} — resolver returned wrong key.");
+            $this->assertIsString($resolved['label'], "{$label} — label must be a string.");
+            $this->assertMatchesRegularExpression('/^#[0-9a-fA-F]{6}$/', $resolved['color'], "{$label} — color must be a 6-hex code.");
+        }
+    }
+
+    public function test_category_view_does_not_label_tied_topic_as_left(): void
+    {
+        // Wave TTTTTTTTTTT — defense-in-depth for category.blade.php,
+        // which used the same broken collect()->sortDesc()->keys()
+        // ->first() reducer as bias-distribution before Wave RRR.
+        // The view is currently dead code (not wired to any active
+        // route), but locking the contract here means a future
+        // restoration of /categorie/{slug} ingestion can't silently
+        // bring back the screenshot bug.
+        $bias = ['left' => 1, 'center' => 0, 'right' => 1, 'unknown' => 0];
+        $resolved = \App\Support\GrimbaClusterBias::resolve($bias);
+        $this->assertSame('middle_ground', $resolved['key'],
+            'category-view bias resolver must call GrimbaClusterBias::resolve which returns middle_ground on L=R ties.');
+        $this->assertSame(__('Juste milieu'), $resolved['label']);
+    }
+
     public function test_grimba_rebuild_og_command_deletes_static_cards_only_by_default(): void
     {
         // Wave SSSSSSSSSSS (Vader 2026-05-26, Zen YELLOW close) —
