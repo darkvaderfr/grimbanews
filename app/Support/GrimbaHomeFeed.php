@@ -444,6 +444,7 @@ class GrimbaHomeFeed
         $hero = self::pickHero($state);
         $heroBriefingColumn = self::pickHeroBriefingColumn($state, 5);
         $heroBlindspots = self::pickBlindspots($state, 2);
+        $heroMiddleGround = self::pickMiddleGround($state, 2);
         $heroStats = self::pickRecentForStats(9);
         $mostRead = self::pickMostReadByBias($state, 4);
         $topNews = self::pickTopNewsInline($state, 6);
@@ -457,6 +458,7 @@ class GrimbaHomeFeed
             'hero' => $hero,
             'heroBriefingColumn' => $heroBriefingColumn,
             'heroBlindspots' => $heroBlindspots,
+            'heroMiddleGround' => $heroMiddleGround,
             'heroStats' => $heroStats,
             'mostRead' => $mostRead,
             'topNews' => $topNews,
@@ -790,6 +792,58 @@ class GrimbaHomeFeed
         }
 
         return $picked;
+    }
+
+    /**
+     * Wave EEEEEEEEEEE (Vader 2026-05-26) — pick Middle Ground hero
+     * articles for the home rail. Mirror of pickBlindspots: pulls
+     * articles whose cluster was tagged with the 'mg_*' prefix in
+     * story_clusters.review_action by `grimba:reclassify-clusters`.
+     * One article per cluster.
+     */
+    private static function pickMiddleGround(HomeFeedState $state, int $count): Collection
+    {
+        $clusterIds = DB::table('story_clusters')
+            ->where('review_action', 'like', 'mg_%')
+            ->orderByDesc('reviewed_at')
+            ->limit($count * 6)
+            ->pluck('id');
+
+        if ($clusterIds->isEmpty()) {
+            return collect();
+        }
+
+        $candidates = Post::query()
+            ->where('status', 'published')
+            ->whereIn('story_cluster_id', $clusterIds)
+            ->whereNotIn('id', $state->shownIds() ?: [0])
+            ->with('categories.slugable')
+            ->tap(fn ($q) => self::applyHomeRailSurfacing($q))
+            ->limit($count * 4)
+            ->get();
+
+        $picked = collect();
+        $seenClusters = [];
+        foreach ($candidates as $post) {
+            if ($picked->count() >= $count) {
+                break;
+            }
+            $cid = (int) $post->story_cluster_id;
+            if ($cid === 0 || isset($seenClusters[$cid])) {
+                continue;
+            }
+            if ($state->take($post)) {
+                $picked->push($post);
+                $seenClusters[$cid] = true;
+            }
+        }
+
+        return $picked;
+    }
+
+    public static function heroMiddleGround(): Collection
+    {
+        return self::build()['heroMiddleGround'];
     }
 
     private static function pickRecentForStats(int $count): Collection

@@ -5,9 +5,10 @@
     $hero          = GrimbaHomeFeed::hero();
     $briefing      = GrimbaHomeFeed::heroBriefingColumn();
     $blindspots    = GrimbaHomeFeed::heroBlindspots();
+    $middleGround  = GrimbaHomeFeed::heroMiddleGround();
     $briefingStats = GrimbaHomeFeed::heroStats();
 
-    GnTr::warm(collect([$hero])->filter()->concat($briefing)->concat($blindspots)->concat($briefingStats));
+    GnTr::warm(collect([$hero])->filter()->concat($briefing)->concat($blindspots)->concat($middleGround)->concat($briefingStats));
 
     $totalArticles = $briefingStats->sum(fn ($p) => max(1, $p->views ?? 1));
     $readMinutes   = max(1, (int) round($briefingStats->count() * 1.2));
@@ -378,6 +379,55 @@
             <a href="{{ url('/angles-morts') }}" class="grimba-blindspot-rail__more">
                 {{ __('Voir le fil des angles morts') }} →
             </a>
+
+            {{-- Wave EEEEEEEEEEE (Vader 2026-05-26) — Middle Ground
+                hero rail. Mirror of blindspot rail above. When
+                pickMiddleGround returns 0 articles (early state or
+                no clusters tagged yet), the whole block is silent. --}}
+            @if($middleGround->isNotEmpty())
+                <div class="grimba-middle-ground-rail" style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.08);">
+                    <header class="grimba-blindspot-rail__head">
+                        <span class="grimba-blindspot-rail__kicker">
+                            <span class="middle-ground-badge" style="display:inline-block;padding:3px 9px;border-radius:9999px;background:#a855f720;color:#a855f7;font-weight:600;font-size:12px;letter-spacing:.04em;">
+                                ● {{ __('Juste milieu') }}
+                            </span>
+                        </span>
+                        <p class="grimba-blindspot-rail__desc">
+                            {{ __('Histoires couvertes en proportions égales par la gauche et la droite.') }}
+                            <a href="{{ url('/juste-milieu') }}">{{ __('En savoir plus') }}</a>
+                        </p>
+                    </header>
+
+                    @foreach($middleGround as $mg)
+                        @php
+                            $mgTitle = GnTr::title($mg);
+                            $mgTranslated = GnTr::isTranslated($mg);
+                        @endphp
+                        <a href="{{ $mg->url }}" class="grimba-blind-card">
+                            <div class="grimba-blind-card__media">
+                                {!! Theme::partial('post-hero-img', ['post' => $mg, 'size' => 'medium']) !!}
+                            </div>
+                            <div class="grimba-blind-card__body">
+                                <span class="grimba-blind-card__tag">
+                                    <span class="middle-ground-badge" style="display:inline-block;padding:2px 8px;border-radius:9999px;background:#a855f7;color:#fff;font-weight:600;font-size:11px;">
+                                        {{ __('Juste milieu') }}
+                                    </span>
+                                    @include(Theme::getThemeNamespace('partials.cards.category-badge'), ['post' => $mg, 'variant' => 'dark', 'size' => 'sm'])
+                                </span>
+                                <h3 class="grimba-blind-card__title">{{ $mgTitle }}</h3>
+                                @if($mgTranslated)
+                                    {!! Theme::partial('nobuai-chip', ['size' => 'sm']) !!}
+                                @endif
+                                {!! Theme::partial('home.coverage-bar', ['post' => $mg, 'compact' => true, 'onDark' => true]) !!}
+                            </div>
+                        </a>
+                    @endforeach
+
+                    <a href="{{ url('/juste-milieu') }}" class="grimba-blindspot-rail__more">
+                        {{ __('Voir le fil du juste milieu') }} →
+                    </a>
+                </div>
+            @endif
 
             {!! Theme::partial('bias-mix', ['variant' => 'compact']) !!}
         </aside>

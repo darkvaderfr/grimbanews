@@ -454,19 +454,46 @@ class GrimbaHealth extends Command
                 implode("\n", array_map(static fn (string $w): string => '• ' . $w, $warnings))
             ),
         ];
+        // Wave FFFFFFFFFFF (Vader 2026-05-26, Zen MEDIUM-2 follow-up) —
+        // self-monitoring the paging path. Without this, a Slack webhook
+        // that returns 410 (channel deleted) / 404 (URL revoked) /
+        // resolves but 5xxs for a week silently degrades: operator
+        // believes paging works but no message ever arrives. Now: every
+        // webhook attempt registers a synthetic GrimbaAutomationMonitor
+        // run keyed 'slack_webhook'. The status surfaces in the next
+        // hourly grimba:health probe (section 9, scheduler freshness)
+        // so silent paging stops being silent.
+        $runId = GrimbaAutomationMonitor::start('slack_webhook', 'grimba:health → slack-webhook POST');
         try {
             $resp = \Illuminate\Support\Facades\Http::timeout(5)
                 ->connectTimeout(3)
                 ->retry(0)
                 ->asJson()
                 ->post($webhook, $payload);
-            $this->line('   📡 slack-webhook POST ' . ($resp->successful() ? 'ok' : 'failed (' . $resp->status() . ')'));
+            if ($resp->successful()) {
+                $this->line('   📡 slack-webhook POST ok');
+                GrimbaAutomationMonitor::finish($runId, 'success', 0);
+            } else {
+                $this->line('   📡 slack-webhook POST failed (' . $resp->status() . ')');
+                GrimbaAutomationMonitor::finish(
+                    $runId,
+                    'failed',
+                    1,
+                    'Slack webhook returned ' . $resp->status() . ' (host ' . (parse_url($webhook, PHP_URL_HOST) ?: 'unknown') . ')'
+                );
+            }
         } catch (\Throwable $e) {
             // Wave BBBBBBBBBBB (Zen LOW) — don't echo $e->getMessage() because
             // cURL errors may include the full webhook URL (with token).
             // Only surface the host, never the path/token.
             $host = (string) (parse_url($webhook, PHP_URL_HOST) ?: 'unknown-host');
             $this->line('   📡 slack-webhook POST failed (host=' . $host . ', ' . get_class($e) . ')');
+            GrimbaAutomationMonitor::finish(
+                $runId,
+                'failed',
+                1,
+                'Slack webhook threw ' . get_class($e) . ' (host ' . $host . ')'
+            );
         }
     }
 }

@@ -131,6 +131,33 @@ class GrimbaAutomationMonitor
                 'command' => 'grimba:saved-search-digests',
                 'expected_minutes' => 10080,
             ],
+            // Wave FFFFFFFFFFF (Vader 2026-05-26, Zen MEDIUM-2) — synthetic
+            // job key for the Slack-webhook health-paging path. Recorded
+            // from GrimbaHealth::notifySlackOnRisk() when an attempt
+            // happens (success OR fail). Expected cadence: at least once
+            // every 24h IF a risk-warning fires, otherwise never (the
+            // hourly cron only POSTs on risk). Treat as stale-OK when
+            // never observed — a clean week of zero risk warnings is
+            // the goal, not a failure.
+            'slack_webhook' => [
+                'label' => 'Slack health-webhook paging',
+                'command' => 'grimba:health (slack POST)',
+                'expected_minutes' => 10080,
+            ],
+            // Wave DDDDDDDDDDD (Vader 2026-05-23) — Middle Ground / Blindspot
+            // cluster reclassification (daily 03:35 UTC).
+            'reclassify_clusters' => [
+                'label' => 'Cluster bias reclassification',
+                'command' => 'grimba:reclassify-clusters --limit=555 --persist',
+                'expected_minutes' => 1440,
+            ],
+            // Wave YYYYYYYYYY (Vader 2026-05-23) — daily backup CREATE
+            // (paired with backup_verify).
+            'backup_create' => [
+                'label' => 'Daily SQLite backup create',
+                'command' => 'grimba:create-backup --keep=14',
+                'expected_minutes' => 1440,
+            ],
         ];
     }
 
@@ -161,6 +188,13 @@ class GrimbaAutomationMonitor
         return [
             ...self::freshnessJobKeys(),
             'full_articles',
+            // Wave FFFFFFFFFFF (Vader 2026-05-26, Zen MEDIUM-2) — self-
+            // monitor the Slack paging path. Each grimba:health run with
+            // GRIMBA_HEALTH_SLACK_WEBHOOK set posts to Slack and records
+            // the result here. When the webhook silently 5xxs / 404s
+            // for a week, this key reports stale/failed in the next
+            // health probe — closes the "silent paging" hole.
+            'slack_webhook',
         ];
     }
 
