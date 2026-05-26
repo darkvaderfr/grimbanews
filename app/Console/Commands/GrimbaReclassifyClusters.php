@@ -32,7 +32,8 @@ class GrimbaReclassifyClusters extends Command
     protected $signature = 'grimba:reclassify-clusters
         {--limit=555 : Walk this many recent articles by post.id desc}
         {--persist : Denorm bias signal onto story_clusters.review_action prefix mg_}
-        {--report-only=all : Filter rows: all, middle_ground, blindspot, balanced, left, center, right}';
+        {--report-only=all : Filter rows: all, middle_ground, blindspot, balanced, left, center, right}
+        {--json : Print results as JSON instead of formatted text (suppresses text headers; ideal for ops pipelines)}';
 
     protected $description = 'Retroactive cluster bias reclassification + Middle Ground / Blindspot surfacing.';
 
@@ -41,12 +42,18 @@ class GrimbaReclassifyClusters extends Command
         $limit = max(1, (int) $this->option('limit'));
         $persist = (bool) $this->option('persist');
         $filter = (string) $this->option('report-only');
+        // Wave IIII (Vader 2026-05-26) — JSON output mode for ops pipes.
+        // When set, suppress all decorative text so `... --json | jq`
+        // works cleanly.
+        $jsonMode = (bool) $this->option('json');
 
-        $this->newLine();
-        $this->line(str_repeat('═', 78));
-        $this->line(sprintf('  Reclassifying clusters from the last %d articles · %s', $limit, now()->toIso8601String()));
-        $this->line(str_repeat('═', 78));
-        $this->newLine();
+        if (! $jsonMode) {
+            $this->newLine();
+            $this->line(str_repeat('═', 78));
+            $this->line(sprintf('  Reclassifying clusters from the last %d articles · %s', $limit, now()->toIso8601String()));
+            $this->line(str_repeat('═', 78));
+            $this->newLine();
+        }
 
         // 1. Pull the last N article rows with cluster + bias.
         $articles = DB::table('posts')
@@ -151,42 +158,44 @@ class GrimbaReclassifyClusters extends Command
             return $pri($a) <=> $pri($b) ?: $b['total'] <=> $a['total'];
         });
 
-        $this->table(
-            ['Cluster', 'Signal', 'L', 'C', 'R', '?', '🅣', 'Tag'],
-            array_map(fn ($r) => [
-                '#' . $r['cid'],
-                $r['label'],
-                $r['l'],
-                $r['c'],
-                $r['r'],
-                $r['unk'],
-                $r['total'],
-                $r['tag'],
-            ], array_slice($rendered, 0, 50))
-        );
+        if (! $jsonMode) {
+            $this->table(
+                ['Cluster', 'Signal', 'L', 'C', 'R', '?', '🅣', 'Tag'],
+                array_map(fn ($r) => [
+                    '#' . $r['cid'],
+                    $r['label'],
+                    $r['l'],
+                    $r['c'],
+                    $r['r'],
+                    $r['unk'],
+                    $r['total'],
+                    $r['tag'],
+                ], array_slice($rendered, 0, 50))
+            );
 
-        if (count($rendered) > 50) {
-            $this->line(sprintf('  … and %d more rows (showing first 50).', count($rendered) - 50));
+            if (count($rendered) > 50) {
+                $this->line(sprintf('  … and %d more rows (showing first 50).', count($rendered) - 50));
+            }
+
+            $this->newLine();
+            $this->line('Summary across all reclassified clusters:');
+            $this->line(sprintf(
+                '  Clusters examined: %d · Middle Ground: %d · Blindspot: %d · Balanced: %d · Left: %d · Center: %d · Right: %d',
+                count($byCluster),
+                $totals['middle_ground'],
+                $totals['blindspot'],
+                $totals['balanced'],
+                $totals['left'],
+                $totals['center'],
+                $totals['right']
+            ));
         }
-
-        $this->newLine();
-        $this->line('Summary across all reclassified clusters:');
-        $this->line(sprintf(
-            '  Clusters examined: %d · Middle Ground: %d · Blindspot: %d · Balanced: %d · Left: %d · Center: %d · Right: %d',
-            count($byCluster),
-            $totals['middle_ground'],
-            $totals['blindspot'],
-            $totals['balanced'],
-            $totals['left'],
-            $totals['center'],
-            $totals['right']
-        ));
 
         // 5. Persist Middle Ground tag onto story_clusters.review_action
         // (prefix `mg_` so existing review_action consumers stay backward-
         // compatible). Only writes when --persist set.
+        $persisted = 0;
         if ($persist) {
-            $persisted = 0;
             foreach ($rows as $r) {
                 if ($r['signal'] !== 'middle_ground') {
                     continue;
@@ -201,14 +210,37 @@ class GrimbaReclassifyClusters extends Command
                     ]);
                 $persisted++;
             }
-            $this->line(sprintf('  Persisted %d Middle Ground tags onto story_clusters.review_action (prefix mg_).', $persisted));
-        } else {
+            if (! $jsonMode) {
+                $this->line(sprintf('  Persisted %d Middle Ground tags onto story_clusters.review_action (prefix mg_).', $persisted));
+            }
+        } elseif (! $jsonMode) {
             $this->line('  --persist not set; no story_clusters rows touched.');
         }
 
-        $this->newLine();
-        $this->line(str_repeat('═', 78));
-        $this->newLine();
+        if ($jsonMode) {
+            // Wave IIII — emit single JSON object with totals + a
+            // compact rows array for ops pipes. Suppresses every
+            // other text line — caller may safely `... --json | jq`.
+            $this->line(json_encode([
+                'walked_limit' => $limit,
+                'persist' => $persist,
+                'totals' => [
+                    'left' => $totals['left'],
+                    'center' => $totals['center'],
+                    'right' => $totals['right'],
+                    'middle_ground' => $totals['middle_ground'] ?? 0,
+                    'blindspot' => $totals['blindspot'] ?? 0,
+                    'balanced' => $totals['balanced'] ?? 0,
+                    'unclassified' => $totals['unclassified'] ?? 0,
+                ],
+                'clusters_touched' => $persisted,
+                'generated_at' => now()->toIso8601String(),
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        } else {
+            $this->newLine();
+            $this->line(str_repeat('═', 78));
+            $this->newLine();
+        }
 
         return self::SUCCESS;
     }

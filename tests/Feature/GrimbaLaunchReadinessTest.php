@@ -2120,6 +2120,34 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_grimba_reclassify_clusters_json_mode_is_valid_pipeable_json(): void
+    {
+        // Wave IIII (Vader 2026-05-26) — --json mode is the ops contract
+        // for ingest-monitor pipes (e.g. cron| jq '.totals.middle_ground').
+        // Test asserts that the command's stdout is a single line of
+        // valid JSON with the expected keys.
+        \Illuminate\Support\Facades\Artisan::call('grimba:reclassify-clusters', [
+            '--limit' => 100,
+            '--json' => true,
+        ]);
+        $output = trim(\Illuminate\Support\Facades\Artisan::output());
+        // Strip any trailing newline or blank — find the JSON line.
+        $lines = array_values(array_filter(array_map('trim', explode("\n", $output)), fn ($l) => $l !== ''));
+        $jsonLine = end($lines);
+        $decoded = json_decode($jsonLine, true);
+        $this->assertIsArray($decoded, "JSON mode must emit valid JSON. Got: " . substr($jsonLine, 0, 200));
+        foreach (['walked_limit', 'persist', 'totals', 'clusters_touched', 'generated_at'] as $key) {
+            $this->assertArrayHasKey($key, $decoded, "JSON must include '{$key}' key.");
+        }
+        foreach (['left', 'center', 'right', 'middle_ground', 'blindspot', 'balanced'] as $totalKey) {
+            $this->assertArrayHasKey($totalKey, $decoded['totals'], "JSON totals must include '{$totalKey}' key.");
+            $this->assertIsInt($decoded['totals'][$totalKey], "totals.{$totalKey} must be int.");
+        }
+        $this->assertSame(100, $decoded['walked_limit']);
+        $this->assertFalse($decoded['persist'], '--persist not set; clusters_touched must be 0.');
+        $this->assertSame(0, $decoded['clusters_touched']);
+    }
+
     public function test_dossiers_diversity_filter_serves_middle_ground_blindspot_tabs(): void
     {
         // Wave FFFF (Vader 2026-05-26) — /dossiers?diversity=middle_ground
