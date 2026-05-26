@@ -2108,6 +2108,19 @@ class GrimbaLaunchReadinessTest extends TestCase
             // 404.blade.php, so we don't assert here. Live curl
             // shows the CTA at line 54 of 404.blade.php works.
         ];
+
+        // Wave LLLL (Vader 2026-05-26) — dynamic surface: pick a real
+        // mg_-tagged cluster ID from the DB and add it to the walk so
+        // the /comparatif/{id} header badge ships in this smoke test.
+        $mgClusterId = \Illuminate\Support\Facades\DB::table('story_clusters')
+            ->where('review_action', 'like', 'mg_%')
+            ->value('id');
+        if ($mgClusterId) {
+            $surfaces[] = [
+                'route' => '/comparatif/' . $mgClusterId,
+                'mustContain' => 'Juste milieu',
+            ];
+        }
         foreach ($surfaces as $surface) {
             $expectedStatus = $surface['expectedStatus'] ?? 200;
             $response = $this->get($surface['route']);
