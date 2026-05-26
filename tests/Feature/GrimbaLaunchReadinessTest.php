@@ -1987,6 +1987,25 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsInt($exit0);
     }
 
+    public function test_bias_legend_methodology_link_is_not_a_404(): void
+    {
+        // Wave YYY (Vader 2026-05-26) — bias-legend partial used to link
+        // to /methodology (English route name) instead of /methodologie
+        // (the live FR route). Since bias-legend ships on every
+        // category + feed page, this 404'd readers site-wide every
+        // time they tapped the methodology link. Regression-guard.
+        $rendered = view(\Theme::getThemeNamespace('partials.bias-legend'))->render();
+        $this->assertStringNotContainsString('href="' . url('/methodology') . '"', $rendered,
+            'bias-legend must NOT link to /methodology (404 — English route does not exist).');
+        $this->assertStringContainsString('href="' . url('/methodologie') . '"', $rendered,
+            'bias-legend must link to /methodologie (the live FR route).');
+        // Also confirm the chips now deep-link.
+        $this->assertStringContainsString('href="' . url('/juste-milieu') . '"', $rendered,
+            'Juste milieu chip in bias-legend must be a clickable deep-link.');
+        $this->assertStringContainsString('href="' . url('/angles-morts') . '"', $rendered,
+            'Angle mort chip in bias-legend must be a clickable deep-link.');
+    }
+
     public function test_grimba_cluster_bias_resolve_handles_three_way_tie_as_middle_ground(): void
     {
         // Wave TTTTTTTTTTT (Vader 2026-05-26) — pattern-sweep extension
