@@ -326,6 +326,50 @@
         </div>
     </div>
 
+    {{-- Wave PPPPPPPPPPP (Vader 2026-05-26) — Editorial signal mix tile.
+         Pages an editor when Middle Ground dries up (e.g. after a hot
+         partisan cycle) OR when Blindspot count spikes. The "since"
+         line shows the last time the reclassifier persisted a new MG
+         tag — operator's at-a-glance freshness gauge for the signal. --}}
+    <div class="row g-3 mb-3">
+        <div class="col-12">
+            <div class="card grimba-status-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between gap-3 mb-3 flex-wrap">
+                        <div>
+                            <span class="grimba-cockpit__kicker">Signal éditorial</span>
+                            <h3 class="card-title mt-2 mb-1">Juste milieu · Angles morts</h3>
+                            <p class="text-muted mb-0">Clusters classés par <code>grimba:reclassify-clusters</code> (03:35 UTC). Si le « juste milieu » s’assèche, c’est un signal — pas un bug.</p>
+                        </div>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <div class="text-center" style="min-width:120px;">
+                                <div class="grimba-status-card__count" style="color:#a855f7;">{{ $middleGroundClusterCount }}</div>
+                                <small class="text-muted">juste milieu</small>
+                            </div>
+                            <div class="text-center" style="min-width:120px;">
+                                <div class="grimba-status-card__count" style="color:#8a2be2;">{{ $blindspotClusterCount }}</div>
+                                <small class="text-muted">angles morts</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grimba-provider-row">
+                        <span>Dernier juste milieu posé</span>
+                        <strong>{{ $middleGroundLatestAt ? \Carbon\Carbon::parse($middleGroundLatestAt)->locale('fr')->diffForHumans() : 'aucun encore' }}</strong>
+                    </div>
+                    <div class="grimba-provider-row">
+                        <span>Ratio MG / total clusters</span>
+                        <strong>{{ $clusterCount > 0 ? round($middleGroundClusterCount * 100 / max(1, $clusterCount), 1) . '%' : '—' }}</strong>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{{ url('/juste-milieu') }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Voir la page publique</a>
+                        <a href="{{ url('/angles-morts') }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Voir les angles morts</a>
+                        <a href="{{ url('/comparatif?diversity=middle_ground') }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Filtre dossiers</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-3 mb-3">
         {{-- Active dossiers --}}
         <div class="col-lg-7 col-12">

@@ -114,6 +114,22 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ->where('is_blindspot', true)
                 ->count();
 
+            // Wave PPPPPPPPPPP (Vader 2026-05-26) — editorial-signal axis
+            // counters. Middle Ground clusters carry the mg_<L>_<C>_<R>
+            // tag set by grimba:reclassify-clusters; Blindspot clusters
+            // carry blindspot_*. We surface both so the cockpit pages
+            // an editor whenever the signal mix drifts (e.g. MG drying
+            // up after a hot political cycle).
+            $middleGroundClusterCount = Schema::hasTable('story_clusters')
+                ? DB::table('story_clusters')->where('review_action', 'like', 'mg_%')->count()
+                : 0;
+            $blindspotClusterCount = Schema::hasTable('story_clusters')
+                ? DB::table('story_clusters')->where('review_action', 'like', 'blindspot_%')->count()
+                : 0;
+            $middleGroundLatestAt = Schema::hasTable('story_clusters')
+                ? DB::table('story_clusters')->where('review_action', 'like', 'mg_%')->max('reviewed_at')
+                : null;
+
             // Stats headers + operational pressure.
             $publishedToday = $todayPosts->count();
             $publicationFloor = 12;
@@ -264,7 +280,8 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'latestDrafts', 'nobuDrivers', 'translationDrivers',
                 'nobuFailureDiagnostics',
                 'nobuInsightReady', 'nobuInsightPending', 'nobuInsightStale', 'nobuInsightLatest',
-                'automationStatus'
+                'automationStatus',
+                'middleGroundClusterCount', 'blindspotClusterCount', 'middleGroundLatestAt'
             ));
         })->name('cockpit');
 

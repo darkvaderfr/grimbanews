@@ -77,6 +77,23 @@
             </p>
         </article>
 
+        {{-- Wave OOOOOOOOOOO (Vader 2026-05-26) — Middle Ground / Juste milieu
+             signal explainer. Keeps the editorial-signal axis (angle mort
+             vs juste milieu) intelligible to readers landing from the
+             /juste-milieu page or the bias-legend chip. --}}
+        <article class="grimba-methodology__section" id="juste-milieu">
+            <h2>{{ __("3 bis. Qu'est-ce que le « juste milieu » ?") }}</h2>
+            <p>
+                {!! __("À l'opposé d'un angle mort, le <strong>juste milieu</strong> signale une histoire couverte <em>équitablement</em> par les deux extrêmes : autant d'articles classés à gauche qu'à droite, avec au moins un papier au centre. Pour le lecteur, c'est le marqueur d'un sujet où le consensus médiatique se forme — pas d'un sujet « neutre ».") !!}
+            </p>
+            <p>
+                {{ __("Concrètement, un cluster bascule en juste milieu quand le compte gauche égale le compte droite (ou diffère d'un seul article) ET qu'aucun des deux côtés ne dépasse le centre. La règle est encodée dans GrimbaClusterBias::resolve() et rejouée chaque nuit à 03:35 UTC sur les 555 derniers articles. Les clusters identifiés portent l'étiquette interne « mg_<L>_<C>_<R> » et apparaissent en violet partout dans le site — pastille de la légende, onglet /comparatif?diversity=middle_ground, page dédiée /juste-milieu, fil RSS /feed.juste-milieu.xml.") }}
+            </p>
+            <p class="opacity-85">
+                {!! __("À ne pas confondre avec la <strong>couverture équilibrée</strong> (signal de diversité, mesurée par le pourcentage de chaque camp dans la couverture brute). Le juste milieu est le <em>signal éditorial</em> — il dit « regardez, ici, les extrêmes se rejoignent » — pendant que la couverture équilibrée mesure simplement le partage statistique. Les deux affichages cohabitent sur les dossiers.") !!}
+            </p>
+        </article>
+
         <article class="grimba-methodology__section">
             <h2>{{ __('4. Score de crédibilité (0–100)') }}</h2>
             <p>
