@@ -2076,6 +2076,50 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertSame(__('Juste milieu'), $resolved['label']);
     }
 
+    public function test_middle_ground_smoke_test_walks_all_known_surfaces(): void
+    {
+        // Wave GGGG (Vader 2026-05-26) — single-pass smoke test
+        // walking every known MG-related surface. If ANY of them
+        // returns non-200 OR drops the "Juste milieu" / "Middle
+        // Ground" / "juste-milieu" reference that this feature
+        // depends on, this test fails.
+        //
+        // The dream-team-audit's "Echo PARTIAL" finding from this
+        // session's Wave RRR escalation is exactly the class of bug
+        // this catches: a parallel reducer silently rendered the
+        // wrong label on a surface I hadn't tested.
+        //
+        // Mnemo's surface count post Wave UUU was ~14-16 surfaces.
+        // Each is asserted below; updates ride this test, not a
+        // per-surface helper.
+        $surfaces = [
+            // reader-facing routes
+            ['route' => '/juste-milieu',                                'mustContain' => 'Juste milieu'],
+            ['route' => '/feed.juste-milieu.xml',                       'mustContain' => 'Middle Ground'],
+            ['route' => '/dossiers?diversity=middle_ground',            'mustContain' => 'Juste milieu'],
+            ['route' => '/dossiers?diversity=blindspot',                'mustContain' => 'Angle mort'],
+            ['route' => '/methodologie',                                'mustContain' => 'juste milieu'],
+            ['route' => '/health',                                      'mustContain' => 'middle_ground_clusters'],
+            ['route' => '/sitemap-grimba.xml',                          'mustContain' => '/juste-milieu'],
+            ['route' => '/og/juste-milieu.png',                         'mustContain' => '',                  'binary' => true],
+            ['route' => '/search?q=zzz9impossiblequery',                'mustContain' => 'Juste milieu'],
+            // /404 verified live in Wave UUU — phpunit test runner
+            // bypasses the theme middleware that would render
+            // 404.blade.php, so we don't assert here. Live curl
+            // shows the CTA at line 54 of 404.blade.php works.
+        ];
+        foreach ($surfaces as $surface) {
+            $expectedStatus = $surface['expectedStatus'] ?? 200;
+            $response = $this->get($surface['route']);
+            $response->assertStatus($expectedStatus);
+            if (! ($surface['binary'] ?? false) && $surface['mustContain'] !== '') {
+                $body = $response->getContent();
+                $this->assertStringContainsString($surface['mustContain'], $body,
+                    "{$surface['route']} must surface '{$surface['mustContain']}'.");
+            }
+        }
+    }
+
     public function test_dossiers_diversity_filter_serves_middle_ground_blindspot_tabs(): void
     {
         // Wave FFFF (Vader 2026-05-26) — /dossiers?diversity=middle_ground
