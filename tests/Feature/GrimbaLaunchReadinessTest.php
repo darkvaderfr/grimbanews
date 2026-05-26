@@ -2133,6 +2133,50 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_api_middle_ground_json_returns_valid_data_product(): void
+    {
+        // Wave NNNN (Vader 2026-05-26) — public read-only API for the
+        // Middle Ground signal. Lock contract:
+        //   - 200 OK + application/json
+        //   - CORS open (Access-Control-Allow-Origin: *)
+        //   - Top-level keys: generated_at, count, limit, classifier_cadence,
+        //     classifier_command, methodology_url, rows
+        //   - Each row: cluster_id, topic, left_count, center_count,
+        //     right_count, tagged_at, days_since_tagged, dossier_url
+        //   - limit query string honored (max 200)
+        $response = $this->get('/api/middle-ground.json?limit=3');
+        $response->assertStatus(200);
+        $this->assertStringStartsWith('application/json',
+            (string) $response->headers->get('content-type'));
+        $this->assertSame('*', $response->headers->get('access-control-allow-origin'));
+        $body = $response->json();
+        foreach (['generated_at', 'count', 'limit', 'classifier_cadence',
+                  'classifier_command', 'methodology_url', 'rows'] as $key) {
+            $this->assertArrayHasKey($key, $body, "API must include top-level key '{$key}'.");
+        }
+        $this->assertSame(3, $body['limit']);
+        $this->assertIsArray($body['rows']);
+        $this->assertLessThanOrEqual(3, count($body['rows']));
+        if ($body['rows'] !== []) {
+            $row = $body['rows'][0];
+            foreach (['cluster_id', 'topic', 'left_count', 'center_count',
+                      'right_count', 'tagged_at', 'days_since_tagged',
+                      'dossier_url'] as $rowKey) {
+                $this->assertArrayHasKey($rowKey, $row, "Each row must include '{$rowKey}'.");
+            }
+            $this->assertIsInt($row['cluster_id']);
+            $this->assertIsInt($row['left_count']);
+            $this->assertIsInt($row['center_count']);
+            $this->assertIsInt($row['right_count']);
+            $this->assertStringContainsString('/comparatif/', $row['dossier_url']);
+        }
+        // limit cap: ?limit=10000 should clamp to 200 max.
+        $largeResponse = $this->get('/api/middle-ground.json?limit=10000');
+        $largeResponse->assertStatus(200);
+        $this->assertSame(200, $largeResponse->json('limit'),
+            'limit must clamp at 200 max.');
+    }
+
     public function test_cluster_page_renders_middle_ground_since_badge_when_tagged(): void
     {
         // Wave LLLL (Vader 2026-05-26) — when a cluster carries an

@@ -526,6 +526,56 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ]);
         })->name('public.health');
 
+        // Wave NNNN (Vader 2026-05-26) — public read-only JSON API for
+        // the Middle Ground signal. Turns the editorial signal into a
+        // data product (researchers, journalists, developers can pipe
+        // it). Returns at most --limit clusters with their LCR counts
+        // and tag age. Cached 15 min (signal moves once a day at most).
+        Route::get('api/middle-ground.json', function (Request $request) {
+            $limit = max(1, min(200, (int) ($request->query('limit') ?? 50)));
+            $rows = [];
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('story_clusters')) {
+                    $clusters = \Illuminate\Support\Facades\DB::table('story_clusters')
+                        ->where('review_action', 'like', 'mg_%')
+                        ->orderByDesc('reviewed_at')
+                        ->limit($limit)
+                        ->get(['id', 'topic', 'review_action', 'reviewed_at']);
+                    foreach ($clusters as $c) {
+                        // mg_<L>_<C>_<R> tag denorm
+                        $parts = explode('_', (string) $c->review_action);
+                        $rows[] = [
+                            'cluster_id' => (int) $c->id,
+                            'topic' => (string) $c->topic,
+                            'left_count' => (int) ($parts[1] ?? 0),
+                            'center_count' => (int) ($parts[2] ?? 0),
+                            'right_count' => (int) ($parts[3] ?? 0),
+                            'tagged_at' => $c->reviewed_at,
+                            'days_since_tagged' => $c->reviewed_at
+                                ? (int) \Carbon\Carbon::parse($c->reviewed_at)->diffInDays(now())
+                                : null,
+                            'dossier_url' => url('/comparatif/' . $c->id),
+                        ];
+                    }
+                }
+            } catch (\Throwable) {
+                // Empty rows; let consumer see empty array, not 500.
+            }
+            return response()->json([
+                'generated_at' => now()->utc()->toIso8601String(),
+                'count' => count($rows),
+                'limit' => $limit,
+                'classifier_cadence' => 'daily-0335-utc',
+                'classifier_command' => 'grimba:reclassify-clusters',
+                'methodology_url' => url('/methodologie#juste-milieu'),
+                'rows' => $rows,
+            ], 200, [
+                'Cache-Control' => 'public, max-age=900, s-maxage=1800',
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET',
+            ]);
+        })->name('public.api.middle_ground');
+
         // Phase D-09 — per-stream RSS feeds. /feed.breaking.xml
         // surfaces every post that matched the strict breaking-news
         // keyword pool in the active region + locale; /feed.latest.xml
