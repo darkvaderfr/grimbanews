@@ -13,11 +13,16 @@
         'unknown' => '#9ca3af',
     ];
 
+    // Wave HHHHHHHHHHH (Vader 2026-05-26) — added middle_ground +
+    // blindspot tabs alongside the diversity tabs. These read the
+    // editorial-signal axis instead of the raw side-presence axis.
     $diversityTabs = [
-        'all'       => ['label' => __('Tous'),                    'color' => '#1a1713'],
-        'balanced'  => ['label' => __('Couverture équilibrée'),   'color' => '#22c55e'],
-        'partial'   => ['label' => __('Couverture partielle'),    'color' => '#eab308'],
-        'one_sided' => ['label' => __('Couverture unilatérale'),  'color' => '#ef4444'],
+        'all'           => ['label' => __('Tous'),                    'color' => '#1a1713'],
+        'balanced'      => ['label' => __('Couverture équilibrée'),   'color' => '#22c55e'],
+        'partial'       => ['label' => __('Couverture partielle'),    'color' => '#eab308'],
+        'one_sided'     => ['label' => __('Couverture unilatérale'),  'color' => '#ef4444'],
+        'middle_ground' => ['label' => __('Juste milieu'),            'color' => '#a855f7'],
+        'blindspot'     => ['label' => __('Angle mort'),              'color' => '#8a2be2'],
     ];
 
     $buildPageUrl = function (int $page) use ($diversityFilter): string {

@@ -60,9 +60,21 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $perPage = 24;
             $page = max(1, (int) $request->query('page', 1));
             $diversityFilter = (string) $request->query('diversity', 'all');
-            if (! in_array($diversityFilter, ['all', 'balanced', 'partial', 'one_sided'], true)) {
+            // Wave HHHHHHHHHHH (Vader 2026-05-26) — add Middle Ground +
+            // Blindspot as editorial-signal filters alongside the
+            // pre-existing diversity filters.
+            if (! in_array($diversityFilter, ['all', 'balanced', 'partial', 'one_sided', 'middle_ground', 'blindspot'], true)) {
                 $diversityFilter = 'all';
             }
+
+            // Pre-resolve the set of cluster IDs tagged with the 'mg_*'
+            // (Middle Ground) prefix by grimba:reclassify-clusters so
+            // the filter can match without a JOIN per row.
+            $middleGroundClusterIds = DB::table('story_clusters')
+                ->where('review_action', 'like', 'mg_%')
+                ->pluck('id')
+                ->mapWithKeys(fn ($id) => [(int) $id => true])
+                ->all();
 
             // Pre-aggregate post counts per cluster + per bias side in
             // a single grouped query so we don't fan out N+1 below.
@@ -126,9 +138,17 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->filter(fn ($c) => $c->total > 0)
                 ->values();
 
-            $filtered = $diversityFilter === 'all'
-                ? $allClusters
-                : $allClusters->filter(fn ($c) => $c->diversity === $diversityFilter)->values();
+            $filtered = match ($diversityFilter) {
+                'all' => $allClusters,
+                'middle_ground' => $allClusters->filter(fn ($c) => isset($middleGroundClusterIds[(int) $c->id]))->values(),
+                'blindspot' => $allClusters->filter(function ($c) {
+                    // Reuse the reclassifier's blindspot rule: known coverage ≥3 + max camp ≥80%
+                    $known = $c->counts['left'] + $c->counts['center'] + $c->counts['right'];
+                    $maxCamp = max($c->counts['left'], $c->counts['center'], $c->counts['right']);
+                    return $known >= 3 && $maxCamp >= ($known * 0.8);
+                })->values(),
+                default => $allClusters->filter(fn ($c) => $c->diversity === $diversityFilter)->values(),
+            };
 
             $totalCount = $filtered->count();
             $clusters = $filtered->slice(($page - 1) * $perPage, $perPage)->values();
@@ -414,6 +434,8 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         Route::get('health', function () {
             $dbOk = false;
             $lastPublishedAt = null;
+            $middleGroundCount = null;
+            $blindspotCount = null;
             try {
                 $dbOk = \Illuminate\Support\Facades\DB::connection()->getPdo() !== null;
                 if ($dbOk && \Illuminate\Support\Facades\Schema::hasTable('posts')) {
@@ -421,6 +443,23 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                         ->where('status', 'published')
                         ->orderByDesc('created_at')
                         ->value('created_at') ?? '');
+                }
+                // Wave IIIIIIIIIII (Vader 2026-05-26) — surface
+                // Middle Ground + Blindspot counts as editorial
+                // signal monitors. Operators get a quick read of
+                // editorial-coverage diversity at the same probe
+                // they hit for db health.
+                if ($dbOk && \Illuminate\Support\Facades\Schema::hasTable('story_clusters')) {
+                    $middleGroundCount = (int) \Illuminate\Support\Facades\DB::table('story_clusters')
+                        ->where('review_action', 'like', 'mg_%')
+                        ->count();
+                }
+                if ($dbOk && \Illuminate\Support\Facades\Schema::hasTable('posts') && \Illuminate\Support\Facades\Schema::hasColumn('posts', 'is_blindspot')) {
+                    $blindspotCount = (int) \Illuminate\Support\Facades\DB::table('posts')
+                        ->where('status', 'published')
+                        ->where('is_blindspot', true)
+                        ->distinct('story_cluster_id')
+                        ->count('story_cluster_id');
                 }
             } catch (\Throwable $e) {
                 $dbOk = false;
@@ -431,6 +470,8 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 'time' => now()->utc()->toIso8601String(),
                 'db' => $dbOk ? 'up' : 'down',
                 'last_post_at' => $lastPublishedAt ?: null,
+                'middle_ground_clusters' => $middleGroundCount,
+                'blindspot_clusters' => $blindspotCount,
             ], $dbOk ? 200 : 503, [
                 'Cache-Control' => 'no-store, max-age=0',
                 'X-Robots-Tag' => 'noindex',
@@ -479,6 +520,41 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         };
         Route::get('feed.latest.xml', $latestFeedHandler)->name('public.feed.latest');
         Route::get('feed.latest',     $latestFeedHandler)->name('public.feed.latest.alt');
+
+        // Wave JJJJJJJJJJJ (Vader 2026-05-26) — RSS feed for Middle
+        // Ground clusters. Mirror of feed.latest.xml but filtered to
+        // articles in clusters tagged with the 'mg_*' prefix by
+        // grimba:reclassify-clusters (daily 03:35 UTC). Lets readers
+        // subscribe to "stories covered equally by left and right"
+        // as a standalone editorial signal stream.
+        $middleGroundFeedHandler = function () {
+            $clusterIds = DB::table('story_clusters')
+                ->where('review_action', 'like', 'mg_%')
+                ->orderByDesc('reviewed_at')
+                ->pluck('id');
+
+            $posts = \Botble\Blog\Models\Post::query()
+                ->whereIn('story_cluster_id', $clusterIds)
+                ->where('status', 'published')
+                ->tap(fn ($q) => GnTr::orderForTargetLocale($q))
+                ->limit(30)
+                ->get();
+
+            $xml = view('theme.grimba-feed', [
+                'posts' => $posts,
+                'siteTitle' => 'GrimbaNews · Middle Ground',
+                'siteUrl' => url('/juste-milieu'),
+                'siteDesc' => 'Stories covered in equal proportions by the left and the right — a distinct editorial signal from blindspots.',
+                'feedUrl' => url('/feed.juste-milieu.xml'),
+                'builtAt' => now()->toRssString(),
+            ])->render();
+
+            return response($xml, 200)
+                ->header('Content-Type', 'application/rss+xml; charset=UTF-8')
+                ->header('Cache-Control', 'public, max-age=1800');
+        };
+        Route::get('feed.juste-milieu.xml', $middleGroundFeedHandler)->name('public.feed.middle_ground');
+        Route::get('feed.juste-milieu',     $middleGroundFeedHandler)->name('public.feed.middle_ground.alt');
 
         Route::get('ads.txt', function () {
             $path = public_path('ads.txt');

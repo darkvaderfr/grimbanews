@@ -1861,6 +1861,60 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_middle_ground_surfaces_render_end_to_end(): void
+    {
+        // Wave KKKKKKKKKKK (Vader 2026-05-26) — regression guard for
+        // the Middle Ground feature shipped across waves C, D, E, F,
+        // G, H, I, J. Locks four contract surfaces:
+        //   1. /juste-milieu listing renders 200 + ships Middle Ground
+        //      badge HTML
+        //   2. /health JSON exposes middle_ground_clusters numeric key
+        //   3. /feed.juste-milieu.xml renders 200 + Content-Type RSS
+        //   4. bias-legend partial emits 5 chips incl. Juste milieu
+        //      (Middle Ground) AND Angle mort (Blindspot)
+        // Together they prevent silent regression if the
+        // GrimbaClusterBias helper / grimba:reclassify-clusters
+        // command / mg_* tag prefix get refactored.
+
+        // 1. /juste-milieu listing
+        $listing = $this->get('/juste-milieu');
+        $listing->assertStatus(200);
+        $listingHtml = $listing->getContent();
+        $this->assertStringContainsString('middle-ground-badge', $listingHtml,
+            '/juste-milieu must render the Middle Ground badge.');
+
+        // 2. /health JSON
+        $health = $this->get('/health');
+        $health->assertStatus(200);
+        $health->assertJsonStructure([
+            'status',
+            'middle_ground_clusters',
+            'blindspot_clusters',
+        ]);
+
+        // 3. /feed.juste-milieu.xml
+        $feed = $this->get('/feed.juste-milieu.xml');
+        $feed->assertStatus(200);
+        $feed->assertHeader('Content-Type', 'application/rss+xml; charset=UTF-8');
+        $this->assertStringContainsString('GrimbaNews · Middle Ground', $feed->getContent());
+
+        // 4. bias-legend partial renders 5 chips (test uses the view
+        //    directly so home-page caching can't mask a regression).
+        $legend = view(\Theme::getThemeNamespace('partials.bias-legend'))->render();
+        // The literal #a855f7 colour is the Middle Ground hex;
+        // #8a2be2 is the Blindspot hex.
+        $this->assertStringContainsString('#a855f7', $legend,
+            'bias-legend must include Middle Ground chip (purple #a855f7).');
+        $this->assertStringContainsString('#8a2be2', $legend,
+            'bias-legend must include Blindspot chip (blueviolet #8a2be2).');
+        $this->assertStringContainsString('#3b82f6', $legend,
+            'bias-legend must include Left chip (blue).');
+        $this->assertStringContainsString('#22c55e', $legend,
+            'bias-legend must include Center chip (green).');
+        $this->assertStringContainsString('#ef4444', $legend,
+            'bias-legend must include Right chip (red).');
+    }
+
     public function test_advertise_page_does_not_get_public_cached(): void
     {
         // Wave TTTTTTT / Wave YYYYYYY — /advertise has an @csrf token
