@@ -44,18 +44,26 @@
         </header>
 
         @if($posts->isEmpty())
-            {{-- Wave UUU (Vader 2026-05-26) — reader-friendly empty state.
-                 Pre-fix this surfaced "php artisan grimba:reclassify-clusters
-                 --persist" to readers, which is admin-internal leak.
-                 Replaced with content readers can act on. --}}
-            <div class="glass-panel p-4 text-center">
-                <h2 class="h5 mb-2">{{ __('Pas encore de « Juste milieu » à afficher') }}</h2>
-                <p class="opacity-85 mb-3">{{ __("Notre moteur identifie les histoires couvertes équitablement par la gauche et la droite chaque nuit à 03:35 UTC. Revenez d'ici demain — ou explorez d'autres signaux pendant ce temps.") }}</p>
-                <div class="d-inline-flex gap-2 flex-wrap justify-content-center">
+            {{-- Wave CCCC (Vader 2026-05-26, Mnemo cinematic-polish flag) —
+                 Steve's design language standard: hero typography, purple
+                 gradient sweep matching the Middle Ground chip palette,
+                 generous vertical rhythm, contextual signal monitor below
+                 the CTAs so the empty state still tells a story instead
+                 of going dark. --}}
+            <div class="glass-panel p-5 text-center" style="background: linear-gradient(180deg, rgba(168,85,247,0.06) 0%, rgba(168,85,247,0.02) 60%, transparent 100%); border: 1px solid rgba(168,85,247,0.15);">
+                <div style="font-size:48px; line-height:1; color:#a855f7; margin-bottom:18px; letter-spacing:0;" aria-hidden="true">⊕</div>
+                <h2 class="mb-2" style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:28px; letter-spacing:-0.01em;">
+                    {{ __('Pas encore de « Juste milieu » à afficher') }}
+                </h2>
+                <p class="opacity-85 mx-auto mb-4" style="max-width:520px;">{{ __("Notre moteur identifie les histoires couvertes équitablement par la gauche et la droite chaque nuit à 03:35 UTC. Revenez d'ici demain — ou explorez d'autres signaux pendant ce temps.") }}</p>
+                <div class="d-inline-flex gap-2 flex-wrap justify-content-center mb-4">
                     <a href="{{ url('/angles-morts') }}" class="btn-grimba btn-grimba--sm btn-grimba--ghost">{{ __('Voir les angles morts') }}</a>
                     <a href="{{ url('/dossiers') }}" class="btn-grimba btn-grimba--sm btn-grimba--ghost">{{ __('Tous les dossiers') }}</a>
                     <a href="{{ url('/methodologie') }}#juste-milieu" class="btn-grimba btn-grimba--sm btn-grimba--ghost">{{ __('Comment on classe') }}</a>
                 </div>
+                <p class="small opacity-60 m-0">
+                    {{ __('Signal observé chaque jour à 03:35 UTC · prochaine analyse dans moins de 24h.') }}
+                </p>
             </div>
         @else
             <div class="row g-4">
