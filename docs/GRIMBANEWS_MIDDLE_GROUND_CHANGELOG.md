@@ -106,6 +106,9 @@ Methodology §3 bis "Qu'est-ce que le juste milieu" explainer with `#juste-milie
 
 Earlier waves CCC through KKK established the Middle Ground feature across 11 initial surfaces: GrimbaClusterBias::resolve helper, bias-legend chip, /juste-milieu listing route, /feed.juste-milieu.xml RSS, sitemap entry, source-diversity-meter tag, GrimbaSourceBreakdown wiring, GrimbaHomeFeed hero rail, GrimbaReclassifyClusters command (daily 03:35 UTC), /dossiers diversity filter, /health JSON middle_ground_clusters key. Initial corpus reclassify: 21 MG clusters identified from 722 total.
 
+### Wave KKKK (`1097981e`)
+Mythos walker pack 4 — 60 deferred → partial via 60 surrogate docs (trust & safety, reader bookmarks v3, author payout, GDPR /vos-droits, editorial cadence, semantic search v2, search analytics, ML feed + preference center, privacy ops DSAR, annotations + bookmarks, daily report variants, transparency/ombudsman, OSS methodology). Ledger: deferred 747→687, partial 528→588.
+
 ## Cross-references
 
 - Resume prompt: `~/.claude/projects/-Users-vb-kaizen/memory/project_grimbanews_next_prompt.md`
