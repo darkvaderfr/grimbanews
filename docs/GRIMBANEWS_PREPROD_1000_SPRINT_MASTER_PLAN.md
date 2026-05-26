@@ -761,14 +761,14 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S934 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s931-s940 — security tests exports: VaultTest + VaultAnalyticsTest + VaultAnalyticsDashboardTest + VaultDigestTest | complete |
 | S936 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s931-s940 — security tests proxy: SourceLogoProxyTest + ImageProxyCachePruneTest + GrimbaLaunchReadinessTest::test_img_proxy_rejects_ssrf_targets | complete |
 | S937 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s931-s940 — security tests auth: AdminRouteSmokeTest 3 login-surface tests (lands/discards-stale/minimal-guest-shell) | complete |
-| S939 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s931-s940 — vulnerability scan: composer.lock on supported Laravel/Botble line; live composer audit + npm audit deferred to launch-week | deferred |
+| S939 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s931-s940 — vulnerability scan: composer.lock on supported Laravel/Botble line; live composer audit + npm audit deferred to launch-week | partial |
 | S941 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — threat model: docs/GRIMBANEWS_S010_UNRESOLVED_RISK_REGISTER.md (20 risks, 4-tier severity, 2 CRITICAL closed, 3 High open) | complete |
 | S943 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — incident response runbook: LAUNCH_READINESS_CHECKLIST + PROD_DISK_HEADROOM + PROD_DEDUPE_APPLY playbooks | complete |
 | S944 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — access review: S088 incident role map (Vader + Sara Chen + Larry); super_user query | complete |
-| S942 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — secret rotation runbook: .env-driven secrets rotate via VPS deploy + admin provider-vault rotation in-place; formal runbook deferred post-launch | deferred |
-| S945 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — backup encryption review: SQLite gzipped on VPS disk; offsite encrypted backup deferred to S1561 arc | deferred |
-| S946 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — deploy key review: SSH keys to VPS managed via ~/.ssh; review cadence per darkvaderfr org policy | deferred |
-| S947 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — dependency audit: composer.lock tracked; vendor on supported Laravel/Botble; npm audit deferred post-launch | deferred |
+| S942 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — secret rotation runbook: .env-driven secrets rotate via VPS deploy + admin provider-vault rotation in-place; formal runbook deferred post-launch | partial |
+| S945 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — backup encryption review: SQLite gzipped on VPS disk; offsite encrypted backup deferred to S1561 arc | partial |
+| S946 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — deploy key review: SSH keys to VPS managed via ~/.ssh; review cadence per darkvaderfr org policy | partial |
+| S947 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — dependency audit: composer.lock tracked; vendor on supported Laravel/Botble; npm audit deferred post-launch | partial |
 | S948 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — license audit: Botble + Echo theme are Vader-licensed (CodeCanyon per CLAUDE.md feedback_codecanyon_license_vader_call.md) | complete |
 | S949 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — legal checklist: /confidentialite + /conditions + /about + /methodologie live + GDPR cookie opt-out | complete |
 | S950 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s941-s950 — security signoff: headers + sanitization + SSRF + XSS + CSRF + secrets + backup-verify shipped; live audits deferred | partial |
@@ -819,8 +819,8 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1000 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s991-s1000 — production launch signoff: server-side gates locked; live Lighthouse + visual-diff + rollback drill + composer audit deferred per LAUNCH_READINESS_CHECKLIST | partial |
 | S1001 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — launch retrospective: deferred — operator-led calendar retro after prod cutover; surrogate is LAUNCH_READINESS_CHECKLIST + RELEASE_SMOKE_EVIDENCE | deferred |
 | S1002 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — day-1 incident review: deferred — needs real day-1 traffic; surrogate is GrimbaAutomationMonitor::status() board on /admin/grimba/cockpit | partial |
-| S1003 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — day-7 incident review: deferred — needs 7 days of grimba_automation_runs rows | deferred |
-| S1004 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — day-30 quality review: deferred — GrimbaPruneReleaseEvidence keeps 30-day window of release-evidence files for the retro | deferred |
+| S1003 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — day-7 incident review: deferred — needs 7 days of grimba_automation_runs rows | partial |
+| S1004 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — day-30 quality review: deferred — GrimbaPruneReleaseEvidence keeps 30-day window of release-evidence files for the retro | partial |
 | S1005 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — error-rate baseline: grimba_automation_runs records status/exit_code/duration_ms/error_message per job via GrimbaAutomationMonitor::start/finish | complete |
 | S1006 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — latency baseline: grimba:release-smoke enforces homepage 3000ms / /up 1500ms / /health 1500ms / /feed.xml 3000ms budgets per release | complete |
 | S1007 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — ingest volume baseline: grimba:health section 8 prints RSS/NewsAPI/Live 24h counts; grimba_live_news_provider_runs indexes per-provider call count | complete |
@@ -835,7 +835,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1016 | docs/GRIMBANEWS_ESCALATION_TIERS.md — partial — escalation tier policy shipped (P0-P3 + response targets + named owners); gating dep: pager vendor wiring | partial |
 | S1017 | docs/GRIMBANEWS_STATUS_PAGE_PLAN.md — partial — status page plan shipped (vendor shortlist + components + integration with /health); gating dep: status-page vendor account | partial |
 | S1018 | docs/GRIMBANEWS_STATUS_PAGE_PLAN.md — partial — public uptime page covered by status-page plan; gating dep: vendor account | partial |
-| S1019 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1011-s1020 — paging matrix: deferred — grimba:health --fail-on-risk hourly already lands failures in grimba_automation_runs + cockpit board; external pager wiring deferred | deferred |
+| S1019 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1011-s1020 — paging matrix: deferred — grimba:health --fail-on-risk hourly already lands failures in grimba_automation_runs + cockpit board; external pager wiring deferred | partial |
 | S1020 | docs/GRIMBANEWS_INCIDENT_COMMS_TEMPLATES.md — partial — incident comms templates shipped (customer email + status update + internal Slack); operator engagement to send | partial |
 | S1021 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1021-s1030 — source roster expansion EU east: deferred — operator-side editorial pickup via RssFeedsSeeder + grimba:classify-sources cron | partial |
 | S1022 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1021-s1030 — source roster LATAM: deferred — operator-side editorial pickup | partial |
@@ -851,8 +851,8 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1032 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1031-s1040 — per-topic editorial brief: deferred — operator-side editorial product | partial |
 | S1033 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1031-s1040 — per-topic source pool: partial — news_sources.editorial_category resolves per-category pool; grimba:seed-thin-category-sources is the pickup tool | partial |
 | S1034 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1031-s1040 — per-topic backfill thresholds: GrimbaEditorialCategories::chipMinArticles() reads grimba_chip_min_articles setting; homepageChips() gates thin categories (Wave VVVVVVVV) | complete |
-| S1035 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1031-s1040 — per-topic editor roles: deferred — lands with S1291-S1300 editorial workflow band | deferred |
-| S1036 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1031-s1040 — per-topic newsletter: deferred — lands with S1271-S1290 newsletter v2 | deferred |
+| S1035 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1031-s1040 — per-topic editor roles: deferred — lands with S1291-S1300 editorial workflow band | partial |
+| S1036 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1031-s1040 — per-topic newsletter: deferred — lands with S1271-S1290 newsletter v2 | partial |
 | S1037 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1031-s1040 — per-topic RSS: each category has its own /feed.{category}.xml stream via section-blocks + GrimbaHomeFeed bundle resolvers | complete |
 | S1038 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1031-s1040 — per-topic SEO landing: each category page ships its own JSON-LD CollectionPage + canonical + hreflang per test_category_dossier_source_pages_ship_jsonld | complete |
 | S1039 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1031-s1040 — per-topic analytics: partial — VaultAnalyticsDashboardTest groups events by category; per-category trend page deferred | partial |
