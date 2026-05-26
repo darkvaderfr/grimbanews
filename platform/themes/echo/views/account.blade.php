@@ -77,6 +77,16 @@
                 <p class="small opacity-75 m-0">{{ __('Stories couvertes par un seul côté.') }}</p>
             </a>
 
+            {{-- Wave UUU (Vader 2026-05-26) — /juste-milieu account tile parity. --}}
+            <a href="{{ url('/juste-milieu') }}" class="glass-panel p-4" style="display:block; text-decoration:none; color:var(--gn-ink,#1a1713);"
+               onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+                <div style="font-size:24px; margin-bottom:8px; color:#a855f7;">⊕</div>
+                <h3 style="font-family:'Fraunces','Playfair Display',Georgia,serif; font-weight:600; font-size:18px; margin:0 0 4px;">
+                    {{ __('Juste milieu') }}
+                </h3>
+                <p class="small opacity-75 m-0">{{ __('Stories où gauche et droite se rejoignent.') }}</p>
+            </a>
+
             <a href="{{ url('/pour-vous/export.csv') }}" class="glass-panel p-4" style="display:block; text-decoration:none; color:var(--gn-ink,#1a1713);"
                onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
                 <div style="font-size:24px; margin-bottom:8px;">📊</div>

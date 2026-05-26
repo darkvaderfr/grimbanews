@@ -36,17 +36,26 @@
             <p class="small opacity-75 mb-0">
                 {{ trans_choice(':count cluster en Juste milieu|:count clusters en Juste milieu', $middleGroundClusterCount, ['count' => $middleGroundClusterCount]) }}
                 · <a href="{{ url('/angles-morts') }}" class="text-decoration-underline">{{ __('Voir aussi les angles morts') }} →</a>
+                {{-- Wave UUU (Vader 2026-05-26) — methodology cross-link
+                     so readers landing on /juste-milieu can deep-link to
+                     the §3 bis explainer without bouncing back to home. --}}
+                · <a href="{{ url('/methodologie') }}#juste-milieu" class="text-decoration-underline">{{ __('Comment on classe') }} →</a>
             </p>
         </header>
 
         @if($posts->isEmpty())
+            {{-- Wave UUU (Vader 2026-05-26) — reader-friendly empty state.
+                 Pre-fix this surfaced "php artisan grimba:reclassify-clusters
+                 --persist" to readers, which is admin-internal leak.
+                 Replaced with content readers can act on. --}}
             <div class="glass-panel p-4 text-center">
-                <p class="mb-0">{{ __("Aucune histoire « Juste milieu » identifiée pour le moment.") }}</p>
-                <p class="small opacity-75 mt-2 mb-0">
-                    {{ __('Exécutez') }}
-                    <code>php artisan grimba:reclassify-clusters --persist</code>
-                    {{ __('pour reclassifier les clusters récents.') }}
-                </p>
+                <h2 class="h5 mb-2">{{ __('Pas encore de « Juste milieu » à afficher') }}</h2>
+                <p class="opacity-85 mb-3">{{ __("Notre moteur identifie les histoires couvertes équitablement par la gauche et la droite chaque nuit à 03:35 UTC. Revenez d'ici demain — ou explorez d'autres signaux pendant ce temps.") }}</p>
+                <div class="d-inline-flex gap-2 flex-wrap justify-content-center">
+                    <a href="{{ url('/angles-morts') }}" class="btn-grimba btn-grimba--sm btn-grimba--ghost">{{ __('Voir les angles morts') }}</a>
+                    <a href="{{ url('/dossiers') }}" class="btn-grimba btn-grimba--sm btn-grimba--ghost">{{ __('Tous les dossiers') }}</a>
+                    <a href="{{ url('/methodologie') }}#juste-milieu" class="btn-grimba btn-grimba--sm btn-grimba--ghost">{{ __('Comment on classe') }}</a>
+                </div>
             </div>
         @else
             <div class="row g-4">

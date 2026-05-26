@@ -50,6 +50,8 @@
                          skip the 301 redirect hop /comparatif → /dossiers. --}}
                     <a href="{{ url('/dossiers') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Tous les dossiers') }}</a>
                     <a href="{{ url('/angles-morts') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Angles morts') }}</a>
+                    {{-- Wave UUU (Vader 2026-05-26) — /juste-milieu CTA parity. --}}
+                    <a href="{{ url('/juste-milieu') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm" style="border-color:#a855f7;color:#a855f7;">{{ __('Juste milieu') }}</a>
                     <a href="{{ url('/methodologie') }}" class="btn-grimba btn-grimba--ghost btn-grimba--sm">{{ __('Méthodologie') }}</a>
                 </div>
             </div>
