@@ -365,6 +365,36 @@
                         <a href="{{ url('/angles-morts') }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Voir les angles morts</a>
                         <a href="{{ url('/comparatif?diversity=middle_ground') }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Filtre dossiers</a>
                     </div>
+
+                    {{-- Wave HHHH (Vader 2026-05-26) — top-5 sources by
+                         MG contribution. Surfaces which sources anchor
+                         the Middle Ground signal most often — the
+                         bridge-builders of the corpus. --}}
+                    @if(! empty($middleGroundTopSources) && $middleGroundTopSources->isNotEmpty())
+                        <hr class="my-3">
+                        <div>
+                            <span class="grimba-cockpit__kicker">Sources qui ancrent le juste milieu</span>
+                            <div class="mt-2">
+                                @foreach($middleGroundTopSources as $src)
+                                    @php
+                                        $biasColor = match($src->bias_rating ?? 'unknown') {
+                                            'left' => '#3b82f6',
+                                            'center' => '#a8a8a8',
+                                            'right' => '#e84c3d',
+                                            default => '#9ca3af',
+                                        };
+                                    @endphp
+                                    <div class="grimba-provider-row">
+                                        <span>
+                                            <span aria-hidden="true" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ $biasColor }};margin-right:6px;vertical-align:middle;"></span>
+                                            {{ $src->source_name }}
+                                        </span>
+                                        <strong>{{ $src->contribution_count }} {{ $src->contribution_count === 1 ? 'article' : 'articles' }}</strong>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

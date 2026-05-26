@@ -132,6 +132,29 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 ? DB::table('story_clusters')->where('review_action', 'like', 'mg_%')->max('reviewed_at')
                 : null;
 
+            // Wave HHHH (Vader 2026-05-26) — per-source MG contribution
+            // top-5. Surfaces which news sources are most often part of
+            // mg_-tagged clusters. Operator-side intelligence: if one
+            // source consistently anchors the MG signal, that's the
+            // bridge-builder of the corpus. Pure read; no schema change.
+            $middleGroundTopSources = collect();
+            if ($hasStoryClusters && Schema::hasTable('news_sources')) {
+                $mgClusterIds = DB::table('story_clusters')
+                    ->where('review_action', 'like', 'mg_%')
+                    ->pluck('id');
+                if ($mgClusterIds->isNotEmpty()) {
+                    $middleGroundTopSources = DB::table('posts')
+                        ->join('news_sources', 'news_sources.id', '=', 'posts.source_id')
+                        ->whereIn('posts.story_cluster_id', $mgClusterIds)
+                        ->where('posts.status', 'published')
+                        ->selectRaw('news_sources.name AS source_name, news_sources.bias_rating AS bias_rating, COUNT(*) AS contribution_count')
+                        ->groupBy('news_sources.id', 'news_sources.name', 'news_sources.bias_rating')
+                        ->orderByDesc('contribution_count')
+                        ->limit(5)
+                        ->get();
+                }
+            }
+
             // Stats headers + operational pressure.
             $publishedToday = $todayPosts->count();
             $publicationFloor = 12;
@@ -283,7 +306,8 @@ Route::prefix(BaseHelper::getAdminPrefix() . '/grimba')
                 'nobuFailureDiagnostics',
                 'nobuInsightReady', 'nobuInsightPending', 'nobuInsightStale', 'nobuInsightLatest',
                 'automationStatus',
-                'middleGroundClusterCount', 'blindspotClusterCount', 'middleGroundLatestAt'
+                'middleGroundClusterCount', 'blindspotClusterCount', 'middleGroundLatestAt',
+                'middleGroundTopSources'
             ));
         })->name('cockpit');
 
