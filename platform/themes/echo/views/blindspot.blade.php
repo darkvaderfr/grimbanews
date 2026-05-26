@@ -27,6 +27,15 @@
                 {{ __("Un angle mort est une histoire importante rapportée presque exclusivement par un côté du spectre politique. GrimbaNews les signale pour que vous sachiez ce qu'on ne vous raconte pas.") }}
             </p>
 
+            {{-- Wave EEEE (Vader 2026-05-26) — symmetric cross-link to
+                 /juste-milieu so the two editorial-signal pages each
+                 advertise the other. The middle-ground view already
+                 carries "Voir aussi les angles morts" in its header
+                 (Wave DDDDDDDDDDD). --}}
+            <p class="small opacity-75 mb-0">
+                <a href="{{ url('/juste-milieu') }}" class="text-decoration-underline" style="color:#a855f7;">{{ __('Voir aussi le juste milieu — quand la gauche et la droite couvrent ensemble') }} →</a>
+            </p>
+
             {{-- S315 — bias-side filter tabs (Ground-fidelity). --}}
             <div class="d-flex gap-2 flex-wrap" role="tablist" aria-label="{{ __('Filtrer les angles morts') }}">
                 @php

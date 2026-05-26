@@ -2076,6 +2076,46 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertSame(__('Juste milieu'), $resolved['label']);
     }
 
+    public function test_all_4_static_og_cards_regenerate_after_rebuild(): void
+    {
+        // Wave EEEE (Vader 2026-05-26) — OG card regeneration parity
+        // test. After grimba:rebuild-og deletes the 4 static cards,
+        // each /og/<name>.png route must serve a freshly-rendered PNG
+        // on the next request. Catches regressions where a future
+        // refactor breaks one of the surface() branches but tests
+        // only cover /og/juste-milieu.png.
+        $cards = ['home.png', 'local.png', 'coffre.png', 'juste-milieu.png'];
+
+        // Wipe the cache.
+        \Illuminate\Support\Facades\Artisan::call('grimba:rebuild-og');
+        foreach ($cards as $name) {
+            $path = storage_path('app/public/og/' . $name);
+            $this->assertFileDoesNotExist($path, "{$name} should be deleted after rebuild-og.");
+        }
+
+        // Hit each route, assert 200 + PNG content + file re-created.
+        $urlMap = [
+            'home.png' => '/og/home.png',
+            'local.png' => '/og/local.png',
+            'coffre.png' => '/og/coffre.png',
+            'juste-milieu.png' => '/og/juste-milieu.png',
+        ];
+        foreach ($urlMap as $name => $url) {
+            $response = $this->get($url);
+            $response->assertStatus(200);
+            $this->assertStringStartsWith('image/png', (string) $response->headers->get('content-type'),
+                "{$url} must serve image/png content-type.");
+            $body = $response->getContent();
+            // PNG magic bytes: 89 50 4E 47 0D 0A 1A 0A
+            $this->assertSame("\x89PNG\r\n\x1a\n", substr($body, 0, 8),
+                "{$url} body must start with PNG magic bytes.");
+            $this->assertTrue(strlen($body) > 1000,
+                "{$url} should be a non-trivial PNG (>1KB).");
+            $this->assertFileExists(storage_path('app/public/og/' . $name),
+                "{$url} should cache the file on first request.");
+        }
+    }
+
     public function test_grimba_rebuild_og_command_deletes_static_cards_only_by_default(): void
     {
         // Wave SSSSSSSSSSS (Vader 2026-05-26, Zen YELLOW close) —
