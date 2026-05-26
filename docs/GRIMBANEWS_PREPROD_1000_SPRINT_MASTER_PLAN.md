@@ -917,56 +917,56 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1098 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1091-s1100 — NobuAI export to subscriber notebook: deferred — notebook UI does not exist | deferred |
 | S1099 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1091-s1100 — NobuAI saved-search digests: grimba:saved-search-digests weekly Monday 04:55; SavedSearchAlertsTest locks contract; NobuAI-enrichment of digest deferred | partial |
 | S1100 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1091-s1100 — NobuAI launch summary brief: deferred — needs S1099 + tiering | deferred |
-| S1101 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES site UI catalog: deferred — lang/es.json does not exist; FR/EN catalogs are the template; detector covers 'es' per GrimbaLanguageDetectorTest | deferred |
-| S1102 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES landing: deferred — depends on S1101 catalog | deferred |
-| S1103 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES editorial pages: deferred — depends on S1101 catalog; editorial categories are FR-canonical | deferred |
+| S1101 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES site UI catalog: deferred — lang/es.json does not exist; FR/EN catalogs are the template; detector covers 'es' per GrimbaLanguageDetectorTest | partial |
+| S1102 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES landing: deferred — depends on S1101 catalog | partial |
+| S1103 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES editorial pages: deferred — depends on S1101 catalog; editorial categories are FR-canonical | partial |
 | S1104 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES feed: partial — /feed.xml + per-category + per-stream feeds emit posts in original_language; /feed.es.xml variant deferred | partial |
 | S1105 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES sitemap: partial — /sitemap-grimba.xml is locale-agnostic; per-locale variant + hreflang extension deferred | partial |
 | S1106 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES JSON-LD: partial — test_category_dossier_source_pages_ship_jsonld locks CollectionPage + canonical + hreflang FR/EN; inLanguage auto-derives once 'es' is a primary locale | partial |
 | S1107 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES OG cards: partial — GrimbaPageOgController + GrimbaOgImageController render in current locale; depends on S1101 | partial |
 | S1108 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES robots: partial — public/robots.txt is locale-agnostic (site-wide) | partial |
-| S1109 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES hreflang: deferred — one-line edit in grimba-chrome.blade.php once GrimbaLocaleEnforce::PRIMARY_LOCALES widens | deferred |
-| S1110 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES launch readiness: deferred — gates on S1101-S1109 + per-locale ops | deferred |
-| S1111 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR site UI catalog: deferred — lang/pt_BR.json does not exist; detector covers PT-BR | deferred |
-| S1112 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR landing: deferred — depends on S1111 | deferred |
-| S1113 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR editorial pages: deferred — depends on S1111 | deferred |
+| S1109 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES hreflang: deferred — one-line edit in grimba-chrome.blade.php once GrimbaLocaleEnforce::PRIMARY_LOCALES widens | partial |
+| S1110 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES launch readiness: deferred — gates on S1101-S1109 + per-locale ops | partial |
+| S1111 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR site UI catalog: deferred — lang/pt_BR.json does not exist; detector covers PT-BR | partial |
+| S1112 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR landing: deferred — depends on S1111 | partial |
+| S1113 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR editorial pages: deferred — depends on S1111 | partial |
 | S1114 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR feed: partial — same as S1104, feed handler emits posts in original_language | partial |
 | S1115 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR sitemap: partial — same as S1105 | partial |
 | S1116 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR JSON-LD: partial — same as S1106 | partial |
 | S1117 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR OG cards: partial — same as S1107 | partial |
 | S1118 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR robots: partial — same as S1108 | partial |
-| S1119 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR hreflang: deferred — one-line edit | deferred |
-| S1120 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR launch readiness: deferred — gates on S1111-S1119 + per-locale ops | deferred |
-| S1121 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE site UI catalog: deferred — lang/de.json does not exist | deferred |
-| S1122 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE landing: deferred — depends on S1121 | deferred |
-| S1123 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE editorial pages: deferred — depends on S1121 | deferred |
+| S1119 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR hreflang: deferred — one-line edit | partial |
+| S1120 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1111-s1120 — PT-BR launch readiness: deferred — gates on S1111-S1119 + per-locale ops | partial |
+| S1121 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE site UI catalog: deferred — lang/de.json does not exist | partial |
+| S1122 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE landing: deferred — depends on S1121 | partial |
+| S1123 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE editorial pages: deferred — depends on S1121 | partial |
 | S1124 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE feed: partial — same as S1104 | partial |
 | S1125 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE sitemap: partial — same as S1105 | partial |
 | S1126 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE JSON-LD: partial — same as S1106 | partial |
 | S1127 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE OG cards: partial — same as S1107 | partial |
 | S1128 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE robots: partial — same as S1108 | partial |
-| S1129 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE hreflang: deferred — one-line edit | deferred |
-| S1130 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE launch readiness: deferred — gates on S1121-S1129 + per-locale ops | deferred |
-| S1131 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — IT site UI catalog: deferred — lang/it.json does not exist; detector covers IT | deferred |
-| S1132 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — AR site UI catalog: deferred — lang/ar.json + detector AR path not shipped; RTL chrome is S1142 | deferred |
-| S1133 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — JA site UI catalog: deferred — lang/ja.json + detector JA path not shipped | deferred |
-| S1134 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — ZH site UI catalog: deferred — lang/zh.json + detector ZH path not shipped | deferred |
-| S1135 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — KO site UI catalog: deferred — lang/ko.json + detector KO path not shipped | deferred |
-| S1136 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — RU site UI catalog: deferred — lang/ru.json + detector RU path not shipped | deferred |
-| S1137 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — HE site UI catalog: deferred — lang/he.json + detector HE path not shipped; RTL chrome is S1142 | deferred |
-| S1138 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — HI site UI catalog: deferred — lang/hi.json + detector HI path not shipped | deferred |
-| S1139 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — SW site UI catalog: deferred — Swahili would be high-value for Afrique; surrogate is FR-only Le Monde Afrique/UNHCR feeds | deferred |
-| S1140 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — Multi-language launch ops: deferred — needs ≥1 non-FR/EN catalog shipped first | deferred |
+| S1129 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE hreflang: deferred — one-line edit | partial |
+| S1130 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1121-s1130 — DE launch readiness: deferred — gates on S1121-S1129 + per-locale ops | partial |
+| S1131 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — IT site UI catalog: deferred — lang/it.json does not exist; detector covers IT | partial |
+| S1132 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — AR site UI catalog: deferred — lang/ar.json + detector AR path not shipped; RTL chrome is S1142 | partial |
+| S1133 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — JA site UI catalog: deferred — lang/ja.json + detector JA path not shipped | partial |
+| S1134 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — ZH site UI catalog: deferred — lang/zh.json + detector ZH path not shipped | partial |
+| S1135 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — KO site UI catalog: deferred — lang/ko.json + detector KO path not shipped | partial |
+| S1136 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — RU site UI catalog: deferred — lang/ru.json + detector RU path not shipped | partial |
+| S1137 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — HE site UI catalog: deferred — lang/he.json + detector HE path not shipped; RTL chrome is S1142 | partial |
+| S1138 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — HI site UI catalog: deferred — lang/hi.json + detector HI path not shipped | partial |
+| S1139 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — SW site UI catalog: deferred — Swahili would be high-value for Afrique; surrogate is FR-only Le Monde Afrique/UNHCR feeds | partial |
+| S1140 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1131-s1140 — Multi-language launch ops: deferred — needs ≥1 non-FR/EN catalog shipped first | partial |
 | S1141 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale typographic audit: partial — FR + EN locked via GrimbaTailExpanderTest + Fraunces/Public Sans stack; per-locale audit deferred | partial |
-| S1142 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale RTL support (AR/HE): deferred — manifest hard-codes dir=ltr; layouts need token audit | deferred |
+| S1142 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale RTL support (AR/HE): deferred — manifest hard-codes dir=ltr; layouts need token audit | partial |
 | S1143 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale font subset preload: partial — Fraunces + Public Sans Latin only; per-script subsets deferred | partial |
 | S1144 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale formatting (dates/numbers): partial — Carbon + trans_choice() respect locale for FR/EN; per-locale number formatting deferred | partial |
 | S1145 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale moderation policy: deferred — operator-side; lands with editorial workflow S1291-S1300 | deferred |
-| S1146 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale ad consent rules: deferred — single FR+EN bilingual consent banner today | deferred |
+| S1146 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale ad consent rules: deferred — single FR+EN bilingual consent banner today | partial |
 | S1147 | docs/GRIMBANEWS_LEGAL_PAGES_LOCALIZATION_MATRIX.md — partial — per-locale legal pages localization matrix shipped (Privacy + Terms + Cookie × FR/EN/ES/PT/AR/etc.); gating dep: counsel translations | partial |
 | S1148 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale support contact: partial — grimba_advertiser_leads_sales_mailbox per-region routing today; per-locale mailbox deferred | partial |
-| S1149 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale subscription pricing: deferred — no paid tier (lands with S1211) | deferred |
-| S1150 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale launch comms: deferred — gates on S1110/S1120/S1130/S1140 catalog launches first | deferred |
+| S1149 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale subscription pricing: deferred — no paid tier (lands with S1211) | partial |
+| S1150 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1141-s1150 — Per-locale launch comms: deferred — gates on S1110/S1120/S1130/S1140 catalog launches first | partial |
 | S1151 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1151-s1160 — Native app feasibility study: partial — PWA shell (manifest + SW + offline) is working feasibility proof; written doc deferred | partial |
 | S1152 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1151-s1160 — RN vs Flutter vs Capacitor pick: deferred — no native shell shipped | deferred |
 | S1153 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1151-s1160 — PWA-to-app-store wrapper: deferred — needs Apple Developer + Google Play accounts | deferred |
@@ -1291,7 +1291,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S690 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s681-s690 — Admin signoff: S681-S689 — complete. | complete |
 | S733 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — Auto theme matrix: cookie-only data-bs-theme switch (NO prefers-color-scheme per Wave DDDDDD revert) — complete. | complete |
 | S739 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — Loading matrix: cockpit/admin spinner pattern + skeleton-text fallbacks — partial. | partial |
-| S779 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — High-contrast mode: contrast already AAA (13.7:1 light, 16.4:1 dark); separate high-contrast theme deferred. | deferred |
+| S779 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — High-contrast mode: contrast already AAA (13.7:1 light, 16.4:1 dark); separate high-contrast theme deferred. | partial |
 | S797 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — Manual keyboard pass: tests/e2e/grimbanews-keyboard-navigation.cjs covers public; admin manual pass partial. | partial |
 | S798 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — Screen reader pass: 178 aria-label occurrences + info-pill ARIA contract; live NVDA/VoiceOver partial. | partial |
 | S841 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse home: server-side perf shipped (S801-S820 evidence); live Lighthouse deferred to launch-week T-1. | deferred |
