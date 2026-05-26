@@ -1985,6 +1985,49 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsInt($exit0);
     }
 
+    public function test_grimba_rebuild_og_command_deletes_static_cards_only_by_default(): void
+    {
+        // Wave SSSSSSSSSSS (Vader 2026-05-26, Zen YELLOW close) —
+        // grimba:rebuild-og is the operator's documented OG cache
+        // invalidation surface. Default behaviour: delete the 4 static
+        // share cards (home + local + coffre + juste-milieu), leave
+        // per-article and per-story caches alone. --include-articles
+        // wipes everything. This test asserts the safety boundary so
+        // a future refactor can't quietly start nuking article-level
+        // caches by default.
+        $ogDir = storage_path('app/public/og');
+        \Illuminate\Support\Facades\File::ensureDirectoryExists($ogDir);
+
+        $staticFixture = $ogDir . '/juste-milieu.png';
+        $articleFixture = $ogDir . '/post-99999-test.png';
+        $storyFixture = $ogDir . '/story-99999-2-test.png';
+
+        // Write 1-byte sentinel files (real PNG content isn't required
+        // for the deletion test; the controller will regenerate on
+        // next request from real cluster data).
+        foreach ([$staticFixture, $articleFixture, $storyFixture] as $f) {
+            \Illuminate\Support\Facades\File::put($f, "\x89PNG\r\n");
+        }
+
+        // Default mode: only the static card should go.
+        \Illuminate\Support\Facades\Artisan::call('grimba:rebuild-og');
+        $this->assertFileDoesNotExist($staticFixture,
+            'grimba:rebuild-og must delete static OG cards by default.');
+        $this->assertFileExists($articleFixture,
+            'grimba:rebuild-og must NOT delete article OG caches without --include-articles.');
+        $this->assertFileExists($storyFixture,
+            'grimba:rebuild-og must NOT delete story OG caches without --include-articles.');
+
+        // --include-articles mode: everything goes.
+        \Illuminate\Support\Facades\Artisan::call('grimba:rebuild-og', [
+            '--include-articles' => true,
+        ]);
+        $this->assertFileDoesNotExist($articleFixture,
+            'grimba:rebuild-og --include-articles must delete article OG caches.');
+        $this->assertFileDoesNotExist($storyFixture,
+            'grimba:rebuild-og --include-articles must delete story OG caches.');
+    }
+
     public function test_bias_distribution_panel_does_not_label_tied_clusters_as_left(): void
     {
         // Wave RRRRRRRRRRR (Vader 2026-05-26) — the EXACT bug Vader
