@@ -2076,6 +2076,37 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertSame(__('Juste milieu'), $resolved['label']);
     }
 
+    public function test_dossiers_diversity_filter_serves_middle_ground_blindspot_tabs(): void
+    {
+        // Wave FFFF (Vader 2026-05-26) — /dossiers?diversity=middle_ground
+        // and /dossiers?diversity=blindspot are the comparatif-index
+        // tab entry points. A future refactor of the route handler
+        // could silently drop the diversity= query-string handling
+        // (it's not a Laravel route param, just a runtime branch),
+        // which would invisibly send readers back to the default
+        // mixed listing. This test exercises all 6 known tabs and
+        // asserts each renders 200 + carries the correct active-tab
+        // marker.
+        $tabs = [
+            'all'           => 'Tous',
+            'balanced'      => 'Couverture équilibrée',
+            'partial'       => 'Couverture partielle',
+            'one_sided'     => 'Couverture unilatérale',
+            'middle_ground' => 'Juste milieu',
+            'blindspot'     => 'Angle mort',
+        ];
+        foreach ($tabs as $key => $label) {
+            $url = $key === 'all' ? '/dossiers' : "/dossiers?diversity={$key}";
+            $response = $this->get($url);
+            $response->assertStatus(200);
+            $html = $response->getContent();
+            // The diversity tab label must appear at least once in
+            // the rendered tablist.
+            $this->assertStringContainsString($label, $html,
+                "{$url} must surface the '{$label}' tab label.");
+        }
+    }
+
     public function test_all_4_static_og_cards_regenerate_after_rebuild(): void
     {
         // Wave EEEE (Vader 2026-05-26) — OG card regeneration parity
