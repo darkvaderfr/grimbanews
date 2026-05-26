@@ -393,25 +393,39 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             // is honest staleness, not pretend freshness.
             $editorialIso = '2026-05-19T00:00:00+00:00';
 
+            // Wave AAAA (Vader 2026-05-26) — added /feed.juste-milieu.xml
+            // entry (parity with /feed.xml) and per-URL <image:image>
+            // extensions so Google Image Search can discover the OG
+            // share cards. Mirror surface entries point at their
+            // dedicated cards; rest fall back to /og/home.png.
             $entries = [
-                ['url' => url('/methodologie'),               'lastmod' => $editorialIso,    'changefreq' => 'monthly', 'priority' => '0.8'],
-                ['url' => url('/comprendre-le-barometre'),    'lastmod' => $editorialIso,    'changefreq' => 'monthly', 'priority' => '0.7'],
-                ['url' => url('/breaking'),                   'lastmod' => $newestPostIso,   'changefreq' => 'hourly',  'priority' => '0.9'],
-                ['url' => url('/latest'),                     'lastmod' => $newestPostIso,   'changefreq' => 'hourly',  'priority' => '0.9'],
-                ['url' => url('/dossiers'),                   'lastmod' => $newestClusterIso,'changefreq' => 'daily',   'priority' => '0.8'],
-                ['url' => url('/angles-morts'),               'lastmod' => $newestPostIso,   'changefreq' => 'daily',   'priority' => '0.7'],
-                ['url' => url('/juste-milieu'),               'lastmod' => $newestPostIso,   'changefreq' => 'daily',   'priority' => '0.7'],
+                ['url' => url('/methodologie'),               'lastmod' => $editorialIso,    'changefreq' => 'monthly', 'priority' => '0.8', 'image' => url('/og/home.png'),         'image_title' => 'GrimbaNews — méthodologie'],
+                ['url' => url('/comprendre-le-barometre'),    'lastmod' => $editorialIso,    'changefreq' => 'monthly', 'priority' => '0.7', 'image' => url('/og/home.png'),         'image_title' => 'GrimbaNews — comprendre le baromètre'],
+                ['url' => url('/breaking'),                   'lastmod' => $newestPostIso,   'changefreq' => 'hourly',  'priority' => '0.9', 'image' => url('/og/home.png'),         'image_title' => 'GrimbaNews — breaking'],
+                ['url' => url('/latest'),                     'lastmod' => $newestPostIso,   'changefreq' => 'hourly',  'priority' => '0.9', 'image' => url('/og/home.png'),         'image_title' => 'GrimbaNews — dernières actualités'],
+                ['url' => url('/dossiers'),                   'lastmod' => $newestClusterIso,'changefreq' => 'daily',   'priority' => '0.8', 'image' => url('/og/home.png'),         'image_title' => 'GrimbaNews — dossiers comparés'],
+                ['url' => url('/angles-morts'),               'lastmod' => $newestPostIso,   'changefreq' => 'daily',   'priority' => '0.7', 'image' => url('/og/home.png'),         'image_title' => 'GrimbaNews — angles morts'],
+                ['url' => url('/juste-milieu'),               'lastmod' => $newestPostIso,   'changefreq' => 'daily',   'priority' => '0.7', 'image' => url('/og/juste-milieu.png'), 'image_title' => 'GrimbaNews — juste milieu'],
+                ['url' => url('/local'),                      'lastmod' => $newestPostIso,   'changefreq' => 'daily',   'priority' => '0.7', 'image' => url('/og/local.png'),        'image_title' => 'GrimbaNews — actualité locale'],
+                ['url' => url('/coffre'),                     'lastmod' => $editorialIso,    'changefreq' => 'weekly',  'priority' => '0.5', 'image' => url('/og/coffre.png'),       'image_title' => 'GrimbaNews — votre veille'],
                 ['url' => url('/feed.xml'),                   'lastmod' => $newestPostIso,   'changefreq' => 'hourly',  'priority' => '0.6'],
+                ['url' => url('/feed.juste-milieu.xml'),      'lastmod' => $newestPostIso,   'changefreq' => 'daily',   'priority' => '0.5'],
             ];
 
             $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
             foreach ($entries as $e) {
                 $xml .= "  <url>\n";
                 $xml .= '    <loc>' . htmlspecialchars($e['url'], ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</loc>\n";
                 $xml .= "    <lastmod>{$e['lastmod']}</lastmod>\n";
                 $xml .= "    <changefreq>{$e['changefreq']}</changefreq>\n";
                 $xml .= "    <priority>{$e['priority']}</priority>\n";
+                if (! empty($e['image'])) {
+                    $xml .= "    <image:image>\n";
+                    $xml .= '      <image:loc>' . htmlspecialchars($e['image'], ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</image:loc>\n";
+                    $xml .= '      <image:title>' . htmlspecialchars($e['image_title'] ?? '', ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</image:title>\n";
+                    $xml .= "    </image:image>\n";
+                }
                 $xml .= "  </url>\n";
             }
             $xml .= '</urlset>' . "\n";
@@ -2147,21 +2161,44 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             // /og/juste-milieu.png share card instead of the home fallback.
             Theme::set('grimba_og_image', url('/og/juste-milieu.png'));
 
+            // Wave AAAA (Vader 2026-05-26) — Schema.org enhancement.
+            // - itemListElement is now a real ListItem[] array carrying
+            //   each rendered post (position + url + headline) so
+            //   Google Discover can preview the listing instead of
+            //   treating it as a single page-level item.
+            // - additionalType pins the page to a NewsMediaOrganization
+            //   editorial-signal class so structured-data parsers can
+            //   discriminate Middle Ground from a generic CollectionPage.
+            // - image points at the new dedicated card.
+            $itemListElement = [];
+            foreach ($posts->items() as $i => $p) {
+                $itemListElement[] = [
+                    '@type' => 'ListItem',
+                    'position' => ($posts->firstItem() ?? 1) + $i,
+                    'url' => url('/article/' . $p->slug),
+                    'name' => (string) $p->name,
+                ];
+            }
             Theme::set('grimbaJsonLd', json_encode([
                 '@context' => 'https://schema.org',
                 '@type' => 'CollectionPage',
+                'additionalType' => 'https://schema.org/SpecialAnnouncement',
                 'name' => __('Juste milieu') . ' — GrimbaNews',
                 'description' => __('Les histoires couvertes équitablement par la gauche et la droite.'),
                 'url' => url('/juste-milieu'),
+                'image' => url('/og/juste-milieu.png'),
+                'inLanguage' => app()->getLocale(),
                 'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
                 'mainEntity' => [
                     '@type' => 'ItemList',
                     'numberOfItems' => $posts->total(),
-                    'itemListElement' => 'NewsArticle',
+                    'itemListOrder' => 'https://schema.org/ItemListOrderDescending',
+                    'itemListElement' => $itemListElement,
                 ],
                 'about' => [
                     '@type' => 'Thing',
                     'name' => __('Couverture éditoriale équilibrée (Juste milieu)'),
+                    'description' => __('Signal éditorial signalant les histoires où la gauche et la droite couvrent en proportions égales.'),
                 ],
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
