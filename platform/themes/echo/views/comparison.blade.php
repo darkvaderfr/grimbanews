@@ -12,7 +12,26 @@
 <section class="comparison-page py-5">
     <div class="container">
         <header class="glass-panel grimba-editorial-ribbon p-4 p-md-5 mb-4">
-            <span class="small text-uppercase opacity-75">{{ __('Dossier') }} #{{ $clusterId }}</span>
+            <div class="d-flex align-items-start justify-content-between gap-2 flex-wrap mb-2">
+                <span class="small text-uppercase opacity-75">{{ __('Dossier') }} #{{ $clusterId }}</span>
+                {{-- Wave LLLL (Vader 2026-05-26) — Middle Ground signal
+                     badge surfaced when the cluster carries the mg_ tag
+                     set by grimba:reclassify-clusters. Tells readers
+                     this is a "consensus forming" story, not just a
+                     comparison page. --}}
+                @if(! empty($middleGroundSince) || $middleGroundSince === 0)
+                    <a href="{{ url('/juste-milieu') }}" class="text-decoration-none"
+                       style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:9999px;background:#a855f720;color:#a855f7;font-weight:600;font-size:12px;letter-spacing:.04em;"
+                       aria-label="{{ __('Ce dossier est classé juste milieu — voir tous les dossiers juste milieu') }}">
+                        ● {{ __('Juste milieu') }}
+                        @if($middleGroundSince === 0)
+                            · {{ __("aujourd'hui") }}
+                        @else
+                            · {{ trans_choice('depuis :n jour|depuis :n jours', $middleGroundSince, ['n' => $middleGroundSince]) }}
+                        @endif
+                    </a>
+                @endif
+            </div>
             <h1 class="h2 mb-2">{{ $storyTitle }}</h1>
             <p class="opacity-85 mb-0">
                 {{ __('Même histoire, plusieurs angles. Comparez comment chaque média couvre le sujet — et repérez les silences.') }}

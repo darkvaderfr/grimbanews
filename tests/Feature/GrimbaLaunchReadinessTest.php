@@ -2120,6 +2120,32 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_cluster_page_renders_middle_ground_since_badge_when_tagged(): void
+    {
+        // Wave LLLL (Vader 2026-05-26) — when a cluster carries an
+        // mg_ tag in story_clusters.review_action, the cluster page
+        // (/comparatif/{id}) should surface a "Juste milieu · depuis
+        // N jours" badge in the header so readers and social
+        // previews see the editorial signal.
+        $mgCluster = \Illuminate\Support\Facades\DB::table('story_clusters')
+            ->where('review_action', 'like', 'mg_%')
+            ->first(['id']);
+        if (! $mgCluster) {
+            $this->markTestSkipped('No mg_ tagged cluster in test DB.');
+            return;
+        }
+        $response = $this->get('/comparatif/' . $mgCluster->id);
+        $response->assertStatus(200);
+        $body = $response->getContent();
+        $this->assertStringContainsString('Juste milieu', $body,
+            "/comparatif/{$mgCluster->id} must surface the Juste milieu badge.");
+        // The aria-label proves the badge is the LLLL-style one
+        // (not the page's other "Juste milieu" mentions).
+        $this->assertStringContainsString('Ce dossier est classé juste milieu',
+            $body,
+            "/comparatif/{$mgCluster->id} must carry the LLLL badge aria-label.");
+    }
+
     public function test_grimba_reclassify_clusters_json_mode_is_valid_pipeable_json(): void
     {
         // Wave IIII (Vader 2026-05-26) — --json mode is the ops contract

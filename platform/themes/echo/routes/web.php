@@ -312,10 +312,34 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Comparaison'), url('/comparatif/' . $clusterId));
 
+            // Wave LLLL (Vader 2026-05-26) — Middle Ground status read.
+            // When the cluster carries an mg_ tag, surface "Juste milieu
+            // depuis X jours" + a /og/juste-milieu.png fallback on the
+            // page. Operator can see at a glance from social previews
+            // when a tied cluster is being shared. Reads from
+            // story_clusters.review_action + reviewed_at.
+            $middleGroundSince = null;
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('story_clusters')) {
+                    $cluster = \Illuminate\Support\Facades\DB::table('story_clusters')
+                        ->where('id', $clusterId)
+                        ->first(['review_action', 'reviewed_at']);
+                    if ($cluster
+                        && is_string($cluster->review_action)
+                        && str_starts_with($cluster->review_action, 'mg_')
+                        && $cluster->reviewed_at) {
+                        $middleGroundSince = (int) \Carbon\Carbon::parse($cluster->reviewed_at)->diffInDays(now());
+                    }
+                }
+            } catch (\Throwable) {
+                $middleGroundSince = null;
+            }
+
             return Theme::scope('comparison', [
-                'posts'      => $posts,
-                'storyTitle' => $storyTitle,
-                'clusterId'  => $clusterId,
+                'posts'             => $posts,
+                'storyTitle'        => $storyTitle,
+                'clusterId'         => $clusterId,
+                'middleGroundSince' => $middleGroundSince,
             ])->render();
         })->where('clusterId', '[0-9]+')->name('public.comparison');
 
