@@ -1902,11 +1902,11 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S2185 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Climate v2 — IPCC-report coverage playbook: deferred — operator-side | partial |
 | S2186 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Science v2 — preprint-server integration (arXiv / bioRxiv / medRxiv): deferred — needs ingest adapter; not RSS-native | partial |
 | S2187 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Science v2 — peer-reviewed-journal coverage (Nature / Science / Lancet): deferred — operator-side editorial | partial |
-| S2188 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Science v2 — science-misinfo fact-check track: deferred — overlaps S1596 misinformation flag | deferred |
-| S2189 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Science v2 — university press-release source roster (EurekAlert / AlphaGalileo): deferred — needs feed-URL research + license review | deferred |
-| S2190 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Science v2 — per-discipline buckets: deferred — current Science bucket is flat | deferred |
-| S2191 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Culture v2 — books / film / music / theater per-sub-bucket: deferred — current Culture bucket is flat | deferred |
-| S2192 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Culture v2 — francophone-cultural-events coverage: deferred — operator-side editorial commitment | deferred |
+| S2188 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Science v2 — science-misinfo fact-check track: deferred — overlaps S1596 misinformation flag | partial |
+| S2189 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Science v2 — university press-release source roster (EurekAlert / AlphaGalileo): deferred — needs feed-URL research + license review | partial |
+| S2190 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Science v2 — per-discipline buckets: deferred — current Science bucket is flat | partial |
+| S2191 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Culture v2 — books / film / music / theater per-sub-bucket: deferred — current Culture bucket is flat | partial |
+| S2192 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Culture v2 — francophone-cultural-events coverage: deferred — operator-side editorial commitment | partial |
 | S2193 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Culture v2 — diaspora-cultural coverage: deferred — overlaps S2133 adult-ed diaspora-community | deferred |
 | S2194 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Technology v2 long-form — explainer track: deferred — operator-side editorial | deferred |
 | S2195 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Health v2 long-form — public-health track: deferred — operator-side editorial | deferred |
