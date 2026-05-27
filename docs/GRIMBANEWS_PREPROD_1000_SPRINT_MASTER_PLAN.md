@@ -2141,10 +2141,10 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1787 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1781-s1790 — Fact-check primer — partner-school distribution: deferred — same as S1778. | partial |
 | S1788 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1781-s1790 — Fact-check primer — interactive quiz: deferred — no quiz primitive (gates on S1721-S1730 literacy band). | partial |
 | S1789 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1781-s1790 — Fact-check primer — analytics (read-through rate): deferred — depends on S1733 read-event capture. | partial |
-| S1790 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1781-s1790 — Fact-check primer — launch retrospective: deferred — gates on S1781-S1789. | deferred |
+| S1790 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1781-s1790 — Fact-check primer — launch retrospective: deferred — gates on S1781-S1789. | partial |
 | S1791 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1791-s1800 — Methodology video — script: deferred — no video pipeline; surrogate is /methodologie written longform. — surrogate doc: docs/GRIMBANEWS_METHODOLOGY_VIDEO_SCRIPT_PLAN.md (partial). | partial |
-| S1792 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1791-s1800 — Methodology video — recording: deferred — operator-side production. | deferred |
-| S1793 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1791-s1800 — Methodology video — hosting (YouTube / Vimeo / self-hosted): deferred — same. | deferred |
+| S1792 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1791-s1800 — Methodology video — recording: deferred — operator-side production. | partial |
+| S1793 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1791-s1800 — Methodology video — hosting (YouTube / Vimeo / self-hosted): deferred — same. | partial |
 | S1794 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1791-s1800 — Methodology video — embed on /methodologie: deferred — GrimbaSecurityHeaders CSP currently locks down frame-src to a closed list (operator-side pickup once host is picked). | deferred |
 | S1795 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1791-s1800 — Methodology video — transcript (a11y): deferred — depends on S1791. | deferred |
 | S1796 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1791-s1800 — Methodology video — cross-locale subtitles (FR + EN): deferred — depends on S1791-S1795. — surrogate doc: docs/GRIMBANEWS_METHODOLOGY_VIDEO_SUBTITLES_PLAN.md (partial). | partial |
