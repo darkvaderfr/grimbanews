@@ -892,18 +892,18 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1073 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — prompt-A/B harness: deferred — no A/B engine wired | partial |
 | S1074 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — prompt-version pinning: partial — git history is the version pin; runtime pin deferred | partial |
 | S1075 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — prompt rollback path: partial — git revert is the rollback; runtime A/B + rollback deferred | partial |
-| S1076 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — embedding store: deferred — needs vector DB (pgvector/qdrant/pinecone) | deferred |
-| S1077 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — retrieval-augmented insight: deferred — depends on S1076 | deferred |
+| S1076 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — embedding store: deferred — needs vector DB (pgvector/qdrant/pinecone) | partial |
+| S1077 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — retrieval-augmented insight: deferred — depends on S1076 | partial |
 | S1078 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — agent-style verifier: deferred — needs multi-agent harness | partial |
 | S1079 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — hallucination-detector pass: partial — GrimbaNobuAiBrandPurityTest covers brand-leak class; broader fact-hallucination detector deferred | partial |
 | S1080 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — NobuAI cost optimizer: GrimbaProviderCredits per-provider per-day counter + daily-cap settings + failoverOrder() cheapest-first pin via grimba_nobuai_driver | complete |
 | S1081 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — per-reader NobuAI personality: deferred — needs reader-profile tone preference column | partial |
-| S1082 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — per-edition NobuAI style: deferred — single global style | deferred |
+| S1082 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — per-edition NobuAI style: deferred — single global style | partial |
 | S1083 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — per-language NobuAI tone: partial — posts.summary_nobuai_locale is locale-aware (S-LANG-08); per-locale prompt-template deferred | partial |
 | S1084 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — per-topic NobuAI expertise: deferred — single prompt-vocabulary per GrimbaNobuAiPrompts | partial |
 | S1085 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — NobuAI freshness SLA v2: partial — grimba:nobuai-summaries --stale --limit=25 every 30min; live (on-request) regeneration deferred | partial |
 | S1086 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — NobuAI batch nightly: every-30-min cadence is more aggressive than nightly; nightly long-form batch deferred | complete |
-| S1087 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — NobuAI A/B insight quality: deferred — needs A/B harness (S1073) | deferred |
+| S1087 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — NobuAI A/B insight quality: deferred — needs A/B harness (S1073) | partial |
 | S1088 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — NobuAI reader trust score: deferred — needs reader-feedback channel (S1089) — surrogate doc: docs/GRIMBANEWS_NOBUAI_READER_TRUST_SCORE_DESIGN.md (partial). | partial |
 | S1089 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — NobuAI feedback loop (👍/👎): deferred — no thumbs UI on summaries — surrogate doc: docs/GRIMBANEWS_NOBUAI_READER_FEEDBACK_THUMBS_DESIGN.md (partial). | partial |
 | S1090 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — NobuAI hallucination-corpus growth: deferred — depends on reader-feedback channel | partial |
@@ -916,7 +916,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1097 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1091-s1100 — NobuAI public-API throttling: partial — /health has Cache-Control no-store; full rate-limiter deferred to S1181-S1190 public API v2 | partial |
 | S1098 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1091-s1100 — NobuAI export to subscriber notebook: deferred — notebook UI does not exist | partial |
 | S1099 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1091-s1100 — NobuAI saved-search digests: grimba:saved-search-digests weekly Monday 04:55; SavedSearchAlertsTest locks contract; NobuAI-enrichment of digest deferred | partial |
-| S1100 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1091-s1100 — NobuAI launch summary brief: deferred — needs S1099 + tiering | deferred |
+| S1100 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1091-s1100 — NobuAI launch summary brief: deferred — needs S1099 + tiering | partial |
 | S1101 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES site UI catalog: deferred — lang/es.json does not exist; FR/EN catalogs are the template; detector covers 'es' per GrimbaLanguageDetectorTest | partial |
 | S1102 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES landing: deferred — depends on S1101 catalog | partial |
 | S1103 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1101-s1110 — ES editorial pages: deferred — depends on S1101 catalog; editorial categories are FR-canonical | partial |
