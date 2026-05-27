@@ -897,10 +897,10 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1078 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — agent-style verifier: deferred — needs multi-agent harness | partial |
 | S1079 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — hallucination-detector pass: partial — GrimbaNobuAiBrandPurityTest covers brand-leak class; broader fact-hallucination detector deferred | partial |
 | S1080 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — NobuAI cost optimizer: GrimbaProviderCredits per-provider per-day counter + daily-cap settings + failoverOrder() cheapest-first pin via grimba_nobuai_driver | complete |
-| S1081 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — per-reader NobuAI personality: deferred — needs reader-profile tone preference column | deferred |
+| S1081 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — per-reader NobuAI personality: deferred — needs reader-profile tone preference column | partial |
 | S1082 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — per-edition NobuAI style: deferred — single global style | deferred |
 | S1083 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — per-language NobuAI tone: partial — posts.summary_nobuai_locale is locale-aware (S-LANG-08); per-locale prompt-template deferred | partial |
-| S1084 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — per-topic NobuAI expertise: deferred — single prompt-vocabulary per GrimbaNobuAiPrompts | deferred |
+| S1084 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — per-topic NobuAI expertise: deferred — single prompt-vocabulary per GrimbaNobuAiPrompts | partial |
 | S1085 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — NobuAI freshness SLA v2: partial — grimba:nobuai-summaries --stale --limit=25 every 30min; live (on-request) regeneration deferred | partial |
 | S1086 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — NobuAI batch nightly: every-30-min cadence is more aggressive than nightly; nightly long-form batch deferred | complete |
 | S1087 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — NobuAI A/B insight quality: deferred — needs A/B harness (S1073) | deferred |
