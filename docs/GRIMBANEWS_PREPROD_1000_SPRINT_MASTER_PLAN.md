@@ -817,7 +817,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S998 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s991-s1000 — rollback drill green: grimba:verify-backups --all restore-smoke (S965) detects corruption; live prod drill deferred | partial |
 | S999 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s991-s1000 — release evidence complete: grimba:release-smoke --evidence + GrimbaPruneReleaseEvidence 30-day rolling (ReleaseEvidencePruneTest + ReleaseSmokeCommandTest) | complete |
 | S1000 | docs/GRIMBANEWS_S901_S1000_SECURITY_BACKUP_LAUNCH_PACK.md#s991-s1000 — production launch signoff: server-side gates locked; live Lighthouse + visual-diff + rollback drill + composer audit deferred per LAUNCH_READINESS_CHECKLIST | partial |
-| S1001 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — launch retrospective: deferred — operator-led calendar retro after prod cutover; surrogate is LAUNCH_READINESS_CHECKLIST + RELEASE_SMOKE_EVIDENCE | deferred |
+| S1001 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — launch retrospective: deferred — operator-led calendar retro after prod cutover; surrogate is LAUNCH_READINESS_CHECKLIST + RELEASE_SMOKE_EVIDENCE | partial |
 | S1002 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — day-1 incident review: deferred — needs real day-1 traffic; surrogate is GrimbaAutomationMonitor::status() board on /admin/grimba/cockpit | partial |
 | S1003 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — day-7 incident review: deferred — needs 7 days of grimba_automation_runs rows | partial |
 | S1004 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1001-s1010 — day-30 quality review: deferred — GrimbaPruneReleaseEvidence keeps 30-day window of release-evidence files for the retro | partial |
@@ -866,26 +866,26 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1047 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1041-s1050 — breaking-news cluster gate: GrimbaHomeFeed::breaking() requires posts.story_cluster_id IS NOT NULL | complete |
 | S1048 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1041-s1050 — breaking-news visibility ladder: BreakingStreamTest locks well-formed bundle + capped + sorted contract | complete |
 | S1049 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1041-s1050 — breaking-news editorial overrides: /admin/grimba/home-rails + GrimbaHomeFeed::overridesFor() pin/unpin (per S680 admin pack) | complete |
-| S1050 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1041-s1050 — breaking-news A/B tests: deferred — no A/B engine; lands with personalization v2 (S1361-S1380) | deferred |
+| S1050 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1041-s1050 — breaking-news A/B tests: deferred — no A/B engine; lands with personalization v2 (S1361-S1380) | partial |
 | S1051 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1051-s1060 — cluster-merge LLM scorer: deferred — current findOrFormCluster() is canonical-URL + title-similarity | partial |
 | S1052 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1051-s1060 — cluster-split LLM scorer: deferred — same | partial |
 | S1053 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1051-s1060 — cluster-confidence v2: partial — current confidence is rule-based (sources count + bias diversity); LLM-confidence deferred | partial |
 | S1054 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1051-s1060 — cluster-narrative summary: grimba:nobuai-summaries --limit=80 every 30min; posts.summary_nobuai + summary_nobuai_locale; coverage via GrimbaNobuAiHealth | complete |
-| S1055 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1051-s1060 — cluster-quote extraction: deferred — needs LLM extractive pipeline | deferred |
-| S1056 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1051-s1060 — cluster-fact-claim extraction: deferred — same | deferred |
+| S1055 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1051-s1060 — cluster-quote extraction: deferred — needs LLM extractive pipeline | partial |
+| S1056 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1051-s1060 — cluster-fact-claim extraction: deferred — same | partial |
 | S1057 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1051-s1060 — cluster-image deduplication: GrimbaArticleDedupe covers image-by-URL + canonical-URL dedup; DedupePostsCommandTest locks contract | complete |
 | S1058 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1051-s1060 — cluster-update-vs-new detection: GrimbaRssPoller::findOrFormCluster() title-similarity + same-day + same-source guard | complete |
 | S1059 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1051-s1060 — cluster-language-mix display: dossier page shows per-language voices via partials/dossier-voices.blade.php; amber badge for unknown-language (S-LANG-14) | complete |
 | S1060 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1051-s1060 — cluster-credibility band display: partials/story-breakdown.blade.php ships bias+factuality+ownership breakdown with confidence + source count + unknown bucket (S401-S450) | complete |
-| S1061 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — bias-shift detection over time: deferred — needs time-series of source bias scores | deferred |
-| S1062 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — factuality-shift detection: deferred — same | deferred |
+| S1061 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — bias-shift detection over time: deferred — needs time-series of source bias scores | partial |
+| S1062 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — factuality-shift detection: deferred — same | partial |
 | S1063 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — ownership-graph queries: partial — news_sources.ownership_type + owner_name stored; graph queries need owner-id normalization | partial |
 | S1064 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — syndication-tree resolver: partial — GrimbaArticleDedupe flags syndicated via canonical-URL; explicit tree resolver deferred | partial |
-| S1065 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — ad-tech-controlled-source flag: deferred — needs operator metadata column | deferred |
+| S1065 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — ad-tech-controlled-source flag: deferred — needs operator metadata column | partial |
 | S1066 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — state-owned-media flag: partial — news_sources.ownership_type='state' slot exists; auto-population deferred | partial |
 | S1067 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — philanthropy-funded flag: partial — same — ownership_type='nonprofit' slot | partial |
 | S1068 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — peer-fund-funded flag: partial — same | partial |
-| S1069 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — opinion-vs-news classifier: deferred — needs editorial heuristic + LLM-judge | deferred |
+| S1069 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — opinion-vs-news classifier: deferred — needs editorial heuristic + LLM-judge | partial |
 | S1070 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — sponsored-content detector: deferred — needs content-class heuristic | deferred |
 | S1071 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — model selector v2 (per-task model): partial — GrimbaNobuAi::failoverOrder() reads grimba_nobuai_driver global pin; per-task selector deferred | partial |
 | S1072 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — self-hosted small-model trial: deferred — needs GPU box | deferred |
