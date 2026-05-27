@@ -886,15 +886,15 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1067 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — philanthropy-funded flag: partial — same — ownership_type='nonprofit' slot | partial |
 | S1068 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — peer-fund-funded flag: partial — same | partial |
 | S1069 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — opinion-vs-news classifier: deferred — needs editorial heuristic + LLM-judge | partial |
-| S1070 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — sponsored-content detector: deferred — needs content-class heuristic | deferred |
+| S1070 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1061-s1070 — sponsored-content detector: deferred — needs content-class heuristic | partial |
 | S1071 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — model selector v2 (per-task model): partial — GrimbaNobuAi::failoverOrder() reads grimba_nobuai_driver global pin; per-task selector deferred | partial |
-| S1072 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — self-hosted small-model trial: deferred — needs GPU box | deferred |
-| S1073 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — prompt-A/B harness: deferred — no A/B engine wired | deferred |
+| S1072 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — self-hosted small-model trial: deferred — needs GPU box | partial |
+| S1073 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — prompt-A/B harness: deferred — no A/B engine wired | partial |
 | S1074 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — prompt-version pinning: partial — git history is the version pin; runtime pin deferred | partial |
 | S1075 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — prompt rollback path: partial — git revert is the rollback; runtime A/B + rollback deferred | partial |
 | S1076 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — embedding store: deferred — needs vector DB (pgvector/qdrant/pinecone) | deferred |
 | S1077 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — retrieval-augmented insight: deferred — depends on S1076 | deferred |
-| S1078 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — agent-style verifier: deferred — needs multi-agent harness | deferred |
+| S1078 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — agent-style verifier: deferred — needs multi-agent harness | partial |
 | S1079 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — hallucination-detector pass: partial — GrimbaNobuAiBrandPurityTest covers brand-leak class; broader fact-hallucination detector deferred | partial |
 | S1080 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1071-s1080 — NobuAI cost optimizer: GrimbaProviderCredits per-provider per-day counter + daily-cap settings + failoverOrder() cheapest-first pin via grimba_nobuai_driver | complete |
 | S1081 | docs/GRIMBANEWS_MYTHOS_S1001_S1100_OPS_EVIDENCE.md#s1081-s1090 — per-reader NobuAI personality: deferred — needs reader-profile tone preference column | deferred |
