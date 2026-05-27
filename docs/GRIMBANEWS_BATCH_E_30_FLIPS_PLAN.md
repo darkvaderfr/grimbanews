@@ -1,0 +1,5 @@
+# GrimbaNews — Batch E: 30 Ledger Flips
+
+Walks 30 rows S2109-S2143 deferred → partial. Post-launch Mythos arc.
+
+Master plan rows: S2109, S2110, S2111, S2112, S2113, S2114, S2115, S2116, S2117, S2119, S2120, S2121, S2122, S2123, S2124, S2126, S2127, S2128, S2129, S2130, S2131, S2132, S2133, S2135, S2137, S2138, S2139, S2140, S2141, S2142.
