@@ -1907,9 +1907,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S2190 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Science v2 — per-discipline buckets: deferred — current Science bucket is flat | partial |
 | S2191 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Culture v2 — books / film / music / theater per-sub-bucket: deferred — current Culture bucket is flat | partial |
 | S2192 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Culture v2 — francophone-cultural-events coverage: deferred — operator-side editorial commitment | partial |
-| S2193 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Culture v2 — diaspora-cultural coverage: deferred — overlaps S2133 adult-ed diaspora-community | deferred |
-| S2194 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Technology v2 long-form — explainer track: deferred — operator-side editorial | deferred |
-| S2195 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Health v2 long-form — public-health track: deferred — operator-side editorial | deferred |
+| S2193 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Culture v2 — diaspora-cultural coverage: deferred — overlaps S2133 adult-ed diaspora-community | partial |
+| S2194 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Technology v2 long-form — explainer track: deferred — operator-side editorial | partial |
+| S2195 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Health v2 long-form — public-health track: deferred — operator-side editorial | partial |
 | S2196 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Sports v2 international — beyond football: deferred — operator-side editorial | deferred |
 | S2197 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Niche-topic per-bucket newsletter: deferred — gates on S1271+ newsletter v2 | deferred |
 | S2198 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Niche-topic per-bucket landing page (deeper than /categorie/{slug}): deferred — current category landing is per-classifier-bucket | deferred |
