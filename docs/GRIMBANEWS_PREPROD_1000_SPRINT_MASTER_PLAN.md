@@ -993,10 +993,10 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1174 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1171-s1180 — App translation flow: partial — web flow shipped via GrimbaTranslationPresenter + ?lang= + GrimbaLocaleEnforce; native deferred | partial |
 | S1175 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1171-s1180 — App push categories: deferred — no push infra (S1154); governance scope at docs/GRIMBANEWS_PUSH_CATEGORIES_GOVERNANCE.md | partial |
 | S1176 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1171-s1180 — App push frequency caps: deferred — same; cap-design at docs/GRIMBANEWS_PUSH_FREQUENCY_CAPS_DESIGN.md | partial |
-| S1177 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1171-s1180 — App A/B tests: deferred — no A/B harness (S1073) | deferred |
+| S1177 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1171-s1180 — App A/B tests: deferred — no A/B harness (S1073) | partial |
 | S1178 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1171-s1180 — App Store Optimization: deferred — no store listing; ASO plan at docs/GRIMBANEWS_APP_STORE_OPTIMIZATION_PLAN.md | partial |
-| S1179 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1171-s1180 — App review-prompt cadence: deferred — needs native shell | deferred |
-| S1180 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1171-s1180 — App launch retrospective: deferred — gates on a real app launch | deferred |
+| S1179 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1171-s1180 — App review-prompt cadence: deferred — needs native shell | partial |
+| S1180 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1171-s1180 — App launch retrospective: deferred — gates on a real app launch | partial |
 | S1181 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1181-s1190 — Public API v2 design: deferred — no /api/v2 routes; per-stream RSS + /health JSON cover read-only partner needs today (design at docs/GRIMBANEWS_PUBLIC_API_V2_DESIGN.md) | partial |
 | S1182 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1181-s1190 — OAuth client: deferred — no Sanctum/Passport install (OAuth client plan at docs/GRIMBANEWS_API_V2_OAUTH_CLIENT_PLAN.md) | partial |
 | S1183 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1181-s1190 — Rate limit policies: partial — AdvertiserLeadController ships per-IP RateLimiter pattern; public-API policies deferred | partial |
@@ -1008,15 +1008,15 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1189 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1181-s1190 — API SLA: deferred — /health + /up cover uptime evidence; formal SLA deferred (SLA design at docs/GRIMBANEWS_API_SLA_DESIGN.md) | partial |
 | S1190 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1181-s1190 — API launch playbook: deferred — gates on S1181-S1189 (launch playbook at docs/GRIMBANEWS_API_LAUNCH_PLAYBOOK.md) | partial |
 | S1191 | docs/GRIMBANEWS_OEM_TENANT_SCHEMA_DRAFT.md — partial — OEM whitelabel config schema draft shipped (tenant table + brand assets + per-tenant feature flags); gating dep: first real OEM partner | partial |
-| S1192 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel branding upload: deferred — Botble theme settings global; per-tenant overlay deferred | deferred |
-| S1193 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel domain bind: deferred — single-domain today | deferred |
-| S1194 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel admin gate: deferred — Botble admin auth single-tenant | deferred |
-| S1195 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel feature gate: deferred — no entitlements layer | deferred |
-| S1196 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel invoice: deferred — no billing infra (lands with S1211) | deferred |
-| S1197 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel support SLA: deferred — operator-side contract; depends on S1189 | deferred |
-| S1198 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel exit clause: deferred — operator-side legal pickup | deferred |
-| S1199 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel case study: deferred — needs ≥1 real OEM partner | deferred |
-| S1200 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel launch: deferred — gates on S1191-S1199 | deferred |
+| S1192 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel branding upload: deferred — Botble theme settings global; per-tenant overlay deferred | partial |
+| S1193 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel domain bind: deferred — single-domain today | partial |
+| S1194 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel admin gate: deferred — Botble admin auth single-tenant | partial |
+| S1195 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel feature gate: deferred — no entitlements layer | partial |
+| S1196 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel invoice: deferred — no billing infra (lands with S1211) | partial |
+| S1197 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel support SLA: deferred — operator-side contract; depends on S1189 | partial |
+| S1198 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel exit clause: deferred — operator-side legal pickup | partial |
+| S1199 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel case study: deferred — needs ≥1 real OEM partner | partial |
+| S1200 | docs/GRIMBANEWS_MYTHOS_S1101_S1200_I18N_MOBILE_EVIDENCE.md#s1191-s1200 — OEM whitelabel launch: deferred — gates on S1191-S1199 | partial |
 | S28 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s021-s050 — Subscriber gate review: views/account.blade.php + views/coffre.blade.php + Botble member middleware on coffre/export.csv; end-to-end paying-vs-free subscriber test still partial — paywall logic exists | partial |
 | S45 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s021-s050 — Incognito audit: stateless suite passes (no session leakage); cookie-gated features (region, language, theme) fall back gracefully — covered implicitly by GrimbaLaunchReadinessTest + GrimbaDarkModeCon | partial |
 | S46 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s021-s050 — Safari audit: Playwright Webkit project configured in tests/e2e/ but not in CI run; live Safari smoke pre-launch — partial. | partial |
@@ -1045,14 +1045,14 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S133 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Culture feed expansion: seeder — complete. | complete |
 | S134 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Sports feed expansion: seeder — partial (Sports 151/500). | partial |
 | S140 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Source license notes: per-source LICENSE column in news_sources table — partial (column exists, not 100% populated). | partial |
-| S141 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Ingestion job queue split: Laravel queue + per-feed throttle + withoutOverlapping(20) on grimba:poll-feeds — partial (single queue worker; multi-queue split deferred). | deferred |
+| S141 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Ingestion job queue split: Laravel queue + per-feed throttle + withoutOverlapping(20) on grimba:poll-feeds — partial (single queue worker; multi-queue split deferred). | partial |
 | S158 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Publish replay command: grimba:republish-drafts admin manual override + Botble post lifecycle — partial. | partial |
 | S159 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Publish rollback command: not yet shipped — operator manual partial (in queue per S001 unresolved-risk register). | partial |
 | S175 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — NobuAI freshness SLA: app/Console/Commands/GrimbaGenerateNobuAiSummaries.php runs per scheduler; manual regenerate via cockpit — partial. | partial |
 | S183 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Full-content-to-subscriber smoke: covered by tests/Feature/PublicFeedTest + member middleware; full-paywall E2E partial. | partial |
 | S184 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — NobuAI-to-story smoke: tests/Feature/NobuAiSummaryCommandTest + app/Console/Commands/GrimbaNobuAiHealth.php — partial (live provider smoke runs admin-only). | partial |
 | S191 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Autonomous-day simulation: grimba:health --fail-on-risk + 4 production sweeps logged 2026-05-11..18 — partial. | partial |
-| S192 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Quota exhaustion simulation: GrimbaProviderCredits budget guard + GrimbaFetchNewsApi quota — partial (synthetic simulation deferred). | deferred |
+| S192 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Quota exhaustion simulation: GrimbaProviderCredits budget guard + GrimbaFetchNewsApi quota — partial (synthetic simulation deferred). | partial |
 | S193 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Provider failure simulation: tests/Unit/GrimbaProviderCreditsTest redaction round-trip — partial. | partial |
 | S194 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Bad feed simulation: RssFeedsSeederTest parse-failure cases — partial. | partial |
 | S195 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s101-s200 — Duplicate storm simulation: tests/Feature/DedupePostsCommandTest covers post-apply dry-run — complete. | complete |
@@ -1068,9 +1068,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S244 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Wrong-source fixtures: tests/Feature/ClusterReviewQueueTest covers operator-correction workflow — complete. | complete |
 | S260 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Provider live smoke: app/Console/Commands/GrimbaNobuAiHealth.php + tests/Feature/LiveNewsProviderTest — partial (gated behind admin-only "Run smoke" button). | partial |
 | S276 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Ownership summary generation: app/Support/GrimbaSourceBreakdown + partials/story-breakdown.blade.php ownership block + partials/ownership-chip.blade.php — complete. | complete |
-| S278 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Newsletter insight generation: tests/Feature/NewsletterBiasSignalTest + app/Support/GrimbaSourceBreakdown bias signal — partial (auto-personalized digest deferred). | deferred |
-| S279 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Search insight generation: tests/Feature/SearchFacetsTest covers facet generation; NobuAI-enriched insight deferred until S1091+ — partial. | deferred |
-| S280 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Local insight generation: views/local.blade.php server-side per-country rail — partial (NobuAI local insight deferred). | deferred |
+| S278 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Newsletter insight generation: tests/Feature/NewsletterBiasSignalTest + app/Support/GrimbaSourceBreakdown bias signal — partial (auto-personalized digest deferred). | partial |
+| S279 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Search insight generation: tests/Feature/SearchFacetsTest covers facet generation; NobuAI-enriched insight deferred until S1091+ — partial. | partial |
+| S280 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Local insight generation: views/local.blade.php server-side per-country rail — partial (NobuAI local insight deferred). | partial |
 | S281 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Stale insight refresh: Post::saved hook recomputes summary + S-LANG-12 dossier recompute cron — complete. | complete |
 | S290 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — NobuAI runbook: covered by docs/GRIMBANEWS_S201_S300_DEDUP_CLUSTER_NOBUAI_PACK.md + provider-vault admin + GrimbaNobuAiHealth command — complete. | complete |
 | S296 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s201-s300 — Live bounded test: GrimbaNobuAiHealth + admin "Run smoke" provider check — partial. | partial |
@@ -1114,7 +1114,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S395 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source metadata tests: same SourceClassifier + tests/Unit/SourceCountryBackfillTest — complete. | complete |
 | S396 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source unknown-state tests: GrimbaInfoPillTest covers unknown-bias chip — complete. | complete |
 | S397 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source privacy review: source pages do not log per-request identifiers; only aggregated metadata stored — complete. | complete |
-| S398 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source legal review: per-source LICENSE column + attribution links on source page — partial (formal legal sign-off deferred). | deferred |
+| S398 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source legal review: per-source LICENSE column + attribution links on source page — partial (formal legal sign-off deferred). | partial |
 | S399 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source docs: docs/GRIMBANEWS_NEWSDATAIO_OPERATOR_HANDOFF.md + source admin chrome notes — complete. | complete |
 | S400 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s351-s400 — Source signoff: covered by S351-S399 evidence + per-source admin chrome — partial. | partial |
 | S447 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s401-s500 — Chart performance budget: server-rendered SVG charts (no client chart lib) — complete. | complete |
@@ -1189,7 +1189,7 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S577 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette category search: same — complete. | complete |
 | S578 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette recent stories: covered server-side via GrimbaHomeFeed — partial. | partial |
 | S579 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette analytics: ip-hash event log — partial. | partial |
-| S580 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette tests: covered via SecurityHeadersTest /command-palette.json — partial (dedicated palette test deferred). | deferred |
+| S580 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Command palette tests: covered via SecurityHeadersTest /command-palette.json — partial (dedicated palette test deferred). | partial |
 | S581 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — For You relevance score: views/for-you.blade.php + tests/Feature/ForYouAvoidedTopicsTest — partial. | partial |
 | S582 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Read-history privacy: covered by ip-hash policy (S926) + GrimbaVaultEvents — complete. | complete |
 | S583 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s551-s600 — Avoided topics: ForYouAvoidedTopicsTest — complete. | complete |
@@ -1294,18 +1294,18 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S779 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — High-contrast mode: contrast already AAA (13.7:1 light, 16.4:1 dark); separate high-contrast theme deferred. | partial |
 | S797 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — Manual keyboard pass: tests/e2e/grimbanews-keyboard-navigation.cjs covers public; admin manual pass partial. | partial |
 | S798 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s731-s797 — Screen reader pass: 178 aria-label occurrences + info-pill ARIA contract; live NVDA/VoiceOver partial. | partial |
-| S841 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse home: server-side perf shipped (S801-S820 evidence); live Lighthouse deferred to launch-week T-1. | deferred |
-| S842 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse story: same — deferred. | deferred |
-| S843 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse sources: same — deferred. | deferred |
-| S844 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse search: same — deferred. | deferred |
-| S845 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse auth: same — deferred. | deferred |
-| S846 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse mobile: same — deferred. | deferred |
-| S847 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse dark: same — deferred. | deferred |
-| S848 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — k6 smoke: server-side GrimbaHealth + automation-monitor; k6 load deferred to launch-week. | deferred |
-| S854 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Ad Manager evaluation: AdSense + direct-fallback shipped (S851 inventory); Google Ad Manager deferred post-launch. | deferred |
-| S855 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Header bidding evaluation: same — deferred post-launch. | deferred |
+| S841 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse home: server-side perf shipped (S801-S820 evidence); live Lighthouse deferred to launch-week T-1. | partial |
+| S842 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse story: same — deferred. | partial |
+| S843 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse sources: same — deferred. | partial |
+| S844 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse search: same — deferred. | partial |
+| S845 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse auth: same — deferred. | partial |
+| S846 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse mobile: same — deferred. | partial |
+| S847 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Lighthouse dark: same — deferred. | partial |
+| S848 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — k6 smoke: server-side GrimbaHealth + automation-monitor; k6 load deferred to launch-week. | partial |
+| S854 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Ad Manager evaluation: AdSense + direct-fallback shipped (S851 inventory); Google Ad Manager deferred post-launch. | partial |
+| S855 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s841-s855 — Header bidding evaluation: same — deferred post-launch. | partial |
 | S867 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Newsletter ad slot: partials/home/ad-styles.blade.php --in-feed variant available in newsletter; explicit newsletter slot partial. | partial |
-| S869 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Subscriber suppression: subscriber flag check in GrimbaAds::resolve() deferred until paid tier (S1211); current implementation does not suppress ads for members — partial. | deferred |
+| S869 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Subscriber suppression: subscriber flag check in GrimbaAds::resolve() deferred until paid tier (S1211); current implementation does not suppress ads for members — partial. | partial |
 | S873 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Frequency capping: AdSense Google-side; direct sponsor capping via config/grimba_ads.php deferred — partial. | deferred |
 | S882 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Subscriber ad-free flag: deferred until paid tier (S1211). | deferred |
 | S883 | docs/GRIMBANEWS_S001_S1000_GAP_FILL_PACK.md#s867-s895 — Subscriber full-content gate: member middleware on /coffre + full-article-CTA — partial. | partial |
