@@ -2163,9 +2163,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1809 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1801-s1810 — SOC 2 evidence-vault setup: deferred — no compliance-evidence vault (Drata-style automated collection). Closest surrogate: docs/GRIMBANEWS_RELEASE_SMOKE_EVIDENCE_2026_05_12.md is a one-off evidence fi | partial |
 | S1810 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1801-s1810 — SOC 2 Type I prep retrospective: deferred — gates on S1801-S1809 actually shipping; operator-side Sara-Chen retro. | partial |
 | S1811 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit firm engagement: deferred — no signed engagement; budget + firm-shortlist Sara-Chen-owned. | partial |
-| S1812 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit scope definition: deferred — depends on S1811. | deferred |
-| S1813 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit kickoff: deferred — same. | deferred |
-| S1814 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit field-work week 1 (access control / change-mgmt): deferred — same. | deferred |
+| S1812 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit scope definition: deferred — depends on S1811. | partial |
+| S1813 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit kickoff: deferred — same. | partial |
+| S1814 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit field-work week 1 (access control / change-mgmt): deferred — same. | partial |
 | S1815 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit field-work week 2 (encryption / logging / backup): deferred — same. | deferred |
 | S1816 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit field-work week 3 (incident-response / vendor-risk): deferred — same. | deferred |
 | S1817 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit findings response: deferred — same. | deferred |
