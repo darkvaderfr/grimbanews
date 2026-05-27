@@ -2046,9 +2046,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1692 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1691-s1700 — API — OAuth client / API-key model: partial — docs/GRIMBANEWS_API_ACADEMIC_TIER_PLAN.md "Schema (API key model)" defines api_keys + api_key_use_log schemas with tier enum + scopes + citation_required; ships with Sanctum. | partial |
 | S1693 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1691-s1700 — API — academic-tier signup: deferred — depends on S1692. | partial |
 | S1694 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1691-s1700 — API — academic-tier rate limit (higher than free tier): deferred — depends on S1691 + S1692; surrogate is per-IP RateLimiter on advertiser-lead endpoint (AdvertiserLeadController 5/10min). | partial |
-| S1695 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1691-s1700 — API — academic-tier usage dashboard: deferred — depends on S1691 + S1692. | deferred |
-| S1696 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1691-s1700 — API — academic-tier API docs: deferred — depends on S1691. | deferred |
-| S1697 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1691-s1700 — API — academic-tier citation requirement: deferred — depends on S1693. | deferred |
+| S1695 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1691-s1700 — API — academic-tier usage dashboard: deferred — depends on S1691 + S1692. | partial |
+| S1696 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1691-s1700 — API — academic-tier API docs: deferred — depends on S1691. | partial |
+| S1697 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1691-s1700 — API — academic-tier citation requirement: deferred — depends on S1693. | partial |
 | S1698 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1691-s1700 — API — academic-tier dataset license: deferred — same as S1687. | deferred |
 | S1699 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1691-s1700 — API — academic-tier renewal cadence: deferred — depends on S1693. | deferred |
 | S1700 | docs/GRIMBANEWS_MYTHOS_S1601_S1800_LOCAL_TOOLS_DATA_EVIDENCE.md#s1691-s1700 — API — academic-tier launch playbook: partial — docs/GRIMBANEWS_API_ACADEMIC_TIER_PLAN.md "Launch playbook" sequences Phase 1-5 + signup flow + renewal cadence + per-tier rate limits. | partial |
