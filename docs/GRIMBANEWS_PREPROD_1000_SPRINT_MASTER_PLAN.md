@@ -1913,9 +1913,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S2196 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Sports v2 international — beyond football: deferred — operator-side editorial | partial |
 | S2197 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Niche-topic per-bucket newsletter: deferred — gates on S1271+ newsletter v2 | partial |
 | S2198 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Niche-topic per-bucket landing page (deeper than /categorie/{slug}): deferred — current category landing is per-classifier-bucket | partial |
-| S2199 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Niche-topic v2 coverage-density tracker: deferred — gates on S2179 per-region tracker pattern | deferred |
-| S2200 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Niche-topic v2 launch retrospective: deferred — gates on S2181-S2199 | deferred |
-| S2201 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2201-s2220 — Long-form investigations — scope decision + first-investigation pick: deferred — operator-side editorial | deferred |
+| S2199 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Niche-topic v2 coverage-density tracker: deferred — gates on S2179 per-region tracker pattern | partial |
+| S2200 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2181-s2200 — Niche-topic v2 launch retrospective: deferred — gates on S2181-S2199 | partial |
+| S2201 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2201-s2220 — Long-form investigations — scope decision + first-investigation pick: deferred — operator-side editorial | partial |
 | S2202 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2201-s2220 — Long-form investigations — investigative-reporter hire (first): deferred — not on current Iboga roster | deferred |
 | S2203 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2201-s2220 — Long-form investigations — multi-source intake (primary docs, FOIA, leaks): deferred — needs SecureDrop / OnionShare; no anonymous-tip infra (S2025) | deferred |
 | S2204 | docs/GRIMBANEWS_MYTHOS_S2001_S2237_TRUST_OPENSOURCE_FINAL_EVIDENCE.md#s2201-s2220 — Long-form investigations — FOIA template library: deferred — operator-side legal tooling | deferred |
