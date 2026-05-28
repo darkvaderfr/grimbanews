@@ -2169,9 +2169,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1815 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit field-work week 2 (encryption / logging / backup): deferred — same. | partial |
 | S1816 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit field-work week 3 (incident-response / vendor-risk): deferred — same. | partial |
 | S1817 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit findings response: deferred — same. | partial |
-| S1818 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit remediation: deferred — same. | deferred |
-| S1819 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 Type I report signoff: deferred — same. | deferred |
-| S1820 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 Type I audit retrospective: deferred — gates on S1811-S1819. | deferred |
+| S1818 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit remediation: deferred — same. | partial |
+| S1819 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 Type I report signoff: deferred — same. | partial |
+| S1820 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 Type I audit retrospective: deferred — gates on S1811-S1819. | partial |
 | S1821 | docs/GRIMBANEWS_ISMS_SCOPE.md — partial — ISO 27001 ISMS scope statement shipped (in-scope assets + boundaries + interested parties); gating dep: cert body engagement | partial |
 | S1822 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 Statement of Applicability (Annex A controls): deferred — same. | deferred |
 | S1823 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 risk-treatment plan: deferred — same; pre-requisite for S1831. | deferred |
