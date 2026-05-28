@@ -2244,9 +2244,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1890 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit retrospective: deferred — same. | partial |
 | S1891 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit firm shortlist: deferred — depends on S1811. | partial |
 | S1892 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit firm engagement: deferred — same. | partial |
-| S1893 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit kickoff: deferred — same. | deferred |
-| S1894 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit fieldwork: deferred — same. | deferred |
-| S1895 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit findings response: deferred — same. | deferred |
+| S1893 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit kickoff: deferred — same. | partial |
+| S1894 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit fieldwork: deferred — same. | partial |
+| S1895 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit findings response: deferred — same. | partial |
 | S1896 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit remediation: deferred — same. | deferred |
 | S1897 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit report receipt: deferred — same. | deferred |
 | S1898 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit report distribution (customers / prospects): deferred — same; gates on enterprise-tier S1991 motion (B2B prospects request reports). | deferred |
