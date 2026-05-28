@@ -2166,9 +2166,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1812 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit scope definition: deferred — depends on S1811. | partial |
 | S1813 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit kickoff: deferred — same. | partial |
 | S1814 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit field-work week 1 (access control / change-mgmt): deferred — same. | partial |
-| S1815 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit field-work week 2 (encryption / logging / backup): deferred — same. | deferred |
-| S1816 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit field-work week 3 (incident-response / vendor-risk): deferred — same. | deferred |
-| S1817 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit findings response: deferred — same. | deferred |
+| S1815 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit field-work week 2 (encryption / logging / backup): deferred — same. | partial |
+| S1816 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit field-work week 3 (incident-response / vendor-risk): deferred — same. | partial |
+| S1817 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit findings response: deferred — same. | partial |
 | S1818 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 audit remediation: deferred — same. | deferred |
 | S1819 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 Type I report signoff: deferred — same. | deferred |
 | S1820 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 Type I audit retrospective: deferred — gates on S1811-S1819. | deferred |
