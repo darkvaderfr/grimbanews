@@ -2185,9 +2185,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1831 | docs/GRIMBANEWS_RISK_ASSESSMENT_METHODOLOGY.md — partial — risk assessment methodology shipped (impact × likelihood × mitigation matrix + scoring rubric); gating dep: actual asset register run | partial |
 | S1832 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Asset-threat-vulnerability-impact mapping: deferred — same. | partial |
 | S1833 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Inherent-risk scoring: deferred — same. | partial |
-| S1834 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Control-effectiveness scoring: deferred — same. | deferred |
-| S1835 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Residual-risk scoring: deferred — same. | deferred |
-| S1836 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-treatment decisions (avoid / mitigate / transfer / accept): deferred — same. | deferred |
+| S1834 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Control-effectiveness scoring: deferred — same. | partial |
+| S1835 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Residual-risk scoring: deferred — same. | partial |
+| S1836 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-treatment decisions (avoid / mitigate / transfer / accept): deferred — same. | partial |
 | S1837 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk register publication: partial — docs/GRIMBANEWS_S010_UNRESOLVED_RISK_REGISTER.md ships a pre-launch risk register; ISO-conformant version deferred. | partial |
 | S1838 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-register cadence (quarterly review): deferred — operator-side; depends on S1837 conformant version. | deferred |
 | S1839 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-register launch readiness: deferred — gates on S1831-S1838. | deferred |
