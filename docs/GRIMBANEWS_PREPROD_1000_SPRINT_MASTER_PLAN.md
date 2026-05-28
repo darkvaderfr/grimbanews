@@ -2193,9 +2193,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1839 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-register launch readiness: deferred — gates on S1831-S1838. | partial |
 | S1840 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-assessment retrospective: deferred — same. | partial |
 | S1841 | docs/GRIMBANEWS_PCI_DSS_SCOPE_STATEMENT.md — partial — PCI DSS scope statement shipped (N/A determination: no card data stored, Stripe-hosted checkout); gating dep: if payment-processing model changes | partial |
-| S1842 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS network segmentation diagram: deferred — N/A until CDE exists. | deferred |
-| S1843 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS card-data-flow diagram: deferred — same. | deferred |
-| S1844 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS SAQ selection (A / A-EP / D): deferred — same. | deferred |
+| S1842 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS network segmentation diagram: deferred — N/A until CDE exists. | partial |
+| S1843 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS card-data-flow diagram: deferred — same. | partial |
+| S1844 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS SAQ selection (A / A-EP / D): deferred — same. | partial |
 | S1845 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS quarterly ASV scan: deferred — same. | deferred |
 | S1846 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS annual penetration test: deferred — same; broader pen-test sits in S2011 bug-bounty band. | deferred |
 | S1847 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS QSA engagement (if Level 1): deferred — same. | deferred |
