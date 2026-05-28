@@ -2229,11 +2229,11 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1875 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor SOC 2 / ISO 27001 report collection: deferred — same. | partial |
 | S1876 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor incident-notification clauses: deferred — same. | partial |
 | S1877 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor termination + data-return clauses: deferred — same. | partial |
-| S1878 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor quarterly review cadence: deferred — depends on S1871-S1877. | deferred |
+| S1878 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor quarterly review cadence: deferred — depends on S1871-S1877. | partial |
 | S1879 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor risk dashboard: deferred — same. — surrogate doc: docs/GRIMBANEWS_VENDOR_RISK_DASHBOARD_DESIGN.md (partial). | partial |
-| S1880 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor risk-management launch readiness: deferred — gates on S1871-S1879. | deferred |
+| S1880 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor risk-management launch readiness: deferred — gates on S1871-S1879. | partial |
 | S1881 | docs/GRIMBANEWS_INTERNAL_AUDIT_CHARTER.md — partial — internal audit charter shipped (scope + independence + cadence + reporting); gating dep: first audit cycle | partial |
-| S1882 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit team composition: deferred — exec roster has Sara Chen (CISO) — natural internal-audit lead; team composition formalization deferred. | deferred |
+| S1882 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit team composition: deferred — exec roster has Sara Chen (CISO) — natural internal-audit lead; team composition formalization deferred. | partial |
 | S1883 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit plan (annual): deferred — same. | deferred |
 | S1884 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit working-paper template: deferred — same. | deferred |
 | S1885 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit findings register: deferred — same. | deferred |
