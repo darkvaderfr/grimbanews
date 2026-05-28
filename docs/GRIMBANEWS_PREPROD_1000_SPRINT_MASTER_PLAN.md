@@ -2189,9 +2189,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1835 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Residual-risk scoring: deferred — same. | partial |
 | S1836 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-treatment decisions (avoid / mitigate / transfer / accept): deferred — same. | partial |
 | S1837 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk register publication: partial — docs/GRIMBANEWS_S010_UNRESOLVED_RISK_REGISTER.md ships a pre-launch risk register; ISO-conformant version deferred. | partial |
-| S1838 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-register cadence (quarterly review): deferred — operator-side; depends on S1837 conformant version. | deferred |
-| S1839 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-register launch readiness: deferred — gates on S1831-S1838. | deferred |
-| S1840 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-assessment retrospective: deferred — same. | deferred |
+| S1838 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-register cadence (quarterly review): deferred — operator-side; depends on S1837 conformant version. | partial |
+| S1839 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-register launch readiness: deferred — gates on S1831-S1838. | partial |
+| S1840 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-assessment retrospective: deferred — same. | partial |
 | S1841 | docs/GRIMBANEWS_PCI_DSS_SCOPE_STATEMENT.md — partial — PCI DSS scope statement shipped (N/A determination: no card data stored, Stripe-hosted checkout); gating dep: if payment-processing model changes | partial |
 | S1842 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS network segmentation diagram: deferred — N/A until CDE exists. | deferred |
 | S1843 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS card-data-flow diagram: deferred — same. | deferred |
