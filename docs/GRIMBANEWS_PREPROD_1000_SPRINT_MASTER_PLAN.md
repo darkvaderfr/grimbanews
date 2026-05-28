@@ -2196,9 +2196,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1842 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS network segmentation diagram: deferred — N/A until CDE exists. | partial |
 | S1843 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS card-data-flow diagram: deferred — same. | partial |
 | S1844 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS SAQ selection (A / A-EP / D): deferred — same. | partial |
-| S1845 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS quarterly ASV scan: deferred — same. | deferred |
-| S1846 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS annual penetration test: deferred — same; broader pen-test sits in S2011 bug-bounty band. | deferred |
-| S1847 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS QSA engagement (if Level 1): deferred — same. | deferred |
+| S1845 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS quarterly ASV scan: deferred — same. | partial |
+| S1846 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS annual penetration test: deferred — same; broader pen-test sits in S2011 bug-bounty band. | partial |
+| S1847 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS QSA engagement (if Level 1): deferred — same. | partial |
 | S1848 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS Attestation of Compliance (AoC): deferred — same. | deferred |
 | S1849 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS launch readiness: deferred — gates on payment processor selection + integration first. | deferred |
 | S1850 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS retrospective: deferred — same. | deferred |
