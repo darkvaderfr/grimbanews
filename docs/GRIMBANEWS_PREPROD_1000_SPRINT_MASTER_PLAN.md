@@ -2237,10 +2237,10 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1883 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit plan (annual): deferred — same. | partial |
 | S1884 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit working-paper template: deferred — same. | partial |
 | S1885 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit findings register: deferred — same. | partial |
-| S1886 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit corrective-action tracking: deferred — same. | deferred |
-| S1887 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit management-review cadence: deferred — same; depends on S1828 (ISO 27001 management review). | deferred |
+| S1886 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit corrective-action tracking: deferred — same. | partial |
+| S1887 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit management-review cadence: deferred — same; depends on S1828 (ISO 27001 management review). | partial |
 | S1888 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit independence safeguards: deferred — same. — surrogate doc: docs/GRIMBANEWS_INTERNAL_AUDIT_INDEPENDENCE_SAFEGUARDS_PLAN.md (partial). | partial |
-| S1889 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit launch readiness: deferred — gates on S1881-S1888. | deferred |
+| S1889 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit launch readiness: deferred — gates on S1881-S1888. | partial |
 | S1890 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit retrospective: deferred — same. | deferred |
 | S1891 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit firm shortlist: deferred — depends on S1811. | deferred |
 | S1892 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit firm engagement: deferred — same. | deferred |
