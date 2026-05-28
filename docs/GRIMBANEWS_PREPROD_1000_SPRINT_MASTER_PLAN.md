@@ -2173,11 +2173,11 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1819 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 Type I report signoff: deferred — same. | partial |
 | S1820 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1811-s1820 — SOC 2 Type I audit retrospective: deferred — gates on S1811-S1819. | partial |
 | S1821 | docs/GRIMBANEWS_ISMS_SCOPE.md — partial — ISO 27001 ISMS scope statement shipped (in-scope assets + boundaries + interested parties); gating dep: cert body engagement | partial |
-| S1822 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 Statement of Applicability (Annex A controls): deferred — same. | deferred |
-| S1823 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 risk-treatment plan: deferred — same; pre-requisite for S1831. | deferred |
+| S1822 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 Statement of Applicability (Annex A controls): deferred — same. | partial |
+| S1823 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 risk-treatment plan: deferred — same; pre-requisite for S1831. | partial |
 | S1824 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 information-asset inventory: partial — app/Support/GrimbaDatabaseBackups.php enumerates the live SQLite DB; provider-vault enumerates third-party API tokens; full information-asset register  | partial |
 | S1825 | docs/GRIMBANEWS_POLICY_LIBRARY_INDEX.md — partial — ISO 27001 policy library index shipped (8 core policies enumerated + ownership + review cadence); gating dep: policies themselves drafted | partial |
-| S1826 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS responsibilities matrix (RACI): deferred — operator-side org chart; exec roster at ~/.claude/projects/-Users-vb-kaizen/memory/project_iboga_full_roster.md is the source-of-truth for who | deferred |
+| S1826 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS responsibilities matrix (RACI): deferred — operator-side org chart; exec roster at ~/.claude/projects/-Users-vb-kaizen/memory/project_iboga_full_roster.md is the source-of-truth for who | partial |
 | S1827 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 internal-audit plan: deferred — depends on S1881 (internal audit cadence band). | deferred |
 | S1828 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 management-review cadence: deferred — operator-side governance pickup. | deferred |
 | S1829 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS launch readiness: deferred — gates on S1821-S1828. | deferred |
