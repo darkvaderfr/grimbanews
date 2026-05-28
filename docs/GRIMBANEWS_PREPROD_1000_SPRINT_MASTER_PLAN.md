@@ -2178,9 +2178,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1824 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 information-asset inventory: partial — app/Support/GrimbaDatabaseBackups.php enumerates the live SQLite DB; provider-vault enumerates third-party API tokens; full information-asset register  | partial |
 | S1825 | docs/GRIMBANEWS_POLICY_LIBRARY_INDEX.md — partial — ISO 27001 policy library index shipped (8 core policies enumerated + ownership + review cadence); gating dep: policies themselves drafted | partial |
 | S1826 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS responsibilities matrix (RACI): deferred — operator-side org chart; exec roster at ~/.claude/projects/-Users-vb-kaizen/memory/project_iboga_full_roster.md is the source-of-truth for who | partial |
-| S1827 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 internal-audit plan: deferred — depends on S1881 (internal audit cadence band). | deferred |
-| S1828 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 management-review cadence: deferred — operator-side governance pickup. | deferred |
-| S1829 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS launch readiness: deferred — gates on S1821-S1828. | deferred |
+| S1827 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 internal-audit plan: deferred — depends on S1881 (internal audit cadence band). | partial |
+| S1828 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 management-review cadence: deferred — operator-side governance pickup. | partial |
+| S1829 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS launch readiness: deferred — gates on S1821-S1828. | partial |
 | S1830 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS retrospective: deferred — same. | deferred |
 | S1831 | docs/GRIMBANEWS_RISK_ASSESSMENT_METHODOLOGY.md — partial — risk assessment methodology shipped (impact × likelihood × mitigation matrix + scoring rubric); gating dep: actual asset register run | partial |
 | S1832 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Asset-threat-vulnerability-impact mapping: deferred — same. | deferred |
