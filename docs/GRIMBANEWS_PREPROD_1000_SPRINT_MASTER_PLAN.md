@@ -2221,11 +2221,11 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1867 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1861-s1870 — Privacy-policy page coverage: partial — /politique-de-confidentialite (FR) + /privacy-policy (EN) ship via the legal-page band; per-cookie-purpose drill-in deferred. | partial |
 | S1868 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1861-s1870 — Cookie consent banner i18n: partial — cookie-consent partial uses __() for default copy (FR + EN via lang/{locale}.json); other locales deferred per S1146. | partial |
 | S1869 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1861-s1870 — Privacy-program metrics dashboard: deferred — no consent-rate / opt-out-rate dashboard. | partial |
-| S1870 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1861-s1870 — Privacy program v2 launch readiness: deferred — gates on S1861-S1869. | deferred |
+| S1870 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1861-s1870 — Privacy program v2 launch readiness: deferred — gates on S1861-S1869. | partial |
 | S1871 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor inventory: partial — .env.example lists API key slots for newsdata.io / NEWSAPI / OpenRouter / NobuAI / LibreTranslate; consolidated vendor register deferred. | partial |
-| S1872 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor risk-tier classification (critical / high / medium / low): deferred — depends on S1871. | deferred |
+| S1872 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor risk-tier classification (critical / high / medium / low): deferred — depends on S1871. | partial |
 | S1873 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor DPA collection: deferred — no DPA register; operator-side counsel pickup. — surrogate doc: docs/GRIMBANEWS_VENDOR_DPA_COLLECTION_PLAN.md (partial). | partial |
-| S1874 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor security-questionnaire intake: deferred — same. | deferred |
+| S1874 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor security-questionnaire intake: deferred — same. | partial |
 | S1875 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor SOC 2 / ISO 27001 report collection: deferred — same. | deferred |
 | S1876 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor incident-notification clauses: deferred — same. | deferred |
 | S1877 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor termination + data-return clauses: deferred — same. | deferred |
