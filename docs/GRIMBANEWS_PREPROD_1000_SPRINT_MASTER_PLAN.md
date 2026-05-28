@@ -2234,9 +2234,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1880 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor risk-management launch readiness: deferred — gates on S1871-S1879. | partial |
 | S1881 | docs/GRIMBANEWS_INTERNAL_AUDIT_CHARTER.md — partial — internal audit charter shipped (scope + independence + cadence + reporting); gating dep: first audit cycle | partial |
 | S1882 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit team composition: deferred — exec roster has Sara Chen (CISO) — natural internal-audit lead; team composition formalization deferred. | partial |
-| S1883 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit plan (annual): deferred — same. | deferred |
-| S1884 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit working-paper template: deferred — same. | deferred |
-| S1885 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit findings register: deferred — same. | deferred |
+| S1883 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit plan (annual): deferred — same. | partial |
+| S1884 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit working-paper template: deferred — same. | partial |
+| S1885 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit findings register: deferred — same. | partial |
 | S1886 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit corrective-action tracking: deferred — same. | deferred |
 | S1887 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit management-review cadence: deferred — same; depends on S1828 (ISO 27001 management review). | deferred |
 | S1888 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1881-s1890 — Internal-audit independence safeguards: deferred — same. — surrogate doc: docs/GRIMBANEWS_INTERNAL_AUDIT_INDEPENDENCE_SAFEGUARDS_PLAN.md (partial). | partial |
