@@ -2226,9 +2226,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1872 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor risk-tier classification (critical / high / medium / low): deferred — depends on S1871. | partial |
 | S1873 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor DPA collection: deferred — no DPA register; operator-side counsel pickup. — surrogate doc: docs/GRIMBANEWS_VENDOR_DPA_COLLECTION_PLAN.md (partial). | partial |
 | S1874 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor security-questionnaire intake: deferred — same. | partial |
-| S1875 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor SOC 2 / ISO 27001 report collection: deferred — same. | deferred |
-| S1876 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor incident-notification clauses: deferred — same. | deferred |
-| S1877 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor termination + data-return clauses: deferred — same. | deferred |
+| S1875 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor SOC 2 / ISO 27001 report collection: deferred — same. | partial |
+| S1876 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor incident-notification clauses: deferred — same. | partial |
+| S1877 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor termination + data-return clauses: deferred — same. | partial |
 | S1878 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor quarterly review cadence: deferred — depends on S1871-S1877. | deferred |
 | S1879 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor risk dashboard: deferred — same. — surrogate doc: docs/GRIMBANEWS_VENDOR_RISK_DASHBOARD_DESIGN.md (partial). | partial |
 | S1880 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1871-s1880 — Vendor risk-management launch readiness: deferred — gates on S1871-S1879. | deferred |
