@@ -2181,10 +2181,10 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1827 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 internal-audit plan: deferred — depends on S1881 (internal audit cadence band). | partial |
 | S1828 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 management-review cadence: deferred — operator-side governance pickup. | partial |
 | S1829 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS launch readiness: deferred — gates on S1821-S1828. | partial |
-| S1830 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS retrospective: deferred — same. | deferred |
+| S1830 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1821-s1830 — ISO 27001 ISMS retrospective: deferred — same. | partial |
 | S1831 | docs/GRIMBANEWS_RISK_ASSESSMENT_METHODOLOGY.md — partial — risk assessment methodology shipped (impact × likelihood × mitigation matrix + scoring rubric); gating dep: actual asset register run | partial |
-| S1832 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Asset-threat-vulnerability-impact mapping: deferred — same. | deferred |
-| S1833 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Inherent-risk scoring: deferred — same. | deferred |
+| S1832 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Asset-threat-vulnerability-impact mapping: deferred — same. | partial |
+| S1833 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Inherent-risk scoring: deferred — same. | partial |
 | S1834 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Control-effectiveness scoring: deferred — same. | deferred |
 | S1835 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Residual-risk scoring: deferred — same. | deferred |
 | S1836 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1831-s1840 — Risk-treatment decisions (avoid / mitigate / transfer / accept): deferred — same. | deferred |
