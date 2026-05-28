@@ -2199,9 +2199,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1845 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS quarterly ASV scan: deferred — same. | partial |
 | S1846 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS annual penetration test: deferred — same; broader pen-test sits in S2011 bug-bounty band. | partial |
 | S1847 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS QSA engagement (if Level 1): deferred — same. | partial |
-| S1848 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS Attestation of Compliance (AoC): deferred — same. | deferred |
-| S1849 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS launch readiness: deferred — gates on payment processor selection + integration first. | deferred |
-| S1850 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS retrospective: deferred — same. | deferred |
+| S1848 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS Attestation of Compliance (AoC): deferred — same. | partial |
+| S1849 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS launch readiness: deferred — gates on payment processor selection + integration first. | partial |
+| S1850 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1841-s1850 — PCI DSS retrospective: deferred — same. | partial |
 | S1851 | docs/GRIMBANEWS_GDPR_ROPA.md — partial — GDPR Article 30 ROPA shipped (10+ processing activities enumerated with lawful basis + retention + subprocessors); gating dep: DPO formal appointment | partial |
 | S1852 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1851-s1860 — GDPR DPIA — homepage personalization + For-You: deferred — no formal DPIA; technical surrogate is app/Support/GrimbaForYou cookie-only profile (no member-row personalization, no profile-graph). | deferred |
 | S1853 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1851-s1860 — GDPR DPIA — vault analytics: partial — app/Support/GrimbaVaultEvents.php is privacy-safe by design (event hashes, no per-reader PII beyond logged-in member id), archived weekly via grimba:archive-vaul | partial |
