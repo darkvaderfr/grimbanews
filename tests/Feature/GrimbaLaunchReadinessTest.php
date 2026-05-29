@@ -2275,7 +2275,26 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('avg cluster size', $output);
         $this->assertStringContainsString('symmetric (center=0)', $output);
         $this->assertStringContainsString('3. Bias bucket totals', $output);
-        $this->assertStringContainsString('4. Top tag mixes', $output);
+        $this->assertStringContainsString('tag mixes', $output);
+    }
+
+    public function test_grimba_mg_stats_top_option_limits_tag_list(): void
+    {
+        // Wave SUB-58-CODE-B (2026-05-29) — --top=N should clamp to [1,100]
+        // and update both the section header and the underlying tag-list
+        // length. Test exercises an explicit --top=3 and asserts the header
+        // reflects it; on a low-data env the actual tag count may be < 3
+        // (asserting on count would be flaky), so we assert the header text.
+        \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats', ['--top' => 3]);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        $this->assertStringContainsString('4. Top 3 tag mixes', $output,
+            '--top=3 must update the section header label.');
+
+        // Clamp on the low side: --top=0 should clamp to 1.
+        \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats', ['--top' => 0]);
+        $clamped = \Illuminate\Support\Facades\Artisan::output();
+        $this->assertStringContainsString('4. Top 1 tag mixes', $clamped,
+            '--top=0 must clamp to a minimum of 1.');
     }
 
     public function test_grimba_mg_stats_json_mode_is_valid_pipeable_json(): void

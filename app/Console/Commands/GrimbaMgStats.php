@@ -27,7 +27,8 @@ use Illuminate\Support\Facades\DB;
 class GrimbaMgStats extends Command
 {
     protected $signature = 'grimba:mg-stats
-        {--json : emit machine-readable JSON instead of the text report}';
+        {--json : emit machine-readable JSON instead of the text report}
+        {--top=10 : how many top tag mixes to include (1..100; default 10)}';
 
     protected $description = 'Middle Ground (mg_*) cluster summary: current totals, 24h/7d/30d trend, L/C/R distribution.';
 
@@ -57,12 +58,13 @@ class GrimbaMgStats extends Command
             ->where('updated_at', '>=', $last30d)
             ->count();
 
+        $top = max(1, min(100, (int) $this->option('top')));
         $tags = DB::table('story_clusters')
             ->select('review_action', DB::raw('COUNT(*) as c'))
             ->where('review_action', 'like', 'mg_%')
             ->groupBy('review_action')
             ->orderByDesc('c')
-            ->limit(10)
+            ->limit($top)
             ->get();
 
         $sumL = 0;
@@ -133,7 +135,7 @@ class GrimbaMgStats extends Command
         $this->line(sprintf('   right                      %d', $sumR));
 
         $this->newLine();
-        $this->line('4. Top tag mixes (descending)');
+        $this->line(sprintf('4. Top %d tag mixes (descending)', $top));
         if ($tags->isEmpty()) {
             $this->line('   (no MG clusters in store)');
         } else {
