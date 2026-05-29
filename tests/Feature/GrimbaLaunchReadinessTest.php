@@ -2980,6 +2980,22 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsArray($decoded['top_tags'], 'top_tags must be an array.');
     }
 
+    public function test_api_middle_ground_json_methodology_url_is_absolute(): void
+    {
+        // Sprint KK (2026-05-29) — methodology_url must be an
+        // absolute URL (starts with http(s)) so external dashboards
+        // can dereference it without app-host context. A regression
+        // that emits a relative path (e.g., "/methodologie") would
+        // silently break any cross-origin caller.
+        $response = $this->get('/api/middle-ground.json?summary_only=1');
+        $body = $response->json();
+        $this->assertArrayHasKey('methodology_url', $body);
+        $this->assertMatchesRegularExpression('#^https?://#', $body['methodology_url'],
+            'methodology_url must be absolute (start with http:// or https://).');
+        $this->assertStringContainsString('methodologie', $body['methodology_url'],
+            'methodology_url must point at /methodologie (canonical FR landing).');
+    }
+
     public function test_api_middle_ground_json_summary_left_equals_right_invariant(): void
     {
         // Sprint JJ (2026-05-29) — every cluster in the response is
