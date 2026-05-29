@@ -273,4 +273,27 @@ class GrimbaClusterBias
             'malformed_count' => $malformed,
         ];
     }
+
+    /**
+     * Canonical Blade lookup table: bias key → [label, short, color].
+     * Multiple Blade templates reimplement this same array; centralizing
+     * here avoids drift (label rename in one file, color tweak in
+     * another). Future surfaces should reach for biasMetaForBlade()
+     * instead of inlining.
+     *
+     * Labels translate through __() so the result is locale-sensitive
+     * — call from a request context, not a static cache.
+     *
+     * @return array<string, array{label: string, short: string, color: string}>
+     */
+    public static function biasMetaForBlade(): array
+    {
+        return [
+            'left' => ['label' => __('Gauche'), 'short' => 'L', 'color' => '#3b82f6'],
+            'center' => ['label' => __('Centre'), 'short' => 'C', 'color' => '#a8a8a8'],
+            'right' => ['label' => __('Droite'), 'short' => 'R', 'color' => '#e84c3d'],
+            self::KEY_MIDDLE_GROUND => ['label' => __('Juste milieu'), 'short' => '⊕', 'color' => '#a855f7'],
+            'unknown' => ['label' => __('Non classé'), 'short' => '?', 'color' => '#6b6459'],
+        ];
+    }
 }

@@ -2278,6 +2278,24 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_bias_meta_for_blade_returns_canonical_table(): void
+    {
+        // Sprint U (2026-05-29) — biasMetaForBlade() is the canonical
+        // [key → label, short, color] table that several Blade files
+        // reimplement. Pin the contract: all 5 bucket keys present,
+        // each entry has label + short + color, MG color stays purple.
+        $meta = \App\Support\GrimbaClusterBias::biasMetaForBlade();
+        $this->assertIsArray($meta);
+        foreach (['left', 'center', 'right', 'middle_ground', 'unknown'] as $key) {
+            $this->assertArrayHasKey($key, $meta, "biasMetaForBlade must include '{$key}'.");
+            $this->assertArrayHasKey('label', $meta[$key]);
+            $this->assertArrayHasKey('short', $meta[$key]);
+            $this->assertArrayHasKey('color', $meta[$key]);
+        }
+        $this->assertSame('#a855f7', $meta['middle_ground']['color']);
+        $this->assertSame('⊕', $meta['middle_ground']['short']);
+    }
+
     public function test_grimba_cluster_bias_bias_from_mg_tag_one_call_convenience(): void
     {
         // Sprint T (2026-05-29) — biasFromMgTag() is the one-call
