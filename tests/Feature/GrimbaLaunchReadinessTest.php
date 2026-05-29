@@ -2992,12 +2992,20 @@ class GrimbaLaunchReadinessTest extends TestCase
             'summary block must still be present in summary_only mode.');
         $this->assertArrayNotHasKey('rows', $body,
             'rows must be omitted in summary_only mode for smaller payload.');
+        // Sprint HH (2026-05-29) — count must still reflect the
+        // number of rows that would have been returned, so chart
+        // widgets keep the metric without needing rows.
+        $this->assertArrayHasKey('count', $body);
+        $this->assertIsInt($body['count']);
 
         // Default mode (without summary_only) must still include rows.
         $defaultResponse = $this->get('/api/middle-ground.json?limit=2');
         $defaultBody = $defaultResponse->json();
         $this->assertArrayHasKey('rows', $defaultBody,
             'rows must be present in default mode.');
+        // count must match rows length in default mode.
+        $this->assertSame(count($defaultBody['rows']), $defaultBody['count'],
+            'count must equal rows length in default mode.');
     }
 
     public function test_dossiers_diversity_filter_serves_middle_ground_blindspot_tabs(): void
