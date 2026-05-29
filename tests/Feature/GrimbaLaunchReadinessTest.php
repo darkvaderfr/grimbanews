@@ -2278,6 +2278,38 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_mg_stats_since_hours_option_emits_extra_window(): void
+    {
+        // Wave SUB-58-CODE-C (2026-05-29) — --since-hours=N gives ops
+        // an arbitrary lookback alongside the 24h/7d/30d defaults
+        // (e.g., "MG count since last deploy 4 hours ago"). Text mode
+        // adds a line; JSON mode adds two keys. We test text mode for
+        // header presence and JSON mode for key + value type.
+        \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats', ['--since-hours' => 6]);
+        $text = \Illuminate\Support\Facades\Artisan::output();
+        $this->assertStringContainsString('updated since 6h', $text,
+            '--since-hours=6 must add a "since 6h" line to text mode.');
+
+        \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats', ['--since-hours' => 6, '--json' => true]);
+        $jsonOut = trim(\Illuminate\Support\Facades\Artisan::output());
+        $lines = array_values(array_filter(array_map('trim', explode("\n", $jsonOut)), fn ($l) => $l !== ''));
+        $decoded = json_decode(end($lines), true);
+        $this->assertIsArray($decoded);
+        $this->assertArrayHasKey('since_hours', $decoded);
+        $this->assertSame(6, $decoded['since_hours']);
+        $this->assertArrayHasKey('updated_since_hours', $decoded);
+        $this->assertIsInt($decoded['updated_since_hours']);
+
+        // Without the option, the keys must NOT appear (clean payload
+        // for the default cron case).
+        \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats', ['--json' => true]);
+        $defaultOut = trim(\Illuminate\Support\Facades\Artisan::output());
+        $defaultLines = array_values(array_filter(array_map('trim', explode("\n", $defaultOut)), fn ($l) => $l !== ''));
+        $defaultDecoded = json_decode(end($defaultLines), true);
+        $this->assertArrayNotHasKey('since_hours', $defaultDecoded,
+            'JSON payload without --since-hours must NOT contain since_hours.');
+    }
+
     public function test_grimba_mg_stats_top_option_limits_tag_list(): void
     {
         // Wave SUB-58-CODE-B (2026-05-29) — --top=N should clamp to [1,100]

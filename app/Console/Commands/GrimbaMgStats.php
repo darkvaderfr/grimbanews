@@ -28,7 +28,8 @@ class GrimbaMgStats extends Command
 {
     protected $signature = 'grimba:mg-stats
         {--json : emit machine-readable JSON instead of the text report}
-        {--top=10 : how many top tag mixes to include (1..100; default 10)}';
+        {--top=10 : how many top tag mixes to include (1..100; default 10)}
+        {--since-hours= : extra arbitrary lookback window; emits a "since N hours" count alongside the 24h/7d/30d defaults}';
 
     protected $description = 'Middle Ground (mg_*) cluster summary: current totals, 24h/7d/30d trend, L/C/R distribution.';
 
@@ -57,6 +58,16 @@ class GrimbaMgStats extends Command
             ->where('review_action', 'like', 'mg_%')
             ->where('updated_at', '>=', $last30d)
             ->count();
+
+        $sinceHoursOpt = $this->option('since-hours');
+        $sinceHours = ($sinceHoursOpt !== null && $sinceHoursOpt !== '') ? max(1, (int) $sinceHoursOpt) : null;
+        $countSince = null;
+        if ($sinceHours !== null) {
+            $countSince = (int) DB::table('story_clusters')
+                ->where('review_action', 'like', 'mg_%')
+                ->where('updated_at', '>=', $now->copy()->subHours($sinceHours))
+                ->count();
+        }
 
         $top = max(1, min(100, (int) $this->option('top')));
         $tags = DB::table('story_clusters')
@@ -93,7 +104,7 @@ class GrimbaMgStats extends Command
         $avgSize = $total > 0 ? round(($sumL + $sumC + $sumR) / $total, 2) : 0.0;
 
         if ($this->option('json')) {
-            $this->line(json_encode([
+            $payload = [
                 'as_of' => $now->toIso8601String(),
                 'total_mg_clusters' => $total,
                 'updated_last_24h' => $count24h,
@@ -106,7 +117,12 @@ class GrimbaMgStats extends Command
                 'sum_center' => $sumC,
                 'sum_right' => $sumR,
                 'top_tags' => $tags->map(fn($t) => ['tag' => $t->review_action, 'count' => (int) $t->c])->all(),
-            ], JSON_UNESCAPED_SLASHES));
+            ];
+            if ($sinceHours !== null) {
+                $payload['since_hours'] = $sinceHours;
+                $payload['updated_since_hours'] = $countSince;
+            }
+            $this->line(json_encode($payload, JSON_UNESCAPED_SLASHES));
             return self::SUCCESS;
         }
 
@@ -121,6 +137,9 @@ class GrimbaMgStats extends Command
         $this->line(sprintf('   ⊕ updated last 24h        %d', $count24h));
         $this->line(sprintf('   ⊕ updated last 7d         %d', $count7d));
         $this->line(sprintf('   ⊕ updated last 30d        %d', $count30d));
+        if ($sinceHours !== null) {
+            $this->line(sprintf('   ⊕ updated since %dh%s%d', $sinceHours, str_repeat(' ', max(1, 11 - strlen((string) $sinceHours))), $countSince));
+        }
 
         $this->newLine();
         $this->line('2. Shape');
