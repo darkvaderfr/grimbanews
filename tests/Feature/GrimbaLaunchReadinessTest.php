@@ -2980,6 +2980,27 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsArray($decoded['top_tags'], 'top_tags must be an array.');
     }
 
+    public function test_api_middle_ground_atom_limit_clamps_match_json_endpoint(): void
+    {
+        // Sprint MM (2026-05-29) — atom endpoint must use the same
+        // [1, 200] limit clamp as the JSON sibling. There's no
+        // top-level "limit" field to inspect in atom, so we assert
+        // that limit=999 returns ≤200 entries (counting <entry> tags
+        // as a proxy for the clamp working). Empty-store envs return
+        // 0 entries, which still respects the cap.
+        $response = $this->get('/api/middle-ground.atom?limit=999');
+        $response->assertStatus(200);
+        $body = $response->getContent();
+        $entryCount = substr_count($body, '<entry>');
+        $this->assertLessThanOrEqual(200, $entryCount,
+            'atom feed must clamp limit=999 to at most 200 entries.');
+
+        // Negative limit must also be safe (no PHP TypeError).
+        $negResponse = $this->get('/api/middle-ground.atom?limit=-5');
+        $negResponse->assertStatus(200,
+            'atom endpoint must not 500 on negative limit.');
+    }
+
     public function test_api_middle_ground_json_limit_clamps_to_200_and_1(): void
     {
         // Sprint LL (2026-05-29) — limit is clamped to [1, 200] so
