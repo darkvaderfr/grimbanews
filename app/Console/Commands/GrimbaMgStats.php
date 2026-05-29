@@ -129,25 +129,13 @@ class GrimbaMgStats extends Command
                 $symmetric, $centerHeavy, $malformed,
                 $sumL, $sumC, $sumR
             ));
-            if ($this->option('fail-on-empty') && $total === 0) {
-                return self::FAILURE;
-            }
-            if ($this->option('strict') && $malformed > 0) {
-                return self::FAILURE;
-            }
-            return self::SUCCESS;
+            return $this->exitCodeForGuardrails($total, $malformed);
         }
 
         if ($this->option('quiet-metric')) {
             $this->line(sprintf('TOTAL=%d SYMMETRIC=%d CENTER_HEAVY=%d MALFORMED=%d',
                 $total, $symmetric, $centerHeavy, $malformed));
-            if ($this->option('fail-on-empty') && $total === 0) {
-                return self::FAILURE;
-            }
-            if ($this->option('strict') && $malformed > 0) {
-                return self::FAILURE;
-            }
-            return self::SUCCESS;
+            return $this->exitCodeForGuardrails($total, $malformed);
         }
 
         if ($this->option('json')) {
@@ -171,13 +159,7 @@ class GrimbaMgStats extends Command
             }
             $payload['malformed_count'] = $malformed;
             $this->line(json_encode($payload, JSON_UNESCAPED_SLASHES));
-            if ($this->option('fail-on-empty') && $total === 0) {
-                return self::FAILURE;
-            }
-            if ($this->option('strict') && $malformed > 0) {
-                return self::FAILURE;
-            }
-            return self::SUCCESS;
+            return $this->exitCodeForGuardrails($total, $malformed);
         }
 
         $this->newLine();
@@ -223,12 +205,32 @@ class GrimbaMgStats extends Command
         }
 
         $this->newLine();
+        $exit = $this->exitCodeForGuardrails($total, $malformed);
+        if ($exit !== self::SUCCESS) {
+            // Emit the matching error line so the text-mode operator
+            // sees why the exit code is 1.
+            if ($this->option('fail-on-empty') && $total === 0) {
+                $this->error('FAIL: zero MG clusters in store; the Middle Ground pipeline may be stalled.');
+            } elseif ($this->option('strict') && $malformed > 0) {
+                $this->error(sprintf('FAIL: %d malformed mg_* tag(s) in store (--strict mode).', $malformed));
+            }
+        }
+        return $exit;
+    }
+
+    /**
+     * Shared guardrails: --fail-on-empty short-circuits on zero MG
+     * clusters; --strict short-circuits on any malformed tag.
+     * Returns FAILURE (1) when either trips, else SUCCESS (0).
+     * Centralized so each output mode (text, json, csv, quiet-metric)
+     * doesn't reimplement the exit-code wiring.
+     */
+    private function exitCodeForGuardrails(int $total, int $malformed): int
+    {
         if ($this->option('fail-on-empty') && $total === 0) {
-            $this->error('FAIL: zero MG clusters in store; the Middle Ground pipeline may be stalled.');
             return self::FAILURE;
         }
         if ($this->option('strict') && $malformed > 0) {
-            $this->error(sprintf('FAIL: %d malformed mg_* tag(s) in store (--strict mode).', $malformed));
             return self::FAILURE;
         }
         return self::SUCCESS;
