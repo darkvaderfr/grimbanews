@@ -2278,6 +2278,33 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_color_palette_is_distinct_per_bucket(): void
+    {
+        // Sprint O (2026-05-29) — pin the resolver's color contract.
+        // Every distinguishable bucket must return a different color
+        // so the UI chip never accidentally merges two buckets into
+        // the same visual signal. Specifically: middle_ground purple
+        // (#a855f7), left blue, center neutral, right red, unknown
+        // gray-brown. A future palette-tuning sprint that accidentally
+        // converges two buckets fails loud here.
+        $cases = [
+            'left' => \App\Support\GrimbaClusterBias::resolve(['left' => 5, 'center' => 1, 'right' => 1]),
+            'center' => \App\Support\GrimbaClusterBias::resolve(['left' => 1, 'center' => 5, 'right' => 1]),
+            'right' => \App\Support\GrimbaClusterBias::resolve(['left' => 1, 'center' => 1, 'right' => 5]),
+            'middle_ground' => \App\Support\GrimbaClusterBias::resolve(['left' => 2, 'center' => 1, 'right' => 2]),
+            'unknown' => \App\Support\GrimbaClusterBias::resolve(['left' => 0, 'center' => 0, 'right' => 0]),
+        ];
+        $colors = array_map(fn ($c) => $c['color'], $cases);
+        $this->assertCount(
+            count($cases),
+            array_unique($colors),
+            'every distinguishable bucket must use a distinct color: ' . json_encode($colors)
+        );
+        // Pin Middle Ground purple — Vader 2026-05-23 directive.
+        $this->assertSame('#a855f7', $cases['middle_ground']['color'],
+            'middle_ground must stay the canonical purple.');
+    }
+
     public function test_grimba_cluster_bias_is_middle_ground_key_for_resolver_result(): void
     {
         // Sprint N (2026-05-29) — isMiddleGroundKey() handles two
