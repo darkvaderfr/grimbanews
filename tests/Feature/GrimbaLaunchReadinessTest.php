@@ -2278,6 +2278,34 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_is_balanced_handles_tolerance(): void
+    {
+        // Sprint W (2026-05-29) — isBalanced() handles editorial
+        // surfaces that want to flag "near-balanced" coverage, not
+        // just strict ties. Default tolerance=0 matches the resolver's
+        // middle_ground branch predicate.
+        $this->assertTrue(\App\Support\GrimbaClusterBias::isBalanced(3, 3),
+            'strict equality must be balanced.');
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isBalanced(3, 4),
+            'one-apart must not be balanced at tolerance=0.');
+        $this->assertTrue(\App\Support\GrimbaClusterBias::isBalanced(3, 4, 1),
+            'one-apart must be balanced at tolerance=1.');
+        $this->assertTrue(\App\Support\GrimbaClusterBias::isBalanced(5, 3, 2),
+            'two-apart must be balanced at tolerance=2.');
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isBalanced(5, 2, 2),
+            'three-apart must not be balanced at tolerance=2.');
+
+        // Zero-coverage cases: always false (no articles is not "balanced").
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isBalanced(0, 0));
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isBalanced(0, 5));
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isBalanced(5, 0, 10),
+            'zero on one side is never balanced regardless of tolerance.');
+
+        // Negative tolerance gets floored to 0.
+        $this->assertTrue(\App\Support\GrimbaClusterBias::isBalanced(3, 3, -5));
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isBalanced(3, 4, -5));
+    }
+
     public function test_grimba_cluster_bias_resolve_result_shape_is_complete_across_branches(): void
     {
         // Sprint V (2026-05-29) — every resolver branch (unknown,

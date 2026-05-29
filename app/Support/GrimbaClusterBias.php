@@ -286,6 +286,27 @@ class GrimbaClusterBias
      *
      * @return array<string, array{label: string, short: string, color: string}>
      */
+    /**
+     * Detect whether a (left, right) pair counts as "balanced
+     * coverage" — i.e., the two sides differ by at most $tolerance.
+     * The default $tolerance=0 means strict equality (the same
+     * predicate the resolver uses for the middle_ground branch).
+     * Higher tolerances (1 or 2) are useful for surfaces that want
+     * to flag clusters as "near-balanced" even if one side has a
+     * single extra article — useful for editorial dashboards where
+     * a strict tie is overly narrow.
+     *
+     * Both sides must be > 0 — zero-coverage on either side is not
+     * "balanced", it's "blindspot" (no articles from one side).
+     */
+    public static function isBalanced(int $left, int $right, int $tolerance = 0): bool
+    {
+        if ($left <= 0 || $right <= 0) {
+            return false;
+        }
+        return abs($left - $right) <= max(0, $tolerance);
+    }
+
     public static function biasMetaForBlade(): array
     {
         return [
