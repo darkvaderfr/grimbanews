@@ -2980,6 +2980,24 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsArray($decoded['top_tags'], 'top_tags must be an array.');
     }
 
+    public function test_api_middle_ground_json_summary_left_equals_right_invariant(): void
+    {
+        // Sprint JJ (2026-05-29) — every cluster in the response is
+        // MG-tagged, and the resolver requires L=R for the MG branch.
+        // Therefore sum_left across the slice MUST equal sum_right.
+        // A future bug that swaps left/right counts in the parser
+        // or accidentally aggregates non-MG rows would break this
+        // invariant. This is a structural property test.
+        $response = $this->get('/api/middle-ground.json?summary_only=1');
+        $body = $response->json();
+        $this->assertArrayHasKey('summary', $body);
+        $this->assertSame(
+            $body['summary']['sum_left'],
+            $body['summary']['sum_right'],
+            'sum_left MUST equal sum_right because every MG cluster has L=R by definition.'
+        );
+    }
+
     public function test_api_middle_ground_json_summary_only_omits_rows(): void
     {
         // Sprint GG (2026-05-29) — ?summary_only=1 returns just the
