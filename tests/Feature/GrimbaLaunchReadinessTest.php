@@ -2609,6 +2609,25 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsInt($decoded['malformed_count']);
     }
 
+    public function test_grimba_cluster_bias_summarize_mg_tags_is_idempotent(): void
+    {
+        // Sprint CC (2026-05-29) — summarizeMgTags() must be a pure
+        // function: same input → identical output across invocations,
+        // no internal state. A future refactor that adds caching
+        // without keying on input would silently leak prior results
+        // into subsequent calls. This test catches that class of bug.
+        $input = ['mg_2_1_2', 'mg_3_0_3', 'mg_invalid', 'mg_1_1_1'];
+        $first = \App\Support\GrimbaClusterBias::summarizeMgTags($input);
+        $second = \App\Support\GrimbaClusterBias::summarizeMgTags($input);
+        $third = \App\Support\GrimbaClusterBias::summarizeMgTags($input);
+        $this->assertSame($first, $second);
+        $this->assertSame($second, $third);
+
+        // Different input → different output (no caching collisions).
+        $alt = \App\Support\GrimbaClusterBias::summarizeMgTags(['mg_5_5_5']);
+        $this->assertNotSame($first, $alt);
+    }
+
     public function test_grimba_cluster_bias_summarize_mg_tags_aggregates_correctly(): void
     {
         // Wave SUB-58-CODE-J (2026-05-29) — summarizeMgTags() is the
