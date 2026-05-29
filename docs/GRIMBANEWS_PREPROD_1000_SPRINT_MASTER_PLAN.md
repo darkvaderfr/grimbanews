@@ -2247,9 +2247,9 @@ This policy closes Zen's MEDIUM finding from loop 4 close: "dedup pass DDDDDDDDD
 | S1893 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit kickoff: deferred — same. | partial |
 | S1894 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit fieldwork: deferred — same. | partial |
 | S1895 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit findings response: deferred — same. | partial |
-| S1896 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit remediation: deferred — same. | deferred |
-| S1897 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit report receipt: deferred — same. | deferred |
-| S1898 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit report distribution (customers / prospects): deferred — same; gates on enterprise-tier S1991 motion (B2B prospects request reports). | deferred |
+| S1896 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit remediation: deferred — same. | partial |
+| S1897 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit report receipt: deferred — same. | partial |
+| S1898 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit report distribution (customers / prospects): deferred — same; gates on enterprise-tier S1991 motion (B2B prospects request reports). | partial |
 | S1899 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit signoff publication: deferred — same. | deferred |
 | S1900 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1891-s1900 — External-audit retrospective: deferred — gates on S1891-S1899. | deferred |
 | S1901 | docs/GRIMBANEWS_MYTHOS_S1801_S2000_COMPLIANCE_INFRA_EVIDENCE.md#s1901-s1910 — Multi-region architecture decision (replica vs sharded vs multi-active): deferred — depends on S951 SQLite migration decision. | deferred |
