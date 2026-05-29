@@ -2278,6 +2278,34 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_resolve_echoes_input_counts(): void
+    {
+        // Sprint R (2026-05-29) — resolve() now echoes back the
+        // normalized (left, center, right, total) so downstream
+        // Blade surfaces can render verdict + distribution from a
+        // single array. Test pins the contract.
+        $result = \App\Support\GrimbaClusterBias::resolve(['left' => 2, 'center' => 1, 'right' => 2]);
+        $this->assertSame(2, $result['left']);
+        $this->assertSame(1, $result['center']);
+        $this->assertSame(2, $result['right']);
+        $this->assertSame(5, $result['total']);
+
+        // Empty case: still echoes zeros + total=0.
+        $empty = \App\Support\GrimbaClusterBias::resolve([]);
+        $this->assertSame('unknown', $empty['key']);
+        $this->assertSame(0, $empty['left']);
+        $this->assertSame(0, $empty['center']);
+        $this->assertSame(0, $empty['right']);
+        $this->assertSame(0, $empty['total']);
+
+        // Defensive: extra keys in input are ignored.
+        $extra = \App\Support\GrimbaClusterBias::resolve([
+            'left' => 1, 'center' => 1, 'right' => 1, 'middle_ground' => 99,
+        ]);
+        $this->assertSame(3, $extra['total'],
+            'unknown input keys must not pollute the total.');
+    }
+
     public function test_grimba_mg_stats_examples_flag_prints_quickref(): void
     {
         // Sprint Q (2026-05-29) — --examples is operator quickref so

@@ -78,18 +78,31 @@ class GrimbaClusterBias
     /**
      * Resolve majority-bias key + label + color from a bias-count array.
      *
+     * The result echoes back the normalized (left, center, right)
+     * counts so downstream Blade surfaces can render the verdict
+     * AND the underlying distribution without having to pass the
+     * input twice.
+     *
      * @param array<string, int> $counts e.g. ['left' => 3, 'center' => 1, 'right' => 3]
-     * @return array{key: string, label: string, color: string}
+     * @return array{key: string, label: string, color: string, left: int, center: int, right: int, total: int}
      */
     public static function resolve(array $counts): array
     {
         $left = (int) ($counts['left'] ?? 0);
         $center = (int) ($counts['center'] ?? 0);
         $right = (int) ($counts['right'] ?? 0);
+        $total = $left + $center + $right;
+
+        $with = static fn (array $base): array => $base + [
+            'left' => $left,
+            'center' => $center,
+            'right' => $right,
+            'total' => $total,
+        ];
 
         // Nothing classified → unknown
-        if ($left + $center + $right <= 0) {
-            return ['key' => 'unknown', 'label' => __('Non classé'), 'color' => '#6b6459'];
+        if ($total <= 0) {
+            return $with(['key' => 'unknown', 'label' => __('Non classé'), 'color' => '#6b6459']);
         }
 
         // The Middle Ground case: left and right tied AND that tie
@@ -97,22 +110,22 @@ class GrimbaClusterBias
         // L=R tie, prefer "Middle Ground" because it tells the
         // reader the bigger story — coverage spans both sides.
         if ($left > 0 && $left === $right && $left >= $center) {
-            return [
-                'key' => 'middle_ground',
+            return $with([
+                'key' => self::KEY_MIDDLE_GROUND,
                 'label' => __('Juste milieu'),
                 'color' => '#a855f7',
-            ];
+            ]);
         }
 
         // Otherwise, the single highest bucket wins.
         $top = max($left, $center, $right);
         if ($top === $left) {
-            return ['key' => 'left', 'label' => __('Gauche'), 'color' => '#3b82f6'];
+            return $with(['key' => 'left', 'label' => __('Gauche'), 'color' => '#3b82f6']);
         }
         if ($top === $right) {
-            return ['key' => 'right', 'label' => __('Droite'), 'color' => '#e84c3d'];
+            return $with(['key' => 'right', 'label' => __('Droite'), 'color' => '#e84c3d']);
         }
-        return ['key' => 'center', 'label' => __('Centre'), 'color' => '#a8a8a8'];
+        return $with(['key' => 'center', 'label' => __('Centre'), 'color' => '#a8a8a8']);
     }
 
     /**
