@@ -2609,6 +2609,38 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsInt($decoded['malformed_count']);
     }
 
+    public function test_grimba_cluster_bias_summarize_mg_tags_handles_large_input_fast(): void
+    {
+        // Sprint EE (2026-05-29) — operator surfaces will call this
+        // with the full clusters table — could be 5K+ rows. The
+        // aggregator must stay O(n) without surprise allocations or
+        // regex compilation per row. Test seeds 5000 synthetic tags,
+        // asserts correct counts + a generous 100ms upper bound to
+        // catch O(n²) regressions.
+        $tags = [];
+        for ($i = 0; $i < 5000; $i++) {
+            // alternate symmetric vs center-heavy vs malformed
+            $mod = $i % 3;
+            $tags[] = $mod === 0
+                ? "mg_{$i}_0_{$i}"
+                : ($mod === 1 ? "mg_1_{$i}_1" : "mg_invalid_{$i}");
+        }
+        $start = microtime(true);
+        $summary = \App\Support\GrimbaClusterBias::summarizeMgTags($tags);
+        $elapsedMs = (microtime(true) - $start) * 1000;
+
+        $this->assertLessThan(100, $elapsedMs,
+            "5000-tag aggregation must finish under 100ms; took {$elapsedMs}ms.");
+        // i=0,3,...,4998 (1667 entries, mod=0) → mg_<i>_0_<i> (symmetric).
+        // i=1,4,...,4999 (1667 entries, mod=1) → mg_1_<i>_1 (center-heavy when i>=1).
+        // i=2,5,...,4997 (1666 entries, mod=2) → mg_invalid_<i> (malformed).
+        $this->assertSame(1666, $summary['malformed_count']);
+        $this->assertSame(1667, $summary['symmetric_count']);
+        $this->assertSame(1667, $summary['center_heavy_count']);
+        $this->assertSame(1667 + 1667, $summary['count'],
+            'valid (non-malformed) tags must sum to 2/3-ish of input.');
+    }
+
     public function test_grimba_cluster_bias_resolve_is_pure_function(): void
     {
         // Sprint DD (2026-05-29) — resolve() is a pure function: no
