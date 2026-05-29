@@ -2278,6 +2278,29 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_mg_stats_strict_flag_recognized_and_json_includes_malformed_count(): void
+    {
+        // Sprint K (2026-05-29) — --strict turns malformed mg_* tags
+        // into a hard failure for CI/cron pipelines (data-drift
+        // detector). We don't seed the shared DB; instead we (a) verify
+        // that --strict mode runs and returns SUCCESS when no malformed
+        // tags exist in fixtures, and (b) confirm the JSON payload now
+        // exposes malformed_count so log shippers can detect drift even
+        // without --strict.
+        $exitStrictClean = \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats', ['--strict' => true]);
+        $this->assertSame(0, $exitStrictClean,
+            '--strict on a clean (no malformed) store must still exit 0.');
+
+        \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats', ['--json' => true]);
+        $output = trim(\Illuminate\Support\Facades\Artisan::output());
+        $lines = array_values(array_filter(array_map('trim', explode("\n", $output)), fn ($l) => $l !== ''));
+        $decoded = json_decode(end($lines), true);
+        $this->assertIsArray($decoded);
+        $this->assertArrayHasKey('malformed_count', $decoded,
+            'JSON payload must surface malformed_count for log-shipper detection.');
+        $this->assertIsInt($decoded['malformed_count']);
+    }
+
     public function test_grimba_cluster_bias_summarize_mg_tags_aggregates_correctly(): void
     {
         // Wave SUB-58-CODE-J (2026-05-29) — summarizeMgTags() is the

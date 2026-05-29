@@ -31,7 +31,8 @@ class GrimbaMgStats extends Command
         {--json : emit machine-readable JSON instead of the text report}
         {--top=10 : how many top tag mixes to include (1..100; default 10)}
         {--since-hours= : extra arbitrary lookback window; emits a "since N hours" count alongside the 24h/7d/30d defaults}
-        {--fail-on-empty : exit 1 when there are zero MG clusters in store (cron-friendly signal that the MG pipeline has stalled)}';
+        {--fail-on-empty : exit 1 when there are zero MG clusters in store (cron-friendly signal that the MG pipeline has stalled)}
+        {--strict : exit 1 when any malformed mg_* tag is detected in store (data-drift detector)}';
 
     protected $description = 'Middle Ground (mg_*) cluster summary: current totals, 24h/7d/30d trend, L/C/R distribution.';
 
@@ -91,6 +92,7 @@ class GrimbaMgStats extends Command
         $symmetric = $summary['symmetric_count'];
         $centerHeavy = $summary['center_heavy_count'];
         $avgSize = $summary['avg_cluster_size'];
+        $malformed = $summary['malformed_count'];
 
         if ($this->option('json')) {
             $payload = [
@@ -111,8 +113,12 @@ class GrimbaMgStats extends Command
                 $payload['since_hours'] = $sinceHours;
                 $payload['updated_since_hours'] = $countSince;
             }
+            $payload['malformed_count'] = $malformed;
             $this->line(json_encode($payload, JSON_UNESCAPED_SLASHES));
             if ($this->option('fail-on-empty') && $total === 0) {
+                return self::FAILURE;
+            }
+            if ($this->option('strict') && $malformed > 0) {
                 return self::FAILURE;
             }
             return self::SUCCESS;
@@ -155,9 +161,18 @@ class GrimbaMgStats extends Command
             }
         }
 
+        if ($malformed > 0) {
+            $this->newLine();
+            $this->warn(sprintf('   ⚠  %d malformed mg_* tag(s) detected (run with --strict to fail).', $malformed));
+        }
+
         $this->newLine();
         if ($this->option('fail-on-empty') && $total === 0) {
             $this->error('FAIL: zero MG clusters in store; the Middle Ground pipeline may be stalled.');
+            return self::FAILURE;
+        }
+        if ($this->option('strict') && $malformed > 0) {
+            $this->error(sprintf('FAIL: %d malformed mg_* tag(s) in store (--strict mode).', $malformed));
             return self::FAILURE;
         }
         return self::SUCCESS;
