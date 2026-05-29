@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Support\Continents;
 use Botble\Blog\Models\Post;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -245,6 +246,75 @@ class GrimbaHomeFeed
      *
      * @return array{mode: string, posts: Collection<int, Post>}
      */
+    /**
+     * S-MAP-04 (Vader 2026-05-29) — per-continent breaking-news
+     * aggregation for the full-viewport /breaking-map view. Joins
+     * posts → news_sources to get country, then groups by
+     * App\Support\Continents bucket. Posts with no source_id or
+     * NULL country fall into the 'global' bucket.
+     *
+     * Returns an array keyed by continent string ('africa', 'americas',
+     * 'asia', 'europe', 'oceania', 'global') — every key present, even
+     * if its collection is empty (the view renders an empty-state
+     * ticker rather than skipping the continent).
+     *
+     * @return array<string, Collection<int, Post>>
+     */
+    public static function breakingByContinent(int $windowHours = 18, int $perContinent = 8): array
+    {
+        // Wider cap than breaking() — the map view tolerates older
+        // content (a "calm continent" today still wants to show what
+        // happened last week), and admins use ?window=N to inspect.
+        $windowHours = max(1, min(720, $windowHours));
+        $perContinent = max(1, min(20, $perContinent));
+        $locale = self::resolveReaderLocale();
+        $strict = GrimbaLanguageSettings::strictForBreaking();
+        $bucket = $strict ? 'strict' : 'soft';
+
+        $cacheKey = 'grimba_breaking_continent_v1:' . $locale . ':' . $bucket . ':' . $windowHours . ':' . $perContinent;
+
+        return Cache::remember($cacheKey, 60, function () use ($windowHours, $strict, $locale, $perContinent): array {
+            $continents = Continents::all();
+            $buckets = array_fill_keys($continents, collect());
+
+            // Join posts → news_sources on source_id to read country.
+            // Use Post query so eager-loading + slugable accessor still
+            // works (the rendering view will read $post->url()).
+            $cols = ['posts.id','posts.name','posts.translated_name','posts.translated_to',
+                     'posts.original_language','posts.source_name','posts.source_id',
+                     'posts.bias_rating','posts.published_at','posts.created_at','posts.image',
+                     'news_sources.country as source_country'];
+
+            $query = Post::query()
+                ->leftJoin('news_sources', 'posts.source_id', '=', 'news_sources.id')
+                ->where('posts.status', 'published')
+                ->whereNotNull('posts.source_name')
+                ->with('slugable');
+
+            if ($strict) {
+                GrimbaTranslationPresenter::filterForTargetLocale($query, $locale);
+            }
+
+            GrimbaPostRecency::wherePublishedSince($query, now()->subHours($windowHours));
+            GrimbaPostRecency::orderByPublished($query);
+
+            // Cap upstream pull at perContinent × 6 buckets × 2 (over-pull
+            // to allow per-bucket fill even when geography is skewed
+            // toward Europe + Americas, which it is).
+            $candidates = $query->limit($perContinent * 6 * 2)->get($cols);
+
+            foreach ($candidates as $post) {
+                $continent = Continents::forCountry($post->source_country ?? null);
+                if ($buckets[$continent]->count() >= $perContinent) {
+                    continue;
+                }
+                $buckets[$continent]->push($post);
+            }
+
+            return $buckets;
+        });
+    }
+
     public static function breaking(int $windowHours = 18): array
     {
         $windowHours = max(1, min(72, $windowHours));

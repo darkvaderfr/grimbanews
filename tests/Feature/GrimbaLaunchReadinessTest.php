@@ -2980,6 +2980,59 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsArray($decoded['top_tags'], 'top_tags must be an array.');
     }
 
+    public function test_breaking_map_route_renders_all_six_continent_tickers(): void
+    {
+        // S-MAP-19 (Vader 2026-05-29) — /breaking-map renders the
+        // full-viewport world map + 6 continent tickers (5 continents +
+        // global). Test asserts: 200 status, all 6 data-continent
+        // attributes present, locale-aware title, ARIA labels.
+        $response = $this->get('/breaking-map?window=720');
+        $response->assertStatus(200);
+        $body = $response->getContent();
+        // All 5 continents + 'global' bucket each get a ticker.
+        foreach (['africa', 'americas', 'asia', 'europe', 'oceania', 'global'] as $continent) {
+            $this->assertStringContainsString(
+                'data-continent="' . $continent . '"',
+                $body,
+                "Continent ticker for '{$continent}' must render."
+            );
+        }
+        // SVG world map decoration must be present (aria-hidden so
+        // screen readers focus on the tickers).
+        $this->assertStringContainsString('class="gmap__svg"', $body);
+        $this->assertStringContainsString('aria-hidden="true"', $body);
+        // Each ticker carries a scroll-direction attribute (Vader
+        // 2026-05-20 brief: alternating L→R / R→L pattern).
+        $this->assertMatchesRegularExpression('/data-dir="(ltr|rtl)"/', $body,
+            'tickers must declare scroll direction for the CSS animation.');
+    }
+
+    public function test_continents_helper_iso2_to_continent_lookup(): void
+    {
+        // S-MAP-03 (Vader 2026-05-29) — Continents helper round-trip.
+        // Pin a representative country per continent so a future ISO-2
+        // table refactor doesn't silently misroute traffic.
+        $this->assertSame('africa', \App\Support\Continents::forCountry('NG'));
+        $this->assertSame('americas', \App\Support\Continents::forCountry('US'));
+        $this->assertSame('americas', \App\Support\Continents::forCountry('br'),
+            'case-insensitive: lowercase ISO-2 must still resolve.');
+        $this->assertSame('asia', \App\Support\Continents::forCountry('JP'));
+        $this->assertSame('europe', \App\Support\Continents::forCountry('FR'));
+        $this->assertSame('oceania', \App\Support\Continents::forCountry('AU'));
+        // Unknown / null / empty all fall into the synthetic 'global'.
+        $this->assertSame('global', \App\Support\Continents::forCountry(null));
+        $this->assertSame('global', \App\Support\Continents::forCountry(''));
+        $this->assertSame('global', \App\Support\Continents::forCountry('ZZ'));
+        // Direction-alternation contract (per brief: not all in same
+        // direction — eye drawn across the map).
+        $directions = array_map(
+            fn ($c) => \App\Support\Continents::scrollDirection($c),
+            \App\Support\Continents::all()
+        );
+        $this->assertContains('ltr', $directions);
+        $this->assertContains('rtl', $directions);
+    }
+
     public function test_api_middle_ground_endpoints_share_cache_control_policy(): void
     {
         // Sprint QQ (2026-05-29) — both JSON and Atom endpoints feed

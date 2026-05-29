@@ -774,6 +774,25 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         // post that matched the strict breaking-news keyword pool in
         // the active region + locale. Falls back to a clean empty
         // state when no real breaking is firing right now.
+        Route::get('breaking-map', function (Request $request) {
+            // S-MAP-16 (Vader 2026-05-29) — full-viewport world-map
+            // breaking-news view. /breaking?region=X is the linear
+            // sibling; /breaking-map is the spatial layout.
+            $windowHours = max(1, min(720, (int) ($request->query('window') ?? 18)));
+            $buckets = \App\Support\GrimbaHomeFeed::breakingByContinent($windowHours, 8);
+
+            SeoHelper::setTitle(__('Breaking News Map') . ' — GrimbaNews')
+                ->setDescription(__('Voir où dans le monde l\'actualité se passe — carte plein écran avec tickers par continent.'));
+            SeoHelper::openGraph()->setUrl(url('/breaking-map'));
+
+            Theme::breadcrumb()
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Breaking news'), url('/breaking'))
+                ->add(__('Carte'), url('/breaking-map'));
+
+            return Theme::scope('breaking-map', compact('buckets', 'windowHours'))->render();
+        })->name('public.breaking_map');
+
         Route::get('breaking', function (Request $request) {
             $bundle = \App\Support\GrimbaHomeFeed::breaking(18);
             $mode = $bundle['mode'] ?? 'latest';
