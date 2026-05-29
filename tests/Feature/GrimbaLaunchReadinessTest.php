@@ -2278,6 +2278,29 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_is_middle_ground_key_for_resolver_result(): void
+    {
+        // Sprint N (2026-05-29) — isMiddleGroundKey() handles two
+        // overloads: a resolved array (preferred) or a bare key
+        // string. Reader-facing surfaces that work off live resolver
+        // output need this to branch without comparing magic strings.
+        $middleGround = \App\Support\GrimbaClusterBias::resolve(['left' => 2, 'center' => 1, 'right' => 2]);
+        $this->assertTrue(\App\Support\GrimbaClusterBias::isMiddleGroundKey($middleGround));
+        $this->assertTrue(\App\Support\GrimbaClusterBias::isMiddleGroundKey('middle_ground'));
+
+        $center = \App\Support\GrimbaClusterBias::resolve(['left' => 1, 'center' => 5, 'right' => 1]);
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isMiddleGroundKey($center));
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isMiddleGroundKey('center'));
+
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isMiddleGroundKey(null));
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isMiddleGroundKey(['key' => 'left']));
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isMiddleGroundKey([]),
+            'empty array (missing key) must return false.');
+
+        // Constant pinned for grep-traceability.
+        $this->assertSame('middle_ground', \App\Support\GrimbaClusterBias::KEY_MIDDLE_GROUND);
+    }
+
     public function test_grimba_cluster_bias_is_middle_ground_and_prefix_constants(): void
     {
         // Sprint L (2026-05-29) — isMiddleGround() + MG_TAG_PREFIX +

@@ -37,6 +37,12 @@ class GrimbaClusterBias
     public const MG_TAG_SQL_LIKE = 'mg_%';
 
     /**
+     * Canonical resolver key for Middle Ground. Centralized so a
+     * future key-rename doesn't leave dangling string literals.
+     */
+    public const KEY_MIDDLE_GROUND = 'middle_ground';
+
+    /**
      * Boolean convenience: is this review_action value a Middle
      * Ground tag (any well-formed mg_<L>_<C>_<R>)? Returns false
      * for null, empty, non-mg_, and malformed mg_-prefixed values.
@@ -46,6 +52,27 @@ class GrimbaClusterBias
     public static function isMiddleGround(?string $tag): bool
     {
         return $tag !== null && self::parseMgTag($tag) !== null;
+    }
+
+    /**
+     * Boolean convenience for the live-resolver result. Use after
+     * calling resolve() when you need to branch on Middle Ground vs
+     * any other bias key without comparing the magic string.
+     *
+     * Two overloads: pass either the resolved array (preferred) or
+     * the bare key string (legacy callsites).
+     *
+     * @param array{key: string}|string|null $resolvedOrKey
+     */
+    public static function isMiddleGroundKey($resolvedOrKey): bool
+    {
+        if ($resolvedOrKey === null) {
+            return false;
+        }
+        if (is_array($resolvedOrKey)) {
+            return ($resolvedOrKey['key'] ?? null) === self::KEY_MIDDLE_GROUND;
+        }
+        return $resolvedOrKey === self::KEY_MIDDLE_GROUND;
     }
 
     /**
