@@ -123,4 +123,67 @@ class GrimbaClusterBias
     {
         return 'mg_' . max(0, $left) . '_' . max(0, $center) . '_' . max(0, $right);
     }
+
+    /**
+     * Summarize a list of persisted mg_* tags into the standard shape
+     * used by admin surfaces (mg-stats, the cockpit dashboard tile,
+     * future per-locale breakdowns). Returns:
+     *
+     *   [
+     *     'count'              => int,    // valid tags
+     *     'sum_left'           => int,
+     *     'sum_center'         => int,
+     *     'sum_right'          => int,
+     *     'avg_cluster_size'   => float,  // 2dp
+     *     'symmetric_count'    => int,    // center == 0
+     *     'center_heavy_count' => int,    // center >= left (and > 0)
+     *     'malformed_count'    => int,    // tags that failed parseMgTag()
+     *   ]
+     *
+     * Malformed tags are reported (not silently dropped) so callers
+     * can surface drift in persisted data.
+     *
+     * @param iterable<int, string> $tags
+     * @return array{count: int, sum_left: int, sum_center: int, sum_right: int, avg_cluster_size: float, symmetric_count: int, center_heavy_count: int, malformed_count: int}
+     */
+    public static function summarizeMgTags(iterable $tags): array
+    {
+        $count = 0;
+        $sumL = 0;
+        $sumC = 0;
+        $sumR = 0;
+        $symmetric = 0;
+        $centerHeavy = 0;
+        $malformed = 0;
+
+        foreach ($tags as $tag) {
+            $parsed = self::parseMgTag((string) $tag);
+            if ($parsed === null) {
+                $malformed++;
+                continue;
+            }
+            $count++;
+            $sumL += $parsed['left'];
+            $sumC += $parsed['center'];
+            $sumR += $parsed['right'];
+            if ($parsed['center'] === 0) {
+                $symmetric++;
+            } elseif ($parsed['center'] >= $parsed['left']) {
+                $centerHeavy++;
+            }
+        }
+
+        $avgSize = $count > 0 ? round(($sumL + $sumC + $sumR) / $count, 2) : 0.0;
+
+        return [
+            'count' => $count,
+            'sum_left' => $sumL,
+            'sum_center' => $sumC,
+            'sum_right' => $sumR,
+            'avg_cluster_size' => $avgSize,
+            'symmetric_count' => $symmetric,
+            'center_heavy_count' => $centerHeavy,
+            'malformed_count' => $malformed,
+        ];
+    }
 }

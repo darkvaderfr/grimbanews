@@ -2278,6 +2278,40 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_summarize_mg_tags_aggregates_correctly(): void
+    {
+        // Wave SUB-58-CODE-J (2026-05-29) — summarizeMgTags() is the
+        // canonical aggregator. Multiple admin surfaces will use it
+        // (mg-stats already does, cockpit tile is next, per-locale
+        // breakdown after that). Pin the contract: given a hand-built
+        // list of tags, the output matches expected sums + counts +
+        // average + symmetry classification.
+        $tags = [
+            'mg_2_0_2',  // symmetric (center=0)
+            'mg_1_0_1',  // symmetric
+            'mg_3_2_3',  // not symmetric, center < left, not center-heavy
+            'mg_1_5_1',  // center-heavy (center >= left, center > 0)
+            'mg_invalid', // malformed
+            'mg_2_1',    // malformed (3 segments)
+        ];
+        $summary = \App\Support\GrimbaClusterBias::summarizeMgTags($tags);
+        $this->assertSame(4, $summary['count'], 'malformed tags must not count.');
+        $this->assertSame(2, $summary['malformed_count']);
+        $this->assertSame(2 + 1 + 3 + 1, $summary['sum_left']);
+        $this->assertSame(0 + 0 + 2 + 5, $summary['sum_center']);
+        $this->assertSame(2 + 1 + 3 + 1, $summary['sum_right']);
+        $this->assertSame(2, $summary['symmetric_count']);
+        $this->assertSame(1, $summary['center_heavy_count']);
+        // avg = (sum_left+sum_center+sum_right) / count = (7+7+7)/4 = 5.25
+        $this->assertSame(5.25, $summary['avg_cluster_size']);
+
+        // Empty input edge.
+        $empty = \App\Support\GrimbaClusterBias::summarizeMgTags([]);
+        $this->assertSame(0, $empty['count']);
+        $this->assertSame(0.0, $empty['avg_cluster_size']);
+        $this->assertSame(0, $empty['malformed_count']);
+    }
+
     public function test_grimba_mg_stats_fail_on_empty_exit_code_contract(): void
     {
         // Wave SUB-58-CODE-I (2026-05-29) — --fail-on-empty gives cron

@@ -80,27 +80,17 @@ class GrimbaMgStats extends Command
             ->limit($top)
             ->get();
 
-        $sumL = 0;
-        $sumC = 0;
-        $sumR = 0;
-        $symmetric = 0;
-        $centerHeavy = 0;
-        foreach (DB::table('story_clusters')->select('review_action')->where('review_action', 'like', 'mg_%')->get() as $row) {
-            $parsed = GrimbaClusterBias::parseMgTag((string) $row->review_action);
-            if ($parsed === null) {
-                continue;
-            }
-            $sumL += $parsed['left'];
-            $sumC += $parsed['center'];
-            $sumR += $parsed['right'];
-            if ($parsed['center'] === 0) {
-                $symmetric++;
-            } elseif ($parsed['center'] >= $parsed['left']) {
-                $centerHeavy++;
-            }
-        }
-
-        $avgSize = $total > 0 ? round(($sumL + $sumC + $sumR) / $total, 2) : 0.0;
+        $tagRows = DB::table('story_clusters')
+            ->select('review_action')
+            ->where('review_action', 'like', 'mg_%')
+            ->get();
+        $summary = GrimbaClusterBias::summarizeMgTags($tagRows->pluck('review_action'));
+        $sumL = $summary['sum_left'];
+        $sumC = $summary['sum_center'];
+        $sumR = $summary['sum_right'];
+        $symmetric = $summary['symmetric_count'];
+        $centerHeavy = $summary['center_heavy_count'];
+        $avgSize = $summary['avg_cluster_size'];
 
         if ($this->option('json')) {
             $payload = [
