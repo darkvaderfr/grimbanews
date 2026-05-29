@@ -2980,6 +2980,29 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsArray($decoded['top_tags'], 'top_tags must be an array.');
     }
 
+    public function test_api_middle_ground_json_generated_at_is_iso8601_and_recent(): void
+    {
+        // Sprint OO (2026-05-29) — generated_at is the freshness
+        // signal external dashboards use to detect "is this signal
+        // stale?". Test asserts it parses as ISO 8601 AND is within
+        // 60 seconds of "now" (regression catcher for any caching
+        // bug that pins the timestamp instead of computing per
+        // request).
+        $body = $this->get('/api/middle-ground.json?summary_only=1')->json();
+        $this->assertArrayHasKey('generated_at', $body);
+        $generatedAt = \Carbon\Carbon::parse($body['generated_at']);
+        $secondsAgo = abs(now()->diffInSeconds($generatedAt));
+        $this->assertLessThan(60, $secondsAgo,
+            "generated_at must be within 60s of now; was {$secondsAgo}s ago.");
+        // ISO 8601 format check via regex (Carbon::parse() is lenient,
+        // so verify the on-wire format).
+        $this->assertMatchesRegularExpression(
+            '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/',
+            $body['generated_at'],
+            'generated_at must be an ISO 8601 timestamp.'
+        );
+    }
+
     public function test_api_middle_ground_json_classifier_documentation_fields(): void
     {
         // Sprint NN (2026-05-29) — classifier_cadence + classifier_command
