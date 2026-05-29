@@ -2278,6 +2278,36 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_three_way_tie_resolves_to_middle_ground(): void
+    {
+        // Wave SUB-58-CODE-G (2026-05-29) — Vader directive 2026-05-20:
+        // when left equals right, the cluster is Middle Ground even if
+        // center also matches. This test pins the explicit L=C=R case
+        // (e.g., 2/2/2), which was passing by coincidence under the
+        // `left >= center` branch but had no dedicated assertion. A
+        // future "strictly greater" refactor would silently regress
+        // and label the three-way tie as Centre. This test catches that.
+        $result = \App\Support\GrimbaClusterBias::resolve(['left' => 2, 'center' => 2, 'right' => 2]);
+        $this->assertSame('middle_ground', $result['key'],
+            'L=C=R must resolve to middle_ground (Vader 2026-05-20 directive).');
+        $this->assertSame('#a855f7', $result['color'],
+            'middle_ground color must be the canonical purple.');
+
+        // Same for higher-magnitude three-way tie.
+        $resultHigh = \App\Support\GrimbaClusterBias::resolve(['left' => 5, 'center' => 5, 'right' => 5]);
+        $this->assertSame('middle_ground', $resultHigh['key']);
+
+        // Asymmetric high-center should NOT be MG: L=R=1, C=5 → Centre wins
+        // because L>0 && L===R is true but L>=C fails (1 >= 5 false).
+        $centerHeavy = \App\Support\GrimbaClusterBias::resolve(['left' => 1, 'center' => 5, 'right' => 1]);
+        $this->assertSame('center', $centerHeavy['key'],
+            'L=R=1, C=5 must resolve to center, not middle_ground (Vader: center-only is Centre, not MG).');
+
+        // Zero-everything edge: must return unknown, not crash.
+        $empty = \App\Support\GrimbaClusterBias::resolve(['left' => 0, 'center' => 0, 'right' => 0]);
+        $this->assertSame('unknown', $empty['key']);
+    }
+
     public function test_grimba_health_hints_at_mg_stats_when_clusters_exist(): void
     {
         // Wave SUB-58-CODE-F (2026-05-29) — when middle_ground_clusters
