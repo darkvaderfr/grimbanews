@@ -2980,6 +2980,26 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsArray($decoded['top_tags'], 'top_tags must be an array.');
     }
 
+    public function test_api_middle_ground_endpoints_share_cache_control_policy(): void
+    {
+        // Sprint QQ (2026-05-29) — both JSON and Atom endpoints feed
+        // the same downstream consumers (dashboards, status pages,
+        // RSS aggregators). They MUST share the same Cache-Control
+        // policy so a CDN doesn't accidentally serve fresh-JSON +
+        // stale-Atom (or vice-versa). Test asserts both endpoints
+        // carry max-age=900 + CORS open.
+        $json = $this->get('/api/middle-ground.json?summary_only=1');
+        $atom = $this->get('/api/middle-ground.atom?limit=1');
+        $jsonCC = (string) $json->headers->get('cache-control');
+        $atomCC = (string) $atom->headers->get('cache-control');
+        $this->assertStringContainsString('max-age=900', $jsonCC,
+            'JSON endpoint must carry max-age=900.');
+        $this->assertStringContainsString('max-age=900', $atomCC,
+            'Atom endpoint must carry max-age=900 (parity with JSON).');
+        $this->assertSame('*', $json->headers->get('access-control-allow-origin'));
+        $this->assertSame('*', $atom->headers->get('access-control-allow-origin'));
+    }
+
     public function test_api_middle_ground_json_row_dossier_url_is_well_formed(): void
     {
         // Sprint PP (2026-05-29) — dossier_url is the click-through
