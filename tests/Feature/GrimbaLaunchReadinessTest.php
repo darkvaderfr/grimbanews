@@ -2609,6 +2609,34 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsInt($decoded['malformed_count']);
     }
 
+    public function test_grimba_cluster_bias_resolve_is_pure_function(): void
+    {
+        // Sprint DD (2026-05-29) — resolve() is a pure function: no
+        // database, no clock, no random source. Same input → identical
+        // output across N invocations, regardless of order between
+        // calls with other inputs. Pin this contract so a future
+        // refactor that touches a DB cache or system clock fails loud.
+        $a = ['left' => 2, 'center' => 1, 'right' => 2];
+        $b = ['left' => 5, 'center' => 1, 'right' => 1];
+        $resultsA = [
+            \App\Support\GrimbaClusterBias::resolve($a),
+            \App\Support\GrimbaClusterBias::resolve($b), // interleave
+            \App\Support\GrimbaClusterBias::resolve($a),
+            \App\Support\GrimbaClusterBias::resolve($a),
+        ];
+        $this->assertSame($resultsA[0], $resultsA[2],
+            'resolve(a) called twice with b in between must match.');
+        $this->assertSame($resultsA[2], $resultsA[3]);
+        // The b call should also be stable.
+        $resultsB = [
+            \App\Support\GrimbaClusterBias::resolve($b),
+            \App\Support\GrimbaClusterBias::resolve($b),
+        ];
+        $this->assertSame($resultsB[0], $resultsB[1]);
+        // And the two inputs produce different results.
+        $this->assertNotSame($resultsA[0], $resultsB[0]);
+    }
+
     public function test_grimba_cluster_bias_summarize_mg_tags_is_idempotent(): void
     {
         // Sprint CC (2026-05-29) — summarizeMgTags() must be a pure
