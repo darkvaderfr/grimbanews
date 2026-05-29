@@ -2980,6 +2980,26 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsArray($decoded['top_tags'], 'top_tags must be an array.');
     }
 
+    public function test_api_middle_ground_json_summary_only_omits_rows(): void
+    {
+        // Sprint GG (2026-05-29) — ?summary_only=1 returns just the
+        // top-level + summary, omitting rows for status pages /
+        // chart widgets that don't need per-cluster detail.
+        $response = $this->get('/api/middle-ground.json?summary_only=1');
+        $response->assertStatus(200);
+        $body = $response->json();
+        $this->assertArrayHasKey('summary', $body,
+            'summary block must still be present in summary_only mode.');
+        $this->assertArrayNotHasKey('rows', $body,
+            'rows must be omitted in summary_only mode for smaller payload.');
+
+        // Default mode (without summary_only) must still include rows.
+        $defaultResponse = $this->get('/api/middle-ground.json?limit=2');
+        $defaultBody = $defaultResponse->json();
+        $this->assertArrayHasKey('rows', $defaultBody,
+            'rows must be present in default mode.');
+    }
+
     public function test_dossiers_diversity_filter_serves_middle_ground_blindspot_tabs(): void
     {
         // Wave FFFF (Vader 2026-05-26) — /dossiers?diversity=middle_ground

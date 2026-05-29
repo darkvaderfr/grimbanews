@@ -533,6 +533,11 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         // and tag age. Cached 15 min (signal moves once a day at most).
         Route::get('api/middle-ground.json', function (Request $request) {
             $limit = max(1, min(200, (int) ($request->query('limit') ?? 50)));
+            // Sprint GG (2026-05-29) — ?summary_only=1 returns just
+            // the top-level + summary block, omitting rows entirely.
+            // Useful for status pages / chart widgets that need the
+            // aggregate but not the per-cluster detail.
+            $summaryOnly = filter_var($request->query('summary_only'), FILTER_VALIDATE_BOOLEAN);
             $rows = [];
             try {
                 if (\Illuminate\Support\Facades\Schema::hasTable('story_clusters')) {
@@ -582,7 +587,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ), $rows)
             );
 
-            return response()->json([
+            $payload = [
                 'generated_at' => now()->utc()->toIso8601String(),
                 'count' => count($rows),
                 'limit' => $limit,
@@ -597,8 +602,11 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     'symmetric_count' => $summary['symmetric_count'],
                     'center_heavy_count' => $summary['center_heavy_count'],
                 ],
-                'rows' => $rows,
-            ], 200, [
+            ];
+            if (! $summaryOnly) {
+                $payload['rows'] = $rows;
+            }
+            return response()->json($payload, 200, [
                 'Cache-Control' => 'public, max-age=900, s-maxage=1800',
                 'Access-Control-Allow-Origin' => '*',
                 'Access-Control-Allow-Methods' => 'GET',
