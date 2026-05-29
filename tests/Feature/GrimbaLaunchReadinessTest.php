@@ -2980,6 +2980,20 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsArray($decoded['top_tags'], 'top_tags must be an array.');
     }
 
+    public function test_api_middle_ground_json_classifier_documentation_fields(): void
+    {
+        // Sprint NN (2026-05-29) — classifier_cadence + classifier_command
+        // are documentation fields that tell consumers how this signal
+        // is produced + how to reproduce locally. They're contract
+        // surface — changing them silently breaks downstream docs
+        // and integrators. Pin the canonical values.
+        $body = $this->get('/api/middle-ground.json?summary_only=1')->json();
+        $this->assertSame('daily-0335-utc', $body['classifier_cadence'],
+            'classifier_cadence must stay "daily-0335-utc" — pinned operator schedule.');
+        $this->assertSame('grimba:reclassify-clusters', $body['classifier_command'],
+            'classifier_command must stay the canonical Artisan command name.');
+    }
+
     public function test_api_middle_ground_atom_limit_clamps_match_json_endpoint(): void
     {
         // Sprint MM (2026-05-29) — atom endpoint must use the same
