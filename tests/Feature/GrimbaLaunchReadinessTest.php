@@ -2397,6 +2397,34 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertNull(\App\Support\GrimbaClusterBias::biasFromMgTag('blindspot'));
     }
 
+    public function test_grimba_mg_stats_csv_mode_emits_header_plus_data_row(): void
+    {
+        // Sprint AA (2026-05-29) — --csv emits a header row + one
+        // data row for spreadsheet ingestion. Useful when ops wants
+        // to pipe daily snapshots into Excel/Sheets without writing
+        // a parser. Format is fixed: changing column order would
+        // break downstream sheets, so this test pins it.
+        \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats', ['--csv' => true]);
+        $output = trim(\Illuminate\Support\Facades\Artisan::output());
+        $lines = array_values(array_filter(array_map('trim', explode("\n", $output)), fn ($l) => $l !== ''));
+        $this->assertGreaterThanOrEqual(2, count($lines),
+            'CSV must emit at least header + data row.');
+        $header = $lines[0];
+        $expectedColumns = [
+            'as_of', 'total_mg_clusters',
+            'updated_last_24h', 'updated_last_7d', 'updated_last_30d',
+            'avg_cluster_size',
+            'symmetric_count', 'center_heavy_count', 'malformed_count',
+            'sum_left', 'sum_center', 'sum_right',
+        ];
+        $this->assertSame(implode(',', $expectedColumns), $header,
+            'CSV column order must stay stable for downstream sheets.');
+        // Data row must have the same number of columns.
+        $data = $lines[1];
+        $this->assertSame(count($expectedColumns), substr_count($data, ',') + 1,
+            'CSV data row must have the same column count as the header.');
+    }
+
     public function test_grimba_mg_stats_quiet_metric_mode_emits_keyvalue_pairs(): void
     {
         // Sprint S (2026-05-29) — --quiet-metric is for monitoring

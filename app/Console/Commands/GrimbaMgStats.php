@@ -34,7 +34,8 @@ class GrimbaMgStats extends Command
         {--fail-on-empty : exit 1 when there are zero MG clusters in store (cron-friendly signal that the MG pipeline has stalled)}
         {--strict : exit 1 when any malformed mg_* tag is detected in store (data-drift detector)}
         {--examples : print common usage examples and exit (operator quickref)}
-        {--quiet-metric : suppress the headers; print only "TOTAL=<n> SYMMETRIC=<n> CENTER_HEAVY=<n>" (script-friendly)}';
+        {--quiet-metric : suppress the headers; print only "TOTAL=<n> SYMMETRIC=<n> CENTER_HEAVY=<n>" (script-friendly)}
+        {--csv : emit one CSV header row + one data row for spreadsheet ingestion}';
 
     protected $description = 'Middle Ground (mg_*) cluster summary: current totals, 24h/7d/30d trend, L/C/R distribution.';
 
@@ -117,6 +118,25 @@ class GrimbaMgStats extends Command
         $centerHeavy = $summary['center_heavy_count'];
         $avgSize = $summary['avg_cluster_size'];
         $malformed = $summary['malformed_count'];
+
+        if ($this->option('csv')) {
+            $this->line('as_of,total_mg_clusters,updated_last_24h,updated_last_7d,updated_last_30d,avg_cluster_size,symmetric_count,center_heavy_count,malformed_count,sum_left,sum_center,sum_right');
+            $this->line(sprintf(
+                '%s,%d,%d,%d,%d,%s,%d,%d,%d,%d,%d,%d',
+                $now->toIso8601String(),
+                $total, $count24h, $count7d, $count30d,
+                number_format($avgSize, 2, '.', ''),
+                $symmetric, $centerHeavy, $malformed,
+                $sumL, $sumC, $sumR
+            ));
+            if ($this->option('fail-on-empty') && $total === 0) {
+                return self::FAILURE;
+            }
+            if ($this->option('strict') && $malformed > 0) {
+                return self::FAILURE;
+            }
+            return self::SUCCESS;
+        }
 
         if ($this->option('quiet-metric')) {
             $this->line(sprintf('TOTAL=%d SYMMETRIC=%d CENTER_HEAVY=%d MALFORMED=%d',
