@@ -2155,6 +2155,13 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('<rights>Open data under attribution', $body);
         // CORS open.
         $this->assertSame('*', $response->headers->get('access-control-allow-origin'));
+        // Sprint Z (2026-05-29) — if any entries are present, each
+        // entry summary must include the new "Total: N" field (Sprint
+        // Y), proving the JSON↔Atom parity rolled through.
+        if (str_contains($body, '<entry>')) {
+            $this->assertStringContainsString('Total:', $body,
+                'Atom entry summaries must include "Total:" since Sprint Y.');
+        }
     }
 
     public function test_api_middle_ground_json_returns_valid_data_product(): void
