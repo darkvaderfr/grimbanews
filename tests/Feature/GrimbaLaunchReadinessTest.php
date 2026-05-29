@@ -2278,6 +2278,27 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_format_mg_tag_round_trips_with_parser(): void
+    {
+        // Wave SUB-58-CODE-E (2026-05-29) — formatMgTag() is the
+        // canonical writer for the persisted tag, paired with the
+        // parseMgTag() reader. Round-trip is the contract: parsing
+        // the output of format MUST recover the original triple.
+        foreach ([[2, 1, 2], [0, 0, 0], [10, 3, 10], [1, 0, 1]] as [$l, $c, $r]) {
+            $tag = \App\Support\GrimbaClusterBias::formatMgTag($l, $c, $r);
+            $this->assertSame("mg_{$l}_{$c}_{$r}", $tag);
+            $parsed = \App\Support\GrimbaClusterBias::parseMgTag($tag);
+            $this->assertSame(
+                ['left' => $l, 'center' => $c, 'right' => $r],
+                $parsed,
+                "format({$l},{$c},{$r}) → parse round-trip must recover."
+            );
+        }
+
+        // Negatives are floored to 0 (defensive against garbage inputs).
+        $this->assertSame('mg_0_0_0', \App\Support\GrimbaClusterBias::formatMgTag(-1, -2, -3));
+    }
+
     public function test_grimba_cluster_bias_parse_mg_tag_round_trip(): void
     {
         // Wave SUB-58-CODE-D (2026-05-29) — parseMgTag() is the new

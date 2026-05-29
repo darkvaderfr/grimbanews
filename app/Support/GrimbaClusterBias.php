@@ -108,4 +108,19 @@ class GrimbaClusterBias
             'right' => (int) $parts[3],
         ];
     }
+
+    /**
+     * Format the canonical "mg_<L>_<C>_<R>" tag for persistence on
+     * story_clusters.review_action. Counterpart to parseMgTag() —
+     * keep writer + reader on the same single source of truth so a
+     * format change (e.g., adding a separator, swapping segment
+     * order) only touches one file.
+     *
+     * Inputs are floored to non-negative ints (negative slots are
+     * meaningless for bias counts).
+     */
+    public static function formatMgTag(int $left, int $center, int $right): string
+    {
+        return 'mg_' . max(0, $left) . '_' . max(0, $center) . '_' . max(0, $right);
+    }
 }

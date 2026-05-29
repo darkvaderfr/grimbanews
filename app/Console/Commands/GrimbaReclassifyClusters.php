@@ -200,7 +200,7 @@ class GrimbaReclassifyClusters extends Command
                 if ($r['signal'] !== 'middle_ground') {
                     continue;
                 }
-                $tag = 'mg_' . $r['l'] . '_' . $r['c'] . '_' . $r['r'];
+                $tag = GrimbaClusterBias::formatMgTag((int) $r['l'], (int) $r['c'], (int) $r['r']);
                 DB::table('story_clusters')
                     ->where('id', $r['cid'])
                     ->update([
