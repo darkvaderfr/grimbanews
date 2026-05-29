@@ -2980,6 +2980,27 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsArray($decoded['top_tags'], 'top_tags must be an array.');
     }
 
+    public function test_api_middle_ground_json_row_dossier_url_is_well_formed(): void
+    {
+        // Sprint PP (2026-05-29) — dossier_url is the click-through
+        // an aggregator surface uses to send readers from the API
+        // back to the cluster page. Must be (a) absolute, (b) point
+        // at /comparatif/{cluster_id}, (c) match the row's own
+        // cluster_id field. A bug here would either 404 visitors or
+        // send them to the wrong cluster (data-corruption flavor).
+        $body = $this->get('/api/middle-ground.json?limit=5')->json();
+        $this->assertIsArray($body['rows']);
+        foreach ($body['rows'] as $row) {
+            $this->assertMatchesRegularExpression(
+                '#^https?://[^/]+/comparatif/\d+$#',
+                $row['dossier_url'],
+                'dossier_url must be absolute and end with /comparatif/<int>.'
+            );
+            $this->assertStringEndsWith('/comparatif/' . $row['cluster_id'], $row['dossier_url'],
+                'dossier_url must reference the row\'s own cluster_id.');
+        }
+    }
+
     public function test_api_middle_ground_json_generated_at_is_iso8601_and_recent(): void
     {
         // Sprint OO (2026-05-29) — generated_at is the freshness
