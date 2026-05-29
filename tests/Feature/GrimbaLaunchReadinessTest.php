@@ -2278,6 +2278,35 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_parse_and_format_are_locale_independent(): void
+    {
+        // Wave SUB-58-CODE-H (2026-05-29) — parseMgTag() / formatMgTag()
+        // operate on the persisted internal tag, not on localized labels.
+        // A bug here would be: someone refactors to use translator output
+        // for the bucket names, making EN-vs-FR drift produce different
+        // tags. Pin contract: same tag in any active locale.
+        $original = app()->getLocale();
+        try {
+            foreach (['en', 'fr'] as $loc) {
+                app()->setLocale($loc);
+                $tag = \App\Support\GrimbaClusterBias::formatMgTag(2, 1, 2);
+                $this->assertSame('mg_2_1_2', $tag,
+                    "formatMgTag must be locale-independent (locale={$loc}).");
+                $parsed = \App\Support\GrimbaClusterBias::parseMgTag($tag);
+                $this->assertSame(['left' => 2, 'center' => 1, 'right' => 2], $parsed,
+                    "parseMgTag must be locale-independent (locale={$loc}).");
+
+                // resolve()'s key field is also locale-independent
+                // (only label is translated).
+                $resolved = \App\Support\GrimbaClusterBias::resolve(['left' => 2, 'center' => 1, 'right' => 2]);
+                $this->assertSame('middle_ground', $resolved['key'],
+                    "resolve()['key'] must be locale-independent (locale={$loc}).");
+            }
+        } finally {
+            app()->setLocale($original);
+        }
+    }
+
     public function test_grimba_cluster_bias_three_way_tie_resolves_to_middle_ground(): void
     {
         // Wave SUB-58-CODE-G (2026-05-29) — Vader directive 2026-05-20:
