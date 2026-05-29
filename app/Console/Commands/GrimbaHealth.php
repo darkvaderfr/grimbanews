@@ -444,6 +444,9 @@ class GrimbaHealth extends Command
             $minMiddleGround,
             $minMiddleGround === 0 ? ', observe-only' : ''
         ));
+        if ($middleGroundCount > 0) {
+            $this->line('     ↳ for MG trend + tag-mix breakdown: php artisan grimba:mg-stats');
+        }
 
         if ($riskWarnings === []) {
             $this->line('   ✓ operating floors are clear');

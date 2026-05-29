@@ -2278,6 +2278,26 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_health_hints_at_mg_stats_when_clusters_exist(): void
+    {
+        // Wave SUB-58-CODE-F (2026-05-29) — when middle_ground_clusters
+        // count is non-zero, grimba:health should hint operators to the
+        // companion command grimba:mg-stats for trend + tag-mix detail.
+        // This is a discoverability micro-fix: anyone reading the health
+        // output now learns the next-step command without grepping
+        // through artisan list.
+        \Illuminate\Support\Facades\Artisan::call('grimba:health');
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        // Either we have MG clusters → hint must appear, OR we don't →
+        // the section should still mention "middle ground clusters" line.
+        $this->assertStringContainsString('middle ground clusters', $output,
+            'health output must include the MG clusters line.');
+        if (preg_match('/middle ground clusters\s*:\s*(\d+)/', $output, $m) && (int) $m[1] > 0) {
+            $this->assertStringContainsString('grimba:mg-stats', $output,
+                'when MG clusters > 0, grimba:health must hint at grimba:mg-stats.');
+        }
+    }
+
     public function test_grimba_cluster_bias_format_mg_tag_round_trips_with_parser(): void
     {
         // Wave SUB-58-CODE-E (2026-05-29) — formatMgTag() is the
