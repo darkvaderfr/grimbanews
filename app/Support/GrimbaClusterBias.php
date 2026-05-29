@@ -22,6 +22,33 @@ namespace App\Support;
 class GrimbaClusterBias
 {
     /**
+     * Canonical prefix for persisted Middle Ground tags on
+     * story_clusters.review_action. Centralized so a future
+     * format change (e.g., versioning prefix as "mg2_") only
+     * touches this file. Consumers MUST use this constant
+     * rather than hardcoding 'mg_'.
+     */
+    public const MG_TAG_PREFIX = 'mg_';
+
+    /**
+     * SQL LIKE-pattern matching the canonical prefix. Use in
+     * query builders: `->where('review_action', 'like', GrimbaClusterBias::MG_TAG_SQL_LIKE)`.
+     */
+    public const MG_TAG_SQL_LIKE = 'mg_%';
+
+    /**
+     * Boolean convenience: is this review_action value a Middle
+     * Ground tag (any well-formed mg_<L>_<C>_<R>)? Returns false
+     * for null, empty, non-mg_, and malformed mg_-prefixed values.
+     * Equivalent to parseMgTag($tag) !== null but reads cleaner
+     * at call sites that only need a yes/no.
+     */
+    public static function isMiddleGround(?string $tag): bool
+    {
+        return $tag !== null && self::parseMgTag($tag) !== null;
+    }
+
+    /**
      * Resolve majority-bias key + label + color from a bias-count array.
      *
      * @param array<string, int> $counts e.g. ['left' => 3, 'center' => 1, 'right' => 3]

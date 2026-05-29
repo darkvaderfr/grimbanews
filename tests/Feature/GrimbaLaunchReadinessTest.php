@@ -2278,6 +2278,28 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_is_middle_ground_and_prefix_constants(): void
+    {
+        // Sprint L (2026-05-29) — isMiddleGround() + MG_TAG_PREFIX +
+        // MG_TAG_SQL_LIKE centralize the mg_ prefix across the codebase.
+        // Test exercises the boolean for null, empty, well-formed,
+        // malformed, and non-mg inputs. Constants pinned to current
+        // value so a refactor doesn't silently break stored data.
+        $this->assertTrue(\App\Support\GrimbaClusterBias::isMiddleGround('mg_2_1_2'));
+        $this->assertTrue(\App\Support\GrimbaClusterBias::isMiddleGround('mg_0_0_0'));
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isMiddleGround(null));
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isMiddleGround(''));
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isMiddleGround('mg_invalid'));
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isMiddleGround('blindspot'));
+        $this->assertFalse(\App\Support\GrimbaClusterBias::isMiddleGround('MG_2_1_2'),
+            'case-sensitive: uppercase prefix must return false.');
+
+        // Constants pinned for grep-traceability + cross-codebase
+        // consistency. Changing these requires touching this test.
+        $this->assertSame('mg_', \App\Support\GrimbaClusterBias::MG_TAG_PREFIX);
+        $this->assertSame('mg_%', \App\Support\GrimbaClusterBias::MG_TAG_SQL_LIKE);
+    }
+
     public function test_grimba_mg_stats_strict_flag_recognized_and_json_includes_malformed_count(): void
     {
         // Sprint K (2026-05-29) — --strict turns malformed mg_* tags
