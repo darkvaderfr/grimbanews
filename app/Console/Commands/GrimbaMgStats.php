@@ -33,7 +33,8 @@ class GrimbaMgStats extends Command
         {--since-hours= : extra arbitrary lookback window; emits a "since N hours" count alongside the 24h/7d/30d defaults}
         {--fail-on-empty : exit 1 when there are zero MG clusters in store (cron-friendly signal that the MG pipeline has stalled)}
         {--strict : exit 1 when any malformed mg_* tag is detected in store (data-drift detector)}
-        {--examples : print common usage examples and exit (operator quickref)}';
+        {--examples : print common usage examples and exit (operator quickref)}
+        {--quiet-metric : suppress the headers; print only "TOTAL=<n> SYMMETRIC=<n> CENTER_HEAVY=<n>" (script-friendly)}';
 
     protected $description = 'Middle Ground (mg_*) cluster summary: current totals, 24h/7d/30d trend, L/C/R distribution.';
 
@@ -116,6 +117,18 @@ class GrimbaMgStats extends Command
         $centerHeavy = $summary['center_heavy_count'];
         $avgSize = $summary['avg_cluster_size'];
         $malformed = $summary['malformed_count'];
+
+        if ($this->option('quiet-metric')) {
+            $this->line(sprintf('TOTAL=%d SYMMETRIC=%d CENTER_HEAVY=%d MALFORMED=%d',
+                $total, $symmetric, $centerHeavy, $malformed));
+            if ($this->option('fail-on-empty') && $total === 0) {
+                return self::FAILURE;
+            }
+            if ($this->option('strict') && $malformed > 0) {
+                return self::FAILURE;
+            }
+            return self::SUCCESS;
+        }
 
         if ($this->option('json')) {
             $payload = [

@@ -2278,6 +2278,22 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_mg_stats_quiet_metric_mode_emits_keyvalue_pairs(): void
+    {
+        // Sprint S (2026-05-29) — --quiet-metric is for monitoring
+        // scripts that want a single line of KEY=value pairs they
+        // can parse without depending on jq or the verbose text
+        // layout. Test asserts the format + that all four metric
+        // keys appear.
+        \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats', ['--quiet-metric' => true]);
+        $output = trim(\Illuminate\Support\Facades\Artisan::output());
+        $this->assertMatchesRegularExpression(
+            '/^TOTAL=\d+ SYMMETRIC=\d+ CENTER_HEAVY=\d+ MALFORMED=\d+$/',
+            $output,
+            'quiet-metric output must be a single line of KEY=int pairs.'
+        );
+    }
+
     public function test_grimba_cluster_bias_resolve_echoes_input_counts(): void
     {
         // Sprint R (2026-05-29) — resolve() now echoes back the
