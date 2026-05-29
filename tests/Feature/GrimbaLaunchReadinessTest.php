@@ -2278,6 +2278,34 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_resolve_result_shape_is_complete_across_branches(): void
+    {
+        // Sprint V (2026-05-29) — every resolver branch (unknown,
+        // middle_ground, left, right, center) must return a result
+        // array containing all 7 keys. A future refactor that adds
+        // a new branch but forgets to thread the echo-keys through
+        // would silently break downstream Blade surfaces relying on
+        // ['total'] or ['left']. This test exercises one input per
+        // branch and asserts shape completeness.
+        $cases = [
+            [[], 'unknown'],
+            [['left' => 2, 'center' => 1, 'right' => 2], 'middle_ground'],
+            [['left' => 5, 'center' => 1, 'right' => 1], 'left'],
+            [['left' => 1, 'center' => 1, 'right' => 5], 'right'],
+            [['left' => 1, 'center' => 5, 'right' => 1], 'center'],
+        ];
+        $expectedKeys = ['key', 'label', 'color', 'left', 'center', 'right', 'total'];
+        foreach ($cases as [$input, $expectedKey]) {
+            $result = \App\Support\GrimbaClusterBias::resolve($input);
+            $this->assertSame($expectedKey, $result['key'],
+                "input " . json_encode($input) . " should resolve to '{$expectedKey}'.");
+            foreach ($expectedKeys as $k) {
+                $this->assertArrayHasKey($k, $result,
+                    "branch '{$expectedKey}' must include key '{$k}' in result.");
+            }
+        }
+    }
+
     public function test_grimba_cluster_bias_bias_meta_for_blade_returns_canonical_table(): void
     {
         // Sprint U (2026-05-29) — biasMetaForBlade() is the canonical
