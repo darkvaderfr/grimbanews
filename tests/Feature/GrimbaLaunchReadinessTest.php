@@ -2278,6 +2278,37 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_mg_stats_fail_on_empty_exit_code_contract(): void
+    {
+        // Wave SUB-58-CODE-I (2026-05-29) — --fail-on-empty gives cron
+        // pipelines an exit-code signal that the MG pipeline has stalled
+        // (zero clusters tagged). Default behavior stays SUCCESS so the
+        // option is opt-in; existing cron jobs don't suddenly start
+        // paging on an unrelated condition.
+        //
+        // Test asserts: without --fail-on-empty, exit code is 0
+        // regardless of MG count; with --fail-on-empty AND zero MG
+        // clusters present, exit code is 1. (Non-empty case isn't
+        // easily testable without seeding, so we focus on the contract
+        // edge that matters: don't silently swallow the stall signal.)
+        $exitDefault = \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats');
+        $this->assertSame(0, $exitDefault,
+            'default mode must exit 0 regardless of MG count.');
+
+        $totalMg = \Illuminate\Support\Facades\DB::table('story_clusters')
+            ->where('review_action', 'like', 'mg_%')
+            ->count();
+
+        $exitFail = \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats', ['--fail-on-empty' => true]);
+        if ($totalMg === 0) {
+            $this->assertSame(1, $exitFail,
+                'with --fail-on-empty AND zero MG clusters, must exit 1.');
+        } else {
+            $this->assertSame(0, $exitFail,
+                'with --fail-on-empty AND non-zero MG clusters, must exit 0.');
+        }
+    }
+
     public function test_grimba_cluster_bias_parse_and_format_are_locale_independent(): void
     {
         // Wave SUB-58-CODE-H (2026-05-29) — parseMgTag() / formatMgTag()

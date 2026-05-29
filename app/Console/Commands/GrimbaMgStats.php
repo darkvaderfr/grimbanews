@@ -30,7 +30,8 @@ class GrimbaMgStats extends Command
     protected $signature = 'grimba:mg-stats
         {--json : emit machine-readable JSON instead of the text report}
         {--top=10 : how many top tag mixes to include (1..100; default 10)}
-        {--since-hours= : extra arbitrary lookback window; emits a "since N hours" count alongside the 24h/7d/30d defaults}';
+        {--since-hours= : extra arbitrary lookback window; emits a "since N hours" count alongside the 24h/7d/30d defaults}
+        {--fail-on-empty : exit 1 when there are zero MG clusters in store (cron-friendly signal that the MG pipeline has stalled)}';
 
     protected $description = 'Middle Ground (mg_*) cluster summary: current totals, 24h/7d/30d trend, L/C/R distribution.';
 
@@ -121,6 +122,9 @@ class GrimbaMgStats extends Command
                 $payload['updated_since_hours'] = $countSince;
             }
             $this->line(json_encode($payload, JSON_UNESCAPED_SLASHES));
+            if ($this->option('fail-on-empty') && $total === 0) {
+                return self::FAILURE;
+            }
             return self::SUCCESS;
         }
 
@@ -162,6 +166,10 @@ class GrimbaMgStats extends Command
         }
 
         $this->newLine();
+        if ($this->option('fail-on-empty') && $total === 0) {
+            $this->error('FAIL: zero MG clusters in store; the Middle Ground pipeline may be stalled.');
+            return self::FAILURE;
+        }
         return self::SUCCESS;
     }
 }
