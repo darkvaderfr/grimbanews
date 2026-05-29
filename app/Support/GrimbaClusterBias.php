@@ -192,6 +192,26 @@ class GrimbaClusterBias
     }
 
     /**
+     * One-call convenience: take a persisted mg_<L>_<C>_<R> tag and
+     * return the full resolver result, OR null on malformed input.
+     * Use at call sites that have a persisted tag and want the
+     * verdict + counts in one go, e.g. an admin tile displaying:
+     *
+     *   $bias = GrimbaClusterBias::biasFromMgTag($cluster->review_action);
+     *   if ($bias) { echo $bias['label'] . " ({$bias['left']}/{$bias['right']})"; }
+     *
+     * @return array{key: string, label: string, color: string, left: int, center: int, right: int, total: int}|null
+     */
+    public static function biasFromMgTag(?string $tag): ?array
+    {
+        $parsed = $tag !== null ? self::parseMgTag($tag) : null;
+        if ($parsed === null) {
+            return null;
+        }
+        return self::resolve($parsed);
+    }
+
+    /**
      * Summarize a list of persisted mg_* tags into the standard shape
      * used by admin surfaces (mg-stats, the cockpit dashboard tile,
      * future per-locale breakdowns). Returns:

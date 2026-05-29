@@ -2278,6 +2278,33 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_bias_from_mg_tag_one_call_convenience(): void
+    {
+        // Sprint T (2026-05-29) — biasFromMgTag() is the one-call
+        // path from persisted tag → full resolver result. Use at
+        // admin tiles and any surface that has a tag and wants both
+        // the verdict and the underlying counts.
+        $bias = \App\Support\GrimbaClusterBias::biasFromMgTag('mg_2_1_2');
+        $this->assertIsArray($bias);
+        $this->assertSame(\App\Support\GrimbaClusterBias::KEY_MIDDLE_GROUND, $bias['key']);
+        $this->assertSame(2, $bias['left']);
+        $this->assertSame(1, $bias['center']);
+        $this->assertSame(2, $bias['right']);
+        $this->assertSame(5, $bias['total']);
+
+        // Asymmetric: mg_1_5_1 still parses but resolver sees it as
+        // L=R=1 with center=5 so middle_ground branch is skipped
+        // (L>=C fails), and Centre wins.
+        $center = \App\Support\GrimbaClusterBias::biasFromMgTag('mg_1_5_1');
+        $this->assertSame('center', $center['key']);
+
+        // Malformed inputs: null, not throw.
+        $this->assertNull(\App\Support\GrimbaClusterBias::biasFromMgTag(null));
+        $this->assertNull(\App\Support\GrimbaClusterBias::biasFromMgTag(''));
+        $this->assertNull(\App\Support\GrimbaClusterBias::biasFromMgTag('mg_invalid'));
+        $this->assertNull(\App\Support\GrimbaClusterBias::biasFromMgTag('blindspot'));
+    }
+
     public function test_grimba_mg_stats_quiet_metric_mode_emits_keyvalue_pairs(): void
     {
         // Sprint S (2026-05-29) — --quiet-metric is for monitoring
