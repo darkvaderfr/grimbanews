@@ -44,21 +44,21 @@ class GrimbaMgStats extends Command
         $last30d = $now->copy()->subDays(30);
 
         $total = (int) DB::table('story_clusters')
-            ->where('review_action', 'like', 'mg_%')
+            ->where('review_action', 'like', GrimbaClusterBias::MG_TAG_SQL_LIKE)
             ->count();
 
         $count24h = (int) DB::table('story_clusters')
-            ->where('review_action', 'like', 'mg_%')
+            ->where('review_action', 'like', GrimbaClusterBias::MG_TAG_SQL_LIKE)
             ->where('updated_at', '>=', $last24h)
             ->count();
 
         $count7d = (int) DB::table('story_clusters')
-            ->where('review_action', 'like', 'mg_%')
+            ->where('review_action', 'like', GrimbaClusterBias::MG_TAG_SQL_LIKE)
             ->where('updated_at', '>=', $last7d)
             ->count();
 
         $count30d = (int) DB::table('story_clusters')
-            ->where('review_action', 'like', 'mg_%')
+            ->where('review_action', 'like', GrimbaClusterBias::MG_TAG_SQL_LIKE)
             ->where('updated_at', '>=', $last30d)
             ->count();
 
@@ -67,7 +67,7 @@ class GrimbaMgStats extends Command
         $countSince = null;
         if ($sinceHours !== null) {
             $countSince = (int) DB::table('story_clusters')
-                ->where('review_action', 'like', 'mg_%')
+                ->where('review_action', 'like', GrimbaClusterBias::MG_TAG_SQL_LIKE)
                 ->where('updated_at', '>=', $now->copy()->subHours($sinceHours))
                 ->count();
         }
@@ -75,7 +75,7 @@ class GrimbaMgStats extends Command
         $top = max(1, min(100, (int) $this->option('top')));
         $tags = DB::table('story_clusters')
             ->select('review_action', DB::raw('COUNT(*) as c'))
-            ->where('review_action', 'like', 'mg_%')
+            ->where('review_action', 'like', GrimbaClusterBias::MG_TAG_SQL_LIKE)
             ->groupBy('review_action')
             ->orderByDesc('c')
             ->limit($top)
@@ -83,7 +83,7 @@ class GrimbaMgStats extends Command
 
         $tagRows = DB::table('story_clusters')
             ->select('review_action')
-            ->where('review_action', 'like', 'mg_%')
+            ->where('review_action', 'like', GrimbaClusterBias::MG_TAG_SQL_LIKE)
             ->get();
         $summary = GrimbaClusterBias::summarizeMgTags($tagRows->pluck('review_action'));
         $sumL = $summary['sum_left'];

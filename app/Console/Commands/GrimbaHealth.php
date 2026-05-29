@@ -378,7 +378,7 @@ class GrimbaHealth extends Command
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('story_clusters')) {
                 $middleGroundCount = (int) \Illuminate\Support\Facades\DB::table('story_clusters')
-                    ->where('review_action', 'like', 'mg_%')
+                    ->where('review_action', 'like', \App\Support\GrimbaClusterBias::MG_TAG_SQL_LIKE)
                     ->count();
             }
         } catch (\Throwable) {

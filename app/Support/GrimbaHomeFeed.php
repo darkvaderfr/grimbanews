@@ -804,7 +804,7 @@ class GrimbaHomeFeed
     private static function pickMiddleGround(HomeFeedState $state, int $count): Collection
     {
         $clusterIds = DB::table('story_clusters')
-            ->where('review_action', 'like', 'mg_%')
+            ->where('review_action', 'like', GrimbaClusterBias::MG_TAG_SQL_LIKE)
             ->orderByDesc('reviewed_at')
             ->limit($count * 6)
             ->pluck('id');
