@@ -2980,6 +2980,22 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsArray($decoded['top_tags'], 'top_tags must be an array.');
     }
 
+    public function test_api_middle_ground_json_limit_clamps_to_200_and_1(): void
+    {
+        // Sprint LL (2026-05-29) — limit is clamped to [1, 200] so
+        // a misbehaving client can't pull the entire clusters table
+        // in one request, and a 0 or negative limit can't trigger
+        // edge cases in the consumer. Test boundary cases.
+        $hi = $this->get('/api/middle-ground.json?limit=999&summary_only=1')->json();
+        $this->assertSame(200, $hi['limit'], 'limit=999 must clamp to 200.');
+        $lo = $this->get('/api/middle-ground.json?limit=0&summary_only=1')->json();
+        $this->assertSame(1, $lo['limit'], 'limit=0 must clamp to 1.');
+        $neg = $this->get('/api/middle-ground.json?limit=-5&summary_only=1')->json();
+        $this->assertSame(1, $neg['limit'], 'limit=-5 must clamp to 1.');
+        $unset = $this->get('/api/middle-ground.json?summary_only=1')->json();
+        $this->assertSame(50, $unset['limit'], 'missing limit must default to 50.');
+    }
+
     public function test_api_middle_ground_json_methodology_url_is_absolute(): void
     {
         // Sprint KK (2026-05-29) — methodology_url must be an
