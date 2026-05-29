@@ -76,4 +76,36 @@ class GrimbaClusterBias
     {
         return self::resolve($counts)['color'];
     }
+
+    /**
+     * Parse the persisted "mg_<L>_<C>_<R>" tag written by
+     * grimba:reclassify-clusters --persist onto
+     * story_clusters.review_action. Returns null when the input
+     * isn't a well-formed mg_ tag (wrong prefix, wrong segment
+     * count, non-integer segments). Callers that need to defend
+     * against drift in persisted tag data should check for null
+     * rather than catch downstream exceptions.
+     *
+     * Example: "mg_2_1_2" → ['left' => 2, 'center' => 1, 'right' => 2].
+     *
+     * @return array{left: int, center: int, right: int}|null
+     */
+    public static function parseMgTag(string $tag): ?array
+    {
+        if (! str_starts_with($tag, 'mg_')) {
+            return null;
+        }
+        $parts = explode('_', $tag);
+        if (count($parts) !== 4) {
+            return null;
+        }
+        if (! ctype_digit($parts[1]) || ! ctype_digit($parts[2]) || ! ctype_digit($parts[3])) {
+            return null;
+        }
+        return [
+            'left' => (int) $parts[1],
+            'center' => (int) $parts[2],
+            'right' => (int) $parts[3],
+        ];
+    }
 }

@@ -2278,6 +2278,44 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_parse_mg_tag_round_trip(): void
+    {
+        // Wave SUB-58-CODE-D (2026-05-29) — parseMgTag() is the new
+        // centralized parser for the persisted "mg_<L>_<C>_<R>" tag.
+        // Multiple call sites parse this manually today (GrimbaMgStats
+        // was just refactored to use this; future surfaces should too).
+        // Test exercises happy path + malformed inputs that must return
+        // null (not throw, not return partial data).
+        $this->assertSame(
+            ['left' => 2, 'center' => 1, 'right' => 2],
+            \App\Support\GrimbaClusterBias::parseMgTag('mg_2_1_2')
+        );
+        $this->assertSame(
+            ['left' => 0, 'center' => 0, 'right' => 0],
+            \App\Support\GrimbaClusterBias::parseMgTag('mg_0_0_0')
+        );
+        $this->assertSame(
+            ['left' => 10, 'center' => 3, 'right' => 10],
+            \App\Support\GrimbaClusterBias::parseMgTag('mg_10_3_10')
+        );
+
+        // Malformed: must return null, not throw.
+        $this->assertNull(\App\Support\GrimbaClusterBias::parseMgTag(''));
+        $this->assertNull(\App\Support\GrimbaClusterBias::parseMgTag('mg_'));
+        $this->assertNull(\App\Support\GrimbaClusterBias::parseMgTag('mg_2_1'),
+            'three-segment tag must return null.');
+        $this->assertNull(\App\Support\GrimbaClusterBias::parseMgTag('mg_2_1_2_extra'),
+            'five-segment tag must return null.');
+        $this->assertNull(\App\Support\GrimbaClusterBias::parseMgTag('mg_a_1_2'),
+            'non-numeric segment must return null.');
+        $this->assertNull(\App\Support\GrimbaClusterBias::parseMgTag('mg_-1_1_2'),
+            'negative segment must return null (ctype_digit rejects).');
+        $this->assertNull(\App\Support\GrimbaClusterBias::parseMgTag('blindspot'),
+            'unrelated review_action value must return null.');
+        $this->assertNull(\App\Support\GrimbaClusterBias::parseMgTag('MG_2_1_2'),
+            'case-sensitive: uppercase prefix must return null.');
+    }
+
     public function test_grimba_mg_stats_since_hours_option_emits_extra_window(): void
     {
         // Wave SUB-58-CODE-C (2026-05-29) — --since-hours=N gives ops

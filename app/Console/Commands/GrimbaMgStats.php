@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\GrimbaClusterBias;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -84,19 +85,16 @@ class GrimbaMgStats extends Command
         $symmetric = 0;
         $centerHeavy = 0;
         foreach (DB::table('story_clusters')->select('review_action')->where('review_action', 'like', 'mg_%')->get() as $row) {
-            $parts = explode('_', (string) $row->review_action);
-            if (count($parts) !== 4) {
+            $parsed = GrimbaClusterBias::parseMgTag((string) $row->review_action);
+            if ($parsed === null) {
                 continue;
             }
-            $l = (int) $parts[1];
-            $c = (int) $parts[2];
-            $r = (int) $parts[3];
-            $sumL += $l;
-            $sumC += $c;
-            $sumR += $r;
-            if ($c === 0) {
+            $sumL += $parsed['left'];
+            $sumC += $parsed['center'];
+            $sumR += $parsed['right'];
+            if ($parsed['center'] === 0) {
                 $symmetric++;
-            } elseif ($c >= $l) {
+            } elseif ($parsed['center'] >= $parsed['left']) {
                 $centerHeavy++;
             }
         }
