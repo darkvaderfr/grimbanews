@@ -595,7 +595,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             try {
                 if (\Illuminate\Support\Facades\Schema::hasTable('story_clusters')) {
                     $clusters = \Illuminate\Support\Facades\DB::table('story_clusters')
-                        ->where('review_action', 'like', 'mg_%')
+                        ->where('review_action', 'like', \App\Support\GrimbaClusterBias::MG_TAG_SQL_LIKE)
                         ->orderByDesc('reviewed_at')
                         ->limit($limit)
                         ->get(['id', 'topic', 'review_action', 'reviewed_at']);
@@ -619,10 +619,16 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $xml .= '  <generator uri="https://grimbanews.com" version="1.0">GrimbaNews</generator>' . "\n";
             $xml .= '  <rights>Open data under attribution to grimbanews.com</rights>' . "\n";
             foreach ($clusters as $c) {
-                $parts = explode('_', (string) $c->review_action);
-                $l = (int) ($parts[1] ?? 0);
-                $cc = (int) ($parts[2] ?? 0);
-                $r = (int) ($parts[3] ?? 0);
+                // Sprint Y (2026-05-29) — route through biasFromMgTag()
+                // for consistent parsing across JSON + Atom + admin.
+                // Malformed tags are skipped (clean feed for readers).
+                $bias = \App\Support\GrimbaClusterBias::biasFromMgTag((string) $c->review_action);
+                if ($bias === null) {
+                    continue;
+                }
+                $l = $bias['left'];
+                $cc = $bias['center'];
+                $r = $bias['right'];
                 $dossierUrl = url('/comparatif/' . $c->id);
                 $tagged = $c->reviewed_at ? \Carbon\Carbon::parse($c->reviewed_at)->utc()->toIso8601String() : $now->toIso8601String();
                 $xml .= '  <entry>' . "\n";
@@ -631,7 +637,7 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 $xml .= '    <link rel="alternate" type="text/html" href="' . htmlspecialchars($dossierUrl, ENT_XML1 | ENT_QUOTES, 'UTF-8') . '"/>' . "\n";
                 $xml .= "    <published>{$tagged}</published>\n";
                 $xml .= "    <updated>{$tagged}</updated>\n";
-                $xml .= '    <summary>' . htmlspecialchars("Left: {$l} · Center: {$cc} · Right: {$r}", ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</summary>' . "\n";
+                $xml .= '    <summary>' . htmlspecialchars("Left: {$l} · Center: {$cc} · Right: {$r} · Total: {$bias['total']}", ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</summary>' . "\n";
                 $xml .= '    <category term="middle_ground" label="Juste milieu"/>' . "\n";
                 $xml .= '  </entry>' . "\n";
             }
