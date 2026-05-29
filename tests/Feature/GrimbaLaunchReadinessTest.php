@@ -2278,6 +2278,33 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_cluster_bias_labels_localize_per_locale(): void
+    {
+        // Sprint P (2026-05-29) — labels are translated via __()
+        // while keys + colors stay locale-independent (per Sprint H).
+        // Pin the per-locale label values to catch (a) a missing
+        // translation file silently rendering English strings on /fr
+        // pages and (b) a translation file getting clobbered.
+        $original = app()->getLocale();
+        try {
+            app()->setLocale('fr');
+            $fr = \App\Support\GrimbaClusterBias::resolve(['left' => 2, 'center' => 1, 'right' => 2]);
+            $this->assertSame('Juste milieu', $fr['label'],
+                'FR locale must render "Juste milieu" for middle_ground.');
+
+            app()->setLocale('en');
+            $en = \App\Support\GrimbaClusterBias::resolve(['left' => 2, 'center' => 1, 'right' => 2]);
+            $this->assertNotSame('', $en['label'],
+                'EN locale must render a non-empty label.');
+
+            // Key is locale-independent (already proven in Sprint H,
+            // re-asserted here for clarity).
+            $this->assertSame($fr['key'], $en['key']);
+        } finally {
+            app()->setLocale($original);
+        }
+    }
+
     public function test_grimba_cluster_bias_color_palette_is_distinct_per_bucket(): void
     {
         // Sprint O (2026-05-29) — pin the resolver's color contract.
