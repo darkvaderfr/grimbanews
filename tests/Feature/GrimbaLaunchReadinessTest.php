@@ -2255,6 +2255,57 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertSame(0, $decoded['clusters_touched']);
     }
 
+    public function test_grimba_mg_stats_text_mode_renders_summary(): void
+    {
+        // Wave SUB-58-CODE (2026-05-29) — grimba:mg-stats text mode
+        // is a one-page operator summary of the Middle Ground signal.
+        // Test asserts the section headers + key metric labels render,
+        // so a future refactor that drops the "Totals" or "Shape"
+        // sections fails loud instead of silently regressing the
+        // operator-facing surface.
+        \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats');
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        $this->assertStringContainsString('Middle Ground — daily summary', $output);
+        $this->assertStringContainsString('1. Totals', $output);
+        $this->assertStringContainsString('total MG clusters', $output);
+        $this->assertStringContainsString('updated last 24h', $output);
+        $this->assertStringContainsString('updated last 7d', $output);
+        $this->assertStringContainsString('updated last 30d', $output);
+        $this->assertStringContainsString('2. Shape', $output);
+        $this->assertStringContainsString('avg cluster size', $output);
+        $this->assertStringContainsString('symmetric (center=0)', $output);
+        $this->assertStringContainsString('3. Bias bucket totals', $output);
+        $this->assertStringContainsString('4. Top tag mixes', $output);
+    }
+
+    public function test_grimba_mg_stats_json_mode_is_valid_pipeable_json(): void
+    {
+        // Wave SUB-58-CODE (2026-05-29) — --json mode is the ops
+        // contract for log shippers + dashboards. Test asserts the
+        // command's stdout is a single line of valid JSON with the
+        // expected keys + integer types.
+        \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats', [
+            '--json' => true,
+        ]);
+        $output = trim(\Illuminate\Support\Facades\Artisan::output());
+        $lines = array_values(array_filter(array_map('trim', explode("\n", $output)), fn ($l) => $l !== ''));
+        $jsonLine = end($lines);
+        $decoded = json_decode($jsonLine, true);
+        $this->assertIsArray($decoded, "JSON mode must emit valid JSON. Got: " . substr((string) $jsonLine, 0, 200));
+        foreach ([
+            'as_of', 'total_mg_clusters', 'updated_last_24h', 'updated_last_7d', 'updated_last_30d',
+            'avg_cluster_size', 'symmetric_count', 'center_heavy_count',
+            'sum_left', 'sum_center', 'sum_right', 'top_tags',
+        ] as $key) {
+            $this->assertArrayHasKey($key, $decoded, "JSON must include '{$key}' key.");
+        }
+        foreach (['total_mg_clusters', 'updated_last_24h', 'updated_last_7d', 'updated_last_30d',
+                  'symmetric_count', 'center_heavy_count', 'sum_left', 'sum_center', 'sum_right'] as $intKey) {
+            $this->assertIsInt($decoded[$intKey], "{$intKey} must be int.");
+        }
+        $this->assertIsArray($decoded['top_tags'], 'top_tags must be an array.');
+    }
+
     public function test_dossiers_diversity_filter_serves_middle_ground_blindspot_tabs(): void
     {
         // Wave FFFF (Vader 2026-05-26) — /dossiers?diversity=middle_ground
