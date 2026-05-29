@@ -2184,7 +2184,8 @@ class GrimbaLaunchReadinessTest extends TestCase
         if ($body['rows'] !== []) {
             $row = $body['rows'][0];
             foreach (['cluster_id', 'topic', 'left_count', 'center_count',
-                      'right_count', 'tagged_at', 'days_since_tagged',
+                      'right_count', 'total_count', 'bias_color',
+                      'tagged_at', 'days_since_tagged',
                       'dossier_url'] as $rowKey) {
                 $this->assertArrayHasKey($rowKey, $row, "Each row must include '{$rowKey}'.");
             }
@@ -2192,6 +2193,16 @@ class GrimbaLaunchReadinessTest extends TestCase
             $this->assertIsInt($row['left_count']);
             $this->assertIsInt($row['center_count']);
             $this->assertIsInt($row['right_count']);
+            // Sprint X (2026-05-29) — total_count + bias_color are derived
+            // server-side so consumers don't reimplement the resolver.
+            $this->assertIsInt($row['total_count']);
+            $this->assertSame(
+                $row['left_count'] + $row['center_count'] + $row['right_count'],
+                $row['total_count'],
+                'total_count must equal sum of L+C+R per row.'
+            );
+            $this->assertMatchesRegularExpression('/^#[0-9a-fA-F]{6}$/', $row['bias_color'],
+                'bias_color must be a 6-digit hex string.');
             $this->assertStringContainsString('/comparatif/', $row['dossier_url']);
         }
         // limit cap: ?limit=10000 should clamp to 200 max.

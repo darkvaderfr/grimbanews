@@ -537,19 +537,29 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             try {
                 if (\Illuminate\Support\Facades\Schema::hasTable('story_clusters')) {
                     $clusters = \Illuminate\Support\Facades\DB::table('story_clusters')
-                        ->where('review_action', 'like', 'mg_%')
+                        ->where('review_action', 'like', \App\Support\GrimbaClusterBias::MG_TAG_SQL_LIKE)
                         ->orderByDesc('reviewed_at')
                         ->limit($limit)
                         ->get(['id', 'topic', 'review_action', 'reviewed_at']);
                     foreach ($clusters as $c) {
-                        // mg_<L>_<C>_<R> tag denorm
-                        $parts = explode('_', (string) $c->review_action);
+                        // Sprint X (2026-05-29) — route through the canonical
+                        // biasFromMgTag() helper instead of inline explode.
+                        // Adds total_count + bias_color so downstream
+                        // dashboards don't need a per-row color lookup.
+                        $bias = \App\Support\GrimbaClusterBias::biasFromMgTag((string) $c->review_action);
+                        if ($bias === null) {
+                            // malformed tag — skip silently (mg-stats --strict
+                            // surfaces drift; consumer sees clean data).
+                            continue;
+                        }
                         $rows[] = [
                             'cluster_id' => (int) $c->id,
                             'topic' => (string) $c->topic,
-                            'left_count' => (int) ($parts[1] ?? 0),
-                            'center_count' => (int) ($parts[2] ?? 0),
-                            'right_count' => (int) ($parts[3] ?? 0),
+                            'left_count' => $bias['left'],
+                            'center_count' => $bias['center'],
+                            'right_count' => $bias['right'],
+                            'total_count' => $bias['total'],
+                            'bias_color' => $bias['color'],
                             'tagged_at' => $c->reviewed_at,
                             'days_since_tagged' => $c->reviewed_at
                                 ? (int) \Carbon\Carbon::parse($c->reviewed_at)->diffInDays(now())
