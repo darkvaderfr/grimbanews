@@ -32,12 +32,35 @@ class GrimbaMgStats extends Command
         {--top=10 : how many top tag mixes to include (1..100; default 10)}
         {--since-hours= : extra arbitrary lookback window; emits a "since N hours" count alongside the 24h/7d/30d defaults}
         {--fail-on-empty : exit 1 when there are zero MG clusters in store (cron-friendly signal that the MG pipeline has stalled)}
-        {--strict : exit 1 when any malformed mg_* tag is detected in store (data-drift detector)}';
+        {--strict : exit 1 when any malformed mg_* tag is detected in store (data-drift detector)}
+        {--examples : print common usage examples and exit (operator quickref)}';
 
     protected $description = 'Middle Ground (mg_*) cluster summary: current totals, 24h/7d/30d trend, L/C/R distribution.';
 
     public function handle(): int
     {
+        if ($this->option('examples')) {
+            $this->line('grimba:mg-stats — Middle Ground daily summary');
+            $this->newLine();
+            $this->line('Common patterns:');
+            $this->line('  php artisan grimba:mg-stats');
+            $this->line('    → human-readable daily summary');
+            $this->line('  php artisan grimba:mg-stats --json | jq .total_mg_clusters');
+            $this->line('    → pipeable JSON for log shippers / dashboards');
+            $this->line('  php artisan grimba:mg-stats --top=20');
+            $this->line('    → deeper tag-mix tail');
+            $this->line('  php artisan grimba:mg-stats --since-hours=4');
+            $this->line('    → custom lookback alongside the 24h/7d/30d defaults');
+            $this->line('  php artisan grimba:mg-stats --fail-on-empty');
+            $this->line('    → cron-friendly stall detector (exit 1 if zero MG clusters)');
+            $this->line('  php artisan grimba:mg-stats --strict');
+            $this->line('    → CI data-drift detector (exit 1 if malformed tags exist)');
+            $this->line('  php artisan grimba:mg-stats --json --fail-on-empty --strict');
+            $this->line('    → all signals on; the recommended daily-cron line');
+            $this->newLine();
+            return self::SUCCESS;
+        }
+
         $now = now();
         $last24h = $now->copy()->subDay();
         $last7d = $now->copy()->subDays(7);

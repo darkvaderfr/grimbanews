@@ -2278,6 +2278,24 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('tag mixes', $output);
     }
 
+    public function test_grimba_mg_stats_examples_flag_prints_quickref(): void
+    {
+        // Sprint Q (2026-05-29) — --examples is operator quickref so
+        // the team doesn't have to grep through source to learn the
+        // flag combinations. Test asserts a few canonical example
+        // lines appear, so a future refactor that drops the examples
+        // block fails loud.
+        $exit = \Illuminate\Support\Facades\Artisan::call('grimba:mg-stats', ['--examples' => true]);
+        $this->assertSame(0, $exit);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        $this->assertStringContainsString('Middle Ground daily summary', $output);
+        $this->assertStringContainsString('--json', $output);
+        $this->assertStringContainsString('--fail-on-empty', $output);
+        $this->assertStringContainsString('--strict', $output);
+        $this->assertStringContainsString('--since-hours', $output);
+        $this->assertStringContainsString('--top', $output);
+    }
+
     public function test_grimba_cluster_bias_labels_localize_per_locale(): void
     {
         // Sprint P (2026-05-29) — labels are translated via __()
