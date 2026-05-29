@@ -2987,6 +2987,14 @@ class GrimbaLaunchReadinessTest extends TestCase
         // chart widgets that don't need per-cluster detail.
         $response = $this->get('/api/middle-ground.json?summary_only=1');
         $response->assertStatus(200);
+        // Sprint II (2026-05-29) — caching headers must carry through
+        // summary_only so CDN behavior is identical. Status pages
+        // hammer this endpoint; cache headers matter.
+        $cacheControl = (string) $response->headers->get('cache-control');
+        $this->assertStringContainsString('max-age=900', $cacheControl,
+            'summary_only response must carry the same Cache-Control max-age=900 as default.');
+        $this->assertSame('*', $response->headers->get('access-control-allow-origin'),
+            'summary_only response must keep CORS open.');
         $body = $response->json();
         $this->assertArrayHasKey('summary', $body,
             'summary block must still be present in summary_only mode.');
