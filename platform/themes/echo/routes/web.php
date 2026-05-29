@@ -571,6 +571,17 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             } catch (\Throwable) {
                 // Empty rows; let consumer see empty array, not 500.
             }
+            // Sprint FF (2026-05-29) — summary block aggregates the
+            // returned rows so dashboards/embeds don't have to loop
+            // over rows for top-line metrics. We summarize only the
+            // returned slice (respects $limit) so /?limit=10 + page-2
+            // semantics stay clean.
+            $summary = \App\Support\GrimbaClusterBias::summarizeMgTags(
+                array_map(fn ($r) => \App\Support\GrimbaClusterBias::formatMgTag(
+                    $r['left_count'], $r['center_count'], $r['right_count']
+                ), $rows)
+            );
+
             return response()->json([
                 'generated_at' => now()->utc()->toIso8601String(),
                 'count' => count($rows),
@@ -578,6 +589,14 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 'classifier_cadence' => 'daily-0335-utc',
                 'classifier_command' => 'grimba:reclassify-clusters',
                 'methodology_url' => url('/methodologie#juste-milieu'),
+                'summary' => [
+                    'sum_left' => $summary['sum_left'],
+                    'sum_center' => $summary['sum_center'],
+                    'sum_right' => $summary['sum_right'],
+                    'avg_cluster_size' => $summary['avg_cluster_size'],
+                    'symmetric_count' => $summary['symmetric_count'],
+                    'center_heavy_count' => $summary['center_heavy_count'],
+                ],
                 'rows' => $rows,
             ], 200, [
                 'Cache-Control' => 'public, max-age=900, s-maxage=1800',

@@ -2188,6 +2188,16 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertSame(3, $body['limit']);
         $this->assertIsArray($body['rows']);
         $this->assertLessThanOrEqual(3, count($body['rows']));
+        // Sprint FF (2026-05-29) — summary block aggregates the
+        // returned slice for dashboards/embeds.
+        $this->assertArrayHasKey('summary', $body);
+        foreach (['sum_left', 'sum_center', 'sum_right',
+                  'avg_cluster_size', 'symmetric_count', 'center_heavy_count'] as $sk) {
+            $this->assertArrayHasKey($sk, $body['summary'],
+                "summary block must include '{$sk}'.");
+        }
+        $this->assertIsInt($body['summary']['sum_left']);
+        $this->assertIsInt($body['summary']['symmetric_count']);
         if ($body['rows'] !== []) {
             $row = $body['rows'][0];
             foreach (['cluster_id', 'topic', 'left_count', 'center_count',
