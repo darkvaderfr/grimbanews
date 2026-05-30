@@ -3260,6 +3260,27 @@ class GrimbaLaunchReadinessTest extends TestCase
             $this->assertLessThanOrEqual(2, $pin['posts']->count(),
                 'perCountry=2 must cap displayed posts at 2.');
         }
+
+        // S-MAP-V4 Phase 1 audit fix (Zen/Echo/Critic) — COVERAGE must not
+        // depend on the per-country cap. The set of pinned countries (and
+        // each country's exact total) is driven by the authoritative grouped
+        // COUNT, so a tighter or wider cap changes only how many posts each
+        // pin carries, never WHICH countries appear. The original build
+        // gated pin existence on a global recency over-pull whose limit grew
+        // with perCountry, silently dropping quiet countries (17 of 28 hidden
+        // at 720h, incl. GB). This locks that the drop can't regress.
+        $narrow = \App\Support\GrimbaHomeFeed::pinsForMap(720, 1);
+        $wide = \App\Support\GrimbaHomeFeed::pinsForMap(720, 20);
+        $narrowSet = collect($narrow)->pluck('country')->sort()->values()->all();
+        $wideSet = collect($wide)->pluck('country')->sort()->values()->all();
+        $this->assertSame($wideSet, $narrowSet,
+            'pinned-country set must be invariant to perCountry — coverage is not gated on the display pull.');
+        // Per-country exact totals are likewise cap-independent.
+        $wideTotals = collect($wide)->mapWithKeys(fn ($p) => [$p['country'] => $p['total']])->all();
+        foreach ($narrow as $pin) {
+            $this->assertSame($wideTotals[$pin['country']], $pin['total'],
+                "total for {$pin['country']} must not change with perCountry.");
+        }
     }
 
     public function test_api_middle_ground_endpoints_share_cache_control_policy(): void

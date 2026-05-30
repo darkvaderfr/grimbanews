@@ -317,16 +317,17 @@ class GrimbaHomeFeed
 
     /**
      * S-MAP-V4-05 (Vader 2026-05-29) — pin source for the Leaflet
-     * /breaking-map rebuild. Returns one entry per *pinnable* country
-     * (a country with a known centroid), each carrying its map coordinates,
-     * continent, the exact total of matching posts in the window, and the
-     * freshest $perCountry posts for the pin popup / cluster expansion.
+     * /breaking-map rebuild. Returns one entry per *pinnable* country with at
+     * least one matching post in the window (a country with a known centroid),
+     * each carrying its map coordinates, continent, the exact total of matching
+     * posts in the window, and the freshest $perCountry posts for the pin
+     * popup / cluster expansion.
      *
      * Shape:
      *   [
      *     ['country' => 'US', 'continent' => 'americas',
      *      'lat' => 39.538, 'lng' => -97.483,
-     *      'total' => 225, 'posts' => Collection<Post>(<= $perCountry)],
+     *      'total' => 225, 'posts' => Collection<Post>(>=1, <= $perCountry)],
      *     ...
      *   ]
      *
@@ -336,6 +337,18 @@ class GrimbaHomeFeed
      * Posts whose source has a NULL/empty/unknown country — or a country
      * with no centroid — carry no map location and are omitted (the
      * continent sidecar still counts them via breakingByContinent()).
+     *
+     * Coverage is driven by the authoritative grouped COUNT, NOT by a global
+     * recency over-pull: the original V4-05 build gated pin existence on a
+     * 600-row freshest-first pull, which silently dropped quiet countries
+     * whose posts fell outside the freshest rows (S-MAP-V4 Phase 1 audit —
+     * Zen/Echo/Critic: 17 of 28 countries hidden at window=720h, incl. GB).
+     * The fix below emits a pin for EVERY pinnable country the count pass
+     * finds, then fetches that country's own freshest posts — so a prolific
+     * FR/US wire can never starve a quiet region off the map. This costs one
+     * small indexed query per pinnable country (bounded by the distinct
+     * source-country count, ~30, behind the 60s cache) and scales with
+     * geography rather than total post volume.
      */
     public static function pinsForMap(int $windowHours = 18, int $perCountry = 5): array
     {
@@ -348,8 +361,8 @@ class GrimbaHomeFeed
         $cacheKey = 'grimba_pins_map_v1:' . $locale . ':' . $bucket . ':' . $windowHours . ':' . $perCountry;
 
         return Cache::remember($cacheKey, 60, function () use ($windowHours, $strict, $locale, $perCountry): array {
-            // Shared base query, rebuilt fresh for each pass so the count
-            // and the display pull apply identical filters and can never
+            // Shared base query, rebuilt fresh for each pass so the count and
+            // the per-country pulls apply identical filters and can never
             // diverge: published posts with a non-empty source country,
             // inner-joined to news_sources, inside the window, locale-strict
             // when configured.
@@ -370,8 +383,16 @@ class GrimbaHomeFeed
                 return $query;
             };
 
-            // Exact per-country totals (the pin's count badge) — a grouped
-            // COUNT over the whole window, not just the freshest pull.
+            // Pass 1 — exact per-country totals over the whole window (the pin
+            // badge). Keep only pinnable countries (a known centroid). The ISO
+            // is normalized (upper+trim) and summed on collision so a future
+            // ingest path that writes case/whitespace variants of one code
+            // can't clobber or undercount the badge.
+            $cols = ['posts.id','posts.name','posts.translated_name','posts.translated_to',
+                     'posts.original_language','posts.source_name','posts.source_id',
+                     'posts.bias_rating','posts.published_at','posts.created_at','posts.image',
+                     'news_sources.country as source_country'];
+
             $totals = [];
             foreach (
                 $base()->toBase()
@@ -380,53 +401,38 @@ class GrimbaHomeFeed
                     ->get() as $row
             ) {
                 $iso = strtoupper(trim((string) $row->country));
-                if ($iso !== '') {
-                    $totals[$iso] = (int) $row->total;
+                if ($iso === '' || CountryCentroids::for($iso) === null) {
+                    continue; // blank or unpinnable — no map location
                 }
+                $totals[$iso] = ($totals[$iso] ?? 0) + (int) $row->total;
             }
 
-            // Display posts — freshest first, capped per country in PHP.
-            // Over-pull so the busiest geographies still fill their cap.
-            $cols = ['posts.id','posts.name','posts.translated_name','posts.translated_to',
-                     'posts.original_language','posts.source_name','posts.source_id',
-                     'posts.bias_rating','posts.published_at','posts.created_at','posts.image',
-                     'news_sources.country as source_country'];
+            // Pass 2 — for each pinnable country, its own freshest <=perCountry
+            // posts. One small indexed query per country guarantees every
+            // counted country gets a pin (a country with total>0 returns >=1
+            // post here, since this query shares Pass 1's exact filters).
+            $pins = [];
+            foreach ($totals as $iso => $total) {
+                $centroid = CountryCentroids::for($iso); // non-null by construction
 
-            $displayQuery = $base()->with('slugable');
-            GrimbaPostRecency::orderByPublished($displayQuery);
-            $candidates = $displayQuery->limit(max($perCountry * 60, 600))->get($cols);
+                $postsQuery = $base()
+                    ->whereRaw('upper(trim(news_sources.country)) = ?', [$iso])
+                    ->with('slugable');
+                GrimbaPostRecency::orderByPublished($postsQuery);
+                $posts = $postsQuery->limit($perCountry)->get($cols);
 
-            $byCountry = [];
-            foreach ($candidates as $post) {
-                $iso = strtoupper(trim((string) ($post->source_country ?? '')));
-                if ($iso === '') {
-                    continue;
-                }
-
-                $centroid = CountryCentroids::for($iso);
-                if ($centroid === null) {
-                    continue; // unpinnable — no map location for this country
-                }
-
-                if (! isset($byCountry[$iso])) {
-                    $byCountry[$iso] = [
-                        'country' => $iso,
-                        'continent' => Continents::forCountry($iso),
-                        'lat' => $centroid[0],
-                        'lng' => $centroid[1],
-                        'total' => $totals[$iso] ?? 0,
-                        'posts' => collect(),
-                    ];
-                }
-
-                if ($byCountry[$iso]['posts']->count() < $perCountry) {
-                    $byCountry[$iso]['posts']->push($post);
-                }
+                $pins[] = [
+                    'country' => $iso,
+                    'continent' => Continents::forCountry($iso),
+                    'lat' => $centroid[0],
+                    'lng' => $centroid[1],
+                    'total' => $total,
+                    'posts' => $posts,
+                ];
             }
 
             // Densest country first (drives draw order + the sidecar), ISO
             // as the deterministic tie-break.
-            $pins = array_values($byCountry);
             usort($pins, fn ($a, $b) => ($b['total'] <=> $a['total']) ?: strcmp($a['country'], $b['country']));
 
             return $pins;
