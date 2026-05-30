@@ -3140,6 +3140,9 @@ class GrimbaLaunchReadinessTest extends TestCase
         // V4-16 — the sidecar collapses to a swipe-up bottom-sheet on mobile.
         $this->assertStringContainsString('data-action="sheet-toggle"', $body, 'mobile sheet handle must ship.');
         $this->assertStringContainsString('[data-sheet="open"]', $body, 'sheet expand state must be styled.');
+        // V4-17 — pin <-> row hover-sync wiring.
+        $this->assertStringContainsString('setActiveRow', $body, 'pin hover must highlight its continent row.');
+        $this->assertStringContainsString('focusContinent', $body, 'row hover must pan the map to that continent.');
     }
 
     public function test_breaking_route_accepts_optional_region_filter(): void

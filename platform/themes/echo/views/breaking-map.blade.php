@@ -729,6 +729,31 @@
         },
     });
 
+    // ── S-MAP-V4-17 hover-sync (pin <-> sidecar continent row) ────────
+    const sidecarRows = [...shell.querySelectorAll('.gmap-sidecar__row')];
+    const setActiveRow = (cont) => {
+        sidecarRows.forEach((r) => {
+            r.dataset.active = (cont && r.dataset.continent === cont) ? 'true' : 'false';
+        });
+    };
+    const focusContinent = (cont) => {
+        const ms = (shell._gmap.byContinent || {})[cont] || [];
+        if (!ms.length) return;
+        const b = L.latLngBounds(ms.map((m) => m.getLatLng()));
+        // maxZoom 5 == disableClusteringAtZoom, so the continent's clusters
+        // open into their individual country markers ("opens any cluster").
+        map.fitBounds(b.pad(0.3), { maxZoom: 5 });
+    };
+    // Hover (or keyboard-focus) a sidecar row -> highlight it + pan/zoom the
+    // map to that continent. focusContinent no-ops until pins finish loading.
+    sidecarRows.forEach((r) => {
+        const cont = r.dataset.continent;
+        r.addEventListener('mouseenter', () => { setActiveRow(cont); focusContinent(cont); });
+        r.addEventListener('mouseleave', () => setActiveRow(null));
+        r.addEventListener('focusin', () => { setActiveRow(cont); focusContinent(cont); });
+        r.addEventListener('focusout', () => setActiveRow(null));
+    });
+
     setStatus(@json(__('Chargement des actualités…')));
     fetch(apiUrl, { headers: { Accept: 'application/json' } })
         .then((r) => r.ok ? r.json() : Promise.reject(r.status))
@@ -736,6 +761,7 @@
             const pins = (data && data.pins) || [];
             if (!pins.length) { setStatus(@json(__('Aucune actualité urgente sur la carte.'))); return; }
 
+            const byContinent = {};
             pins.forEach((pin) => {
                 if (typeof pin.lat !== 'number' || typeof pin.lng !== 'number') return;
                 const counts = countsFromPosts(pin.posts);
@@ -753,12 +779,17 @@
                     minWidth: 240,
                     autoPanPadding: [24, 24],
                 });
+                // V4-17 — hovering a pin highlights its continent's sidecar row.
+                (byContinent[pin.continent] = byContinent[pin.continent] || []).push(marker);
+                marker.on('mouseover', () => setActiveRow(pin.continent));
+                marker.on('mouseout', () => setActiveRow(null));
                 clusterGroup.addLayer(marker);
             });
 
             map.addLayer(clusterGroup);
             shell._gmap.clusterGroup = clusterGroup;
             shell._gmap.pins = pins;
+            shell._gmap.byContinent = byContinent;
 
             try {
                 const b = clusterGroup.getBounds();
