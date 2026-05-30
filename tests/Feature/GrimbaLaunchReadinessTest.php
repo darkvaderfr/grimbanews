@@ -2980,13 +2980,14 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertIsArray($decoded['top_tags'], 'top_tags must be an array.');
     }
 
-    public function test_breaking_map_route_renders_all_six_continent_tickers(): void
+    public function test_breaking_map_legacy_renders_all_six_continent_tickers(): void
     {
-        // S-MAP-19 (Vader 2026-05-29) — /breaking-map renders the
-        // full-viewport world map + 6 continent tickers (5 continents +
-        // global). Test asserts: 200 status, all 6 data-continent
-        // attributes present, locale-aware title, ARIA labels.
-        $response = $this->get('/breaking-map?window=720');
+        // S-MAP-19 (Vader 2026-05-29) — the v1-v3 hand-rolled SVG experience
+        // (full-viewport world map + 6 continent tickers + HUD chrome) now
+        // lives at /breaking-map-legacy after S-MAP-V4-09 swapped /breaking-map
+        // to the real Leaflet map. This locks the frozen v3 fallback: 200,
+        // all 6 data-continent tickers, SVG world map, scroll-dir, controls.
+        $response = $this->get('/breaking-map-legacy?window=720');
         $response->assertStatus(200);
         $body = $response->getContent();
         // All 5 continents + 'global' bucket each get a ticker.
@@ -3017,6 +3018,48 @@ class GrimbaLaunchReadinessTest extends TestCase
             'v2: equator + tropics graticule must render.');
         $this->assertStringContainsString('gmap-grid', $body,
             'v2: HUD grid overlay must render.');
+    }
+
+    public function test_breaking_map_v4_renders_real_leaflet_map(): void
+    {
+        // S-MAP-V4-09 (Vader 2026-05-30) — /breaking-map is now the REAL map:
+        // Leaflet + CARTO Dark Matter tiles + Natural Earth boundaries +
+        // /api/breaking-map.json, with the v3 HUD chrome on top. Locks the
+        // swap so a regression can't silently revert to the SVG or drop the
+        // real-map wiring.
+        $response = $this->get('/breaking-map?window=720');
+        $response->assertStatus(200);
+        $body = $response->getContent();
+
+        // The HUD shell + chrome controls carried from v3.
+        $this->assertStringContainsString('data-component="gmap"', $body);
+        $this->assertStringContainsString('data-action="pause"', $body, 'Pause control must be present.');
+        $this->assertStringContainsString('data-action="fullscreen"', $body, 'Fullscreen control must be present.');
+
+        // Vendored (not CDN) Leaflet + markercluster assets.
+        $this->assertStringContainsString('vendor/leaflet/leaflet.css', $body);
+        $this->assertStringContainsString('vendor/leaflet/leaflet.js', $body);
+        $this->assertStringContainsString('vendor/leaflet/leaflet.markercluster.js', $body);
+
+        // Real map data: the Leaflet container, CARTO Dark Matter tiles, the
+        // Natural Earth boundary layer, and the pins JSON endpoint.
+        $this->assertStringContainsString('id="gmap-leaflet"', $body, 'Leaflet map container must be present.');
+        $this->assertStringContainsString('basemaps.cartocdn.com/dark_all', $body, 'CARTO Dark Matter tiles must be configured.');
+        $this->assertStringContainsString('vendor/natural-earth/world.geojson', $body, 'Natural Earth boundaries must be loaded.');
+        $this->assertStringContainsString('/api/breaking-map.json', $body, 'view must fetch the pins JSON endpoint.');
+
+        // Open-map attribution (NobuAI brand rule: map providers are fine).
+        $this->assertStringContainsString('openstreetmap.org/copyright', $body);
+        $this->assertStringContainsString('carto.com/attributions', $body);
+
+        // a11y: skip-to-list link + the live status region.
+        $this->assertStringContainsString('gmap-skip', $body, 'skip-to-list link must be present.');
+        $this->assertStringContainsString('role="status"', $body, 'ARIA live status region must be present.');
+
+        // The hand-rolled v3 SVG must be GONE from /breaking-map (it lives on
+        // at /breaking-map-legacy) — proves the swap actually happened.
+        $this->assertStringNotContainsString('class="gmap-svg"', $body,
+            '/breaking-map must no longer render the v3 hand-rolled SVG.');
     }
 
     public function test_breaking_route_accepts_optional_region_filter(): void
@@ -3059,13 +3102,13 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString(url('/breaking?region=europe'), $body);
     }
 
-    public function test_breaking_map_ticker_head_clicks_through_to_region_filter(): void
+    public function test_breaking_map_legacy_ticker_head_clicks_through_to_region_filter(): void
     {
-        // S-MAP-v3-C — each continent ticker header is now a link to
-        // /breaking?region=<continent>. Test pins the URL pattern
-        // appears for at least one continent so a future refactor
-        // that drops the click-through fails loud.
-        $body = $this->get('/breaking-map?window=720')->getContent();
+        // S-MAP-v3-C — each continent ticker header in the frozen v3 fallback
+        // links to /breaking?region=<continent>. (The v4 map's region
+        // click-through arrives with the Phase 4 sidecar.) Locked on the
+        // legacy URL so a refactor that drops it fails loud.
+        $body = $this->get('/breaking-map-legacy?window=720')->getContent();
         $this->assertStringContainsString(
             'href="' . url('/breaking?region=europe') . '"',
             $body,
@@ -3086,11 +3129,13 @@ class GrimbaLaunchReadinessTest extends TestCase
             'home header must show the localized "Carte" label.');
     }
 
-    public function test_breaking_map_continent_labels_render_over_map(): void
+    public function test_breaking_map_legacy_continent_labels_render_over_map(): void
     {
-        // S-MAP-v2 (Vader 2026-05-29) — each continent name renders
-        // as a HUD label overlaid on the map. Pin all 5 + global.
-        $body = $this->get('/breaking-map?window=720')->getContent();
+        // S-MAP-v2 (Vader 2026-05-29) — each continent name renders as a HUD
+        // label overlaid on the frozen v3 SVG map. Pin all 5 + global on the
+        // legacy URL (the v4 real map shows country PINS, not continent
+        // labels; per-continent labels return with the Phase 4 sidecar).
+        $body = $this->get('/breaking-map-legacy?window=720')->getContent();
         foreach ([
             __('Europe'),
             __('Amériques'),
