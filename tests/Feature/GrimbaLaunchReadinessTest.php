@@ -3283,6 +3283,111 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_api_breaking_map_json_shape_contract(): void
+    {
+        // S-MAP-V4-08 (Vader 2026-05-30) — lock the /api/breaking-map.json
+        // contract the Leaflet view (V4-09/10) and external consumers code
+        // against: top-level + per-pin + per-post keys, headers, ETag/304,
+        // the summary block, per-country cap, and window clamping. Runs
+        // against live seeded data.
+        $perCountry = 3;
+        $response = $this->get('/api/breaking-map.json?window=720&per_country=' . $perCountry);
+        $response->assertStatus(200);
+
+        // Headers: cacheable + CORS-open + JSON + a non-empty ETag.
+        $cacheControl = $response->headers->get('Cache-Control');
+        $this->assertStringContainsString('max-age=60', (string) $cacheControl);
+        $this->assertStringContainsString('public', (string) $cacheControl);
+        $this->assertSame('*', $response->headers->get('Access-Control-Allow-Origin'));
+        $this->assertStringContainsString('GET', (string) $response->headers->get('Access-Control-Allow-Methods'));
+        $this->assertStringContainsString('application/json', (string) $response->headers->get('Content-Type'));
+        $etag = $response->headers->get('ETag');
+        $this->assertNotEmpty($etag, 'endpoint must emit an ETag for cheap revalidation.');
+
+        $body = $response->json();
+
+        // Top-level shape.
+        foreach (['generated_at', 'window_hours', 'per_country', 'count', 'methodology_url', 'summary', 'pins'] as $key) {
+            $this->assertArrayHasKey($key, $body, "top-level '{$key}' missing.");
+        }
+        $this->assertSame(720, $body['window_hours']);
+        $this->assertSame($perCountry, $body['per_country']);
+        $this->assertSame(count($body['pins']), $body['count'], 'count must equal number of pins.');
+        $this->assertStringStartsWith('http', $body['methodology_url'], 'methodology_url must be absolute.');
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T/', (string) $body['generated_at']);
+        $this->assertNotEmpty($body['pins'], 'live data must yield pins in a 720h window.');
+
+        // Summary block.
+        foreach (['total_countries', 'total_posts', 'displayed_posts', 'top_countries'] as $key) {
+            $this->assertArrayHasKey($key, $body['summary'], "summary '{$key}' missing.");
+        }
+        $this->assertSame(count($body['pins']), $body['summary']['total_countries']);
+        $this->assertGreaterThanOrEqual($body['summary']['displayed_posts'], $body['summary']['total_posts'],
+            'total_posts (exact) must be >= displayed_posts (capped).');
+        $this->assertLessThanOrEqual(3, count($body['summary']['top_countries']), 'top_countries is top-3.');
+        // top_countries are the densest pins, in order.
+        $pinTotals = array_map(fn ($p) => $p['total_at_country'], $body['pins']);
+        foreach ($body['summary']['top_countries'] as $i => $tc) {
+            $this->assertSame($pinTotals[$i], $tc['total'], 'top_countries must mirror the densest pins in order.');
+        }
+
+        // Per-pin + per-post shape.
+        $palette = \App\Support\GrimbaClusterBias::biasMetaForBlade();
+        $continents = \App\Support\Continents::all();
+        foreach ($body['pins'] as $pin) {
+            foreach (['country', 'continent', 'lat', 'lng', 'total_at_country', 'posts'] as $key) {
+                $this->assertArrayHasKey($key, $pin, "pin '{$key}' missing.");
+            }
+            $this->assertMatchesRegularExpression('/^[A-Z]{2}$/', $pin['country']);
+            $this->assertContains($pin['continent'], $continents);
+            $this->assertGreaterThanOrEqual(-90, $pin['lat']);
+            $this->assertLessThanOrEqual(90, $pin['lat']);
+            $this->assertGreaterThanOrEqual(-180, $pin['lng']);
+            $this->assertLessThanOrEqual(180, $pin['lng']);
+            // Per-country cap: shown posts in [1, perCountry]; exact total >= shown.
+            $shown = count($pin['posts']);
+            $this->assertGreaterThanOrEqual(1, $shown);
+            $this->assertLessThanOrEqual($perCountry, $shown, 'posts[] must respect the per_country cap.');
+            $this->assertGreaterThanOrEqual($shown, $pin['total_at_country']);
+
+            foreach ($pin['posts'] as $post) {
+                foreach (['title', 'url', 'source_name', 'published_at', 'bias_rating', 'bias_color'] as $key) {
+                    $this->assertArrayHasKey($key, $post, "post '{$key}' missing.");
+                }
+                $this->assertContains($post['bias_rating'], ['left', 'center', 'right', 'unknown'],
+                    'a post bias is one of left/center/right/unknown (middle_ground is cluster-only).');
+                // bias_color must be the canonical palette color for that rating.
+                $this->assertSame($palette[$post['bias_rating']]['color'], $post['bias_color'],
+                    'bias_color must match the Wave palette for its rating.');
+                $this->assertStringStartsWith('http', $post['url'], 'post url must be absolute.');
+                if ($post['published_at'] !== null) {
+                    $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T/', $post['published_at']);
+                }
+            }
+        }
+
+        // ETag revalidation: If-None-Match with the served ETag -> 304.
+        $this->withHeaders(['If-None-Match' => $etag])
+            ->get('/api/breaking-map.json?window=720&per_country=' . $perCountry)
+            ->assertStatus(304);
+
+        // ?summary_only=1 -> summary present, pins omitted.
+        $summaryOnly = $this->get('/api/breaking-map.json?window=720&summary_only=1');
+        $summaryOnly->assertStatus(200);
+        $so = $summaryOnly->json();
+        $this->assertArrayHasKey('summary', $so);
+        $this->assertArrayNotHasKey('pins', $so, 'summary_only must omit pins[].');
+
+        // Per-country cap is a hard ceiling.
+        foreach ($this->get('/api/breaking-map.json?window=720&per_country=1')->json('pins') as $pin) {
+            $this->assertLessThanOrEqual(1, count($pin['posts']), 'per_country=1 caps posts at 1.');
+        }
+
+        // Window clamps to [1, 720] (no 500, no unbounded scan).
+        $this->assertSame(720, $this->get('/api/breaking-map.json?window=999999')->json('window_hours'));
+        $this->assertSame(1, $this->get('/api/breaking-map.json?window=0')->json('window_hours'));
+    }
+
     public function test_api_middle_ground_endpoints_share_cache_control_policy(): void
     {
         // Sprint QQ (2026-05-29) — both JSON and Atom endpoints feed
