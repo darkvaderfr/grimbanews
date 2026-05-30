@@ -3157,6 +3157,63 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertContains('rtl', $directions);
     }
 
+    public function test_country_centroids_pin_representative_countries_in_range(): void
+    {
+        // S-MAP-V4-04 (Vader 2026-05-29) — App\Support\CountryCentroids maps
+        // ISO-2 -> [lat, lng] so /breaking-map can drop a pin at the source's
+        // country. Pin a representative country per continent inside its
+        // rough bounding box so a future table refactor that scrambles
+        // coordinates fails loud (a pin landing in the ocean is a regression).
+        $boxes = [
+            // iso => [latMin, latMax, lngMin, lngMax]
+            'US' => [24, 50, -125, -66],   'CA' => [41, 75, -141, -52],
+            'BR' => [-34, 6, -74, -34],    'FR' => [41, 51, -5, 10],
+            'GB' => [49, 61, -8, 2],       'DE' => [47, 55, 5, 16],
+            'RU' => [41, 78, 19, 180],     'JP' => [30, 46, 128, 146],
+            'IN' => [6, 36, 68, 98],       'EG' => [22, 32, 24, 37],
+            'NG' => [4, 14, 2, 15],        'ZA' => [-35, -22, 16, 33],
+            'AU' => [-44, -10, 112, 154],
+        ];
+        foreach ($boxes as $iso => [$latMin, $latMax, $lngMin, $lngMax]) {
+            $c = \App\Support\CountryCentroids::for($iso);
+            $this->assertIsArray($c, "Centroid for {$iso} must exist.");
+            [$lat, $lng] = $c;
+            $this->assertGreaterThanOrEqual($latMin, $lat, "{$iso} lat below box");
+            $this->assertLessThanOrEqual($latMax, $lat, "{$iso} lat above box");
+            $this->assertGreaterThanOrEqual($lngMin, $lng, "{$iso} lng west of box");
+            $this->assertLessThanOrEqual($lngMax, $lng, "{$iso} lng east of box");
+        }
+
+        // Case-insensitive: lowercase ISO-2 resolves to the same centroid.
+        $this->assertSame(
+            \App\Support\CountryCentroids::for('FR'),
+            \App\Support\CountryCentroids::for('fr'),
+            'lookup must be case-insensitive.'
+        );
+
+        // null / empty / unrecognised codes return null (no fake pin).
+        $this->assertNull(\App\Support\CountryCentroids::for(null));
+        $this->assertNull(\App\Support\CountryCentroids::for(''));
+        $this->assertNull(\App\Support\CountryCentroids::for('ZZ'));
+        $this->assertFalse(\App\Support\CountryCentroids::has('ZZ'));
+        $this->assertTrue(\App\Support\CountryCentroids::has('us'));
+
+        // Table size is pinned so an accidental truncation fails loud.
+        $this->assertSame(237, \App\Support\CountryCentroids::count(),
+            'centroid table size changed — confirm intentional before re-pinning.');
+
+        // Every country that currently feeds the system (the live
+        // news_sources ISO-2 set, incl. tiny Vatican) must have a centroid,
+        // so no real source can be silently dropped from the map.
+        $liveSourceCodes = ['US','FR','GB','BE','CH','CA','IN','AU','CO','MA','IL','CI','CM',
+            'DE','TN','ZA','AR','BF','CG','EG','GH','GR','ID','IE','KR','LT','PK','PL','QA',
+            'RU','SN','TR','VA'];
+        foreach ($liveSourceCodes as $iso) {
+            $this->assertTrue(\App\Support\CountryCentroids::has($iso),
+                "live news_sources country {$iso} must have a map centroid.");
+        }
+    }
+
     public function test_api_middle_ground_endpoints_share_cache_control_policy(): void
     {
         // Sprint QQ (2026-05-29) — both JSON and Atom endpoints feed
