@@ -3074,6 +3074,9 @@ class GrimbaLaunchReadinessTest extends TestCase
         // Clustering + custom icon wiring.
         $this->assertStringContainsString('markerClusterGroup', $body, 'markercluster must be wired.');
         $this->assertStringContainsString('iconCreateFunction', $body, 'custom cluster icon must be wired.');
+        // V4-12 — clicking a cluster zooms to expand into its countries.
+        $this->assertStringContainsString('zoomToBoundsOnClick', $body, 'cluster click must expand to underlying pins.');
+        $this->assertStringContainsString('disableClusteringAtZoom', $body, 'clustering must switch off at a regional zoom.');
         // Per-country + cluster donut markup hooks.
         $this->assertStringContainsString('gmap-pin__donut', $body);
         $this->assertStringContainsString('gmap-cluster__count', $body);
@@ -3096,6 +3099,24 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('gmap-pop__item', $body, 'popup post-row markup must ship.');
         $this->assertStringContainsString('Intl.DisplayNames', $body, 'country name must be localized client-side.');
         $this->assertStringContainsString('escapeHtml', $body, 'RSS-sourced popup text must be HTML-escaped (XSS guard).');
+    }
+
+    public function test_breaking_map_v4_pause_and_fullscreen_wired(): void
+    {
+        // S-MAP-V4-13/14 (Vader 2026-05-30) — Pause freezes the map's motion
+        // (pulses + Leaflet zoom/fade animations) and Fullscreen uses the
+        // native API with a ResizeObserver-driven invalidateSize so the map
+        // re-fills its container on every resize (fullscreen, window,
+        // orientation). Lock the shipped wiring.
+        $body = $this->get('/breaking-map?window=720')->getContent();
+        // V4-13 — pause freezes Leaflet animation options.
+        $this->assertStringContainsString('zoomAnimation', $body, 'Pause must freeze the zoom animation.');
+        $this->assertStringContainsString('data-paused', $body, 'Pause must drive the [data-paused] freeze.');
+        // V4-14 — fullscreen + robust resize.
+        $this->assertStringContainsString('requestFullscreen', $body, 'Fullscreen must use the native API.');
+        $this->assertStringContainsString('fullscreenchange', $body, 'must react to fullscreenchange.');
+        $this->assertStringContainsString('invalidateSize', $body, 'must invalidate Leaflet size on resize.');
+        $this->assertStringContainsString('ResizeObserver', $body, 'must observe container resizes.');
     }
 
     public function test_breaking_route_accepts_optional_region_filter(): void

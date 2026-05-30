@@ -466,8 +466,22 @@
         });
     }
 
-    // Keep the map sized to its container on viewport changes.
-    window.addEventListener('resize', () => map.invalidateSize());
+    // S-MAP-V4-14 — keep Leaflet correctly sized through EVERY container
+    // resize (fullscreen enter/exit, window resize, mobile orientation, the
+    // Phase 4 sidecar collapse) via a debounced ResizeObserver — more robust
+    // than a one-shot setTimeout after fullscreenchange. The fullscreen
+    // toggle above also nudges invalidateSize immediately for snappy feedback.
+    const mapEl = document.getElementById('gmap-leaflet');
+    if ('ResizeObserver' in window && mapEl) {
+        let rafId = null;
+        const ro = new ResizeObserver(() => {
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => map.invalidateSize({ animate: false }));
+        });
+        ro.observe(mapEl);
+    } else {
+        window.addEventListener('resize', () => map.invalidateSize());
+    }
 })();
 </script>
 
