@@ -3214,6 +3214,54 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_pins_for_map_returns_pinnable_country_groups(): void
+    {
+        // S-MAP-V4-05 (Vader 2026-05-29) — GrimbaHomeFeed::pinsForMap feeds
+        // the Leaflet /breaking-map. Asserts the contract the view + JSON
+        // endpoint (V4-06) depend on: one entry per pinnable country, each
+        // with a real centroid, its continent, the exact window total, and
+        // the freshest <= $perCountry posts. Runs against live seeded data.
+        $perCountry = 5;
+        $pins = \App\Support\GrimbaHomeFeed::pinsForMap(720, $perCountry);
+        $this->assertIsArray($pins);
+        $this->assertNotEmpty($pins, 'live data must yield at least one map pin in a 720h window.');
+
+        $prevTotal = PHP_INT_MAX;
+        foreach ($pins as $pin) {
+            foreach (['country', 'continent', 'lat', 'lng', 'total', 'posts'] as $key) {
+                $this->assertArrayHasKey($key, $pin, "pin missing '{$key}' key.");
+            }
+            // Country is an uppercase ISO-2 with a real centroid; the pin's
+            // coordinates ARE that centroid (no drift, no orphan pins).
+            $this->assertMatchesRegularExpression('/^[A-Z]{2}$/', $pin['country']);
+            $centroid = \App\Support\CountryCentroids::for($pin['country']);
+            $this->assertNotNull($centroid, "pinned country {$pin['country']} must have a centroid.");
+            $this->assertSame($centroid[0], $pin['lat']);
+            $this->assertSame($centroid[1], $pin['lng']);
+            $this->assertGreaterThanOrEqual(-90, $pin['lat']);
+            $this->assertLessThanOrEqual(90, $pin['lat']);
+            $this->assertGreaterThanOrEqual(-180, $pin['lng']);
+            $this->assertLessThanOrEqual(180, $pin['lng']);
+            // Continent agrees with the canonical mapping.
+            $this->assertSame(\App\Support\Continents::forCountry($pin['country']), $pin['continent']);
+            // Display posts are capped; exact total is never below them.
+            $shown = $pin['posts']->count();
+            $this->assertGreaterThanOrEqual(1, $shown, 'a pin must carry at least one displayed post.');
+            $this->assertLessThanOrEqual($perCountry, $shown, 'displayed posts must respect the per-country cap.');
+            $this->assertGreaterThanOrEqual($shown, $pin['total'], 'total must be >= displayed count.');
+            // Densest-first ordering.
+            $this->assertLessThanOrEqual($prevTotal, $pin['total'], 'pins must be ordered by total desc.');
+            $prevTotal = $pin['total'];
+        }
+
+        // The per-country cap is a hard ceiling: a tighter cap must shrink
+        // (never grow) the displayed posts on every pin.
+        foreach (\App\Support\GrimbaHomeFeed::pinsForMap(720, 2) as $pin) {
+            $this->assertLessThanOrEqual(2, $pin['posts']->count(),
+                'perCountry=2 must cap displayed posts at 2.');
+        }
+    }
+
     public function test_api_middle_ground_endpoints_share_cache_control_policy(): void
     {
         // Sprint QQ (2026-05-29) — both JSON and Atom endpoints feed

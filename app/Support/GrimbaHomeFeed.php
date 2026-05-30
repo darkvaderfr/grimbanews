@@ -315,6 +315,124 @@ class GrimbaHomeFeed
         });
     }
 
+    /**
+     * S-MAP-V4-05 (Vader 2026-05-29) — pin source for the Leaflet
+     * /breaking-map rebuild. Returns one entry per *pinnable* country
+     * (a country with a known centroid), each carrying its map coordinates,
+     * continent, the exact total of matching posts in the window, and the
+     * freshest $perCountry posts for the pin popup / cluster expansion.
+     *
+     * Shape:
+     *   [
+     *     ['country' => 'US', 'continent' => 'americas',
+     *      'lat' => 39.538, 'lng' => -97.483,
+     *      'total' => 225, 'posts' => Collection<Post>(<= $perCountry)],
+     *     ...
+     *   ]
+     *
+     * Mirrors breakingByContinent(): same published + has-source filter,
+     * same locale-strict gate, same 60s cache. v4 pins at the *source's*
+     * country, not the story location (story-level geocoding is Phase 2).
+     * Posts whose source has a NULL/empty/unknown country — or a country
+     * with no centroid — carry no map location and are omitted (the
+     * continent sidecar still counts them via breakingByContinent()).
+     */
+    public static function pinsForMap(int $windowHours = 18, int $perCountry = 5): array
+    {
+        $windowHours = max(1, min(720, $windowHours));
+        $perCountry = max(1, min(20, $perCountry));
+        $locale = self::resolveReaderLocale();
+        $strict = GrimbaLanguageSettings::strictForBreaking();
+        $bucket = $strict ? 'strict' : 'soft';
+
+        $cacheKey = 'grimba_pins_map_v1:' . $locale . ':' . $bucket . ':' . $windowHours . ':' . $perCountry;
+
+        return Cache::remember($cacheKey, 60, function () use ($windowHours, $strict, $locale, $perCountry): array {
+            // Shared base query, rebuilt fresh for each pass so the count
+            // and the display pull apply identical filters and can never
+            // diverge: published posts with a non-empty source country,
+            // inner-joined to news_sources, inside the window, locale-strict
+            // when configured.
+            $base = function () use ($strict, $locale, $windowHours) {
+                $query = Post::query()
+                    ->join('news_sources', 'posts.source_id', '=', 'news_sources.id')
+                    ->where('posts.status', 'published')
+                    ->whereNotNull('posts.source_name')
+                    ->whereNotNull('news_sources.country')
+                    ->where('news_sources.country', '!=', '');
+
+                if ($strict) {
+                    GrimbaTranslationPresenter::filterForTargetLocale($query, $locale);
+                }
+
+                GrimbaPostRecency::wherePublishedSince($query, now()->subHours($windowHours));
+
+                return $query;
+            };
+
+            // Exact per-country totals (the pin's count badge) — a grouped
+            // COUNT over the whole window, not just the freshest pull.
+            $totals = [];
+            foreach (
+                $base()->toBase()
+                    ->select('news_sources.country as country', DB::raw('count(*) as total'))
+                    ->groupBy('news_sources.country')
+                    ->get() as $row
+            ) {
+                $iso = strtoupper(trim((string) $row->country));
+                if ($iso !== '') {
+                    $totals[$iso] = (int) $row->total;
+                }
+            }
+
+            // Display posts — freshest first, capped per country in PHP.
+            // Over-pull so the busiest geographies still fill their cap.
+            $cols = ['posts.id','posts.name','posts.translated_name','posts.translated_to',
+                     'posts.original_language','posts.source_name','posts.source_id',
+                     'posts.bias_rating','posts.published_at','posts.created_at','posts.image',
+                     'news_sources.country as source_country'];
+
+            $displayQuery = $base()->with('slugable');
+            GrimbaPostRecency::orderByPublished($displayQuery);
+            $candidates = $displayQuery->limit(max($perCountry * 60, 600))->get($cols);
+
+            $byCountry = [];
+            foreach ($candidates as $post) {
+                $iso = strtoupper(trim((string) ($post->source_country ?? '')));
+                if ($iso === '') {
+                    continue;
+                }
+
+                $centroid = CountryCentroids::for($iso);
+                if ($centroid === null) {
+                    continue; // unpinnable — no map location for this country
+                }
+
+                if (! isset($byCountry[$iso])) {
+                    $byCountry[$iso] = [
+                        'country' => $iso,
+                        'continent' => Continents::forCountry($iso),
+                        'lat' => $centroid[0],
+                        'lng' => $centroid[1],
+                        'total' => $totals[$iso] ?? 0,
+                        'posts' => collect(),
+                    ];
+                }
+
+                if ($byCountry[$iso]['posts']->count() < $perCountry) {
+                    $byCountry[$iso]['posts']->push($post);
+                }
+            }
+
+            // Densest country first (drives draw order + the sidecar), ISO
+            // as the deterministic tie-break.
+            $pins = array_values($byCountry);
+            usort($pins, fn ($a, $b) => ($b['total'] <=> $a['total']) ?: strcmp($a['country'], $b['country']));
+
+            return $pins;
+        });
+    }
+
     public static function breaking(int $windowHours = 18): array
     {
         $windowHours = max(1, min(72, $windowHours));
