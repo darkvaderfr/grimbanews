@@ -3084,6 +3084,20 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_breaking_map_v4_popups_wired_and_xss_safe(): void
+    {
+        // S-MAP-V4-11 (Vader 2026-05-30) — each marker binds a locale-aware
+        // popup (country name via Intl.DisplayNames, post title + source +
+        // "Lire l'article →"). Titles come from RSS (untrusted) so they MUST
+        // be HTML-escaped before going into popup innerHTML. Lock the wiring
+        // + the XSS guard (asserting locale-independent JS tokens).
+        $body = $this->get('/breaking-map?window=720')->getContent();
+        $this->assertStringContainsString('bindPopup', $body, 'markers must bind a popup.');
+        $this->assertStringContainsString('gmap-pop__item', $body, 'popup post-row markup must ship.');
+        $this->assertStringContainsString('Intl.DisplayNames', $body, 'country name must be localized client-side.');
+        $this->assertStringContainsString('escapeHtml', $body, 'RSS-sourced popup text must be HTML-escaped (XSS guard).');
+    }
+
     public function test_breaking_route_accepts_optional_region_filter(): void
     {
         // S-MAP-v3-C (Vader 2026-05-29) — /breaking?region=<continent>

@@ -255,6 +255,45 @@
     }
     .gmap-shell[data-paused="true"] .gmap-pin::before { animation-play-state: paused; }
     @media (prefers-reduced-motion: reduce) { .gmap-pin::before { animation: none; } }
+
+    /* ── S-MAP-V4-11 per-pin popup (HUD-themed Leaflet popup) ───────── */
+    .gmap-pop-wrap .leaflet-popup-content-wrapper {
+        background: rgba(6, 8, 18, .96);
+        color: #e8f4ff;
+        border: 1px solid rgba(168, 85, 247, .35);
+        border-radius: 8px;
+        box-shadow: 0 14px 44px rgba(0, 0, 0, .65);
+        backdrop-filter: blur(6px);
+    }
+    .gmap-pop-wrap .leaflet-popup-content { margin: 12px 14px; }
+    .gmap-pop-wrap .leaflet-popup-tip {
+        background: rgba(6, 8, 18, .96);
+        border: 1px solid rgba(168, 85, 247, .35);
+    }
+    .gmap-pop-wrap a.leaflet-popup-close-button { color: rgba(232, 244, 255, .6); }
+    .gmap-pop__head {
+        display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+        padding-bottom: 8px; margin-bottom: 8px;
+        border-bottom: 1px solid rgba(34, 211, 238, .18);
+    }
+    .gmap-pop__head strong {
+        font-size: 14px; color: #22d3ee; letter-spacing: .04em; text-transform: uppercase;
+    }
+    .gmap-pop__total {
+        font-size: 10px; font-weight: 800; color: rgba(232, 244, 255, .55);
+        text-transform: uppercase; letter-spacing: .06em; white-space: nowrap;
+    }
+    .gmap-pop__list {
+        list-style: none; margin: 0; padding: 0;
+        display: flex; flex-direction: column; gap: 9px;
+        max-height: 260px; overflow-y: auto;
+    }
+    .gmap-pop__item { display: flex; gap: 9px; align-items: flex-start; text-decoration: none; color: #e8f4ff; }
+    .gmap-pop__item:hover .gmap-pop__title { text-decoration: underline; color: #fff; }
+    .gmap-pop__dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; box-shadow: 0 0 6px currentColor; }
+    .gmap-pop__txt { display: flex; flex-direction: column; gap: 2px; }
+    .gmap-pop__title { font-size: 13px; line-height: 1.3; font-weight: 600; }
+    .gmap-pop__src { font-size: 10px; color: rgba(34, 211, 238, .75); text-transform: uppercase; letter-spacing: .04em; }
 </style>
 
 <section
@@ -262,6 +301,7 @@
     data-component="gmap"
     data-api-url="{{ $apiUrl }}"
     data-geojson-url="{{ $geoJsonUrl }}"
+    data-locale="{{ $readerLocale }}"
     aria-label="{{ __('Carte mondiale en direct des actualités urgentes') }}"
 >
     <header class="gmap-chrome">
@@ -463,6 +503,35 @@
         return BIAS_COLOR[best];
     };
 
+    // ── V4-11 popup helpers ──────────────────────────────────────────
+    // Titles/source come from RSS feeds (untrusted) and go into popup
+    // innerHTML, so escape rigorously to prevent XSS.
+    const escapeHtml = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const locale = (shell.dataset.locale || document.documentElement.lang || 'fr').slice(0, 2);
+    let regionNames = null;
+    try { regionNames = new Intl.DisplayNames([locale], { type: 'region' }); } catch (e) { regionNames = null; }
+    const countryLabel = (iso) => {
+        if (!iso) return '';
+        try { return (regionNames && regionNames.of(iso)) || iso; } catch (e) { return iso; }
+    };
+    const L_STORIES = @json(__('actualités'));
+    const L_READ = @json(__("Lire l'article"));
+    const buildPopup = (pin) => {
+        const items = (pin.posts || []).map((p) =>
+            '<li><a class="gmap-pop__item" href="' + escapeHtml(p.url || '#') + '">'
+            + '<span class="gmap-pop__dot" style="background:' + escapeHtml(p.bias_color || '#6b6459') + '"></span>'
+            + '<span class="gmap-pop__txt">'
+            + '<span class="gmap-pop__title">' + escapeHtml(p.title) + '</span>'
+            + '<span class="gmap-pop__src">' + escapeHtml(p.source_name) + ' · ' + escapeHtml(L_READ) + ' →</span>'
+            + '</span></a></li>'
+        ).join('');
+        return '<div class="gmap-pop">'
+            + '<div class="gmap-pop__head"><strong>' + escapeHtml(countryLabel(pin.country)) + '</strong>'
+            + '<span class="gmap-pop__total">' + fmt(pin.total_at_country || 0) + ' ' + escapeHtml(L_STORIES) + '</span></div>'
+            + '<ul class="gmap-pop__list">' + items + '</ul></div>';
+    };
+
     const clusterGroup = L.markerClusterGroup({
         maxClusterRadius: 48,
         showCoverageOnHover: false,
@@ -498,9 +567,15 @@
                     + '<span class="gmap-pin__count">' + fmt(pin.total_at_country || 0) + '</span></div>';
                 const marker = L.marker([pin.lat, pin.lng], {
                     icon: L.divIcon({ html, className: 'gmap-pin-wrap', iconSize: [34, 34] }),
-                    title: (pin.country || '') + ' — ' + (pin.total_at_country || 0),
+                    title: countryLabel(pin.country) + ' — ' + (pin.total_at_country || 0),
                 });
                 marker._gmapPin = Object.assign({ _counts: counts }, pin);
+                marker.bindPopup(buildPopup(pin), {
+                    className: 'gmap-pop-wrap',
+                    maxWidth: 320,
+                    minWidth: 240,
+                    autoPanPadding: [24, 24],
+                });
                 clusterGroup.addLayer(marker);
             });
 
