@@ -3168,6 +3168,51 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('counts_at_country', $body, 'filter must use exact per-bias counts.');
     }
 
+    public function test_breaking_map_v4_feature_lock(): void
+    {
+        // S-MAP-V4-19 (Vader 2026-05-30) — consolidated feature lock for the
+        // v4 map. The vendored assets the client loads must exist on disk (a
+        // feature test dispatches through the kernel and can't HTTP-200 a
+        // static public/ file — the web server serves those — so assert
+        // presence + validity instead).
+        foreach ([
+            'vendor/leaflet/leaflet.js',
+            'vendor/leaflet/leaflet.css',
+            'vendor/leaflet/leaflet.markercluster.js',
+            'vendor/leaflet/MarkerCluster.css',
+            'vendor/leaflet/MarkerCluster.Default.css',
+            'vendor/leaflet/images/marker-icon.png',
+        ] as $asset) {
+            $this->assertFileExists(public_path($asset), "vendored asset missing: {$asset}");
+        }
+
+        // Natural Earth boundaries — present, valid FeatureCollection, with
+        // the canonical iso2 join key (the FR/NO/XK -99 fix from V4-03).
+        $geoPath = public_path('vendor/natural-earth/world.geojson');
+        $this->assertFileExists($geoPath);
+        $geo = json_decode((string) file_get_contents($geoPath), true);
+        $this->assertSame('FeatureCollection', $geo['type'] ?? null);
+        $this->assertNotEmpty($geo['features'] ?? []);
+        $this->assertArrayHasKey('iso2', $geo['features'][0]['properties'] ?? [],
+            'world.geojson must carry the canonical iso2 join key (V4-03 fix).');
+
+        // The page renders every v4 surface.
+        $body = $this->get('/breaking-map?window=720')->getContent();
+        $this->assertStringContainsString('id="gmap-leaflet"', $body, 'map container.');
+        $this->assertStringContainsString('data-component="gmap-sidecar"', $body, 'continent sidecar.');
+        $this->assertSame(5, substr_count($body, 'class="gmap-chip"'), '5 bias filter chips.');
+        $this->assertStringContainsString('/api/breaking-map.json', $body, 'pins endpoint wired.');
+        $this->assertMatchesRegularExpression('#application/ld\+json[^>]*>.*?CollectionPage#s', $body, 'JSON-LD CollectionPage.');
+        $this->assertStringContainsString('role="application"', $body, 'map ARIA role.');
+        $this->assertStringContainsString('role="status"', $body, 'ARIA live status region.');
+        $this->assertStringContainsString('gmap-skip', $body, 'skip-to-list link.');
+
+        // Data endpoint reachable + well-formed.
+        $api = $this->get('/api/breaking-map.json?window=720');
+        $api->assertStatus(200);
+        $this->assertArrayHasKey('pins', $api->json());
+    }
+
     public function test_breaking_route_accepts_optional_region_filter(): void
     {
         // S-MAP-v3-C (Vader 2026-05-29) — /breaking?region=<continent>
