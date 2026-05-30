@@ -254,6 +254,8 @@
         color: #f5d4ff; letter-spacing: .02em;
     }
     .gmap-shell[data-paused="true"] .gmap-pin::before { animation-play-state: paused; }
+    /* V4-13 — paused also kills the Leaflet tile fade-in transition. */
+    .gmap-shell[data-paused="true"] .leaflet-tile { transition: none !important; }
     @media (prefers-reduced-motion: reduce) { .gmap-pin::before { animation: none; } }
 
     /* ── S-MAP-V4-11 per-pin popup (HUD-themed Leaflet popup) ───────── */
@@ -410,11 +412,18 @@
     if (pauseBtn) {
         const pauseLabel = pauseBtn.querySelector('span');
         pauseBtn.addEventListener('click', () => {
-            const paused = shell.dataset.paused === 'true';
-            shell.dataset.paused = paused ? 'false' : 'true';
-            pauseBtn.dataset.active = paused ? 'false' : 'true';
-            pauseBtn.setAttribute('aria-pressed', paused ? 'false' : 'true');
-            pauseLabel.textContent = paused ? @json(__('Pause')) : @json(__('Reprendre'));
+            const next = shell.dataset.paused !== 'true';   // toggling TO this state
+            shell.dataset.paused = next ? 'true' : 'false';
+            pauseBtn.dataset.active = next ? 'true' : 'false';
+            pauseBtn.setAttribute('aria-pressed', next ? 'true' : 'false');
+            pauseLabel.textContent = next ? @json(__('Reprendre')) : @json(__('Pause'));
+            // S-MAP-V4-13 — freeze/thaw the map's motion alongside the CSS
+            // pulse freeze: Leaflet's zoom animation ("auto-zoom"), tile
+            // fade-in, and marker-zoom animations all go instant while
+            // paused, so the LIVE surface visibly stops moving.
+            map.options.zoomAnimation = !next;
+            map.options.fadeAnimation = !next;
+            map.options.markerZoomAnimation = !next;
         });
     }
 
@@ -533,10 +542,18 @@
     };
 
     const clusterGroup = L.markerClusterGroup({
-        maxClusterRadius: 48,
+        // V4-12 — clicking a cluster zooms to fit its countries, expanding
+        // into sub-clusters and then individual country markers. The radius
+        // is tight enough that distinct countries separate by mid-zoom, and
+        // clustering switches off entirely from zoom 5 so a regional read
+        // shows every country. (Same-centroid spiderfy is a no-op here — one
+        // marker per country — but kept on as a safety net.)
+        maxClusterRadius: 46,
+        disableClusteringAtZoom: 5,
+        zoomToBoundsOnClick: true,
+        animate: true,
         showCoverageOnHover: false,
         spiderfyOnMaxZoom: true,
-        disableClusteringAtZoom: 6,
         iconCreateFunction: (cluster) => {
             const counts = { left: 0, center: 0, right: 0, unknown: 0 };
             let total = 0;
