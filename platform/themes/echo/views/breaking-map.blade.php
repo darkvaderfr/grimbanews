@@ -260,6 +260,11 @@
         color: #a855f7;
         border-bottom: 1px solid rgba(168, 85, 247, .18);
         margin-bottom: 6px;
+        text-decoration: none;
+    }
+    .gmap-ticker__head--link:hover {
+        color: #e8f4ff;
+        background: rgba(168, 85, 247, .12);
     }
     .gmap-ticker__head-count {
         color: rgba(232, 244, 255, .55);
@@ -545,8 +550,10 @@
                             $dist['counts']['right'] ?? 0,
                             $dist['counts']['unknown'] ?? 0);
                 @endphp
-                <header class="gmap-ticker__head">
-                    <span>{{ Continents::label($continent) }}</span>
+                <a class="gmap-ticker__head gmap-ticker__head--link"
+                   href="{{ url('/breaking?region=' . $continent) }}"
+                   title="{{ __('Voir tous') }} — {{ Continents::label($continent) }}">
+                    <span>{{ Continents::label($continent) }} →</span>
                     <span class="gmap-ticker__head-meter">
                         @if($donutGradient)
                             <span class="gmap-donut"
@@ -556,7 +563,7 @@
                         @endif
                         <span class="gmap-ticker__head-count">{{ $posts->count() }}</span>
                     </span>
-                </header>
+                </a>
                 @if($posts->isEmpty())
                     <div class="gmap-empty">{{ __('Calme par ici.') }}</div>
                 @else

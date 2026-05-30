@@ -3019,6 +3019,41 @@ class GrimbaLaunchReadinessTest extends TestCase
             'v2: HUD grid overlay must render.');
     }
 
+    public function test_breaking_route_accepts_optional_region_filter(): void
+    {
+        // S-MAP-v3-C (Vader 2026-05-29) — /breaking?region=<continent>
+        // is the click-through target from the map view. Valid
+        // continents narrow the list (title gets the continent suffix);
+        // unknown / missing values fall back to the unfiltered view.
+        $okResponse = $this->get('/breaking?region=europe');
+        $okResponse->assertStatus(200);
+        $this->assertStringContainsString(__('Europe'), $okResponse->getContent(),
+            'valid region must surface continent label in the page.');
+
+        // Bogus region must NOT 404 — it falls back to unfiltered.
+        $bogusResponse = $this->get('/breaking?region=bogus');
+        $bogusResponse->assertStatus(200);
+
+        // Missing region param must work too (regression: original
+        // /breaking route had no concept of region).
+        $emptyResponse = $this->get('/breaking');
+        $emptyResponse->assertStatus(200);
+    }
+
+    public function test_breaking_map_ticker_head_clicks_through_to_region_filter(): void
+    {
+        // S-MAP-v3-C — each continent ticker header is now a link to
+        // /breaking?region=<continent>. Test pins the URL pattern
+        // appears for at least one continent so a future refactor
+        // that drops the click-through fails loud.
+        $body = $this->get('/breaking-map?window=720')->getContent();
+        $this->assertStringContainsString(
+            'href="' . url('/breaking?region=europe') . '"',
+            $body,
+            'ticker head must link to the region-filtered /breaking view.'
+        );
+    }
+
     public function test_breaking_map_nav_entry_present_on_home(): void
     {
         // S-MAP-v3-B (Vader 2026-05-29) — header tools row gets a

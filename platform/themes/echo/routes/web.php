@@ -794,11 +794,26 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
         })->name('public.breaking_map');
 
         Route::get('breaking', function (Request $request) {
-            $bundle = \App\Support\GrimbaHomeFeed::breaking(18);
-            $mode = $bundle['mode'] ?? 'latest';
-            $posts = $bundle['posts'] ?? collect();
+            // S-MAP-v3-C (Vader 2026-05-29) — optional ?region=<continent>
+            // narrows the linear breaking list to one continent.
+            // Validated against the canonical list; unknown values fall
+            // back to the unfiltered view (no 404, no surprise).
+            $regionFilter = strtolower(trim((string) $request->query('region', '')));
+            $validRegions = \App\Support\Continents::all();
+            $applyRegionFilter = in_array($regionFilter, $validRegions, true);
 
-            SeoHelper::setTitle(__('Breaking news') . ' — GrimbaNews')
+            if ($applyRegionFilter) {
+                $continentBuckets = \App\Support\GrimbaHomeFeed::breakingByContinent(48, 20);
+                $posts = $continentBuckets[$regionFilter] ?? collect();
+                $mode = $posts->isNotEmpty() ? 'region' : 'latest';
+            } else {
+                $bundle = \App\Support\GrimbaHomeFeed::breaking(18);
+                $mode = $bundle['mode'] ?? 'latest';
+                $posts = $bundle['posts'] ?? collect();
+            }
+
+            $titleSuffix = $applyRegionFilter ? ' — ' . \App\Support\Continents::label($regionFilter) : '';
+            SeoHelper::setTitle(__('Breaking news') . $titleSuffix . ' — GrimbaNews')
                 ->setDescription(__('Real-time breaking news from across the political spectrum.'));
 
             // Sprint 20 — JSON-LD CollectionPage schema for SEO.
