@@ -3062,6 +3062,28 @@ class GrimbaLaunchReadinessTest extends TestCase
             '/breaking-map must no longer render the v3 hand-rolled SVG.');
     }
 
+    public function test_breaking_map_v4_wires_bias_markers_and_clusters(): void
+    {
+        // S-MAP-V4-10 (Vader 2026-05-30) — the client renders one bias-mix
+        // donut marker per country (total_at_country in the center) clustered
+        // into purple-glow bias-mix donut bubbles (decision #4). Markers are
+        // client-rendered, so lock that the wiring SHIPPED in the view (a
+        // deleted script/style block fails this loud).
+        $body = $this->get('/breaking-map?window=720')->getContent();
+
+        // Clustering + custom icon wiring.
+        $this->assertStringContainsString('markerClusterGroup', $body, 'markercluster must be wired.');
+        $this->assertStringContainsString('iconCreateFunction', $body, 'custom cluster icon must be wired.');
+        // Per-country + cluster donut markup hooks.
+        $this->assertStringContainsString('gmap-pin__donut', $body);
+        $this->assertStringContainsString('gmap-cluster__count', $body);
+        $this->assertStringContainsString('conic-gradient', $body, 'bias-mix donut uses a conic-gradient.');
+        // The client bias palette must mirror the server (Wave) palette.
+        foreach (['#3b82f6', '#a8a8a8', '#e84c3d', '#6b6459'] as $hex) {
+            $this->assertStringContainsString($hex, $body, "client palette must include {$hex}.");
+        }
+    }
+
     public function test_breaking_route_accepts_optional_region_filter(): void
     {
         // S-MAP-v3-C (Vader 2026-05-29) — /breaking?region=<continent>

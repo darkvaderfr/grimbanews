@@ -201,6 +201,60 @@
     .gmap-shell[data-fullscreen-fallback="true"] {
         position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 9999;
     }
+
+    /* ── S-MAP-V4-10 bias pin markers + cluster bias-mix donuts ─────── */
+    /* Reset Leaflet's default white divIcon box for our custom icons. */
+    .gmap-pin-wrap, .gmap-cluster-wrap { background: transparent; border: 0; }
+
+    .gmap-pin {
+        position: relative; width: 34px; height: 34px;
+        display: grid; place-items: center;
+        filter: drop-shadow(0 0 6px var(--glow, #22d3ee));
+        cursor: pointer;
+    }
+    .gmap-pin::before {            /* pulse ring */
+        content: ''; position: absolute; inset: 0; border-radius: 50%;
+        border: 1px solid var(--glow, #22d3ee);
+        animation: gmap-pin-pulse 2.6s ease-out infinite;
+    }
+    @keyframes gmap-pin-pulse {
+        0%   { transform: scale(.7); opacity: .8; }
+        70%  { transform: scale(1.85); opacity: 0; }
+        100% { opacity: 0; }
+    }
+    .gmap-pin__donut {            /* conic bias-mix ring */
+        position: absolute; inset: 0; border-radius: 50%;
+        box-shadow: 0 0 0 1px rgba(4, 6, 12, .85);
+    }
+    .gmap-pin__donut::after {
+        content: ''; position: absolute; inset: 5px; border-radius: 50%;
+        background: rgba(4, 6, 12, .94);
+    }
+    .gmap-pin__count {
+        position: relative; z-index: 1;
+        font: 800 11px/1 var(--font-sans, system-ui, sans-serif);
+        color: #e8f4ff; letter-spacing: .02em;
+    }
+
+    .gmap-cluster {
+        position: relative; width: 48px; height: 48px;
+        display: grid; place-items: center;
+        filter: drop-shadow(0 0 10px rgba(168, 85, 247, .6));
+        cursor: pointer;
+    }
+    .gmap-cluster__donut { position: absolute; inset: 0; border-radius: 50%; }
+    .gmap-cluster__donut::after {
+        content: ''; position: absolute; inset: 6px; border-radius: 50%;
+        background: rgba(8, 6, 18, .95);
+        box-shadow: inset 0 0 10px rgba(168, 85, 247, .5);
+    }
+    .gmap-cluster__count {
+        position: relative; z-index: 1;
+        font: 800 13px/1 var(--font-sans, system-ui, sans-serif);
+        color: #f5d4ff; letter-spacing: .02em;
+    }
+    .gmap-shell[data-paused="true"] .gmap-pin::before { animation-play-state: paused; }
+    @media (prefers-reduced-motion: reduce) { .gmap-pin::before { animation: none; } }
 </style>
 
 <section
@@ -365,5 +419,102 @@
 
     // Keep the map sized to its container on viewport changes.
     window.addEventListener('resize', () => map.invalidateSize());
+})();
+</script>
+
+<script>
+/* S-MAP-V4-10 — fetch /api/breaking-map.json and render one bias-mix-donut
+   marker per country (total_at_country in the center), clustered into
+   purple-glow bias-mix donut bubbles (Vader decision #4, on-brand with the
+   v3-A per-ticker donut). */
+(function () {
+    const shell = document.querySelector('[data-component="gmap"]');
+    if (!shell || !shell._gmap || typeof L === 'undefined' || typeof L.markerClusterGroup !== 'function') return;
+
+    const { map, setStatus } = shell._gmap;
+    const apiUrl = shell.dataset.apiUrl;
+    if (!apiUrl) return;
+
+    // Must mirror GrimbaClusterBias::biasMetaForBlade() (server palette).
+    const BIAS_ORDER = ['left', 'center', 'right', 'unknown'];
+    const BIAS_COLOR = { left: '#3b82f6', center: '#a8a8a8', right: '#e84c3d', unknown: '#6b6459' };
+    const fmt = (n) => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + 'k' : String(n);
+
+    const donutGradient = (counts) => {
+        const total = BIAS_ORDER.reduce((s, k) => s + (counts[k] || 0), 0);
+        if (!total) return 'conic-gradient(#3a3a3a 0deg 360deg)';
+        let deg = 0; const stops = [];
+        for (const k of BIAS_ORDER) {
+            const c = counts[k] || 0; if (!c) continue;
+            const end = deg + (c / total) * 360;
+            stops.push(BIAS_COLOR[k] + ' ' + deg.toFixed(2) + 'deg ' + end.toFixed(2) + 'deg');
+            deg = end;
+        }
+        return 'conic-gradient(' + stops.join(',') + ')';
+    };
+    const countsFromPosts = (posts) => {
+        const c = { left: 0, center: 0, right: 0, unknown: 0 };
+        (posts || []).forEach((p) => { const k = (c[p.bias_rating] !== undefined) ? p.bias_rating : 'unknown'; c[k]++; });
+        return c;
+    };
+    const dominantColor = (counts) => {
+        let best = 'unknown', n = -1;
+        for (const k of BIAS_ORDER) if ((counts[k] || 0) > n) { n = counts[k] || 0; best = k; }
+        return BIAS_COLOR[best];
+    };
+
+    const clusterGroup = L.markerClusterGroup({
+        maxClusterRadius: 48,
+        showCoverageOnHover: false,
+        spiderfyOnMaxZoom: true,
+        disableClusteringAtZoom: 6,
+        iconCreateFunction: (cluster) => {
+            const counts = { left: 0, center: 0, right: 0, unknown: 0 };
+            let total = 0;
+            cluster.getAllChildMarkers().forEach((m) => {
+                const p = m._gmapPin; if (!p) return;
+                total += p.total_at_country || 0;
+                BIAS_ORDER.forEach((k) => { counts[k] += (p._counts[k] || 0); });
+            });
+            const html = '<div class="gmap-cluster" role="img" aria-label="' + total + '">'
+                + '<span class="gmap-cluster__donut" style="background:' + donutGradient(counts) + '"></span>'
+                + '<span class="gmap-cluster__count">' + fmt(total) + '</span></div>';
+            return L.divIcon({ html, className: 'gmap-cluster-wrap', iconSize: [48, 48] });
+        },
+    });
+
+    setStatus(@json(__('Chargement des actualités…')));
+    fetch(apiUrl, { headers: { Accept: 'application/json' } })
+        .then((r) => r.ok ? r.json() : Promise.reject(r.status))
+        .then((data) => {
+            const pins = (data && data.pins) || [];
+            if (!pins.length) { setStatus(@json(__('Aucune actualité urgente sur la carte.'))); return; }
+
+            pins.forEach((pin) => {
+                if (typeof pin.lat !== 'number' || typeof pin.lng !== 'number') return;
+                const counts = countsFromPosts(pin.posts);
+                const html = '<div class="gmap-pin" style="--glow:' + dominantColor(counts) + '">'
+                    + '<span class="gmap-pin__donut" style="background:' + donutGradient(counts) + '"></span>'
+                    + '<span class="gmap-pin__count">' + fmt(pin.total_at_country || 0) + '</span></div>';
+                const marker = L.marker([pin.lat, pin.lng], {
+                    icon: L.divIcon({ html, className: 'gmap-pin-wrap', iconSize: [34, 34] }),
+                    title: (pin.country || '') + ' — ' + (pin.total_at_country || 0),
+                });
+                marker._gmapPin = Object.assign({ _counts: counts }, pin);
+                clusterGroup.addLayer(marker);
+            });
+
+            map.addLayer(clusterGroup);
+            shell._gmap.clusterGroup = clusterGroup;
+            shell._gmap.pins = pins;
+
+            try {
+                const b = clusterGroup.getBounds();
+                if (b && b.isValid()) map.fitBounds(b.pad(0.25), { maxZoom: 5 });
+            } catch (e) { /* keep default view */ }
+
+            setStatus(null);
+        })
+        .catch(() => setStatus(@json(__('Impossible de charger les actualités. Réessayez.'))));
 })();
 </script>
