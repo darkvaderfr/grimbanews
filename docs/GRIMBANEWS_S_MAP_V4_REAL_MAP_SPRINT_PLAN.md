@@ -189,13 +189,13 @@ Leaflet attribution shows "Leaflet | © OpenStreetMap contributors | © CARTO" i
 - Insert as the V4 fleet replacing the v1-v3 brief (`docs/GRIMBANEWS_S_MAP_WORLD_BREAKING_FEATURE_BRIEF.md`) — that brief stays as the original requirements doc.
 - Master plan row updates: S-MAP-FLEET row description changes from "v1 hand-rolled SVG" to "v4 Leaflet + Natural Earth real-map rebuild" — 22 sprints renumbered V4-01..22.
 
-## Open questions for Vader (answer before V4-01 starts)
+## Vader decisions (answered 2026-05-29 — locked, do not re-litigate)
 
-1. **CARTO Dark Matter vs Stadia Alidade Smooth Dark vs self-hosted MapLibre** — CARTO is the recommended default (no key required). Stadia is cleaner-looking but requires a free key. MapLibre+PMTiles is best long-term but adds 200KB to the bundle. Confirm CARTO is OK.
-2. **Phase 2 (story-level geocoding) — green-light now or after v4 ships?** Story-level geocoding makes the map dramatically more useful (a story about Ukraine pinned in Kyiv, not at the source's HQ in DC). But it depends on a NobuAI geocoding pass over post bodies — non-trivial.
-3. **Bias filter chips (V4-18) — show by default or only after user clicks "Filter"?** Default-on adds visual noise; default-hidden hides the discoverability.
-4. **Cluster icon visual — donut showing the bias mix of pins under it, or solid purple with count?** Donut is richer but more work; purple+count is faster.
-5. **Tile-proxy route in Phase 2 — yes/no, and if yes, where (own VPS vs CloudFlare workers)?** Affects CARTO traffic budget.
+1. ✅ **Tile provider: CARTO Dark Matter.** Free tier, no key. Vendor tile-proxy decision deferred to Phase 2.
+2. ✅ **Story-level geocoding: deferred to Phase 2.** V4 ships with source-country pins only. NobuAI geocoding pass becomes a separate fleet after v4.
+3. ✅ **Bias filter chips: default-on.** All 5 chips (Left / Center / Right / MG / Unknown) visible above the map at first paint.
+4. ✅ **Cluster bubble: bias-mix donut.** Each cluster icon shows a tiny conic-gradient donut of the L/C/R split of pins inside (on-brand with v3-A per-ticker donut).
+5. **Deferred — CloudFlare workers vs own VPS tile-proxy** — Phase 2 decision, not blocking V4.
 
 ---
 
@@ -230,12 +230,12 @@ Stack decisions already made in the plan (don't re-litigate, just execute):
 - /api/breaking-map.json as the JSON data source, cached 60s, CORS-open
 - Reuses `App\Support\Continents` + `GrimbaClusterBias::biasMetaForBlade()` from v2/v3
 
-Open questions still pending Vader's answer (call them out at the start of V4-01 if not yet answered):
-1. CARTO Dark Matter vs Stadia Alidade Smooth Dark vs self-hosted MapLibre — plan default is CARTO; confirm.
-2. Phase 2 (story-level geocoding via NobuAI) green-light now or after v4?
-3. Bias filter chips default-on or default-hidden?
-4. Cluster icon visual: bias-mix donut vs solid purple+count?
-5. Phase 2 tile-proxy route on VPS or CloudFlare workers?
+Vader's decisions (locked 2026-05-29, do not re-litigate):
+1. ✅ Tile provider: CARTO Dark Matter (free tier, no key).
+2. ✅ Story-level geocoding: deferred to Phase 2 (after v4 ships).
+3. ✅ Bias filter chips: default-on, all 5 visible above the map.
+4. ✅ Cluster bubble: bias-mix donut (matches v3-A per-ticker donut).
+5. Phase 2 tile-proxy decision (CloudFlare vs VPS) — not blocking V4.
 
 Working directory: `/Users/vb/agidev/GrimbaNews/` (symlinked from `/Users/vb/GrimbaNews/`).
 Local server: `php artisan serve` already running on port 8000 (zombie process from earlier — restart if config changes).
