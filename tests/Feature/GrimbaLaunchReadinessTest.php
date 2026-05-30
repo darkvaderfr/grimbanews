@@ -3107,6 +3107,30 @@ class GrimbaLaunchReadinessTest extends TestCase
         }
     }
 
+    public function test_breaking_map_legacy_route_preserves_v3_fallback(): void
+    {
+        // S-MAP-V4-01 (Vader 2026-05-29) — the v1-v3 hand-rolled SVG map is
+        // pinned at /breaking-map-legacy as a working fallback while the v4
+        // Leaflet rebuild takes over /breaking-map (V4-09). This test locks
+        // the fallback so the v4 work can never silently regress it: the
+        // legacy URL must keep rendering the v3 SVG + all 6 tickers, and
+        // must carry the noindex header so it does not compete for SEO.
+        $response = $this->get('/breaking-map-legacy?window=720');
+        $response->assertStatus(200);
+        $response->assertHeader('X-Robots-Tag', 'noindex');
+        $body = $response->getContent();
+        foreach (['africa', 'americas', 'asia', 'europe', 'oceania', 'global'] as $continent) {
+            $this->assertStringContainsString(
+                'data-continent="' . $continent . '"',
+                $body,
+                "Legacy fallback must still render the '{$continent}' ticker."
+            );
+        }
+        // The hand-rolled SVG world map is the defining v3 artifact.
+        $this->assertStringContainsString('class="gmap-svg"', $body,
+            'legacy fallback must still render the v3 SVG world map.');
+    }
+
     public function test_continents_helper_iso2_to_continent_lookup(): void
     {
         // S-MAP-03 (Vader 2026-05-29) — Continents helper round-trip.

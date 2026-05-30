@@ -830,6 +830,65 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             return Theme::scope('breaking-map', compact('buckets', 'windowHours', 'totalAcrossContinents'))->render();
         })->name('public.breaking_map');
 
+        // S-MAP-V4-01 (Vader 2026-05-29) — the v1-v3 hand-rolled SVG world
+        // map is pinned here as the working fallback at /breaking-map-legacy
+        // while the v4 Leaflet + Natural Earth rebuild takes over the
+        // canonical /breaking-map URL (V4-09 swaps the breaking-map view).
+        // This route renders a frozen copy of the v3 view
+        // (breaking-map-legacy.blade.php) so the v4 rebuild can never
+        // regress the fallback — zero rollback risk. It is marked noindex
+        // so it does not compete with /breaking-map for SEO, and is removed
+        // in V4-22 once v4 is signed off.
+        Route::get('breaking-map-legacy', function (Request $request) {
+            $windowHours = max(1, min(720, (int) ($request->query('window') ?? 18)));
+            $buckets = \App\Support\GrimbaHomeFeed::breakingByContinent($windowHours, 8);
+
+            $totalAcrossContinents = 0;
+            foreach ($buckets as $bucketPosts) { $totalAcrossContinents += $bucketPosts->count(); }
+
+            SeoHelper::setTitle(__('Breaking News Map') . ' — GrimbaNews')
+                ->setDescription(__('Voir où dans le monde l\'actualité se passe — carte plein écran avec tickers par continent.'));
+            SeoHelper::openGraph()
+                ->setUrl(url('/breaking-map-legacy'))
+                ->setType('website')
+                ->setTitle(__('Breaking News Map') . ' — GrimbaNews')
+                ->setDescription(__('Carte plein écran de l\'actualité urgente par continent.'));
+
+            $itemListElements = [];
+            $pos = 1;
+            foreach ($buckets as $continent => $bucketPosts) {
+                $itemListElements[] = [
+                    '@type' => 'ListItem',
+                    'position' => $pos++,
+                    'name' => \App\Support\Continents::label($continent),
+                    'url' => url('/breaking?region=' . $continent),
+                    'description' => sprintf('%d %s', $bucketPosts->count(), __('articles')),
+                ];
+            }
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => __('Breaking News Map') . ' — GrimbaNews',
+                'description' => __('Carte plein écran de l\'actualité urgente par continent.'),
+                'url' => url('/breaking-map-legacy'),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'mainEntity' => [
+                    '@type' => 'ItemList',
+                    'numberOfItems' => count($itemListElements),
+                    'itemListElement' => $itemListElements,
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
+
+            Theme::breadcrumb()
+                ->add(__('Accueil'), url('/'))
+                ->add(__('Breaking news'), url('/breaking'))
+                ->add(__('Carte'), url('/breaking-map-legacy'));
+
+            return response(
+                Theme::scope('breaking-map-legacy', compact('buckets', 'windowHours', 'totalAcrossContinents'))->render()
+            )->header('X-Robots-Tag', 'noindex');
+        })->name('public.breaking_map_legacy');
+
         Route::get('breaking', function (Request $request) {
             // S-MAP-v3-C (Vader 2026-05-29) — optional ?region=<continent>
             // narrows the linear breaking list to one continent.
