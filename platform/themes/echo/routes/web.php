@@ -669,6 +669,10 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                     'lat' => $pin['lat'],
                     'lng' => $pin['lng'],
                     'total_at_country' => $pin['total'],
+                    // Exact per-bias breakdown (sums to total_at_country) — the
+                    // donut + the bias filter chips run off this, not the
+                    // capped posts[] sample.
+                    'counts_at_country' => $pin['counts'],
                     'posts' => $posts,
                 ];
             }

@@ -129,6 +129,29 @@
         text-transform: uppercase; letter-spacing: .08em; font-weight: 700;
     }
 
+    /* ── S-MAP-V4-18 bias filter chips ──────────────────────────────── */
+    .gmap-chips {
+        position: relative; z-index: 5;
+        display: flex; flex-wrap: wrap; gap: 8px;
+        padding: 10px 22px;
+        background: rgba(4, 6, 12, .55);
+        border-bottom: 1px solid rgba(34, 211, 238, .1);
+    }
+    .gmap-chip {
+        appearance: none; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 7px;
+        padding: 5px 12px; border-radius: 999px;
+        font: 700 12px/1 var(--font-sans, system-ui, sans-serif);
+        letter-spacing: .02em; color: #e8f4ff;
+        background: rgba(255, 255, 255, .04);
+        border: 1px solid var(--chip, #6b6459);
+        transition: opacity .15s, background .15s, filter .15s;
+    }
+    .gmap-chip:hover, .gmap-chip:focus-visible { background: rgba(255, 255, 255, .1); outline: none; }
+    .gmap-chip__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--chip, #6b6459); box-shadow: 0 0 6px var(--chip, #6b6459); flex-shrink: 0; }
+    .gmap-chip[data-on="false"] { opacity: .38; filter: grayscale(.6); border-color: rgba(232, 244, 255, .25); }
+    .gmap-chip[data-on="false"] .gmap-chip__dot { box-shadow: none; }
+
     /* ── Stage + Leaflet map ────────────────────────────────────────── */
     .gmap-stage {
         position: relative;
@@ -418,6 +441,18 @@
             </a>
         </div>
     </header>
+
+    {{-- S-MAP-V4-18 — bias filter chips (default-on, Vader decision #3).
+         Toggling re-renders the pin layer from the exact counts_at_country.
+         'middle_ground' is a cluster-only verdict, included for parity. --}}
+    <div class="gmap-chips" role="group" aria-label="{{ __('Filtrer par tendance politique') }}">
+        @foreach(['left', 'center', 'right', 'middle_ground', 'unknown'] as $bk)
+            <button type="button" class="gmap-chip" data-bias="{{ $bk }}" data-on="true" aria-pressed="true"
+                    style="--chip: {{ $biasMeta[$bk]['color'] }};">
+                <span class="gmap-chip__dot" aria-hidden="true"></span>{{ $biasMeta[$bk]['label'] }}
+            </button>
+        @endforeach
+    </div>
 
     <div class="gmap-body">
     <div class="gmap-stage" data-component="gmap-stage">
@@ -719,7 +754,8 @@
             let total = 0;
             cluster.getAllChildMarkers().forEach((m) => {
                 const p = m._gmapPin; if (!p) return;
-                total += p.total_at_country || 0;
+                // _total/_counts are the bias-FILTERED values set in buildMarker.
+                total += (typeof p._total === 'number' ? p._total : (p.total_at_country || 0));
                 BIAS_ORDER.forEach((k) => { counts[k] += (p._counts[k] || 0); });
             });
             const html = '<div class="gmap-cluster" role="img" aria-label="' + total + '">'
@@ -754,49 +790,78 @@
         r.addEventListener('focusout', () => setActiveRow(null));
     });
 
+    // ── S-MAP-V4-18 bias filter chips + the (re)render pipeline ──────
+    // enabledBias drives which bias slices count toward each pin's donut +
+    // count + visibility, using the EXACT counts_at_country (not the capped
+    // sample). Default-on (Vader decision #3). 'middle_ground' is a
+    // cluster-only verdict — no per-source-country post carries it — so its
+    // chip is present for parity but matches no pins.
+    const enabledBias = { left: true, center: true, right: true, unknown: true };
+
+    const buildMarker = (pin) => {
+        if (typeof pin.lat !== 'number' || typeof pin.lng !== 'number') return null;
+        const src = pin.counts_at_country || countsFromPosts(pin.posts);
+        const counts = { left: 0, center: 0, right: 0, unknown: 0 };
+        let total = 0;
+        for (const k of BIAS_ORDER) { if (enabledBias[k]) { counts[k] = src[k] || 0; total += counts[k]; } }
+        if (total <= 0) return null; // every story here is filtered out
+
+        const html = '<div class="gmap-pin" style="--glow:' + dominantColor(counts) + '">'
+            + '<span class="gmap-pin__donut" style="background:' + donutGradient(counts) + '"></span>'
+            + '<span class="gmap-pin__count">' + fmt(total) + '</span></div>';
+        const marker = L.marker([pin.lat, pin.lng], {
+            icon: L.divIcon({ html, className: 'gmap-pin-wrap', iconSize: [34, 34] }),
+            title: countryLabel(pin.country) + ' — ' + total,
+        });
+        marker._gmapPin = Object.assign({ _counts: counts, _total: total }, pin);
+        marker.bindPopup(buildPopup(pin), { className: 'gmap-pop-wrap', maxWidth: 320, minWidth: 240, autoPanPadding: [24, 24] });
+        // V4-17 — hovering a pin highlights its continent's sidecar row.
+        marker.on('mouseover', () => setActiveRow(pin.continent));
+        marker.on('mouseout', () => setActiveRow(null));
+        return marker;
+    };
+
+    const renderPins = () => {
+        clusterGroup.clearLayers();
+        const byContinent = {};
+        let shown = 0;
+        (shell._gmap.pins || []).forEach((pin) => {
+            const marker = buildMarker(pin);
+            if (!marker) return;
+            shown++;
+            (byContinent[pin.continent] = byContinent[pin.continent] || []).push(marker);
+            clusterGroup.addLayer(marker);
+        });
+        shell._gmap.byContinent = byContinent;
+        setStatus(shown ? null : @json(__('Aucune actualité pour ces filtres.')));
+    };
+
+    shell._gmap.clusterGroup = clusterGroup;
+    map.addLayer(clusterGroup);
+
+    // Wire the chips — toggling re-renders the pin layer (no reload).
+    shell.querySelectorAll('.gmap-chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+            const on = chip.dataset.on !== 'true';
+            chip.dataset.on = on ? 'true' : 'false';
+            chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+            if (chip.dataset.bias in enabledBias) { enabledBias[chip.dataset.bias] = on; }
+            renderPins();
+        });
+    });
+
     setStatus(@json(__('Chargement des actualités…')));
     fetch(apiUrl, { headers: { Accept: 'application/json' } })
         .then((r) => r.ok ? r.json() : Promise.reject(r.status))
         .then((data) => {
             const pins = (data && data.pins) || [];
             if (!pins.length) { setStatus(@json(__('Aucune actualité urgente sur la carte.'))); return; }
-
-            const byContinent = {};
-            pins.forEach((pin) => {
-                if (typeof pin.lat !== 'number' || typeof pin.lng !== 'number') return;
-                const counts = countsFromPosts(pin.posts);
-                const html = '<div class="gmap-pin" style="--glow:' + dominantColor(counts) + '">'
-                    + '<span class="gmap-pin__donut" style="background:' + donutGradient(counts) + '"></span>'
-                    + '<span class="gmap-pin__count">' + fmt(pin.total_at_country || 0) + '</span></div>';
-                const marker = L.marker([pin.lat, pin.lng], {
-                    icon: L.divIcon({ html, className: 'gmap-pin-wrap', iconSize: [34, 34] }),
-                    title: countryLabel(pin.country) + ' — ' + (pin.total_at_country || 0),
-                });
-                marker._gmapPin = Object.assign({ _counts: counts }, pin);
-                marker.bindPopup(buildPopup(pin), {
-                    className: 'gmap-pop-wrap',
-                    maxWidth: 320,
-                    minWidth: 240,
-                    autoPanPadding: [24, 24],
-                });
-                // V4-17 — hovering a pin highlights its continent's sidecar row.
-                (byContinent[pin.continent] = byContinent[pin.continent] || []).push(marker);
-                marker.on('mouseover', () => setActiveRow(pin.continent));
-                marker.on('mouseout', () => setActiveRow(null));
-                clusterGroup.addLayer(marker);
-            });
-
-            map.addLayer(clusterGroup);
-            shell._gmap.clusterGroup = clusterGroup;
             shell._gmap.pins = pins;
-            shell._gmap.byContinent = byContinent;
-
+            renderPins();
             try {
                 const b = clusterGroup.getBounds();
                 if (b && b.isValid()) map.fitBounds(b.pad(0.25), { maxZoom: 5 });
             } catch (e) { /* keep default view */ }
-
-            setStatus(null);
         })
         .catch(() => setStatus(@json(__('Impossible de charger les actualités. Réessayez.'))));
 })();

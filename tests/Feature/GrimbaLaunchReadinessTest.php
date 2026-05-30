@@ -3145,6 +3145,25 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('focusContinent', $body, 'row hover must pan the map to that continent.');
     }
 
+    public function test_breaking_map_v4_bias_filter_chips_default_on(): void
+    {
+        // S-MAP-V4-18 (Vader 2026-05-30) — 5 bias filter chips above the map,
+        // ALL default-on (decision #3); toggling re-renders the pin layer (no
+        // reload) off the EXACT counts_at_country.
+        $body = $this->get('/breaking-map?window=720')->getContent();
+        foreach (['left', 'center', 'right', 'middle_ground', 'unknown'] as $bias) {
+            // Each chip ships and is default-on (decision #3). Scoped to the
+            // chip's own attributes (the page has unrelated data-on elsewhere).
+            $this->assertStringContainsString('data-bias="' . $bias . '" data-on="true"', $body,
+                "chip {$bias} must render default-on (decision #3).");
+        }
+        $this->assertSame(5, substr_count($body, 'class="gmap-chip"'), 'exactly 5 bias chips.');
+        // Filter pipeline: re-renders off exact counts, no reload.
+        $this->assertStringContainsString('enabledBias', $body);
+        $this->assertStringContainsString('renderPins', $body);
+        $this->assertStringContainsString('counts_at_country', $body, 'filter must use exact per-bias counts.');
+    }
+
     public function test_breaking_route_accepts_optional_region_filter(): void
     {
         // S-MAP-v3-C (Vader 2026-05-29) — /breaking?region=<continent>
@@ -3356,9 +3375,13 @@ class GrimbaLaunchReadinessTest extends TestCase
 
         $prevTotal = PHP_INT_MAX;
         foreach ($pins as $pin) {
-            foreach (['country', 'continent', 'lat', 'lng', 'total', 'posts'] as $key) {
+            foreach (['country', 'continent', 'lat', 'lng', 'total', 'counts', 'posts'] as $key) {
                 $this->assertArrayHasKey($key, $pin, "pin missing '{$key}' key.");
             }
+            // V4-18 — exact per-bias counts must sum to the total.
+            $c = $pin['counts'];
+            $this->assertSame($c['left'] + $c['center'] + $c['right'] + $c['unknown'], $pin['total'],
+                "exact bias counts must sum to total for {$pin['country']}.");
             // Country is an uppercase ISO-2 with a real centroid; the pin's
             // coordinates ARE that centroid (no drift, no orphan pins).
             $this->assertMatchesRegularExpression('/^[A-Z]{2}$/', $pin['country']);
@@ -3498,9 +3521,13 @@ class GrimbaLaunchReadinessTest extends TestCase
         $palette = \App\Support\GrimbaClusterBias::biasMetaForBlade();
         $continents = \App\Support\Continents::all();
         foreach ($body['pins'] as $pin) {
-            foreach (['country', 'continent', 'lat', 'lng', 'total_at_country', 'posts'] as $key) {
+            foreach (['country', 'continent', 'lat', 'lng', 'total_at_country', 'counts_at_country', 'posts'] as $key) {
                 $this->assertArrayHasKey($key, $pin, "pin '{$key}' missing.");
             }
+            // V4-18 — exact per-bias counts sum to the badge total.
+            $cc = $pin['counts_at_country'];
+            $this->assertSame($cc['left'] + $cc['center'] + $cc['right'] + $cc['unknown'], $pin['total_at_country'],
+                'counts_at_country must sum to total_at_country.');
             $this->assertMatchesRegularExpression('/^[A-Z]{2}$/', $pin['country']);
             $this->assertContains($pin['continent'], $continents);
             $this->assertGreaterThanOrEqual(-90, $pin['lat']);

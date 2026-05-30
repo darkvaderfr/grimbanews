@@ -393,18 +393,29 @@ class GrimbaHomeFeed
                      'posts.bias_rating','posts.published_at','posts.created_at','posts.image',
                      'news_sources.country as source_country'];
 
+            // Grouped by country AND bias so each pin carries an EXACT per-bias
+            // breakdown (counts) — the donut + the V4-18 bias filter chips run
+            // off these, not the capped sample. ISO normalized (upper+trim) +
+            // summed on collision; non-left/center/right folds to 'unknown'.
             $totals = [];
+            $counts = [];
             foreach (
                 $base()->toBase()
-                    ->select('news_sources.country as country', DB::raw('count(*) as total'))
-                    ->groupBy('news_sources.country')
+                    ->select('news_sources.country as country', 'posts.bias_rating as bias_rating', DB::raw('count(*) as n'))
+                    ->groupBy('news_sources.country', 'posts.bias_rating')
                     ->get() as $row
             ) {
                 $iso = strtoupper(trim((string) $row->country));
                 if ($iso === '' || CountryCentroids::for($iso) === null) {
                     continue; // blank or unpinnable — no map location
                 }
-                $totals[$iso] = ($totals[$iso] ?? 0) + (int) $row->total;
+                $bias = in_array($row->bias_rating, ['left', 'center', 'right'], true) ? $row->bias_rating : 'unknown';
+                $n = (int) $row->n;
+                $totals[$iso] = ($totals[$iso] ?? 0) + $n;
+                if (! isset($counts[$iso])) {
+                    $counts[$iso] = ['left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0];
+                }
+                $counts[$iso][$bias] += $n;
             }
 
             // Pass 2 — for each pinnable country, its own freshest <=perCountry
@@ -427,6 +438,7 @@ class GrimbaHomeFeed
                     'lat' => $centroid[0],
                     'lng' => $centroid[1],
                     'total' => $total,
+                    'counts' => $counts[$iso],
                     'posts' => $posts,
                 ];
             }
