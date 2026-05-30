@@ -613,6 +613,85 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             ]);
         })->name('public.api.middle_ground');
 
+        // S-MAP-V4-06 (Vader 2026-05-30) — public read-only JSON API for the
+        // breaking-news MAP. Wraps GrimbaHomeFeed::pinsForMap (one entry per
+        // pinnable country, pinned at the source's Natural Earth centroid) so
+        // the Leaflet /breaking-map view (V4-09/10) and any external consumer
+        // get the pins as data. Same CORS + cacheable shape as
+        // /api/middle-ground.json; cached 60s (pinsForMap's own TTL) with an
+        // ETag for cheap 304 revalidation. Each pin carries its exact
+        // total_at_country badge; each post carries its article url +
+        // bias_rating + bias_color (the Wave bias palette: L blue / C grey /
+        // R red / unknown tan) so the client can color markers and build the
+        // cluster bias-mix donut without a second lookup.
+        Route::get('api/breaking-map.json', function (Request $request) {
+            $windowHours = max(1, min(720, (int) ($request->query('window') ?? 18)));
+            $perCountry = max(1, min(20, (int) ($request->query('per_country') ?? 5)));
+
+            $pins = \App\Support\GrimbaHomeFeed::pinsForMap($windowHours, $perCountry);
+            $palette = \App\Support\GrimbaClusterBias::biasMetaForBlade();
+
+            // Warm the translation cache once across every displayed post so
+            // the per-post title() lookups below don't N+1 the translations
+            // table.
+            \App\Support\GrimbaTranslationPresenter::warm(
+                collect($pins)->flatMap(fn ($pin) => $pin['posts'])
+            );
+
+            $pinData = [];
+            foreach ($pins as $pin) {
+                $posts = [];
+                foreach ($pin['posts'] as $post) {
+                    // posts.bias_rating is one of left/center/right/unknown
+                    // (middle_ground is a cluster-only verdict); anything
+                    // else normalizes to 'unknown' so the color never misses.
+                    $biasKey = isset($palette[$post->bias_rating]) ? (string) $post->bias_rating : 'unknown';
+                    $posts[] = [
+                        'title' => \App\Support\GrimbaTranslationPresenter::title($post),
+                        'url' => $post->slug
+                            ? route('public.grimba-article', $post->slug)
+                            : url('/search?q=' . rawurlencode((string) $post->name)),
+                        'source_name' => (string) $post->source_name,
+                        'published_at' => \App\Support\GrimbaTranslationPresenter::publishedAt($post)?->toIso8601String(),
+                        'bias_rating' => $biasKey,
+                        'bias_color' => $palette[$biasKey]['color'],
+                    ];
+                }
+
+                $pinData[] = [
+                    'country' => $pin['country'],
+                    'continent' => $pin['continent'],
+                    'lat' => $pin['lat'],
+                    'lng' => $pin['lng'],
+                    'total_at_country' => $pin['total'],
+                    'posts' => $posts,
+                ];
+            }
+
+            $response = response()->json([
+                'generated_at' => now()->utc()->toIso8601String(),
+                'window_hours' => $windowHours,
+                'per_country' => $perCountry,
+                'count' => count($pinData),
+                'methodology_url' => url('/methodologie'),
+                'pins' => $pinData,
+            ], 200, [
+                'Cache-Control' => 'public, max-age=60, s-maxage=60',
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET',
+            ]);
+
+            // Cheap revalidation: ETag over the DATA (+ params) only, NOT the
+            // full body — the body's generated_at is a fresh now() each call,
+            // so hashing it would change the ETag every request and never
+            // 304. Hashing the pins keeps the ETag stable for the 60s cache
+            // window and flips only when the pins actually change.
+            $response->setEtag(md5(json_encode([$windowHours, $perCountry, $pinData], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)));
+            $response->isNotModified($request);
+
+            return $response;
+        })->name('public.api.breaking_map');
+
         // Wave RRRR (Vader 2026-05-26) — Atom feed parity for the
         // Middle Ground signal. RSS readers + IFTTT-style automators
         // prefer Atom. Same data as the JSON API, different wrapper.
