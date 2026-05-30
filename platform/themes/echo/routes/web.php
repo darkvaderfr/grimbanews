@@ -668,25 +668,59 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 ];
             }
 
-            $response = response()->json([
+            // S-MAP-V4-07 — aggregate summary so chart / status widgets get
+            // the top-line metrics without iterating pins[]. total_posts is
+            // the TRUE breaking volume on the map (sum of the exact
+            // per-country totals); displayed_posts is how many post markers
+            // were actually shipped after the per-country cap; top_countries
+            // is the 3 densest by exact total ($pinData is already
+            // densest-first from pinsForMap).
+            $summary = [
+                'total_countries' => count($pinData),
+                'total_posts' => array_sum(array_column($pinData, 'total_at_country')),
+                'displayed_posts' => array_sum(array_map(static fn ($p) => count($p['posts']), $pinData)),
+                'top_countries' => array_map(
+                    static fn ($p) => [
+                        'country' => $p['country'],
+                        'continent' => $p['continent'],
+                        'total' => $p['total_at_country'],
+                    ],
+                    array_slice($pinData, 0, 3)
+                ),
+            ];
+
+            // ?summary_only=1 returns the top-level + summary block, omitting
+            // pins[] — for status pages / chart widgets that need the
+            // aggregate but not the per-pin detail (parity with
+            // /api/middle-ground.json).
+            $summaryOnly = filter_var($request->query('summary_only'), FILTER_VALIDATE_BOOLEAN);
+
+            $payload = [
                 'generated_at' => now()->utc()->toIso8601String(),
                 'window_hours' => $windowHours,
                 'per_country' => $perCountry,
                 'count' => count($pinData),
                 'methodology_url' => url('/methodologie'),
-                'pins' => $pinData,
-            ], 200, [
+                'summary' => $summary,
+            ];
+            if (! $summaryOnly) {
+                $payload['pins'] = $pinData;
+            }
+
+            $response = response()->json($payload, 200, [
                 'Cache-Control' => 'public, max-age=60, s-maxage=60',
                 'Access-Control-Allow-Origin' => '*',
                 'Access-Control-Allow-Methods' => 'GET',
             ]);
 
-            // Cheap revalidation: ETag over the DATA (+ params) only, NOT the
-            // full body — the body's generated_at is a fresh now() each call,
-            // so hashing it would change the ETag every request and never
-            // 304. Hashing the pins keeps the ETag stable for the 60s cache
-            // window and flips only when the pins actually change.
-            $response->setEtag(md5(json_encode([$windowHours, $perCountry, $pinData], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)));
+            // Cheap revalidation: ETag over the DATA (+ params + variant) only,
+            // NOT the full body — the body's generated_at is a fresh now()
+            // each call, so hashing it would change the ETag every request and
+            // never 304. Hashing the pins keeps the ETag stable for the 60s
+            // cache window and flips only when the pins actually change;
+            // $summaryOnly is included so the two response variants never
+            // share an ETag.
+            $response->setEtag(md5(json_encode([$windowHours, $perCountry, $summaryOnly, $pinData], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)));
             $response->isNotModified($request);
 
             return $response;
