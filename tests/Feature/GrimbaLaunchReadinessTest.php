@@ -2997,14 +2997,47 @@ class GrimbaLaunchReadinessTest extends TestCase
                 "Continent ticker for '{$continent}' must render."
             );
         }
-        // SVG world map decoration must be present (aria-hidden so
-        // screen readers focus on the tickers).
-        $this->assertStringContainsString('class="gmap__svg"', $body);
-        $this->assertStringContainsString('aria-hidden="true"', $body);
+        // SVG world map must be present. v2 renamed the class to
+        // kebab-case (gmap-svg) and the SVG itself is role="img" with
+        // an aria-label rather than aria-hidden (continent paths are
+        // a meaningful image, not pure decoration).
+        $this->assertStringContainsString('class="gmap-svg"', $body);
+        $this->assertStringContainsString('role="img"', $body);
         // Each ticker carries a scroll-direction attribute (Vader
         // 2026-05-20 brief: alternating L→R / R→L pattern).
         $this->assertMatchesRegularExpression('/data-dir="(ltr|rtl)"/', $body,
             'tickers must declare scroll direction for the CSS animation.');
+        // S-MAP-v2 — fullscreen + pause controls present.
+        $this->assertStringContainsString('data-action="fullscreen"', $body,
+            'v2: fullscreen toggle button must be in the chrome.');
+        $this->assertStringContainsString('data-action="pause"', $body,
+            'v2: pause toggle button must be in the chrome.');
+        // v2 — futurist HUD landmarks (grid, graticule, pulse).
+        $this->assertStringContainsString('gmap-graticule', $body,
+            'v2: equator + tropics graticule must render.');
+        $this->assertStringContainsString('gmap-grid', $body,
+            'v2: HUD grid overlay must render.');
+    }
+
+    public function test_breaking_map_continent_labels_render_over_map(): void
+    {
+        // S-MAP-v2 (Vader 2026-05-29) — each continent name renders
+        // as a HUD label overlaid on the map. Pin all 5 + global.
+        $body = $this->get('/breaking-map?window=720')->getContent();
+        foreach ([
+            __('Europe'),
+            __('Amériques'),
+            __('Asie'),
+            __('Afrique'),
+            __('Océanie'),
+            __('Global'),
+        ] as $expectedLabel) {
+            $this->assertStringContainsString(
+                $expectedLabel,
+                $body,
+                "Continent label '{$expectedLabel}' must appear in the map view."
+            );
+        }
     }
 
     public function test_continents_helper_iso2_to_continent_lookup(): void
