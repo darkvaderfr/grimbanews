@@ -255,11 +255,34 @@
         .gmap-brand__pulse { animation: none !important; }
     }
 
-    /* Mobile: stack the map (60dvh) over the sidecar (V4-16 makes it a sheet). */
+    /* Desktop: the grab handle is hidden (sidecar is a static panel). */
+    .gmap-sidecar__handle { display: none; }
+
+    /* S-MAP-V4-16 — mobile: map fills 60dvh; the sidecar becomes a swipe-up
+       bottom-sheet that peeks a handle and expands to the continent stack. */
     @media (max-width: 768px) {
         .gmap-body { flex-direction: column; }
         .gmap-stage { min-height: 60dvh; height: 60dvh; flex: 0 0 auto; }
-        .gmap-sidecar { flex: 0 0 auto; width: 100%; border-left: none; border-top: 1px solid rgba(34, 211, 238, .15); }
+        .gmap-sidecar {
+            position: fixed; left: 0; right: 0; bottom: 0; z-index: 9000;
+            flex: 0 0 auto; width: 100%; max-height: 78dvh;
+            border-left: none; border-top: 1px solid rgba(34, 211, 238, .25);
+            border-radius: 16px 16px 0 0;
+            padding-top: 4px;
+            transform: translateY(calc(100% - 58px));
+            transition: transform .28s cubic-bezier(.4, 0, .2, 1);
+            box-shadow: 0 -16px 40px rgba(0, 0, 0, .6);
+        }
+        .gmap-shell[data-sheet="open"] .gmap-sidecar { transform: translateY(0); }
+        .gmap-sidecar__handle {
+            display: block; width: 100%; height: 38px; padding: 0;
+            background: transparent; border: 0; cursor: pointer; position: relative;
+        }
+        .gmap-sidecar__handle::before {
+            content: ''; position: absolute; top: 9px; left: 50%; transform: translateX(-50%);
+            width: 44px; height: 5px; border-radius: 3px; background: rgba(34, 211, 238, .55);
+        }
+        @media (prefers-reduced-motion: reduce) { .gmap-sidecar { transition: none; } }
     }
 
     /* Fullscreen (native API or CSS fallback). */
@@ -409,6 +432,10 @@
          donut + region click-through. data-continent powers the V4-17
          hover-sync between pins and rows. --}}
     <aside class="gmap-sidecar" data-component="gmap-sidecar" aria-label="{{ __('Répartition par continent') }}">
+        {{-- S-MAP-V4-16 — mobile-only grab handle: tap or swipe up to expand
+             the bottom-sheet (hidden on desktop, where the sidecar is fixed). --}}
+        <button type="button" class="gmap-sidecar__handle" data-action="sheet-toggle"
+                aria-expanded="false" aria-label="{{ __('Afficher la répartition par continent') }}"></button>
         <h2 class="gmap-sidecar__title">{{ __('Par continent') }}</h2>
         <ul class="gmap-sidecar__list">
             @foreach($continentTotals as $cont => $d)
@@ -557,6 +584,26 @@
                 sync();
             }
         });
+    }
+
+    // S-MAP-V4-16 — mobile bottom-sheet: tap the handle to toggle, or swipe
+    // up/down on it. No-op on desktop (the handle is display:none there).
+    const sheetHandle = shell.querySelector('[data-action="sheet-toggle"]');
+    if (sheetHandle) {
+        const setSheet = (open) => {
+            shell.dataset.sheet = open ? 'open' : 'closed';
+            sheetHandle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        };
+        sheetHandle.addEventListener('click', () => setSheet(shell.dataset.sheet !== 'open'));
+        let startY = null;
+        sheetHandle.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
+        sheetHandle.addEventListener('touchend', (e) => {
+            if (startY === null) return;
+            const dy = e.changedTouches[0].clientY - startY;
+            if (dy < -30) setSheet(true);        // swipe up -> open
+            else if (dy > 30) setSheet(false);   // swipe down -> close
+            startY = null;
+        }, { passive: true });
     }
 
     // S-MAP-V4-14 — keep Leaflet correctly sized through EVERY container

@@ -3137,6 +3137,9 @@ class GrimbaLaunchReadinessTest extends TestCase
         foreach ([__('Europe'), __('Afrique'), __('Global')] as $label) {
             $this->assertStringContainsString($label, $body, "sidecar must show the localized label '{$label}'.");
         }
+        // V4-16 — the sidecar collapses to a swipe-up bottom-sheet on mobile.
+        $this->assertStringContainsString('data-action="sheet-toggle"', $body, 'mobile sheet handle must ship.');
+        $this->assertStringContainsString('[data-sheet="open"]', $body, 'sheet expand state must be styled.');
     }
 
     public function test_breaking_route_accepts_optional_region_filter(): void
