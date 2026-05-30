@@ -25,6 +25,28 @@
         $k = $rating && isset($biasMeta[$rating]) ? $rating : 'unknown';
         return $biasMeta[$k]['color'] ?? '#6b6459';
     };
+
+    // S-MAP-v3 — per-continent bias distribution (L/C/R/MG/unknown counts).
+    // Powers the inline mini-donut that appears in each ticker header.
+    $biasDistribution = function ($posts): array {
+        $counts = ['left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0];
+        foreach ($posts as $p) {
+            $r = $p->bias_rating ?? 'unknown';
+            if (! isset($counts[$r])) { $r = 'unknown'; }
+            $counts[$r]++;
+        }
+        $total = array_sum($counts);
+        if ($total === 0) { return ['total' => 0, 'segments' => []]; }
+        $segments = [];
+        $cumulativeDeg = 0;
+        foreach (['left', 'center', 'right', 'unknown'] as $k) {
+            if ($counts[$k] === 0) { continue; }
+            $deg = ($counts[$k] / $total) * 360;
+            $segments[] = ['key' => $k, 'count' => $counts[$k], 'start' => $cumulativeDeg, 'deg' => $deg];
+            $cumulativeDeg += $deg;
+        }
+        return ['total' => $total, 'segments' => $segments, 'counts' => $counts];
+    };
 @endphp
 
 <style>
@@ -243,6 +265,27 @@
         color: rgba(232, 244, 255, .55);
         font-size: 10px;
         font-weight: 800;
+    }
+    .gmap-ticker__head-meter {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .gmap-donut {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        background: conic-gradient(var(--gmap-donut-gradient, #555 0deg, #555 360deg));
+        box-shadow: 0 0 6px rgba(168, 85, 247, .25);
+        position: relative;
+    }
+    .gmap-donut::after {
+        content: '';
+        position: absolute;
+        inset: 4px;
+        border-radius: 50%;
+        background: rgba(4, 6, 12, .92);
     }
     .gmap-ticker__track {
         display: flex;
@@ -482,9 +525,37 @@
                 aria-live="polite"
                 aria-label="{{ __('Actualités urgentes') }} — {{ Continents::label($continent) }}"
             >
+                @php
+                    $dist = $biasDistribution($posts);
+                    $donutGradient = '';
+                    if (!empty($dist['segments'])) {
+                        $parts = [];
+                        foreach ($dist['segments'] as $seg) {
+                            $color = $biasMeta[$seg['key']]['color'] ?? '#555';
+                            $start = number_format($seg['start'], 3, '.', '');
+                            $end = number_format($seg['start'] + $seg['deg'], 3, '.', '');
+                            $parts[] = "{$color} {$start}deg {$end}deg";
+                        }
+                        $donutGradient = 'conic-gradient(' . implode(', ', $parts) . ')';
+                    }
+                    $donutTitle = empty($dist['counts']) ? '' :
+                        sprintf('L %d · C %d · R %d · ? %d',
+                            $dist['counts']['left'] ?? 0,
+                            $dist['counts']['center'] ?? 0,
+                            $dist['counts']['right'] ?? 0,
+                            $dist['counts']['unknown'] ?? 0);
+                @endphp
                 <header class="gmap-ticker__head">
                     <span>{{ Continents::label($continent) }}</span>
-                    <span class="gmap-ticker__head-count">{{ $posts->count() }}</span>
+                    <span class="gmap-ticker__head-meter">
+                        @if($donutGradient)
+                            <span class="gmap-donut"
+                                  style="background:{{ $donutGradient }};"
+                                  title="{{ $donutTitle }}"
+                                  aria-label="{{ __('Distribution L/C/R') }}: {{ $donutTitle }}"></span>
+                        @endif
+                        <span class="gmap-ticker__head-count">{{ $posts->count() }}</span>
+                    </span>
                 </header>
                 @if($posts->isEmpty())
                     <div class="gmap-empty">{{ __('Calme par ici.') }}</div>
