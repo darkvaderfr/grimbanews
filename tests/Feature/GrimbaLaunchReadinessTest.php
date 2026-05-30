@@ -3300,6 +3300,11 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('public', (string) $cacheControl);
         $this->assertSame('*', $response->headers->get('Access-Control-Allow-Origin'));
         $this->assertStringContainsString('GET', (string) $response->headers->get('Access-Control-Allow-Methods'));
+        // Titles are locale-specific (resolved from the grimba_lang cookie),
+        // so the response must Vary on Cookie or a shared cache could serve
+        // one locale's titles to another reader.
+        $this->assertStringContainsString('Cookie', (string) $response->headers->get('Vary'),
+            'breaking-map.json must Vary: Cookie (locale comes from the cookie, not the URL).');
         $this->assertStringContainsString('application/json', (string) $response->headers->get('Content-Type'));
         $etag = $response->headers->get('ETag');
         $this->assertNotEmpty($etag, 'endpoint must emit an ETag for cheap revalidation.');

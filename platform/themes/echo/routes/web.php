@@ -643,9 +643,14 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
                 $posts = [];
                 foreach ($pin['posts'] as $post) {
                     // posts.bias_rating is one of left/center/right/unknown
-                    // (middle_ground is a cluster-only verdict); anything
-                    // else normalizes to 'unknown' so the color never misses.
-                    $biasKey = isset($palette[$post->bias_rating]) ? (string) $post->bias_rating : 'unknown';
+                    // (middle_ground is a cluster-only verdict). Normalize
+                    // explicitly to the reader set so a stray cluster-only
+                    // value can never leak to a per-post marker — the palette
+                    // DOES carry a middle_ground key, so an isset() guard
+                    // alone would pass it straight through.
+                    $biasKey = in_array((string) $post->bias_rating, ['left', 'center', 'right'], true)
+                        ? (string) $post->bias_rating
+                        : 'unknown';
                     $posts[] = [
                         'title' => \App\Support\GrimbaTranslationPresenter::title($post),
                         'url' => $post->slug
@@ -708,7 +713,15 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             }
 
             $response = response()->json($payload, 200, [
-                'Cache-Control' => 'public, max-age=60, s-maxage=60',
+                // The reader locale comes from the grimba_lang COOKIE (and
+                // ?lang=), not the URL path, and each pin title is a
+                // locale-specific translated headline. A shared cache keyed
+                // on URL alone could serve FR titles to an EN reader, so:
+                // Vary: Cookie keys shared caches on the locale cookie, and
+                // s-maxage is dropped so no shared tier caches cross-locale.
+                // The browser still gets max-age=60 (pinsForMap's server TTL).
+                'Cache-Control' => 'public, max-age=60',
+                'Vary' => 'Cookie',
                 'Access-Control-Allow-Origin' => '*',
                 'Access-Control-Allow-Methods' => 'GET',
             ]);
@@ -720,7 +733,14 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             // cache window and flips only when the pins actually change;
             // $summaryOnly is included so the two response variants never
             // share an ETag.
-            $response->setEtag(md5(json_encode([$windowHours, $perCountry, $summaryOnly, $pinData], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)));
+            $etagJson = json_encode([$windowHours, $perCountry, $summaryOnly, $pinData], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            // A malformed UTF-8 byte in a title makes json_encode return
+            // false; md5(false) would collapse to the constant md5('') and
+            // could trigger a spurious cross-variant 304. Fall back to a
+            // per-request-unique digest instead.
+            $response->setEtag($etagJson !== false
+                ? md5($etagJson)
+                : md5($windowHours . ':' . $perCountry . ':' . ($summaryOnly ? '1' : '0') . ':' . count($pinData) . ':' . now()->timestamp));
             $response->isNotModified($request);
 
             return $response;
