@@ -781,16 +781,53 @@ Route::group(['middleware' => ['web', 'core']], function (): void {
             $windowHours = max(1, min(720, (int) ($request->query('window') ?? 18)));
             $buckets = \App\Support\GrimbaHomeFeed::breakingByContinent($windowHours, 8);
 
+            $totalAcrossContinents = 0;
+            foreach ($buckets as $bucketPosts) { $totalAcrossContinents += $bucketPosts->count(); }
+
             SeoHelper::setTitle(__('Breaking News Map') . ' — GrimbaNews')
                 ->setDescription(__('Voir où dans le monde l\'actualité se passe — carte plein écran avec tickers par continent.'));
-            SeoHelper::openGraph()->setUrl(url('/breaking-map'));
+            SeoHelper::openGraph()
+                ->setUrl(url('/breaking-map'))
+                ->setType('website')
+                ->setTitle(__('Breaking News Map') . ' — GrimbaNews')
+                ->setDescription(__('Carte plein écran de l\'actualité urgente par continent.'));
+
+            // S-MAP-v3-D — JSON-LD for SEO. CollectionPage with a
+            // mainEntity ItemList enumerating the 6 continent buckets
+            // so search-engine crawlers see the geographic structure
+            // explicitly. Avoids the generic-page-with-no-structure
+            // signal.
+            $itemListElements = [];
+            $pos = 1;
+            foreach ($buckets as $continent => $bucketPosts) {
+                $itemListElements[] = [
+                    '@type' => 'ListItem',
+                    'position' => $pos++,
+                    'name' => \App\Support\Continents::label($continent),
+                    'url' => url('/breaking?region=' . $continent),
+                    'description' => sprintf('%d %s', $bucketPosts->count(), __('articles')),
+                ];
+            }
+            Theme::set('grimbaJsonLd', json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                'name' => __('Breaking News Map') . ' — GrimbaNews',
+                'description' => __('Carte plein écran de l\'actualité urgente par continent.'),
+                'url' => url('/breaking-map'),
+                'isPartOf' => ['@type' => 'WebSite', 'name' => 'GrimbaNews', 'url' => url('/')],
+                'mainEntity' => [
+                    '@type' => 'ItemList',
+                    'numberOfItems' => count($itemListElements),
+                    'itemListElement' => $itemListElements,
+                ],
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT));
 
             Theme::breadcrumb()
                 ->add(__('Accueil'), url('/'))
                 ->add(__('Breaking news'), url('/breaking'))
                 ->add(__('Carte'), url('/breaking-map'));
 
-            return Theme::scope('breaking-map', compact('buckets', 'windowHours'))->render();
+            return Theme::scope('breaking-map', compact('buckets', 'windowHours', 'totalAcrossContinents'))->render();
         })->name('public.breaking_map');
 
         Route::get('breaking', function (Request $request) {

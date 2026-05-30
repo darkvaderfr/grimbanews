@@ -3040,6 +3040,25 @@ class GrimbaLaunchReadinessTest extends TestCase
         $emptyResponse->assertStatus(200);
     }
 
+    public function test_breaking_map_emits_collectionpage_jsonld_with_six_items(): void
+    {
+        // S-MAP-v3-D (Vader 2026-05-29) — JSON-LD makes the page
+        // structure explicit for search-engine crawlers + LLM agents.
+        // Test asserts: CollectionPage with mainEntity ItemList of 6
+        // (5 continents + global) ListItems, each pointing at its
+        // /breaking?region= deep link.
+        $body = $this->get('/breaking-map?window=720')->getContent();
+        $this->assertMatchesRegularExpression(
+            '#<script[^>]*type="application/ld\+json"[^>]*>.*?CollectionPage.*?Breaking News Map.*?</script>#s',
+            $body,
+            'breaking-map must emit a CollectionPage JSON-LD block.'
+        );
+        $this->assertStringContainsString('"@type":"ItemList"', $body);
+        $this->assertStringContainsString('"numberOfItems":6', $body,
+            'ItemList must enumerate 6 buckets (5 continents + global).');
+        $this->assertStringContainsString(url('/breaking?region=europe'), $body);
+    }
+
     public function test_breaking_map_ticker_head_clicks_through_to_region_filter(): void
     {
         // S-MAP-v3-C — each continent ticker header is now a link to
