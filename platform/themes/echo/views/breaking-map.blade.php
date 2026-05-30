@@ -12,6 +12,7 @@
      */
     use App\Support\GrimbaHomeFeed;
     use App\Support\GrimbaClusterBias;
+    use App\Support\Continents;
 
     $readerLocale = GrimbaHomeFeed::resolveReaderLocale();
     // Client fetches the API with an explicit ?lang= so the shared-cache key
@@ -29,6 +30,24 @@
         'right' => $biasMeta['right']['color'],
         'unknown' => $biasMeta['unknown']['color'],
     ];
+
+    // S-MAP-V4-15 — exact per-continent totals for the sidecar (agrees with
+    // the map's per-pin totals; adds the 'global' source-less bucket).
+    $continentTotals = GrimbaHomeFeed::continentTotals($windowHours);
+    $sidecarDonut = function (array $d) use ($biasPalette): string {
+        $total = (int) ($d['count'] ?? 0);
+        if ($total <= 0) { return ''; }
+        $parts = [];
+        $deg = 0.0;
+        foreach (['left', 'center', 'right', 'unknown'] as $k) {
+            $c = (int) ($d[$k] ?? 0);
+            if ($c <= 0) { continue; }
+            $end = $deg + ($c / $total) * 360;
+            $parts[] = $biasPalette[$k] . ' ' . number_format($deg, 2, '.', '') . 'deg ' . number_format($end, 2, '.', '') . 'deg';
+            $deg = $end;
+        }
+        return 'conic-gradient(' . implode(', ', $parts) . ')';
+    };
 @endphp
 
 <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin>
@@ -126,6 +145,40 @@
         background: #04050a;   /* shows through before tiles paint */
     }
 
+    /* ── S-MAP-V4-15 desktop sidecar (map | continent panel) ────────── */
+    .gmap-body { position: relative; flex: 1 1 auto; display: flex; min-height: 0; }
+    .gmap-sidecar {
+        flex: 0 0 304px; width: 304px; z-index: 4;
+        background: rgba(4, 6, 12, .85);
+        border-left: 1px solid rgba(34, 211, 238, .15);
+        backdrop-filter: blur(6px);
+        overflow-y: auto;
+        padding: 18px 14px 24px;
+    }
+    .gmap-sidecar__title {
+        margin: 0 0 14px; font-size: 11px; font-weight: 800;
+        letter-spacing: .12em; text-transform: uppercase; color: #22d3ee;
+    }
+    .gmap-sidecar__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .gmap-sidecar__link {
+        display: flex; align-items: center; gap: 11px; padding: 9px 10px;
+        border-radius: 6px; text-decoration: none; color: #e8f4ff;
+        border: 1px solid transparent; transition: background .15s, border-color .15s;
+    }
+    .gmap-sidecar__link:hover,
+    .gmap-sidecar__row[data-active="true"] .gmap-sidecar__link {
+        background: rgba(168, 85, 247, .14);
+        border-color: rgba(168, 85, 247, .4);
+    }
+    .gmap-sidecar__donut {
+        width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; position: relative;
+        box-shadow: 0 0 6px rgba(168, 85, 247, .25);
+    }
+    .gmap-sidecar__donut::after { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: rgba(4, 6, 12, .92); }
+    .gmap-sidecar__donut--empty { background: rgba(255, 255, 255, .06); box-shadow: none; }
+    .gmap-sidecar__label { flex: 1; font-size: 13px; font-weight: 700; }
+    .gmap-sidecar__count { font-size: 12px; font-weight: 800; color: rgba(232, 244, 255, .6); font-variant-numeric: tabular-nums; }
+
     /* HUD overlay — scan-lines + cyan grid + radial glow, layered ABOVE the
        tiles but pointer-events:none so the map stays fully interactive and
        Leaflet controls below it stay clickable. */
@@ -202,9 +255,11 @@
         .gmap-brand__pulse { animation: none !important; }
     }
 
-    /* Mobile: map fills 60dvh; the card-stack sidecar arrives in V4-16. */
+    /* Mobile: stack the map (60dvh) over the sidecar (V4-16 makes it a sheet). */
     @media (max-width: 768px) {
+        .gmap-body { flex-direction: column; }
         .gmap-stage { min-height: 60dvh; height: 60dvh; flex: 0 0 auto; }
+        .gmap-sidecar { flex: 0 0 auto; width: 100%; border-left: none; border-top: 1px solid rgba(34, 211, 238, .15); }
     }
 
     /* Fullscreen (native API or CSS fallback). */
@@ -341,6 +396,7 @@
         </div>
     </header>
 
+    <div class="gmap-body">
     <div class="gmap-stage" data-component="gmap-stage">
         <a class="gmap-skip" href="{{ url('/breaking') }}">{{ __('Aller à la liste des actualités') }}</a>
         <div id="gmap-leaflet" class="gmap-leaflet" role="application"
@@ -348,6 +404,30 @@
         <div class="gmap-hud" aria-hidden="true"></div>
         <div class="gmap-status" role="status" aria-live="polite">{{ __('Chargement de la carte…') }}</div>
     </div>
+
+    {{-- S-MAP-V4-15 — continent sidecar: exact per-continent counts + bias
+         donut + region click-through. data-continent powers the V4-17
+         hover-sync between pins and rows. --}}
+    <aside class="gmap-sidecar" data-component="gmap-sidecar" aria-label="{{ __('Répartition par continent') }}">
+        <h2 class="gmap-sidecar__title">{{ __('Par continent') }}</h2>
+        <ul class="gmap-sidecar__list">
+            @foreach($continentTotals as $cont => $d)
+                @php $grad = $sidecarDonut($d); @endphp
+                <li class="gmap-sidecar__row" data-continent="{{ $cont }}">
+                    <a class="gmap-sidecar__link"
+                       href="{{ url('/breaking?region=' . $cont) }}"
+                       title="{{ Continents::label($cont) }} — {{ $d['count'] }} {{ __('actualités') }}">
+                        <span class="gmap-sidecar__donut {{ $grad ? '' : 'gmap-sidecar__donut--empty' }}"
+                              @if($grad) style="background: {{ $grad }};" @endif
+                              aria-hidden="true"></span>
+                        <span class="gmap-sidecar__label">{{ Continents::label($cont) }}</span>
+                        <span class="gmap-sidecar__count">{{ number_format($d['count']) }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </aside>
+    </div>{{-- /gmap-body --}}
 
     <noscript>
         <div style="padding:24px;text-align:center;">

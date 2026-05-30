@@ -3121,6 +3121,24 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('ResizeObserver', $body, 'must observe container resizes.');
     }
 
+    public function test_breaking_map_v4_sidecar_renders_continent_rows(): void
+    {
+        // S-MAP-V4-15 (Vader 2026-05-30) — the desktop sidecar shows all 6
+        // continent rows (5 + global) with localized labels, exact counts +
+        // bias donut, and a /breaking?region= click-through each.
+        $body = $this->get('/breaking-map?window=720')->getContent();
+        $this->assertStringContainsString('data-component="gmap-sidecar"', $body, 'sidecar must render.');
+        foreach (['europe', 'americas', 'asia', 'africa', 'oceania', 'global'] as $cont) {
+            $this->assertStringContainsString('data-continent="' . $cont . '"', $body,
+                "sidecar must have a row for {$cont} (powers V4-17 hover-sync).");
+            $this->assertStringContainsString('href="' . url('/breaking?region=' . $cont) . '"', $body,
+                "sidecar {$cont} row must link to its region filter.");
+        }
+        foreach ([__('Europe'), __('Afrique'), __('Global')] as $label) {
+            $this->assertStringContainsString($label, $body, "sidecar must show the localized label '{$label}'.");
+        }
+    }
+
     public function test_breaking_route_accepts_optional_region_filter(): void
     {
         // S-MAP-v3-C (Vader 2026-05-29) — /breaking?region=<continent>
@@ -3384,6 +3402,36 @@ class GrimbaLaunchReadinessTest extends TestCase
         foreach ($narrow as $pin) {
             $this->assertSame($wideTotals[$pin['country']], $pin['total'],
                 "total for {$pin['country']} must not change with perCountry.");
+        }
+    }
+
+    public function test_continent_totals_exact_and_consistent_with_pins(): void
+    {
+        // S-MAP-V4-15 (Vader 2026-05-30) — continentTotals feeds the sidecar
+        // with EXACT per-continent counts + bias breakdown (5 continents +
+        // the synthetic 'global' source-less bucket). Locks: all 6 keys,
+        // count == sum of its bias buckets, and the consistency contract the
+        // sidecar leans on — a real continent's sidecar total is never below
+        // the sum of that continent's map pin totals (continentTotals is a
+        // superset: it also counts non-pinnable + source-less posts).
+        $totals = \App\Support\GrimbaHomeFeed::continentTotals(720);
+        foreach (\App\Support\Continents::all() as $cont) {
+            $this->assertArrayHasKey($cont, $totals, "continentTotals must include {$cont}.");
+            $d = $totals[$cont];
+            foreach (['count', 'left', 'center', 'right', 'unknown'] as $k) {
+                $this->assertArrayHasKey($k, $d);
+            }
+            $this->assertSame($d['left'] + $d['center'] + $d['right'] + $d['unknown'], $d['count'],
+                "{$cont}: count must equal the sum of its bias buckets.");
+        }
+
+        $pinSums = [];
+        foreach (\App\Support\GrimbaHomeFeed::pinsForMap(720, 1) as $pin) {
+            $pinSums[$pin['continent']] = ($pinSums[$pin['continent']] ?? 0) + $pin['total'];
+        }
+        foreach ($pinSums as $cont => $sum) {
+            $this->assertGreaterThanOrEqual($sum, $totals[$cont]['count'],
+                "sidecar total for {$cont} must be >= the sum of its pin totals (consistency).");
         }
     }
 

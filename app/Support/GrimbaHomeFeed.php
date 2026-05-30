@@ -439,6 +439,66 @@ class GrimbaHomeFeed
         });
     }
 
+    /**
+     * S-MAP-V4-15 (Vader 2026-05-30) — EXACT per-continent totals + bias
+     * breakdown for the /breaking-map sidecar. Unlike breakingByContinent()
+     * (which caps each bucket's displayed posts), this returns the true
+     * window counts, so the sidecar agrees with the map's exact per-pin
+     * totals (sum of a continent's pin totals == its sidecar count, modulo
+     * the synthetic 'global' bucket). One grouped query.
+     *
+     * Returns every continent key from Continents::all() (5 + 'global'):
+     *   ['europe' => ['count' => 1202, 'left' => .., 'center' => .., 'right' => .., 'unknown' => ..], ...]
+     *
+     * 'global' collects NULL/empty/unrecognized-country posts (no map pin).
+     * Mirrors pinsForMap's published + has-source + locale-strict filters and
+     * 60s cache; uses a LEFT join so source-less posts still land in 'global'.
+     *
+     * @return array<string, array{count:int,left:int,center:int,right:int,unknown:int}>
+     */
+    public static function continentTotals(int $windowHours = 18): array
+    {
+        $windowHours = max(1, min(720, $windowHours));
+        $locale = self::resolveReaderLocale();
+        $strict = GrimbaLanguageSettings::strictForBreaking();
+        $bucket = $strict ? 'strict' : 'soft';
+
+        $cacheKey = 'grimba_continent_totals_v1:' . $locale . ':' . $bucket . ':' . $windowHours;
+
+        return Cache::remember($cacheKey, 60, function () use ($windowHours, $strict, $locale): array {
+            $query = Post::query()
+                ->leftJoin('news_sources', 'posts.source_id', '=', 'news_sources.id')
+                ->where('posts.status', 'published')
+                ->whereNotNull('posts.source_name');
+
+            if ($strict) {
+                GrimbaTranslationPresenter::filterForTargetLocale($query, $locale);
+            }
+
+            GrimbaPostRecency::wherePublishedSince($query, now()->subHours($windowHours));
+
+            $rows = $query->toBase()
+                ->select('news_sources.country as country', 'posts.bias_rating as bias_rating', DB::raw('count(*) as n'))
+                ->groupBy('news_sources.country', 'posts.bias_rating')
+                ->get();
+
+            $totals = [];
+            foreach (Continents::all() as $continent) {
+                $totals[$continent] = ['count' => 0, 'left' => 0, 'center' => 0, 'right' => 0, 'unknown' => 0];
+            }
+
+            foreach ($rows as $row) {
+                $continent = Continents::forCountry($row->country !== null ? (string) $row->country : null);
+                $bias = in_array($row->bias_rating, ['left', 'center', 'right'], true) ? $row->bias_rating : 'unknown';
+                $n = (int) $row->n;
+                $totals[$continent]['count'] += $n;
+                $totals[$continent][$bias] += $n;
+            }
+
+            return $totals;
+        });
+    }
+
     public static function breaking(int $windowHours = 18): array
     {
         $windowHours = max(1, min(72, $windowHours));
