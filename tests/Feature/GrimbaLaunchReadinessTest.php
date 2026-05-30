@@ -3099,6 +3099,10 @@ class GrimbaLaunchReadinessTest extends TestCase
         $this->assertStringContainsString('gmap-pop__item', $body, 'popup post-row markup must ship.');
         $this->assertStringContainsString('Intl.DisplayNames', $body, 'country name must be localized client-side.');
         $this->assertStringContainsString('escapeHtml', $body, 'RSS-sourced popup text must be HTML-escaped (XSS guard).');
+        // V4-18 audit — the popup honors the active bias filter (filtered
+        // header total + list; empty message when no sampled story matches).
+        $this->assertStringContainsString('Aucune histoire pour ces filtres', $body,
+            'popup must handle the filtered-empty case.');
     }
 
     public function test_breaking_map_v4_pause_and_fullscreen_wired(): void

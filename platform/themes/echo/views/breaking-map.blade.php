@@ -409,6 +409,7 @@
     .gmap-pop__txt { display: flex; flex-direction: column; gap: 2px; }
     .gmap-pop__title { font-size: 13px; line-height: 1.3; font-weight: 600; }
     .gmap-pop__src { font-size: 10px; color: rgba(34, 211, 238, .75); text-transform: uppercase; letter-spacing: .04em; }
+    .gmap-pop__empty { list-style: none; font-size: 12px; font-style: italic; color: rgba(232, 244, 255, .5); }
 </style>
 
 <section
@@ -448,7 +449,8 @@
     <div class="gmap-chips" role="group" aria-label="{{ __('Filtrer par tendance politique') }}">
         @foreach(['left', 'center', 'right', 'middle_ground', 'unknown'] as $bk)
             <button type="button" class="gmap-chip" data-bias="{{ $bk }}" data-on="true" aria-pressed="true"
-                    style="--chip: {{ $biasMeta[$bk]['color'] }};">
+                    style="--chip: {{ $biasMeta[$bk]['color'] }};"
+                    @if($bk === 'middle_ground') title="{{ __('Verdict par dossier — pas de marqueur individuel sur la carte') }}" @endif>
                 <span class="gmap-chip__dot" aria-hidden="true"></span>{{ $biasMeta[$bk]['label'] }}
             </button>
         @endforeach
@@ -679,6 +681,12 @@
     const BIAS_COLOR = @json($biasPalette);
     const fmt = (n) => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + 'k' : String(n);
 
+    // V4-18 — which bias slices count toward each pin's donut/count/visibility
+    // AND its popup. Default-on (Vader decision #3). Declared up here so
+    // buildPopup (below) can honor the same filter as the marker badge.
+    // 'middle_ground' is a cluster-only verdict (no per-post MG) -> absent.
+    const enabledBias = { left: true, center: true, right: true, unknown: true };
+
     const donutGradient = (counts) => {
         const total = BIAS_ORDER.reduce((s, k) => s + (counts[k] || 0), 0);
         if (!total) return 'conic-gradient(#3a3a3a 0deg 360deg)';
@@ -721,18 +729,27 @@
     };
     const L_STORIES = @json(__('actualités'));
     const L_READ = @json(__("Lire l'article"));
+    const L_NO_MATCH = @json(__('Aucune histoire pour ces filtres.'));
     const buildPopup = (pin) => {
-        const items = (pin.posts || []).map((p) =>
-            '<li><a class="gmap-pop__item" href="' + escapeHtml(safeUrl(p.url)) + '">'
-            + '<span class="gmap-pop__dot" style="background:' + escapeHtml(p.bias_color || '#6b6459') + '"></span>'
-            + '<span class="gmap-pop__txt">'
-            + '<span class="gmap-pop__title">' + escapeHtml(p.title) + '</span>'
-            + '<span class="gmap-pop__src">' + escapeHtml(p.source_name) + ' · ' + escapeHtml(L_READ) + ' →</span>'
-            + '</span></a></li>'
-        ).join('');
+        // V4-18 audit — the popup honors the active bias filter, so its header
+        // total + story list stay consistent with the (filtered) marker badge.
+        const src = pin.counts_at_country || {};
+        let total = 0;
+        for (const k of BIAS_ORDER) { if (enabledBias[k]) { total += (src[k] || 0); } }
+        const posts = (pin.posts || []).filter((p) =>
+            enabledBias[BIAS_ORDER.includes(p.bias_rating) ? p.bias_rating : 'unknown']);
+        const items = posts.length
+            ? posts.map((p) =>
+                '<li><a class="gmap-pop__item" href="' + escapeHtml(safeUrl(p.url)) + '">'
+                + '<span class="gmap-pop__dot" style="background:' + escapeHtml(p.bias_color || '#6b6459') + '"></span>'
+                + '<span class="gmap-pop__txt">'
+                + '<span class="gmap-pop__title">' + escapeHtml(p.title) + '</span>'
+                + '<span class="gmap-pop__src">' + escapeHtml(p.source_name) + ' · ' + escapeHtml(L_READ) + ' →</span>'
+                + '</span></a></li>').join('')
+            : '<li class="gmap-pop__empty">' + escapeHtml(L_NO_MATCH) + '</li>';
         return '<div class="gmap-pop">'
             + '<div class="gmap-pop__head"><strong>' + escapeHtml(countryLabel(pin.country)) + '</strong>'
-            + '<span class="gmap-pop__total">' + fmt(pin.total_at_country || 0) + ' ' + escapeHtml(L_STORIES) + '</span></div>'
+            + '<span class="gmap-pop__total">' + fmt(total) + ' ' + escapeHtml(L_STORIES) + '</span></div>'
             + '<ul class="gmap-pop__list">' + items + '</ul></div>';
     };
 
@@ -791,13 +808,11 @@
     });
 
     // ── S-MAP-V4-18 bias filter chips + the (re)render pipeline ──────
-    // enabledBias drives which bias slices count toward each pin's donut +
-    // count + visibility, using the EXACT counts_at_country (not the capped
-    // sample). Default-on (Vader decision #3). 'middle_ground' is a
-    // cluster-only verdict — no per-source-country post carries it — so its
-    // chip is present for parity but matches no pins.
-    const enabledBias = { left: true, center: true, right: true, unknown: true };
-
+    // enabledBias (declared above) drives each pin's donut + count +
+    // visibility + popup, off the EXACT counts_at_country (not the capped
+    // sample). 'middle_ground' is a cluster-only verdict — no per-source-
+    // country post carries it — so its chip is present for parity but matches
+    // no pins.
     const buildMarker = (pin) => {
         if (typeof pin.lat !== 'number' || typeof pin.lng !== 'number') return null;
         const src = pin.counts_at_country || countsFromPosts(pin.posts);
