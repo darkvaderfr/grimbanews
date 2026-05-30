@@ -99,6 +99,10 @@
                         <span class="grimba-header-tool-link__pulse" aria-hidden="true"></span>
                         <span class="grimba-header-tool-link__label">{{ __('Breaking') }}</span>
                     </a>
+                    {{-- S-MAP-v3-B (Vader 2026-05-29) — full-viewport map view sibling to /breaking. --}}
+                    <a href="{{ url('/breaking-map') }}" class="grimba-header-tool-link" title="{{ __('Breaking news map') }}">
+                        <span class="grimba-header-tool-link__label">{{ __('Carte') }}</span>
+                    </a>
                     <a href="{{ url('/latest') }}" class="grimba-header-tool-link" title="{{ __('Latest news') }}">
                         <span class="grimba-header-tool-link__label">{{ __('Dernières') }}</span>
                     </a>

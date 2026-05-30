@@ -3019,6 +3019,19 @@ class GrimbaLaunchReadinessTest extends TestCase
             'v2: HUD grid overlay must render.');
     }
 
+    public function test_breaking_map_nav_entry_present_on_home(): void
+    {
+        // S-MAP-v3-B (Vader 2026-05-29) — header tools row gets a
+        // "Carte" link to /breaking-map next to /breaking. A regression
+        // that drops the link would orphan the map view from
+        // discoverability.
+        $body = $this->get('/')->getContent();
+        $this->assertStringContainsString('href="' . url('/breaking-map') . '"', $body,
+            'home header must link to /breaking-map.');
+        $this->assertStringContainsString('>' . __('Carte') . '<', $body,
+            'home header must show the localized "Carte" label.');
+    }
+
     public function test_breaking_map_continent_labels_render_over_map(): void
     {
         // S-MAP-v2 (Vader 2026-05-29) — each continent name renders
