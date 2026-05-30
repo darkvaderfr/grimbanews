@@ -3109,9 +3109,11 @@ class GrimbaLaunchReadinessTest extends TestCase
         // re-fills its container on every resize (fullscreen, window,
         // orientation). Lock the shipped wiring.
         $body = $this->get('/breaking-map?window=720')->getContent();
-        // V4-13 — pause freezes Leaflet animation options.
-        $this->assertStringContainsString('zoomAnimation', $body, 'Pause must freeze the zoom animation.');
+        // V4-13 — Pause freezes the autonomous motion (pin/brand pulse +
+        // tile fade) via the [data-paused] CSS state.
         $this->assertStringContainsString('data-paused', $body, 'Pause must drive the [data-paused] freeze.');
+        $this->assertStringContainsString('animation-play-state: paused', $body,
+            'paused state must freeze the pulse animation via CSS.');
         // V4-14 — fullscreen + robust resize.
         $this->assertStringContainsString('requestFullscreen', $body, 'Fullscreen must use the native API.');
         $this->assertStringContainsString('fullscreenchange', $body, 'must react to fullscreenchange.');

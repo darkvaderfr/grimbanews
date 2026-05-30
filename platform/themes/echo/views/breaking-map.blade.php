@@ -11,12 +11,24 @@
      * @var int $windowHours
      */
     use App\Support\GrimbaHomeFeed;
+    use App\Support\GrimbaClusterBias;
 
     $readerLocale = GrimbaHomeFeed::resolveReaderLocale();
     // Client fetches the API with an explicit ?lang= so the shared-cache key
     // is URL-based (belt with the endpoint's Vary: Cookie suspenders).
     $apiUrl = url('/api/breaking-map.json') . '?window=' . $windowHours . '&lang=' . $readerLocale;
     $geoJsonUrl = asset('vendor/natural-earth/world.geojson');
+
+    // Phase-3-audit fix — single-source the client marker palette from the
+    // server (GrimbaClusterBias) so the two can never drift. Posts are only
+    // ever left/center/right/unknown (middle_ground is cluster-only).
+    $biasMeta = GrimbaClusterBias::biasMetaForBlade();
+    $biasPalette = [
+        'left' => $biasMeta['left']['color'],
+        'center' => $biasMeta['center']['color'],
+        'right' => $biasMeta['right']['color'],
+        'unknown' => $biasMeta['unknown']['color'],
+    ];
 @endphp
 
 <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin>
@@ -417,13 +429,14 @@
             pauseBtn.dataset.active = next ? 'true' : 'false';
             pauseBtn.setAttribute('aria-pressed', next ? 'true' : 'false');
             pauseLabel.textContent = next ? @json(__('Reprendre')) : @json(__('Pause'));
-            // S-MAP-V4-13 — freeze/thaw the map's motion alongside the CSS
-            // pulse freeze: Leaflet's zoom animation ("auto-zoom"), tile
-            // fade-in, and marker-zoom animations all go instant while
-            // paused, so the LIVE surface visibly stops moving.
-            map.options.zoomAnimation = !next;
-            map.options.fadeAnimation = !next;
-            map.options.markerZoomAnimation = !next;
+            // S-MAP-V4-13 — Pause freezes the AUTONOMOUS "live" motion via the
+            // [data-paused] CSS state: the pin pulse + brand pulse
+            // (animation-play-state:paused) and the Leaflet tile fade-in
+            // transition. Leaflet's zoom/pan animations are user-initiated
+            // (not autonomous) and reading their options post-init is a no-op
+            // anyway (Leaflet caches _zoomAnimated at construction), so Pause
+            // intentionally leaves the map fully pannable/zoomable — it stops
+            // the heartbeat, not the controls.
         });
     }
 
@@ -498,9 +511,10 @@
     const apiUrl = shell.dataset.apiUrl;
     if (!apiUrl) return;
 
-    // Must mirror GrimbaClusterBias::biasMetaForBlade() (server palette).
+    // Palette is single-sourced from the server (GrimbaClusterBias) via the
+    // @php block above, so the client can never drift from biasMetaForBlade().
     const BIAS_ORDER = ['left', 'center', 'right', 'unknown'];
-    const BIAS_COLOR = { left: '#3b82f6', center: '#a8a8a8', right: '#e84c3d', unknown: '#6b6459' };
+    const BIAS_COLOR = @json($biasPalette);
     const fmt = (n) => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + 'k' : String(n);
 
     const donutGradient = (counts) => {
@@ -517,7 +531,9 @@
     };
     const countsFromPosts = (posts) => {
         const c = { left: 0, center: 0, right: 0, unknown: 0 };
-        (posts || []).forEach((p) => { const k = (c[p.bias_rating] !== undefined) ? p.bias_rating : 'unknown'; c[k]++; });
+        // Allow-set (not object-presence) so an inherited prop name like
+        // 'constructor'/'toString' can't slip past into c[k]++.
+        (posts || []).forEach((p) => { const k = BIAS_ORDER.includes(p.bias_rating) ? p.bias_rating : 'unknown'; c[k]++; });
         return c;
     };
     const dominantColor = (counts) => {
@@ -531,6 +547,9 @@
     // innerHTML, so escape rigorously to prevent XSS.
     const escapeHtml = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    // Scheme allow-list so a non-http(s) URL (e.g. javascript:) can never
+    // reach the href even if the API contract ever loosens.
+    const safeUrl = (u) => (typeof u === 'string' && /^https?:\/\//i.test(u)) ? u : '#';
     const locale = (shell.dataset.locale || document.documentElement.lang || 'fr').slice(0, 2);
     let regionNames = null;
     try { regionNames = new Intl.DisplayNames([locale], { type: 'region' }); } catch (e) { regionNames = null; }
@@ -542,7 +561,7 @@
     const L_READ = @json(__("Lire l'article"));
     const buildPopup = (pin) => {
         const items = (pin.posts || []).map((p) =>
-            '<li><a class="gmap-pop__item" href="' + escapeHtml(p.url || '#') + '">'
+            '<li><a class="gmap-pop__item" href="' + escapeHtml(safeUrl(p.url)) + '">'
             + '<span class="gmap-pop__dot" style="background:' + escapeHtml(p.bias_color || '#6b6459') + '"></span>'
             + '<span class="gmap-pop__txt">'
             + '<span class="gmap-pop__title">' + escapeHtml(p.title) + '</span>'
